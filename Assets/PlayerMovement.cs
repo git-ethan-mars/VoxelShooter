@@ -15,7 +15,11 @@ public class PlayerMovement : MonoBehaviour
     {
         var verticalInput = Input.GetAxis("Vertical");
         var horizontalInput = Input.GetAxis("Horizontal");
-        var moveDirection =verticalInput * transform.forward + horizontalInput * transform.right;
+        var moveDirection = verticalInput * transform.forward + horizontalInput * transform.right;
         Rigidbody.velocity = moveDirection * speed;
+        if (Input.GetKey(KeyCode.Space))
+            Rigidbody.velocity = new Vector3(Rigidbody.velocity.x, speed, Rigidbody.velocity.z);
+        if (Input.GetKey(KeyCode.LeftShift))
+            Rigidbody.velocity = new Vector3(Rigidbody.velocity.x, -speed, Rigidbody.velocity.z);
     }
 }
