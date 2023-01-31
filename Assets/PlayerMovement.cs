@@ -11,7 +11,7 @@ public class PlayerMovement : MonoBehaviour
         Rigidbody.freezeRotation = true;
     }
     
-    private void Update()
+    private void FixedUpdate()
     {
         var verticalInput = Input.GetAxis("Vertical");
         var horizontalInput = Input.GetAxis("Horizontal");
