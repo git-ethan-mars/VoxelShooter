@@ -23,7 +23,8 @@ public class BlockPlacement : MonoBehaviour
     {
         var ray = Camera.ScreenPointToRay(CenterPosition);
         var raycastResult = Physics.Raycast(ray, out var hitInfo, placeDistance);
-        if (Input.GetMouseButtonDown(1) && raycastResult)
+        if (!raycastResult) return;
+        if (Input.GetMouseButtonDown(1))
         {
             if (hitInfo.collider.transform.position.x - hitInfo.point.x >= BlockSize / 2)
             {
@@ -60,6 +61,11 @@ public class BlockPlacement : MonoBehaviour
                 var newBlockPosition = hitInfo.collider.transform.position + new Vector3(0, 0, BlockSize);
                 Instantiate(blocks[0], newBlockPosition, Quaternion.identity);
             }
+        }
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            Destroy(hitInfo.collider.gameObject);
         }
     }
 }
