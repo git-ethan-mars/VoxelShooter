@@ -6,7 +6,10 @@ using UnityEngine;
 public class BlockPlacement : MonoBehaviour
 {
     [SerializeField] private List<GameObject> blocks;
+    [SerializeField] private GameObject slicedBlock;
     [SerializeField] private float placeDistance;
+    [SerializeField] private float explosionForce;
+    [SerializeField] private float explosionRadius;
     private Camera Camera { get; set; }
     private Vector2 CenterPosition { get; set; }
     private float BlockSize { get; set; }
@@ -24,7 +27,7 @@ public class BlockPlacement : MonoBehaviour
         var ray = Camera.ScreenPointToRay(CenterPosition);
         var raycastResult = Physics.Raycast(ray, out var hitInfo, placeDistance);
         if (!raycastResult) return;
-        if (Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonDown(1) && hitInfo.collider.CompareTag("Block"))
         {
             if (hitInfo.collider.transform.position.x - hitInfo.point.x >= BlockSize / 2)
             {
@@ -63,9 +66,16 @@ public class BlockPlacement : MonoBehaviour
             }
         }
 
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && hitInfo.collider.gameObject.CompareTag("Block"))
         {
-            Destroy(hitInfo.collider.gameObject);
+            var cube = hitInfo.collider.gameObject;
+            Destroy(cube);
+        }
+
+        if (Input.GetMouseButtonDown(0) && hitInfo.collider.gameObject.CompareTag("TNT"))
+        {
+            var cube = hitInfo.collider.gameObject;
+            cube.GetComponent<Explosion>().Explode();
         }
     }
 }
