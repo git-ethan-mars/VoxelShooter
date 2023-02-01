@@ -1647,6 +1647,7 @@ MonoBehaviour:
   placeDistance: 5.65
   explosionForce: 263.58
   explosionRadius: 10
+  RomanChe: 1.rch
 --- !u!1 &1459472068
 GameObject:
   m_ObjectHideFlags: 0
@@ -1687,7 +1688,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1459472070
 MonoBehaviour:
@@ -2050,6 +2051,9 @@ MonoBehaviour:
   keyMenuPaused: 27
   crosshair: {fileID: 897187693}
   InventoryPanel: {fileID: 1494801121}
+  CountinueGameButton: {fileID: 908380788}
+  SettingsButton: {fileID: 905597490}
+  SaveAndExitButton: {fileID: 2039915115}
 --- !u!4 &1765098782
 Transform:
   m_ObjectHideFlags: 0

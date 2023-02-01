@@ -11,11 +11,15 @@ public class MenuPaused : MonoBehaviour
     [SerializeField] KeyCode keyMenuPaused;
     [SerializeField] private GameObject crosshair;
     [SerializeField] private GameObject InventoryPanel;
+    [SerializeField] private Button CountinueGameButton;
+    [SerializeField] private Button SettingsButton;
+    [SerializeField] private Button SaveAndExitButton;
     bool isMenuPaused = false;
     // Start is called before the first frame update
     void Start()
     {
         menuPaused.SetActive(false);
+        SaveAndExitButton.onClick.AddListener(ExitAndQuit);
     }
 
     // Update is called once per frame
@@ -49,10 +53,10 @@ public class MenuPaused : MonoBehaviour
         isMenuPaused = false;
     }
 
-    /*public void ExitAndQuit()
+    public void ExitAndQuit()
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene("MainMenu");
-    }*/
+    }
         
 }
