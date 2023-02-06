@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 // ReSharper disable PossibleLossOfFraction
@@ -9,67 +8,30 @@ public class BlockPlacement : MonoBehaviour
     [SerializeField] private GameObject slicedBlock;
     [SerializeField] private float placeDistance;
     [SerializeField] private float explosionForce;
-    [SerializeField] private float explosionRadius;
-    private Camera Camera { get; set; }
-    private Vector2 CenterPosition { get; set; }
-    private float BlockSize { get; set; }
+    private Camera _camera;
 
     private void Start()
     {
-        GetComponent<Transform>();
-        Camera = Camera.main;
-        BlockSize = blocks[0].GetComponent<BoxCollider>().size.x;
         CenterPosition = new Vector2(Screen.width / 2, Screen.height / 2);
     }
 
     private void Update()
     {
-        var ray = Camera.ScreenPointToRay(CenterPosition);
+        if (!Input.GetMouseButtonDown(1) && !Input.GetMouseButtonDown(0)) return;
+        var ray = _camera.ViewportPointToRay(new Vector3(0.5f, 0.5f));
         var raycastResult = Physics.Raycast(ray, out var hitInfo, placeDistance);
         if (!raycastResult) return;
-        if (Input.GetMouseButtonDown(1) && hitInfo.collider.CompareTag("Block"))
+        if (Input.GetMouseButtonDown(1) &&
+            (hitInfo.collider.CompareTag("Chunk") || hitInfo.collider.gameObject.CompareTag("Floor")))
         {
-            if (hitInfo.collider.transform.position.x - hitInfo.point.x >= BlockSize / 2)
-            {
-                var newBlockPosition = hitInfo.collider.transform.position - new Vector3(BlockSize, 0, 0);
-                Instantiate(blocks[0], newBlockPosition, Quaternion.identity);
-            }
-
-            else if (hitInfo.collider.transform.position.x - hitInfo.point.x <= -BlockSize / 2)
-            {
-                var newBlockPosition = hitInfo.collider.transform.position + new Vector3(BlockSize, 0, 0);
-                Instantiate(blocks[0], newBlockPosition, Quaternion.identity);
-            }
-
-            else if (hitInfo.collider.transform.position.y - hitInfo.point.y >= BlockSize / 2)
-            {
-                var newBlockPosition = hitInfo.collider.transform.position - new Vector3(0, BlockSize, 0);
-                Instantiate(blocks[0], newBlockPosition, Quaternion.identity);
-            }
-
-            else if (hitInfo.collider.transform.position.y - hitInfo.point.y <= -BlockSize / 2)
-            {
-                var newBlockPosition = hitInfo.collider.transform.position + new Vector3(0, BlockSize, 0);
-                Instantiate(blocks[0], newBlockPosition, Quaternion.identity);
-            }
-
-            else if (hitInfo.collider.transform.position.z - hitInfo.point.z >= BlockSize / 2)
-            {
-                var newBlockPosition = hitInfo.collider.transform.position - new Vector3(0, 0, BlockSize);
-                Instantiate(blocks[0], newBlockPosition, Quaternion.identity);
-            }
-
-            else if (hitInfo.collider.transform.position.z - hitInfo.point.z <= -BlockSize / 2)
-            {
-                var newBlockPosition = hitInfo.collider.transform.position + new Vector3(0, 0, BlockSize);
-                Instantiate(blocks[0], newBlockPosition, Quaternion.identity);
-            }
+            var newBlock = new Block {Kind = BlockKind.CommonBlock};
+            GlobalEvents.OnBlockChangeState(newBlock, Vector3Int.FloorToInt(hitInfo.point + hitInfo.normal/2));
         }
 
-        if (Input.GetMouseButtonDown(0) && hitInfo.collider.gameObject.CompareTag("Block"))
+        if (Input.GetMouseButtonDown(0) && hitInfo.collider.gameObject.CompareTag("Chunk"))
         {
-            var cube = hitInfo.collider.gameObject;
-            Destroy(cube);
+            var destroyedBlock = new Block() {Kind = BlockKind.Empty};
+            GlobalEvents.OnBlockChangeState(destroyedBlock, Vector3Int.FloorToInt(hitInfo.point + hitInfo.normal/2));
         }
 
         if (Input.GetMouseButtonDown(0) && hitInfo.collider.gameObject.CompareTag("TNT"))

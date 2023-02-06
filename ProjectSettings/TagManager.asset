@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Block
   - TNT
+  - Floor
   layers:
   - Default
   - TransparentFX

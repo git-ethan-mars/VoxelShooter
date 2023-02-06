@@ -706,11 +706,11 @@ PlayerSettings:
   apiCompatibilityLevel: 6
   activeInputHandler: 0
   windowsGamepadBackendHint: 0
-  cloudProjectId: 
+  cloudProjectId: 0972df1e-f805-4796-8472-08c0fa6686fb
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: 
-  organizationId: 
+  projectName: VoxelShooter
+  organizationId: unity_05a751b99a713bdfbf55
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   playerDataPath: 
