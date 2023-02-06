@@ -4,9 +4,9 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - Block
   - TNT
   - Floor
+  - Chunk
   layers:
   - Default
   - TransparentFX

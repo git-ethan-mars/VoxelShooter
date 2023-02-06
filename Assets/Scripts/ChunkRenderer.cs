@@ -61,12 +61,7 @@ public class ChunkRenderer : MonoBehaviour
         Vertices.Add(position + new Vector3Int(0, 1, 1));
         Vertices.Add(position + new Vector3Int(1, 1, 0));
         Vertices.Add(position + new Vector3Int(1, 1, 1));
-        Triangles.Add(Vertices.Count - 4);
-        Triangles.Add(Vertices.Count - 3);
-        Triangles.Add(Vertices.Count - 2);
-        Triangles.Add(Vertices.Count - 3);
-        Triangles.Add(Vertices.Count - 1);
-        Triangles.Add(Vertices.Count - 2);
+        AddTriangles();
     }
 
     private void GenerateBottomSide(Vector3Int position)
@@ -75,12 +70,7 @@ public class ChunkRenderer : MonoBehaviour
         Vertices.Add(position + new Vector3Int(1, 0, 0));
         Vertices.Add(position + new Vector3Int(0, 0, 1));
         Vertices.Add(position + new Vector3Int(1, 0, 1));
-        Triangles.Add(Vertices.Count - 4);
-        Triangles.Add(Vertices.Count - 3);
-        Triangles.Add(Vertices.Count - 2);
-        Triangles.Add(Vertices.Count - 3);
-        Triangles.Add(Vertices.Count - 1);
-        Triangles.Add(Vertices.Count - 2);
+        AddTriangles();
     }
 
     private void GenerateFrontSide(Vector3Int position)
@@ -89,13 +79,10 @@ public class ChunkRenderer : MonoBehaviour
         Vertices.Add(position + new Vector3Int(1, 0, 1));
         Vertices.Add(position + new Vector3Int(0, 1, 1));
         Vertices.Add(position + new Vector3Int(1, 1, 1));
-        Triangles.Add(Vertices.Count - 4);
-        Triangles.Add(Vertices.Count - 3);
-        Triangles.Add(Vertices.Count - 2);
-        Triangles.Add(Vertices.Count - 3);
-        Triangles.Add(Vertices.Count - 1);
-        Triangles.Add(Vertices.Count - 2);
+        AddTriangles();
     }
+
+    
 
     private void GenerateBackSide(Vector3Int position)
     {
@@ -103,12 +90,7 @@ public class ChunkRenderer : MonoBehaviour
         Vertices.Add(position + new Vector3Int(0, 1, 0));
         Vertices.Add(position + new Vector3Int(1, 0, 0));
         Vertices.Add(position + new Vector3Int(1, 1, 0));
-        Triangles.Add(Vertices.Count - 4);
-        Triangles.Add(Vertices.Count - 3);
-        Triangles.Add(Vertices.Count - 2);
-        Triangles.Add(Vertices.Count - 3);
-        Triangles.Add(Vertices.Count - 1);
-        Triangles.Add(Vertices.Count - 2);
+        AddTriangles();
     }
 
     private void GenerateRightSide(Vector3Int position)
@@ -117,12 +99,7 @@ public class ChunkRenderer : MonoBehaviour
         Vertices.Add(position + new Vector3Int(0, 0, 1));
         Vertices.Add(position + new Vector3Int(0, 1, 0));
         Vertices.Add(position + new Vector3Int(0, 1, 1));
-        Triangles.Add(Vertices.Count - 4);
-        Triangles.Add(Vertices.Count - 3);
-        Triangles.Add(Vertices.Count - 2);
-        Triangles.Add(Vertices.Count - 3);
-        Triangles.Add(Vertices.Count - 1);
-        Triangles.Add(Vertices.Count - 2);
+        AddTriangles();
     }
 
     private void GenerateLeftSide(Vector3Int position)
@@ -131,6 +108,11 @@ public class ChunkRenderer : MonoBehaviour
         Vertices.Add(position + new Vector3Int(1, 1, 0));
         Vertices.Add(position + new Vector3Int(1, 0, 1));
         Vertices.Add(position + new Vector3Int(1, 1, 1));
+        AddTriangles();
+    }
+    
+    private void AddTriangles()
+    {
         Triangles.Add(Vertices.Count - 4);
         Triangles.Add(Vertices.Count - 3);
         Triangles.Add(Vertices.Count - 2);
@@ -176,8 +158,8 @@ public class ChunkRenderer : MonoBehaviour
 
     public void SpawnBlock(Vector3Int blockPosition, Block block)
     {
+        Debug.Log($"{blockPosition} {block}");
         ChunkData.Blocks[blockPosition.x, blockPosition.y, blockPosition.z] = block;
-        Debug.Log($"{blockPosition} {block.Kind}");
         RegenerateMesh();
     }
 

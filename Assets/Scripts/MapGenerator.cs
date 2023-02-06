@@ -9,7 +9,7 @@ public class MapGenerator : MonoBehaviour
 
     public void Start()
     {
-        Map = MapReader.CreateNewMap("a.rch", 64, 64, 64);
+        Map = MapReader.CreateNewMap("a.rch",32,32,32);
         var floorRenderer = Instantiate(floorRendererPrefab, transform);
         floorRenderer.Map = Map;
         GlobalEvents.OnBlockChangeStateEvent.AddListener(ChangeBlockState);
@@ -46,7 +46,6 @@ public class MapGenerator : MonoBehaviour
             position.z >= 0 && position.z < Map.Depth)
         {
             var chunkIndex = FindChunkByPosition(position);
-            Debug.Log(chunkIndex);
             var localPosition = new Vector3Int(position.x % ChunkData.ChunkSize, position.y % ChunkData.ChunkSize,
                 position.z % ChunkData.ChunkSize);
             Chunks[chunkIndex].SpawnBlock(localPosition, block);
