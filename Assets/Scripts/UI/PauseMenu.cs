@@ -6,13 +6,12 @@ public class PauseMenu : MonoBehaviour
 {
    
     [SerializeField] private KeyCode keyMenuPaused;
+    [SerializeField] private GameObject gameplayUI;
     [SerializeField] private GameObject pauseMenu;
-    [SerializeField] private GameObject crosshair;
-    [SerializeField] private GameObject inventoryPanel;
     [SerializeField] private Button continueGameButton;
     [SerializeField] private Button settingsButton;
     [SerializeField] private Button saveAndExitButton;
-
+    
     private bool IsMenuPaused { get; set; }
     private void Start()
     {
@@ -28,9 +27,8 @@ public class PauseMenu : MonoBehaviour
         if (IsMenuPaused)
         {
             pauseMenu.SetActive(true);
-            crosshair.SetActive(false);
+            gameplayUI.SetActive(false);
             ChangeButtonStates(true);
-            inventoryPanel.SetActive(false);
             Cursor.lockState = CursorLockMode.None;
             Time.timeScale = 0f;
         }
@@ -38,9 +36,8 @@ public class PauseMenu : MonoBehaviour
         else
         {
             pauseMenu.SetActive(false);
-            crosshair.SetActive(true);
+            gameplayUI.SetActive(true);
             ChangeButtonStates(false);
-            inventoryPanel.SetActive(true);
             Cursor.lockState = CursorLockMode.Locked;
             Time.timeScale = 1f;
         }

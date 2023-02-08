@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using UI;
+using UnityEngine;
 using UnityEngine.Events;
 
 namespace GamePlay
@@ -12,11 +13,18 @@ namespace GamePlay
             OnBlockChangeStateEvent.Invoke(block, position);
         }
 
-        public static readonly UnityEvent<Block> OnBlockChoiceEvent = new();
+        public static readonly UnityEvent<InventoryItem> OnSlotChangeEvent = new();
 
-        public static void SendBlockChoice(Block block)
+        public static void SendSlotChoice(InventoryItem item)
         {
-            OnBlockChoiceEvent.Invoke(block);
+            OnSlotChangeEvent.Invoke(item);
+        }
+
+        public static readonly UnityEvent<Color> OnColorBlockChange = new();
+
+        public static void SendColorBlockChange(Color color)
+        {
+            OnColorBlockChange.Invoke(color);
         }
     }
 }

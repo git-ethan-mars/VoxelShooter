@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab5c3208b2d24b7f8572145594577ee2, type: 3}
+  m_Name: Brown Block
+  m_EditorClassIdentifier: 
+  icon: {fileID: 21300000, guid: 4ead82b14af87024b97b832d874cc460, type: 3}
+  kind: 8
+  color: {r: 0.5882353, g: 0.29411766, b: 0, a: 1}

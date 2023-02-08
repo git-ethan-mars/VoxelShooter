@@ -1,4 +1,5 @@
 using System;
+using UI;
 using UnityEngine;
 
 // ReSharper disable PossibleLossOfFraction
@@ -8,12 +9,12 @@ namespace GamePlay
     public class BlockPlacement : MonoBehaviour
     {
         [SerializeField] private float placeDistance;
-        private Block _currentBlock;
+        private InventoryItem _currentItem;
         private Camera Camera { get; set; }
 
         private void Awake()
         {
-            GlobalEvents.OnBlockChoiceEvent.AddListener(newBlock => _currentBlock = newBlock);
+            GlobalEvents.OnSlotChangeEvent.AddListener(newItem => _currentItem = newItem);
         }
 
         private void Start()
@@ -30,7 +31,8 @@ namespace GamePlay
             if (Input.GetMouseButtonDown(1) &&
                 (hitInfo.collider.CompareTag("Chunk") || hitInfo.collider.gameObject.CompareTag("Floor")))
             {
-                GlobalEvents.SendBlockState(_currentBlock, Vector3Int.FloorToInt(hitInfo.point + hitInfo.normal / 2));
+                GlobalEvents.SendBlockState(new Block() {Kind = _currentItem.kind},
+                    Vector3Int.FloorToInt(hitInfo.point + hitInfo.normal / 2));
             }
 
             if (Input.GetMouseButtonDown(0) && hitInfo.collider.gameObject.CompareTag("Chunk"))

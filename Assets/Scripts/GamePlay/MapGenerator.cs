@@ -11,7 +11,7 @@ namespace GamePlay
 
         public void Start()
         {
-            Map = MapReader.CreateNewMap(32,32,32);
+            Map = MapReader.Read("a.rch");
             var floorRenderer = Instantiate(floorRendererPrefab, transform);
             floorRenderer.Map = Map;
             GlobalEvents.OnBlockChangeStateEvent.AddListener(ChangeBlockState);

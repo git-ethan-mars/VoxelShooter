@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace GamePlay
@@ -6,6 +7,8 @@ namespace GamePlay
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public class ChunkRenderer : MonoBehaviour
     {
+        [SerializeField] private BlockInfo[] blocks;
+        private const int AtlasSizeInPixels = 128;
         private Mesh ChunkMesh { get; set; }
         private MeshCollider MeshCollider { get; set; }
         private MeshFilter MeshFilter { get; set; }
@@ -174,31 +177,14 @@ namespace GamePlay
             }
         }
 
-        private void AddUv(BlockKind blockKind)
+        private void AddUv(BlockKind kind)
         {
-            if (blockKind == BlockKind.Red)
-            {
-                UV.Add(new Vector2(128f / 512 + 0.01f, 480f / 512+0.01f));
-                UV.Add(new Vector2(128f / 512+0.01f, 1));
-                UV.Add(new Vector2(160f / 512-0.01f, 480f / 512+0.01f));
-                UV.Add(new Vector2(160f / 512-0.01f, 1));
-            }
-
-            if (blockKind == BlockKind.Green)
-            {
-                UV.Add(new Vector2(64f / 512+0.01f, 480f / 512+0.01f));
-                UV.Add(new Vector2(64f / 512+0.01f, 1));
-                UV.Add(new Vector2(96f / 512-0.01f, 480f / 512+0.01f));
-                UV.Add(new Vector2(96f / 512-0.01f, 1));
-            }
-
-            if (blockKind == BlockKind.Blue)
-            {
-                UV.Add(new Vector2(0f / 512, 32f / 512+0.01f));
-                UV.Add(new Vector2(0f / 512, 64f / 512-0.01f));
-                UV.Add(new Vector2(32f / 512-0.01f, 32f / 512+0.01f));
-                UV.Add(new Vector2(32f / 512-0.01f, 64f / 512-0.01f));
-            }
+            var blockInfo = blocks.First(b => b.kind == kind);
+            const float floatErrorFix = 0.5f;
+            UV.Add((blockInfo.leftBottomUVPosition + new Vector2(floatErrorFix,floatErrorFix)) / AtlasSizeInPixels);
+            UV.Add((blockInfo.leftBottomUVPosition + new Vector2(32-floatErrorFix, floatErrorFix)) / AtlasSizeInPixels);
+            UV.Add((blockInfo.leftBottomUVPosition + new Vector2(floatErrorFix, 32-floatErrorFix)) / AtlasSizeInPixels);
+            UV.Add((blockInfo.leftBottomUVPosition + new Vector2(32-floatErrorFix, 32-floatErrorFix)) / AtlasSizeInPixels);
         }
 
         public void SpawnBlock(Vector3Int blockPosition, Block block)
