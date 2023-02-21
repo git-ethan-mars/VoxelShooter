@@ -19,5 +19,13 @@ namespace GamePlay
         {
             OnPaletteUpdate.Invoke(colorId);
         }
+        
+        public static readonly UnityEvent<string> OnSaveMapEvent = new();
+
+        public static void SendMapSave (string saveName)
+        {
+            OnSaveMapEvent.Invoke(saveName);
+        }
     }
+    
 }

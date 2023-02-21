@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Threading;
+using UnityEngine;
 
 namespace GamePlay
 {
@@ -15,6 +16,7 @@ namespace GamePlay
             var floorRenderer = Instantiate(floorRendererPrefab, transform);
             floorRenderer.Map = Map;
             GlobalEvents.OnBlockChangeStateEvent.AddListener(ChangeBlockState);
+            GlobalEvents.OnSaveMapEvent.AddListener(mapName => MapWriter.SaveMap(mapName, Map));
             Chunks = new ChunkRenderer[Map.Width / ChunkData.ChunkSize * Map.Height / ChunkData.ChunkSize * Map.Depth /
                                        ChunkData.ChunkSize];
             for (var x = 0; x < Map.Width / ChunkData.ChunkSize; x++)

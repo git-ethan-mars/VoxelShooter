@@ -1,25 +1,33 @@
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using GamePlay;
+using TMPro;
 
 namespace UI
 {
     public class PauseMenu : MonoBehaviour
     {
         [SerializeField] private KeyCode keyMenuPaused;
+        [SerializeField] private GameObject saveMenu;
         [SerializeField] private GameObject gameplayUI;
         [SerializeField] private GameObject pauseMenu;
         [SerializeField] private Button continueGameButton;
         [SerializeField] private Button settingsButton;
         [SerializeField] private Button saveAndExitButton;
+        [SerializeField] private Button confirmSaveButton;
+        [SerializeField] private Button backToPauseButton;
+        [SerializeField] private TMP_InputField saveName;
 
         private bool IsMenuPaused { get; set; }
 
         private void Start()
         {
-            pauseMenu.SetActive(false);
             saveAndExitButton.onClick.AddListener(ExitAndQuit);
             continueGameButton.onClick.AddListener(Resume);
+            confirmSaveButton.onClick.AddListener(ConfirmSave);
+            backToPauseButton.onClick.AddListener(BackToPause);
         }
 
         public void Update()
@@ -50,6 +58,7 @@ namespace UI
         private void Resume()
         {
             pauseMenu.SetActive(false);
+            saveMenu.SetActive(false);
             gameplayUI.SetActive(true);
             ChangeButtonStates(false);
             Cursor.lockState = CursorLockMode.Locked;
@@ -57,10 +66,23 @@ namespace UI
             IsMenuPaused = false;
         }
 
-        private static void ExitAndQuit()
+        private void ExitAndQuit()
+        {
+            saveMenu.SetActive(true);
+            ChangeButtonStates(false);
+        }
+
+        private void ConfirmSave()
         {
             Time.timeScale = 1f;
+            GlobalEvents.SendMapSave(saveName.text + ".rch");
             SceneManager.LoadScene("MainMenu");
+        }
+
+        private void BackToPause()
+        {
+            ChangeButtonStates(true);
+            saveMenu.SetActive(false);
         }
     }
 }
