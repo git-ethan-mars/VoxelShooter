@@ -12,19 +12,12 @@ namespace GamePlay
         {
             OnBlockChangeStateEvent.Invoke(block, position);
         }
+        
+       public static readonly UnityEvent<byte> OnPaletteUpdate = new();
 
-        public static readonly UnityEvent<InventoryItem> OnSlotChangeEvent = new();
-
-        public static void SendSlotChoice(InventoryItem item)
+        public static void SendPaletteUpdate(byte colorId)
         {
-            OnSlotChangeEvent.Invoke(item);
-        }
-
-        public static readonly UnityEvent<Color> OnColorBlockChange = new();
-
-        public static void SendColorBlockChange(Color color)
-        {
-            OnColorBlockChange.Invoke(color);
+            OnPaletteUpdate.Invoke(colorId);
         }
     }
 }

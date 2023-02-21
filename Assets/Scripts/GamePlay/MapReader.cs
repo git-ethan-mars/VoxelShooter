@@ -56,10 +56,10 @@ namespace GamePlay
                     {
                         for (var z = 0; z < ChunkData.ChunkSize; z++)
                         {
-                            var blockKind = (BlockKind) binaryReader.ReadByte();
+                            var blockColor = binaryReader.ReadByte();
                             var block = new Block()
                             {
-                                Kind = blockKind
+                                ColorID = blockColor
                             };
                             chunk.Blocks[x, y, z] = block;
                         }

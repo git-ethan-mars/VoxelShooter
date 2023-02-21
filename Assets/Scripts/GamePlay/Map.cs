@@ -1,4 +1,6 @@
-﻿namespace GamePlay
+﻿using UnityEngine;
+
+namespace GamePlay
 {
     public class Map
     {
@@ -12,6 +14,13 @@
             Width = width;
             Height = height;
             Depth = depth;
+        }
+        
+        public int FindChunkByPosition(Vector3Int position)
+        {
+            return position.z / ChunkData.ChunkSize +
+                   position.y / ChunkData.ChunkSize * (Depth / ChunkData.ChunkSize) +
+                   position.x / ChunkData.ChunkSize * (Height / ChunkData.ChunkSize * Depth / ChunkData.ChunkSize);
         }
     }
 }

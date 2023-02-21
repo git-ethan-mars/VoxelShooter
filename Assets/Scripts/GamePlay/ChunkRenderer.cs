@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace GamePlay
@@ -7,24 +6,25 @@ namespace GamePlay
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public class ChunkRenderer : MonoBehaviour
     {
-        [SerializeField] private BlockInfo[] blocks;
-        private const int AtlasSizeInPixels = 128;
         private Mesh ChunkMesh { get; set; }
         private MeshCollider MeshCollider { get; set; }
         private MeshFilter MeshFilter { get; set; }
         public ChunkData ChunkData { get; set; }
         private List<Vector3> Vertices { get; set; }
         private List<int> Triangles { get; set; }
-        private List<Vector2> UV { get; set; }
+        private List<Color> Colors { get; set; }
+
+        private Dictionary<byte, Color> _blockColorById;
 
         private void Start()
         {
+            _blockColorById = BlockColor.GetBlockColorDictionary();
             MeshFilter = GetComponent<MeshFilter>();
             MeshCollider = GetComponent<MeshCollider>();
             ChunkMesh = new Mesh();
             Vertices = new List<Vector3>();
             Triangles = new List<int>();
-            UV = new List<Vector2>();
+            Colors = new List<Color>();
             RegenerateMesh();
         }
 
@@ -33,7 +33,8 @@ namespace GamePlay
         {
             Vertices.Clear();
             Triangles.Clear();
-            UV.Clear();
+            
+            Colors.Clear();
             ChunkMesh.Clear();
             for (var x = 0; x < ChunkData.ChunkSize; x++)
             {
@@ -48,7 +49,7 @@ namespace GamePlay
 
             ChunkMesh.vertices = Vertices.ToArray();
             ChunkMesh.triangles = Triangles.ToArray();
-            ChunkMesh.uv = UV.ToArray();
+            ChunkMesh.colors = Colors.ToArray();
             ChunkMesh.RecalculateNormals();
             ChunkMesh.RecalculateBounds();
             if (Vertices.Count == 0)
@@ -132,64 +133,61 @@ namespace GamePlay
 
         private void GenerateBlock(int x, int y, int z)
         {
-            if (ChunkData.Blocks[x, y, z].Kind == BlockKind.Empty) return;
+            if (ChunkData.Blocks[x, y, z].ColorID == BlockColor.Empty) return;
             var blockPosition = new Vector3Int(x, y, z);
             if (!IsValidPosition(x, y + 1, z) ||
-                (IsValidPosition(x, y + 1, z) && ChunkData.Blocks[x, y + 1, z].Kind == BlockKind.Empty))
+                (IsValidPosition(x, y + 1, z) && ChunkData.Blocks[x, y + 1, z].ColorID == BlockColor.Empty))
             {
                 GenerateTopSide(blockPosition);
-                AddUv(ChunkData.Blocks[blockPosition.x, blockPosition.y, blockPosition.z].Kind);
+                AddUv(ChunkData.Blocks[blockPosition.x, blockPosition.y, blockPosition.z].ColorID);
             }
 
             if (!IsValidPosition(x, y - 1, z) ||
-                (IsValidPosition(x, y - 1, z) && ChunkData.Blocks[x, y - 1, z].Kind == BlockKind.Empty))
+                (IsValidPosition(x, y - 1, z) && ChunkData.Blocks[x, y - 1, z].ColorID == BlockColor.Empty))
             {
                 GenerateBottomSide(blockPosition);
-                AddUv(ChunkData.Blocks[blockPosition.x, blockPosition.y, blockPosition.z].Kind);
+                AddUv(ChunkData.Blocks[blockPosition.x, blockPosition.y, blockPosition.z].ColorID);
             }
 
             if (!IsValidPosition(x, y, z + 1) ||
-                (IsValidPosition(x, y, z + 1) && ChunkData.Blocks[x, y, z + 1].Kind == BlockKind.Empty))
+                (IsValidPosition(x, y, z + 1) && ChunkData.Blocks[x, y, z + 1].ColorID == BlockColor.Empty))
             {
                 GenerateFrontSide(blockPosition);
-                AddUv(ChunkData.Blocks[blockPosition.x, blockPosition.y, blockPosition.z].Kind);
+                AddUv(ChunkData.Blocks[blockPosition.x, blockPosition.y, blockPosition.z].ColorID);
             }
 
             if (!IsValidPosition(x, y, z - 1) ||
-                (IsValidPosition(x, y, z - 1) && ChunkData.Blocks[x, y, z - 1].Kind == BlockKind.Empty))
+                (IsValidPosition(x, y, z - 1) && ChunkData.Blocks[x, y, z - 1].ColorID == BlockColor.Empty))
             {
                 GenerateBackSide(blockPosition);
-                AddUv(ChunkData.Blocks[blockPosition.x, blockPosition.y, blockPosition.z].Kind);
+                AddUv(ChunkData.Blocks[blockPosition.x, blockPosition.y, blockPosition.z].ColorID);
             }
 
             if (!IsValidPosition(x - 1, y, z) ||
-                (IsValidPosition(x - 1, y, z) && ChunkData.Blocks[x - 1, y, z].Kind == BlockKind.Empty))
+                (IsValidPosition(x - 1, y, z) && ChunkData.Blocks[x - 1, y, z].ColorID == BlockColor.Empty))
             {
                 GenerateRightSide(blockPosition);
-                AddUv(ChunkData.Blocks[blockPosition.x, blockPosition.y, blockPosition.z].Kind);
+                AddUv(ChunkData.Blocks[blockPosition.x, blockPosition.y, blockPosition.z].ColorID);
             }
 
             if (!IsValidPosition(x + 1, y, z) ||
-                (IsValidPosition(x + 1, y, z) && ChunkData.Blocks[x + 1, y, z].Kind == BlockKind.Empty))
+                (IsValidPosition(x + 1, y, z) && ChunkData.Blocks[x + 1, y, z].ColorID == BlockColor.Empty))
             {
                 GenerateLeftSide(blockPosition);
-                AddUv(ChunkData.Blocks[blockPosition.x, blockPosition.y, blockPosition.z].Kind);
+                AddUv(ChunkData.Blocks[blockPosition.x, blockPosition.y, blockPosition.z].ColorID);
             }
         }
 
-        private void AddUv(BlockKind kind)
+        private void AddUv(byte colorID)
         {
-            var blockInfo = blocks.First(b => b.kind == kind);
-            const float floatErrorFix = 0.5f;
-            UV.Add((blockInfo.leftBottomUVPosition + new Vector2(floatErrorFix,floatErrorFix)) / AtlasSizeInPixels);
-            UV.Add((blockInfo.leftBottomUVPosition + new Vector2(32-floatErrorFix, floatErrorFix)) / AtlasSizeInPixels);
-            UV.Add((blockInfo.leftBottomUVPosition + new Vector2(floatErrorFix, 32-floatErrorFix)) / AtlasSizeInPixels);
-            UV.Add((blockInfo.leftBottomUVPosition + new Vector2(32-floatErrorFix, 32-floatErrorFix)) / AtlasSizeInPixels);
+            Colors.Add(_blockColorById[colorID]);
+            Colors.Add(_blockColorById[colorID]);
+            Colors.Add(_blockColorById[colorID]);
+            Colors.Add(_blockColorById[colorID]);
         }
 
         public void SpawnBlock(Vector3Int blockPosition, Block block)
         {
-            Debug.Log($"{blockPosition} {block.Kind}");
             ChunkData.Blocks[blockPosition.x, blockPosition.y, blockPosition.z] = block;
             RegenerateMesh();
         }

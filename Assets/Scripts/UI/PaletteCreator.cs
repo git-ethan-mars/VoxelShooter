@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using GamePlay;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,70 +8,53 @@ namespace UI
 {
     public class PaletteCreator : MonoBehaviour
     {
-        [SerializeField] private Texture2D colorAtlas;
-        [SerializeField] private Image[] colorBlocks;
         [SerializeField] private Image pointer;
         [SerializeField] private Sprite blackBoarder;
         [SerializeField] private Sprite blueBoarder;
-        private Image[,] _colorMatrix;
-        private int indexX;
-        private int indexY;
+        private int _indexX;
+        private int _indexY;
+        private const int PaletteSize = 8;
+        private Dictionary<byte, Color> _blockColorById;
 
         private void Start()
         {
-            
-            _colorMatrix = new Image[4,4];
-            for (var x = 0; x < 4; x++)
+            var i = 0;
+            _blockColorById = BlockColor.GetBlockColorDictionary();
+            foreach (var color in _blockColorById.Values)
             {
-                for (var y = 0; y < 4; y++)
-                {
-                    colorBlocks[y+4*x].color = colorAtlas.GetPixel(32 * x, 32 * y);
-                    _colorMatrix[x, y] = colorBlocks[y + 4 * x];
-                }
+                transform.GetChild(i).GetComponent<Image>().color = color;
+                i++;
             }
 
-            GlobalEvents.SendColorBlockChange(_colorMatrix[0, 0].color);
-            StartCoroutine(ChangePointerColor());
+            GlobalEvents.SendPaletteUpdate((byte)(_indexX + _indexY * PaletteSize + 1));
         }
 
         private void Update()
         {
+            if (!Input.GetKeyDown(KeyCode.LeftArrow) && !Input.GetKeyDown(KeyCode.RightArrow) &&
+                !Input.GetKeyDown(KeyCode.UpArrow) && !Input.GetKeyDown(KeyCode.DownArrow)) return;
             if (Input.GetKeyDown(KeyCode.LeftArrow))
-            {
-                if (indexX > 0)
-                {
-                    indexX--;
-                    pointer.transform.position = _colorMatrix[indexY, indexX].transform.position;
-                    GlobalEvents.SendColorBlockChange(_colorMatrix[indexY, indexX].color);
-                }
-            }
+                if (_indexX > 0)
+                    _indexX--;
+
             if (Input.GetKeyDown(KeyCode.RightArrow))
-            {
-                if (indexX < 3)
-                {
-                    indexX++;
-                    pointer.transform.position = _colorMatrix[indexY, indexX].transform.position;
-                    GlobalEvents.SendColorBlockChange(_colorMatrix[indexY, indexX].color);
-                }
-            }
+                if (_indexX < PaletteSize - 1)
+                    _indexX++;
+
             if (Input.GetKeyDown(KeyCode.UpArrow))
             {
-                if (indexY > 0)
-                {
-                    indexY--;
-                    pointer.transform.position = _colorMatrix[indexY, indexX].transform.position;
-                    GlobalEvents.SendColorBlockChange(_colorMatrix[indexY, indexX].color);
-                }
+                if (_indexY > 0) 
+                    _indexY--;
             }
+
             if (Input.GetKeyDown(KeyCode.DownArrow))
             {
-                if (indexY < 3)
-                {
-                    indexY++;
-                    pointer.transform.position = _colorMatrix[indexY, indexX].transform.position;
-                    GlobalEvents.SendColorBlockChange(_colorMatrix[indexY, indexX].color);
-                }
+                if (_indexY < PaletteSize - 1) 
+                    _indexY++;
             }
+
+            pointer.transform.position = transform.GetChild(_indexX + _indexY * PaletteSize).position;
+            GlobalEvents.SendPaletteUpdate((byte)(_indexX + _indexY * PaletteSize + 1));
         }
 
         private IEnumerator ChangePointerColor()
@@ -82,8 +66,12 @@ namespace UI
                 pointer.sprite = blueBoarder;
                 yield return new WaitForSeconds(0.5f);
             }
-            
-            
+        }
+
+
+        private void OnEnable()
+        {
+            StartCoroutine(ChangePointerColor());
         }
     }
 }

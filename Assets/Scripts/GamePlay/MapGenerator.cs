@@ -35,21 +35,29 @@ namespace GamePlay
             }
         }
 
-        private int FindChunkByPosition(Vector3Int position)
-        {
-            return position.z / ChunkData.ChunkSize +
-                   position.y / ChunkData.ChunkSize * (Map.Depth / ChunkData.ChunkSize) +
-                   position.x / ChunkData.ChunkSize * (Map.Height / ChunkData.ChunkSize * Map.Depth / ChunkData.ChunkSize);
-        }
+       
 
         private void ChangeBlockState(Block block, Vector3Int position)
         {
             if (position.x >= 0 && position.x < Map.Width && position.y >= 0 && position.y < Map.Height &&
                 position.z >= 0 && position.z < Map.Depth)
             {
-                var chunkIndex = FindChunkByPosition(position);
+                var chunkIndex = Map.FindChunkByPosition(position);
                 var localPosition = new Vector3Int(position.x % ChunkData.ChunkSize, position.y % ChunkData.ChunkSize,
                     position.z % ChunkData.ChunkSize);
+                Chunks[chunkIndex].SpawnBlock(localPosition, block);
+            }
+        }
+
+        public void ChangeBlockColor(byte colorId, Vector3Int position)
+        {
+            if (position.x >= 0 && position.x < Map.Width && position.y >= 0 && position.y < Map.Height &&
+                position.z >= 0 && position.z < Map.Depth)
+            {
+                var chunkIndex = Map.FindChunkByPosition(position);
+                var localPosition = new Vector3Int(position.x % ChunkData.ChunkSize, position.y % ChunkData.ChunkSize,
+                    position.z % ChunkData.ChunkSize);
+                var block = new Block() {ColorID = colorId};
                 Chunks[chunkIndex].SpawnBlock(localPosition, block);
             }
         }

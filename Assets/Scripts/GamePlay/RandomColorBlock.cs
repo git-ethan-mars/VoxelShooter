@@ -9,7 +9,7 @@ namespace GamePlay
         private void Start()
         {
             MeshRenderer = GetComponent<MeshRenderer>();
-            MeshRenderer.material.color = new Color(Random.value, Random.value, Random.value);
+            MeshRenderer.material.color = new UnityEngine.Color(Random.value, Random.value, Random.value);
         }
     }
 }

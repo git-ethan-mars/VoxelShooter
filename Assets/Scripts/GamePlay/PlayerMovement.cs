@@ -12,7 +12,7 @@ namespace GamePlay
             Rigidbody = GetComponent<Rigidbody>();
             Rigidbody.freezeRotation = true;
         }
-    
+
         private void FixedUpdate()
         {
             var verticalInput = Input.GetAxis("Vertical");
