@@ -1945,6 +1945,7 @@ MonoBehaviour:
   - {fileID: 763243943}
   - {fileID: 2087491599}
   blockPlacement: {fileID: 1405898376}
+  coloringBrush: {fileID: 1405898380}
 --- !u!114 &598128323
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4569,6 +4570,7 @@ GameObject:
   - component: {fileID: 1405898375}
   - component: {fileID: 1405898376}
   - component: {fileID: 1405898377}
+  - component: {fileID: 1405898380}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -4632,7 +4634,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 759123832072eff4ba7ecfa75e0d02eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  placeDistance: 5.65
+  placeDistance: 5
 --- !u!65 &1405898377
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4696,6 +4698,19 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1405898369}
   m_Mesh: {fileID: -2432090755550338912, guid: 96d04f8ba5f01554faf1a5444838c58a, type: 3}
+--- !u!114 &1405898380
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1405898369}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 644addb4419d402d9ad8516be301cf8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  placeDistance: 5
 --- !u!1 &1459472068
 GameObject:
   m_ObjectHideFlags: 0
