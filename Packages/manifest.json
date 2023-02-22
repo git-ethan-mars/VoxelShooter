@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "com.mirror.steamworks.net": "https://github.com/Chykary/FizzySteamworks.git?path=/com.mirror.steamworks.net",
     "com.unity.collab-proxy": "1.17.7",
     "com.unity.feature.development": "1.0.1",
     "com.unity.ide.rider": "3.0.18",
