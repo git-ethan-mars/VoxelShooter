@@ -15,8 +15,21 @@ namespace GamePlay
 
         private void FixedUpdate()
         {
-            var verticalInput = Input.GetAxis("Vertical");
-            var horizontalInput = Input.GetAxis("Horizontal");
+            var verticalInput = 0f;
+            if (Input.GetKey(KeyCode.W))
+                verticalInput += 1;
+            if (Input.GetKey(KeyCode.S))
+                verticalInput -= 1;
+            var horizontalInput = 0f;
+            if (Input.GetKey(KeyCode.D))
+            {
+                horizontalInput += 1;
+            }
+            if (Input.GetKey(KeyCode.A))
+            {
+                horizontalInput -= 1;
+            }
+
             var moveDirection = verticalInput * transform.forward + horizontalInput * transform.right;
             Rigidbody.velocity = moveDirection * speed;
             if (Input.GetKey(KeyCode.Space))

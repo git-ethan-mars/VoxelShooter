@@ -39,7 +39,8 @@ namespace UI
                 pauseMenu.SetActive(true);
                 gameplayUI.SetActive(false);
                 ChangeButtonStates(true);
-                Cursor.lockState = CursorLockMode.None;
+                Cursor.lockState = CursorLockMode.Confined;
+                Cursor.visible = true;
                 Time.timeScale = 0f;
             }
             else
@@ -62,6 +63,7 @@ namespace UI
             gameplayUI.SetActive(true);
             ChangeButtonStates(false);
             Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
             Time.timeScale = 1f;
             IsMenuPaused = false;
         }
