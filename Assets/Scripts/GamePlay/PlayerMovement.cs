@@ -1,8 +1,9 @@
+using Mirror;
 using UnityEngine;
 
 namespace GamePlay
 {
-    public class PlayerMovement : MonoBehaviour
+    public class PlayerMovement : NetworkBehaviour
     {
         private Rigidbody Rigidbody { get; set; }
         [SerializeField] private float speed;
@@ -15,6 +16,7 @@ namespace GamePlay
 
         private void FixedUpdate()
         {
+            if (!isOwned) return;
             var verticalInput = 0f;
             if (Input.GetKey(KeyCode.W))
                 verticalInput += 1;
