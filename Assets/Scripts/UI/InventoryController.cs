@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using GamePlay;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Image = UnityEngine.UI.Image;
 
 namespace UI
@@ -10,15 +11,14 @@ namespace UI
     {
         private List<IInventoryItemView> _itemList;
         [SerializeField] private List<GameObject> slots;
-        [SerializeField] private BlockPlacement blockPlacement;
-        [SerializeField] private ColoringBrush coloringBrush;
+        [SerializeField] private GameObject owner;
         private int _itemIndex;
         private int _maxIndex;
 
         private void Awake()
         {
             _itemList = new List<IInventoryItemView>()
-                {new BlockView(blockPlacement), new BrushView(coloringBrush)};
+                {new BlockView(owner.GetComponent<BlockPlacement>()), new BrushView(owner.GetComponent<ColoringBrush>())};
             _maxIndex = Math.Min(_itemList.Count, slots.Count);
             for (var i = 0; i < _maxIndex; i++)
             {

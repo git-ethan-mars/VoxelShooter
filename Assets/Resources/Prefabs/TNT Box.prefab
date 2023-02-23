@@ -9,6 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1262306237317752309}
+  - component: {fileID: 3381989271422780290}
+  - component: {fileID: 5090258997291032949}
   m_Layer: 0
   m_Name: TNT Box
   m_TagString: Untagged
@@ -32,6 +34,34 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &3381989271422780290
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2484185073032474620}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.7809766, y: 0.3321179, z: 0.8405682}
+  m_Center: {x: 0.4898289, y: 0.16605894, z: 0.5244672}
+--- !u!114 &5090258997291032949
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2484185073032474620}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec8646aeb5f34c043944dffd269fcc6f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  explosionForce: 1000
+  explosionRadius: 15
+  slicedBlock: {fileID: 2719062774224184141, guid: ab4935dfc27cf5146b28e1e85d87f101, type: 3}
 --- !u!1 &6326382301332018277
 GameObject:
   m_ObjectHideFlags: 0
@@ -43,10 +73,8 @@ GameObject:
   - component: {fileID: 964268957795087318}
   - component: {fileID: 1194590225524667056}
   - component: {fileID: 2288859361943238683}
-  - component: {fileID: 3010510948184916782}
-  - component: {fileID: 6673035774220078298}
   m_Layer: 0
-  m_Name: TNT
+  m_Name: TNT Render
   m_TagString: TNT
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -117,31 +145,3 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &3010510948184916782
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6326382301332018277}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 2.5, y: 1.1, z: 3.3}
-  m_Center: {x: 0.25, y: 0.55, z: 0.35000002}
---- !u!114 &6673035774220078298
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6326382301332018277}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec8646aeb5f34c043944dffd269fcc6f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  explosionForce: 1000
-  explosionRadius: 15
-  slicedBlock: {fileID: 2719062774224184141, guid: ab4935dfc27cf5146b28e1e85d87f101, type: 3}
