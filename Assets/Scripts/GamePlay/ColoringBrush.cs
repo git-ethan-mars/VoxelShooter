@@ -5,7 +5,11 @@ namespace GamePlay
     public class ColoringBrush : MonoBehaviour
     {
         [SerializeField] private float placeDistance;
-        [SerializeField] private Camera Camera;
+        private Camera Camera { get; set; }
+        private void Start()
+        {
+            Camera = Camera.main;
+        }
 
         public void PaintBlock(byte colorId)
         {

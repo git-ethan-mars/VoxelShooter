@@ -6,8 +6,11 @@ namespace GamePlay
     public class BlockPlacement : MonoBehaviour
     {
         [SerializeField] private float placeDistance;
-        [SerializeField] private Camera Camera;
-        
+        private Camera Camera { get; set; }
+        private void Start()
+        {
+            Camera = Camera.main;
+        }
 
         public void PlaceBlock(byte colorId)
         {

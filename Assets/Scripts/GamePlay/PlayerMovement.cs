@@ -1,9 +1,8 @@
-using Mirror;
 using UnityEngine;
 
 namespace GamePlay
 {
-    public class PlayerMovement : NetworkBehaviour
+    public class PlayerMovement : MonoBehaviour
     {
         private Rigidbody Rigidbody { get; set; }
         [SerializeField] private float speed;
