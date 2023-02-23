@@ -11,14 +11,13 @@ GameObject:
   - component: {fileID: 5117619621521762858}
   - component: {fileID: 5117619621521762861}
   - component: {fileID: 5117619621521762860}
-  - component: {fileID: 5117619621521762859}
   m_Layer: 0
   m_Name: Camera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &5117619621521762858
 Transform:
   m_ObjectHideFlags: 0
@@ -84,22 +83,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5117619621521762863}
-  m_Enabled: 1
---- !u!114 &5117619621521762859
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5117619621521762863}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 203ae1b9418850e4a86144a2e0249fab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  objectToFollow: {fileID: 7341028304130904992}
-  sensitivityX: 800
-  sensitivityY: 800
+  m_Enabled: 0
 --- !u!1 &5182803370366131678
 GameObject:
   m_ObjectHideFlags: 0
@@ -112,6 +96,7 @@ GameObject:
   - component: {fileID: 6511852134791516027}
   - component: {fileID: 4320226976157258569}
   - component: {fileID: 3294164181410002064}
+  - component: {fileID: 3487740726025922466}
   - component: {fileID: 1992078693207383822}
   - component: {fileID: 8977804146212694667}
   - component: {fileID: 5585783584928449443}
@@ -183,6 +168,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   placeDistance: 5
   Camera: {fileID: 5117619621521762861}
+--- !u!114 &3487740726025922466
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5182803370366131678}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 203ae1b9418850e4a86144a2e0249fab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0.1
+  cameraObject: {fileID: 5117619621521762863}
+  sensitivityX: 800
+  sensitivityY: 800
 --- !u!54 &1992078693207383822
 Rigidbody:
   m_ObjectHideFlags: 0
