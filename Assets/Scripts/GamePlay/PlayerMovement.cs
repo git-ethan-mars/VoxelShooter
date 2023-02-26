@@ -16,7 +16,7 @@ namespace GamePlay
 
         private void FixedUpdate()
         {
-            if (!isOwned) return;
+            if (!isLocalPlayer) return;
             var verticalInput = 0f;
             if (Input.GetKey(KeyCode.W))
                 verticalInput += 1;

@@ -26,7 +26,7 @@ namespace GamePlay
 
         private void Update()
         {
-            if (!isOwned) return;
+            if (!isLocalPlayer) return;
             var mouseXInput = Input.GetAxisRaw("Mouse X");
             var mouseYInput = Input.GetAxisRaw("Mouse Y");
             var mouseX = mouseXInput * Time.deltaTime * sensitivityX;

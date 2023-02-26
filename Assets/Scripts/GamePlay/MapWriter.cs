@@ -38,7 +38,7 @@ namespace GamePlay
                     {
                         for (var z = 0; z < ChunkData.ChunkSize; z++)
                         {
-                            binaryWriter.Write(map.Chunks[chunkNumber].Blocks[x, y, z].ColorID);
+                            binaryWriter.Write(map.Chunks[chunkNumber].Blocks[x][y][z].ColorID);
                         }
                     }
                 }

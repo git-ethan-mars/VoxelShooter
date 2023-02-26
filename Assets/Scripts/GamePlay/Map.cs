@@ -15,6 +15,14 @@ namespace GamePlay
             Height = height;
             Depth = depth;
         }
+
+        public Map()
+        {
+            Chunks = new[] {new ChunkData()};
+            Width = 32;
+            Height = 32;
+            Depth = 32;
+        }
         
         public int FindChunkByPosition(Vector3Int position)
         {

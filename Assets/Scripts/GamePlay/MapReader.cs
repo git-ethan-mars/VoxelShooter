@@ -31,6 +31,10 @@ namespace GamePlay
             var depth = binaryReader.ReadInt32();
             var chunks = new ChunkData[width / ChunkData.ChunkSize * height / ChunkData.ChunkSize * depth /
                                        ChunkData.ChunkSize];
+            for (var i = 0; i < chunks.Length; i++)
+            {
+                chunks[i] = new ChunkData();
+            }
             var map = new Map(chunks, width, height, depth);
             for (var x = 0; x < width / ChunkData.ChunkSize; x++)
             {
@@ -61,7 +65,7 @@ namespace GamePlay
                             {
                                 ColorID = blockColor
                             };
-                            chunk.Blocks[x, y, z] = block;
+                            chunk.Blocks[x][y][z] = block;
                         }
                     }
                 }

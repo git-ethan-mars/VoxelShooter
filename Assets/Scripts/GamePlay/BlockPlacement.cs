@@ -1,16 +1,16 @@
 using UnityEngine;
 
-
 namespace GamePlay
 {
     public class BlockPlacement : MonoBehaviour
     {
         [SerializeField] private float placeDistance;
-        [SerializeField] private Camera Camera;
+        private Camera _camera;
 
         public void PlaceBlock(byte colorId)
         {
-            var ray = Camera.ViewportPointToRay(new Vector3(0.5f, 0.5f));
+            _camera ??= gameObject.GetComponentInChildren<Camera>();
+            var ray = _camera.ViewportPointToRay(new Vector3(0.5f, 0.5f));
             var raycastResult = Physics.Raycast(ray, out var hitInfo, placeDistance);
             if (!raycastResult) return;
             if (hitInfo.collider.CompareTag("Chunk") || hitInfo.collider.gameObject.CompareTag("Floor"))
@@ -22,7 +22,8 @@ namespace GamePlay
 
         public void DestroyBlock()
         {
-            var ray = Camera.ViewportPointToRay(new Vector3(0.5f, 0.5f));
+            _camera ??= gameObject.GetComponentInChildren<Camera>();
+            var ray = _camera.ViewportPointToRay(new Vector3(0.5f, 0.5f));
             var raycastResult = Physics.Raycast(ray, out var hitInfo, placeDistance);
             if (!raycastResult) return;
             if (hitInfo.collider.gameObject.CompareTag("Chunk"))

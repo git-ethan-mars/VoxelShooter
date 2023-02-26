@@ -100,6 +100,7 @@ GameObject:
   - component: {fileID: 1992078693207383822}
   - component: {fileID: 8977804146212694667}
   - component: {fileID: 5585783584928449443}
+  - component: {fileID: 1395833875297004550}
   m_Layer: 0
   m_Name: Builder
   m_TagString: Untagged
@@ -153,7 +154,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   placeDistance: 5
-  Camera: {fileID: 5117619621521762861}
 --- !u!114 &3294164181410002064
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -167,7 +167,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   placeDistance: 5
-  Camera: {fileID: 5117619621521762861}
 --- !u!114 &3487740726025922466
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -248,6 +247,18 @@ MonoBehaviour:
   compressRotation: 0
   positionPrecision: 0.01
   scalePrecision: 0.01
+--- !u!114 &1395833875297004550
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5182803370366131678}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38f7f248a7354052a8f101e84db66359, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8148329389886199145
 GameObject:
   m_ObjectHideFlags: 0
