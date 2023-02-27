@@ -7,10 +7,9 @@ namespace GamePlay
     public class CameraController : NetworkBehaviour
     {
         [SerializeField] private GameObject cameraObject;
+        [SerializeField] private GameObject playerHead;
         [SerializeField] private float sensitivityX;
         [SerializeField] private float sensitivityY;
-        private Transform CameraTransform { get; set; }
-        private Vector3 CameraPositionOffset { get; set; }
         private Camera Camera { get; set; }
         private float XRotation { get; set; }
         private float YRotation { get; set; }
@@ -18,11 +17,8 @@ namespace GamePlay
         public override void OnStartAuthority()
         {
             cameraObject.SetActive(true);
-            Camera = cameraObject.GetComponent<Camera>();
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
-            CameraPositionOffset = Camera.transform.position;
-            CameraTransform = Camera.transform;
 
         }
 
@@ -36,8 +32,7 @@ namespace GamePlay
             YRotation += mouseX;
             XRotation -= mouseY;
             XRotation = Math.Clamp(XRotation, -90, 90);
-            CameraTransform.rotation = Quaternion.Euler(XRotation, YRotation, 0);
-            transform.rotation = CameraTransform.rotation;
+            playerHead.transform.rotation = Quaternion.Euler(XRotation, YRotation, 0);
         }
     }
 }

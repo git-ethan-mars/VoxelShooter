@@ -26,12 +26,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5117619621521762863}
   m_LocalRotation: {x: -0, y: -0.00000004196695, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -1.9000001, z: -1.8}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -0.0000000839339, y: 3.2500002, z: 0.99999964}
+  m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 7341028304130904992}
-  m_RootOrder: 1
+  m_Father: {fileID: 8148329389886199149}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!20 &5117619621521762861
 Camera:
@@ -121,7 +121,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8148329389886199149}
-  - {fileID: 5117619621521762858}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -183,6 +182,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   cameraObject: {fileID: 5117619621521762863}
+  playerHead: {fileID: 8148329389886199145}
   sensitivityX: 800
   sensitivityY: 800
 --- !u!54 &1992078693207383822
@@ -274,7 +274,7 @@ GameObject:
   - component: {fileID: 8148329389886199139}
   - component: {fileID: 8148329389886199138}
   m_Layer: 0
-  m_Name: BuilderRender
+  m_Name: PlayerHead
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -288,10 +288,11 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8148329389886199145}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -2.5, z: -2}
+  m_LocalPosition: {x: 0, y: -2.58, z: -1.8}
   m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 5117619621521762858}
   m_Father: {fileID: 7341028304130904992}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
