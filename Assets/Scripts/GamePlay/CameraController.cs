@@ -24,7 +24,7 @@ namespace GamePlay
 
         }
 
-        private void Update()
+        private void LateUpdate()
         {
             if (!isLocalPlayer) return;
             var mouseXInput = Input.GetAxisRaw("Mouse X");

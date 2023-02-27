@@ -1,5 +1,4 @@
-﻿using UI;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
 namespace GamePlay
@@ -12,20 +11,19 @@ namespace GamePlay
         {
             OnBlockChangeStateEvent.Invoke(block, position);
         }
-        
-       public static readonly UnityEvent<byte> OnPaletteUpdate = new();
+
+        public static readonly UnityEvent<byte> OnPaletteUpdate = new();
 
         public static void SendPaletteUpdate(byte colorId)
         {
             OnPaletteUpdate.Invoke(colorId);
         }
-        
+
         public static readonly UnityEvent<string> OnSaveMapEvent = new();
 
-        public static void SendMapSave (string saveName)
+        public static void SendMapSave(string saveName)
         {
             OnSaveMapEvent.Invoke(saveName);
         }
     }
-    
 }

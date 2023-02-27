@@ -1,4 +1,5 @@
-﻿using GamePlay;
+﻿using Core;
+using GamePlay;
 using UnityEngine;
 
 namespace UI
@@ -13,7 +14,7 @@ namespace UI
 
         public BlockView(BlockPlacement blockPlacement)
         {
-            GlobalEvents.OnPaletteUpdate.AddListener(colorId=>_currentColorId = colorId);
+            GlobalEvents.OnPaletteUpdate.AddListener(colorId => _currentColorId = colorId);
             _blockPlacement = blockPlacement;
             _palette = GameObject.Find("Canvas/GamePlay/Palette");
             Icon = Resources.Load<Sprite>("Sprites/Blocks/#C0C0C0");
@@ -30,7 +31,7 @@ namespace UI
             _palette.SetActive(false);
             Pointer.SetActive(false);
         }
-        
+
         public void OnLeftMouseButtonDown()
         {
             _blockPlacement.DestroyBlock();

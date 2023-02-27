@@ -1,4 +1,4 @@
-﻿namespace UI
+﻿namespace Core
 {
     public interface ILeftMouseButtonHoldHandler
     {
