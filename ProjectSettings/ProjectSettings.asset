@@ -691,7 +691,13 @@ PlayerSettings:
   XboxOneOverrideIdentityPublisher: 
   vrEditorSettings: {}
   cloudServicesEnabled:
+    Build: 0
+    Collab: 0
+    Game Performance: 0
+    Purchasing: 0
+    UDP: 0
     UNet: 1
+    Unity Ads: 0
   luminIcon:
     m_Name: 
     m_ModelFolderPath: 
@@ -706,11 +712,11 @@ PlayerSettings:
   apiCompatibilityLevel: 6
   activeInputHandler: 0
   windowsGamepadBackendHint: 0
-  cloudProjectId: 0972df1e-f805-4796-8472-08c0fa6686fb
+  cloudProjectId: 661452cf-a3d6-461f-a722-d611c1257f81
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
   projectName: VoxelShooter
-  organizationId: unity_05a751b99a713bdfbf55
+  organizationId: calipson
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   playerDataPath: 
