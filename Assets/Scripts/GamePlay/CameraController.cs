@@ -7,7 +7,6 @@ namespace GamePlay
     public class CameraController : NetworkBehaviour
     {
         [SerializeField] private GameObject cameraObject;
-        [SerializeField] private GameObject playerHead;
         [SerializeField] private float sensitivityX;
         [SerializeField] private float sensitivityY;
         private Camera Camera { get; set; }
@@ -32,7 +31,7 @@ namespace GamePlay
             YRotation += mouseX;
             XRotation -= mouseY;
             XRotation = Math.Clamp(XRotation, -90, 90);
-            playerHead.transform.rotation = Quaternion.Euler(XRotation, YRotation, 0);
+            transform.rotation = Quaternion.Euler(XRotation, YRotation, 0);
         }
     }
 }
