@@ -133,48 +133,48 @@ namespace GamePlay
 
         private void GenerateBlock(int x, int y, int z)
         {
-            if (ChunkData.Blocks[x][y][z].ColorID == BlockColor.Empty) return;
+            if (ChunkData.Blocks[x,y,z].ColorID == BlockColor.Empty) return;
             var blockPosition = new Vector3Int(x, y, z);
             if (!IsValidPosition(x, y + 1, z) ||
-                (IsValidPosition(x, y + 1, z) && ChunkData.Blocks[x][y + 1][z].ColorID == BlockColor.Empty))
+                (IsValidPosition(x, y + 1, z) && ChunkData.Blocks[x,y + 1,z].ColorID == BlockColor.Empty))
             {
                 GenerateTopSide(blockPosition);
-                AddUv(ChunkData.Blocks[blockPosition.x][blockPosition.y][blockPosition.z].ColorID);
+                AddUv(ChunkData.Blocks[blockPosition.x,blockPosition.y,blockPosition.z].ColorID);
             }
 
             if (!IsValidPosition(x, y - 1, z) ||
-                (IsValidPosition(x, y - 1, z) && ChunkData.Blocks[x][y - 1][z].ColorID == BlockColor.Empty))
+                (IsValidPosition(x, y - 1, z) && ChunkData.Blocks[x,y - 1,z].ColorID == BlockColor.Empty))
             {
                 GenerateBottomSide(blockPosition);
-                AddUv(ChunkData.Blocks[blockPosition.x][blockPosition.y][blockPosition.z].ColorID);
+                AddUv(ChunkData.Blocks[blockPosition.x,blockPosition.y,blockPosition.z].ColorID);
             }
 
             if (!IsValidPosition(x, y, z + 1) ||
-                (IsValidPosition(x, y, z + 1) && ChunkData.Blocks[x][y][z + 1].ColorID == BlockColor.Empty))
+                (IsValidPosition(x, y, z + 1) && ChunkData.Blocks[x,y,z + 1].ColorID == BlockColor.Empty))
             {
                 GenerateFrontSide(blockPosition);
-                AddUv(ChunkData.Blocks[blockPosition.x][blockPosition.y][blockPosition.z].ColorID);
+                AddUv(ChunkData.Blocks[blockPosition.x,blockPosition.y,blockPosition.z].ColorID);
             }
 
             if (!IsValidPosition(x, y, z - 1) ||
-                (IsValidPosition(x, y, z - 1) && ChunkData.Blocks[x][y][z - 1].ColorID == BlockColor.Empty))
+                (IsValidPosition(x, y, z - 1) && ChunkData.Blocks[x,y,z - 1].ColorID == BlockColor.Empty))
             {
                 GenerateBackSide(blockPosition);
-                AddUv(ChunkData.Blocks[blockPosition.x][blockPosition.y][blockPosition.z].ColorID);
+                AddUv(ChunkData.Blocks[blockPosition.x,blockPosition.y,blockPosition.z].ColorID);
             }
 
             if (!IsValidPosition(x - 1, y, z) ||
-                (IsValidPosition(x - 1, y, z) && ChunkData.Blocks[x - 1][y][z].ColorID == BlockColor.Empty))
+                (IsValidPosition(x - 1, y, z) && ChunkData.Blocks[x - 1,y,z].ColorID == BlockColor.Empty))
             {
                 GenerateRightSide(blockPosition);
-                AddUv(ChunkData.Blocks[blockPosition.x][blockPosition.y][blockPosition.z].ColorID);
+                AddUv(ChunkData.Blocks[blockPosition.x,blockPosition.y,blockPosition.z].ColorID);
             }
 
             if (!IsValidPosition(x + 1, y, z) ||
-                (IsValidPosition(x + 1, y, z) && ChunkData.Blocks[x + 1][y][z].ColorID == BlockColor.Empty))
+                (IsValidPosition(x + 1, y, z) && ChunkData.Blocks[x + 1,y,z].ColorID == BlockColor.Empty))
             {
                 GenerateLeftSide(blockPosition);
-                AddUv(ChunkData.Blocks[blockPosition.x][blockPosition.y][blockPosition.z].ColorID);
+                AddUv(ChunkData.Blocks[blockPosition.x,blockPosition.y,blockPosition.z].ColorID);
             }
         }
 
@@ -188,7 +188,7 @@ namespace GamePlay
 
         public void SpawnBlock(Vector3Int blockPosition, Block block)
         {
-            ChunkData.Blocks[blockPosition.x][blockPosition.y][blockPosition.z] = block;
+            ChunkData.Blocks[blockPosition.x,blockPosition.y,blockPosition.z] = block;
             RegenerateMesh();
         }
 

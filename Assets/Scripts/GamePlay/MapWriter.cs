@@ -14,7 +14,13 @@ namespace GamePlay
 
             var strExeFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
             var strWorkPath = Path.GetDirectoryName(strExeFilePath) + @"\..\..\Assets\Maps\";
-            using var binaryWriter = new BinaryWriter(File.OpenWrite(strWorkPath + fileName));
+            using var file = File.OpenWrite(strWorkPath + fileName);
+            WriteMap(map, file);
+        }
+
+        public static void WriteMap(Map map, Stream stream)
+        {
+            var binaryWriter = new BinaryWriter(stream);
             binaryWriter.Write(map.Width);
             binaryWriter.Write(map.Height);
             binaryWriter.Write(map.Depth);
@@ -38,7 +44,7 @@ namespace GamePlay
                     {
                         for (var z = 0; z < ChunkData.ChunkSize; z++)
                         {
-                            binaryWriter.Write(map.Chunks[chunkNumber].Blocks[x][y][z].ColorID);
+                            binaryWriter.Write(map.Chunks[chunkNumber].Blocks[x, y, z].ColorID);
                         }
                     }
                 }

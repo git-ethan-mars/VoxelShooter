@@ -16,7 +16,7 @@ namespace GamePlay
             return new Map(chunks, width, height, depth);
         }
 
-        public static Map Read(string fileName)
+        public static Map ReadFromFile(string fileName)
         {
             var strExeFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
             var filePath = Path.GetDirectoryName(strExeFilePath) + @"\..\..\Assets\Maps\" + fileName;
@@ -25,16 +25,20 @@ namespace GamePlay
                 return CreateNewMap();
             }
 
-            using var binaryReader = new BinaryReader(File.OpenRead(filePath));
+            using var file = File.OpenRead(filePath);
+            return ReadFromStream(file);
+
+        }
+
+        public static Map ReadFromStream(Stream stream)
+        {
+            stream.Seek(0, SeekOrigin.Begin);
+            var binaryReader = new BinaryReader(stream);
             var width = binaryReader.ReadInt32();
             var height = binaryReader.ReadInt32();
             var depth = binaryReader.ReadInt32();
             var chunks = new ChunkData[width / ChunkData.ChunkSize * height / ChunkData.ChunkSize * depth /
                                        ChunkData.ChunkSize];
-            for (var i = 0; i < chunks.Length; i++)
-            {
-                chunks[i] = new ChunkData();
-            }
             var map = new Map(chunks, width, height, depth);
             for (var x = 0; x < width / ChunkData.ChunkSize; x++)
             {
@@ -65,7 +69,7 @@ namespace GamePlay
                             {
                                 ColorID = blockColor
                             };
-                            chunk.Blocks[x][y][z] = block;
+                            chunk.Blocks[x,y,z] = block;
                         }
                     }
                 }

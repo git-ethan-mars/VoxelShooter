@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using Mirror;
+using UnityEngine;
 
 namespace GamePlay
 {
@@ -18,7 +20,7 @@ namespace GamePlay
 
         public Map()
         {
-            Chunks = new[] {new ChunkData()};
+            Chunks = new [] {new ChunkData()};
             Width = 32;
             Height = 32;
             Depth = 32;
