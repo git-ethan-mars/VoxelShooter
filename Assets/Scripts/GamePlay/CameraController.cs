@@ -9,7 +9,6 @@ namespace GamePlay
         [SerializeField] private GameObject cameraObject;
         [SerializeField] private float sensitivityX;
         [SerializeField] private float sensitivityY;
-        private Camera Camera { get; set; }
         private float XRotation { get; set; }
         private float YRotation { get; set; }
 

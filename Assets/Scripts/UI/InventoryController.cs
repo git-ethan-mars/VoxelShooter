@@ -41,12 +41,20 @@ namespace UI
 
             if (Input.GetKeyDown(KeyCode.Alpha1))
             {
+                Debug.Log("1");
+                _itemList[_itemIndex].Unselect();
                 _itemIndex = 0;
+                _itemList[_itemIndex].Select();
+
             }
 
-            if (Input.GetKeyDown(KeyCode.Alpha1))
+            if (Input.GetKeyDown(KeyCode.Alpha2))
             {
+                Debug.Log("2");
+                _itemList[_itemIndex].Unselect();
                 _itemIndex = 1;
+                _itemList[_itemIndex].Select();
+
             }
 
             if (Input.GetMouseButtonDown(0) && _itemList[_itemIndex] is ILeftMouseButtonDownHandler)
