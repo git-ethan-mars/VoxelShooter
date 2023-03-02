@@ -46,7 +46,7 @@ namespace GamePlay
         {
             for (var i = 0; i < CompressedMap.Length; i += PackageSize)
             {
-                ReceiveByteChunk(CompressedMap[i..Math.Min(i + PackageSize, i + CompressedMap.Length)],
+                ReceiveByteChunk(CompressedMap[i..Math.Min(i + PackageSize, CompressedMap.Length)],
                     CompressedMap.Length);
             }
         }
@@ -65,19 +65,11 @@ namespace GamePlay
             ClientBuffer ??= new byte[allBytesCount];
             Buffer.BlockCopy(chunk, 0, ClientBuffer, DestinationOffset, chunk.Length);
             DestinationOffset += chunk.Length;
-            if (DestinationOffset == allBytesCount)
-            {
-                Map = MapCompressor.Decompress(ClientBuffer);
-                ClientBuffer = null;
-                DestinationOffset = 0;
-                MapGenerator.Initialize(this, Map);
-            }
-        }
-
-        public override void OnStopServer()
-        {
-            base.OnStopServer();
-            MapWriter.SaveMap("1.rch", Map);
+            if (DestinationOffset != allBytesCount) return;
+            Map = MapCompressor.Decompress(ClientBuffer);
+            ClientBuffer = null;
+            DestinationOffset = 0;
+            MapGenerator.Initialize(this, Map);
         }
     }
 }

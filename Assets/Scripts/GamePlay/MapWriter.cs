@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using UnityEngine;
 
 namespace GamePlay
 {
@@ -12,9 +13,14 @@ namespace GamePlay
                 throw new ArgumentException();
             }
 
-            var strExeFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            var strWorkPath = Path.GetDirectoryName(strExeFilePath) + @"\..\..\Assets\Maps\";
-            using var file = File.OpenWrite(strWorkPath + fileName);
+            var mapDirectory = Application.dataPath + "/Maps";
+            if(!Directory.Exists(mapDirectory))
+            {
+                Directory.CreateDirectory(mapDirectory);
+            }
+            var filePath = Application.dataPath + $"/Maps/{fileName}";
+            
+            using var file = File.OpenWrite(filePath);
             WriteMap(map, file);
         }
 

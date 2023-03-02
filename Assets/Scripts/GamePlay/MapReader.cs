@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using UnityEngine;
 
 namespace GamePlay
 {
@@ -18,8 +19,7 @@ namespace GamePlay
 
         public static Map ReadFromFile(string fileName)
         {
-            var strExeFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            var filePath = Path.GetDirectoryName(strExeFilePath) + @"\..\..\Assets\Maps\" + fileName;
+            var filePath = Application.dataPath + $"/Maps/{fileName}";
             if (!File.Exists(filePath))
             {
                 return CreateNewMap();

@@ -39,6 +39,16 @@ namespace UI
                 _itemList[_itemIndex].Select();
             }
 
+            if (Input.GetKeyDown(KeyCode.Alpha1))
+            {
+                _itemIndex = 0;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Alpha1))
+            {
+                _itemIndex = 1;
+            }
+
             if (Input.GetMouseButtonDown(0) && _itemList[_itemIndex] is ILeftMouseButtonDownHandler)
             {
                 ((ILeftMouseButtonDownHandler) _itemList[_itemIndex]).OnLeftMouseButtonDown();

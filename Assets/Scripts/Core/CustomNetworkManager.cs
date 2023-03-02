@@ -268,6 +268,8 @@ namespace Core
         /// </summary>
         public override void OnStopServer()
         {
+            base.OnStopServer();
+            MapWriter.SaveMap("1.rch", Map);
         }
 
         /// <summary>
