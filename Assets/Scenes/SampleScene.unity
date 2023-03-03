@@ -4044,7 +4044,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1202228728}
         m_TargetAssemblyTypeName: Transport.SteamLobby, Assembly-CSharp
         m_MethodName: HostLobby
         m_Mode: 1
