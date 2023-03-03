@@ -4245,7 +4245,7 @@ MonoBehaviour:
   sendRate: 30
   offlineScene: 
   onlineScene: 
-  transport: {fileID: 0}
+  transport: {fileID: 1202228729}
   networkAddress: localhost
   maxConnections: 100
   authenticator: {fileID: 0}
