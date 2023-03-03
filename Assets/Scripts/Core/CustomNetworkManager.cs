@@ -163,6 +163,7 @@ namespace Core
         public override void OnServerAddPlayer(NetworkConnectionToClient conn)
         {
             base.OnServerAddPlayer(conn);
+            CompressedMap = MapCompressor.Compress(Map);
         }
 
         /// <summary>

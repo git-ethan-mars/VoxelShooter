@@ -14,7 +14,7 @@ namespace UI
 
         public BrushView(ColoringBrush coloringBrush)
         {
-            GlobalEvents.OnPaletteUpdate.AddListener(colorId => _currentColorId = colorId);
+            GlobalEvents.onPaletteUpdate.AddListener(colorId => _currentColorId = colorId);
             _coloringBrush = coloringBrush;
             _palette = GameObject.Find("Canvas/GamePlay/Palette");
             Icon = Resources.Load<Sprite>("Sprites/brush");

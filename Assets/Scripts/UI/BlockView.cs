@@ -14,7 +14,7 @@ namespace UI
 
         public BlockView(BlockPlacement blockPlacement)
         {
-            GlobalEvents.OnPaletteUpdate.AddListener(colorId => _currentColorId = colorId);
+            GlobalEvents.onPaletteUpdate.AddListener(colorId => _currentColorId = colorId);
             _blockPlacement = blockPlacement;
             _palette = GameObject.Find("Canvas/GamePlay/Palette");
             Icon = Resources.Load<Sprite>("Sprites/Blocks/#C0C0C0");

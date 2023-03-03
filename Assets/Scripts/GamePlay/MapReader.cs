@@ -65,7 +65,7 @@ namespace GamePlay
                         for (var z = 0; z < ChunkData.ChunkSize; z++)
                         {
                             var blockColor = binaryReader.ReadByte();
-                            var block = new Block()
+                            var block = new Block
                             {
                                 ColorID = blockColor
                             };

@@ -12,7 +12,7 @@ namespace UI
         private List<IInventoryItemView> _itemList;
         private int _itemIndex;
         private int _maxIndex;
-        
+
         public override void OnStartAuthority()
         {
             _itemList = new List<IInventoryItemView>
@@ -23,12 +23,13 @@ namespace UI
             _maxIndex = Math.Min(_itemList.Count, inventoryView.SlotsCount);
             for (var i = 0; i < _maxIndex; i++)
             {
-                inventoryView.SetIconForItem(i,_itemList[i].Icon);
+                inventoryView.SetIconForItem(i, _itemList[i].Icon);
                 inventoryView.SetPointer(i, _itemList[i]);
             }
-            _itemList[_itemIndex].Select();
 
+            _itemList[_itemIndex].Select();
         }
+
         private void Update()
         {
             if (!isLocalPlayer) return;
@@ -44,7 +45,6 @@ namespace UI
                 _itemList[_itemIndex].Unselect();
                 _itemIndex = 0;
                 _itemList[_itemIndex].Select();
-
             }
 
             if (Input.GetKeyDown(KeyCode.Alpha2))
@@ -52,7 +52,6 @@ namespace UI
                 _itemList[_itemIndex].Unselect();
                 _itemIndex = 1;
                 _itemList[_itemIndex].Select();
-
             }
 
             if (Input.GetMouseButtonDown(0) && _itemList[_itemIndex] is ILeftMouseButtonDownHandler)

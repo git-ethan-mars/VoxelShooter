@@ -13,7 +13,6 @@ namespace GamePlay
 
         private byte[] ClientBuffer { get; set; }
         private int DestinationOffset { get; set; }
-
         private const int PackageSize = 1024;
 
         private void Awake()
@@ -25,25 +24,39 @@ namespace GamePlay
         {
             Map = CustomNetworkManager.Map;
             CompressedMap = CustomNetworkManager.CompressedMap;
-            MapGenerator.Initialize(this, Map);
+            MapGenerator.Initialize(Map);
         }
 
-        public override void OnStartClient()
+        public override void OnStartLocalPlayer()
         {
+            base.OnStartLocalPlayer();
+            GlobalEvents.onBlockChangeStateEvent.AddListener(ChangeBlockState);
             if (!isClientOnly) return;
-            Debug.Log("Called: GetCompressedMapFromServer();");
             GetCompressedMapFromServer();
         }
 
-        [Command(requiresAuthority = false)]
-        public void UpdateChunkOnServer(int chunkIndex, Vector3Int localPosition, byte colorId)
+        private void ChangeBlockState(Block block, Vector3Int position)
         {
+            if (position.x < 0 || position.x >= Map.Width || position.y < 0 || position.y >= Map.Height ||
+                position.z < 0 || position.z >= Map.Depth) return;
+            var chunkIndex = Map.FindChunkByPosition(position);
+            var localPosition = new Vector3Int(position.x % ChunkData.ChunkSize, position.y % ChunkData.ChunkSize,
+                position.z % ChunkData.ChunkSize);
+            UpdateChunkOnServer(chunkIndex, localPosition, block.ColorID);
+        }
+
+        [Command]
+        private void UpdateChunkOnServer(int chunkIndex, Vector3Int localPosition, byte colorId)
+        {
+            if (Map.Chunks[chunkIndex].Blocks[localPosition.x, localPosition.y, localPosition.z].ColorID == colorId)
+                return;
             UpdateChunkOnClient(chunkIndex, localPosition, colorId);
         }
-        
+
         [Command]
         private void GetCompressedMapFromServer()
         {
+            CompressedMap = CustomNetworkManager.CompressedMap;
             for (var i = 0; i < CompressedMap.Length; i += PackageSize)
             {
                 ReceiveByteChunk(CompressedMap[i..Math.Min(i + PackageSize, CompressedMap.Length)],
@@ -56,7 +69,7 @@ namespace GamePlay
         {
             MapGenerator.Chunks[chunkIndex].SpawnBlock(localPosition, new Block() {ColorID = colorId});
         }
-        
+
 
         [TargetRpc]
         private void ReceiveByteChunk(byte[] chunk, int allBytesCount)
@@ -69,7 +82,7 @@ namespace GamePlay
             Map = MapCompressor.Decompress(ClientBuffer);
             ClientBuffer = null;
             DestinationOffset = 0;
-            MapGenerator.Initialize(this, Map);
+            MapGenerator.Initialize(Map);
         }
     }
 }
