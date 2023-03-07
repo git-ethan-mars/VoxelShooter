@@ -119,7 +119,8 @@ namespace Core
         /// <param name="newSceneName">Name of the scene that's about to be loaded</param>
         /// <param name="sceneOperation">Scene operation that's about to happen</param>
         /// <param name="customHandling">true to indicate that scene loading will be handled through overrides</param>
-        public override void OnClientChangeScene(string newSceneName, SceneOperation sceneOperation, bool customHandling)
+        public override void OnClientChangeScene(string newSceneName, SceneOperation sceneOperation,
+            bool customHandling)
         {
         }
 
@@ -182,7 +183,8 @@ namespace Core
         /// </summary>
         /// <param name="conn">Connection of the client...may be null</param>
         /// <param name="exception">Exception thrown from the Transport.</param>
-        public override void OnServerError(NetworkConnectionToClient conn, TransportError transportError, string message)
+        public override void OnServerError(NetworkConnectionToClient conn, TransportError transportError,
+            string message)
         {
         }
 
@@ -238,10 +240,7 @@ namespace Core
         public override void OnStartHost()
         {
             base.OnStartHost();
-            Map = Map.CreateNewMap(32,32,32);
-            CompressedMap = MapCompressor.Compress(Map);
-            MapCompressor.Decompress(CompressedMap);
-            Debug.Log(CompressedMap.Length);
+            Map = MapReader.ReadFromFile("Classic.vxl");
         }
 
         /// <summary>

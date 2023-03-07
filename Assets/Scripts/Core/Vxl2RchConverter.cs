@@ -13,7 +13,7 @@ namespace Core
         private static int _height;
         private const int Depth = 512;
 
-        public static Map LoadVXL(string mapName)
+        public static Map LoadVxl(string mapName)
         {
             var data = File.ReadAllBytes(Application.dataPath + $"/Maps/{mapName}");
             _height = GetMapHeight(data);
@@ -72,7 +72,7 @@ namespace Core
                 }
             }
 
-            //AddInnerVoxels(colors, heightOffset);
+            AddInnerVoxels(colors, heightOffset);
 
             var chunks =
                 new ChunkData[Width / ChunkData.ChunkSize * _height / ChunkData.ChunkSize *

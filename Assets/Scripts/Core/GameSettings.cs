@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using Application = UnityEngine.Device.Application;
+using UnityEngine.Profiling;
 
 namespace Core
 {
@@ -7,6 +7,7 @@ namespace Core
     {
         public void Awake()
         {
+            Profiler.maxUsedMemory = int.MaxValue;
             Application.targetFrameRate = 60;
         }
     }

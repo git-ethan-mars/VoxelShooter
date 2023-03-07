@@ -13,7 +13,7 @@ namespace Core
             {
                 if (Path.GetExtension(fileName) == ".vxl")
                 {
-                    return Vxl2RchConverter.LoadVXL(fileName);
+                    return Vxl2RchConverter.LoadVxl(fileName);
                 }
 
                 throw new ArgumentException();
