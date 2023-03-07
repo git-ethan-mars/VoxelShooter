@@ -1,8 +1,7 @@
-using System;
+using Core;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using GamePlay;
 using TMPro;
 
 namespace UI

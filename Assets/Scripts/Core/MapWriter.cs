@@ -1,8 +1,9 @@
 ﻿using System;
 using System.IO;
+using GamePlay;
 using UnityEngine;
 
-namespace GamePlay
+namespace Core
 {
     public static class MapWriter
     {
@@ -14,12 +15,13 @@ namespace GamePlay
             }
 
             var mapDirectory = Application.dataPath + "/Maps";
-            if(!Directory.Exists(mapDirectory))
+            if (!Directory.Exists(mapDirectory))
             {
                 Directory.CreateDirectory(mapDirectory);
             }
+
             var filePath = Application.dataPath + $"/Maps/{fileName}";
-            
+
             using var file = File.OpenWrite(filePath);
             WriteMap(map, file);
         }
@@ -50,7 +52,11 @@ namespace GamePlay
                     {
                         for (var z = 0; z < ChunkData.ChunkSize; z++)
                         {
-                            binaryWriter.Write(map.Chunks[chunkNumber].Blocks[x, y, z].ColorID);
+                            var color = map.Chunks[chunkNumber].Blocks[x, y, z].Color;
+                            binaryWriter.Write(color.b);
+                            binaryWriter.Write(color.g);
+                            binaryWriter.Write(color.r);
+                            binaryWriter.Write(color.a);
                         }
                     }
                 }

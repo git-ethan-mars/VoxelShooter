@@ -18,15 +18,22 @@ namespace GamePlay
             }
         }
 
-        public const byte Empty = 0;
-        private static Dictionary<byte, Color> _blockColorById;
+        public static Color32 Empty = new(0,0,0,0);
 
-        public static Dictionary<byte, Color> GetBlockColorDictionary()
+        private static Dictionary<byte, Color> _colorById;
+        public static Dictionary<byte, Color> ColorById => _colorById ??= CacheColorByIdDictionary();
+        
+        public static Color32 UIntToColor(uint color)
         {
-            return _blockColorById ??= CacheBlockColorDictionary();
+            var a = (byte) (color >> 24);
+            var r = (byte) (color >> 16);
+            var g = (byte) (color >> 8);
+            var b = (byte) (color >> 0);
+            return new Color32(r, g, b, a);
         }
+        
 
-        private static Dictionary<byte, Color> CacheBlockColorDictionary()
+        private static Dictionary<byte, Color> CacheColorByIdDictionary()
         {
             var blockColorById = new Dictionary<byte, Color>();
             var colorBoarders = new ColorBoarder[]

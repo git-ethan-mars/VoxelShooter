@@ -1,28 +1,27 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using GamePlay;
 using UnityEngine;
 
-namespace GamePlay
+namespace Core
 {
     public static class MapReader
-    {
-        public static Map CreateNewMap(int width = 512, int height = 64, int depth = 512)
-        {
-            var chunks = new ChunkData[width / ChunkData.ChunkSize * height / ChunkData.ChunkSize * depth /
-                                       ChunkData.ChunkSize];
-            for (var i = 0; i < chunks.Length; i++)
-            {
-                chunks[i] = new ChunkData();
-            }
-
-            return new Map(chunks, width, height, depth);
-        }
-
+    { 
         public static Map ReadFromFile(string fileName)
         {
+            if (Path.GetExtension(fileName) != ".rch")
+            {
+                if (Path.GetExtension(fileName) == ".vxl")
+                {
+                    return Vxl2RchConverter.LoadVXL(fileName);
+                }
+
+                throw new ArgumentException();
+            }
             var filePath = Application.dataPath + $"/Maps/{fileName}";
             if (!File.Exists(filePath))
             {
-                return CreateNewMap();
+                return Map.CreateNewMap();
             }
 
             using var file = File.OpenRead(filePath);
@@ -64,10 +63,10 @@ namespace GamePlay
                     {
                         for (var z = 0; z < ChunkData.ChunkSize; z++)
                         {
-                            var blockColor = binaryReader.ReadByte();
+                            var blockColor = binaryReader.ReadUInt32();
                             var block = new Block
                             {
-                                ColorID = blockColor
+                                Color = BlockColor.UIntToColor(blockColor)
                             };
                             chunk.Blocks[x,y,z] = block;
                         }

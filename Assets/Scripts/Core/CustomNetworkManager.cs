@@ -238,8 +238,10 @@ namespace Core
         public override void OnStartHost()
         {
             base.OnStartHost();
-            Map = MapReader.ReadFromFile("1.rch");
+            Map = Map.CreateNewMap(32,32,32);
             CompressedMap = MapCompressor.Compress(Map);
+            MapCompressor.Decompress(CompressedMap);
+            Debug.Log(CompressedMap.Length);
         }
 
         /// <summary>
@@ -270,7 +272,7 @@ namespace Core
         public override void OnStopServer()
         {
             base.OnStopServer();
-            MapWriter.SaveMap("1.rch", Map);
+            //MapWriter.SaveMap("1.rch", Map);
         }
 
         /// <summary>

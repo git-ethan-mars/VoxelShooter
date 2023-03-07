@@ -10,11 +10,11 @@ namespace UI
         public GameObject Pointer { get; set; }
         private readonly GameObject _palette;
         private readonly ColoringBrush _coloringBrush;
-        private byte _currentColorId;
+        private Color32 _currentColor;
 
         public BrushView(ColoringBrush coloringBrush)
         {
-            GlobalEvents.onPaletteUpdate.AddListener(colorId => _currentColorId = colorId);
+            GlobalEvents.OnPaletteUpdate.AddListener(color => _currentColor = color);
             _coloringBrush = coloringBrush;
             _palette = GameObject.Find("Canvas/GamePlay/Palette");
             Icon = Resources.Load<Sprite>("Sprites/brush");
@@ -34,7 +34,7 @@ namespace UI
 
         public void OnLeftMouseButtonHold()
         {
-            _coloringBrush.PaintBlock(_currentColorId);
+            _coloringBrush.PaintBlock(_currentColor);
         }
     }
 }

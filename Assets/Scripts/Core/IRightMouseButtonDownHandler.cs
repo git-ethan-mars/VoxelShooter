@@ -2,6 +2,6 @@
 {
     public interface IRightMouseButtonDownHandler
     {
-        void OnRightMouseButtonDown();
+        public void OnRightMouseButtonDown();
     }
 }

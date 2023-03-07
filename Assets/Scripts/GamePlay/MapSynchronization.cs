@@ -2,6 +2,7 @@
 using Core;
 using Mirror;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace GamePlay
 {
@@ -13,7 +14,7 @@ namespace GamePlay
 
         private byte[] ClientBuffer { get; set; }
         private int DestinationOffset { get; set; }
-        private const int PackageSize = 1024;
+        private const int PackageSize = 4096;
 
         private void Awake()
         {
@@ -24,33 +25,43 @@ namespace GamePlay
         {
             Map = CustomNetworkManager.Map;
             CompressedMap = CustomNetworkManager.CompressedMap;
-            MapGenerator.Initialize(Map);
         }
 
         public override void OnStartLocalPlayer()
         {
             base.OnStartLocalPlayer();
-            GlobalEvents.onBlockChangeStateEvent.AddListener(ChangeBlockState);
-            if (!isClientOnly) return;
-            GetCompressedMapFromServer();
+            GlobalEvents.OnBlockChangeStateEvent.AddListener(ChangeBlockState);
+            if (isServer)
+            {
+                MapGenerator.Initialize(Map);
+            }
+
+            if (isClientOnly)
+                GetCompressedMapFromServer();
         }
 
         private void ChangeBlockState(Block block, Vector3Int position)
         {
-            if (position.x < 0 || position.x >= Map.Width || position.y < 0 || position.y >= Map.Height ||
-                position.z < 0 || position.z >= Map.Depth) return;
-            var chunkIndex = Map.FindChunkByPosition(position);
-            var localPosition = new Vector3Int(position.x % ChunkData.ChunkSize, position.y % ChunkData.ChunkSize,
-                position.z % ChunkData.ChunkSize);
-            UpdateChunkOnServer(chunkIndex, localPosition, block.ColorID);
+            UpdateChunkOnServer(position, block.Color);
         }
 
         [Command]
-        private void UpdateChunkOnServer(int chunkIndex, Vector3Int localPosition, byte colorId)
+        private void UpdateChunkOnServer(Vector3Int globalPosition, Color32 color)
         {
-            if (Map.Chunks[chunkIndex].Blocks[localPosition.x, localPosition.y, localPosition.z].ColorID == colorId)
+            if (globalPosition.x < 0 || globalPosition.x >= Map.Width || globalPosition.y <= 0 ||
+                globalPosition.y >= Map.Height ||
+                globalPosition.z < 0 || globalPosition.z >= Map.Depth) return;
+            var chunkIndex = Map.FindChunkNumberByPosition(globalPosition);
+            var localPosition = new Vector3Int(globalPosition.x % ChunkData.ChunkSize,
+                globalPosition.y % ChunkData.ChunkSize,
+                globalPosition.z % ChunkData.ChunkSize);
+            var currentBlockColor =
+                Map.Chunks[chunkIndex].Blocks[localPosition.x, localPosition.y, localPosition.z].Color;
+            if (currentBlockColor.Equals(color))
                 return;
-            UpdateChunkOnClient(chunkIndex, localPosition, colorId);
+            MapGenerator.Chunks[chunkIndex]
+                .SpawnBlock(localPosition, new Block() {Color = color});
+            UpdateChunkOnClient(chunkIndex, localPosition, color);
         }
 
         [Command]
@@ -65,9 +76,10 @@ namespace GamePlay
         }
 
         [ClientRpc]
-        private void UpdateChunkOnClient(int chunkIndex, Vector3Int localPosition, byte colorId)
+        private void UpdateChunkOnClient(int chunkIndex, Vector3Int localPosition, Color32 color)
         {
-            MapGenerator.Chunks[chunkIndex].SpawnBlock(localPosition, new Block() {ColorID = colorId});
+            MapGenerator.Chunks[chunkIndex]
+                .SpawnBlock(localPosition, new Block() {Color = color});
         }
 
 

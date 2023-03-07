@@ -1,22 +1,23 @@
-﻿using UnityEngine;
+﻿using GamePlay;
+using UnityEngine;
 using UnityEngine.Events;
 
-namespace GamePlay
+namespace Core
 {
     public static class GlobalEvents
     {
-        public static readonly UnityEvent<Block, Vector3Int> onBlockChangeStateEvent = new();
+        public static readonly UnityEvent<Block, Vector3Int> OnBlockChangeStateEvent = new();
 
         public static void SendBlockState(Block block, Vector3Int position)
         {
-            onBlockChangeStateEvent.Invoke(block, position);
+            OnBlockChangeStateEvent.Invoke(block, position);
         }
 
-        public static readonly UnityEvent<byte> onPaletteUpdate = new();
+        public static readonly UnityEvent<Color32> OnPaletteUpdate = new();
 
-        public static void SendPaletteUpdate(byte colorId)
+        public static void SendPaletteUpdate(Color32 color)
         {
-            onPaletteUpdate.Invoke(colorId);
+            OnPaletteUpdate.Invoke(color);
         }
 
         public static readonly UnityEvent<string> OnSaveMapEvent = new();

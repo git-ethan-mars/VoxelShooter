@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.IO.Compression;
 
-namespace GamePlay
+namespace Core
 {
     public static class MapCompressor
     {
