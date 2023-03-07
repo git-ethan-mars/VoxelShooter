@@ -143,7 +143,13 @@ namespace GamePlay
 
         private void GenerateBlock(int x, int y, int z)
         {
-            if (ChunkData.Blocks[x, y, z].Color.Equals(BlockColor.Empty)) return;
+            if (ChunkData.Blocks[x, y, z].Color.Equals(BlockColor.Empty))
+            {
+                BlockMeshes[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] =
+                    new BlockMesh(null, BlockColor.Empty, 0);
+                return;
+            }
+
             var blockPosition = new Vector3Int(x, y, z);
             var color = ChunkData.Blocks[blockPosition.x, blockPosition.y, blockPosition.z].Color;
             var facesCount = 0;

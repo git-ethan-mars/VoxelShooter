@@ -41,8 +41,7 @@ namespace UI
 
         public void OnRightMouseButtonDown()
         {
-            //_blockPlacement.
-            //_blockPlacement.PlaceBlock(_currentColor);
+            _blockPlacement.DestroyBlock();
         }
     }
 }

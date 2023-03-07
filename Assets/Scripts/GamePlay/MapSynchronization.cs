@@ -59,8 +59,9 @@ namespace GamePlay
                 Map.Chunks[chunkIndex].Blocks[localPosition.x, localPosition.y, localPosition.z].Color;
             if (currentBlockColor.Equals(color))
                 return;
-            MapGenerator.Chunks[chunkIndex]
-                .SpawnBlock(localPosition, new Block() {Color = color});
+            MapGenerator.Chunks[chunkIndex].ChunkData.Blocks[localPosition.x, localPosition.y, localPosition.z] =
+                new Block() {Color = color};
+
             UpdateChunkOnClient(chunkIndex, localPosition, color);
         }
 
