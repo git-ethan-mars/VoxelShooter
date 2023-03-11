@@ -27,11 +27,12 @@ namespace Core
             {
                 chunks[i] = new ChunkData();
             }
+
             var map = new Map(chunks, width, height, depth);
             map.AddWater();
             return map;
         }
-        
+
         public void AddWater()
         {
             var waterColor = new Color32();
@@ -40,7 +41,9 @@ namespace Core
                 for (var z = 0; z < Depth; z++)
                 {
                     waterColor = Chunks[FindChunkNumberByPosition(new Vector3Int(x, 0, z))]
-                        .Blocks[x & (ChunkData.ChunkSize - 1), 0, z & (ChunkData.ChunkSize - 1)].Color;
+                        .Blocks[
+                            (x & ChunkData.ChunkSize - 1) * ChunkData.ChunkSizeSquared +
+                            (z & (ChunkData.ChunkSize - 1))].Color;
                 }
             }
 
@@ -51,11 +54,15 @@ namespace Core
             {
                 for (var z = 0; z < Depth; z++)
                 {
-                    if (!Chunks[FindChunkNumberByPosition(new Vector3Int(x, 0, z))]
-                            .Blocks[x & (ChunkData.ChunkSize - 1), 0, z & (ChunkData.ChunkSize - 1)].Color
+                    var blocks = Chunks[FindChunkNumberByPosition(new Vector3Int(x, 0, z))].Blocks;
+                    var block = blocks[
+                            (x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
+                            (z & (ChunkData.ChunkSize - 1))];
+                    if (!block.Color
                             .Equals(BlockColor.Empty)) continue;
-                    Chunks[FindChunkNumberByPosition(new Vector3Int(x, 0, z))]
-                        .Blocks[x & (ChunkData.ChunkSize - 1), 0, z & (ChunkData.ChunkSize - 1)].Color = waterColor;
+                    block.Color = waterColor;
+                    blocks[(x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
+                           (z & (ChunkData.ChunkSize - 1))] = block;
                 }
             }
         }

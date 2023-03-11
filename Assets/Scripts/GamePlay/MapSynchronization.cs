@@ -56,10 +56,10 @@ namespace GamePlay
                 globalPosition.y % ChunkData.ChunkSize,
                 globalPosition.z % ChunkData.ChunkSize);
             var currentBlockColor =
-                Map.Chunks[chunkIndex].Blocks[localPosition.x, localPosition.y, localPosition.z].Color;
+                Map.Chunks[chunkIndex].Blocks[localPosition.x * ChunkData.ChunkSizeSquared + localPosition.y * ChunkData.ChunkSize +localPosition.z].Color;
             if (currentBlockColor.Equals(color))
                 return;
-            MapGenerator.Chunks[chunkIndex].ChunkData.Blocks[localPosition.x, localPosition.y, localPosition.z] =
+            MapGenerator.Chunks[chunkIndex].ChunkData.Blocks[localPosition.x * ChunkData.ChunkSizeSquared + localPosition.y * ChunkData.ChunkSize +localPosition.z] =
                 new Block() {Color = color};
 
             UpdateChunkOnClient(chunkIndex, localPosition, color);

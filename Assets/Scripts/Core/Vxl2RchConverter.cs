@@ -90,12 +90,18 @@ namespace Core
                 {
                     for (var z = 0; z < Depth; z++)
                     {
-                        chunks[map.FindChunkNumberByPosition(
-                                new Vector3Int(Width - 1 - x, _height - heightOffset - 1 - y, z))].Blocks[
-                                (Width - 1 - x) & (ChunkData.ChunkSize - 1),
-                                (_height - heightOffset - 1 - y) & (ChunkData.ChunkSize - 1),
-                                z & (ChunkData.ChunkSize - 1)].Color =
+                        var chunk = chunks[map.FindChunkNumberByPosition(
+                            new Vector3Int(Width - 1 - x, _height - heightOffset - 1 - y, z))];
+                        var block = chunk.Blocks[
+                            ((Width - 1 - x) & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
+                            ((_height - heightOffset - 1 - y) & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSize +
+                            (z & (ChunkData.ChunkSize - 1))];
+                        block.Color =
                             colors[GetPosition(x, y, z)];
+                        chunk.Blocks[((Width - 1 - x) & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
+                                     ((_height - heightOffset - 1 - y) & (ChunkData.ChunkSize - 1)) *
+                                     ChunkData.ChunkSize +
+                                     (z & (ChunkData.ChunkSize - 1))] = block;
                     }
                 }
             }

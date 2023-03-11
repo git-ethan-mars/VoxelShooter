@@ -68,7 +68,7 @@ namespace Core
                             {
                                 Color = BlockColor.UIntToColor(blockColor)
                             };
-                            chunk.Blocks[x,y,z] = block;
+                            chunk.Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] = block;
                         }
                     }
                 }

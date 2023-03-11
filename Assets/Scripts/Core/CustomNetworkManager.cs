@@ -1,6 +1,8 @@
+using System.Diagnostics;
 using GamePlay;
 using Mirror;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 /*
 	Documentation: https://mirror-networking.gitbook.io/docs/components/network-manager
@@ -240,7 +242,6 @@ namespace Core
         public override void OnStartHost()
         {
             base.OnStartHost();
-            Map = MapReader.ReadFromFile("Classic.vxl");
         }
 
         /// <summary>
@@ -271,7 +272,6 @@ namespace Core
         public override void OnStopServer()
         {
             base.OnStopServer();
-            //MapWriter.SaveMap("1.rch", Map);
         }
 
         /// <summary>

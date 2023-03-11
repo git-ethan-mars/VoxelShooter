@@ -1,4 +1,8 @@
 using System.Collections.Generic;
+using Core;
+using Unity.Burst;
+using Unity.Collections;
+using Unity.Jobs;
 using UnityEngine;
 
 namespace GamePlay
@@ -16,24 +20,25 @@ namespace GamePlay
         private MeshCollider MeshCollider { get; set; }
         private MeshFilter MeshFilter { get; set; }
         public ChunkData ChunkData { get; set; }
-        private List<Vector3> Vertices { get; set; }
-        private List<int> Triangles { get; set; }
-        private List<Color32> Colors { get; set; }
+        public NativeList<Vector3> Vertices { get; set; }
+        public NativeList<int> Triangles { get; set; }
+        public NativeList<Color32> Colors { get; set; }
+        public NativeList<Vector3> Normals { get; set; }
         private BlockMesh[] BlockMeshes { get; set; }
 
-        private void Start()
+        public void InitializeData()
         {
             BlockMeshes = new BlockMesh[ChunkData.ChunkSizeCubed];
             MeshFilter = GetComponent<MeshFilter>();
             MeshCollider = GetComponent<MeshCollider>();
             ChunkMesh = new Mesh();
-            Vertices = new List<Vector3>();
-            Triangles = new List<int>();
-            Colors = new List<Color32>();
-            CreateMesh();
+            Vertices = new NativeList<Vector3>(Allocator.Persistent);
+            Triangles = new NativeList<int>(Allocator.Persistent);
+            Colors = new NativeList<Color32>(Allocator.Persistent);
+            Normals = new NativeList<Vector3>(Allocator.Persistent);
         }
 
-        private void CreateMesh()
+        public void GenerateBlockMesh()
         {
             for (var x = 0; x < ChunkData.ChunkSize; x++)
             {
@@ -45,8 +50,6 @@ namespace GamePlay
                     }
                 }
             }
-
-            RegenerateMesh();
         }
 
 
@@ -56,31 +59,45 @@ namespace GamePlay
             Triangles.Clear();
             Colors.Clear();
             ChunkMesh.Clear();
+            Normals.Clear();
             for (var i = 0; i < ChunkData.ChunkSizeCubed; i++)
             {
                 if (BlockMeshes[i].FacesCount == 0) continue;
-                Vertices.AddRange(BlockMeshes[i].Vertices);
+                for (var j = 0; j < BlockMeshes[i].Vertices.Length; j++)
+                    Vertices.Add(BlockMeshes[i].Vertices[j]);
                 for (var j = 0; j < BlockMeshes[i].FacesCount; j++)
                 {
-                    Triangles.Add(Vertices.Count - 4 * (BlockMeshes[i].FacesCount - 1 - j) - 4);
-                    Triangles.Add(Vertices.Count - 4 * (BlockMeshes[i].FacesCount - 1 - j) - 3);
-                    Triangles.Add(Vertices.Count - 4 * (BlockMeshes[i].FacesCount - 1 - j) - 2);
-                    Triangles.Add(Vertices.Count - 4 * (BlockMeshes[i].FacesCount - 1 - j) - 3);
-                    Triangles.Add(Vertices.Count - 4 * (BlockMeshes[i].FacesCount - 1 - j) - 1);
-                    Triangles.Add(Vertices.Count - 4 * (BlockMeshes[i].FacesCount - 1 - j) - 2);
+                    Triangles.Add(Vertices.Length - 4 * (BlockMeshes[i].FacesCount - 1 - j) - 4);
+                    Triangles.Add(Vertices.Length - 4 * (BlockMeshes[i].FacesCount - 1 - j) - 3);
+                    Triangles.Add(Vertices.Length - 4 * (BlockMeshes[i].FacesCount - 1 - j) - 2);
+                    Triangles.Add(Vertices.Length - 4 * (BlockMeshes[i].FacesCount - 1 - j) - 3);
+                    Triangles.Add(Vertices.Length - 4 * (BlockMeshes[i].FacesCount - 1 - j) - 1);
+                    Triangles.Add(Vertices.Length - 4 * (BlockMeshes[i].FacesCount - 1 - j) - 2);
                     for (var k = 0; k < 4; k++)
                     {
                         Colors.Add(BlockMeshes[i].Color);
+                        Normals.Add(BlockMeshes[i].Normals[j]);
                     }
                 }
             }
 
-            ChunkMesh.vertices = Vertices.ToArray();
-            ChunkMesh.triangles = Triangles.ToArray();
-            ChunkMesh.colors32 = Colors.ToArray();
-            ChunkMesh.RecalculateNormals();
-            ChunkMesh.RecalculateBounds();
-            if (Vertices.Count == 0)
+            ApplyMesh();
+        }
+
+
+        public void ApplyMesh()
+        {
+            ChunkMesh.SetVertices(Vertices.AsArray());
+            var triangles = new int[Triangles.Length];
+            for (var i = 0; i < Triangles.Length; i++)
+            {
+                triangles[i] = Triangles[i];
+            }
+
+            ChunkMesh.SetTriangles(triangles, 0);
+            ChunkMesh.SetColors(Colors.AsArray());
+            ChunkMesh.SetNormals(Normals.AsArray());
+            if (Vertices.Length == 0)
             {
                 MeshCollider.sharedMesh = null;
             }
@@ -92,124 +109,151 @@ namespace GamePlay
         }
 
 
-        private static void GenerateTopSide(Vector3Int position, List<Vector3> vertices)
+        private static void GenerateTopSide(Vector3Int position, List<Vector3> vertices, List<Vector3> normals)
         {
             vertices.Add(position + new Vector3Int(0, 1, 0));
             vertices.Add(position + new Vector3Int(0, 1, 1));
             vertices.Add(position + new Vector3Int(1, 1, 0));
             vertices.Add(position + new Vector3Int(1, 1, 1));
+            normals.Add(Vector3.up);
         }
 
-        private static void GenerateBottomSide(Vector3Int position, List<Vector3> vertices)
+        private static void GenerateBottomSide(Vector3Int position, List<Vector3> vertices, List<Vector3> normals)
         {
             vertices.Add(position + new Vector3Int(0, 0, 0));
             vertices.Add(position + new Vector3Int(1, 0, 0));
             vertices.Add(position + new Vector3Int(0, 0, 1));
             vertices.Add(position + new Vector3Int(1, 0, 1));
+            normals.Add(Vector3.back);
         }
 
-        private static void GenerateFrontSide(Vector3Int position, List<Vector3> vertices)
+        private static void GenerateFrontSide(Vector3Int position, List<Vector3> vertices, List<Vector3> normals)
         {
             vertices.Add(position + new Vector3Int(0, 0, 1));
             vertices.Add(position + new Vector3Int(1, 0, 1));
             vertices.Add(position + new Vector3Int(0, 1, 1));
             vertices.Add(position + new Vector3Int(1, 1, 1));
+            normals.Add(Vector3.forward);
         }
 
 
-        private static void GenerateBackSide(Vector3Int position, List<Vector3> vertices)
+        private static void GenerateBackSide(Vector3Int position, List<Vector3> vertices, List<Vector3> normals)
         {
             vertices.Add(position + new Vector3Int(0, 0, 0));
             vertices.Add(position + new Vector3Int(0, 1, 0));
             vertices.Add(position + new Vector3Int(1, 0, 0));
             vertices.Add(position + new Vector3Int(1, 1, 0));
+            normals.Add(Vector3.back);
         }
 
-        private static void GenerateRightSide(Vector3Int position, List<Vector3> vertices)
+        private static void GenerateRightSide(Vector3Int position, List<Vector3> vertices, List<Vector3> normals)
         {
             vertices.Add(position + new Vector3Int(0, 0, 0));
             vertices.Add(position + new Vector3Int(0, 0, 1));
             vertices.Add(position + new Vector3Int(0, 1, 0));
             vertices.Add(position + new Vector3Int(0, 1, 1));
+            normals.Add(Vector3.left);
         }
 
-        private static void GenerateLeftSide(Vector3Int position, List<Vector3> vertices)
+        private static void GenerateLeftSide(Vector3Int position, List<Vector3> vertices, List<Vector3> normals)
         {
             vertices.Add(position + new Vector3Int(1, 0, 0));
             vertices.Add(position + new Vector3Int(1, 1, 0));
             vertices.Add(position + new Vector3Int(1, 0, 1));
             vertices.Add(position + new Vector3Int(1, 1, 1));
+            normals.Add(Vector3.right);
         }
 
         private void GenerateBlock(int x, int y, int z)
         {
-            if (ChunkData.Blocks[x, y, z].Color.Equals(BlockColor.Empty))
+            if (ChunkData.Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
+                .Equals(BlockColor.Empty))
             {
                 BlockMeshes[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] =
-                    new BlockMesh(null, BlockColor.Empty, 0);
+                    new BlockMesh(null, BlockColor.Empty, 0, null);
                 return;
             }
 
             var blockPosition = new Vector3Int(x, y, z);
-            var color = ChunkData.Blocks[blockPosition.x, blockPosition.y, blockPosition.z].Color;
+            var color = ChunkData.Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color;
             var facesCount = 0;
             var vertices = new List<Vector3>();
+            var normals = new List<Vector3>();
             if (!IsValidPosition(x, y + 1, z) && UpperNeighbour is not null &&
-                UpperNeighbour.ChunkData.Blocks[x, 0, z].Color.Equals(BlockColor.Empty) ||
-                IsValidPosition(x, y + 1, z) && ChunkData.Blocks[x, y + 1, z].Color.Equals(BlockColor.Empty))
+                UpperNeighbour.ChunkData.Blocks[x * ChunkData.ChunkSizeSquared + z].Color.Equals(BlockColor.Empty) ||
+                IsValidPosition(x, y + 1, z) && ChunkData
+                    .Blocks[x * ChunkData.ChunkSizeSquared + (y + 1) * ChunkData.ChunkSize + z].Color
+                    .Equals(BlockColor.Empty))
             {
-                GenerateTopSide(blockPosition, vertices);
+                GenerateTopSide(blockPosition, vertices, normals);
                 facesCount++;
             }
 
             if (!IsValidPosition(x, y - 1, z) && LowerNeighbour is not null && LowerNeighbour.ChunkData
-                    .Blocks[x, ChunkData.ChunkSize - 1, z].Color.Equals(BlockColor.Empty) ||
-                IsValidPosition(x, y - 1, z) && ChunkData.Blocks[x, y - 1, z].Color.Equals(BlockColor.Empty))
+                    .Blocks[x * ChunkData.ChunkSizeSquared + (ChunkData.ChunkSize - 1) * ChunkData.ChunkSize + z].Color
+                    .Equals(BlockColor.Empty) ||
+                IsValidPosition(x, y - 1, z) && ChunkData
+                    .Blocks[x * ChunkData.ChunkSizeSquared + (y - 1) * ChunkData.ChunkSize + z].Color
+                    .Equals(BlockColor.Empty))
             {
-                GenerateBottomSide(blockPosition, vertices);
+                GenerateBottomSide(blockPosition, vertices, normals);
                 facesCount++;
             }
 
             if (!IsValidPosition(x, y, z + 1) && FrontNeighbour is not null &&
-                FrontNeighbour.ChunkData.Blocks[x, y, 0].Color.Equals(BlockColor.Empty) ||
-                IsValidPosition(x, y, z + 1) && ChunkData.Blocks[x, y, z + 1].Color.Equals(BlockColor.Empty))
+                FrontNeighbour.ChunkData.Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize].Color
+                    .Equals(BlockColor.Empty) ||
+                IsValidPosition(x, y, z + 1) && ChunkData
+                    .Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z + 1].Color
+                    .Equals(BlockColor.Empty))
             {
-                GenerateFrontSide(blockPosition, vertices);
+                GenerateFrontSide(blockPosition, vertices, normals);
                 facesCount++;
             }
 
             if (!IsValidPosition(x, y, z - 1) && BackNeighbour is not null &&
-                BackNeighbour.ChunkData.Blocks[x, y, ChunkData.ChunkSize - 1].Color.Equals(BlockColor.Empty) ||
-                IsValidPosition(x, y, z - 1) && ChunkData.Blocks[x, y, z - 1].Color.Equals(BlockColor.Empty))
+                BackNeighbour.ChunkData
+                    .Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + ChunkData.ChunkSize - 1].Color
+                    .Equals(BlockColor.Empty) ||
+                IsValidPosition(x, y, z - 1) && ChunkData
+                    .Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z - 1].Color
+                    .Equals(BlockColor.Empty))
             {
-                GenerateBackSide(blockPosition, vertices);
+                GenerateBackSide(blockPosition, vertices, normals);
                 facesCount++;
             }
 
             if (!IsValidPosition(x + 1, y, z) && LeftNeighbour is not null &&
-                LeftNeighbour.ChunkData.Blocks[0, y, z].Color.Equals(BlockColor.Empty) ||
-                IsValidPosition(x + 1, y, z) && ChunkData.Blocks[x + 1, y, z].Color.Equals(BlockColor.Empty))
+                LeftNeighbour.ChunkData.Blocks[y * ChunkData.ChunkSize + z].Color.Equals(BlockColor.Empty) ||
+                IsValidPosition(x + 1, y, z) && ChunkData
+                    .Blocks[(x + 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
+                    .Equals(BlockColor.Empty))
             {
-                GenerateLeftSide(blockPosition, vertices);
+                GenerateLeftSide(blockPosition, vertices, normals);
                 facesCount++;
             }
 
             if (!IsValidPosition(x - 1, y, z) && RightNeighbour is not null && RightNeighbour.ChunkData
-                    .Blocks[ChunkData.ChunkSize - 1, y, z].Color.Equals(BlockColor.Empty) ||
-                IsValidPosition(x - 1, y, z) && ChunkData.Blocks[x - 1, y, z].Color.Equals(BlockColor.Empty))
+                    .Blocks[(ChunkData.ChunkSize - 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
+                    .Equals(BlockColor.Empty) ||
+                IsValidPosition(x - 1, y, z) && ChunkData
+                    .Blocks[(x - 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
+                    .Equals(BlockColor.Empty))
             {
-                GenerateRightSide(blockPosition, vertices);
+                GenerateRightSide(blockPosition, vertices, normals);
                 facesCount++;
             }
 
             BlockMeshes[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] =
-                new BlockMesh(vertices.ToArray(), color, facesCount);
+                new BlockMesh(vertices.ToArray(), color, facesCount, normals.ToArray());
         }
 
 
         public void SpawnBlock(Vector3Int blockPosition, Block block)
         {
-            ChunkData.Blocks[blockPosition.x, blockPosition.y, blockPosition.z] = block;
+            ChunkData.Blocks[
+                blockPosition.x * ChunkData.ChunkSizeSquared + blockPosition.y * ChunkData.ChunkSize +
+                blockPosition.z] = block;
             GenerateBlock(blockPosition.x, blockPosition.y, blockPosition.z);
             if (IsValidPosition(blockPosition.x + 1, blockPosition.y, blockPosition.z))
             {
@@ -279,10 +323,19 @@ namespace GamePlay
             }
         }
 
-        private static bool IsValidPosition(int x, int y, int z)
+        public static bool IsValidPosition(int x, int y, int z)
         {
             return x is >= 0 and < ChunkData.ChunkSize && y is >= 0 and < ChunkData.ChunkSize &&
                    z is >= 0 and < ChunkData.ChunkSize;
+        }
+
+        private void OnDestroy()
+        {
+            Vertices.Dispose();
+            Normals.Dispose();
+            Colors.Dispose();
+            Triangles.Dispose();
+            ChunkData.Blocks.Dispose();
         }
 
         private struct BlockMesh
@@ -290,13 +343,189 @@ namespace GamePlay
             public readonly Vector3[] Vertices;
             public readonly int FacesCount;
             public readonly Color32 Color;
+            public readonly Vector3[] Normals;
 
-            public BlockMesh(Vector3[] vertices, Color32 color, int facesCount)
+            public BlockMesh(Vector3[] vertices, Color32 color, int facesCount, Vector3[] normals)
             {
                 Vertices = vertices;
                 Color = color;
                 FacesCount = facesCount;
+                Normals = normals;
             }
+        }
+    }
+
+   
+    [BurstCompile]
+    public struct UpdateMeshJob : IJob
+    {
+        public NativeArray<Block> Blocks;
+        public NativeList<Vector3> Vertices;
+        public NativeList<Vector3> Normals;
+        public NativeList<int> Triangles;
+        public NativeList<Color32> Color;
+
+        public void Execute()
+        {
+            for (var index = 0; index < ChunkData.ChunkSizeCubed; index++)
+            {
+                var block = Blocks[index];
+                if (block.Color.IsEquals(BlockColor.Empty)) continue;
+                var x = index / ChunkData.ChunkSizeSquared;
+                var y = (index - x * ChunkData.ChunkSizeSquared) / ChunkData.ChunkSize;
+                var z = index - x * ChunkData.ChunkSizeSquared - y * ChunkData.ChunkSize;
+                var blockPosition = new Vector3Int(x, y, z);
+                if (!ChunkRenderer.IsValidPosition(x, y + 1, z) ||
+                    ChunkRenderer.IsValidPosition(x, y + 1, z) &&
+                    Blocks[x * ChunkData.ChunkSizeSquared + (y + 1) * ChunkData.ChunkSize + z].Color
+                        .IsEquals(BlockColor.Empty))
+                {
+                    GenerateTopSide(blockPosition, Vertices);
+                    AddTriangles();
+                    AddColor(block);
+                    for (var i = 0; i < 4; i++)
+                    {
+                        Normals.Add(Vector3.up);
+                    }
+                }
+
+                if (!ChunkRenderer.IsValidPosition(x, y - 1, z) ||
+                    ChunkRenderer.IsValidPosition(x, y - 1, z) &&
+                    Blocks[x * ChunkData.ChunkSizeSquared + (y - 1) * ChunkData.ChunkSize + z].Color
+                        .IsEquals(BlockColor.Empty))
+                {
+                    GenerateBottomSide(blockPosition, Vertices);
+                    AddTriangles();
+                    AddColor(block);
+                    for (var i = 0; i < 4; i++)
+                    {
+                        Normals.Add(Vector3.down);
+                    }
+                }
+
+                if (!ChunkRenderer.IsValidPosition(x, y, z + 1) ||
+                    ChunkRenderer.IsValidPosition(x, y, z + 1) &&
+                    Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z + 1].Color
+                        .IsEquals(BlockColor.Empty))
+                {
+                    GenerateFrontSide(blockPosition, Vertices);
+                    AddTriangles();
+                    AddColor(block);
+                    for (var i = 0; i < 4; i++)
+                    {
+                        Normals.Add(Vector3.forward);
+                    }
+                }
+
+                if (!ChunkRenderer.IsValidPosition(x, y, z - 1) ||
+                    ChunkRenderer.IsValidPosition(x, y, z - 1) &&
+                    Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z - 1].Color
+                        .IsEquals(BlockColor.Empty))
+                {
+                    GenerateBackSide(blockPosition, Vertices);
+                    AddTriangles();
+                    AddColor(block);
+                    for (var i = 0; i < 4; i++)
+                    {
+                        Normals.Add(Vector3.back);
+                    }
+                }
+
+                if (!ChunkRenderer.IsValidPosition(x + 1, y, z) ||
+                    ChunkRenderer.IsValidPosition(x + 1, y, z) &&
+                    Blocks[(x + 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
+                        .IsEquals(BlockColor.Empty))
+                {
+                    GenerateLeftSide(blockPosition, Vertices);
+                    AddTriangles();
+                    AddColor(block);
+                    for (var i = 0; i < 4; i++)
+                    {
+                        Normals.Add(Vector3.right);
+                    }
+                }
+
+                if (!ChunkRenderer.IsValidPosition(x - 1, y, z) ||
+                    ChunkRenderer.IsValidPosition(x - 1, y, z) &&
+                    Blocks[(x - 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
+                        .IsEquals(BlockColor.Empty))
+                {
+                    GenerateRightSide(blockPosition, Vertices);
+                    AddTriangles();
+                    AddColor(block);
+                    for (var i = 0; i < 4; i++)
+                    {
+                        Normals.Add(Vector3.left);
+                    }
+                }
+            }
+        }
+
+        private void AddTriangles()
+        {
+            Triangles.Add(Vertices.Length - 4);
+            Triangles.Add(Vertices.Length - 3);
+            Triangles.Add(Vertices.Length - 2);
+            Triangles.Add(Vertices.Length - 3);
+            Triangles.Add(Vertices.Length - 1);
+            Triangles.Add(Vertices.Length - 2);
+        }
+
+        private void AddColor(Block block)
+        {
+            for (var i = 0; i < 4; i++)
+            { 
+                Color.Add(block.Color);
+            }
+        }
+
+        private static void GenerateTopSide(Vector3Int position, NativeList<Vector3> vertices)
+        {
+            vertices.Add(position + new Vector3Int(0, 1, 0));
+            vertices.Add(position + new Vector3Int(0, 1, 1));
+            vertices.Add(position + new Vector3Int(1, 1, 0));
+            vertices.Add(position + new Vector3Int(1, 1, 1));
+        }
+
+        private static void GenerateBottomSide(Vector3Int position, NativeList<Vector3> vertices)
+        {
+            vertices.Add(position + new Vector3Int(0, 0, 0));
+            vertices.Add(position + new Vector3Int(1, 0, 0));
+            vertices.Add(position + new Vector3Int(0, 0, 1));
+            vertices.Add(position + new Vector3Int(1, 0, 1));
+        }
+
+        private static void GenerateFrontSide(Vector3Int position, NativeList<Vector3> vertices)
+        {
+            vertices.Add(position + new Vector3Int(0, 0, 1));
+            vertices.Add(position + new Vector3Int(1, 0, 1));
+            vertices.Add(position + new Vector3Int(0, 1, 1));
+            vertices.Add(position + new Vector3Int(1, 1, 1));
+        }
+
+
+        private static void GenerateBackSide(Vector3Int position, NativeList<Vector3> vertices)
+        {
+            vertices.Add(position + new Vector3Int(0, 0, 0));
+            vertices.Add(position + new Vector3Int(0, 1, 0));
+            vertices.Add(position + new Vector3Int(1, 0, 0));
+            vertices.Add(position + new Vector3Int(1, 1, 0));
+        }
+
+        private static void GenerateRightSide(Vector3Int position, NativeList<Vector3> vertices)
+        {
+            vertices.Add(position + new Vector3Int(0, 0, 0));
+            vertices.Add(position + new Vector3Int(0, 0, 1));
+            vertices.Add(position + new Vector3Int(0, 1, 0));
+            vertices.Add(position + new Vector3Int(0, 1, 1));
+        }
+
+        private static void GenerateLeftSide(Vector3Int position, NativeList<Vector3> vertices)
+        {
+            vertices.Add(position + new Vector3Int(1, 0, 0));
+            vertices.Add(position + new Vector3Int(1, 1, 0));
+            vertices.Add(position + new Vector3Int(1, 0, 1));
+            vertices.Add(position + new Vector3Int(1, 1, 1));
         }
     }
 }

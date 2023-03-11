@@ -52,7 +52,8 @@ namespace Core
                     {
                         for (var z = 0; z < ChunkData.ChunkSize; z++)
                         {
-                            var color = map.Chunks[chunkNumber].Blocks[x, y, z].Color;
+                            var color = map.Chunks[chunkNumber]
+                                .Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color;
                             binaryWriter.Write(color.b);
                             binaryWriter.Write(color.g);
                             binaryWriter.Write(color.r);

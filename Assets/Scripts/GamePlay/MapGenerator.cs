@@ -1,5 +1,9 @@
-﻿using Core;
+﻿using System.Diagnostics;
+using Core;
+using Unity.Collections;
+using Unity.Jobs;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace GamePlay
 {
@@ -8,9 +12,16 @@ namespace GamePlay
         [SerializeField] private ChunkRenderer chunkPrefab;
         private Map Map { get; set; }
         public ChunkRenderer[] Chunks { get; private set; }
+        
+        private void Start()
+        {
+            var map = MapReader.ReadFromFile("AncientEgypt.vxl");
+            Initialize(map);
+        }
 
         public void Initialize(Map map)
         {
+            var stopWatch = new Stopwatch();
             Map = map;
             GlobalEvents.OnSaveMapEvent.AddListener(mapName => MapWriter.SaveMap(mapName, Map));
             Chunks = new ChunkRenderer[Map.Width / ChunkData.ChunkSize * Map.Height / ChunkData.ChunkSize *
@@ -57,6 +68,27 @@ namespace GamePlay
                     Chunks[i].RightNeighbour =
                         Chunks[i - Map.Height / ChunkData.ChunkSize * Map.Depth / ChunkData.ChunkSize];
             }
+            stopWatch.Start();
+            var jobHandlesList = new NativeList<JobHandle>(Allocator.Temp);
+            for (var i = 0; i < Chunks.Length; i++)
+            {
+                    var chunk = Chunks[i];
+                    chunk.InitializeData();
+                    var jobHandle = new UpdateMeshJob()
+                    {
+                        Blocks = chunk.ChunkData.Blocks, Color = chunk.Colors, Normals = chunk.Normals,
+                        Triangles = chunk.Triangles, Vertices = chunk.Vertices
+                    }.Schedule();
+                    jobHandlesList.Add(jobHandle);
+            }
+
+            JobHandle.CompleteAll(jobHandlesList);
+            for (var i = 0; i < Chunks.Length; i++)
+            {
+                Chunks[i].ApplyMesh();
+            }
+            stopWatch.Stop();
+            Debug.Log(stopWatch.ElapsedMilliseconds);
         }
     }
 }
