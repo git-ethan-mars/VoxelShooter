@@ -131,6 +131,11 @@ namespace GamePlay
 
         private void RegenerateMesh()
         {
+            Vertices.Clear();
+            Triangles.Clear();
+            Colors.Clear();
+            ChunkMesh.Clear();
+            Normals.Clear();
             for (var i = 0; i < ChunkData.ChunkSizeCubed; i++)
             {
                 var x = i / ChunkData.ChunkSizeSquared;
@@ -161,21 +166,17 @@ namespace GamePlay
 
                 if (ChunkData.Faces[i].HasFlag(Faces.Left))
                 {
-                    GenerateTopSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
+                    GenerateLeftSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
                 }
 
                 if (ChunkData.Faces[i].HasFlag(Faces.Right))
                 {
-                    GenerateTopSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
+                    GenerateRightSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
                 }
             }
 
             ApplyMesh();
-            Vertices.Clear();
-            Triangles.Clear();
-            Colors.Clear();
-            ChunkMesh.Clear();
-            Normals.Clear();
+            
         }
 
         private static void AddNormals(NativeList<Vector3> normals, Vector3 normal)
