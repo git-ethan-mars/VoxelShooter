@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using GamePlay;
 using Mirror;
+using Unity.Collections;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
@@ -165,10 +166,17 @@ namespace Core
         /// <param name="conn">Connection from client.</param>
         public override void OnServerAddPlayer(NetworkConnectionToClient conn)
         {
+            var stopwatch = Stopwatch.StartNew();
             base.OnServerAddPlayer(conn);
-            CompressedMap = MapCompressor.Compress(Map);
+           //CompressedMap = MapCompressor.Compress(Map);
+           stopwatch.Stop();
+           Debug.Log($"OnServerAddPlayer : {stopwatch.ElapsedMilliseconds}");
         }
 
+        private void Test(NativeArray<int> n)
+        {
+            n[0] = 150;
+        }
         /// <summary>
         /// Called on the server when a client disconnects.
         /// <para>This is called on the Server when a Client disconnects from the Server. Use an override to decide what should happen when a disconnection is detected.</para>
@@ -242,6 +250,10 @@ namespace Core
         public override void OnStartHost()
         {
             base.OnStartHost();
+            var stopwatch = Stopwatch.StartNew();
+            Map = MapReader.ReadFromFile("Classic.vxl");
+            stopwatch.Stop();
+            Debug.Log(stopwatch.ElapsedMilliseconds);
         }
 
         /// <summary>
