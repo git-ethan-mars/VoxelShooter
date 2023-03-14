@@ -14,7 +14,7 @@ namespace GamePlay
 
         private byte[] ClientBuffer { get; set; }
         private int DestinationOffset { get; set; }
-        private const int PackageSize = 4096;
+        private const int PackageSize = 1024;
 
         private void Awake()
         {
