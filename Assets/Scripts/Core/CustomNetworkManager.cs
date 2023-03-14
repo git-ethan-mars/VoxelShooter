@@ -241,7 +241,7 @@ namespace Core
         public override void OnStartHost()
         {
             base.OnStartHost();
-            Map = MapReader.ReadFromFile("Classic.vxl");
+            Map = Map.CreateNewMap(32,32,32);
         }
 
         /// <summary>
