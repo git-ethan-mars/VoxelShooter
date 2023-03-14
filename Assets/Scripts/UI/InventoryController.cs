@@ -13,6 +13,14 @@ namespace UI
         private int _itemIndex;
         private int _maxIndex;
 
+        public void Awake()
+        {
+            GlobalEvents.OnMapLoaded.AddListener(()=>
+            {
+                enabled = true;
+            });
+        }
+
         public override void OnStartAuthority()
         {
             _itemList = new List<IInventoryItemView>
@@ -26,8 +34,9 @@ namespace UI
                 inventoryView.SetIconForItem(i, _itemList[i].Icon);
                 inventoryView.SetPointer(i, _itemList[i]);
             }
-
             _itemList[_itemIndex].Select();
+
+
         }
 
         private void Update()
@@ -72,6 +81,10 @@ namespace UI
             if (Input.GetMouseButton(1) && _itemList[_itemIndex] is IRightMouseButtonHoldHandler)
             {
                 ((IRightMouseButtonHoldHandler) _itemList[_itemIndex]).OnRightMouseButtonHold();
+            }
+            if (_itemList[_itemIndex] is IInnerUpdate)
+            {
+                ((IInnerUpdate) _itemList[_itemIndex]).InnerUpdate();
             }
         }
     }

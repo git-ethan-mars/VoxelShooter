@@ -9,18 +9,18 @@ namespace GamePlay
         private LineRenderer _lineRenderer;
         private Camera _camera;
 
-        private void OnEnable()
+        public void EnableCube()
         {
             _lineRenderer ??= GetComponent<LineRenderer>();
             _lineRenderer.positionCount = 0;
         }
 
-        private void OnDisable()
+        public void DisableCube()
         {
             _lineRenderer.positionCount = 0;
         }
 
-        private void Update()
+        public void UpdateCube()
         {
             var raycastResult = GetRayCastHit(out var raycastHit);
             if (!raycastResult)

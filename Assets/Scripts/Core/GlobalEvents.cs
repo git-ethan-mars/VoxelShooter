@@ -1,5 +1,4 @@
-﻿using GamePlay;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
 namespace Core
@@ -25,6 +24,13 @@ namespace Core
         public static void SendMapSave(string saveName)
         {
             OnSaveMapEvent.Invoke(saveName);
+        }
+
+        public static readonly UnityEvent OnMapLoaded = new();
+
+        public static void SendMapLoadedState()
+        {
+            OnMapLoaded.Invoke();
         }
     }
 }

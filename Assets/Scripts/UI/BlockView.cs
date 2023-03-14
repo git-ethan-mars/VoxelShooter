@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace UI
 {
-    public class BlockView : IInventoryItemView, ILeftMouseButtonDownHandler, IRightMouseButtonDownHandler
+    public class BlockView : IInventoryItemView, ILeftMouseButtonDownHandler, IRightMouseButtonDownHandler, IInnerUpdate
     {
         public Sprite Icon { get; }
         private Color32 _currentColor;
@@ -22,16 +22,16 @@ namespace UI
 
         public void Select()
         {
-            _blockPlacement.enabled = true;
             _palette.SetActive(true);
             Pointer.SetActive(true);
+            _blockPlacement.EnableCube();
         }
 
         public void Unselect()
         {
-            _blockPlacement.enabled = false;
             _palette.SetActive(false);
             Pointer.SetActive(false);
+            _blockPlacement.DisableCube();
         }
 
         public void OnLeftMouseButtonDown()
@@ -42,6 +42,11 @@ namespace UI
         public void OnRightMouseButtonDown()
         {
             _blockPlacement.DestroyBlock();
+        }
+
+        public void InnerUpdate()
+        {
+            _blockPlacement.UpdateCube();
         }
     }
 }

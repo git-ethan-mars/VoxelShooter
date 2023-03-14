@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using Core;
 using Mirror;
 using UnityEngine;
@@ -34,11 +33,8 @@ namespace GamePlay
             GlobalEvents.OnBlockChangeStateEvent.AddListener(ChangeBlockState);
             if (isServer)
             {
-                var stopWatch = new Stopwatch();
-                stopWatch.Start();
                 MapGenerator.Initialize(Map);
-                stopWatch.Stop();
-                Debug.Log(stopWatch.ElapsedMilliseconds);
+                GlobalEvents.SendMapLoadedState();
             }
 
             if (isClientOnly)
@@ -101,6 +97,7 @@ namespace GamePlay
             ClientBuffer = null;
             DestinationOffset = 0;
             MapGenerator.Initialize(Map);
+            GlobalEvents.SendMapLoadedState();
         }
     }
 }

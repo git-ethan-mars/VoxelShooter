@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using GamePlay;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -72,7 +71,7 @@ namespace Core
                 }
             }
 
-            AddInnerVoxels(colors, heightOffset);
+            //AddInnerVoxels(colors, heightOffset);
 
             var chunks =
                 new ChunkData[Width / ChunkData.ChunkSize * _height / ChunkData.ChunkSize *
@@ -106,7 +105,6 @@ namespace Core
                 }
             }
 
-            map.AddWater();
             return map;
         }
 
