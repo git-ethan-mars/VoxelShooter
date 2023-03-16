@@ -3,88 +3,90 @@ using Core;
 using Mirror;
 using UnityEngine;
 
-public class PlayerMovement : NetworkBehaviour
+namespace GamePlay
 {
-    private Rigidbody Rigidbody { get; set; }
-    private bool _onGround;
-    [SerializeField] private float speed;
-    private float _previousFallingSpeed;
-    private bool _isFell;
-    private bool _isJumpButtonPressed;
-    private void Start()
+    [RequireComponent(typeof(Rigidbody))]
+    public class PlayerMovement : NetworkBehaviour
     {
-        Rigidbody = GetComponent<Rigidbody>();
-        Rigidbody.freezeRotation = true;
-    }
-
-    private void Update()
-    {
-        if (!isLocalPlayer) return;
-        var verticalInput = 0f;
-        if (Input.GetKey(KeyCode.W))
-            verticalInput += 1;
-        if (Input.GetKey(KeyCode.S))
-            verticalInput -= 1;
-        var horizontalInput = 0f;
-        if (Input.GetKey(KeyCode.D))
+        [SerializeField] private float speed;
+        [SerializeField] private float jumpMultiplayer;
+        private Rigidbody Rigidbody { get; set; }
+        private bool _isGrounded;
+        private bool _isFell;
+        private bool _isJumpButtonPressed;
+        private float _previousFallingSpeed;
+        private Vector3 _movementForce;
+        private void Start()
         {
-            horizontalInput += 1;
+            Rigidbody = GetComponent<Rigidbody>();
+            Rigidbody.freezeRotation = true;
         }
 
-        if (Input.GetKey(KeyCode.A))
+        private void Update()
         {
-            horizontalInput -= 1;
+            ReadInput();
         }
 
-        if (verticalInput != 0 && horizontalInput != 0)
+        private void ReadInput()
         {
-            verticalInput /= (float)Math.Sqrt(2);
-            horizontalInput /= (float)Math.Sqrt(2);
-        }
-
-        var playerTransform = transform;
-        var moveDirection = (verticalInput * playerTransform.forward + horizontalInput * playerTransform.right) 
-                            * Time.deltaTime;
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            _isJumpButtonPressed = true;
-        }
-
-        var newVelocity = new Vector3(moveDirection.x * speed, Rigidbody.velocity.y, moveDirection.z * speed);
-        Rigidbody.velocity = newVelocity;
-    }
-
-    private void FixedUpdate()
-    {
-        if (_previousFallingSpeed == Rigidbody.velocity.y)
-        {
-            _isFell = true;
-            if (_isJumpButtonPressed && _onGround)
+            if (!isLocalPlayer) return;
+            var verticalInput = 0f;
+            if (Input.GetKey(KeyCode.W))
+                verticalInput += 1;
+            if (Input.GetKey(KeyCode.S))
+                verticalInput -= 1;
+            var horizontalInput = 0f;
+            if (Input.GetKey(KeyCode.D))
             {
-                Rigidbody.AddForce(Vector3.up * 7, ForceMode.VelocityChange);
+                horizontalInput += 1;
+            }
+
+            if (Input.GetKey(KeyCode.A))
+            {
+                horizontalInput -= 1;
+            }
+
+            var playerTransform = transform;
+            _movementForce = (verticalInput * playerTransform.forward + horizontalInput * playerTransform.right).normalized;
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                _isJumpButtonPressed = true;
             }
         }
-        else
-        {
-            _isFell = false;
-        }
-        _isJumpButtonPressed = false;
-        _previousFallingSpeed = Rigidbody.velocity.y;
-    }
 
-    private void OnCollisionStay(Collision collision)
-    {
-        if (collision.collider.gameObject.GetComponent<ChunkRenderer>() && _isFell)
+        private void FixedUpdate()
         {
-            _onGround = true;
+            if (Math.Abs(_previousFallingSpeed - Rigidbody.velocity.y) < 1e-4)
+            {
+                _isFell = true;
+                if (_isJumpButtonPressed && _isGrounded)
+                {
+                    Rigidbody.AddForce(Vector3.up * jumpMultiplayer, ForceMode.VelocityChange);
+                }
+            }
+            else
+            {
+                _isFell = false;
+            }
+            _isJumpButtonPressed = false;
+            _previousFallingSpeed = Rigidbody.velocity.y;
+            Rigidbody.AddForce(_movementForce * speed * 10f);
         }
-    }
 
-    private void OnCollisionExit(Collision collision)
-    {
-        if (collision.collider.gameObject.GetComponent<ChunkRenderer>())
+        private void OnCollisionStay(Collision collision)
         {
-            _onGround = false;
+            if (collision.collider.gameObject.GetComponent<ChunkRenderer>() && _isFell)
+            {
+                _isGrounded = true;
+            }
+        }
+
+        private void OnCollisionExit(Collision collision)
+        {
+            if (collision.collider.gameObject.GetComponent<ChunkRenderer>())
+            {
+                _isGrounded = false;
+            }
         }
     }
 }
