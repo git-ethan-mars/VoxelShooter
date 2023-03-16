@@ -3977,7 +3977,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1173430337
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4022,7 +4022,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1202228728}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: Transport.SteamLobby, Assembly-CSharp
         m_MethodName: HostLobby
         m_Mode: 1
@@ -4179,7 +4179,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1202228715}
   - component: {fileID: 1202228726}
-  - component: {fileID: 1202228729}
   - component: {fileID: 1202228728}
   - component: {fileID: 1202228727}
   m_Layer: 0
@@ -4223,11 +4222,11 @@ MonoBehaviour:
   sendRate: 30
   offlineScene: 
   onlineScene: 
-  transport: {fileID: 1202228729}
+  transport: {fileID: 1202228728}
   networkAddress: localhost
   maxConnections: 100
   authenticator: {fileID: 0}
-  playerPrefab: {fileID: 5182803370366131678, guid: f442e102a58c64c4da6a694d6b368972, type: 3}
+  playerPrefab: {fileID: 8049878084413957514, guid: 7ebfc83253496464dabd519acb0ede76, type: 3}
   autoCreatePlayer: 1
   playerSpawnMethod: 0
   spawnPrefabs: []
@@ -4241,9 +4240,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1202228711}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 71c4a806b865483cb8521f15f5062abe, type: 3}
+  m_Script: {fileID: 11500000, guid: 6442dc8070ceb41f094e44de0bf87274, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  offsetX: 0
+  offsetY: 0
 --- !u!114 &1202228728
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4253,26 +4254,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 1202228711}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ebe2d3aaa4dc3a146b4fc5945c0f4999, type: 3}
+  m_Script: {fileID: 11500000, guid: 6b0fecffa3f624585964b0d0eb21b18e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  button: {fileID: 1173430336}
---- !u!114 &1202228729
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1202228711}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e6e55fca1f4e4844593a3dd65a3ecb39, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Channels: 0200000001000000
-  Timeout: 25
-  AllowSteamRelay: 1
-  UseNextGenSteamNetworking: 1
+  Port: 7777
+  DualMode: 1
+  NoDelay: 1
+  Interval: 10
+  Timeout: 10000
+  FastResend: 2
+  SendWindowSize: 4096
+  ReceiveWindowSize: 4096
+  MaxRetransmit: 40
+  MaximizeSocketBuffers: 1
+  ReliableMaxMessageSize: 298449
+  UnreliableMaxMessageSize: 1199
+  debugLog: 0
+  statisticsGUI: 0
+  statisticsLog: 0
 --- !u!1001 &1248529775
 PrefabInstance:
   m_ObjectHideFlags: 0

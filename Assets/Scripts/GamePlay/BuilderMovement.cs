@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace GamePlay
 {
-    public class PlayerMovement : NetworkBehaviour
+    public class BuilderMovement : NetworkBehaviour
     {
         private Rigidbody Rigidbody { get; set; }
         [SerializeField] private float speed;
