@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using Core;
 using UnityEngine;
 
 namespace GamePlay
@@ -5,35 +8,33 @@ namespace GamePlay
     public class Explosion : MonoBehaviour
     {
         [SerializeField] private float explosionForce;
-        [SerializeField] private float explosionRadius;
+        [SerializeField] private int explosionRadius;
         [SerializeField] private GameObject slicedBlock;
-    
-   
-
-        public void Explode()
+        
+        public void Start()
         {
-            foreach (var overlappedCollider in Physics.OverlapSphere(transform.position, explosionRadius))
+            var explosionCenter = transform.position;
+            List<Vector3Int> globalPositions = new List<Vector3Int>();
+            for (var x = -explosionRadius; x < explosionRadius; x++)
             {
-                if (!overlappedCollider.gameObject.CompareTag("Block"))
-                    continue;
-                var block = overlappedCollider.gameObject;
-                var color = block.GetComponent<MeshRenderer>().material.color;
-                Destroy(block);
-                var slicedInstantiatedBlock = Instantiate(slicedBlock, block.transform.position, Quaternion.identity);
-                foreach (Transform child in slicedInstantiatedBlock.transform)
+                for (var y = -explosionRadius; y < explosionRadius; y++)
                 {
-                    child.gameObject.GetComponent<MeshRenderer>().material.color = color;
+                    for (var z = -explosionRadius; z < explosionRadius; z++)
+                    {
+                        globalPositions.Add(new Vector3Int((int)explosionCenter.x, 
+                            (int)explosionCenter.y, (int)explosionCenter.z) + new Vector3Int(x, y, z));
+                    }
                 }
-            
-                foreach (Transform child in slicedInstantiatedBlock.transform)
-                {
-                    child.gameObject.GetComponent<Rigidbody>()
-                        .AddExplosionForce(explosionForce, transform.position, explosionRadius);
-                }
-            
-                Destroy(slicedInstantiatedBlock,5);
             }
-            Destroy(gameObject);
+
+            foreach (var blockPosition in globalPositions)
+            {
+                
+                if ((blockPosition.x - explosionCenter.x) * (blockPosition.x - explosionCenter.x) 
+                    + (blockPosition.y - explosionCenter.y) * (blockPosition.y - explosionCenter.y) 
+                    + (blockPosition.z - explosionCenter.z) * (blockPosition.z - explosionCenter.z) <= explosionRadius * explosionRadius)
+                    GlobalEvents.SendBlockState(new Block() { Color = BlockColor.Empty }, blockPosition);
+            }
         }
     }
 }

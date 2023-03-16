@@ -71,7 +71,7 @@ namespace Core
                 }
             }
 
-            //AddInnerVoxels(colors, heightOffset);
+            AddInnerVoxels(colors, heightOffset);
 
             var chunks =
                 new ChunkData[Width / ChunkData.ChunkSize * _height / ChunkData.ChunkSize *

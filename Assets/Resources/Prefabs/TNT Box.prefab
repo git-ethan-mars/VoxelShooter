@@ -143,5 +143,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   explosionForce: 1000
-  explosionRadius: 15
+  explosionRadius: 30
   slicedBlock: {fileID: 2719062774224184141, guid: ab4935dfc27cf5146b28e1e85d87f101, type: 3}
