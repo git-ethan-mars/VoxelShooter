@@ -1,3 +1,4 @@
+using System;
 using Core;
 using Mirror;
 using UnityEngine;
@@ -33,6 +34,12 @@ public class PlayerMovement : NetworkBehaviour
         if (Input.GetKey(KeyCode.A))
         {
             horizontalInput -= 1;
+        }
+
+        if (verticalInput != 0 && horizontalInput != 0)
+        {
+            verticalInput /= (float)Math.Sqrt(2);
+            horizontalInput /= (float)Math.Sqrt(2);
         }
 
         var playerTransform = transform;
