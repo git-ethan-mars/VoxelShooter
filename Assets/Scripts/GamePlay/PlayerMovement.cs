@@ -1,43 +1,83 @@
+using Core;
 using Mirror;
 using UnityEngine;
 
-namespace GamePlay
+public class PlayerMovement : NetworkBehaviour
 {
-    public class PlayerMovement : NetworkBehaviour
+    private Rigidbody Rigidbody { get; set; }
+    private bool _onGround;
+    [SerializeField] private float speed;
+    private float _previousFallingSpeed;
+    private bool _isFell;
+    private bool _isJumpButtonPressed;
+    private void Start()
     {
-        private Rigidbody Rigidbody { get; set; }
-        [SerializeField] private float speed;
+        Rigidbody = GetComponent<Rigidbody>();
+        Rigidbody.freezeRotation = true;
+    }
 
-        private void Start()
+    private void Update()
+    {
+        if (!isLocalPlayer) return;
+        var verticalInput = 0f;
+        if (Input.GetKey(KeyCode.W))
+            verticalInput += 1;
+        if (Input.GetKey(KeyCode.S))
+            verticalInput -= 1;
+        var horizontalInput = 0f;
+        if (Input.GetKey(KeyCode.D))
         {
-            Rigidbody = GetComponent<Rigidbody>();
-            Rigidbody.freezeRotation = true;
+            horizontalInput += 1;
         }
 
-        private void FixedUpdate()
+        if (Input.GetKey(KeyCode.A))
         {
-            if (!isLocalPlayer) return;
-            var verticalInput = 0f;
-            if (Input.GetKey(KeyCode.W))
-                verticalInput += 1;
-            if (Input.GetKey(KeyCode.S))
-                verticalInput -= 1;
-            var horizontalInput = 0f;
-            if (Input.GetKey(KeyCode.D))
-            {
-                horizontalInput += 1;
-            }
-            if (Input.GetKey(KeyCode.A))
-            {
-                horizontalInput -= 1;
-            }
+            horizontalInput -= 1;
+        }
 
-            var moveDirection = verticalInput * transform.forward + horizontalInput * transform.right;
-            Rigidbody.velocity = moveDirection * speed;
-            if (Input.GetKey(KeyCode.Space))
-                Rigidbody.velocity = new Vector3(Rigidbody.velocity.x, speed, Rigidbody.velocity.z);
-            if (Input.GetKey(KeyCode.LeftShift))
-                Rigidbody.velocity = new Vector3(Rigidbody.velocity.x, -speed, Rigidbody.velocity.z);
+        var playerTransform = transform;
+        var moveDirection = (verticalInput * playerTransform.forward + horizontalInput * playerTransform.right) 
+                            * Time.deltaTime;
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            _isJumpButtonPressed = true;
+        }
+
+        var newVelocity = new Vector3(moveDirection.x * speed, Rigidbody.velocity.y, moveDirection.z * speed);
+        Rigidbody.velocity = newVelocity;
+    }
+
+    private void FixedUpdate()
+    {
+        if (_previousFallingSpeed == Rigidbody.velocity.y)
+        {
+            _isFell = true;
+            if (_isJumpButtonPressed && _onGround)
+            {
+                Rigidbody.AddForce(Vector3.up * 7, ForceMode.VelocityChange);
+            }
+        }
+        else
+        {
+            _isFell = false;
+        }
+        _isJumpButtonPressed = false;
+        _previousFallingSpeed = Rigidbody.velocity.y;
+    }
+
+    private void OnCollisionStay(Collision collision)
+    {
+        if (collision.collider.gameObject.GetComponent<ChunkRenderer>() && _isFell)
+        {
+            _onGround = true;
+        }
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.collider.gameObject.GetComponent<ChunkRenderer>())
+        {
+            _onGround = false;
         }
     }
 }
