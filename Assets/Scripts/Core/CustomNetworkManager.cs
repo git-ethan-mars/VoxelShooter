@@ -1,7 +1,4 @@
-using System.Diagnostics;
 using Mirror;
-using Unity.Collections;
-using Debug = UnityEngine.Debug;
 
 /*
 	Documentation: https://mirror-networking.gitbook.io/docs/components/network-manager
@@ -241,7 +238,7 @@ namespace Core
         public override void OnStartHost()
         {
             base.OnStartHost();
-            Map = Map.CreateNewMap(32,32,32);
+            Map = MapReader.ReadFromFile("AncientEgypt.vxl");
         }
 
         /// <summary>
@@ -272,7 +269,6 @@ namespace Core
         /// </summary>
         public override void OnStopServer()
         {
-            MapWriter.SaveMap("Classic.rch", Map);
         }
 
         /// <summary>
