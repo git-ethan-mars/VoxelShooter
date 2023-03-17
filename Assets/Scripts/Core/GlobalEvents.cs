@@ -1,15 +1,16 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Events;
 
 namespace Core
 {
     public static class GlobalEvents
     {
-        public static readonly UnityEvent<Block, Vector3Int> OnBlockChangeStateEvent = new();
+        public static readonly UnityEvent<List<Vector3Int>, Block[]> OnBlockChangeStateEvent = new();
 
-        public static void SendBlockState(Block block, Vector3Int position)
+        public static void SendBlockStates(List<Vector3Int> positions, Block[] blocks)
         {
-            OnBlockChangeStateEvent.Invoke(block, position);
+            OnBlockChangeStateEvent.Invoke(positions, blocks);
         }
 
         public static readonly UnityEvent<Color32> OnPaletteUpdate = new();

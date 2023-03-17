@@ -1,4 +1,5 @@
-﻿using Core;
+﻿using System.Collections.Generic;
+using Core;
 using UnityEngine;
 
 namespace GamePlay
@@ -16,8 +17,9 @@ namespace GamePlay
             if (!raycastResult) return;
             if (hitInfo.collider.CompareTag("Chunk"))
             {
-                GlobalEvents.SendBlockState(new Block {Color = color},
-                    Vector3Int.FloorToInt(hitInfo.point - hitInfo.normal / 2));
+                GlobalEvents.SendBlockStates(
+                    new List<Vector3Int>() {Vector3Int.FloorToInt(hitInfo.point - hitInfo.normal / 2)},
+                    new[] {new Block {Color = color}});
             }
         }
     }

@@ -55,8 +55,8 @@ namespace Core
                 {
                     var blocks = Chunks[FindChunkNumberByPosition(new Vector3Int(x, 0, z))].Blocks;
                     var block = blocks[
-                            (x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
-                            (z & (ChunkData.ChunkSize - 1))];
+                        (x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
+                        (z & (ChunkData.ChunkSize - 1))];
                     if (!block.Color
                             .Equals(BlockColor.Empty)) continue;
                     block.Color = waterColor;
@@ -71,6 +71,13 @@ namespace Core
             return position.z / ChunkData.ChunkSize +
                    position.y / ChunkData.ChunkSize * (Depth / ChunkData.ChunkSize) +
                    position.x / ChunkData.ChunkSize * (Height / ChunkData.ChunkSize * Depth / ChunkData.ChunkSize);
+        }
+
+        public bool IsValidPosition(Vector3Int globalPosition)
+        {
+            return !(globalPosition.x < 0 || globalPosition.x >= Width || globalPosition.y <= 0 ||
+                   globalPosition.y >= Height ||
+                   globalPosition.z < 0 || globalPosition.z >= Depth);
         }
     }
 }
