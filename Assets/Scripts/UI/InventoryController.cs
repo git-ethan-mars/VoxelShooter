@@ -82,9 +82,9 @@ namespace UI
             {
                 ((IRightMouseButtonHoldHandler) _itemList[_itemIndex]).OnRightMouseButtonHold();
             }
-            if (_itemList[_itemIndex] is IInnerUpdate)
+            if (_itemList[_itemIndex] is IUpdated)
             {
-                ((IInnerUpdate) _itemList[_itemIndex]).InnerUpdate();
+                ((IUpdated) _itemList[_itemIndex]).InnerUpdate();
             }
         }
     }

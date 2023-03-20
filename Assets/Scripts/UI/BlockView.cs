@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace UI
 {
-    public class BlockView : IInventoryItemView, ILeftMouseButtonDownHandler, IRightMouseButtonDownHandler, IInnerUpdate
+    public class BlockView : IInventoryItemView, ILeftMouseButtonDownHandler, IRightMouseButtonDownHandler, IUpdated
     {
         public Sprite Icon { get; }
         private Color32 _currentColor;
