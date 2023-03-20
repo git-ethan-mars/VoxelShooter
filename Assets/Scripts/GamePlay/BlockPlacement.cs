@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Core;
 using UnityEngine;
 
@@ -59,8 +60,9 @@ namespace GamePlay
         {
             var raycastResult = GetRayCastHit(out var raycastHit);
             if (!raycastResult) return;
-            GlobalEvents.SendBlockState(new Block {Color = color},
-                Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2));
+            GlobalEvents.SendBlockStates(
+                new List<Vector3Int>() {Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2)},
+                new[] {new Block() {Color = color}});
         }
 
         public void StartDrawBlockLine(Color32 color)
@@ -71,16 +73,15 @@ namespace GamePlay
 
         public void EndDrawBlockLine(Color32 color)
         {
-            
         }
 
         public void DestroyBlock()
         {
             var raycastResult = GetRayCastHit(out var raycastHit);
             if (!raycastResult) return;
-            var destroyedBlock = new Block() {Color = BlockColor.Empty};
-            GlobalEvents.SendBlockState(destroyedBlock,
-                Vector3Int.FloorToInt(raycastHit.point - raycastHit.normal / 2));
+            GlobalEvents.SendBlockStates(
+                new List<Vector3Int>() {Vector3Int.FloorToInt(raycastHit.point - raycastHit.normal / 2)},
+                new[] {new Block() {Color = BlockColor.Empty}});
         }
 
         private bool GetRayCastHit(out RaycastHit raycastHit)

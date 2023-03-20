@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using Mirror;
+using Debug = UnityEngine.Debug;
 
 /*
 	Documentation: https://mirror-networking.gitbook.io/docs/components/network-manager
@@ -162,7 +164,7 @@ namespace Core
         public override void OnServerAddPlayer(NetworkConnectionToClient conn)
         {
             base.OnServerAddPlayer(conn);
-            CompressedMap = MapCompressor.Compress(Map);
+            //CompressedMap = MapCompressor.Compress(Map);
         }
 
         /// <summary>
@@ -238,7 +240,10 @@ namespace Core
         public override void OnStartHost()
         {
             base.OnStartHost();
+            var stopwatch = Stopwatch.StartNew();
             Map = MapReader.ReadFromFile("AncientEgypt.vxl");
+            stopwatch.Stop();
+            Debug.Log(stopwatch.ElapsedMilliseconds);
         }
 
         /// <summary>

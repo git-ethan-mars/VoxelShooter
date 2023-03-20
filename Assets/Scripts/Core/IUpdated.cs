@@ -1,6 +1,6 @@
 ﻿namespace Core
 {
-    public interface IInnerUpdate
+    public interface IUpdated
     {
         void InnerUpdate();
     }

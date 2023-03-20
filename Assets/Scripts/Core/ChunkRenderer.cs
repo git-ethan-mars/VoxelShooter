@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Collections;
 using UnityEngine;
 
@@ -128,6 +129,167 @@ namespace Core
             AddColor(colors, color);
         }
 
+        public void SpawnBlocks(List<Vector3Int> blockPositions, List<Color32> colors)
+        {
+            var neighbourChunksToRegenerate = Faces.None;
+            for (var i = 0; i < blockPositions.Count; i++)
+            {
+                ChunkData.Blocks[
+                    blockPositions[i].x * ChunkData.ChunkSizeSquared + blockPositions[i].y * ChunkData.ChunkSize +
+                    blockPositions[i].z] = new Block {Color = colors[i]};
+                SetFaces(blockPositions[i].x, blockPositions[i].y, blockPositions[i].z);
+                SetNeighboursFaces(blockPositions[i]);
+                if (blockPositions[i].z == ChunkData.ChunkSize - 1 && FrontNeighbour is not null)
+                {
+                    FrontNeighbour.SetFaces(blockPositions[i].x, blockPositions[i].y, 0);
+                    neighbourChunksToRegenerate |= Faces.Front;
+                }
+
+                if (blockPositions[i].z == 0 && BackNeighbour is not null)
+                {
+                    BackNeighbour.SetFaces(blockPositions[i].x, blockPositions[i].y, ChunkData.ChunkSize - 1);
+                    neighbourChunksToRegenerate |= Faces.Back;
+                }
+
+                if (blockPositions[i].y == ChunkData.ChunkSize - 1 && UpperNeighbour is not null)
+                {
+                    UpperNeighbour.SetFaces(blockPositions[i].x, 0, blockPositions[i].z);
+                    neighbourChunksToRegenerate |= Faces.Top;
+                }
+
+                if (blockPositions[i].y == 0 && LowerNeighbour is not null)
+                {
+                    LowerNeighbour.SetFaces(blockPositions[i].x, ChunkData.ChunkSize - 1, blockPositions[i].z);
+                    neighbourChunksToRegenerate |= Faces.Bottom;
+                }
+
+                if (blockPositions[i].x == ChunkData.ChunkSize - 1 && RightNeighbour is not null)
+                {
+                    RightNeighbour.SetFaces(0, blockPositions[i].y, blockPositions[i].z);
+                    neighbourChunksToRegenerate |= Faces.Right;
+                }
+                else if (blockPositions[i].x == 0 && LeftNeighbour is not null)
+                {
+                    LeftNeighbour.SetFaces(ChunkData.ChunkSize - 1, blockPositions[i].y, blockPositions[i].z);
+                    neighbourChunksToRegenerate |= Faces.Left;
+                }
+            }
+
+            RegenerateMesh();
+            if (neighbourChunksToRegenerate.HasFlag(Faces.Front))
+            {
+                FrontNeighbour.RegenerateMesh();
+            }
+
+            if (neighbourChunksToRegenerate.HasFlag(Faces.Back))
+            {
+                BackNeighbour.RegenerateMesh();
+            }
+
+            if (neighbourChunksToRegenerate.HasFlag(Faces.Top))
+            {
+                UpperNeighbour.RegenerateMesh();
+            }
+
+            if (neighbourChunksToRegenerate.HasFlag(Faces.Bottom))
+            {
+                LowerNeighbour.RegenerateMesh();
+            }
+
+            if (neighbourChunksToRegenerate.HasFlag(Faces.Right))
+            {
+                RightNeighbour.RegenerateMesh();
+            }
+
+            if (neighbourChunksToRegenerate.HasFlag(Faces.Left))
+            {
+                LeftNeighbour.RegenerateMesh();
+            }
+        }
+
+        /*public void SpawnBlock(Vector3Int blockPosition, Block block)
+        {
+            ChunkData.Blocks[
+                blockPosition.x * ChunkData.ChunkSizeSquared + blockPosition.y * ChunkData.ChunkSize +
+                blockPosition.z] = block;
+            SetFaces(blockPosition.x, blockPosition.y, blockPosition.z);
+            SetNeighboursFaces(blockPosition);
+            RegenerateMesh();
+            if (blockPosition.z == ChunkData.ChunkSize - 1 && FrontNeighbour is not null)
+            {
+                FrontNeighbour.SetFaces(blockPosition.x, blockPosition.y, 0);
+                FrontNeighbour.RegenerateMesh();
+            }
+
+            if (blockPosition.z == 0 && BackNeighbour is not null)
+            {
+                BackNeighbour.SetFaces(blockPosition.x, blockPosition.y, ChunkData.ChunkSize - 1);
+                BackNeighbour.RegenerateMesh();
+            }
+
+            if (blockPosition.y == ChunkData.ChunkSize - 1 && UpperNeighbour is not null)
+            {
+                UpperNeighbour.SetFaces(blockPosition.x, 0, blockPosition.z);
+                UpperNeighbour.RegenerateMesh();
+            }
+
+            if (blockPosition.y == 0 && LowerNeighbour is not null)
+            {
+                LowerNeighbour.SetFaces(blockPosition.x, ChunkData.ChunkSize - 1, blockPosition.z);
+                LowerNeighbour.RegenerateMesh();
+            }
+
+            if (blockPosition.x == ChunkData.ChunkSize - 1 && RightNeighbour is not null)
+            {
+                RightNeighbour.SetFaces(0, blockPosition.y, blockPosition.z);
+                RightNeighbour.RegenerateMesh();
+            }
+            else if (blockPosition.x == 0 && LeftNeighbour is not null)
+            {
+                LeftNeighbour.SetFaces(ChunkData.ChunkSize - 1, blockPosition.y, blockPosition.z);
+                LeftNeighbour.RegenerateMesh();
+            }
+        }*/
+
+        public static bool IsValidPosition(int x, int y, int z)
+        {
+            return x is >= 0 and < ChunkData.ChunkSize && y is >= 0 and < ChunkData.ChunkSize &&
+                   z is >= 0 and < ChunkData.ChunkSize;
+        }
+
+        private void SetNeighboursFaces(Vector3Int blockPosition)
+        {
+            if (IsValidPosition(blockPosition.x + 1, blockPosition.y, blockPosition.z))
+            {
+                SetFaces(blockPosition.x + 1, blockPosition.y, blockPosition.z);
+            }
+
+            if (IsValidPosition(blockPosition.x - 1, blockPosition.y, blockPosition.z))
+            {
+                SetFaces(blockPosition.x - 1, blockPosition.y, blockPosition.z);
+            }
+
+            if (IsValidPosition(blockPosition.x, blockPosition.y + 1, blockPosition.z))
+            {
+                SetFaces(blockPosition.x, blockPosition.y + 1, blockPosition.z);
+            }
+
+            if (IsValidPosition(blockPosition.x, blockPosition.y - 1, blockPosition.z))
+            {
+                SetFaces(blockPosition.x, blockPosition.y - 1, blockPosition.z);
+            }
+
+            if (IsValidPosition(blockPosition.x, blockPosition.y, blockPosition.z + 1))
+            {
+                SetFaces(blockPosition.x, blockPosition.y, blockPosition.z + 1);
+            }
+
+            if (IsValidPosition(blockPosition.x, blockPosition.y, blockPosition.z - 1))
+            {
+                SetFaces(blockPosition.x, blockPosition.y, blockPosition.z - 1);
+            }
+        }
+
         private void RegenerateMesh()
         {
             Vertices.Clear();
@@ -202,7 +364,7 @@ namespace Core
             }
         }
 
-        private void GenerateBlock(int x, int y, int z)
+        private void SetFaces(int x, int y, int z)
         {
             ChunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] = Faces.None;
             if (ChunkData.Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
@@ -247,7 +409,7 @@ namespace Core
                 ChunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Back;
             }
 
-            if (!IsValidPosition(x + 1, y, z)  && RightNeighbour is not null &&
+            if (!IsValidPosition(x + 1, y, z) && RightNeighbour is not null &&
                 RightNeighbour.ChunkData.Blocks[y * ChunkData.ChunkSize + z].Color.Equals(BlockColor.Empty) ||
                 IsValidPosition(x + 1, y, z) && ChunkData
                     .Blocks[(x + 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
@@ -265,86 +427,6 @@ namespace Core
             {
                 ChunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Left;
             }
-        }
-
-
-        public void SpawnBlock(Vector3Int blockPosition, Block block)
-        {
-            ChunkData.Blocks[
-                blockPosition.x * ChunkData.ChunkSizeSquared + blockPosition.y * ChunkData.ChunkSize +
-                blockPosition.z] = block;
-            GenerateBlock(blockPosition.x, blockPosition.y, blockPosition.z);
-            if (IsValidPosition(blockPosition.x + 1, blockPosition.y, blockPosition.z))
-            {
-                GenerateBlock(blockPosition.x + 1, blockPosition.y, blockPosition.z);
-            }
-
-            if (IsValidPosition(blockPosition.x - 1, blockPosition.y, blockPosition.z))
-            {
-                GenerateBlock(blockPosition.x - 1, blockPosition.y, blockPosition.z);
-            }
-
-            if (IsValidPosition(blockPosition.x, blockPosition.y + 1, blockPosition.z))
-            {
-                GenerateBlock(blockPosition.x, blockPosition.y + 1, blockPosition.z);
-            }
-
-            if (IsValidPosition(blockPosition.x, blockPosition.y - 1, blockPosition.z))
-            {
-                GenerateBlock(blockPosition.x, blockPosition.y - 1, blockPosition.z);
-            }
-
-            if (IsValidPosition(blockPosition.x, blockPosition.y, blockPosition.z + 1))
-            {
-                GenerateBlock(blockPosition.x, blockPosition.y, blockPosition.z + 1);
-            }
-
-            if (IsValidPosition(blockPosition.x, blockPosition.y, blockPosition.z - 1))
-            {
-                GenerateBlock(blockPosition.x, blockPosition.y, blockPosition.z - 1);
-            }
-
-            RegenerateMesh();
-            if (blockPosition.z == ChunkData.ChunkSize - 1 && FrontNeighbour is not null)
-            {
-                FrontNeighbour.GenerateBlock(blockPosition.x, blockPosition.y, 0);
-                FrontNeighbour.RegenerateMesh();
-            }
-
-            if (blockPosition.z == 0 && BackNeighbour is not null)
-            {
-                BackNeighbour.GenerateBlock(blockPosition.x, blockPosition.y, ChunkData.ChunkSize - 1);
-                BackNeighbour.RegenerateMesh();
-            }
-
-            if (blockPosition.y == ChunkData.ChunkSize - 1 && UpperNeighbour is not null)
-            {
-                UpperNeighbour.GenerateBlock(blockPosition.x, 0, blockPosition.z);
-                UpperNeighbour.RegenerateMesh();
-            }
-
-            if (blockPosition.y == 0 && LowerNeighbour is not null)
-            {
-                LowerNeighbour.GenerateBlock(blockPosition.x, ChunkData.ChunkSize - 1, blockPosition.z);
-                LowerNeighbour.RegenerateMesh();
-            }
-
-            if (blockPosition.x == ChunkData.ChunkSize - 1 && RightNeighbour is not null)
-            {
-                RightNeighbour.GenerateBlock(0, blockPosition.y, blockPosition.z);
-                RightNeighbour.RegenerateMesh();
-            }
-            else if (blockPosition.x == 0 && LeftNeighbour is not null)
-            {
-                LeftNeighbour.GenerateBlock(ChunkData.ChunkSize - 1, blockPosition.y, blockPosition.z);
-                LeftNeighbour.RegenerateMesh();
-            }
-        }
-
-        public static bool IsValidPosition(int x, int y, int z)
-        {
-            return x is >= 0 and < ChunkData.ChunkSize && y is >= 0 and < ChunkData.ChunkSize &&
-                   z is >= 0 and < ChunkData.ChunkSize;
         }
 
         private void OnDestroy()

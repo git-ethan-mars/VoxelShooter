@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Core;
 using Mirror;
 using UnityEngine;
@@ -41,29 +43,94 @@ namespace GamePlay
                 GetCompressedMapFromServer();
         }
 
-        private void ChangeBlockState(Block block, Vector3Int position)
+        private void ChangeBlockState(List<Vector3Int> position, Block[] blocks)
         {
-            UpdateChunkOnServer(position, block.Color);
+            Hack(position, blocks.Select(block => block.Color).ToList());
+            //UpdateBlocksOnServer(position, blocks.Select(block => block.Color).ToList());
+        }
+
+        private void Hack(List<Vector3Int> globalPositions, List<Color32> colors)
+        {
+            var localPositionsByChunkIndex = new Dictionary<int, List<Vector3Int>>();
+            var colorsByChunkIndex = new Dictionary<int, List<Color32>>();
+            for (var i = 0; i < globalPositions.Count; i++)
+            {
+                if (!Map.IsValidPosition(globalPositions[i])) continue;
+                var chunkIndex = Map.FindChunkNumberByPosition(globalPositions[i]);
+                var localPosition = new Vector3Int(globalPositions[i].x % ChunkData.ChunkSize,
+                    globalPositions[i].y % ChunkData.ChunkSize,
+                    globalPositions[i].z % ChunkData.ChunkSize);
+                var currentBlockColor =
+                    Map.Chunks[chunkIndex]
+                        .Blocks[
+                            localPosition.x * ChunkData.ChunkSizeSquared + localPosition.y * ChunkData.ChunkSize +
+                            localPosition.z].Color;
+
+                if (currentBlockColor.Equals(colors[i])) continue;
+                if (!localPositionsByChunkIndex.ContainsKey(chunkIndex))
+                {
+                    localPositionsByChunkIndex[chunkIndex] = new List<Vector3Int>();
+                }
+
+                if (!colorsByChunkIndex.ContainsKey(chunkIndex))
+                {
+                    colorsByChunkIndex[chunkIndex] = new List<Color32>();
+                }
+
+                localPositionsByChunkIndex[chunkIndex].Add(localPosition);
+                colorsByChunkIndex[chunkIndex].Add(colors[i]);
+                MapGenerator.Chunks[chunkIndex].ChunkData.Blocks[
+                    localPosition.x * ChunkData.ChunkSizeSquared + localPosition.y * ChunkData.ChunkSize +
+                    localPosition.z] = new Block() {Color = colors[i]};
+            }
+
+            foreach (var chunkIndex in localPositionsByChunkIndex.Keys)
+            {
+                MapGenerator.Chunks[chunkIndex]
+                    .SpawnBlocks(localPositionsByChunkIndex[chunkIndex], colorsByChunkIndex[chunkIndex]);
+            }
         }
 
         [Command]
-        private void UpdateChunkOnServer(Vector3Int globalPosition, Color32 color)
+        private void UpdateBlocksOnServer(List<Vector3Int> globalPositions, List<Color32> colors)
         {
-            if (globalPosition.x < 0 || globalPosition.x >= Map.Width || globalPosition.y <= 0 ||
-                globalPosition.y >= Map.Height ||
-                globalPosition.z < 0 || globalPosition.z >= Map.Depth) return;
-            var chunkIndex = Map.FindChunkNumberByPosition(globalPosition);
-            var localPosition = new Vector3Int(globalPosition.x % ChunkData.ChunkSize,
-                globalPosition.y % ChunkData.ChunkSize,
-                globalPosition.z % ChunkData.ChunkSize);
-            var currentBlockColor =
-                Map.Chunks[chunkIndex].Blocks[localPosition.x * ChunkData.ChunkSizeSquared + localPosition.y * ChunkData.ChunkSize +localPosition.z].Color;
-            if (currentBlockColor.Equals(color))
-                return;
-            MapGenerator.Chunks[chunkIndex].ChunkData.Blocks[localPosition.x * ChunkData.ChunkSizeSquared + localPosition.y * ChunkData.ChunkSize +localPosition.z] =
-                new Block() {Color = color};
+            var localPositionsByChunkIndex = new Dictionary<int, List<Vector3Int>>();
+            var colorsByChunkIndex = new Dictionary<int, List<Color32>>();
+            for (var i = 0; i < globalPositions.Count; i++)
+            {
+                if (!Map.IsValidPosition(globalPositions[i])) continue;
+                var chunkIndex = Map.FindChunkNumberByPosition(globalPositions[i]);
+                var localPosition = new Vector3Int(globalPositions[i].x % ChunkData.ChunkSize,
+                    globalPositions[i].y % ChunkData.ChunkSize,
+                    globalPositions[i].z % ChunkData.ChunkSize);
+                var currentBlockColor =
+                    Map.Chunks[chunkIndex]
+                        .Blocks[
+                            localPosition.x * ChunkData.ChunkSizeSquared + localPosition.y * ChunkData.ChunkSize +
+                            localPosition.z].Color;
 
-            UpdateChunkOnClient(chunkIndex, localPosition, color);
+                if (currentBlockColor.Equals(colors[i])) continue;
+                if (!localPositionsByChunkIndex.ContainsKey(chunkIndex))
+                {
+                    localPositionsByChunkIndex[chunkIndex] = new List<Vector3Int>();
+                }
+
+                if (!colorsByChunkIndex.ContainsKey(chunkIndex))
+                {
+                    colorsByChunkIndex[chunkIndex] = new List<Color32>();
+                }
+
+                localPositionsByChunkIndex[chunkIndex].Add(localPosition);
+                colorsByChunkIndex[chunkIndex].Add(colors[i]);
+                MapGenerator.Chunks[chunkIndex].ChunkData.Blocks[
+                    localPosition.x * ChunkData.ChunkSizeSquared + localPosition.y * ChunkData.ChunkSize +
+                    localPosition.z] = new Block() {Color = colors[i]};
+            }
+
+            foreach (var chunkIndex in localPositionsByChunkIndex.Keys)
+            {
+                UpdateChunkOnClient(chunkIndex, localPositionsByChunkIndex[chunkIndex], colorsByChunkIndex[chunkIndex]);
+            }
         }
 
         [Command]
@@ -78,10 +145,10 @@ namespace GamePlay
         }
 
         [ClientRpc]
-        private void UpdateChunkOnClient(int chunkIndex, Vector3Int localPosition, Color32 color)
+        private void UpdateChunkOnClient(int chunkIndex, List<Vector3Int> localPositions, List<Color32> colors)
         {
             MapGenerator.Chunks[chunkIndex]
-                .SpawnBlock(localPosition, new Block() {Color = color});
+                .SpawnBlocks(localPositions, colors);
         }
 
 
