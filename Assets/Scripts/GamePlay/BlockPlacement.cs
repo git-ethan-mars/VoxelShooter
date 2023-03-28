@@ -1,24 +1,32 @@
 using System.Collections.Generic;
 using Core;
+using Data;
 using UnityEngine;
 
 namespace GamePlay
 {
-    public class BlockPlacement : MonoBehaviour
+    public class BlockPlacement
     {
-        [SerializeField] private float placeDistance;
-        private LineRenderer _lineRenderer;
-        private Camera _camera;
+        private readonly LineRenderer _lineRenderer;
+        private readonly Camera _camera;
+        private readonly float _placeDistance;
 
+        public BlockPlacement(LineRenderer lineRenderer, Camera camera, float placeDistance)
+        {
+            _lineRenderer = lineRenderer;
+            _camera = camera;
+            _placeDistance = placeDistance;
+        }
         public void EnableCube()
         {
-            _lineRenderer ??= GetComponent<LineRenderer>();
+            _lineRenderer.enabled = true;
             _lineRenderer.positionCount = 0;
         }
 
         public void DisableCube()
         {
             _lineRenderer.positionCount = 0;
+            _lineRenderer.enabled = false;
         }
 
         public void UpdateCube()
@@ -62,7 +70,7 @@ namespace GamePlay
             if (!raycastResult) return;
             GlobalEvents.SendBlockStates(
                 new List<Vector3Int>() {Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2)},
-                new[] {new Block() {Color = color}});
+                new[] {new BlockData() {Color = color}});
         }
 
         public void StartDrawBlockLine(Color32 color)
@@ -81,14 +89,13 @@ namespace GamePlay
             if (!raycastResult) return;
             GlobalEvents.SendBlockStates(
                 new List<Vector3Int>() {Vector3Int.FloorToInt(raycastHit.point - raycastHit.normal / 2)},
-                new[] {new Block() {Color = BlockColor.Empty}});
+                new[] {new BlockData() {Color = BlockColor.Empty}});
         }
 
         private bool GetRayCastHit(out RaycastHit raycastHit)
         {
-            _camera ??= gameObject.GetComponentInChildren<Camera>();
             var ray = _camera.ViewportPointToRay(new Vector3(0.5f, 0.5f));
-            var raycastResult = Physics.Raycast(ray, out raycastHit, placeDistance);
+            var raycastResult = Physics.Raycast(ray, out raycastHit, _placeDistance);
             if (!raycastResult)
                 return false;
             return raycastHit.collider.gameObject.CompareTag("Chunk");

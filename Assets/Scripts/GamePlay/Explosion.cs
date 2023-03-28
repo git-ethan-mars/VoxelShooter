@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Core;
+using Data;
 using UnityEngine;
 
 namespace GamePlay
@@ -37,7 +38,7 @@ namespace GamePlay
                     validPositions.Add(blockPosition);
             }
 
-            GlobalEvents.SendBlockStates(validPositions, new Block[validPositions.Count]);
+            GlobalEvents.SendBlockStates(validPositions, new BlockData[validPositions.Count]);
         }
     }
 }

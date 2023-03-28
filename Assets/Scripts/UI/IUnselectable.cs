@@ -2,6 +2,6 @@
 {
     public interface IUnselectable
     {
-        void Unselect();
+        public void Unselect();
     }
 }

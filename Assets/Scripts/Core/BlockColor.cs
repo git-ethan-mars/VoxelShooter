@@ -18,11 +18,11 @@ namespace Core
             }
         }
 
-        public static readonly Color32 Empty = new(0,0,0,0);
+        public static readonly Color32 Empty = new(0, 0, 0, 0);
 
         private static Dictionary<byte, Color> _colorById;
         public static Dictionary<byte, Color> ColorById => _colorById ??= CacheColorByIdDictionary();
-        
+
         public static Color32 UIntToColor(uint color)
         {
             var a = (byte) (color >> 24);
@@ -31,7 +31,7 @@ namespace Core
             var b = (byte) (color >> 0);
             return new Color32(r, g, b, a);
         }
-        
+
 
         private static Dictionary<byte, Color> CacheColorByIdDictionary()
         {
@@ -52,7 +52,7 @@ namespace Core
             {
                 for (var j = 0; j < colorBoarders.Length; j++)
                 {
-                    blockColorById[(byte)(j + i * colorBoarders.Length+1)] =
+                    blockColorById[(byte) (j + i * colorBoarders.Length + 1)] =
                         CreateGradient(colorBoarders[i].StartColor, colorBoarders[i].EndColor, (float) j / 8);
                 }
             }
@@ -140,8 +140,6 @@ namespace Core
                 b = x;
             }
 
-            if (hue >= 360)
-                Debug.Log("FUCK");
             return new Color(r + m, g + m, b + m);
         }
     }

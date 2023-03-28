@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Data;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -6,9 +7,9 @@ namespace Core
 {
     public static class GlobalEvents
     {
-        public static readonly UnityEvent<List<Vector3Int>, Block[]> OnBlockChangeStateEvent = new();
+        public static readonly UnityEvent<List<Vector3Int>, BlockData[]> OnBlockChangeStateEvent = new();
 
-        public static void SendBlockStates(List<Vector3Int> positions, Block[] blocks)
+        public static void SendBlockStates(List<Vector3Int> positions, BlockData[] blocks)
         {
             OnBlockChangeStateEvent.Invoke(positions, blocks);
         }

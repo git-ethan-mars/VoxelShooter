@@ -1,11 +1,12 @@
 ﻿using System;
 using System.IO;
+using Data;
 using UnityEngine;
 
 namespace Core
 {
     public static class MapReader
-    { 
+    {
         public static Map ReadFromFile(string fileName)
         {
             if (Path.GetExtension(fileName) != ".rch")
@@ -17,6 +18,7 @@ namespace Core
 
                 throw new ArgumentException();
             }
+
             var filePath = Application.dataPath + $"/Maps/{fileName}";
             if (!File.Exists(filePath))
             {
@@ -25,7 +27,6 @@ namespace Core
 
             using var file = File.OpenRead(filePath);
             return ReadFromStream(file);
-
         }
 
         public static Map ReadFromStream(Stream stream)
@@ -37,7 +38,7 @@ namespace Core
             var depth = binaryReader.ReadInt32();
             var chunks = new ChunkData[width / ChunkData.ChunkSize * height / ChunkData.ChunkSize * depth /
                                        ChunkData.ChunkSize];
-            var map = new Map(chunks, width, height, depth);
+            var map = new Map(new MapData(chunks, width, height, depth));
             for (var x = 0; x < width / ChunkData.ChunkSize; x++)
             {
                 for (var y = 0; y < height / ChunkData.ChunkSize; y++)
@@ -63,7 +64,7 @@ namespace Core
                         for (var z = 0; z < ChunkData.ChunkSize; z++)
                         {
                             var blockColor = binaryReader.ReadUInt32();
-                            var block = new Block
+                            var block = new BlockData
                             {
                                 Color = BlockColor.UIntToColor(blockColor)
                             };

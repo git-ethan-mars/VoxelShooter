@@ -1,5 +1,7 @@
 using System;
 using Core;
+using Infrastructure.Services;
+using Infrastructure.Services.Input;
 using Mirror;
 using UnityEngine;
 
@@ -15,7 +17,14 @@ namespace GamePlay
         private bool _isFell;
         private bool _isJumpButtonPressed;
         private float _previousFallingSpeed;
-        private Vector3 _movementForce;
+        private IInputService _inputService;
+        private Vector3 _movementDirection;
+
+        private void Awake()
+        {
+            _inputService = AllServices.Container.Single<IInputService>();
+        }
+
         private void Start()
         {
             Rigidbody = GetComponent<Rigidbody>();
@@ -24,31 +33,16 @@ namespace GamePlay
 
         private void Update()
         {
+            if (!isLocalPlayer) return;
             ReadInput();
         }
 
         private void ReadInput()
         {
-            if (!isLocalPlayer) return;
-            var verticalInput = 0f;
-            if (Input.GetKey(KeyCode.W))
-                verticalInput += 1;
-            if (Input.GetKey(KeyCode.S))
-                verticalInput -= 1;
-            var horizontalInput = 0f;
-            if (Input.GetKey(KeyCode.D))
-            {
-                horizontalInput += 1;
-            }
-
-            if (Input.GetKey(KeyCode.A))
-            {
-                horizontalInput -= 1;
-            }
-
+            var axis = _inputService.Axis.normalized;
             var playerTransform = transform;
-            _movementForce = (verticalInput * playerTransform.forward + horizontalInput * playerTransform.right).normalized;
-            if (Input.GetKeyDown(KeyCode.Space))
+            _movementDirection = (axis.x * playerTransform.forward + axis.y * playerTransform.right).normalized;
+            if (_inputService.IsJumpButtonDown())
             {
                 _isJumpButtonPressed = true;
             }
@@ -56,7 +50,8 @@ namespace GamePlay
 
         private void FixedUpdate()
         {
-            if (Math.Abs(_previousFallingSpeed - Rigidbody.velocity.y) < 1e-4)
+            if (!isLocalPlayer) return;
+            if (IsPlayerInAir)
             {
                 _isFell = true;
                 if (_isJumpButtonPressed && _isGrounded)
@@ -68,10 +63,13 @@ namespace GamePlay
             {
                 _isFell = false;
             }
+
             _isJumpButtonPressed = false;
             _previousFallingSpeed = Rigidbody.velocity.y;
-            Rigidbody.AddForce(_movementForce * speed * 10f);
+            Rigidbody.velocity = _movementDirection * speed + new Vector3(0, Rigidbody.velocity.y, 0);
         }
+
+        private bool IsPlayerInAir => Math.Abs(_previousFallingSpeed - Rigidbody.velocity.y) < Constants.Epsilon;
 
         private void OnCollisionStay(Collision collision)
         {

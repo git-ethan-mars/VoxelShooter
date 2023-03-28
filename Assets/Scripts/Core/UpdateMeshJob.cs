@@ -1,4 +1,5 @@
-﻿using Unity.Burst;
+﻿using Data;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
@@ -8,13 +9,13 @@ namespace Core
     [BurstCompile]
     public struct UpdateMeshJob : IJob
     {
-        public NativeArray<Block> UpperNeighbour;
-        public NativeArray<Block> LowerNeighbour;
-        public NativeArray<Block> LeftNeighbour;
-        public NativeArray<Block> RightNeighbour;
-        public NativeArray<Block> FrontNeighbour;
-        public NativeArray<Block> BackNeighbour;
-        public NativeArray<Block> Blocks;
+        public NativeArray<BlockData> UpperNeighbour;
+        public NativeArray<BlockData> LowerNeighbour;
+        public NativeArray<BlockData> LeftNeighbour;
+        public NativeArray<BlockData> RightNeighbour;
+        public NativeArray<BlockData> FrontNeighbour;
+        public NativeArray<BlockData> BackNeighbour;
+        public NativeArray<BlockData> Blocks;
         public NativeArray<Faces> Faces;
         public NativeList<Vector3> Vertices;
         public NativeList<Vector3> Normals;

@@ -1,5 +1,6 @@
 ﻿using Core;
 using GamePlay;
+using Infrastructure.AssetManagement;
 using UnityEngine;
 
 namespace UI
@@ -7,29 +8,26 @@ namespace UI
     public class BrushView : IInventoryItemView, ILeftMouseButtonHoldHandler
     {
         public Sprite Icon { get; }
-        public GameObject Pointer { get; set; }
         private readonly GameObject _palette;
         private readonly ColoringBrush _coloringBrush;
         private Color32 _currentColor;
 
-        public BrushView(ColoringBrush coloringBrush)
+        public BrushView(Camera camera, float placeDistance)
         {
             GlobalEvents.OnPaletteUpdate.AddListener(color => _currentColor = color);
-            _coloringBrush = coloringBrush;
+            _coloringBrush = new ColoringBrush(camera, placeDistance);
             _palette = GameObject.Find("Canvas/GamePlay/Palette");
-            Icon = Resources.Load<Sprite>("Sprites/brush");
+            Icon = Resources.Load<Sprite>(SpritePath.BrushPath);
         }
 
         public void Select()
         {
             _palette.SetActive(true);
-            Pointer.SetActive(true);
         }
 
         public void Unselect()
         {
             _palette.SetActive(false);
-            Pointer.SetActive(false);
         }
 
         public void OnLeftMouseButtonHold()

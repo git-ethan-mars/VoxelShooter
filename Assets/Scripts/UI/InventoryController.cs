@@ -2,41 +2,63 @@
 using System.Collections.Generic;
 using Core;
 using GamePlay;
+using Infrastructure;
+using Infrastructure.Factory;
+using Infrastructure.Services;
 using Mirror;
 using UnityEngine;
 
 namespace UI
 {
-    public class InventoryController : NetworkBehaviour
+    public class InventoryController : NetworkBehaviour, ICoroutineRunner
     {
+        [SerializeField] private float placeDistance;
+        [SerializeField] private Transform itemPosition;
         private List<IInventoryItemView> _itemList;
         private int _itemIndex;
         private int _maxIndex;
 
-        public void Awake()
+        private readonly Dictionary<KeyCode, int> _slotIndexByKey = new()
         {
-            GlobalEvents.OnMapLoaded.AddListener(()=>
-            {
-                enabled = true;
-            });
+            [KeyCode.Alpha1] = 0,
+            [KeyCode.Alpha2] = 1,
+            [KeyCode.Alpha3] = 2,
+            [KeyCode.Alpha4] = 3,
+            [KeyCode.Alpha5] = 4,
+        };
+
+        private GameObject[] _boarders;
+        private IGameFactory _gameFactory;
+
+        private void Awake()
+        {
+            _gameFactory = AllServices.Container.Single<IGameFactory>();
+            GlobalEvents.OnMapLoaded.AddListener(() => { enabled = true; });
         }
+
 
         public override void OnStartAuthority()
         {
+            var mainCamera = Camera.main;
             _itemList = new List<IInventoryItemView>
-                {new BlockView(GetComponent<BlockPlacement>()), new BrushView(GetComponent<ColoringBrush>())};
+            {
+                new BlockView(GetComponent<LineRenderer>(), mainCamera, placeDistance),
+                new BrushView(mainCamera, placeDistance),
+                new GunSystem(_gameFactory, this, "StaticData/Inventory Items/Rifle", mainCamera, itemPosition,
+                    GetComponent<MapSynchronization>())
+            };
+
             var inventoryViewGameObject = GameObject.Find("Canvas/GamePlay/Inventory");
             inventoryViewGameObject.SetActive(true);
             var inventoryView = inventoryViewGameObject.GetComponent<InventoryView>();
             _maxIndex = Math.Min(_itemList.Count, inventoryView.SlotsCount);
+            _boarders = inventoryView.Boarders;
             for (var i = 0; i < _maxIndex; i++)
             {
                 inventoryView.SetIconForItem(i, _itemList[i].Icon);
-                inventoryView.SetPointer(i, _itemList[i]);
             }
+
             _itemList[_itemIndex].Select();
-
-
         }
 
         private void Update()
@@ -44,23 +66,15 @@ namespace UI
             if (!isLocalPlayer) return;
             if (Input.GetAxis("Mouse ScrollWheel") != 0.0f)
             {
-                _itemList[_itemIndex].Unselect();
-                _itemIndex = (_itemIndex + Math.Sign(Input.GetAxis("Mouse ScrollWheel")) + _maxIndex) % _maxIndex;
-                _itemList[_itemIndex].Select();
+                ChangeSlotIndex((_itemIndex + Math.Sign(Input.GetAxis("Mouse ScrollWheel")) + _maxIndex) % _maxIndex);
             }
 
-            if (Input.GetKeyDown(KeyCode.Alpha1))
+            foreach (var (key, index) in _slotIndexByKey)
             {
-                _itemList[_itemIndex].Unselect();
-                _itemIndex = 0;
-                _itemList[_itemIndex].Select();
-            }
-
-            if (Input.GetKeyDown(KeyCode.Alpha2))
-            {
-                _itemList[_itemIndex].Unselect();
-                _itemIndex = 1;
-                _itemList[_itemIndex].Select();
+                if (Input.GetKeyDown(key))
+                {
+                    ChangeSlotIndex(index);
+                }
             }
 
             if (Input.GetMouseButtonDown(0) && _itemList[_itemIndex] is ILeftMouseButtonDownHandler)
@@ -78,14 +92,19 @@ namespace UI
                 ((ILeftMouseButtonHoldHandler) _itemList[_itemIndex]).OnLeftMouseButtonHold();
             }
 
-            if (Input.GetMouseButton(1) && _itemList[_itemIndex] is IRightMouseButtonHoldHandler)
-            {
-                ((IRightMouseButtonHoldHandler) _itemList[_itemIndex]).OnRightMouseButtonHold();
-            }
             if (_itemList[_itemIndex] is IUpdated)
             {
                 ((IUpdated) _itemList[_itemIndex]).InnerUpdate();
             }
+        }
+
+        private void ChangeSlotIndex(int newIndex)
+        {
+            _boarders[_itemIndex].SetActive(false);
+            _itemList[_itemIndex].Unselect();
+            _itemIndex = newIndex;
+            _itemList[_itemIndex].Select();
+            _boarders[_itemIndex].SetActive(true);
         }
     }
 }

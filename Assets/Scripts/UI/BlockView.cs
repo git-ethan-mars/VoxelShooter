@@ -1,5 +1,6 @@
 ﻿using Core;
 using GamePlay;
+using Infrastructure.AssetManagement;
 using UnityEngine;
 
 namespace UI
@@ -8,29 +9,26 @@ namespace UI
     {
         public Sprite Icon { get; }
         private Color32 _currentColor;
-        public GameObject Pointer { get; set; }
         private readonly BlockPlacement _blockPlacement;
         private readonly GameObject _palette;
 
-        public BlockView(BlockPlacement blockPlacement)
+        public BlockView(LineRenderer lineRenderer, Camera camera, float placeDistance)
         {
             GlobalEvents.OnPaletteUpdate.AddListener(color => _currentColor = color);
-            _blockPlacement = blockPlacement;
+            _blockPlacement = new BlockPlacement(lineRenderer, camera, placeDistance);
             _palette = GameObject.Find("Canvas/GamePlay/Palette");
-            Icon = Resources.Load<Sprite>("Sprites/Blocks/#C0C0C0");
+            Icon = Resources.Load<Sprite>(SpritePath.BlockPath);
         }
 
         public void Select()
         {
             _palette.SetActive(true);
-            Pointer.SetActive(true);
             _blockPlacement.EnableCube();
         }
 
         public void Unselect()
         {
             _palette.SetActive(false);
-            Pointer.SetActive(false);
             _blockPlacement.DisableCube();
         }
 

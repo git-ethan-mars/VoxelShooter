@@ -1,13 +1,14 @@
 using System;
+using Mirror;
 using UnityEngine;
 
 namespace GamePlay
 {
-    public class HeadRotation : MonoBehaviour
+    public class HeadRotation : NetworkBehaviour
     {
         [SerializeField] private float sensitivityX;
         [SerializeField] private float sensitivityY;
-        [SerializeField] private GameObject playerGameObject;
+        [SerializeField] private Transform headTransform;
 
         private float XRotation { get; set; }
         private float YRotation { get; set; }
@@ -20,6 +21,7 @@ namespace GamePlay
 
         private void Update()
         {
+            if (!isLocalPlayer) return;
             var mouseXInput = Input.GetAxis("Mouse X");
             var mouseYInput = Input.GetAxis("Mouse Y");
             var mouseX = mouseXInput * sensitivityX * Time.deltaTime;
@@ -27,8 +29,8 @@ namespace GamePlay
             YRotation += mouseX;
             XRotation -= mouseY;
             XRotation = Math.Clamp(XRotation, -90, 90);
-            playerGameObject.transform.rotation = Quaternion.Euler(0, YRotation, 0);
-            transform.rotation = Quaternion.Euler(XRotation, YRotation, 0);
+            transform.rotation = Quaternion.Euler(0, YRotation, 0);
+            headTransform.rotation = Quaternion.Euler(XRotation, YRotation, 0);
 
         }
     }

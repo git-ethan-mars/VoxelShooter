@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Data;
 using Unity.Collections;
 using UnityEngine;
 
@@ -136,7 +137,7 @@ namespace Core
             {
                 ChunkData.Blocks[
                     blockPositions[i].x * ChunkData.ChunkSizeSquared + blockPositions[i].y * ChunkData.ChunkSize +
-                    blockPositions[i].z] = new Block {Color = colors[i]};
+                    blockPositions[i].z] = new BlockData {Color = colors[i]};
                 SetFaces(blockPositions[i].x, blockPositions[i].y, blockPositions[i].z);
                 SetNeighboursFaces(blockPositions[i]);
                 if (blockPositions[i].z == ChunkData.ChunkSize - 1 && FrontNeighbour is not null)
@@ -207,49 +208,6 @@ namespace Core
             }
         }
 
-        /*public void SpawnBlock(Vector3Int blockPosition, Block block)
-        {
-            ChunkData.Blocks[
-                blockPosition.x * ChunkData.ChunkSizeSquared + blockPosition.y * ChunkData.ChunkSize +
-                blockPosition.z] = block;
-            SetFaces(blockPosition.x, blockPosition.y, blockPosition.z);
-            SetNeighboursFaces(blockPosition);
-            RegenerateMesh();
-            if (blockPosition.z == ChunkData.ChunkSize - 1 && FrontNeighbour is not null)
-            {
-                FrontNeighbour.SetFaces(blockPosition.x, blockPosition.y, 0);
-                FrontNeighbour.RegenerateMesh();
-            }
-
-            if (blockPosition.z == 0 && BackNeighbour is not null)
-            {
-                BackNeighbour.SetFaces(blockPosition.x, blockPosition.y, ChunkData.ChunkSize - 1);
-                BackNeighbour.RegenerateMesh();
-            }
-
-            if (blockPosition.y == ChunkData.ChunkSize - 1 && UpperNeighbour is not null)
-            {
-                UpperNeighbour.SetFaces(blockPosition.x, 0, blockPosition.z);
-                UpperNeighbour.RegenerateMesh();
-            }
-
-            if (blockPosition.y == 0 && LowerNeighbour is not null)
-            {
-                LowerNeighbour.SetFaces(blockPosition.x, ChunkData.ChunkSize - 1, blockPosition.z);
-                LowerNeighbour.RegenerateMesh();
-            }
-
-            if (blockPosition.x == ChunkData.ChunkSize - 1 && RightNeighbour is not null)
-            {
-                RightNeighbour.SetFaces(0, blockPosition.y, blockPosition.z);
-                RightNeighbour.RegenerateMesh();
-            }
-            else if (blockPosition.x == 0 && LeftNeighbour is not null)
-            {
-                LeftNeighbour.SetFaces(ChunkData.ChunkSize - 1, blockPosition.y, blockPosition.z);
-                LeftNeighbour.RegenerateMesh();
-            }
-        }*/
 
         public static bool IsValidPosition(int x, int y, int z)
         {

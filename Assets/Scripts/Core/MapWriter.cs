@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Data;
 using UnityEngine;
 
 namespace Core
@@ -28,17 +29,17 @@ namespace Core
         public static void WriteMap(Map map, Stream stream)
         {
             var binaryWriter = new BinaryWriter(stream);
-            binaryWriter.Write(map.Width);
-            binaryWriter.Write(map.Height);
-            binaryWriter.Write(map.Depth);
-            for (var x = 0; x < map.Width / ChunkData.ChunkSize; x++)
+            binaryWriter.Write(map.MapData.Width);
+            binaryWriter.Write(map.MapData.Height);
+            binaryWriter.Write(map.MapData.Depth);
+            for (var x = 0; x < map.MapData.Width / ChunkData.ChunkSize; x++)
             {
-                for (var y = 0; y < map.Height / ChunkData.ChunkSize; y++)
+                for (var y = 0; y < map.MapData.Height / ChunkData.ChunkSize; y++)
                 {
-                    for (var z = 0; z < map.Depth / ChunkData.ChunkSize; z++)
+                    for (var z = 0; z < map.MapData.Depth / ChunkData.ChunkSize; z++)
                     {
-                        WriteChunk(z + y * (map.Depth / ChunkData.ChunkSize) +
-                                   x * (map.Height / ChunkData.ChunkSize * map.Depth / ChunkData.ChunkSize));
+                        WriteChunk(z + y * (map.MapData.Depth / ChunkData.ChunkSize) +
+                                   x * (map.MapData.Height / ChunkData.ChunkSize * map.MapData.Depth / ChunkData.ChunkSize));
                     }
                 }
             }
@@ -51,7 +52,7 @@ namespace Core
                     {
                         for (var z = 0; z < ChunkData.ChunkSize; z++)
                         {
-                            var color = map.Chunks[chunkNumber]
+                            var color = map.MapData.Chunks[chunkNumber]
                                 .Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color;
                             binaryWriter.Write(color.b);
                             binaryWriter.Write(color.g);
