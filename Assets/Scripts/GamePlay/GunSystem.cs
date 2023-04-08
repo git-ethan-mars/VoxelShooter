@@ -14,22 +14,27 @@ namespace GamePlay
     public class GunSystem : IInventoryItemView, ILeftMouseButtonDownHandler, ILeftMouseButtonHoldHandler, IUpdated
     {
         public Sprite Icon { get; }
+        public readonly string guid;
         private readonly PrimaryWeapon _weaponConfiguration;
         private readonly TextMeshProUGUI _ammoInfo;
         private readonly Transform _attackPoint;
-        private bool _readyToShoot;
+        public bool _readyToShoot;
+        public float stepRecoil;
         private bool _reloading;
-        private int _bulletsLeft;
-        private int _bulletsShot;
+        public int bulletsInMagazine;
+        public int magazineSize;
+        public int totalBullets;
+        public int _bulletsPerShot;
         private readonly Camera _fpsCam;
-        private float _recoilModifier;
+        public float _recoilModifier;
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly IGameFactory _gameFactory;
         private readonly GameObject _weaponModel;
-        private readonly MapSynchronization _mapSyncronization;
+        private readonly RaycastSynchronization _raycastSyncronization;
+        private readonly StatSynchronization _statSyncronization;
 
         public GunSystem(IGameFactory gameFactory, ICoroutineRunner coroutineRunner, string weaponPath, Camera camera,
-            Transform itemPosition, MapSynchronization mapSynchronization)
+            Transform itemPosition, RaycastSynchronization raycastSynchronization, StatSynchronization statSynchronization)
         {
             _gameFactory = gameFactory;
             _coroutineRunner = coroutineRunner;
@@ -41,9 +46,13 @@ namespace GamePlay
             _attackPoint = _weaponModel.GetComponentInChildren<Transform>();
             _fpsCam = camera;
             _ammoInfo = GameObject.Find("Canvas/GamePlay/AmmoAmount").GetComponent<TextMeshProUGUI>();
-            _bulletsLeft = _weaponConfiguration.magazineSize;
+            bulletsInMagazine = _weaponConfiguration.magazineSize;
             _readyToShoot = true;
-            _mapSyncronization = mapSynchronization;
+            _raycastSyncronization = raycastSynchronization;
+            magazineSize = _weaponConfiguration.magazineSize;
+            guid = Convert.ToString(Guid.NewGuid());
+            stepRecoil = _weaponConfiguration.stepRecoil;
+            _statSyncronization = statSynchronization;
         }
 
         public void Select()
@@ -61,9 +70,9 @@ namespace GamePlay
 
         public void InnerUpdate()
         {
-            if (Input.GetKeyDown(KeyCode.R) && _bulletsLeft < _weaponConfiguration.magazineSize && !_reloading)
+            if (Input.GetKeyDown(KeyCode.R) && bulletsInMagazine < _weaponConfiguration.magazineSize && !_reloading)
                 Reload();
-            _ammoInfo.SetText($"{_bulletsLeft} / {_weaponConfiguration.magazineSize}");
+            _ammoInfo.SetText($"{bulletsInMagazine} / {_weaponConfiguration.magazineSize}");
         }
 
         public void OnLeftMouseButtonDown()
@@ -82,13 +91,13 @@ namespace GamePlay
 
         private void ReadyToShoot()
         {
-            if (_readyToShoot && !_reloading && _bulletsLeft > 0)
+            if (_readyToShoot && !_reloading && bulletsInMagazine > 0)
             {
-                _bulletsShot = _weaponConfiguration.bulletsPerTap;
+                _bulletsPerShot = _weaponConfiguration.bulletsPerTap;
                 Shoot();
             }
 
-            _ammoInfo.SetText($"{_bulletsLeft} / {_weaponConfiguration.magazineSize}");
+            _ammoInfo.SetText($"{bulletsInMagazine} / {_weaponConfiguration.magazineSize}");
         }
 
         private void Shoot()
@@ -99,27 +108,28 @@ namespace GamePlay
             var y = Math.Abs(_recoilModifier - 1) < 0.00001
                 ? 0
                 : Random.Range(-_weaponConfiguration.baseRecoil, _weaponConfiguration.baseRecoil) * _recoilModifier;
-            _recoilModifier += _weaponConfiguration.stepRecoil;
-
-            _readyToShoot = false;
 
             var direction = new Vector3(0.5f, 0.5f);
             if (_weaponConfiguration.isAutomatic)
                 direction += new Vector3(x, y);
 
             var ray = _fpsCam.ViewportPointToRay(direction);
-            _mapSyncronization.ApplyRaycast(ray.origin, ray.direction, _weaponConfiguration.range,
+            _raycastSyncronization.ApplyRaycast(ray.origin, ray.direction, _weaponConfiguration.range,
                 _weaponConfiguration.damage);
 
-
             _gameFactory.CreateMuzzleFlash(_attackPoint);
-            _bulletsLeft--;
-            _bulletsShot--;
+            
+            _statSyncronization.OnShoot(guid);
+            
+        }
 
+        public void StartShootCoroutines()
+        {
+            
             _coroutineRunner.StartCoroutine(WaitForSeconds(ResetShoot, _weaponConfiguration.timeBetweenShooting));
             _coroutineRunner.StartCoroutine(WaitForSeconds(ResetRecoil, _weaponConfiguration.resetTimeRecoil));
-
-            if (_bulletsShot > 0 && _bulletsLeft > 0)
+            
+            if (_bulletsPerShot > 0 && bulletsInMagazine > 0)
                 _coroutineRunner.StartCoroutine(WaitForSeconds(Shoot, _weaponConfiguration.timeBetweenShots));
         }
 
@@ -136,12 +146,18 @@ namespace GamePlay
         private void Reload()
         {
             _reloading = true;
+            _statSyncronization.OnReload(guid);
+            StartReloadCoroutine();
+        }
+
+        public void StartReloadCoroutine()
+        {
             _coroutineRunner.StartCoroutine(WaitForSeconds(ReloadFinished, _weaponConfiguration.reloadTime));
         }
 
         private void ReloadFinished()
         {
-            _bulletsLeft = _weaponConfiguration.magazineSize;
+            bulletsInMagazine = _weaponConfiguration.magazineSize;
             _reloading = false;
         }
 

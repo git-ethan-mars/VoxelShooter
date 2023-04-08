@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Core;
 using GamePlay;
 using Infrastructure;
@@ -29,25 +30,36 @@ namespace UI
 
         private GameObject[] _boarders;
         private IGameFactory _gameFactory;
-
-        private void Awake()
+        /*
+        public void Construct(IGameFactory gameFactory)
         {
-            _gameFactory = AllServices.Container.Single<IGameFactory>();
+            _gameFactory = gameFactory;
             GlobalEvents.OnMapLoaded.AddListener(() => { enabled = true; });
-        }
-
-
-        public override void OnStartAuthority()
-        {
+            
             var mainCamera = Camera.main;
             _itemList = new List<IInventoryItemView>
             {
                 new BlockView(GetComponent<LineRenderer>(), mainCamera, placeDistance),
                 new BrushView(mainCamera, placeDistance),
                 new GunSystem(_gameFactory, this, "StaticData/Inventory Items/Rifle", mainCamera, itemPosition,
-                    GetComponent<MapSynchronization>())
+                    GetComponent<RaycastSynchronization>(), GetComponent<StatSynchronization>())
             };
-
+        }
+        */
+        public override void OnStartAuthority()
+        {
+            _gameFactory = AllServices.Container.Single<IGameFactory>();
+            GlobalEvents.OnMapLoaded.AddListener(() => { enabled = true; });
+            
+            var mainCamera = Camera.main;
+            _itemList = new List<IInventoryItemView>
+            {
+                new BlockView(GetComponent<LineRenderer>(), mainCamera, placeDistance),
+                new BrushView(mainCamera, placeDistance),
+                new GunSystem(_gameFactory, this, "StaticData/Inventory Items/Rifle", mainCamera, itemPosition,
+                    GetComponent<RaycastSynchronization>(), GetComponent<StatSynchronization>())
+            };
+            
             var inventoryViewGameObject = GameObject.Find("Canvas/GamePlay/Inventory");
             inventoryViewGameObject.SetActive(true);
             var inventoryView = inventoryViewGameObject.GetComponent<InventoryView>();
@@ -105,6 +117,11 @@ namespace UI
             _itemIndex = newIndex;
             _itemList[_itemIndex].Select();
             _boarders[_itemIndex].SetActive(true);
+        }
+
+        public GunSystem[] GetGunSystems()
+        {
+            return _itemList.OfType<GunSystem>().ToArray();
         }
     }
 }

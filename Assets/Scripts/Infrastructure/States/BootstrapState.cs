@@ -37,7 +37,7 @@ namespace Infrastructure.States
 
         private void RegisterServices()
         {
-            _allServices.RegisterSingle<IMapProvider>(new MapProvider(Map.CreateNewMap()));
+            _allServices.RegisterSingle<IMapProvider>(new MapProvider(MapReader.ReadFromFile("AncientEgypt.vxl")));
             _allServices.RegisterSingle<IInputService>(new StandaloneInputService());
             _allServices.RegisterSingle<IAssetProvider>(new AssetProvider());
             _allServices.RegisterSingle<IGameFactory>(

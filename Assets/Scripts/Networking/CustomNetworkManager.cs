@@ -35,7 +35,7 @@ namespace Networking
             base.OnClientConnect();
             ConnectionHappened?.Invoke();
         }
-
+        /*
         public override void OnServerAddPlayer(NetworkConnectionToClient conn)
         {
             GameObject player;
@@ -52,5 +52,6 @@ namespace Networking
 
             NetworkServer.AddPlayerForConnection(conn, player);
         }
+        */
     }
 }

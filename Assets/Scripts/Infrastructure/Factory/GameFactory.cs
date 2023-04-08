@@ -4,6 +4,7 @@ using Infrastructure.AssetManagement;
 using Infrastructure.Services;
 using Mirror;
 using Networking;
+using UI;
 using UnityEngine;
 
 namespace Infrastructure.Factory
@@ -30,6 +31,10 @@ namespace Infrastructure.Factory
         {
             var player = _assets.Instantiate(PlayerPath, position, rotation);
             player.GetComponent<MapSynchronization>().Construct(this, _mapProvider, _mapGenerator);
+            player.GetComponent<RaycastSynchronization>().Construct(this);
+            //player.GetComponent<InventoryController>().Construct(this);
+            player.GetComponent<StatSynchronization>().Construct(player.GetComponent<HealthSystem>(), 
+                player.GetComponent<InventoryController>().GetGunSystems());
             return player;
         }
 
@@ -37,6 +42,10 @@ namespace Infrastructure.Factory
         {
             var player = _assets.Instantiate(PlayerPath);
             player.GetComponent<MapSynchronization>().Construct(this, _mapProvider, _mapGenerator);
+            player.GetComponent<RaycastSynchronization>().Construct(this);
+            //player.GetComponent<InventoryController>().Construct(this);
+            player.GetComponent<StatSynchronization>().Construct(player.GetComponent<HealthSystem>(), 
+                player.GetComponent<InventoryController>().GetGunSystems());
             return player;
         }
 

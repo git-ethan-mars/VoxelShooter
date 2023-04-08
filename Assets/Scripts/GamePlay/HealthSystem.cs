@@ -1,10 +1,13 @@
-﻿using UnityEngine;
+﻿using System;
+using JetBrains.Annotations;
+using UnityEngine;
 
 namespace GamePlay
 {
     public class HealthSystem : MonoBehaviour
     {
-        [SerializeField] private int health;
+        [SerializeField] private int health; 
+        public event Action OnHealthChanged; 
 
         public int Health
         {

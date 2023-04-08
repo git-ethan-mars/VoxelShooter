@@ -56,27 +56,7 @@ namespace GamePlay
             UpdateBlocksOnServer(position, blocks.Select(block => block.Color).ToList());
         }
 
-        [Command]
-        public void ApplyRaycast(Vector3 origin, Vector3 direction, float range, int damage)
-        {
-            var ray = new Ray(origin, direction);
-            var raycastResult = Physics.Raycast(ray, out var rayHit, range);
-            if (raycastResult)
-            {
-                var playerHealth = rayHit.collider.transform.parent.gameObject.GetComponent<HealthSystem>();
-                if (playerHealth)
-                {
-                    playerHealth.Health -= damage;
-                    if (playerHealth.Health <= 0)
-                    {
-                        Debug.Log("DEAD");
-                    }
-                }
-
-                _gameFactory.CreateBulletHole(rayHit.point, Quaternion.Euler(rayHit.normal.y * -90,
-                    rayHit.normal.x * 90 + rayHit.normal.z * -180, 0));
-            }
-        }
+        
 
         [Command]
         private void UpdateBlocksOnServer(List<Vector3Int> globalPositions, List<Color32> colors)
