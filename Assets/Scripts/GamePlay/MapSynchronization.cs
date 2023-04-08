@@ -14,9 +14,9 @@ namespace GamePlay
     public class MapSynchronization : NetworkBehaviour
     {
         private IGameFactory _gameFactory;
-        private MapGenerator MapGenerator { get; set; }
+        private IMapProvider _mapProvider;
+        private MapGenerator _mapGenerator;
         private static byte[] CompressedMap { get; set; }
-        private Map Map { get; set; }
 
         private byte[] ClientBuffer { get; set; }
 
@@ -24,16 +24,17 @@ namespace GamePlay
 
         private const int PackageSize = 1024;
 
-        private void Awake()
+        public void Construct(IGameFactory gameFactory, IMapProvider mapProvider, MapGenerator mapGenerator)
         {
-            _gameFactory = AllServices.Container.Single<IGameFactory>();
-            MapGenerator = GameObject.Find("MapGenerator").GetComponent<MapGenerator>();
+            _gameFactory = gameFactory;
+            _mapProvider = mapProvider;
+            _mapGenerator = mapGenerator;
         }
+        
 
         public override void OnStartServer()
         {
-            Map = CustomNetworkManager.Map;
-            CompressedMap = CustomNetworkManager.CompressedMap;
+            //CompressedMap = CustomNetworkManager.CompressedMap;
         }
 
         public override void OnStartLocalPlayer()
@@ -42,14 +43,13 @@ namespace GamePlay
             GlobalEvents.OnBlockChangeStateEvent.AddListener(ChangeBlockState);
             if (isServer)
             {
-                MapGenerator.Initialize(Map);
                 GlobalEvents.SendMapLoadedState();
             }
 
             if (isClientOnly)
                 GetCompressedMapFromServer();
         }
-        
+
 
         private void ChangeBlockState(List<Vector3Int> position, BlockData[] blocks)
         {
@@ -85,13 +85,13 @@ namespace GamePlay
             var colorsByChunkIndex = new Dictionary<int, List<Color32>>();
             for (var i = 0; i < globalPositions.Count; i++)
             {
-                if (!Map.IsValidPosition(globalPositions[i])) continue;
-                var chunkIndex = Map.FindChunkNumberByPosition(globalPositions[i]);
+                if (!_mapProvider.Map.IsValidPosition(globalPositions[i])) continue;
+                var chunkIndex = _mapProvider.Map.FindChunkNumberByPosition(globalPositions[i]);
                 var localPosition = new Vector3Int(globalPositions[i].x % ChunkData.ChunkSize,
                     globalPositions[i].y % ChunkData.ChunkSize,
                     globalPositions[i].z % ChunkData.ChunkSize);
                 var currentBlockColor =
-                    Map.MapData.Chunks[chunkIndex]
+                    _mapProvider.Map.MapData.Chunks[chunkIndex]
                         .Blocks[
                             localPosition.x * ChunkData.ChunkSizeSquared + localPosition.y * ChunkData.ChunkSize +
                             localPosition.z].Color;
@@ -109,7 +109,7 @@ namespace GamePlay
 
                 localPositionsByChunkIndex[chunkIndex].Add(localPosition);
                 colorsByChunkIndex[chunkIndex].Add(colors[i]);
-                MapGenerator.Chunks[chunkIndex].ChunkData.Blocks[
+                _mapGenerator.Chunks[chunkIndex].ChunkData.Blocks[
                     localPosition.x * ChunkData.ChunkSizeSquared + localPosition.y * ChunkData.ChunkSize +
                     localPosition.z] = new BlockData() {Color = colors[i]};
             }
@@ -123,18 +123,18 @@ namespace GamePlay
         [Command]
         private void GetCompressedMapFromServer()
         {
-            CompressedMap = CustomNetworkManager.CompressedMap;
+            /*CompressedMap = CustomNetworkManager.CompressedMap;
             for (var i = 0; i < CompressedMap.Length; i += PackageSize)
             {
                 ReceiveByteChunk(CompressedMap[i..Math.Min(i + PackageSize, CompressedMap.Length)],
                     CompressedMap.Length);
-            }
+            }*/
         }
 
         [ClientRpc]
         private void UpdateChunkOnClient(int chunkIndex, List<Vector3Int> localPositions, List<Color32> colors)
         {
-            MapGenerator.Chunks[chunkIndex]
+            _mapGenerator.Chunks[chunkIndex]
                 .SpawnBlocks(localPositions, colors);
         }
 
@@ -147,10 +147,9 @@ namespace GamePlay
             Buffer.BlockCopy(chunk, 0, ClientBuffer, DestinationOffset, chunk.Length);
             DestinationOffset += chunk.Length;
             if (DestinationOffset != allBytesCount) return;
-            Map = MapCompressor.Decompress(ClientBuffer);
+            _mapProvider.Map = MapCompressor.Decompress(ClientBuffer);
             ClientBuffer = null;
             DestinationOffset = 0;
-            MapGenerator.Initialize(Map);
             GlobalEvents.SendMapLoadedState();
         }
     }

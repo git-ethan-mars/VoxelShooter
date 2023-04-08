@@ -1,4 +1,5 @@
-﻿using Data;
+﻿using System.Collections.Generic;
+using Data;
 using UnityEngine;
 
 namespace Core
@@ -21,8 +22,7 @@ namespace Core
             {
                 chunks[i] = new ChunkData();
             }
-
-            var mapData = new MapData(chunks, width, height, depth);
+            var mapData = new MapData(chunks, width, height, depth, new List<SpawnPoint>());
             var map = new Map(mapData);
             map.AddWater();
             return map;

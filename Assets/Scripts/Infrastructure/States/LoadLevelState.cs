@@ -1,34 +1,35 @@
-﻿using Logic;
+﻿using Infrastructure.Factory;
+using Networking;
 
 namespace Infrastructure.States
 {
-    public class LoadLevelState : IPayloadedState<string>
+    public class LoadMapState : IPayloadedState<string>
     {
         private readonly SceneLoader _sceneLoader;
         private readonly GameStateMachine _stateMachine;
-        private readonly LoadingCurtain _curtain;
+        private readonly IGameFactory _gameFactory;
 
-        public LoadLevelState(GameStateMachine stateMachine, SceneLoader sceneLoader, LoadingCurtain loadingCurtain)
+        public LoadMapState(GameStateMachine stateMachine, SceneLoader sceneLoader, IGameFactory gameFactory)
         {
             _sceneLoader = sceneLoader;
             _stateMachine = stateMachine;
-            _curtain = loadingCurtain;
+            _gameFactory = gameFactory;
         }
 
         public void Enter(string sceneName)
         {
-            _curtain.Show();
             _sceneLoader.Load(sceneName, OnLoaded);
-            _stateMachine.Enter<GameLoopState>();
         }
 
-        private static void OnLoaded()
+        private void OnLoaded()
         {
+            var networkManager = _gameFactory.CreateNetworkManager();
+            networkManager.GetComponent<CustomNetworkManager>().ConnectionHappened +=
+                () => _stateMachine.Enter<GameLoopState>();
         }
 
         public void Exit()
         {
-            _curtain.Hide();
         }
     }
 }

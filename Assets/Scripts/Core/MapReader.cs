@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Data;
 using UnityEngine;
@@ -38,7 +39,8 @@ namespace Core
             var depth = binaryReader.ReadInt32();
             var chunks = new ChunkData[width / ChunkData.ChunkSize * height / ChunkData.ChunkSize * depth /
                                        ChunkData.ChunkSize];
-            var map = new Map(new MapData(chunks, width, height, depth));
+            var spawnPoints = new List<SpawnPoint>();
+            var map = new Map(new MapData(chunks, width, height, depth, spawnPoints));
             for (var x = 0; x < width / ChunkData.ChunkSize; x++)
             {
                 for (var y = 0; y < height / ChunkData.ChunkSize; y++)
@@ -50,6 +52,15 @@ namespace Core
                             x * (height / ChunkData.ChunkSize * depth / ChunkData.ChunkSize)] = ReadChunk();
                     }
                 }
+            }
+
+            var spawnPointCount = binaryReader.ReadInt32();
+            for (var i = 0; i < spawnPointCount; i++)
+            {
+                var x = binaryReader.ReadInt32();
+                var y = binaryReader.ReadInt32();
+                var z = binaryReader.ReadInt32();
+                spawnPoints.Add(new SpawnPoint() {X = x, Y = y, Z = z});
             }
 
             return map;

@@ -1,4 +1,5 @@
-﻿using Infrastructure.AssetManagement;
+﻿using Core;
+using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
 using Infrastructure.Services;
 using Infrastructure.Services.Input;
@@ -31,15 +32,16 @@ namespace Infrastructure.States
 
         private void EnterLoadLevel()
         {
-            _stateMachine.Enter<LoadLevelState, string>("Main");
+            _stateMachine.Enter<LoadMapState, string>("Main");
         }
 
         private void RegisterServices()
         {
+            _allServices.RegisterSingle<IMapProvider>(new MapProvider(Map.CreateNewMap()));
             _allServices.RegisterSingle<IInputService>(new StandaloneInputService());
             _allServices.RegisterSingle<IAssetProvider>(new AssetProvider());
             _allServices.RegisterSingle<IGameFactory>(
-                new GameFactory(_allServices.Single<IAssetProvider>()));
+                new GameFactory(_allServices.Single<IAssetProvider>(), _allServices.Single<IMapProvider>()));
         }
     }
 }

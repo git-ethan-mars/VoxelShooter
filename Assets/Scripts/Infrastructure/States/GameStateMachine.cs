@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Infrastructure.Factory;
 using Infrastructure.Services;
 using Logic;
 
@@ -15,8 +16,8 @@ namespace Infrastructure.States
             _states = new Dictionary<Type, IExitableState>()
             {
                 [typeof(BootstrapState)] = new BootstrapState(this, sceneLoader, allServices),
-                [typeof(LoadLevelState)] = new LoadLevelState(this, sceneLoader, loadingCurtain),
-                [typeof(GameLoopState)] = new GameLoopState()
+                [typeof(LoadMapState)] = new LoadMapState(this, sceneLoader, allServices.Single<IGameFactory>()),
+                [typeof(GameLoopState)] = new GameLoopState(allServices.Single<IGameFactory>(), loadingCurtain)
             };
         }
 

@@ -2,7 +2,7 @@ using Mirror;
 using Steamworks;
 using UnityEngine;
 
-namespace Transport
+namespace Networking.Transport
 {
     public class SteamLobby : MonoBehaviour
     {

@@ -23,7 +23,7 @@ namespace Core
         public NativeList<Color32> Colors { get; private set; }
         public NativeList<Vector3> Normals { get; private set; }
 
-        public void InitializeData()
+        public void Construct()
         {
             MeshFilter = GetComponent<MeshFilter>();
             MeshCollider = GetComponent<MeshCollider>();

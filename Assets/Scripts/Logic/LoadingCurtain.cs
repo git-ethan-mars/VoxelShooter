@@ -1,21 +1,23 @@
 ﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Logic
 {
     public class LoadingCurtain : MonoBehaviour
     {
-        public CanvasGroup Curtain;
+        public CanvasGroup curtain;
 
         private void Awake()
         {
+            gameObject.SetActive(false);
             DontDestroyOnLoad(this);
         }
 
         public void Show()
         {
             gameObject.SetActive(true);
-            Curtain.alpha = 1;
+            curtain.alpha = 1;
         }
 
         public void Hide()
@@ -25,9 +27,9 @@ namespace Logic
 
         private IEnumerator FadeIn()
         {
-            while (Curtain.alpha > 0)
+            while (curtain.alpha > 0)
             {
-                Curtain.alpha -= 0.03f;
+                curtain.alpha -= 0.03f;
                 yield return new WaitForSeconds(0.03f);
             }
 

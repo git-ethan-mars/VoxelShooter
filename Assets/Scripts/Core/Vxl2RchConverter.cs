@@ -83,7 +83,7 @@ namespace Core
                 chunks[i] = new ChunkData();
             }
 
-            var map = new Map(new MapData(chunks, Width, _height, Depth));
+            var map = new Map(new MapData(chunks, Width, _height, Depth, new List<SpawnPoint>()));
             for (var x = 0; x < Width; x++)
             {
                 for (var y = 0; y < _height - heightOffset; y++)
