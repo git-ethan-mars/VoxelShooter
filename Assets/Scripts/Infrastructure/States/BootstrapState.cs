@@ -41,7 +41,7 @@ namespace Infrastructure.States
             var staticData = _allServices.Single<IStaticDataService>();
             staticData.LoadItems();
             staticData.LoadInventories();
-            _allServices.RegisterSingle<IMapProvider>(new MapProvider(MapReader.ReadFromFile("test.rch")));
+            _allServices.RegisterSingle<IMapProvider>(new MapProvider(MapReader.ReadFromFile("AncientEgypt.vxl")));
             _allServices.RegisterSingle<IInputService>(new StandaloneInputService());
             _allServices.RegisterSingle<IAssetProvider>(new AssetProvider());
             _allServices.RegisterSingle<IGameFactory>(

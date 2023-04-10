@@ -1,4 +1,6 @@
-﻿using Infrastructure.AssetManagement;
+﻿using System.Linq;
+using Data;
+using Infrastructure.AssetManagement;
 using Infrastructure.Services;
 using Infrastructure.Services.Input;
 using Inventory;
@@ -54,10 +56,9 @@ namespace Infrastructure.Factory
             var mapSynchronization = player.GetComponent<MapSynchronization>();
             mapSynchronization.Construct(_mapProvider, AllServices.Container.Single<IMapGeneratorProvider>());
             player.GetComponent<RaycastSynchronization>().Construct(this);
-            //player.GetComponent<StatSynchronization>().Construct(player.GetComponent<HealthSystem>(),
-            //    player.GetComponent<InventoryController>().GetGunSystems());
+            player.GetComponent<StatSynchronization>().Construct(player.GetComponent<HealthSystem>(),
+                player.GetComponent<Player.Inventory>().inventory.OfType<PrimaryWeapon>().ToList());
             return player;
-
         }
 
         public GameObject CreateBulletHole(Vector3 position, Quaternion rotation)

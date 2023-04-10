@@ -123,24 +123,6 @@ namespace Inventory
             _statSynchronization.OnShoot(Guid);
         }
 
-        public void StartShootCoroutines()
-        {
-            _coroutineRunner.StartCoroutine(WaitForSeconds(ResetShoot, _weaponConfiguration.timeBetweenShooting));
-            _coroutineRunner.StartCoroutine(WaitForSeconds(ResetRecoil, _weaponConfiguration.resetTimeRecoil));
-            if (BulletsPerShot > 0 && BulletsInMagazine > 0)
-                _coroutineRunner.StartCoroutine(WaitForSeconds(Shoot, _weaponConfiguration.timeBetweenShots));
-        }
-
-        private void ResetRecoil()
-        {
-            RecoilModifier -= _weaponConfiguration.stepRecoil;
-        }
-
-        private void ResetShoot()
-        {
-            _readyToShoot = true;
-        }
-
         private void Reload()
         {
             _reloading = true;

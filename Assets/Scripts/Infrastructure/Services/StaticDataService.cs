@@ -12,7 +12,7 @@ namespace Infrastructure.Services
 
         public void LoadItems()
         {
-            _itemById = Resources.LoadAll<InventoryItem>("StaticData/Inventory Items").ToDictionary(x => x.id);
+            _itemById = Resources.LoadAll<InventoryItem>("StaticData/Inventory Items").ToDictionary(x => x.id, x => x);
         }
 
         public InventoryItem GetItem(int id)
@@ -22,7 +22,7 @@ namespace Infrastructure.Services
 
         public void LoadInventories()
         {
-            _inventoryByClass = Resources.LoadAll<GameInventory>("StaticData/Inventories").ToDictionary(x=>x.gameClass);
+            _inventoryByClass = Resources.LoadAll<GameInventory>("StaticData/Inventories").ToDictionary(x=>x.gameClass, x => x);
         }
 
         public List<InventoryItem> GetInventory(GameClass gameClass)

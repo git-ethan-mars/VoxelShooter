@@ -16,6 +16,7 @@ namespace Data
         public float timeBetweenShots;
         public int magazineSize;
         public int bulletsPerTap;
+        public int totalBullets;
         [Header("Damage")]
         public int damage;
         [Range(0,5)]

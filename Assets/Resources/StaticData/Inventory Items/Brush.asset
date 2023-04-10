@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71c6f805b32642398ec85ad7655e8d8a, type: 3}
   m_Name: Brush
   m_EditorClassIdentifier: 
-  id: 0
+  id: 2
   itemType: 5
   icon: {fileID: 0}
   prefab: {fileID: 0}
