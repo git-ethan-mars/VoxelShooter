@@ -1,29 +1,42 @@
-﻿using Infrastructure.Factory;
-using Logic;
+﻿using System.Collections;
+using Infrastructure.Factory;
+using Infrastructure.Services;
+using Mirror;
 
 namespace Infrastructure.States
 {
     public class GameLoopState : IState
     {
+        private readonly ICoroutineRunner _coroutineRunner;
         private readonly IGameFactory _gameFactory;
-        private readonly LoadingCurtain _curtain;
+        private readonly IMapGeneratorProvider _mapGeneratorProvider;
 
 
-        public GameLoopState(IGameFactory gameFactory, LoadingCurtain loadingCurtain)
+        public GameLoopState(ICoroutineRunner coroutineRunner, IGameFactory gameFactory)
         {
+            _coroutineRunner = coroutineRunner;
             _gameFactory = gameFactory;
-            _curtain = loadingCurtain;
         }
 
         public void Enter()
         {
-            _curtain.Show();
-            _gameFactory.CreateMapGenerator();
-            _curtain.Hide();
+            _coroutineRunner.StartCoroutine(WaitForLocalPlayer());
         }
 
         public void Exit()
         {
+        }
+
+        private IEnumerator WaitForLocalPlayer()
+        {
+            while (!NetworkClient.localPlayer)
+            {
+                yield return null;
+            }
+
+            var player = _gameFactory.InitializeLocalPlayer();
+            _gameFactory.CreateHud(player);
+
         }
     }
 }

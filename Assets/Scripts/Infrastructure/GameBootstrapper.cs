@@ -1,6 +1,6 @@
 using Infrastructure.Services;
 using Infrastructure.States;
-using Logic;
+using UI;
 using UnityEngine;
 using UnityEngine.Profiling;
 

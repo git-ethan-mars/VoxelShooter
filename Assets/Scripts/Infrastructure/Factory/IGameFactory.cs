@@ -1,5 +1,5 @@
-﻿using Core;
-using Infrastructure.Services;
+﻿using Infrastructure.Services;
+using Rendering;
 using UnityEngine;
 
 namespace Infrastructure.Factory
@@ -15,5 +15,7 @@ namespace Infrastructure.Factory
         GameObject CreateNetworkManager();
         GameObject CreateMapGenerator();
         ChunkRenderer CreateChunkRenderer(Vector3Int vector3Int, Quaternion identity, Transform transform);
+        GameObject CreateHud(GameObject player);
+        GameObject InitializeLocalPlayer();
     }
 }

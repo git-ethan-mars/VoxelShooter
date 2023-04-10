@@ -1,4 +1,3 @@
-using Core;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -76,7 +75,6 @@ namespace UI
         private void ConfirmSave()
         {
             Time.timeScale = 1f;
-            GlobalEvents.SendMapSave(saveName.text + ".rch");
             SceneManager.LoadScene("MainMenu");
         }
 

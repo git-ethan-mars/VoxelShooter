@@ -15,8 +15,10 @@ namespace Infrastructure.Services.Input
 
         public bool IsJumpButtonDown() => UnityEngine.Input.GetKeyDown(KeyCode.Space);
 
+
         public bool IsFirstActionButtonHold() => UnityEngine.Input.GetMouseButton(0);
 
         public bool IsSecondActionButtonHold() => UnityEngine.Input.GetMouseButton(1);
+        public float GetScrollSpeed() => UnityEngine.Input.GetAxis("Mouse ScrollWheel");
     }
 }

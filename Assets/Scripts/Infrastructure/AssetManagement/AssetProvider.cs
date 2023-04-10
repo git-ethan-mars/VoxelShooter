@@ -4,6 +4,11 @@ namespace Infrastructure.AssetManagement
 {
     public class AssetProvider : IAssetProvider
     {
+        public T Load<T>(string path) where T : Object
+        {
+            var obj = Resources.Load<T>(path);
+            return obj;
+        }
         public GameObject Instantiate(string path)
         {
             var prefab = Resources.Load<GameObject>(path);

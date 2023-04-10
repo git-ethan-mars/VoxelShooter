@@ -1,7 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using Core;
-using GamePlay;
+using Data;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,6 +12,7 @@ namespace UI
         [SerializeField] private Image pointer;
         [SerializeField] private Sprite blackBoarder;
         [SerializeField] private Sprite blueBoarder;
+        public event Action<Color32> OnColorUpdate;
         private int _indexX;
         private int _indexY;
         private const int PaletteSize = 8;
@@ -27,7 +28,7 @@ namespace UI
                 i++;
             }
 
-            GlobalEvents.SendPaletteUpdate(BlockColor.ColorById[(byte) (_indexX + _indexY * PaletteSize + 1)]);
+            OnColorUpdate?.Invoke(BlockColor.ColorById[(byte) (_indexX + _indexY * PaletteSize + 1)]);
         }
 
         private void Update()
@@ -55,7 +56,7 @@ namespace UI
             }
 
             pointer.transform.position = transform.GetChild(_indexX + _indexY * PaletteSize).position;
-            GlobalEvents.SendPaletteUpdate(_blockColorById[(byte) (_indexX + _indexY * PaletteSize + 1)]);
+            OnColorUpdate?.Invoke(_blockColorById[(byte) (_indexX + _indexY * PaletteSize + 1)]);
         }
 
         private IEnumerator ChangePointerColor()

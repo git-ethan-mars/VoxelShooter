@@ -8,8 +8,8 @@
 
     public static class SpritePath
     {
-        public const string RiflePath = "Sprites/rifle";
         public const string BlockPath = "Sprites/Blocks/#C0C0C0";
         public const string BrushPath = "Sprites/brush";
+        public const string SpawnPointPath = "Sprites/SpawnPoint";
     }
 }

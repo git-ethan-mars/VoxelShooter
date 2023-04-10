@@ -1,4 +1,4 @@
-﻿using Core;
+﻿using MapLogic;
 
 namespace Infrastructure.Services
 {

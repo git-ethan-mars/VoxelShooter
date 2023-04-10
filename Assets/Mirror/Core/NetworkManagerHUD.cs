@@ -1,5 +1,7 @@
 // vis2k: GUILayout instead of spacey += ...; removed Update hotkeys to avoid
 // confusion if someone accidentally presses one.
+
+using System;
 using UnityEngine;
 
 namespace Mirror
@@ -11,6 +13,7 @@ namespace Mirror
     [HelpURL("https://mirror-networking.gitbook.io/docs/components/network-manager-hud")]
     public class NetworkManagerHUD : MonoBehaviour
     {
+        public event Action OnButtonDown;
         NetworkManager manager;
 
         public int offsetX;
@@ -60,6 +63,7 @@ namespace Mirror
                 {
                     if (GUILayout.Button("Host (Server + Client)"))
                     {
+                        OnButtonDown?.Invoke();
                         manager.StartHost();
                     }
                 }
@@ -68,6 +72,7 @@ namespace Mirror
                 GUILayout.BeginHorizontal();
                 if (GUILayout.Button("Client"))
                 {
+                    OnButtonDown?.Invoke();
                     manager.StartClient();
                 }
                 // This updates networkAddress every frame from the TextField

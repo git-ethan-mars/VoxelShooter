@@ -11,14 +11,11 @@ namespace UI
 
         [SerializeField] private List<GameObject> slots;
         public int SlotsCount => slots.Count;
-        
+
 
         public void SetIconForItem(int slotIndex, Sprite icon)
         {
             slots[slotIndex].GetComponent<Image>().sprite = icon;
         }
-        
     }
-    
-    
 }

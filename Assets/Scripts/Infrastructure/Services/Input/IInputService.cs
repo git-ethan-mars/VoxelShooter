@@ -11,5 +11,6 @@ namespace Infrastructure.Services.Input
         bool IsFirstActionButtonHold();
         bool IsSecondActionButtonHold();
         bool IsJumpButtonDown();
+        float GetScrollSpeed();
     }
 }

@@ -1,5 +1,9 @@
 ﻿using Infrastructure.Factory;
+using Infrastructure.Services;
+using MapLogic;
+using Mirror;
 using Networking;
+using UnityEngine;
 
 namespace Infrastructure.States
 {
@@ -21,15 +25,23 @@ namespace Infrastructure.States
             _sceneLoader.Load(sceneName, OnLoaded);
         }
 
+        public void Exit()
+        {
+        }
+
         private void OnLoaded()
         {
             var networkManager = _gameFactory.CreateNetworkManager();
+            networkManager.GetComponent<NetworkManagerHUD>().OnButtonDown +=
+                OnStartGame;
             networkManager.GetComponent<CustomNetworkManager>().ConnectionHappened +=
                 () => _stateMachine.Enter<GameLoopState>();
         }
 
-        public void Exit()
+        private void OnStartGame()
         {
+            var mapGenerator = _gameFactory.CreateMapGenerator();
+            AllServices.Container.RegisterSingle<IMapGeneratorProvider>(new MapGeneratorProvider(mapGenerator.GetComponent<MapGenerator>()));
         }
     }
 }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Infrastructure.Factory;
 using Infrastructure.Services;
-using Logic;
 
 namespace Infrastructure.States
 {
@@ -11,13 +10,14 @@ namespace Infrastructure.States
         private readonly Dictionary<Type, IExitableState> _states;
         private IExitableState _activeState;
 
-        public GameStateMachine(SceneLoader sceneLoader, LoadingCurtain loadingCurtain, AllServices allServices)
+        public GameStateMachine(ICoroutineRunner coroutineRunner, SceneLoader sceneLoader, AllServices allServices)
         {
-            _states = new Dictionary<Type, IExitableState>()
+            _states = new Dictionary<Type, IExitableState>
             {
                 [typeof(BootstrapState)] = new BootstrapState(this, sceneLoader, allServices),
                 [typeof(LoadMapState)] = new LoadMapState(this, sceneLoader, allServices.Single<IGameFactory>()),
-                [typeof(GameLoopState)] = new GameLoopState(allServices.Single<IGameFactory>(), loadingCurtain)
+                [typeof(GameLoopState)] =
+                    new GameLoopState(coroutineRunner, allServices.Single<IGameFactory>())
             };
         }
 

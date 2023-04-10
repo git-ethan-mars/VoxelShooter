@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Data;
 using Infrastructure.Factory;
 using Infrastructure.Services;
+using MapLogic;
 using Mirror;
 using UnityEngine;
 
@@ -15,29 +17,36 @@ namespace Networking
         private int _spawnPointIndex;
         private IMapProvider _mapProvider;
         private IGameFactory _gameFactory;
+        private IStaticDataService _staticData;
 
 
-        public void Construct(IMapProvider mapProvider, IGameFactory gameFactory)
+        public void Construct(IMapProvider mapProvider, IGameFactory gameFactory, IStaticDataService staticDataService)
         {
             _mapProvider = mapProvider;
             _gameFactory = gameFactory;
+            _staticData = staticDataService;
             _spawnPoints = _mapProvider.Map.MapData.SpawnPoints;
         }
 
-        public override void OnServerConnect(NetworkConnectionToClient conn)
+        public override void OnStartServer()
         {
-            base.OnServerConnect(conn);
-            ConnectionHappened?.Invoke();
+            base.OnStartServer();
+            NetworkServer.RegisterHandler<CharacterMessage>(OnCreateCharacter);
         }
+        
 
         public override void OnClientConnect()
         {
             base.OnClientConnect();
             ConnectionHappened?.Invoke();
+            NetworkClient.RegisterHandler<InventoryMessage>(OnInventory);
+            CharacterMessage characterMessage = new CharacterMessage() {GameClass = GameClass.Builder, NickName = ""};
+            NetworkClient.Send(characterMessage);
         }
-        /*
-        public override void OnServerAddPlayer(NetworkConnectionToClient conn)
+
+        private void OnCreateCharacter(NetworkConnectionToClient conn, CharacterMessage message)
         {
+            GameClass gameClass = message.GameClass;
             GameObject player;
             if (_spawnPoints.Count == 0)
             {
@@ -51,7 +60,20 @@ namespace Networking
             }
 
             NetworkServer.AddPlayerForConnection(conn, player);
+            var inventory = _staticData.GetInventory(gameClass).Select(item => item.id).ToArray();
+            InventoryMessage inventoryMessage = new InventoryMessage() {Inventory = inventory};
+            conn.Send(inventoryMessage);
         }
-        */
+
+
+        private void OnInventory(InventoryMessage message)
+        {
+            NetworkClient.localPlayer.gameObject.GetComponent<Player.Inventory>().SetInventory(message.Inventory);
+        }
+
+        public override void OnStopServer()
+        {
+            MapWriter.SaveMap("test.rch", _mapProvider.Map);
+        }
     }
 }

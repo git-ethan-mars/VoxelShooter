@@ -1,10 +1,11 @@
 ﻿using Data;
+using Rendering;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 
-namespace Core
+namespace Optimization
 {
     [BurstCompile]
     public struct UpdateMeshJob : IJob
@@ -28,7 +29,7 @@ namespace Core
             {
                 var block = Blocks[i];
                 var color = block.Color;
-                Faces[i] = Core.Faces.None;
+                Faces[i] = Data.Faces.None;
                 if (block.Color.IsEquals(BlockColor.Empty)) continue;
                 var x = i / ChunkData.ChunkSizeSquared;
                 var y = (i - x * ChunkData.ChunkSizeSquared) / ChunkData.ChunkSize;
@@ -39,7 +40,7 @@ namespace Core
                     Blocks[x * ChunkData.ChunkSizeSquared + (y + 1) * ChunkData.ChunkSize + z].Color
                         .IsEquals(BlockColor.Empty))
                 {
-                    Faces[i] |= Core.Faces.Top;
+                    Faces[i] |= Data.Faces.Top;
                     ChunkRenderer.GenerateTopSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
                 }
 
@@ -49,7 +50,7 @@ namespace Core
                     Blocks[x * ChunkData.ChunkSizeSquared + (y - 1) * ChunkData.ChunkSize + z].Color
                         .IsEquals(BlockColor.Empty))
                 {
-                    Faces[i] |= Core.Faces.Bottom;
+                    Faces[i] |= Data.Faces.Bottom;
                     ChunkRenderer.GenerateBottomSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
                 }
 
@@ -60,7 +61,7 @@ namespace Core
                     Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z + 1].Color
                         .IsEquals(BlockColor.Empty))
                 {
-                    Faces[i] |= Core.Faces.Front;
+                    Faces[i] |= Data.Faces.Front;
                     ChunkRenderer.GenerateFrontSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
                 }
 
@@ -71,7 +72,7 @@ namespace Core
                     Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z - 1].Color
                         .IsEquals(BlockColor.Empty))
                 {
-                    Faces[i] |= Core.Faces.Back;
+                    Faces[i] |= Data.Faces.Back;
                     ChunkRenderer.GenerateBackSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
                 }
 
@@ -81,7 +82,7 @@ namespace Core
                     Blocks[(x + 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
                         .IsEquals(BlockColor.Empty))
                 {
-                    Faces[i] |= Core.Faces.Right;
+                    Faces[i] |= Data.Faces.Right;
                     ChunkRenderer.GenerateRightSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
                 }
 
@@ -92,7 +93,7 @@ namespace Core
                     Blocks[(x - 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
                         .IsEquals(BlockColor.Empty))
                 {
-                    Faces[i] |= Core.Faces.Left;
+                    Faces[i] |= Data.Faces.Left;
                     ChunkRenderer.GenerateLeftSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
                 }
             }
