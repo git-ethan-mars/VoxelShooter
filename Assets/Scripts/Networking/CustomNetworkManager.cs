@@ -67,7 +67,7 @@ namespace Networking
 
         public override void OnStopServer()
         {
-            MapWriter.SaveMap("test.rch", _mapProvider.Map);
+            //MapWriter.SaveMap("test.rch", _mapProvider.Map);
         }
     }
 }

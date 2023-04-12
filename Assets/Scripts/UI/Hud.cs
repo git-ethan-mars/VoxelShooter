@@ -6,6 +6,7 @@ namespace UI
     {
         public GameObject palette;
         public GameObject inventory;
+        public GameObject ammoInfo;
         public GameObject ammoCount;
     }
 }
