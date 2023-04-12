@@ -19,9 +19,9 @@ namespace Infrastructure.Factory
     {
         private readonly IAssetProvider _assets;
         private readonly IMapProvider _mapProvider;
-        private readonly IInputService _inputService;
         private readonly IStaticDataService _staticData;
         private MapGenerator _mapGenerator;
+        private readonly IInputService _inputService;
         private const string NetworkManagerPath = "Prefabs/Infrastructure/NetworkManager";
         private const string MapGeneratorPath = "Prefabs/MapCreation/MapGenerator";
         private const string ChunkRendererPath = "Prefabs/MapCreation/Chunk";
@@ -29,37 +29,44 @@ namespace Infrastructure.Factory
         private const string HudPath = "Prefabs/UI/HUD";
 
 
-        public GameFactory(IAssetProvider assets, IMapProvider mapProvider, IInputService inputService,
+        public GameFactory(IAssetProvider assets, IInputService inputService, IMapProvider mapProvider,
             IStaticDataService staticData)
         {
             _staticData = staticData;
+            _inputService = inputService;
             _assets = assets;
             _mapProvider = mapProvider;
-            _inputService = inputService;
         }
         
 
-        public GameObject CreatePlayer(Vector3 position, Quaternion rotation) =>
-            _assets.Instantiate(PlayerPath, position, rotation);
-
-        public GameObject CreatePlayer() => _assets.Instantiate(PlayerPath);
-
-        public GameObject InitializeLocalPlayer()
+        public GameObject CreatePlayer(GameClass gameClass, Vector3 position, Quaternion rotation)
         {
-            var player = NetworkClient.localPlayer.gameObject;
-            var movement = player.GetComponent<PlayerMovement>();
-            movement.Construct(_inputService, 10, 5);
-            movement.enabled = true;
-            var inventoryInput = player.GetComponent<InventoryInput>();
-            inventoryInput.Construct(_inputService);
-            inventoryInput.enabled = true;
-            var mapSynchronization = player.GetComponent<MapSynchronization>();
-            mapSynchronization.Construct(_mapProvider, AllServices.Container.Single<IMapGeneratorProvider>());
-            player.GetComponent<RaycastSynchronization>().Construct(this);
-            player.GetComponent<StatSynchronization>().Construct(player.GetComponent<HealthSystem>(),
-                player.GetComponent<Player.Inventory>().inventory.OfType<PrimaryWeapon>().ToList());
+            var player = _assets.Instantiate(PlayerPath, position, rotation);
+            ConfigurePlayer(player, gameClass);
             return player;
         }
+
+        public GameObject CreatePlayer(GameClass gameClass)
+        {
+            var player = _assets.Instantiate(PlayerPath);
+            ConfigurePlayer(player, gameClass);
+            return player;
+        }
+
+        private void ConfigurePlayer(GameObject player, GameClass gameClass)
+        {
+            var characteristic = _staticData.GetPlayerCharacteristic(gameClass);
+            var movement = player.GetComponent<PlayerMovement>();
+            movement.Construct(characteristic);
+            player.GetComponent<HealthSystem>().Construct(characteristic);
+            var inventory = _staticData.GetInventory(gameClass).Select(item => item.id).ToArray();
+            var playerInventory = player.GetComponent<Player.Inventory>();
+            foreach (var itemId in inventory)
+            {
+                playerInventory.Ids.Add(itemId);
+            }
+        }
+
 
         public GameObject CreateBulletHole(Vector3 position, Quaternion rotation)
         {
@@ -90,7 +97,7 @@ namespace Infrastructure.Factory
         {
             var hud = _assets.Instantiate(HudPath);
             var inventoryController = hud.GetComponent<Hud>().inventory.GetComponent<InventoryController>();
-            inventoryController.Construct(_assets, this, hud, player);
+            inventoryController.Construct(_assets, _inputService, this, hud, player);
             return hud;
         }
 

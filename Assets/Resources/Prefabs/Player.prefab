@@ -13,8 +13,8 @@ GameObject:
   - component: {fileID: 8550293728240856352}
   - component: {fileID: 7071696806599395278}
   m_Layer: 0
-  m_Name: Pravaya_ruka_sinyaya
-  m_TagString: Untagged
+  m_Name: Right arm
+  m_TagString: Arm
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -110,8 +110,8 @@ GameObject:
   - component: {fileID: 6800954175774620190}
   - component: {fileID: 1965425273556060050}
   m_Layer: 0
-  m_Name: Levaya_ruka_sinyaya
-  m_TagString: Untagged
+  m_Name: Left arm
+  m_TagString: Arm
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -129,7 +129,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 951460950341307336}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &8017654093287939722
 MeshFilter:
@@ -207,8 +207,8 @@ GameObject:
   - component: {fileID: 2827470159255539142}
   - component: {fileID: 576938513244263479}
   m_Layer: 0
-  m_Name: Telo_siniy
-  m_TagString: Untagged
+  m_Name: Chest
+  m_TagString: Chest
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -226,7 +226,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 951460950341307336}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &1592175300422314322
 MeshFilter:
@@ -304,8 +304,8 @@ GameObject:
   - component: {fileID: 3785449706706436186}
   - component: {fileID: 5038703695663905110}
   m_Layer: 0
-  m_Name: Golova_voenny_sinyaya
-  m_TagString: Untagged
+  m_Name: Head
+  m_TagString: Head
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -437,15 +437,16 @@ GameObject:
   - component: {fileID: 1559136694788600597}
   - component: {fileID: -721941239004690369}
   - component: {fileID: -6329305967111660050}
+  - component: {fileID: 188159945711906154}
   - component: {fileID: 5496113448558553160}
   - component: {fileID: 6343140105835637004}
-  - component: {fileID: 4791540602336079483}
   - component: {fileID: -3890806944936244762}
   - component: {fileID: 2734791800071418437}
   - component: {fileID: -2882850801023109427}
+  - component: {fileID: 8727689584874822480}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -462,8 +463,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 5157539354050062272}
   - {fileID: 4526016867100299288}
+  - {fileID: 5157539354050062272}
   - {fileID: 8023773675403276542}
   - {fileID: 358407574529616767}
   - {fileID: 1089694921998829717}
@@ -646,7 +647,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 175592f64b8e4923bb6e8c125e40b621, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  health: 33
+  healthSynchronization: {fileID: 0}
 --- !u!114 &-6329305967111660050
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -676,6 +677,34 @@ MonoBehaviour:
   compressRotation: 0
   positionPrecision: 0.01
   scalePrecision: 0.01
+--- !u!114 &188159945711906154
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7129409968729204767}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 1
+  syncMode: 0
+  syncInterval: 0
+  target: {fileID: 3276943837764328836}
+  clientAuthority: 0
+  syncPosition: 1
+  syncRotation: 1
+  syncScale: 0
+  showGizmos: 0
+  showOverlay: 0
+  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+  onlySyncOnChange: 1
+  bufferResetMultiplier: 5
+  positionSensitivity: 0.01
+  rotationSensitivity: 0.01
+  scaleSensitivity: 0.01
 --- !u!114 &5496113448558553160
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -709,21 +738,6 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0.1
---- !u!114 &4791540602336079483
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7129409968729204767}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 87f69e169545482bb27cd554190dcc11, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0.1
 --- !u!114 &-3890806944936244762
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -731,7 +745,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7129409968729204767}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f5817f0a476b9ae41b2480fff4a6158a, type: 3}
   m_Name: 
@@ -746,7 +760,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7129409968729204767}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 80b0d97ce8104defb14e1e69fdd2da56, type: 3}
   m_Name: 
@@ -766,7 +780,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0558bcc586a0485c9df367cee402e04b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0.1
   inventory: []
+--- !u!114 &8727689584874822480
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7129409968729204767}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c4ecf6ea89d4338b2d8c8da5dd28f0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0.1
+  healthSystem: {fileID: -721941239004690369}
 --- !u!1 &7144124220814764461
 GameObject:
   m_ObjectHideFlags: 0
@@ -811,8 +844,8 @@ GameObject:
   - component: {fileID: 1652199561592608075}
   - component: {fileID: 6596956859504112050}
   m_Layer: 0
-  m_Name: Noga_siniy (2)
-  m_TagString: Untagged
+  m_Name: Right leg
+  m_TagString: Leg
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -908,8 +941,8 @@ GameObject:
   - component: {fileID: 2092982742255187617}
   - component: {fileID: 1584296484197684174}
   m_Layer: 0
-  m_Name: Noga_siniy (1)
-  m_TagString: Untagged
+  m_Name: Left leg
+  m_TagString: Leg
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

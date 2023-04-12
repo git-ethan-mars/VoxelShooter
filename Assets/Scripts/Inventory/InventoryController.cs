@@ -32,7 +32,7 @@ namespace Inventory
         private GameObject _player;
         private GameObject _hud;
 
-        public void Construct(IAssetProvider assets, IGameFactory gameFactory, GameObject hud, GameObject player)
+        public void Construct(IAssetProvider assets, IInputService inputService, IGameFactory gameFactory, GameObject hud, GameObject player)
         {
             AddEventHandlers(player.GetComponent<InventoryInput>());
             _player = player;
@@ -43,7 +43,8 @@ namespace Inventory
             _mapSynchronization = player.GetComponent<MapSynchronization>();
             _palette = hud.GetComponent<Hud>().palette;
             _gameFactory = gameFactory;
-            _inventory = InitializeInventory(player.GetComponent<Player.Inventory>().inventory);
+            _inputService = inputService;
+            _inventory = InitializeInventoryViews(player.GetComponent<Player.Inventory>().inventory);
             _maxIndex = Math.Min(_inventory.Count, inventoryView.SlotsCount);
             _boarders = inventoryView.Boarders;
             for (var i = 0; i < _maxIndex; i++)
@@ -63,7 +64,7 @@ namespace Inventory
             inventoryInput.OnChangeSlot += ChangeSlotIndex;
         }
 
-        private List<IInventoryItemView> InitializeInventory(List<InventoryItem> items)
+        private List<IInventoryItemView> InitializeInventoryViews(List<InventoryItem> items)
         {
             var inventory = new List<IInventoryItemView>();
             foreach (var item in items)
@@ -77,11 +78,11 @@ namespace Inventory
                 {
                     inventory.Add(new BrushView(_cubeRenderer, _mapSynchronization, _assets, _palette));
                 }
+            }
 
-                if (item.itemType == ItemType.PrimaryWeapon)
-                {
-                    inventory.Add(new GunSystem(_gameFactory, this, _mainCamera, itemPosition, _player, _hud, (PrimaryWeapon)item));
-                }
+            foreach (var (_,weapon) in _player.GetComponent<Player.Inventory>().Weapons)
+            {
+                inventory.Add(new GunSystem(_gameFactory, _inputService, _mainCamera, itemPosition, _player, _hud, weapon));
             }
 
             return inventory;

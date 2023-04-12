@@ -1,34 +1,56 @@
-using System;
+using Mirror;
+using UnityEngine;
 
 namespace Data
 {
     public class Weapon
     {
-        public float RecoilModifier;
-        public readonly string Guid;
+        public readonly bool IsAutomatic;
+        public readonly float TimeBetweenShooting;
+        public readonly float BaseRecoil;
         public readonly float StepRecoil;
-        public int BulletsInMagazine;
+        public readonly float Range;
+        public readonly float ReloadTime;
         public readonly int MagazineSize;
-        public bool _readyToShoot;
         public int TotalBullets;
-        public int BulletsPerShot;
-        
-        public float timeBetweenShooting;
-        public float timeBetweenShots;
-        public float resetTimeRecoil;
+        public float RecoilModifier;
+        public readonly float ResetTimeRecoil;
+        public int BulletsInMagazine;
+        public bool IsReady;
+        public GameObject Prefab;
+        public readonly int BulletsPerShot;
+        public int Damage;
+        public readonly Sprite Icon;
+        public readonly int ID;
+        public bool IsReloading;
+        public readonly float HeadMultiplier;
+        public readonly float ChestMultiplier;
+        public readonly float LegMultiplier;
+        public readonly float ArmMultiplier;
 
         public Weapon(PrimaryWeapon primaryWeapon)
         {
-            Guid = System.Guid.NewGuid().ToString();
+            Damage = primaryWeapon.damage;
+            HeadMultiplier = primaryWeapon.headMultiplier;
+            ChestMultiplier = primaryWeapon.chestMultiplier;
+            LegMultiplier = primaryWeapon.legMultiplier;
+            ArmMultiplier = primaryWeapon.armMultiplier;
+            ReloadTime = primaryWeapon.reloadTime;
+            BaseRecoil = primaryWeapon.baseRecoil;
             StepRecoil = primaryWeapon.stepRecoil;
             BulletsInMagazine = primaryWeapon.magazineSize;
             MagazineSize = primaryWeapon.magazineSize;
-            _readyToShoot = true;
+            IsReady = true;
             TotalBullets = primaryWeapon.totalBullets;
             BulletsPerShot = primaryWeapon.bulletsPerTap;
-            timeBetweenShooting = primaryWeapon.timeBetweenShooting;
-            timeBetweenShots = primaryWeapon.timeBetweenShots;
-            resetTimeRecoil = primaryWeapon.resetTimeRecoil;
+            TimeBetweenShooting = primaryWeapon.timeBetweenShooting;
+            ResetTimeRecoil = primaryWeapon.resetTimeRecoil;
+            IsAutomatic = primaryWeapon.isAutomatic;
+            Damage = primaryWeapon.damage;
+            Prefab = primaryWeapon.prefab;
+            Icon = primaryWeapon.icon;
+            ID = primaryWeapon.id;
+            Range = primaryWeapon.range;
         }
     }
 }

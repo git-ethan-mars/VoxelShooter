@@ -6,6 +6,11 @@ TagManager:
   tags:
   - TNT
   - Chunk
+  - Head
+  - Leg
+  - Chest
+  - Arm
+  - Hand
   layers:
   - Default
   - TransparentFX

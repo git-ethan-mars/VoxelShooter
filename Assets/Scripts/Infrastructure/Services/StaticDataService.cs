@@ -7,6 +7,7 @@ namespace Infrastructure.Services
 {
     public class StaticDataService : IStaticDataService
     {
+        private Dictionary<GameClass, PlayerCharacteristic> _playerCharacteristicByClass;
         private Dictionary<GameClass, GameInventory> _inventoryByClass;
         private Dictionary<int, InventoryItem> _itemById;
 
@@ -28,6 +29,17 @@ namespace Infrastructure.Services
         public List<InventoryItem> GetInventory(GameClass gameClass)
         {
             return _inventoryByClass.TryGetValue(gameClass, out var gameInventory) ? gameInventory.inventory : null;
+        }
+
+        public void LoadPlayerCharacteristics()
+        {
+            _playerCharacteristicByClass = Resources.LoadAll<PlayerCharacteristic>("StaticData/Player Characteristics")
+                .ToDictionary(x => x.gameClass, x => x);
+        }
+
+        public PlayerCharacteristic GetPlayerCharacteristic(GameClass gameClass)
+        {
+            return _playerCharacteristicByClass.TryGetValue(gameClass, out var characteristic) ? characteristic : null;
         }
     }
 }

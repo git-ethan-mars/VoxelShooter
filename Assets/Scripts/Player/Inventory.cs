@@ -1,25 +1,37 @@
 ﻿using System.Collections.Generic;
 using Data;
 using Infrastructure.Services;
-using UnityEngine;
+using Mirror;
 
 namespace Player
 {
-    public class Inventory : MonoBehaviour
+    public class Inventory : NetworkBehaviour
     {
+        public readonly SyncList<int> Ids = new();
         public List<InventoryItem> inventory;
+        public Dictionary<int,Weapon> Weapons;
         private IStaticDataService _staticData;
-
+        
         private void Awake()
         {
             _staticData = AllServices.Container.Single<IStaticDataService>();
         }
-        public void SetInventory(int[] ids)
+
+        public void InitInventory()
         {
             inventory = new List<InventoryItem>();
-            for (var i = 0; i < ids.Length; i++)
+            foreach (var id in Ids)
             {
-                inventory.Add(_staticData.GetItem(ids[i]));
+                inventory.Add(_staticData.GetItem(id));
+            }
+            Weapons = new Dictionary<int, Weapon>();
+            foreach (var id in Ids)
+            {
+                var item = _staticData.GetItem(id);
+                if (item.itemType == ItemType.PrimaryWeapon)
+                {
+                    Weapons[id] = new Weapon((PrimaryWeapon) item);
+                }
             }
         }
     }

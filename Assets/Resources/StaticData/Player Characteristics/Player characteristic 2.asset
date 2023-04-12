@@ -9,11 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 927b971191a7431f8eb2fcddadcff301, type: 3}
-  m_Name: Block
+  m_Script: {fileID: 11500000, guid: 6f739bd309a144978936f5701e3ff45f, type: 3}
+  m_Name: Player characteristic 2
   m_EditorClassIdentifier: 
-  id: 1
-  itemType: 4
-  icon: {fileID: 21300000, guid: c1c53273842aff74eaaf609a8c4be7f3, type: 3}
-  prefab: {fileID: 0}
-  count: 0
+  gameClass: 1
+  health: 1
+  speed: 2
+  jumpMultiplier: 3

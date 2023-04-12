@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Data;
 using Infrastructure.Factory;
 using Infrastructure.Services;
 using MapLogic;
 using Mirror;
+using Networking.Synchronization;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Networking
 {
@@ -18,7 +19,7 @@ namespace Networking
         private IMapProvider _mapProvider;
         private IGameFactory _gameFactory;
         private IStaticDataService _staticData;
-
+        private ServerData _serverData;
 
         public void Construct(IMapProvider mapProvider, IGameFactory gameFactory, IStaticDataService staticDataService)
         {
@@ -31,6 +32,7 @@ namespace Networking
         public override void OnStartServer()
         {
             base.OnStartServer();
+            _serverData = new ServerData(_staticData);
             NetworkServer.RegisterHandler<CharacterMessage>(OnCreateCharacter);
         }
         
@@ -39,8 +41,7 @@ namespace Networking
         {
             base.OnClientConnect();
             ConnectionHappened?.Invoke();
-            NetworkClient.RegisterHandler<InventoryMessage>(OnInventory);
-            CharacterMessage characterMessage = new CharacterMessage() {GameClass = GameClass.Builder, NickName = ""};
+            CharacterMessage characterMessage = new CharacterMessage() {GameClass = (GameClass)Random.Range(0,4), NickName = ""};
             NetworkClient.Send(characterMessage);
         }
 
@@ -50,26 +51,19 @@ namespace Networking
             GameObject player;
             if (_spawnPoints.Count == 0)
             {
-                player = _gameFactory.CreatePlayer();
+                player = _gameFactory.CreatePlayer(gameClass);
             }
             else
             {
-                player = _gameFactory.CreatePlayer(_spawnPoints[_spawnPointIndex].ToUnityVector(),
+                player = _gameFactory.CreatePlayer(gameClass,_spawnPoints[_spawnPointIndex].ToUnityVector(),
                     Quaternion.identity);
                 _spawnPointIndex = (_spawnPointIndex + 1) % _spawnPoints.Count;
             }
-
+            player.GetComponent<WeaponSynchronization>().Construct(_gameFactory,_serverData);
+            _serverData.AddPlayer(conn, message.GameClass, message.NickName);
             NetworkServer.AddPlayerForConnection(conn, player);
-            var inventory = _staticData.GetInventory(gameClass).Select(item => item.id).ToArray();
-            InventoryMessage inventoryMessage = new InventoryMessage() {Inventory = inventory};
-            conn.Send(inventoryMessage);
         }
-
-
-        private void OnInventory(InventoryMessage message)
-        {
-            NetworkClient.localPlayer.gameObject.GetComponent<Player.Inventory>().SetInventory(message.Inventory);
-        }
+        
 
         public override void OnStopServer()
         {

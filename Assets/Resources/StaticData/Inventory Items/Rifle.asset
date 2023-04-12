@@ -24,7 +24,7 @@ MonoBehaviour:
   range: 100
   reloadTime: 1
   timeBetweenShots: 0
-  magazineSize: 300
+  magazineSize: 100
   bulletsPerTap: 1
   totalBullets: 900
   damage: 33

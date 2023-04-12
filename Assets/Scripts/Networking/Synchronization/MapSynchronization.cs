@@ -22,10 +22,10 @@ namespace Networking.Synchronization
 
         private const int PackageSize = 1024;
 
-        public void Construct(IMapProvider mapProvider, IMapGeneratorProvider mapGeneratorProvider)
+        public void Awake()
         {
-            _mapProvider = mapProvider;
-            _mapGeneratorProvider = mapGeneratorProvider;
+            _mapProvider = AllServices.Container.Single<IMapProvider>();
+            _mapGeneratorProvider = AllServices.Container.Single<IMapGeneratorProvider>();
         }
 
 

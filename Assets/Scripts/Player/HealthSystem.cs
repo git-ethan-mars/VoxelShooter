@@ -1,24 +1,24 @@
-﻿using System;
+﻿using Data;
+using Mirror;
+using Networking.Synchronization;
 using UnityEngine;
 
 namespace Player
 {
-    public class HealthSystem : MonoBehaviour
+    public class HealthSystem :MonoBehaviour
     {
-        [SerializeField] private int health; 
-        public event Action OnHealthChanged; 
+        public int Health { get; set; }
+        [SerializeField] private HealthSynchronization healthSynchronization;
+        private int _maxHealth;
 
-        public int Health
+        public void Construct(PlayerCharacteristic characteristic)
         {
-            get => health;
-            set => health = value;
+            _maxHealth = characteristic.health;
         }
-
-        public int MaxHealth { get; set; }
-
-        private void Awake()
+        private void Start()
         {
-            MaxHealth = health;
+            _maxHealth = Health;
         }
+        
     }
 }

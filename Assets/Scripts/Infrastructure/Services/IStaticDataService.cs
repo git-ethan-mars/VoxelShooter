@@ -9,5 +9,7 @@ namespace Infrastructure.Services
         InventoryItem GetItem(int id);
         void LoadInventories();
         List<InventoryItem> GetInventory(GameClass gameClass);
+        void LoadPlayerCharacteristics();
+        PlayerCharacteristic GetPlayerCharacteristic(GameClass gameClass);
     }
 }

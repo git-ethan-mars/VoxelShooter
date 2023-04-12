@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Infrastructure.Services;
 using Infrastructure.Services.Input;
 using Mirror;
 using UnityEngine;
@@ -26,11 +27,10 @@ namespace Inventory
             [KeyCode.Alpha5] = 4,
         };
 
-        
 
-        public void Construct(IInputService inputService)
+        private void Awake()
         {
-            _inputService = inputService;
+            _inputService = AllServices.Container.Single<IInputService>();
         }
 
         private void Update()

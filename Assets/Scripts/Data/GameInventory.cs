@@ -9,4 +9,4 @@ namespace Data
         public GameClass gameClass;
         public List<InventoryItem> inventory;
     }
-}
+}   

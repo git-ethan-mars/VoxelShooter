@@ -41,12 +41,12 @@ namespace Infrastructure.States
             var staticData = _allServices.Single<IStaticDataService>();
             staticData.LoadItems();
             staticData.LoadInventories();
-            _allServices.RegisterSingle<IMapProvider>(new MapProvider(MapReader.ReadFromFile("AncientEgypt.vxl")));
+            staticData.LoadPlayerCharacteristics();
+            _allServices.RegisterSingle<IMapProvider>(new MapProvider(Map.CreateNewMap(32,32,32)));
             _allServices.RegisterSingle<IInputService>(new StandaloneInputService());
             _allServices.RegisterSingle<IAssetProvider>(new AssetProvider());
             _allServices.RegisterSingle<IGameFactory>(
-                new GameFactory(_allServices.Single<IAssetProvider>(), _allServices.Single<IMapProvider>(),
-                    _allServices.Single<IInputService>(), _allServices.Single<IStaticDataService>()));
+                new GameFactory(_allServices.Single<IAssetProvider>(),_allServices.Single<IInputService>(), _allServices.Single<IMapProvider>(), _allServices.Single<IStaticDataService>()));
         }
     }
 }

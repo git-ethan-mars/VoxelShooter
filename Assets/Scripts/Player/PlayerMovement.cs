@@ -1,4 +1,6 @@
 using System;
+using Data;
+using Infrastructure.Services;
 using Infrastructure.Services.Input;
 using Mirror;
 using Rendering;
@@ -22,19 +24,25 @@ namespace Player
         private Vector3 _movementDirection;
 
 
-        public void Construct(IInputService inputService, float speed, float jumpMultiplier)
+        public void Construct(PlayerCharacteristic characteristic)
         {
-            Debug.Log("Construct");
-            _inputService = inputService;
-            _speed = speed;
-            _jumpMultiplier = jumpMultiplier;
+            _speed = characteristic.speed;
+            _jumpMultiplier = characteristic.jumpMultiplier;
+        }
+
+        private void Awake()
+        {
+            _inputService = AllServices.Container.Single<IInputService>();
+        }
+
+        private void Start()
+        {
             Rigidbody = GetComponent<Rigidbody>();
             Rigidbody.freezeRotation = true;
         }
 
         private void Update()
         {
-            Debug.Log("Update");
             if (!isLocalPlayer) return;
             ReadInput();
         }
@@ -52,7 +60,6 @@ namespace Player
 
         private void FixedUpdate()
         {
-            Debug.Log("FixedUpdate");
             if (!isLocalPlayer) return;
             if (IsPlayerInAir)
             {

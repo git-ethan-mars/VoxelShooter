@@ -2,6 +2,9 @@
 using Infrastructure.Factory;
 using Infrastructure.Services;
 using Mirror;
+using Networking.Synchronization;
+using Player;
+using UnityEngine;
 
 namespace Infrastructure.States
 {
@@ -34,9 +37,10 @@ namespace Infrastructure.States
                 yield return null;
             }
 
-            var player = _gameFactory.InitializeLocalPlayer();
-            _gameFactory.CreateHud(player);
-
+            var player = NetworkClient.localPlayer.gameObject;
+            player.GetComponent<Player.Inventory>().InitInventory();
+            player.GetComponent<WeaponSynchronization>();
+            _gameFactory.CreateHud(NetworkClient.localPlayer.gameObject);
         }
     }
 }
