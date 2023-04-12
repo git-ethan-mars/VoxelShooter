@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Player characteristic 1
   m_EditorClassIdentifier: 
   gameClass: 0
-  health: 123
-  speed: 123
-  jumpMultiplier: 123
+  health: 150
+  speed: 1.25
+  jumpMultiplier: 1.25
