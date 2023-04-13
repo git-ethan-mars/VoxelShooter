@@ -120,10 +120,10 @@ TextureImporter:
       name: Shotgun
       rect:
         serializedVersion: 2
-        x: 42
-        y: 911
-        width: 338
-        height: 72
+        x: 0
+        y: 1847
+        width: 450
+        height: 100
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,10 +141,10 @@ TextureImporter:
       name: Knife
       rect:
         serializedVersion: 2
-        x: 14
-        y: 808
-        width: 422
-        height: 68
+        x: 0
+        y: 1637
+        width: 450
+        height: 100
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -162,10 +162,10 @@ TextureImporter:
       name: Revolver
       rect:
         serializedVersion: 2
-        x: 137
-        y: 699
-        width: 151
-        height: 79
+        x: 0
+        y: 1358
+        width: 450
+        height: 100
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -183,10 +183,10 @@ TextureImporter:
       name: Automat
       rect:
         serializedVersion: 2
-        x: 17
-        y: 585
-        width: 409
-        height: 81
+        x: 0
+        y: 1065
+        width: 450
+        height: 100
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -204,12 +204,12 @@ TextureImporter:
       name: MP40
       rect:
         serializedVersion: 2
-        x: 135
-        y: 451
-        width: 191
-        height: 97
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 0
+        y: 660
+        width: 450
+        height: 100
+      alignment: 9
+      pivot: {x: 0.33732015, y: 0.64284056}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -225,10 +225,10 @@ TextureImporter:
       name: Boom
       rect:
         serializedVersion: 2
-        x: 24
-        y: 332
-        width: 385
-        height: 87
+        x: 0
+        y: 327
+        width: 450
+        height: 100
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
