@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: e7634cc0bf7762649a525e59875cd9d1
+guid: 6d0a4d7be4748db4393ae2029e347b57
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -33,7 +33,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -117,106 +117,127 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Guns_0
+      name: Shotgun
       rect:
         serializedVersion: 2
         x: 0
-        y: 354
-        width: 100
+        y: 1847
+        width: 450
         height: 100
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 0afa29879a9c3d64ea6219d59b2e1f90
-      internalID: -183867098
+      spriteID: a39f53295c77583408e17909ac178b3c
+      internalID: 1629097733
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Guns_3
+      name: Knife
       rect:
         serializedVersion: 2
         x: 0
-        y: 185
-        width: 100
+        y: 1637
+        width: 450
         height: 100
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 1f84fe0ac2b79cb4a95e84cd5d8bab66
-      internalID: 2005296590
+      spriteID: efc3fb80dbac8cd469a755979b946547
+      internalID: 1150218188
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Guns_5
+      name: Revolver
       rect:
         serializedVersion: 2
         x: 0
-        y: 102
-        width: 100
-        height: 58
+        y: 1358
+        width: 450
+        height: 100
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: d5509563db3072a4090a5c06a43b7275
-      internalID: 1304307358
+      spriteID: f540508eb74e35444906b3373da0ff54
+      internalID: -510781377
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Guns_9
+      name: Automat
       rect:
         serializedVersion: 2
         x: 0
-        y: 58
-        width: 100
-        height: 19
+        y: 1065
+        width: 450
+        height: 100
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: f3c74f3d5ac58b441a3e9b6f5c07a6e4
-      internalID: -465812234
+      spriteID: d79b561f6a307df4d858dfe6d852ea91
+      internalID: 1027491563
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Guns_10
+      name: MP40
       rect:
         serializedVersion: 2
         x: 0
-        y: 6
-        width: 100
-        height: 19
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        y: 660
+        width: 450
+        height: 100
+      alignment: 9
+      pivot: {x: 0.33732015, y: 0.64284056}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 4fc83436106d3a74fb3cd95e11c322e9
-      internalID: 886209943
+      spriteID: bb2ddf134d7cba14f8cc74d44c20961b
+      internalID: 1387272548
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Boom
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 327
+        width: 450
+        height: 100
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ad6cb3cb5b42f694987860ad1f35e6df
+      internalID: 631782971
       vertices: []
       indices: 
       edges: []
@@ -224,7 +245,7 @@ TextureImporter:
     outline: []
     physicsShape: []
     bones: []
-    spriteID: 4af464ab3debdea4da82d2cc148371ba
+    spriteID: 2b71ab6b32e2ad347a61078427a6dbc9
     internalID: 0
     vertices: []
     indices: 
@@ -232,17 +253,12 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      Guns_7: -702351045
-      Guns_8: -919499819
-      Guns_2: -1880600435
-      Guns_0: -183867098
-      Guns_1: 2080269000
-      Guns_6: -147945630
-      Guns_9: -465812234
-      Guns_10: 886209943
-      Guns_3: 2005296590
-      Guns_4: 817565282
-      Guns_5: 1304307358
+      Automat: 1027491563
+      Knife: 1150218188
+      Boom: 631782971
+      Shotgun: 1629097733
+      MP40: 1387272548
+      Revolver: -510781377
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0
