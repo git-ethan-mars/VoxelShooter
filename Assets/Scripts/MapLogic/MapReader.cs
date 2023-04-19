@@ -17,7 +17,7 @@ namespace MapLogic
                     return Vxl2RchConverter.LoadVxl(fileName);
                 }
 
-                throw new ArgumentException();
+                throw new ArgumentException("Неправильный путь до файла");
             }
 
             var filePath = Application.dataPath + $"/Maps/{fileName}";
@@ -39,17 +39,46 @@ namespace MapLogic
             var depth = binaryReader.ReadInt32();
             var chunks = new ChunkData[width / ChunkData.ChunkSize * height / ChunkData.ChunkSize * depth /
                                        ChunkData.ChunkSize];
+            for (var i = 0; i < chunks.Length; i++)
+            {
+                chunks[i] = new ChunkData();
+            }
             var spawnPoints = new List<SpawnPoint>();
             var map = new Map(new MapData(chunks, width, height, depth, spawnPoints));
-            for (var x = 0; x < width / ChunkData.ChunkSize; x++)
+            for (var x = 0; x < width; x++)
             {
-                for (var y = 0; y < height / ChunkData.ChunkSize; y++)
+                for (var z = 0; z < depth; z++)
                 {
-                    for (var z = 0; z < depth / ChunkData.ChunkSize; z++)
+                    byte type = 0;
+                    while (type != 2)
                     {
-                        chunks[
-                            z + y * (depth / ChunkData.ChunkSize) +
-                            x * (height / ChunkData.ChunkSize * depth / ChunkData.ChunkSize)] = ReadChunk();
+                        type = binaryReader.ReadByte();
+                        if (type == 0)
+                        {
+                            var coloredStart = binaryReader.ReadByte();
+                            var coloredEnd = binaryReader.ReadByte();
+                            for (var i = coloredStart; i <= coloredEnd; i++)
+                            {
+                                var color = BlockColor.UInt32ToColor(binaryReader.ReadUInt32());
+                                map.MapData.Chunks[map.FindChunkNumberByPosition(x, i, z)].Blocks[
+                                        x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
+                                        i % ChunkData.ChunkSize * ChunkData.ChunkSize + z % ChunkData.ChunkSize] =
+                                    new BlockData(color);
+                            }
+                        }
+
+                        if (type == 1)
+                        {
+                            var solidStart = binaryReader.ReadByte();
+                            var solidEnd = binaryReader.ReadByte();
+                            for (var i = solidStart; i <= solidEnd; i++)
+                            {
+                                map.MapData.Chunks[map.FindChunkNumberByPosition(x, i, z)].Blocks[
+                                        x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
+                                        i % ChunkData.ChunkSize * ChunkData.ChunkSize + z % ChunkData.ChunkSize] =
+                                    new BlockData(map.MapData.SolidColor);
+                            }
+                        }
                     }
                 }
             }
@@ -64,28 +93,6 @@ namespace MapLogic
             }
 
             return map;
-
-            ChunkData ReadChunk()
-            {
-                var chunk = new ChunkData();
-                for (var x = 0; x < ChunkData.ChunkSize; x++)
-                {
-                    for (var y = 0; y < ChunkData.ChunkSize; y++)
-                    {
-                        for (var z = 0; z < ChunkData.ChunkSize; z++)
-                        {
-                            var blockColor = binaryReader.ReadUInt32();
-                            var block = new BlockData
-                            {
-                                Color = BlockColor.UIntToColor(blockColor)
-                            };
-                            chunk.Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] = block;
-                        }
-                    }
-                }
-
-                return chunk;
-            }
         }
     }
 }

@@ -137,7 +137,7 @@ namespace Rendering
             {
                 ChunkData.Blocks[
                     blockPositions[i].x * ChunkData.ChunkSizeSquared + blockPositions[i].y * ChunkData.ChunkSize +
-                    blockPositions[i].z] = new BlockData {Color = colors[i]};
+                    blockPositions[i].z] = new BlockData(colors[i]);
                 SetFaces(blockPositions[i].x, blockPositions[i].y, blockPositions[i].z);
                 SetNeighboursFaces(blockPositions[i]);
                 if (blockPositions[i].z == ChunkData.ChunkSize - 1 && FrontNeighbour is not null)
@@ -152,9 +152,10 @@ namespace Rendering
                     neighbourChunksToRegenerate |= Faces.Back;
                 }
 
-                if (blockPositions[i].y == ChunkData.ChunkSize - 1 && UpperNeighbour is not null)
+                if (blockPositions[i].y == ChunkData.ChunkSize - 1)
                 {
-                    UpperNeighbour.SetFaces(blockPositions[i].x, 0, blockPositions[i].z);
+                    if (UpperNeighbour is not null)
+                        UpperNeighbour.SetFaces(blockPositions[i].x, 0, blockPositions[i].z);
                     neighbourChunksToRegenerate |= Faces.Top;
                 }
 
@@ -187,7 +188,7 @@ namespace Rendering
                 BackNeighbour.RegenerateMesh();
             }
 
-            if (neighbourChunksToRegenerate.HasFlag(Faces.Top))
+            if (neighbourChunksToRegenerate.HasFlag(Faces.Top) && UpperNeighbour is not null)
             {
                 UpperNeighbour.RegenerateMesh();
             }
@@ -327,8 +328,8 @@ namespace Rendering
             ChunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] = Faces.None;
             if (ChunkData.Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
                 .Equals(BlockColor.Empty)) return;
-            if (!IsValidPosition(x, y + 1, z) && UpperNeighbour is not null &&
-                UpperNeighbour.ChunkData.Blocks[x * ChunkData.ChunkSizeSquared + z].Color.Equals(BlockColor.Empty) ||
+            if (!IsValidPosition(x, y + 1, z) && (UpperNeighbour is null || UpperNeighbour is not null &&
+                UpperNeighbour.ChunkData.Blocks[x * ChunkData.ChunkSizeSquared + z].Color.Equals(BlockColor.Empty)) ||
                 IsValidPosition(x, y + 1, z) && ChunkData
                     .Blocks[x * ChunkData.ChunkSizeSquared + (y + 1) * ChunkData.ChunkSize + z].Color
                     .Equals(BlockColor.Empty))

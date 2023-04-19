@@ -11,12 +11,12 @@ namespace Networking.Synchronization
     {
         private ServerData _serverData;
 
-        private IGameFactory _gameFactory;
+        private IParticleFactory _particleFactory;
 
-        public void Construct(IGameFactory gameFactory, ServerData serverData)
+        public void Construct(IParticleFactory particleFactory, ServerData serverData)
         {
             _serverData = serverData;
-            _gameFactory = gameFactory;
+            _particleFactory = particleFactory;
         }
 
         [Command]
@@ -51,14 +51,14 @@ namespace Networking.Synchronization
         [TargetRpc]
         private void SendWeaponState(int weaponId, int bulletsInMagazine)
         {
-            var weapon = GetComponent<Player.Inventory>().Weapons[weaponId];
+            var weapon = GetComponent<PlayerLogic.Inventory>().Weapons[weaponId];
             weapon.BulletsInMagazine = bulletsInMagazine;
         }
 
         [TargetRpc]
         private void SendReload(int weaponId, int totalBullets, int bulletsInMagazine)
         {
-            var weapon = GetComponent<Player.Inventory>().Weapons[weaponId];
+            var weapon = GetComponent<PlayerLogic.Inventory>().Weapons[weaponId];
             weapon.TotalBullets = totalBullets;
             weapon.BulletsInMagazine = bulletsInMagazine;
         }
@@ -139,34 +139,31 @@ namespace Networking.Synchronization
             if (rayHit.collider.CompareTag("Head"))
             {
                 var connection = rayHit.collider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
-                _serverData.GetPlayerData(connection.connectionId).Characteristic.health -=
-                    (int) (weapon.Damage * weapon.HeadMultiplier);
+                GetComponent<HealthSynchronization>().Damage(connection, (int) (weapon.HeadMultiplier * weapon.Damage));
             }
 
             if (rayHit.collider.CompareTag("Leg"))
             {
                 var connection = rayHit.collider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
-                _serverData.GetPlayerData(connection.connectionId).Characteristic.health -=
-                    (int) (weapon.Damage * weapon.LegMultiplier);
+                GetComponent<HealthSynchronization>().Damage(connection, (int) (weapon.LegMultiplier * weapon.Damage));
             }
 
             if (rayHit.collider.CompareTag("Chest"))
             {
                 var connection = rayHit.collider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
-                _serverData.GetPlayerData(connection.connectionId).Characteristic.health -=
-                    (int) (weapon.Damage * weapon.ChestMultiplier);
+                GetComponent<HealthSynchronization>()
+                    .Damage(connection, (int) (weapon.ChestMultiplier * weapon.Damage));
             }
 
             if (rayHit.collider.CompareTag("Arm"))
             {
                 var connection = rayHit.collider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
-                _serverData.GetPlayerData(connection.connectionId).Characteristic.health -=
-                    (int) (weapon.Damage * weapon.ArmMultiplier);
+                GetComponent<HealthSynchronization>().Damage(connection, (int) (weapon.ArmMultiplier * weapon.Damage));
             }
 
             if (rayHit.collider.CompareTag("Chunk"))
             {
-                _gameFactory.CreateBulletHole(rayHit.point, Quaternion.Euler(rayHit.normal.y * -90,
+                _particleFactory.CreateBulletHole(rayHit.point, Quaternion.Euler(rayHit.normal.y * -90,
                     rayHit.normal.x * 90 + rayHit.normal.z * -180, 0));
             }
         }

@@ -1,6 +1,5 @@
 ﻿using Data;
 using Infrastructure.Factory;
-using Infrastructure.Services;
 using Optimization;
 using Rendering;
 using Unity.Collections;
@@ -12,12 +11,12 @@ namespace MapLogic
     public class MapGenerator : MonoBehaviour
     {
         public ChunkRenderer[] Chunks { get; private set; }
-        private IMapProvider _mapProvider;
+        public Map Map { get; private set; }
         private IGameFactory _chunkFactory;
 
-        public void Construct(IMapProvider mapProvider, IGameFactory gameFactory)
+        public void Construct(Map map, IGameFactory gameFactory)
         {
-            _mapProvider = mapProvider;
+            Map = map;
             _chunkFactory = gameFactory;
             CreateChunkRenderers();
             SetNeighbours();
@@ -37,8 +36,8 @@ namespace MapLogic
                 var rightNeighbourBlocks = new NativeArray<BlockData>(0, Allocator.TempJob);
                 var leftNeighbourBlocks = new NativeArray<BlockData>(0, Allocator.TempJob);
                 if (i + 1 < Chunks.Length &&
-                    i / (_mapProvider.Map.MapData.Depth / ChunkData.ChunkSize) ==
-                    (i + 1) / (_mapProvider.Map.MapData.Depth / ChunkData.ChunkSize))
+                    i / (Map.MapData.Depth / ChunkData.ChunkSize) ==
+                    (i + 1) / (Map.MapData.Depth / ChunkData.ChunkSize))
                 {
                     frontNeighbourBlocks.Dispose();
                     frontNeighbourBlocks =
@@ -54,8 +53,8 @@ namespace MapLogic
                     }
                 }
 
-                if (i - 1 >= 0 && i / (_mapProvider.Map.MapData.Depth / ChunkData.ChunkSize) ==
-                    (i - 1) / (_mapProvider.Map.MapData.Depth / ChunkData.ChunkSize))
+                if (i - 1 >= 0 && i / (Map.MapData.Depth / ChunkData.ChunkSize) ==
+                    (i - 1) / (Map.MapData.Depth / ChunkData.ChunkSize))
                 {
                     backNeighbourBlocks.Dispose();
                     backNeighbourBlocks =
@@ -71,11 +70,11 @@ namespace MapLogic
                     }
                 }
 
-                if (i + _mapProvider.Map.MapData.Depth / ChunkData.ChunkSize < Chunks.Length &&
-                    i / (_mapProvider.Map.MapData.Depth / ChunkData.ChunkSize * _mapProvider.Map.MapData.Height /
+                if (i + Map.MapData.Depth / ChunkData.ChunkSize < Chunks.Length &&
+                    i / (Map.MapData.Depth / ChunkData.ChunkSize * Map.MapData.Height /
                          ChunkData.ChunkSize) ==
-                    (i + _mapProvider.Map.MapData.Depth / ChunkData.ChunkSize) /
-                    (_mapProvider.Map.MapData.Depth / ChunkData.ChunkSize * _mapProvider.Map.MapData.Height /
+                    (i + Map.MapData.Depth / ChunkData.ChunkSize) /
+                    (Map.MapData.Depth / ChunkData.ChunkSize * Map.MapData.Height /
                      ChunkData.ChunkSize))
                 {
                     upperNeighbourBlocks.Dispose();
@@ -86,17 +85,17 @@ namespace MapLogic
                         for (var z = 0; z < ChunkData.ChunkSize; z++)
                         {
                             upperNeighbourBlocks[x * ChunkData.ChunkSize + z] =
-                                Chunks[i + _mapProvider.Map.MapData.Depth / ChunkData.ChunkSize].ChunkData
+                                Chunks[i + Map.MapData.Depth / ChunkData.ChunkSize].ChunkData
                                     .Blocks[x * ChunkData.ChunkSizeSquared + z];
                         }
                     }
                 }
 
-                if (i - _mapProvider.Map.MapData.Depth / ChunkData.ChunkSize >= 0 &&
-                    i / (_mapProvider.Map.MapData.Depth / ChunkData.ChunkSize * _mapProvider.Map.MapData.Height /
+                if (i - Map.MapData.Depth / ChunkData.ChunkSize >= 0 &&
+                    i / (Map.MapData.Depth / ChunkData.ChunkSize * Map.MapData.Height /
                          ChunkData.ChunkSize) ==
-                    (i - _mapProvider.Map.MapData.Depth / ChunkData.ChunkSize) /
-                    (_mapProvider.Map.MapData.Depth / ChunkData.ChunkSize * _mapProvider.Map.MapData.Height /
+                    (i - Map.MapData.Depth / ChunkData.ChunkSize) /
+                    (Map.MapData.Depth / ChunkData.ChunkSize * Map.MapData.Height /
                      ChunkData.ChunkSize))
                 {
                     lowerNeighbourBlocks.Dispose();
@@ -107,7 +106,7 @@ namespace MapLogic
                         for (var z = 0; z < ChunkData.ChunkSize; z++)
                         {
                             lowerNeighbourBlocks[x * ChunkData.ChunkSize + z] =
-                                Chunks[i - _mapProvider.Map.MapData.Depth / ChunkData.ChunkSize].ChunkData
+                                Chunks[i - Map.MapData.Depth / ChunkData.ChunkSize].ChunkData
                                     .Blocks[
                                         x * ChunkData.ChunkSizeSquared +
                                         (ChunkData.ChunkSize - 1) * ChunkData.ChunkSize + z];
@@ -115,7 +114,7 @@ namespace MapLogic
                     }
                 }
 
-                if (i + _mapProvider.Map.MapData.Height / ChunkData.ChunkSize * _mapProvider.Map.MapData.Depth /
+                if (i + Map.MapData.Height / ChunkData.ChunkSize * Map.MapData.Depth /
                     ChunkData.ChunkSize < Chunks.Length)
                 {
                     rightNeighbourBlocks.Dispose();
@@ -127,14 +126,14 @@ namespace MapLogic
                         {
                             rightNeighbourBlocks[y * ChunkData.ChunkSize + z] =
                                 Chunks[
-                                        i + _mapProvider.Map.MapData.Height / ChunkData.ChunkSize *
-                                        _mapProvider.Map.MapData.Depth / ChunkData.ChunkSize].ChunkData
+                                        i + Map.MapData.Height / ChunkData.ChunkSize *
+                                        Map.MapData.Depth / ChunkData.ChunkSize].ChunkData
                                     .Blocks[y * ChunkData.ChunkSize + z];
                         }
                     }
                 }
 
-                if (i - _mapProvider.Map.MapData.Height / ChunkData.ChunkSize * _mapProvider.Map.MapData.Depth /
+                if (i - Map.MapData.Height / ChunkData.ChunkSize * Map.MapData.Depth /
                     ChunkData.ChunkSize >= 0)
                 {
                     leftNeighbourBlocks.Dispose();
@@ -146,8 +145,8 @@ namespace MapLogic
                         {
                             leftNeighbourBlocks[y * ChunkData.ChunkSize + z] =
                                 Chunks[
-                                        i - _mapProvider.Map.MapData.Height / ChunkData.ChunkSize *
-                                        _mapProvider.Map.MapData.Depth / ChunkData.ChunkSize].ChunkData
+                                        i - Map.MapData.Height / ChunkData.ChunkSize *
+                                        Map.MapData.Depth / ChunkData.ChunkSize].ChunkData
                                     .Blocks[(ChunkData.ChunkSize - 1) * ChunkData.ChunkSizeSquared +
                                             y * ChunkData.ChunkSize + z];
                         }
@@ -195,63 +194,63 @@ namespace MapLogic
             for (var i = 0; i < Chunks.Length; i++)
             {
                 if (i + 1 < Chunks.Length &&
-                    i / (_mapProvider.Map.MapData.Depth / ChunkData.ChunkSize) ==
-                    (i + 1) / (_mapProvider.Map.MapData.Depth / ChunkData.ChunkSize))
+                    i / (Map.MapData.Depth / ChunkData.ChunkSize) ==
+                    (i + 1) / (Map.MapData.Depth / ChunkData.ChunkSize))
                     Chunks[i].FrontNeighbour = Chunks[i + 1];
-                if (i - 1 >= 0 && i / (_mapProvider.Map.MapData.Depth / ChunkData.ChunkSize) ==
-                    (i - 1) / (_mapProvider.Map.MapData.Depth / ChunkData.ChunkSize))
+                if (i - 1 >= 0 && i / (Map.MapData.Depth / ChunkData.ChunkSize) ==
+                    (i - 1) / (Map.MapData.Depth / ChunkData.ChunkSize))
                     Chunks[i].BackNeighbour = Chunks[i - 1];
-                if (i + _mapProvider.Map.MapData.Depth / ChunkData.ChunkSize < Chunks.Length &&
-                    i / (_mapProvider.Map.MapData.Depth / ChunkData.ChunkSize * _mapProvider.Map.MapData.Height /
+                if (i + Map.MapData.Depth / ChunkData.ChunkSize < Chunks.Length &&
+                    i / (Map.MapData.Depth / ChunkData.ChunkSize * Map.MapData.Height /
                          ChunkData.ChunkSize) ==
-                    (i + _mapProvider.Map.MapData.Depth / ChunkData.ChunkSize) /
-                    (_mapProvider.Map.MapData.Depth / ChunkData.ChunkSize * _mapProvider.Map.MapData.Height /
+                    (i + Map.MapData.Depth / ChunkData.ChunkSize) /
+                    (Map.MapData.Depth / ChunkData.ChunkSize * Map.MapData.Height /
                      ChunkData.ChunkSize))
-                    Chunks[i].UpperNeighbour = Chunks[i + _mapProvider.Map.MapData.Depth / ChunkData.ChunkSize];
-                if (i - _mapProvider.Map.MapData.Depth / ChunkData.ChunkSize >= 0 &&
-                    i / (_mapProvider.Map.MapData.Depth / ChunkData.ChunkSize * _mapProvider.Map.MapData.Height /
+                    Chunks[i].UpperNeighbour = Chunks[i + Map.MapData.Depth / ChunkData.ChunkSize];
+                if (i - Map.MapData.Depth / ChunkData.ChunkSize >= 0 &&
+                    i / (Map.MapData.Depth / ChunkData.ChunkSize * Map.MapData.Height /
                          ChunkData.ChunkSize) ==
-                    (i - _mapProvider.Map.MapData.Depth / ChunkData.ChunkSize) /
-                    (_mapProvider.Map.MapData.Depth / ChunkData.ChunkSize * _mapProvider.Map.MapData.Height /
+                    (i - Map.MapData.Depth / ChunkData.ChunkSize) /
+                    (Map.MapData.Depth / ChunkData.ChunkSize * Map.MapData.Height /
                      ChunkData.ChunkSize))
-                    Chunks[i].LowerNeighbour = Chunks[i - _mapProvider.Map.MapData.Depth / ChunkData.ChunkSize];
-                if (i + _mapProvider.Map.MapData.Height / ChunkData.ChunkSize * _mapProvider.Map.MapData.Depth /
+                    Chunks[i].LowerNeighbour = Chunks[i - Map.MapData.Depth / ChunkData.ChunkSize];
+                if (i + Map.MapData.Height / ChunkData.ChunkSize * Map.MapData.Depth /
                     ChunkData.ChunkSize < Chunks.Length)
                     Chunks[i].RightNeighbour =
                         Chunks[
-                            i + _mapProvider.Map.MapData.Height / ChunkData.ChunkSize * _mapProvider.Map.MapData.Depth /
+                            i + Map.MapData.Height / ChunkData.ChunkSize * Map.MapData.Depth /
                             ChunkData.ChunkSize];
-                if (i - _mapProvider.Map.MapData.Height / ChunkData.ChunkSize * _mapProvider.Map.MapData.Depth /
+                if (i - Map.MapData.Height / ChunkData.ChunkSize * Map.MapData.Depth /
                     ChunkData.ChunkSize >= 0)
                     Chunks[i].LeftNeighbour =
                         Chunks[
-                            i - _mapProvider.Map.MapData.Height / ChunkData.ChunkSize * _mapProvider.Map.MapData.Depth /
+                            i - Map.MapData.Height / ChunkData.ChunkSize * Map.MapData.Depth /
                             ChunkData.ChunkSize];
             }
         }
 
         private void CreateChunkRenderers()
         {
-            Chunks = new ChunkRenderer[_mapProvider.Map.MapData.Width / ChunkData.ChunkSize *
-                                       _mapProvider.Map.MapData.Height /
+            Chunks = new ChunkRenderer[Map.MapData.Width / ChunkData.ChunkSize *
+                                       Map.MapData.Height /
                                        ChunkData.ChunkSize *
-                                       _mapProvider.Map.MapData.Depth /
+                                       Map.MapData.Depth /
                                        ChunkData.ChunkSize];
-            for (var x = 0; x < _mapProvider.Map.MapData.Width / ChunkData.ChunkSize; x++)
+            for (var x = 0; x < Map.MapData.Width / ChunkData.ChunkSize; x++)
             {
-                for (var y = 0; y < _mapProvider.Map.MapData.Height / ChunkData.ChunkSize; y++)
+                for (var y = 0; y < Map.MapData.Height / ChunkData.ChunkSize; y++)
                 {
-                    for (var z = 0; z < _mapProvider.Map.MapData.Depth / ChunkData.ChunkSize; z++)
+                    for (var z = 0; z < Map.MapData.Depth / ChunkData.ChunkSize; z++)
                     {
-                        var index = z + y * _mapProvider.Map.MapData.Depth / ChunkData.ChunkSize +
-                                    x * _mapProvider.Map.MapData.Height / ChunkData.ChunkSize *
-                                    _mapProvider.Map.MapData.Depth /
+                        var index = z + y * Map.MapData.Depth / ChunkData.ChunkSize +
+                                    x * Map.MapData.Height / ChunkData.ChunkSize *
+                                    Map.MapData.Depth /
                                     ChunkData.ChunkSize;
                         var chunkRenderer = _chunkFactory.CreateChunkRenderer(new Vector3Int(x * ChunkData.ChunkSize,
                             y * ChunkData.ChunkSize,
                             z * ChunkData.ChunkSize), Quaternion.identity, transform);
                         Chunks[index] = chunkRenderer.GetComponent<ChunkRenderer>();
-                        Chunks[index].ChunkData = _mapProvider.Map.MapData.Chunks[index];
+                        Chunks[index].ChunkData = Map.MapData.Chunks[index];
                     }
                 }
             }

@@ -1,4 +1,5 @@
-﻿using Infrastructure.AssetManagement;
+﻿using Data;
+using Infrastructure.AssetManagement;
 using Networking.Synchronization;
 using Rendering;
 using UI;
@@ -12,11 +13,11 @@ namespace Inventory
         private readonly CubeRenderer _cubeRenderer;
         private readonly MapSynchronization _mapSynchronization;
 
-        public SpawnPointView(CubeRenderer cubeRenderer, MapSynchronization mapSynchronization, IAssetProvider assets)
+        public SpawnPointView(CubeRenderer cubeRenderer, MapSynchronization mapSynchronization, SpawnPointItem item)
         {
             _cubeRenderer = cubeRenderer;
             _mapSynchronization = mapSynchronization;
-            Icon = assets.Load<Sprite>(SpritePath.SpawnPointPath);
+            Icon = item.inventoryIcon;
         }
 
         public void Select()
@@ -32,6 +33,7 @@ namespace Inventory
         public void OnLeftMouseButtonDown()
         {
             CreateSpawnPoint();
+            Debug.Log("Спавн поинт добавлен");
         }
 
         public void InnerUpdate()

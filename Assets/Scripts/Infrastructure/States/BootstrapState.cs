@@ -2,7 +2,6 @@
 using Infrastructure.Factory;
 using Infrastructure.Services;
 using Infrastructure.Services.Input;
-using MapLogic;
 
 namespace Infrastructure.States
 {
@@ -42,11 +41,11 @@ namespace Infrastructure.States
             staticData.LoadItems();
             staticData.LoadInventories();
             staticData.LoadPlayerCharacteristics();
-            _allServices.RegisterSingle<IMapProvider>(new MapProvider(Map.CreateNewMap(32,32,32)));
             _allServices.RegisterSingle<IInputService>(new StandaloneInputService());
             _allServices.RegisterSingle<IAssetProvider>(new AssetProvider());
+            _allServices.RegisterSingle<IParticleFactory>(new ParticleFactory(_allServices.Single<IAssetProvider>()));
             _allServices.RegisterSingle<IGameFactory>(
-                new GameFactory(_allServices.Single<IAssetProvider>(),_allServices.Single<IInputService>(), _allServices.Single<IMapProvider>(), _allServices.Single<IStaticDataService>()));
+                new GameFactory(_allServices.Single<IAssetProvider>(),_allServices.Single<IInputService>(), staticData));
         }
     }
 }

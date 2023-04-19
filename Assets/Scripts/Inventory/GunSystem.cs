@@ -6,6 +6,7 @@ using TMPro;
 using UI;
 using UnityEngine;
 using Object = UnityEngine.Object;
+using Vector3 = System.Numerics.Vector3;
 
 namespace Inventory
 {
@@ -29,8 +30,7 @@ namespace Inventory
             _gameFactory = gameFactory;
             _inputService = inputService;
             _weapon = configuration;
-            Model = Object.Instantiate(_weapon.Prefab,
-                itemPosition);
+            Model = _gameFactory.CreateGameModel(_weapon.Prefab, itemPosition);
             Model.SetActive(false);
             Icon = _weapon.Icon;
             _attackPoint = Model.GetComponentInChildren<Transform>();

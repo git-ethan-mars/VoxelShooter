@@ -32,5 +32,9 @@ namespace Networking
             return _dataByConnectionId.TryGetValue(id, out var playerData) ? playerData : null;
         }
 
+        public void UpdatePlayer()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

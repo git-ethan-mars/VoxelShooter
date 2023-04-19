@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Data
 {
@@ -6,9 +7,8 @@ namespace Data
     {
         public int id;
         public ItemType itemType;
-        [Header("Visual/UI")]
-        public Sprite icon;
-        [Header("Model")]
+        [FormerlySerializedAs("icon")] [Header("Visual/UI")]
+        public Sprite inventoryIcon;
         public GameObject prefab;
     }
     public enum ItemType

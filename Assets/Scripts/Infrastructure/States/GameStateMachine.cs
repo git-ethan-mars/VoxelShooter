@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
 using Infrastructure.Services;
 
@@ -10,15 +11,17 @@ namespace Infrastructure.States
         private readonly Dictionary<Type, IExitableState> _states;
         private IExitableState _activeState;
 
-        public GameStateMachine(ICoroutineRunner coroutineRunner, SceneLoader sceneLoader, AllServices allServices)
+        public GameStateMachine(SceneLoader sceneLoader, AllServices allServices)
         {
             _states = new Dictionary<Type, IExitableState>
             {
                 [typeof(BootstrapState)] = new BootstrapState(this, sceneLoader, allServices),
-                [typeof(LoadMapState)] = new LoadMapState(this, sceneLoader, allServices.Single<IGameFactory>()),
+                [typeof(LoadMapState)] = new LoadMapState(this, sceneLoader, allServices.Single<IGameFactory>(),
+                    allServices.Single<IStaticDataService>(), allServices.Single<IAssetProvider>(), allServices.Single<IParticleFactory>()),
                 [typeof(GameLoopState)] =
-                    new GameLoopState(coroutineRunner, allServices.Single<IGameFactory>())
+                    new GameLoopState(allServices.Single<IGameFactory>())
             };
+            
         }
 
         public void Enter<TState>() where TState : class, IState

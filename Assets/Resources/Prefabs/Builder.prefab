@@ -41,7 +41,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1024979548210620896}
-  m_Mesh: {fileID: -2432090755550338912, guid: 96d04f8ba5f01554faf1a5444838c58a, type: 3}
+  m_Mesh: {fileID: 4300000, guid: 021e634f948aa1b49ad93b5707d3ad9a, type: 2}
 --- !u!23 &1024979548210620907
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -62,7 +62,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b407fe7cbe382ec40a898ebf88dd6c62, type: 2}
+  - {fileID: 2100000, guid: a6159b475e206684fa39c04e4cf06628, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -185,11 +185,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38f7f248a7354052a8f101e84db66359, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0.1
   placeDistance: 0
-  attackPoint: {fileID: 0}
+  itemPosition: {fileID: 0}
+  inventoryView: {fileID: 0}
 --- !u!114 &4065092637146402501
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -217,9 +215,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4cdc2635cc8a9a4783582c488ddd908, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0.1
   sensitivityX: 400
   sensitivityY: 400
-  playerGameObject: {fileID: 0}
+  headTransform: {fileID: 0}
 --- !u!54 &1992078693207383822
 Rigidbody:
   m_ObjectHideFlags: 0

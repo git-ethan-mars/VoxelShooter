@@ -7,14 +7,23 @@ namespace Data
     public class PlayerData
     {
         public string NickName;
-        public PlayerCharacteristic Characteristic;
+        public GameClass gameClass;
+        public int health;
+        public int maxHealth;
+        public float speed;
+        public float jumpMultiplier;
         public List<int> ItemIds;
         public readonly Dictionary<int, Weapon> weaponsById;
 
         public PlayerData(GameClass chosenClass, string nick, IStaticDataService staticDataService)
         {
             NickName = nick;
-            Characteristic = staticDataService.GetPlayerCharacteristic(chosenClass);
+            var characteristic = staticDataService.GetPlayerCharacteristic(chosenClass);
+            gameClass = chosenClass;
+            health = characteristic.maxHealth;
+            maxHealth = characteristic.maxHealth;
+            speed = characteristic.speed;
+            jumpMultiplier = characteristic.jumpMultiplier;
             ItemIds = staticDataService.GetInventory(chosenClass).Select(item => item.id).ToList();
             weaponsById = new Dictionary<int, Weapon>();
             foreach (var itemId in ItemIds)

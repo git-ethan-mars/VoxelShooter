@@ -1,73 +1,114 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Data;
 using Infrastructure.Factory;
 using Infrastructure.Services;
 using MapLogic;
 using Mirror;
-using Networking.Synchronization;
-using UnityEngine;
-using Random = UnityEngine.Random;
+using PlayerLogic;
 
 namespace Networking
 {
     public class CustomNetworkManager : NetworkManager
     {
-        public event Action ConnectionHappened;
-        private List<SpawnPoint> _spawnPoints;
+        public ServerData ServerData { get; private set; }
+        public IEntityFactory EntityFactory { get; set; }
+        public event Action<Map> MapLoaded;
+        public event Action<Map> MapDownloaded;
         private int _spawnPointIndex;
-        private IMapProvider _mapProvider;
-        private IGameFactory _gameFactory;
+        private List<byte> _byteChunks;
+        private Map _map;
         private IStaticDataService _staticData;
-        private ServerData _serverData;
 
-        public void Construct(IMapProvider mapProvider, IGameFactory gameFactory, IStaticDataService staticDataService)
+        public void Construct(IStaticDataService staticData)
         {
-            _mapProvider = mapProvider;
-            _gameFactory = gameFactory;
-            _staticData = staticDataService;
-            _spawnPoints = _mapProvider.Map.MapData.SpawnPoints;
+            _staticData = staticData;
+            _byteChunks = new List<byte>();
         }
 
         public override void OnStartServer()
         {
-            base.OnStartServer();
-            _serverData = new ServerData(_staticData);
-            NetworkServer.RegisterHandler<CharacterMessage>(OnCreateCharacter);
-        }
-        
-
-        public override void OnClientConnect()
-        {
-            base.OnClientConnect();
-            ConnectionHappened?.Invoke();
-            CharacterMessage characterMessage = new CharacterMessage() {GameClass = (GameClass)Random.Range(0,4), NickName = ""};
-            NetworkClient.Send(characterMessage);
+            ServerData = new ServerData(_staticData);
+            NetworkServer.RegisterHandler<CharacterMessage>(OnChooseClass);
+            _map = MapReader.ReadFromFile("lastsav.rch");
+            MapLoaded?.Invoke(_map);
         }
 
-        private void OnCreateCharacter(NetworkConnectionToClient conn, CharacterMessage message)
+        public override void OnStartClient()
         {
-            GameClass gameClass = message.GameClass;
-            GameObject player;
-            if (_spawnPoints.Count == 0)
-            {
-                player = _gameFactory.CreatePlayer(gameClass);
-            }
-            else
-            {
-                player = _gameFactory.CreatePlayer(gameClass,_spawnPoints[_spawnPointIndex].ToUnityVector(),
-                    Quaternion.identity);
-                _spawnPointIndex = (_spawnPointIndex + 1) % _spawnPoints.Count;
-            }
-            player.GetComponent<WeaponSynchronization>().Construct(_gameFactory,_serverData);
-            _serverData.AddPlayer(conn, message.GameClass, message.NickName);
-            NetworkServer.AddPlayerForConnection(conn, player);
+            NetworkClient.RegisterHandler<MapMessage>(OnMapLoad);
+            NetworkClient.RegisterHandler<HealthMessage>(OnHealthChange);
         }
-        
+
+
+        public override void OnServerReady(NetworkConnectionToClient conn)
+        {
+            base.OnServerReady(conn);
+            if (NetworkClient.connection.connectionId == conn.connectionId) return;
+            MapMessage[] mapMessages = SplitMap(16000);
+            for (var i = 0; i < mapMessages.Length; i++)
+            {
+                conn.Send(mapMessages[i]);
+            }
+        }
 
         public override void OnStopServer()
         {
-            //MapWriter.SaveMap("test.rch", _mapProvider.Map);
+            MapWriter.SaveMap("lastsav.rch", _map);
+        }
+
+        public void ChangeClass(GameClass gameClass)
+        {
+            CharacterMessage characterMessage = new CharacterMessage()
+                {GameClass = gameClass, NickName = ""};
+            NetworkClient.Send(characterMessage);
+        }
+
+
+        private void OnMapLoad(MapMessage mapMessage)
+        {
+            _byteChunks.AddRange(mapMessage.ByteChunk);
+            if (!mapMessage.IsFinalChunk) return;
+            _map = MapReader.ReadFromStream(new MemoryStream(_byteChunks.ToArray()));
+            MapDownloaded?.Invoke(_map);
+        }
+
+        private void OnChooseClass(NetworkConnectionToClient conn, CharacterMessage message)
+        {
+            var player = EntityFactory.CreatePlayer(conn, message);
+            ServerData.AddPlayer(conn, message.GameClass, message.NickName);
+            NetworkServer.AddPlayerForConnection(conn, player);
+        }
+
+
+        private void OnHealthChange(HealthMessage healthMessage)
+        {
+            NetworkClient.localPlayer.gameObject.GetComponent<HealthSystem>()
+                .UpdateHealth(healthMessage.CurrentHealth, healthMessage.MaxHealth);
+        }
+
+
+        private MapMessage[] SplitMap(int packageSize)
+        {
+            var memoryStream = new MemoryStream();
+            MapWriter.WriteMap(_map, memoryStream);
+            var bytes = memoryStream.ToArray();
+            var messages = new List<MapMessage>();
+
+            for (var i = 0; i < bytes.Length; i += packageSize)
+            {
+                if (bytes.Length <= i + packageSize)
+                {
+                    messages.Add(new MapMessage(bytes[i..bytes.Length], true));
+                }
+                else
+                {
+                    messages.Add(new MapMessage(bytes[i..(i + packageSize)], false));
+                }
+            }
+
+            return messages.ToArray();
         }
     }
 }

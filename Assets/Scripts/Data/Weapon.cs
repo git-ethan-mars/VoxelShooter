@@ -48,7 +48,7 @@ namespace Data
             IsAutomatic = primaryWeapon.isAutomatic;
             Damage = primaryWeapon.damage;
             Prefab = primaryWeapon.prefab;
-            Icon = primaryWeapon.icon;
+            Icon = primaryWeapon.inventoryIcon;
             ID = primaryWeapon.id;
             Range = primaryWeapon.range;
         }

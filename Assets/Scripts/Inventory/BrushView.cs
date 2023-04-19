@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using Data;
-using Infrastructure.AssetManagement;
+﻿using Data;
+using Infrastructure.Factory;
 using Networking.Synchronization;
+using PlayerLogic;
 using Rendering;
 using UI;
 using UnityEngine;
@@ -10,30 +10,36 @@ namespace Inventory
 {
     public class BrushView : IInventoryItemView, ILeftMouseButtonHoldHandler
     {
+        private GameObject Model { get; }
         public Sprite Icon { get; }
         private readonly GameObject _palette;
         private Color32 _currentColor;
-        private readonly Camera _camera;
         private readonly float _placeDistance;
         private readonly CubeRenderer _cubeRenderer;
         private readonly MapSynchronization _mapSynchronization;
 
-        public BrushView(CubeRenderer cubeRenderer, MapSynchronization mapSynchronization, IAssetProvider assets, GameObject palette)
+
+        public BrushView(IGameFactory gameFactory, CubeRenderer cubeRenderer, MapSynchronization mapSynchronization,
+            GameObject palette, BrushItem configuration, GameObject player)
         {
             palette.GetComponent<PaletteCreator>().OnColorUpdate += UpdateColor;
             _cubeRenderer = cubeRenderer;
             _mapSynchronization = mapSynchronization;
             _palette = palette;
-            Icon = assets.Load<Sprite>(SpritePath.BrushPath);
+            Model = gameFactory.CreateGameModel(configuration.prefab, player.GetComponent<Player>().itemPosition);
+            Model.SetActive(false);
+            Icon = configuration.inventoryIcon;
         }
 
         public void Select()
         {
+            Model.SetActive(true);
             _palette.SetActive(true);
         }
 
         public void Unselect()
         {
+            Model.SetActive(false);
             _palette.SetActive(false);
         }
 
@@ -47,9 +53,9 @@ namespace Inventory
             var raycastResult = _cubeRenderer.GetRayCastHit(out var raycastHit);
             if (!raycastResult) return;
             {
-                _mapSynchronization.ChangeBlockState(
-                    new List<Vector3Int>() {Vector3Int.FloorToInt(raycastHit.point - raycastHit.normal / 2)},
-                    new[] {new BlockData {Color = color}});
+                _mapSynchronization.UpdateBlocksOnServer(
+                    new[] {Vector3Int.FloorToInt(raycastHit.point - raycastHit.normal / 2)},
+                    new[] {new BlockData(color)});
             }
         }
 

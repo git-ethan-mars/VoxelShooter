@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using Data;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace MapLogic
 {
@@ -32,19 +31,30 @@ namespace MapLogic
             {
                 for (var x = 0; x < Width; ++x)
                 {
+                    var z = 0;
+                    for (; z < _height; ++z)
+                    {
+                        colors[GetPosition(x, z, y)] = new Color32(89, 53, 47, 255);
+                    }
+
+                    z = 0;
                     while (true)
                     {
                         int number4ByteChunks = data[currentPosition];
                         int topColorStart = data[currentPosition + 1];
                         int topColorEnd = data[currentPosition + 2];
-                        var z = topColorStart;
                         var colorPosition = currentPosition + 4;
                         uint color;
+                        for (; z < topColorStart; ++z)
+                        {
+                            colors[GetPosition(x, z, y)] = BlockColor.Empty;
+                        }
+                        
                         for (; z <= topColorEnd; z++)
                         {
                             color = BitConverter.ToUInt32(data, colorPosition);
                             colorPosition += 4;
-                            colors[GetPosition(x, z, y)] = BlockColor.UIntToColor(color);
+                            colors[GetPosition(x, z, y)] = BlockColor.UInt32ToColor(color);
                         }
 
                         var bottomLength = topColorEnd - topColorStart + 1;
@@ -66,18 +76,17 @@ namespace MapLogic
                         {
                             color = BitConverter.ToUInt32(data, colorPosition);
                             colorPosition += 4;
-                            colors[GetPosition(x, z, y)] = BlockColor.UIntToColor(color);
+                            colors[GetPosition(x, z, y)] = BlockColor.UInt32ToColor(color);
                         }
                     }
                 }
             }
 
-            AddInnerVoxels(colors, heightOffset);
-
             var chunks =
                 new ChunkData[Width / ChunkData.ChunkSize * _height / ChunkData.ChunkSize *
                               Depth /
                               ChunkData.ChunkSize];
+
             for (var i = 0; i < chunks.Length; i++)
             {
                 chunks[i] = new ChunkData();
@@ -91,17 +100,11 @@ namespace MapLogic
                     for (var z = 0; z < Depth; z++)
                     {
                         var chunk = chunks[map.FindChunkNumberByPosition(
-                            new Vector3Int(Width - 1 - x, _height - heightOffset - 1 - y, z))];
-                        var block = chunk.Blocks[
-                            ((Width - 1 - x) & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
-                            ((_height - heightOffset - 1 - y) & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSize +
-                            (z & (ChunkData.ChunkSize - 1))];
-                        block.Color =
-                            colors[GetPosition(x, y, z)];
+                            Width - 1 - x, _height - heightOffset - 1 - y, z)];
                         chunk.Blocks[((Width - 1 - x) & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
                                      ((_height - heightOffset - 1 - y) & (ChunkData.ChunkSize - 1)) *
                                      ChunkData.ChunkSize +
-                                     (z & (ChunkData.ChunkSize - 1))] = block;
+                                     (z & (ChunkData.ChunkSize - 1))] = new BlockData(colors[GetPosition(x, y, z)]);
                     }
                 }
             }
@@ -140,28 +143,6 @@ namespace MapLogic
             }
 
             return height;
-        }
-
-        private static void AddInnerVoxels(Color32[] colors, int heightOffset)
-        {
-            for (var y = 0; y < Depth; y++)
-            {
-                for (var x = 0; x < Width; x++)
-                {
-                    var i = 0;
-                    while (colors[GetPosition(x, _height - heightOffset - 1 - i, y)]
-                           .Equals(BlockColor.Empty))
-                    {
-                        i++;
-                        if (i == _height - heightOffset) break;
-                    }
-
-                    if (i == _height - heightOffset) continue;
-                    for (var j = 0; j < i; j++)
-                        colors[GetPosition(x, _height - heightOffset - 1 - j, y)] =
-                            new Color32((byte) (89 + Random.Range(-10, 10)), 53, 47, 255);
-                }
-            }
         }
     }
 }

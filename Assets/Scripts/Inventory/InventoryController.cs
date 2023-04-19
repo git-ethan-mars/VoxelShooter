@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Data;
 using Infrastructure;
-using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
 using Infrastructure.Services.Input;
 using Networking.Synchronization;
+using PlayerLogic;
 using Rendering;
 using UI;
 using UnityEngine;
@@ -15,11 +14,10 @@ namespace Inventory
 {
     public class InventoryController : MonoBehaviour, ICoroutineRunner
     {
-        [SerializeField] private float placeDistance;
-        [SerializeField] private Transform itemPosition;
         [SerializeField] private InventoryView inventoryView;
+        private Transform _itemPosition;
         private IInputService _inputService;
-        private List<IInventoryItemView> _inventory;
+        private List<IInventoryItemView> _inventoryHandlers;
         private int _itemIndex;
         private int _maxIndex;
         private GameObject[] _boarders;
@@ -27,32 +25,32 @@ namespace Inventory
         private Camera _mainCamera;
         private MapSynchronization _mapSynchronization;
         private GameObject _palette;
-        private IAssetProvider _assets;
         private IGameFactory _gameFactory;
         private GameObject _player;
         private GameObject _hud;
+        private PlayerCharacteristic _characteristic;
 
-        public void Construct(IAssetProvider assets, IInputService inputService, IGameFactory gameFactory, GameObject hud, GameObject player)
+        public void Construct(IInputService inputService, IGameFactory gameFactory, GameObject hud, GameObject player)
         {
             AddEventHandlers(player.GetComponent<InventoryInput>());
             _player = player;
             _hud = hud;
-            _assets = assets;
             _mainCamera = Camera.main;
-            _cubeRenderer = new CubeRenderer(player.GetComponent<LineRenderer>(), _mainCamera, placeDistance);
+            _cubeRenderer = new CubeRenderer(player.GetComponent<LineRenderer>(), _mainCamera, player.GetComponent<Player>().PlaceDistance);
+            _itemPosition = player.GetComponent<Player>().itemPosition;
             _mapSynchronization = player.GetComponent<MapSynchronization>();
             _palette = hud.GetComponent<Hud>().palette;
             _gameFactory = gameFactory;
             _inputService = inputService;
-            _inventory = InitializeInventoryViews(player.GetComponent<Player.Inventory>().inventory);
-            _maxIndex = Math.Min(_inventory.Count, inventoryView.SlotsCount);
+            _inventoryHandlers = InitializeInventoryViews(player.GetComponent<PlayerLogic.Inventory>().inventory);
+            _maxIndex = Math.Min(_inventoryHandlers.Count, inventoryView.SlotsCount);
             _boarders = inventoryView.Boarders;
             for (var i = 0; i < _maxIndex; i++)
             {
-                inventoryView.SetIconForItem(i, _inventory[i].Icon);
+                inventoryView.SetIconForItem(i, _inventoryHandlers[i].Icon);
             }
 
-            _inventory[_itemIndex].Select();
+            _inventoryHandlers[_itemIndex].Select();
         }
 
         private void AddEventHandlers(InventoryInput inventoryInput)
@@ -71,18 +69,23 @@ namespace Inventory
             {
                 if (item.itemType == ItemType.Block)
                 {
-                    inventory.Add(new BlockView(_cubeRenderer, _mapSynchronization, _palette, (BlockItem)item));
+                    inventory.Add(new BlockView(_gameFactory, _cubeRenderer, _mapSynchronization, _hud, (BlockItem)item, _player));
                 }
 
                 if (item.itemType == ItemType.Brush)
                 {
-                    inventory.Add(new BrushView(_cubeRenderer, _mapSynchronization, _assets, _palette));
+                    inventory.Add(new BrushView(_gameFactory, _cubeRenderer, _mapSynchronization, _palette, (BrushItem)item, _player));
+                }
+
+                if (item.itemType == ItemType.SpawnPoint)
+                {
+                    inventory.Add(new SpawnPointView(_cubeRenderer, _mapSynchronization, (SpawnPointItem)item));
                 }
             }
 
-            foreach (var (_,weapon) in _player.GetComponent<Player.Inventory>().Weapons)
+            foreach (var (_,weapon) in _player.GetComponent<PlayerLogic.Inventory>().Weapons)
             {
-                inventory.Add(new GunSystem(_gameFactory, _inputService, _mainCamera, itemPosition, _player, _hud, weapon));
+                inventory.Add(new GunSystem(_gameFactory, _inputService, _mainCamera, _itemPosition, _player, _hud, weapon));
             }
 
             return inventory;
@@ -90,38 +93,38 @@ namespace Inventory
 
         private void FirstActionButtonDown()
         {
-            if (_inventory[_itemIndex] is ILeftMouseButtonDownHandler)
+            if (_inventoryHandlers[_itemIndex] is ILeftMouseButtonDownHandler)
             {
-                ((ILeftMouseButtonDownHandler) _inventory[_itemIndex]).OnLeftMouseButtonDown();
+                ((ILeftMouseButtonDownHandler) _inventoryHandlers[_itemIndex]).OnLeftMouseButtonDown();
             }
         }
 
         private void SecondActionButtonDown()
         {
-            if (_inventory[_itemIndex] is IRightMouseButtonDownHandler)
+            if (_inventoryHandlers[_itemIndex] is IRightMouseButtonDownHandler)
             {
-                ((IRightMouseButtonDownHandler) _inventory[_itemIndex]).OnRightMouseButtonDown();
+                ((IRightMouseButtonDownHandler) _inventoryHandlers[_itemIndex]).OnRightMouseButtonDown();
             }
         }
 
         private void FirstActionButtonHold()
         {
-            if (_inventory[_itemIndex] is ILeftMouseButtonHoldHandler)
+            if (_inventoryHandlers[_itemIndex] is ILeftMouseButtonHoldHandler)
             {
-                ((ILeftMouseButtonHoldHandler) _inventory[_itemIndex]).OnLeftMouseButtonHold();
+                ((ILeftMouseButtonHoldHandler) _inventoryHandlers[_itemIndex]).OnLeftMouseButtonHold();
             }
         }
 
         private void Scroll()
         {
-            ChangeSlotIndex((_itemIndex + Math.Sign(Input.GetAxis("Mouse ScrollWheel")) + _maxIndex) % _maxIndex);
+            ChangeSlotIndex((_itemIndex + Math.Sign(_inputService.GetScrollSpeed()) + _maxIndex) % _maxIndex);
         }
 
         private void Update()
         {
-            if (_inventory[_itemIndex] is IUpdated)
+            if (_inventoryHandlers[_itemIndex] is IUpdated)
             {
-                ((IUpdated) _inventory[_itemIndex]).InnerUpdate();
+                ((IUpdated) _inventoryHandlers[_itemIndex]).InnerUpdate();
             }
         }
 
@@ -129,15 +132,10 @@ namespace Inventory
         private void ChangeSlotIndex(int newIndex)
         {
             _boarders[_itemIndex].SetActive(false);
-            _inventory[_itemIndex].Unselect();
+            _inventoryHandlers[_itemIndex].Unselect();
             _itemIndex = newIndex;
-            _inventory[_itemIndex].Select();
+            _inventoryHandlers[_itemIndex].Select();
             _boarders[_itemIndex].SetActive(true);
-        }
-
-        public GunSystem[] GetGunSystems()
-        {
-            return _inventory.OfType<GunSystem>().ToArray();
         }
     }
 }

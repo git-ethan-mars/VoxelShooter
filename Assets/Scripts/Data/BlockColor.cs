@@ -23,7 +23,7 @@ namespace Data
         private static Dictionary<byte, Color> _colorById;
         public static Dictionary<byte, Color> ColorById => _colorById ??= CacheColorByIdDictionary();
 
-        public static Color32 UIntToColor(uint color)
+        public static Color32 UInt32ToColor(uint color)
         {
             var a = (byte) (color >> 24);
             var r = (byte) (color >> 16);

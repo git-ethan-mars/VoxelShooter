@@ -6,8 +6,11 @@ namespace Data
     public class PlayerCharacteristic : ScriptableObject
     {
         public GameClass gameClass;
-        public int health;
+        public int maxHealth;
         public float speed;
         public float jumpMultiplier;
+        public int blockCount;
+        public float placeDistance = 15;
+
     }
 }
