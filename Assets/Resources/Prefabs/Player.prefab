@@ -436,6 +436,7 @@ GameObject:
   - component: {fileID: 140449071189083950}
   - component: {fileID: 1559136694788600597}
   - component: {fileID: -721941239004690369}
+  - component: {fileID: 995487716897586186}
   - component: {fileID: -6329305967111660050}
   - component: {fileID: 188159945711906154}
   - component: {fileID: 5496113448558553160}
@@ -648,6 +649,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 175592f64b8e4923bb6e8c125e40b621, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &995487716897586186
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7129409968729204767}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 1
+  syncMode: 0
+  syncInterval: 0
+  target: {fileID: 951460950341307336}
+  clientAuthority: 0
+  syncPosition: 1
+  syncRotation: 1
+  syncScale: 0
+  showGizmos: 0
+  showOverlay: 0
+  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+  onlySyncOnChange: 1
+  bufferResetMultiplier: 5
+  positionSensitivity: 0.01
+  rotationSensitivity: 0.01
+  scaleSensitivity: 0.01
 --- !u!114 &-6329305967111660050
 MonoBehaviour:
   m_ObjectHideFlags: 0
