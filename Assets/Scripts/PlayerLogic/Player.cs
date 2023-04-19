@@ -8,15 +8,15 @@ namespace PlayerLogic
 {
     public class Player : NetworkBehaviour
     {
-        public float PlaceDistance { get; set; }
-        public int BlockCount { get; set; }
+        [HideInInspector] [SyncVar] public float placeDistance;
+        [HideInInspector] [SyncVar] public int blockCount;
         public Transform itemPosition;
         private GameObject _hud;
 
         public void Construct(PlayerCharacteristic characteristic)
         {
-            PlaceDistance = characteristic.placeDistance;
-            BlockCount = characteristic.blockCount;
+            placeDistance = characteristic.placeDistance;
+            blockCount = characteristic.blockCount;
         }
         
         public override void OnStartLocalPlayer()

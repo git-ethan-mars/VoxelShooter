@@ -36,7 +36,7 @@ namespace Inventory
             _player = player;
             _hud = hud;
             _mainCamera = Camera.main;
-            _cubeRenderer = new CubeRenderer(player.GetComponent<LineRenderer>(), _mainCamera, player.GetComponent<Player>().PlaceDistance);
+            _cubeRenderer = new CubeRenderer(player.GetComponent<LineRenderer>(), _mainCamera, player.GetComponent<Player>().placeDistance);
             _itemPosition = player.GetComponent<Player>().itemPosition;
             _mapSynchronization = player.GetComponent<MapSynchronization>();
             _palette = hud.GetComponent<Hud>().palette;

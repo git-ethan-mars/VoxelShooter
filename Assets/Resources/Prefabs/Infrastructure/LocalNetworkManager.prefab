@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 3322668320336600090}
   - component: {fileID: -2848463092696046578}
   m_Layer: 0
-  m_Name: NetworkManager 1
+  m_Name: LocalNetworkManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -80,11 +80,11 @@ MonoBehaviour:
   NoDelay: 1
   SendTimeout: 5000
   ReceiveTimeout: 30000
-  serverMaxMessageSize: 16384
+  serverMaxMessageSize: 120000
   serverMaxReceivesPerTick: 10000
   serverSendQueueLimitPerConnection: 10000
   serverReceiveQueueLimitPerConnection: 10000
-  clientMaxMessageSize: 16384
+  clientMaxMessageSize: 120000
   clientMaxReceivesPerTick: 1000
   clientSendQueueLimit: 10000
   clientReceiveQueueLimit: 10000

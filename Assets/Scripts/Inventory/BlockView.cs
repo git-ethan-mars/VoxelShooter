@@ -28,7 +28,7 @@ namespace Inventory
             Model = gameFactory.CreateGameModel(configuration.prefab, player.GetComponent<Player>().itemPosition);
             Model.SetActive(false);
             _palette.GetComponent<PaletteCreator>().OnColorUpdate += UpdateColor;
-            _blockCount = player.GetComponent<Player>().BlockCount;
+            _blockCount = player.GetComponent<Player>().blockCount;
         }
 
         public void Select()

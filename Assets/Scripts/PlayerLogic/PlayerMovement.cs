@@ -11,16 +11,14 @@ namespace PlayerLogic
     [RequireComponent(typeof(Rigidbody))]
     public class PlayerMovement : NetworkBehaviour
     {
-        private float _speed;
-        private float _jumpMultiplier;
+        [SyncVar] private float _speed;
+        [SyncVar] private float _jumpMultiplier;
         private Rigidbody Rigidbody { get; set; }
         private bool _isGrounded;
         private bool _isFell;
         private bool _isJumpButtonPressed;
         private float _previousFallingSpeed;
-
         private IInputService _inputService;
-
         private Vector3 _movementDirection;
 
 
@@ -35,7 +33,7 @@ namespace PlayerLogic
             _inputService = AllServices.Container.Single<IInputService>();
         }
 
-        private void Start()
+        public override void OnStartLocalPlayer()
         {
             Rigidbody = GetComponent<Rigidbody>();
             Rigidbody.freezeRotation = true;

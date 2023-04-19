@@ -1,14 +1,14 @@
 ﻿using System;
 using Data;
-using UnityEngine;
+using Mirror;
 
 namespace PlayerLogic
 {
-    public class HealthSystem :MonoBehaviour
+    public class HealthSystem : NetworkBehaviour
     {
-        public event Action<int, int> OnHealthChanged; 
-        public int Health { get; set; }
-        private int _maxHealth;
+        public event Action<int, int> OnHealthChanged;
+        private int Health { get; set; }
+        [SyncVar] private int _maxHealth;
         
 
         public void Construct(PlayerCharacteristic characteristic)
@@ -30,7 +30,6 @@ namespace PlayerLogic
                 Health = currentHealth;
             }
 
-            Debug.Log($"{Health}");
             OnHealthChanged?.Invoke(Health, _maxHealth);
         }
         

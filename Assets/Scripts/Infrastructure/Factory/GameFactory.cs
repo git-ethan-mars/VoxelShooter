@@ -16,7 +16,7 @@ namespace Infrastructure.Factory
         private MapGenerator _mapGenerator;
         private readonly IInputService _inputService;
         private readonly IStaticDataService _staticData;
-        private const string NetworkManagerPath = "Prefabs/Infrastructure/NetworkManager";
+        private const string NetworkManagerPath = "Prefabs/Infrastructure/LocalNetworkManager";
         private const string SteamNetworkManagerPath = "Prefabs/Infrastructure/SteamManager";
         private const string MapGeneratorPath = "Prefabs/MapCreation/MapGenerator";
         private const string ChunkRendererPath = "Prefabs/MapCreation/Chunk";

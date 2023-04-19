@@ -39,8 +39,8 @@ namespace Infrastructure.States
 
         private void OnLoaded()
         {
-            //_networkManager = _gameFactory.CreateLocalNetworkManager().GetComponent<CustomNetworkManager>();
-            _networkManager = _gameFactory.CreateSteamNetworkManager().GetComponent<CustomNetworkManager>();
+            _networkManager = _gameFactory.CreateLocalNetworkManager().GetComponent<CustomNetworkManager>();
+            //_networkManager = _gameFactory.CreateSteamNetworkManager().GetComponent<CustomNetworkManager>();
             _networkManager.MapLoaded += OnMapLoaded;
             _networkManager.MapDownloaded += OnMapDownloaded;
         }

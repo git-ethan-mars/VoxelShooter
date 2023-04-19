@@ -113,7 +113,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38f7f248a7354052a8f101e84db66359, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  placeDistance: 15
   inventoryView: {fileID: 1007571750086494738}
 --- !u!1 &8385389283162744
 GameObject:

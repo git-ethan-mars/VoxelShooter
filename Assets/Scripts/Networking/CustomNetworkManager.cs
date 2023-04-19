@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using Data;
@@ -31,7 +32,7 @@ namespace Networking
         {
             ServerData = new ServerData(_staticData);
             NetworkServer.RegisterHandler<CharacterMessage>(OnChooseClass);
-            _map = MapReader.ReadFromFile("lastsav.rch");
+            _map = MapReader.ReadFromFile("lastsav.vxl");
             MapLoaded?.Invoke(_map);
         }
 
@@ -46,12 +47,19 @@ namespace Networking
         {
             base.OnServerReady(conn);
             if (NetworkClient.connection.connectionId == conn.connectionId) return;
-            MapMessage[] mapMessages = SplitMap(16000);
-            for (var i = 0; i < mapMessages.Length; i++)
+            MapMessage[] mapMessages = SplitMap(100000);
+            StartCoroutine(SendMap(conn, mapMessages));
+        }
+
+        private IEnumerator SendMap(NetworkConnectionToClient conn, MapMessage[] messages)
+        {
+            for (var i = 0; i < messages.Length; i++)
             {
-                conn.Send(mapMessages[i]);
+                conn.Send(messages[i]);
+                yield return null;
             }
         }
+
 
         public override void OnStopServer()
         {
@@ -77,8 +85,8 @@ namespace Networking
         private void OnChooseClass(NetworkConnectionToClient conn, CharacterMessage message)
         {
             var player = EntityFactory.CreatePlayer(conn, message);
-            ServerData.AddPlayer(conn, message.GameClass, message.NickName);
             NetworkServer.AddPlayerForConnection(conn, player);
+            ServerData.AddPlayer(conn, message.GameClass, message.NickName);
         }
 
 
