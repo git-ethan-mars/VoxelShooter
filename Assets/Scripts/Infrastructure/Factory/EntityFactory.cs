@@ -44,9 +44,8 @@ namespace Infrastructure.Factory
 
         public GameObject RespawnPlayer(NetworkConnectionToClient connection, GameClass gameClass)
         {
-            var oldPlayer = connection.identity.gameObject;
             var player = CreatePlayer(gameClass);
-            Object.Destroy(oldPlayer, 0.1f);
+            ConfigureSynchronization(player);
             return player;
         }
 
@@ -83,8 +82,8 @@ namespace Infrastructure.Factory
 
         private void ConfigurePlayer(GameObject player, GameClass gameClass)
         {
-            player.GetComponent<Player>().Construct(_staticData.GetPlayerCharacteristic(gameClass));
             var characteristic = _staticData.GetPlayerCharacteristic(gameClass);
+            player.GetComponent<Player>().Construct(characteristic);
             var movement = player.GetComponent<PlayerMovement>();
             movement.Construct(characteristic);
             player.GetComponent<HealthSystem>().Construct(characteristic);

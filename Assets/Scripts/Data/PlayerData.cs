@@ -6,32 +6,27 @@ namespace Data
 {
     public class PlayerData
     {
-        public string NickName;
-        public GameClass gameClass;
-        public int health;
-        public int maxHealth;
-        public float speed;
-        public float jumpMultiplier;
-        public List<int> ItemIds;
-        public readonly Dictionary<int, Weapon> weaponsById;
+        public readonly string NickName;
+        public readonly GameClass GameClass;
+        public int Health;
+        public readonly int MaxHealth;
+        public readonly Dictionary<int, Weapon> WeaponsById;
 
         public PlayerData(GameClass chosenClass, string nick, IStaticDataService staticDataService)
         {
             NickName = nick;
             var characteristic = staticDataService.GetPlayerCharacteristic(chosenClass);
-            gameClass = chosenClass;
-            health = characteristic.maxHealth;
-            maxHealth = characteristic.maxHealth;
-            speed = characteristic.speed;
-            jumpMultiplier = characteristic.jumpMultiplier;
-            ItemIds = staticDataService.GetInventory(chosenClass).Select(item => item.id).ToList();
-            weaponsById = new Dictionary<int, Weapon>();
-            foreach (var itemId in ItemIds)
+            GameClass = chosenClass;
+            Health = characteristic.maxHealth;
+            MaxHealth = characteristic.maxHealth;
+            var itemIds = staticDataService.GetInventory(chosenClass).Select(item => item.id).ToList();
+            WeaponsById = new Dictionary<int, Weapon>();
+            foreach (var itemId in itemIds)
             {
                 var item = staticDataService.GetItem(itemId);
                 if (item.itemType == ItemType.PrimaryWeapon)
                 {
-                    weaponsById[itemId] = new Weapon((PrimaryWeapon) item);
+                    WeaponsById[itemId] = new Weapon((PrimaryWeapon) item);
                 }
             }
         }

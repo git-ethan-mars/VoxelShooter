@@ -22,7 +22,7 @@ namespace Networking.Synchronization
         [Command]
         public void CmdShootSingle(Ray ray, int weaponId, NetworkConnectionToClient conn = null)
         {
-            var weapon = _serverData.GetPlayerData(conn!.connectionId).weaponsById[weaponId];
+            var weapon = _serverData.GetPlayerData(conn!.connectionId).WeaponsById[weaponId];
             if (!CanShoot(weapon) || weapon.IsAutomatic) return;
             ApplyRaycast(ray, weapon);
             Shoot(weapon);
@@ -31,7 +31,7 @@ namespace Networking.Synchronization
         [Command]
         public void CmdShootAutomatic(Ray ray, int weaponId, NetworkConnectionToClient conn = null)
         {
-            var weapon = _serverData.GetPlayerData(conn!.connectionId).weaponsById[weaponId];
+            var weapon = _serverData.GetPlayerData(conn!.connectionId).WeaponsById[weaponId];
             if (!CanShoot(weapon) || !weapon.IsAutomatic) return;
             ApplyRaycast(ray, weapon);
             Shoot(weapon);
@@ -40,7 +40,7 @@ namespace Networking.Synchronization
         [Command]
         public void CmdReload(int weaponId, NetworkConnectionToClient conn = null)
         {
-            var weapon = _serverData.GetPlayerData(conn!.connectionId).weaponsById[weaponId];
+            var weapon = _serverData.GetPlayerData(conn!.connectionId).WeaponsById[weaponId];
             if (CanReload(weapon))
             {
                 Reload(weapon);

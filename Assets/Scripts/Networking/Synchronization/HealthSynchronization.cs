@@ -20,16 +20,17 @@ namespace Networking.Synchronization
         public void Damage(NetworkConnectionToClient connection, int totalDamage)
         {
             var playerData = _serverData.GetPlayerData(connection.connectionId);
-            playerData.health -= totalDamage;
+            playerData.Health -= totalDamage;
             connection.Send(new HealthMessage()
-                {CurrentHealth = Math.Max(playerData.health, 0), MaxHealth = playerData.maxHealth});
-            if (playerData.health <= 0)
+                {CurrentHealth = Math.Max(playerData.Health, 0), MaxHealth = playerData.MaxHealth});
+            if (playerData.Health <= 0)
             {
-                var gameClass = _serverData.GetPlayerData(connection.connectionId).gameClass;
-                var player = _entityFactory.RespawnPlayer(connection, gameClass);
-                _serverData.UpdatePlayer();
+                _serverData.UpdatePlayer(connection);
+                var gameClass = _serverData.GetPlayerData(connection.connectionId).GameClass;
+                var player = _entityFactory.RespawnPlayer(connection, gameClass); 
+                var oldPlayer = connection.identity.gameObject;
                 NetworkServer.ReplacePlayerForConnection(connection, player, true);
-
+                Destroy(oldPlayer, 0.1f);
             }
         }
     }

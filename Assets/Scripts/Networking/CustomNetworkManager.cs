@@ -8,6 +8,7 @@ using Infrastructure.Services;
 using MapLogic;
 using Mirror;
 using PlayerLogic;
+using UnityEngine;
 
 namespace Networking
 {
@@ -32,7 +33,7 @@ namespace Networking
         {
             ServerData = new ServerData(_staticData);
             NetworkServer.RegisterHandler<CharacterMessage>(OnChooseClass);
-            _map = MapReader.ReadFromFile("lastsav.vxl");
+            _map = MapReader.ReadFromFile("lastsav.rch");
             MapLoaded?.Invoke(_map);
         }
 
@@ -56,7 +57,8 @@ namespace Networking
             for (var i = 0; i < messages.Length; i++)
             {
                 conn.Send(messages[i]);
-                yield return null;
+                yield return new WaitForSeconds(1);
+                Debug.Log($"{(int)((float)i/messages.Length*100)}%");
             }
         }
 
