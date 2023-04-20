@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 6
   itemType: 0
-  inventoryIcon: {fileID: 0}
+  inventoryIcon: {fileID: 1629097733, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
   prefab: {fileID: 1266766636482955538, guid: 9cd3f16ba6580e041bfac5996bd412b0, type: 3}
   weaponIcon: {fileID: 1629097733, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
   isAutomatic: 0

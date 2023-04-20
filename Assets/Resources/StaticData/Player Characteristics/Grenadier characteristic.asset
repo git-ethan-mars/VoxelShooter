@@ -16,3 +16,5 @@ MonoBehaviour:
   maxHealth: 100
   speed: 10
   jumpMultiplier: 10
+  blockCount: 50
+  placeDistance: 10

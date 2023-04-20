@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Sniper characteristic
   m_EditorClassIdentifier: 
   gameClass: 1
-  health: 100
   maxHealth: 100
   speed: 15
   jumpMultiplier: 15
+  blockCount: 50
+  placeDistance: 10
