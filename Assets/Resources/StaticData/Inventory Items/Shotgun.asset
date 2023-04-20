@@ -18,18 +18,18 @@ MonoBehaviour:
   prefab: {fileID: 1266766636482955538, guid: 9cd3f16ba6580e041bfac5996bd412b0, type: 3}
   weaponIcon: {fileID: 1629097733, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
   isAutomatic: 0
-  timeBetweenShooting: 0
-  baseRecoil: 0
-  stepRecoil: 0
-  resetTimeRecoil: 0
-  range: 0
-  reloadTime: 0
+  timeBetweenShooting: 0.3
+  baseRecoil: 0.05
+  stepRecoil: 0.02
+  resetTimeRecoil: 1
+  range: 10
+  reloadTime: 2
   timeBetweenShots: 0
-  magazineSize: 0
-  bulletsPerTap: 0
-  totalBullets: 0
-  damage: 2
-  headMultiplier: 1
-  chestMultiplier: 1
-  legMultiplier: 1
-  armMultiplier: 1
+  magazineSize: 6
+  bulletsPerTap: 1
+  totalBullets: 18
+  damage: 30
+  headMultiplier: 2
+  chestMultiplier: 1.2
+  legMultiplier: 0.8
+  armMultiplier: 0.6

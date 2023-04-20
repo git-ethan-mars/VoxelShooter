@@ -15,6 +15,6 @@ MonoBehaviour:
   gameClass: 2
   maxHealth: 125
   speed: 10
-  jumpMultiplier: 7
+  jumpMultiplier: 10
   blockCount: 50
   placeDistance: 10
