@@ -27,6 +27,13 @@ namespace PlayerLogic
             });
         }
 
+        [Command]
+        public void DeleteAllSpawnPoints()
+        {
+            Map.MapData.SpawnPoints.Clear();
+            
+        }
+
 
         [Command]
         public void UpdateBlocksOnServer(Vector3Int[] globalPositions, BlockData[] blocks)

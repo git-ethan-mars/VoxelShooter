@@ -10,10 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f66f84cbd34f4d0a91926aca4f641918, type: 3}
-  m_Name: Builder inventory 1
+  m_Name: Builder inventory
   m_EditorClassIdentifier: 
   gameClass: 0
   inventory:
   - {fileID: 11400000, guid: bcadaf7f26063a54aa5810092d788aa3, type: 2}
+  - {fileID: 11400000, guid: 710f561a068d1d644971ad77f629c179, type: 2}
   - {fileID: 11400000, guid: 9e8ce76138b901742970aabce2643555, type: 2}
   - {fileID: 11400000, guid: 4ef1e8d29bc49d94db075d9b8610d96e, type: 2}

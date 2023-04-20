@@ -10,25 +10,25 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 285b4a900c7a4edb9d7a5c6d6172ded8, type: 3}
-  m_Name: Rifle
+  m_Name: Revolver
   m_EditorClassIdentifier: 
-  id: 5
+  id: 9
   itemType: 0
-  inventoryIcon: {fileID: 21300000, guid: fb939fb7dfca8844f95933ac4447a56b, type: 3}
-  prefab: {fileID: 9083155961026743931, guid: 462a6032c614baf41836da3cb2513325, type: 3}
+  inventoryIcon: {fileID: -510781377, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
+  prefab: {fileID: 4367548136736479994, guid: 1c4296936330d494684804c1fb525ba0, type: 3}
   isAutomatic: 0
-  timeBetweenShooting: 1
+  timeBetweenShooting: 0.5
   baseRecoil: 0.01
   stepRecoil: 0.03
-  resetTimeRecoil: 2
-  range: 150
-  reloadTime: 3
+  resetTimeRecoil: 0.5
+  range: 70
+  reloadTime: 0.5
   timeBetweenShots: 0
-  magazineSize: 5
+  magazineSize: 12
   bulletsPerTap: 1
-  totalBullets: 15
-  damage: 50
-  headMultiplier: 3.5
-  chestMultiplier: 1.5
+  totalBullets: 36
+  damage: 20
+  headMultiplier: 2.5
+  chestMultiplier: 1.2
   legMultiplier: 0.8
-  armMultiplier: 0.5
+  armMultiplier: 0.6

@@ -16,13 +16,12 @@ MonoBehaviour:
   itemType: 0
   inventoryIcon: {fileID: 1027491563, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
   prefab: {fileID: 6832412113328611646, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
-  weaponIcon: {fileID: 1027491563, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
   isAutomatic: 1
   timeBetweenShooting: 0.2
   baseRecoil: 0.02
   stepRecoil: 0.04
   resetTimeRecoil: 1.2
-  range: 100
+  range: 80
   reloadTime: 1.5
   timeBetweenShots: 0
   magazineSize: 30

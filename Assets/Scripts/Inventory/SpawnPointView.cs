@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Inventory
 {
-    public class SpawnPointView : IInventoryItemView, ILeftMouseButtonDownHandler, IUpdated
+    public class SpawnPointView : IInventoryItemView, ILeftMouseButtonDownHandler, IUpdated, IRightMouseButtonDownHandler
     {
         public Sprite Icon { get; }
         private readonly CubeRenderer _cubeRenderer;
@@ -44,6 +44,17 @@ namespace Inventory
             var raycastResult = _cubeRenderer.GetRayCastHit(out var raycastHit);
             if (!raycastResult) return;
             _mapSynchronization.SendSpawnPointOnServer(Vector3Int.FloorToInt(raycastHit.point - raycastHit.normal / 2));
+        }
+
+        private void DeleteAllSpawnPoints()
+        {
+            _mapSynchronization.DeleteAllSpawnPoints();
+            Debug.Log("Удалил спавнпойнты");
+        }
+
+        public void OnRightMouseButtonDown()
+        {
+            DeleteAllSpawnPoints();
         }
     }
 }

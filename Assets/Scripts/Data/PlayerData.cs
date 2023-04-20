@@ -24,9 +24,9 @@ namespace Data
             foreach (var itemId in itemIds)
             {
                 var item = staticDataService.GetItem(itemId);
-                if (item.itemType == ItemType.PrimaryWeapon)
+                if (item.itemType == ItemType.Weapon)
                 {
-                    WeaponsById[itemId] = new Weapon((PrimaryWeapon) item);
+                    WeaponsById[itemId] = new Weapon((WeaponItem) item);
                 }
             }
         }

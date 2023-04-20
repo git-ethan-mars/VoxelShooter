@@ -1,4 +1,3 @@
-using Mirror;
 using UnityEngine;
 
 namespace Data
@@ -17,9 +16,9 @@ namespace Data
         public readonly float ResetTimeRecoil;
         public int BulletsInMagazine;
         public bool IsReady;
-        public GameObject Prefab;
+        public readonly GameObject Prefab;
         public readonly int BulletsPerShot;
-        public int Damage;
+        public readonly int Damage;
         public readonly Sprite Icon;
         public readonly int ID;
         public bool IsReloading;
@@ -28,7 +27,7 @@ namespace Data
         public readonly float LegMultiplier;
         public readonly float ArmMultiplier;
 
-        public Weapon(PrimaryWeapon primaryWeapon)
+        public Weapon(WeaponItem primaryWeapon)
         {
             Damage = primaryWeapon.damage;
             HeadMultiplier = primaryWeapon.headMultiplier;

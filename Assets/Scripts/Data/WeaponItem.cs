@@ -2,10 +2,9 @@
 
 namespace Data
 {
-    [CreateAssetMenu(fileName = "Primary Weapon", menuName = "Inventory System/Inventory Items/Primary weapon")]
-    public class PrimaryWeapon : InventoryItem
+    [CreateAssetMenu(fileName = "Weapon", menuName = "Inventory System/Inventory Items/Weapon")]
+    public class WeaponItem : InventoryItem
     {
-        public Sprite weaponIcon;
         [Header("Configuration")] 
         public bool isAutomatic;
         public float timeBetweenShooting;
@@ -31,7 +30,7 @@ namespace Data
 
         private void Awake()
         {
-            itemType = ItemType.PrimaryWeapon;
+            itemType = ItemType.Weapon;
         }
     }
 }

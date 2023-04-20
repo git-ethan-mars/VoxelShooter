@@ -13,8 +13,7 @@ namespace Data
     }
     public enum ItemType
     {
-        PrimaryWeapon,
-        SecondaryWeapon,
+        Weapon,
         MeleeWeapon,
         Dynamite,
         Block,
