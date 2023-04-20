@@ -103,7 +103,8 @@ namespace Infrastructure.Factory
         {
             player.GetComponent<MapSynchronization>().Construct(_map);
             player.GetComponent<HealthSynchronization>().Construct(_serverData, this);
-            player.GetComponent<WeaponSynchronization>().Construct(_particleFactory, _serverData);
+            player.GetComponent<WeaponSynchronization>().Construct(_particleFactory, _serverData, 
+                player.GetComponent<AudioSource>());
         }
     }
 }
