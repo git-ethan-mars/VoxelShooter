@@ -1,6 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using GamePlay;
+using Data;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +12,7 @@ namespace UI
         [SerializeField] private Image pointer;
         [SerializeField] private Sprite blackBoarder;
         [SerializeField] private Sprite blueBoarder;
+        public event Action<Color32> OnColorUpdate;
         private int _indexX;
         private int _indexY;
         private const int PaletteSize = 8;
@@ -19,14 +21,14 @@ namespace UI
         private void Start()
         {
             var i = 0;
-            _blockColorById = BlockColor.GetBlockColorDictionary();
+            _blockColorById = BlockColor.ColorById;
             foreach (var color in _blockColorById.Values)
             {
                 transform.GetChild(i).GetComponent<Image>().color = color;
                 i++;
             }
 
-            GlobalEvents.SendPaletteUpdate((byte)(_indexX + _indexY * PaletteSize + 1));
+            OnColorUpdate?.Invoke(BlockColor.ColorById[(byte) (_indexX + _indexY * PaletteSize + 1)]);
         }
 
         private void Update()
@@ -43,18 +45,18 @@ namespace UI
 
             if (Input.GetKeyDown(KeyCode.UpArrow))
             {
-                if (_indexY > 0) 
+                if (_indexY > 0)
                     _indexY--;
             }
 
             if (Input.GetKeyDown(KeyCode.DownArrow))
             {
-                if (_indexY < PaletteSize - 1) 
+                if (_indexY < PaletteSize - 1)
                     _indexY++;
             }
 
             pointer.transform.position = transform.GetChild(_indexX + _indexY * PaletteSize).position;
-            GlobalEvents.SendPaletteUpdate((byte)(_indexX + _indexY * PaletteSize + 1));
+            OnColorUpdate?.Invoke(_blockColorById[(byte) (_indexX + _indexY * PaletteSize + 1)]);
         }
 
         private IEnumerator ChangePointerColor()
@@ -62,9 +64,9 @@ namespace UI
             while (true)
             {
                 pointer.sprite = blackBoarder;
-                yield return new WaitForSeconds(0.5f);
+                yield return new WaitForSeconds(0.25f);
                 pointer.sprite = blueBoarder;
-                yield return new WaitForSeconds(0.5f);
+                yield return new WaitForSeconds(0.25f);
             }
         }
 

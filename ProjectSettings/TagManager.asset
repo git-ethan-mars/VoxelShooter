@@ -5,8 +5,12 @@ TagManager:
   serializedVersion: 2
   tags:
   - TNT
-  - Floor
   - Chunk
+  - Head
+  - Leg
+  - Chest
+  - Arm
+  - Hand
   layers:
   - Default
   - TransparentFX
