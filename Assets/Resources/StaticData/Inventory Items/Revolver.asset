@@ -32,3 +32,7 @@ MonoBehaviour:
   chestMultiplier: 1.2
   legMultiplier: 0.8
   armMultiplier: 0.6
+  shootingAudioClip: {fileID: 8300000, guid: 5bc3e13105a469d42b92872d84c47e5a, type: 3}
+  shootingVolume: 0.21
+  reloadingAudioClip: {fileID: 8300000, guid: 0ac1dac92b7c87c4b8d7d0d9f28abbd7, type: 3}
+  reloadingVolume: 0.228

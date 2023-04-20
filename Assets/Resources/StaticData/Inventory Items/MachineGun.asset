@@ -13,10 +13,9 @@ MonoBehaviour:
   m_Name: MachineGun
   m_EditorClassIdentifier: 
   id: 4
-  itemType: 1
+  itemType: 0
   inventoryIcon: {fileID: 1387272548, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
   prefab: {fileID: 8848831644225337401, guid: 473522cecdf9425429e337a7bb762690, type: 3}
-  weaponIcon: {fileID: 1387272548, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
   isAutomatic: 1
   timeBetweenShooting: 0.1
   baseRecoil: 0.03
@@ -33,3 +32,7 @@ MonoBehaviour:
   chestMultiplier: 1.2
   legMultiplier: 0.8
   armMultiplier: 0.6
+  shootingAudioClip: {fileID: 8300000, guid: a2503e92ee60ee045aad67f54ebe92ec, type: 3}
+  shootingVolume: 0.211
+  reloadingAudioClip: {fileID: 8300000, guid: 770c353d8ee179243b31afce6bbb3d3b, type: 3}
+  reloadingVolume: 0.205

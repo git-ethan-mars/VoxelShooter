@@ -11,12 +11,10 @@ namespace Networking.Synchronization
     {
         private ServerData _serverData;
         private IParticleFactory _particleFactory;
-        private AudioSource _audioSource;
 
-        public void Construct(IParticleFactory particleFactory, ServerData serverData, AudioSource audioSource)
+        public void Construct(IParticleFactory particleFactory, ServerData serverData)
         {
             _serverData = serverData;
-            _audioSource = audioSource;
             _particleFactory = particleFactory;
         }
 
@@ -105,10 +103,6 @@ namespace Networking.Synchronization
         [Server]
         private void Reload(Weapon weapon)
         {
-            _audioSource.clip = weapon.ReloadingAudioClip;
-            _audioSource.volume = weapon.ReloadingVolume;
-            _audioSource.Play();
-            
             weapon.IsReloading = true;
             if (weapon.TotalBullets + weapon.BulletsInMagazine - weapon.MagazineSize <= 0)
             {
@@ -133,10 +127,6 @@ namespace Networking.Synchronization
         [Server]
         private void Shoot(Weapon weapon)
         {
-            _audioSource.clip = weapon.ShootingAudioClip;
-            _audioSource.volume = weapon.ShootingVolume;
-            _audioSource.Play();
-            
             weapon.BulletsInMagazine -= weapon.BulletsPerShot;
             if (weapon.BulletsInMagazine <= 0)
                 weapon.BulletsInMagazine = 0;
