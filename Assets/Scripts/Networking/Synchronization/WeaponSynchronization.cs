@@ -57,6 +57,7 @@ namespace Networking.Synchronization
             audioSource.clip = weapon.ShootingAudioClip;
             audioSource.volume = weapon.ShootingVolume;
             audioSource.Play();
+            Debug.Log("Player");
             weapon.BulletsInMagazine = bulletsInMagazine;
         }
 
@@ -68,12 +69,13 @@ namespace Networking.Synchronization
             audioSource.clip = weapon.ReloadingAudioClip;
             audioSource.volume = weapon.ReloadingVolume;
             audioSource.Play();
+            Debug.Log("Player");
             weapon.TotalBullets = totalBullets;
             weapon.BulletsInMagazine = bulletsInMagazine;
         }
 
         [Server]
-        private void StartShootCoroutines(Weapon weapon)
+        private void StartShootCoroutines(WeaponData weapon)
         {
             StartCoroutine(WaitForSeconds(() => ResetShoot(weapon), weapon.TimeBetweenShooting));
             StartCoroutine(WaitForSeconds(() => ResetRecoil(weapon), weapon.ResetTimeRecoil));
@@ -85,30 +87,26 @@ namespace Networking.Synchronization
         }
 
         [Server]
-        private void StartReloadCoroutine(Weapon weapon)
+        private void StartReloadCoroutine(WeaponData weapon)
         {
             StartCoroutine(WaitForSeconds(() => ReloadFinished(weapon), weapon.ReloadTime));
         }
 
         [Server]
-        private void ResetRecoil(Weapon weapon)
+        private void ResetRecoil(WeaponData weapon)
         {
             weapon.RecoilModifier -= weapon.StepRecoil;
         }
 
         [Server]
-        private void ResetShoot(Weapon weapon)
+        private void ResetShoot(WeaponData weapon)
         {
             weapon.IsReady = true;
         }
 
         [Server]
-        private void Reload(Weapon weapon)
+        private void Reload(WeaponData weapon)
         {
-            _audioSource.clip = weapon.ReloadingAudioClip;
-            _audioSource.volume = weapon.ReloadingVolume;
-            _audioSource.Play();
-            
             weapon.IsReloading = true;
             if (weapon.TotalBullets + weapon.BulletsInMagazine - weapon.MagazineSize <= 0)
             {
@@ -125,18 +123,14 @@ namespace Networking.Synchronization
         }
 
         [Server]
-        private void ReloadFinished(Weapon weapon)
+        private void ReloadFinished(WeaponData weapon)
         {
             weapon.IsReloading = false;
         }
 
         [Server]
-        private void Shoot(Weapon weapon)
+        private void Shoot(WeaponData weapon)
         {
-            _audioSource.clip = weapon.ShootingAudioClip;
-            _audioSource.volume = weapon.ShootingVolume;
-            _audioSource.Play();
-            
             weapon.BulletsInMagazine -= weapon.BulletsPerShot;
             if (weapon.BulletsInMagazine <= 0)
                 weapon.BulletsInMagazine = 0;
@@ -147,7 +141,7 @@ namespace Networking.Synchronization
         }
 
         [Server]
-        private void ApplyRaycast(Ray ray, Weapon weapon)
+        private void ApplyRaycast(Ray ray, WeaponData weapon)
         {
             var x = Math.Abs(weapon.RecoilModifier) < 0.00001
                 ? 0
@@ -191,10 +185,10 @@ namespace Networking.Synchronization
         }
 
         [Server]
-        private bool CanShoot(Weapon weapon) => weapon.IsReady && !weapon.IsReloading && weapon.BulletsInMagazine > 0;
+        private bool CanShoot(WeaponData weapon) => weapon.IsReady && !weapon.IsReloading && weapon.BulletsInMagazine > 0;
 
         [Server]
-        private bool CanReload(Weapon weapon) => weapon.BulletsInMagazine < weapon.MagazineSize &&
+        private bool CanReload(WeaponData weapon) => weapon.BulletsInMagazine < weapon.MagazineSize &&
                                                  !weapon.IsReloading && weapon.TotalBullets > 0;
 
         private static IEnumerator WaitForSeconds(Action action, float timeInSeconds)

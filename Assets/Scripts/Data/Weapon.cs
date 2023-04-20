@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Data
 {
-    public class Weapon
+    public class WeaponData
     {
         public readonly bool IsAutomatic;
         public readonly float TimeBetweenShooting;
@@ -31,7 +31,7 @@ namespace Data
         public AudioClip ReloadingAudioClip;
         public float ReloadingVolume;
 
-        public Weapon(WeaponItem primaryWeapon)
+        public WeaponData(WeaponItem primaryWeapon)
         {
             Damage = primaryWeapon.damage;
             HeadMultiplier = primaryWeapon.headMultiplier;

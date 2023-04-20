@@ -14,7 +14,7 @@ namespace Inventory
     {
         public Sprite Icon { get; }
         private GameObject Model { get; }
-        private readonly Weapon _weapon;
+        private readonly WeaponData _weapon;
         private readonly GameObject _ammoInfo;
         private readonly TextMeshProUGUI _ammoCount;
         private readonly Transform _attackPoint;
@@ -25,7 +25,7 @@ namespace Inventory
 
 
         public GunSystem(IGameFactory gameFactory, IInputService inputService, Camera camera,
-            Transform itemPosition, GameObject player, GameObject hud, Weapon configuration)
+            Transform itemPosition, GameObject player, GameObject hud, WeaponData configuration)
         {
             _gameFactory = gameFactory;
             _inputService = inputService;
