@@ -69,10 +69,21 @@ namespace MapLogic
                     x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
                                       y % ChunkData.ChunkSize * ChunkData.ChunkSize + z % ChunkData.ChunkSize];
         }
-
+        
         public BlockData GetBlockByGlobalPosition(Vector3Int position) =>
             GetBlockByGlobalPosition(position.x, position.y, position.z);
 
+        public void SetBlockByGlobalPosition(Vector3Int position, BlockData blockData) =>
+            SetBlockByGlobalPosition(position.x, position.y, position.z, blockData);
+        
+        public void SetBlockByGlobalPosition(int x, int y, int z, BlockData blockData)
+        {
+            MapData.Chunks[FindChunkNumberByPosition(x, y, z)]
+                .Blocks[
+                    x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
+                    y % ChunkData.ChunkSize * ChunkData.ChunkSize + z % ChunkData.ChunkSize] = blockData;
+        }
+        
         public int FindChunkNumberByPosition(int x, int y, int z)
         {
             return z / ChunkData.ChunkSize +

@@ -2,7 +2,6 @@ using Data;
 using Infrastructure.Services;
 using Infrastructure.Services.Input;
 using Mirror;
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace PlayerLogic

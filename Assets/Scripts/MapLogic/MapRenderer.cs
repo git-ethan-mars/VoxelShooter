@@ -1,4 +1,6 @@
-﻿using Data;
+﻿using System;
+using System.Collections.Generic;
+using Data;
 using Infrastructure.Factory;
 using Optimization;
 using Rendering;
@@ -8,16 +10,18 @@ using UnityEngine;
 
 namespace MapLogic
 {
-    public class MapGenerator : MonoBehaviour
+    public class MapRenderer : MonoBehaviour
     {
-        public ChunkRenderer[] Chunks { get; private set; }
-        public Map Map { get; private set; }
+        private ChunkRenderer[] Chunks { get; set; }
+        private Map Map { get; set; }
         private IGameFactory _chunkFactory;
+        private Dictionary<Vector3Int, BlockData> _buffer;
 
-        public void Construct(Map map, IGameFactory gameFactory)
+        public void Construct(Map map, IGameFactory gameFactory, Dictionary<Vector3Int, BlockData> buffer)
         {
             Map = map;
             _chunkFactory = gameFactory;
+            _buffer = buffer;
             CreateChunkRenderers();
             SetNeighbours();
             var dataToDispose1 = new NativeArray<BlockData>[Chunks.Length];
@@ -253,6 +257,29 @@ namespace MapLogic
                         Chunks[index].ChunkData = Map.MapData.Chunks[index];
                     }
                 }
+            }
+        }
+
+        private void Update()
+        {
+            if (_buffer.Count == 0) return;
+            var dataByChunkIndex = new Dictionary<int, List<(Vector3Int, BlockData)>>();
+            foreach (var (globalPosition, blockData) in _buffer)
+            {
+                var chunkIndex = Map.FindChunkNumberByPosition(globalPosition);
+                if (!dataByChunkIndex.ContainsKey(chunkIndex))
+                {
+                    dataByChunkIndex[chunkIndex] = new List<(Vector3Int, BlockData)>();
+                }
+                var localPosition = new Vector3Int(globalPosition.x % ChunkData.ChunkSize,
+                    globalPosition.y % ChunkData.ChunkSize,
+                    globalPosition.z % ChunkData.ChunkSize);
+                dataByChunkIndex[chunkIndex].Add((localPosition, blockData));
+            }
+
+            foreach (var (chunkIndex, data) in dataByChunkIndex)
+            {
+                Chunks[chunkIndex].SpawnBlocks(data);
             }
         }
     }

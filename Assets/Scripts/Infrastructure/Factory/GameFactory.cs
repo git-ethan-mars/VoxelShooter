@@ -1,9 +1,13 @@
-﻿using Infrastructure.AssetManagement;
+﻿using System.Collections.Generic;
+using Data;
+using Infrastructure.AssetManagement;
 using Infrastructure.Services;
 using Infrastructure.Services.Input;
 using Inventory;
 using MapLogic;
+using Mirror;
 using Networking;
+using Networking.Synchronization;
 using Rendering;
 using UI;
 using UnityEngine;
@@ -13,12 +17,13 @@ namespace Infrastructure.Factory
     public class GameFactory : IGameFactory
     {
         private readonly IAssetProvider _assets;
-        private MapGenerator _mapGenerator;
+        private MapRenderer _mapGenerator;
         private readonly IInputService _inputService;
         private readonly IStaticDataService _staticData;
         private const string NetworkManagerPath = "Prefabs/Infrastructure/LocalNetworkManager";
         private const string SteamNetworkManagerPath = "Prefabs/Infrastructure/SteamManager";
-        private const string MapGeneratorPath = "Prefabs/MapCreation/MapGenerator";
+        private const string MapSynchronization = "Prefabs/MapCreation/MapSyncronization";
+        private const string MapRendererPath = "Prefabs/MapCreation/MapRenderer";
         private const string ChunkRendererPath = "Prefabs/MapCreation/Chunk";
         private const string HudPath = "Prefabs/UI/HUD";
         private const string ChangeClassMenu = "Prefabs/UI/Change Class Menu";
@@ -32,25 +37,32 @@ namespace Infrastructure.Factory
             _staticData = staticData;
         }
 
-        public GameObject CreateLocalNetworkManager()
+        public GameObject CreateLocalNetworkManager(MapMessageHandler mapSynchronization)
         {
             _networkManager = _assets.Instantiate(NetworkManagerPath);
-            _networkManager.GetComponent<CustomNetworkManager>().Construct(_staticData);
+            _networkManager.GetComponent<CustomNetworkManager>().Construct(_staticData, mapSynchronization);
             return _networkManager;
         }
 
-        public GameObject CreateSteamNetworkManager()
+        public GameObject CreateSteamNetworkManager(MapMessageHandler mapSynchronization)
         {
             _networkManager = _assets.Instantiate(SteamNetworkManagerPath);
-            _networkManager.GetComponent<CustomNetworkManager>().Construct(_staticData);
+            _networkManager.GetComponent<CustomNetworkManager>().Construct(_staticData, mapSynchronization);
             return _networkManager;
         }
 
-        public GameObject CreateMapGenerator(Map map)
+        public GameObject CreateMapSynchronization()
         {
-            var mapGenerator = _assets.Instantiate(MapGeneratorPath);
-            _mapGenerator = mapGenerator.GetComponent<MapGenerator>();
-            _mapGenerator.Construct(map, this);
+            var mapSynchronization = _assets.Instantiate(MapSynchronization);
+            NetworkServer.Spawn(mapSynchronization);
+            return mapSynchronization;
+        }
+
+        public GameObject CreateMapRenderer(Map map,Dictionary<Vector3Int, BlockData> buffer)
+        {
+            var mapGenerator = _assets.Instantiate(MapRendererPath);
+            _mapGenerator = mapGenerator.GetComponent<MapRenderer>();
+            _mapGenerator.Construct(map, this, buffer);
             return mapGenerator;
         }
 
@@ -58,15 +70,13 @@ namespace Infrastructure.Factory
         {
             var hud = _assets.Instantiate(HudPath);
             var inventoryController = hud.GetComponent<Hud>().inventory.GetComponent<InventoryController>();
-            inventoryController.Construct(_inputService, this, hud,player);
+            inventoryController.Construct(_inputService, this, hud, player);
+            
             hud.GetComponent<Hud>().healthBar.Construct(player);
             return hud;
         }
 
-        public GameObject CreateGameModel(GameObject model, Transform itemPosition)
-        {
-            return Object.Instantiate(model, itemPosition);
-        }
+        public GameObject CreateGameModel(GameObject model, Transform itemPosition) => Object.Instantiate(model, itemPosition);
 
         public GameObject CreateChangeClassMenu()
         {

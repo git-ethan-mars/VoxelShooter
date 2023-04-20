@@ -1,7 +1,7 @@
 ﻿using Data;
 using Mirror;
 
-namespace Networking
+namespace Networking.Messages
 {
     public struct CharacterMessage : NetworkMessage
     {

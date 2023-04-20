@@ -1,6 +1,7 @@
 ﻿using System;
 using Infrastructure.Factory;
 using Mirror;
+using Networking.Messages;
 
 namespace Networking.Synchronization
 {

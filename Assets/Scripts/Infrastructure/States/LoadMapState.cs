@@ -3,6 +3,7 @@ using Infrastructure.Factory;
 using Infrastructure.Services;
 using MapLogic;
 using Networking;
+using Networking.Synchronization;
 using UnityEngine;
 
 namespace Infrastructure.States
@@ -16,6 +17,7 @@ namespace Infrastructure.States
         private readonly IAssetProvider _assets;
         private CustomNetworkManager _networkManager;
         private readonly IParticleFactory _particleFactory;
+        private MapMessageHandler _mapSynchronization;
 
         public LoadMapState(GameStateMachine stateMachine, SceneLoader sceneLoader, IGameFactory gameFactory,
             IStaticDataService staticData, IAssetProvider assets, IParticleFactory particleFactory)
@@ -39,24 +41,27 @@ namespace Infrastructure.States
 
         private void OnLoaded()
         {
-            //_networkManager = _gameFactory.CreateLocalNetworkManager().GetComponent<CustomNetworkManager>();
-            _networkManager = _gameFactory.CreateSteamNetworkManager().GetComponent<CustomNetworkManager>();
+            _mapSynchronization = new MapMessageHandler();
+            //_networkManager = _gameFactory.CreateLocalNetworkManager(_mapSynchronization).GetComponent<CustomNetworkManager>();
+            _networkManager = _gameFactory.CreateSteamNetworkManager(_mapSynchronization).GetComponent<CustomNetworkManager>();
             _networkManager.MapLoaded += OnMapLoaded;
-            _networkManager.MapDownloaded += OnMapDownloaded;
+            _mapSynchronization.MapDownloaded += OnMapDownloaded;
         }
         
         private void OnMapLoaded(Map map)
         {
             Debug.Log("Loaded map from disk");
-            CreateMapGenerator(map);
+            _mapSynchronization.Map = map;
+            _gameFactory.CreateMapRenderer(map, _mapSynchronization.Buffer);
             CreateServerEntityFactory(map);
             _stateMachine.Enter<GameLoopState>();
         }
 
         private void OnMapDownloaded(Map map)
         {
+            _mapSynchronization.Map = map;
             Debug.Log("Downloaded map from server");
-            CreateMapGenerator(map);
+            _gameFactory.CreateMapRenderer(map, _mapSynchronization.Buffer);
             _stateMachine.Enter<GameLoopState>();
         }
 
@@ -64,11 +69,6 @@ namespace Infrastructure.States
         {
             var entityFactory = new EntityFactory(map, _assets, _staticData, _networkManager.ServerData, _particleFactory);
             _networkManager.EntityFactory = entityFactory;
-        }
-        private void CreateMapGenerator(Map map)
-        {
-            var mapGenerator = _gameFactory.CreateMapGenerator(map);
-            AllServices.Container.RegisterSingle<IMapGeneratorProvider>(new MapGeneratorProvider(mapGenerator.GetComponent<MapGenerator>()));
         }
 
     }

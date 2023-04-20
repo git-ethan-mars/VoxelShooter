@@ -1,8 +1,6 @@
 ﻿using Data;
-using Infrastructure.AssetManagement;
-using Networking.Synchronization;
+using PlayerLogic;
 using Rendering;
-using UI;
 using UnityEngine;
 
 namespace Inventory
@@ -45,7 +43,7 @@ namespace Inventory
         {
             var raycastResult = _cubeRenderer.GetRayCastHit(out var raycastHit);
             if (!raycastResult) return;
-            _mapSynchronization.CreateSpawnPoint(Vector3Int.FloorToInt(raycastHit.point - raycastHit.normal / 2));
+            _mapSynchronization.SendSpawnPointOnServer(Vector3Int.FloorToInt(raycastHit.point - raycastHit.normal / 2));
         }
     }
 }

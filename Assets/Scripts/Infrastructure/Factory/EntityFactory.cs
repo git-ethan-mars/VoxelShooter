@@ -6,6 +6,7 @@ using Infrastructure.Services;
 using MapLogic;
 using Mirror;
 using Networking;
+using Networking.Messages;
 using Networking.Synchronization;
 using PlayerLogic;
 using UnityEngine;
@@ -20,6 +21,7 @@ namespace Infrastructure.Factory
         private readonly IStaticDataService _staticData;
         private readonly ServerData _serverData;
         private readonly IParticleFactory _particleFactory;
+        private readonly Map _map;
         private const string PlayerPath = "Prefabs/Player";
 
 
@@ -27,6 +29,7 @@ namespace Infrastructure.Factory
             IParticleFactory particleFactory)
         {
             _serverData = serverData;
+            _map = map;
             _spawnPoints = map.MapData.SpawnPoints;
             _assets = assets;
             _staticData = staticData;
@@ -98,6 +101,7 @@ namespace Infrastructure.Factory
 
         private void ConfigureSynchronization(GameObject player)
         {
+            player.GetComponent<MapSynchronization>().Construct(_map);
             player.GetComponent<HealthSynchronization>().Construct(_serverData, this);
             player.GetComponent<WeaponSynchronization>().Construct(_particleFactory, _serverData);
         }
