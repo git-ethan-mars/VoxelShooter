@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameClass: 1
   maxHealth: 100
-  speed: 15
-  jumpMultiplier: 15
+  speed: 12.5
+  jumpMultiplier: 12.5
   blockCount: 50
   placeDistance: 10

@@ -15,4 +15,4 @@ MonoBehaviour:
   id: 0
   itemType: 6
   inventoryIcon: {fileID: 21300000, guid: 8f7ade538945d18448d723fbd9c37ba0, type: 3}
-  prefab: {fileID: 0}
+  prefab: {fileID: 1076878374699499732, guid: e1971f4a8c7661546bc509b44bd91b80, type: 3}
