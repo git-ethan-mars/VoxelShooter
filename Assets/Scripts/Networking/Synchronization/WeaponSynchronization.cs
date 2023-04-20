@@ -11,12 +11,10 @@ namespace Networking.Synchronization
     {
         private ServerData _serverData;
         private IParticleFactory _particleFactory;
-        private AudioSource _audioSource;
 
-        public void Construct(IParticleFactory particleFactory, ServerData serverData, AudioSource audioSource)
+        public void Construct(IParticleFactory particleFactory, ServerData serverData)
         {
             _serverData = serverData;
-            _audioSource = audioSource;
             _particleFactory = particleFactory;
         }
 
