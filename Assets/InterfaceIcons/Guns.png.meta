@@ -121,7 +121,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 1847
+        y: 1900
         width: 450
         height: 100
       alignment: 0
@@ -142,7 +142,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 1637
+        y: 1798
         width: 450
         height: 100
       alignment: 0
@@ -163,7 +163,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 1358
+        y: 1654
         width: 450
         height: 100
       alignment: 0
@@ -184,7 +184,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 1065
+        y: 1524
         width: 450
         height: 100
       alignment: 0
@@ -205,11 +205,11 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 660
+        y: 1372
         width: 450
         height: 100
       alignment: 9
-      pivot: {x: 0.33732015, y: 0.64284056}
+      pivot: {x: 0.4918711, y: 0.51036865}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -226,7 +226,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 327
+        y: 1224
         width: 450
         height: 100
       alignment: 0
@@ -238,6 +238,27 @@ TextureImporter:
       bones: []
       spriteID: ad6cb3cb5b42f694987860ad1f35e6df
       internalID: 631782971
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Rifle
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1097
+        width: 450
+        height: 100
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 896c49bfea13fd349990b20cc4421f0a
+      internalID: -188179433
       vertices: []
       indices: 
       edges: []
@@ -255,6 +276,7 @@ TextureImporter:
     nameFileIdTable:
       Automat: 1027491563
       Knife: 1150218188
+      Rifle: -188179433
       Boom: 631782971
       Shotgun: 1629097733
       MP40: 1387272548
