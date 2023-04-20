@@ -3,7 +3,7 @@
 namespace Data
 {
     [CreateAssetMenu(fileName = "Melee Weapon", menuName = "Inventory System/Inventory Items/Melee weapon")]
-    public class MeleeWeapon : InventoryItem
+    public class MeleeWeaponItem : InventoryItem
     {
         
         private void Awake()

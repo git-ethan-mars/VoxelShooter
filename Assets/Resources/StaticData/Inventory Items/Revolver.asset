@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 285b4a900c7a4edb9d7a5c6d6172ded8, type: 3}
+  m_Name: Revolver
+  m_EditorClassIdentifier: 
+  id: 9
+  itemType: 0
+  inventoryIcon: {fileID: -510781377, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
+  prefab: {fileID: 4367548136736479994, guid: 1c4296936330d494684804c1fb525ba0, type: 3}
+  isAutomatic: 0
+  timeBetweenShooting: 0
+  baseRecoil: 0
+  stepRecoil: 0
+  resetTimeRecoil: 0
+  range: 0
+  reloadTime: 0
+  timeBetweenShots: 0
+  magazineSize: 0
+  bulletsPerTap: 0
+  totalBullets: 0
+  damage: 0
+  headMultiplier: 0
+  chestMultiplier: 0
+  legMultiplier: 0
+  armMultiplier: 0

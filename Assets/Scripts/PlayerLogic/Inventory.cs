@@ -33,9 +33,9 @@ namespace PlayerLogic
             foreach (var id in Ids)
             {
                 var item = _staticData.GetItem(id);
-                if (item.itemType == ItemType.PrimaryWeapon)
+                if (item.itemType == ItemType.Weapon)
                 {
-                    Weapons[id] = new Weapon((PrimaryWeapon) item);
+                    Weapons[id] = new Weapon((WeaponItem) item);
                 }
             }
         }
