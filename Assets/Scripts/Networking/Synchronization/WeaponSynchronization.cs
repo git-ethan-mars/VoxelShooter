@@ -97,10 +97,16 @@ namespace Networking.Synchronization
         private void Reload(Weapon weapon)
         {
             weapon.IsReloading = true;
-            weapon.TotalBullets -= weapon.MagazineSize - weapon.BulletsInMagazine;
-            if (weapon.TotalBullets <= 0)
+            if (weapon.TotalBullets + weapon.BulletsInMagazine - weapon.MagazineSize <= 0)
+            {
+                weapon.BulletsInMagazine += weapon.TotalBullets;
                 weapon.TotalBullets = 0;
-            weapon.BulletsInMagazine = weapon.MagazineSize;
+            }
+            else
+            {
+                weapon.TotalBullets -= weapon.MagazineSize - weapon.BulletsInMagazine;
+                weapon.BulletsInMagazine = weapon.MagazineSize;
+            }
             SendReload(weapon.ID, weapon.TotalBullets, weapon.BulletsInMagazine);
             StartReloadCoroutine(weapon);
         }
@@ -108,7 +114,6 @@ namespace Networking.Synchronization
         [Server]
         private void ReloadFinished(Weapon weapon)
         {
-            weapon.BulletsInMagazine = weapon.MagazineSize;
             weapon.IsReloading = false;
         }
 
