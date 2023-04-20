@@ -27,7 +27,6 @@ namespace PlayerLogic
 
         public void OnDestroy()
         {
-            if (!isLocalPlayer) return;
             Destroy(_hud);
             Debug.Log("HUD DESTROYED");
         }
