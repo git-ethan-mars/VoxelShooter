@@ -22,7 +22,6 @@ namespace Infrastructure
         private static void ApplyGameSettings()
         {
             Profiler.maxUsedMemory = int.MaxValue;
-            Application.targetFrameRate = 60;
         }
     }
 }
