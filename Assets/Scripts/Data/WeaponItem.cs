@@ -27,6 +27,12 @@ namespace Data
         public float legMultiplier;
         [Range(0,5)]
         public float armMultiplier;
+        
+        [Header("Audio")]
+        public AudioClip shootingAudioClip;
+        [Range(0, 1)] public float shootingVolume;
+        public AudioClip reloadingAudioClip;
+        [Range(0, 1)] public float reloadingVolume;
 
         private void Awake()
         {

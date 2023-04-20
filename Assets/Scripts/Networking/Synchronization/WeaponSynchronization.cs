@@ -12,13 +12,9 @@ namespace Networking.Synchronization
         private ServerData _serverData;
         private IParticleFactory _particleFactory;
         private AudioSource _audioSource;
-        private Sounds _shootingSounds;
-        private Sounds _reloadingSounds;
 
         public void Construct(IParticleFactory particleFactory, ServerData serverData, AudioSource audioSource)
         {
-            _shootingSounds = Resources.Load<Sounds>("Audio/Sounds/ShootingSounds");
-            _reloadingSounds = Resources.Load<Sounds>("Audio/Sounds/ReloadingSounds");
             _serverData = serverData;
             _audioSource = audioSource;
             _particleFactory = particleFactory;
@@ -56,26 +52,22 @@ namespace Networking.Synchronization
         [TargetRpc]
         private void SendWeaponState(int weaponId, int bulletsInMagazine)
         {
-            var audioSource = GetComponent<AudioSource>();
-            var sound = _shootingSounds.GetAudioClip(weaponId);
-            audioSource.clip = sound.AudioClip;
-            audioSource.volume = sound.volume;
-            audioSource.Play();
-            
             var weapon = GetComponent<PlayerLogic.Inventory>().Weapons[weaponId];
+            var audioSource = GetComponent<AudioSource>();
+            audioSource.clip = weapon.ShootingAudioClip;
+            audioSource.volume = weapon.ShootingVolume;
+            audioSource.Play();
             weapon.BulletsInMagazine = bulletsInMagazine;
         }
 
         [TargetRpc]
         private void SendReload(int weaponId, int totalBullets, int bulletsInMagazine)
         {
-            var audioSource = GetComponent<AudioSource>();
-            var sound = _reloadingSounds.GetAudioClip(weaponId);
-            audioSource.clip = sound.AudioClip;
-            audioSource.volume = sound.volume;
-            audioSource.Play();
-            
             var weapon = GetComponent<PlayerLogic.Inventory>().Weapons[weaponId];
+            var audioSource = GetComponent<AudioSource>();
+            audioSource.clip = weapon.ReloadingAudioClip;
+            audioSource.volume = weapon.ReloadingVolume;
+            audioSource.Play();
             weapon.TotalBullets = totalBullets;
             weapon.BulletsInMagazine = bulletsInMagazine;
         }
@@ -113,9 +105,8 @@ namespace Networking.Synchronization
         [Server]
         private void Reload(Weapon weapon)
         {
-            var sound = _reloadingSounds.GetAudioClip(weapon.ID);
-            _audioSource.clip = sound.AudioClip;
-            _audioSource.volume = sound.volume;
+            _audioSource.clip = weapon.ReloadingAudioClip;
+            _audioSource.volume = weapon.ReloadingVolume;
             _audioSource.Play();
             
             weapon.IsReloading = true;
@@ -142,9 +133,8 @@ namespace Networking.Synchronization
         [Server]
         private void Shoot(Weapon weapon)
         {
-            var sound = _shootingSounds.GetAudioClip(weapon.ID);
-            _audioSource.clip = sound.AudioClip;
-            _audioSource.volume = sound.volume;
+            _audioSource.clip = weapon.ShootingAudioClip;
+            _audioSource.volume = weapon.ShootingVolume;
             _audioSource.Play();
             
             weapon.BulletsInMagazine -= weapon.BulletsPerShot;

@@ -26,6 +26,10 @@ namespace Data
         public readonly float ChestMultiplier;
         public readonly float LegMultiplier;
         public readonly float ArmMultiplier;
+        public AudioClip ShootingAudioClip;
+        public float ShootingVolume;
+        public AudioClip ReloadingAudioClip;
+        public float ReloadingVolume;
 
         public Weapon(WeaponItem primaryWeapon)
         {
@@ -50,6 +54,10 @@ namespace Data
             Icon = primaryWeapon.inventoryIcon;
             ID = primaryWeapon.id;
             Range = primaryWeapon.range;
+            ShootingAudioClip = primaryWeapon.shootingAudioClip;
+            ShootingVolume = primaryWeapon.shootingVolume;
+            ReloadingAudioClip = primaryWeapon.reloadingAudioClip;
+            ReloadingVolume = primaryWeapon.reloadingVolume;
         }
     }
 }
