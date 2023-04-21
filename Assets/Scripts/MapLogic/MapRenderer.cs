@@ -280,6 +280,7 @@ namespace MapLogic
             {
                 Chunks[chunkIndex].SpawnBlocks(data);
             }
+            _buffer.Clear();
         }
     }
 }
