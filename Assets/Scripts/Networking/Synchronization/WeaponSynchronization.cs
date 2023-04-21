@@ -55,7 +55,6 @@ namespace Networking.Synchronization
             audioSource.clip = weapon.ShootingAudioClip;
             audioSource.volume = weapon.ShootingVolume;
             audioSource.Play();
-            Debug.Log("Player");
             weapon.BulletsInMagazine = bulletsInMagazine;
         }
 
@@ -67,7 +66,6 @@ namespace Networking.Synchronization
             audioSource.clip = weapon.ReloadingAudioClip;
             audioSource.volume = weapon.ReloadingVolume;
             audioSource.Play();
-            Debug.Log("Player");
             weapon.TotalBullets = totalBullets;
             weapon.BulletsInMagazine = bulletsInMagazine;
         }
@@ -152,27 +150,22 @@ namespace Networking.Synchronization
             if (!raycastResult) return;
             if (rayHit.collider.CompareTag("Head"))
             {
-                var connection = rayHit.collider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
-                GetComponent<HealthSynchronization>().Damage(connection, (int) (weapon.HeadMultiplier * weapon.Damage));
+                ShootImpact(rayHit, (int) (weapon.HeadMultiplier * weapon.Damage));
             }
 
             if (rayHit.collider.CompareTag("Leg"))
             {
-                var connection = rayHit.collider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
-                GetComponent<HealthSynchronization>().Damage(connection, (int) (weapon.LegMultiplier * weapon.Damage));
+                ShootImpact(rayHit, (int) (weapon.LegMultiplier * weapon.Damage));
             }
 
             if (rayHit.collider.CompareTag("Chest"))
             {
-                var connection = rayHit.collider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
-                GetComponent<HealthSynchronization>()
-                    .Damage(connection, (int) (weapon.ChestMultiplier * weapon.Damage));
+                ShootImpact(rayHit, (int) (weapon.ChestMultiplier * weapon.Damage));
             }
 
             if (rayHit.collider.CompareTag("Arm"))
             {
-                var connection = rayHit.collider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
-                GetComponent<HealthSynchronization>().Damage(connection, (int) (weapon.ArmMultiplier * weapon.Damage));
+                ShootImpact(rayHit, (int) (weapon.ArmMultiplier * weapon.Damage));
             }
 
             if (rayHit.collider.CompareTag("Chunk"))
@@ -180,6 +173,13 @@ namespace Networking.Synchronization
                 _particleFactory.CreateBulletHole(rayHit.point, Quaternion.Euler(rayHit.normal.y * -90,
                     rayHit.normal.x * 90 + rayHit.normal.z * -180, 0));
             }
+        }
+
+        private void ShootImpact(RaycastHit rayHit, int damage)
+        {
+            var connection = rayHit.collider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
+            GetComponent<HealthSynchronization>().Damage(connection, damage);
+            _particleFactory.CreateBlood(rayHit.point);
         }
 
         [Server]

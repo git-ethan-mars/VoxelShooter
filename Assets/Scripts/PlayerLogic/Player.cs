@@ -22,13 +22,11 @@ namespace PlayerLogic
         public override void OnStartLocalPlayer()
         {
             _hud = AllServices.Container.Single<IGameFactory>().CreateHud(gameObject);
-            Debug.Log("HUD created");
         }
 
         public void OnDestroy()
         {
             Destroy(_hud);
-            Debug.Log("HUD DESTROYED");
         }
     }
 }

@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 4000011227296186}
   - component: {fileID: 198000012944515248}
   - component: {fileID: 199000013307124530}
-  - component: {fileID: 2720633352818156142}
   - component: {fileID: -4110306898872080546}
   m_Layer: 0
   m_Name: MuzzleFlashEffect
@@ -4767,19 +4766,6 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
---- !u!114 &2720633352818156142
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1000010254994808}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b3cedb949dfc6b44aa88e1e82ba6471d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  lifeTime: 0.5
 --- !u!114 &-4110306898872080546
 MonoBehaviour:
   m_ObjectHideFlags: 0

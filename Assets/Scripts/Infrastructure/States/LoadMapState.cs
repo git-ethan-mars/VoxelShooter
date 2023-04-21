@@ -17,10 +17,11 @@ namespace Infrastructure.States
         private readonly IAssetProvider _assets;
         private CustomNetworkManager _networkManager;
         private readonly IParticleFactory _particleFactory;
-        private MapMessageHandler _mapSynchronization;
+        private MapMessageHandler mapMessageHandler;
+        private readonly bool _isLocalBuild;
 
         public LoadMapState(GameStateMachine stateMachine, SceneLoader sceneLoader, IGameFactory gameFactory,
-            IStaticDataService staticData, IAssetProvider assets, IParticleFactory particleFactory)
+            IStaticDataService staticData, IAssetProvider assets, IParticleFactory particleFactory, bool isLocalBuild)
         {
             _sceneLoader = sceneLoader;
             _stateMachine = stateMachine;
@@ -28,6 +29,7 @@ namespace Infrastructure.States
             _staticData = staticData;
             _particleFactory = particleFactory;
             _assets = assets;
+            _isLocalBuild = isLocalBuild;
         }
 
         public void Enter(string sceneName)
@@ -41,27 +43,28 @@ namespace Infrastructure.States
 
         private void OnLoaded()
         {
-            _mapSynchronization = new MapMessageHandler();
-            //_networkManager = _gameFactory.CreateLocalNetworkManager(_mapSynchronization).GetComponent<CustomNetworkManager>();
-            _networkManager = _gameFactory.CreateSteamNetworkManager(_mapSynchronization).GetComponent<CustomNetworkManager>();
+            mapMessageHandler = new MapMessageHandler();
+            _networkManager = _isLocalBuild
+                ? _gameFactory.CreateLocalNetworkManager(mapMessageHandler).GetComponent<CustomNetworkManager>()
+                : _gameFactory.CreateSteamNetworkManager(mapMessageHandler).GetComponent<CustomNetworkManager>();
             _networkManager.MapLoaded += OnMapLoaded;
-            _mapSynchronization.MapDownloaded += OnMapDownloaded;
+            mapMessageHandler.MapDownloaded += OnMapDownloaded;
         }
         
         private void OnMapLoaded(Map map)
         {
             Debug.Log("Loaded map from disk");
-            _mapSynchronization.Map = map;
-            _gameFactory.CreateMapRenderer(map, _mapSynchronization.Buffer);
+            mapMessageHandler.Map = map;
+            _gameFactory.CreateMapRenderer(map, mapMessageHandler.Buffer);
             CreateServerEntityFactory(map);
             _stateMachine.Enter<GameLoopState>();
         }
 
         private void OnMapDownloaded(Map map)
         {
-            _mapSynchronization.Map = map;
+            mapMessageHandler.Map = map;
             Debug.Log("Downloaded map from server");
-            _gameFactory.CreateMapRenderer(map, _mapSynchronization.Buffer);
+            _gameFactory.CreateMapRenderer(map, mapMessageHandler.Buffer);
             _stateMachine.Enter<GameLoopState>();
         }
 

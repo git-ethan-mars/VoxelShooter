@@ -11,13 +11,14 @@ namespace Infrastructure.States
         private readonly Dictionary<Type, IExitableState> _states;
         private IExitableState _activeState;
 
-        public GameStateMachine(SceneLoader sceneLoader, AllServices allServices)
+        public GameStateMachine(SceneLoader sceneLoader, ICoroutineRunner coroutineRunner, AllServices allServices,
+            bool isLocalBuild)
         {
             _states = new Dictionary<Type, IExitableState>
             {
-                [typeof(BootstrapState)] = new BootstrapState(this, sceneLoader, allServices),
+                [typeof(BootstrapState)] = new BootstrapState(this, sceneLoader, allServices, coroutineRunner),
                 [typeof(LoadMapState)] = new LoadMapState(this, sceneLoader, allServices.Single<IGameFactory>(),
-                    allServices.Single<IStaticDataService>(), allServices.Single<IAssetProvider>(), allServices.Single<IParticleFactory>()),
+                    allServices.Single<IStaticDataService>(), allServices.Single<IAssetProvider>(), allServices.Single<IParticleFactory>(), isLocalBuild),
                 [typeof(GameLoopState)] =
                     new GameLoopState(allServices.Single<IGameFactory>())
             };
