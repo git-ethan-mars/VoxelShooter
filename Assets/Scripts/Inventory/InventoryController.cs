@@ -130,6 +130,7 @@ namespace Inventory
 
         private void ChangeSlotIndex(int newIndex)
         {
+            if (newIndex >= _maxIndex) return;
             _boarders[_itemIndex].SetActive(false);
             _inventoryHandlers[_itemIndex].Unselect();
             _itemIndex = newIndex;
