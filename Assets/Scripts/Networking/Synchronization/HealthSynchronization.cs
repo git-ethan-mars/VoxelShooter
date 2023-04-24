@@ -34,5 +34,15 @@ namespace Networking.Synchronization
                 Destroy(oldPlayer, 0.1f);
             }
         }
+        [Command]
+        public void Die(NetworkConnectionToClient connection = null)
+        {
+            _serverData.UpdatePlayer(connection);
+            var gameClass = _serverData.GetPlayerData(connection.connectionId).GameClass;
+            var player = _entityFactory.RespawnPlayer(connection, gameClass); 
+            var oldPlayer = connection.identity.gameObject;
+            NetworkServer.ReplacePlayerForConnection(connection, player, true);
+            Destroy(oldPlayer, 0.1f);
+        }
     }
 }

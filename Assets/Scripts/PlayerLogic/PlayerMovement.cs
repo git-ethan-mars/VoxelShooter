@@ -2,6 +2,7 @@ using Data;
 using Infrastructure.Services;
 using Infrastructure.Services.Input;
 using Mirror;
+using Networking.Synchronization;
 using UnityEngine;
 
 namespace PlayerLogic
@@ -35,6 +36,8 @@ namespace PlayerLogic
         private void Update()
         {
             if (!isLocalPlayer) return;
+            if (Input.GetKeyDown(KeyCode.L))
+                GetComponent<HealthSynchronization>().Die();
             var axis = _inputService.Axis.normalized;
             var playerTransform = transform;
             _movementDirection = (axis.x * playerTransform.forward + axis.y * playerTransform.right).normalized;

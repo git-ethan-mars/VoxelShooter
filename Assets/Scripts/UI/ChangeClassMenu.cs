@@ -1,3 +1,4 @@
+using System;
 using Data;
 using Networking;
 using UnityEngine;
@@ -18,7 +19,7 @@ namespace UI
         {
             _networkManager = networkManager;
         }
-    
+        
         private void Start()
         {
             builderButton.onClick.AddListener(()=>ChangeClass(GameClass.Builder));
@@ -31,6 +32,16 @@ namespace UI
         {
             _networkManager.ChangeClass(gameClass);
             gameObject.SetActive(false);
+        }
+        
+        private void OnEnable()
+        {
+            Cursor.lockState = CursorLockMode.None;
+        }
+
+        private void OnDisable()
+        {
+            Cursor.lockState = CursorLockMode.Locked;
         }
     }
 }

@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 namespace UI
@@ -9,7 +10,7 @@ namespace UI
         public GameObject ammoInfo;
         public GameObject ammoCount;
         public GameObject blockInfo;
-        public GameObject blockCount;
-        public HealthBar healthBar;
+        public TextMeshProUGUI blockCount;
+        public HealthCounter healthCounter;
     }
 }

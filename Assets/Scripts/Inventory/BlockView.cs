@@ -12,35 +12,36 @@ namespace Inventory
         public Sprite Icon { get; }
         private GameObject Model { get; }
         private Color32 _currentColor;
-        private readonly GameObject _palette;
         private readonly CubeRenderer _cubeRenderer;
         private readonly MapSynchronization _mapSynchronization;
         private int _blockCount;
+        private readonly GameObject _blockInfo;
 
 
         public BlockView(IGameFactory gameFactory, CubeRenderer cubeRender, MapSynchronization mapSynchronization, GameObject hud, BlockItem configuration, GameObject player)
         {
             _cubeRenderer = cubeRender;
             _mapSynchronization = mapSynchronization;
-            _palette = hud.GetComponent<Hud>().palette;
+            var palette = hud.GetComponent<Hud>().palette;
+            _blockInfo = hud.GetComponent<Hud>().blockInfo;
             Icon = configuration.inventoryIcon;
             Model = gameFactory.CreateGameModel(configuration.prefab, player.GetComponent<Player>().itemPosition);
             Model.SetActive(false);
-            _palette.GetComponent<PaletteCreator>().OnColorUpdate += UpdateColor;
+            palette.GetComponent<PaletteCreator>().OnColorUpdate += UpdateColor;
             _blockCount = player.GetComponent<Player>().blockCount;
         }
 
         public void Select()
         {
             Model.SetActive(true);
-            _palette.SetActive(true);
+            _blockInfo.SetActive(true);
             _cubeRenderer.EnableCube();
         }
 
         public void Unselect()
         {
             Model.SetActive(false);
-            _palette.SetActive(false);
+            _blockInfo.SetActive(false);
             _cubeRenderer.DisableCube();
         }
 

@@ -87,8 +87,7 @@ namespace Infrastructure.Factory
         {
             var characteristic = _staticData.GetPlayerCharacteristic(gameClass);
             player.GetComponent<Player>().Construct(characteristic);
-            var movement = player.GetComponent<PlayerMovement>();
-            movement.Construct(characteristic);
+            player.GetComponent<PlayerMovement>().Construct(characteristic);
             player.GetComponent<HealthSystem>().Construct(characteristic);
             var inventory = _staticData.GetInventory(gameClass).Select(item => item.id).ToArray();
             var playerInventory = player.GetComponent<PlayerLogic.Inventory>();

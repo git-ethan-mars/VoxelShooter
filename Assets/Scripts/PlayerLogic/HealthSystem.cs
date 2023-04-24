@@ -6,8 +6,8 @@ namespace PlayerLogic
 {
     public class HealthSystem : NetworkBehaviour
     {
-        public event Action<int, int> OnHealthChanged;
-        private int Health { get; set; }
+        public event Action<int> OnHealthChanged;
+        public int Health { get; private set;  }
         [SyncVar] private int _maxHealth;
         
 
@@ -17,7 +17,7 @@ namespace PlayerLogic
         }
         private void Start()
         {
-            _maxHealth = Health;
+            Health = _maxHealth;
         }
 
         public void UpdateHealth(int currentHealth, int maxHealth)
@@ -30,7 +30,7 @@ namespace PlayerLogic
                 Health = currentHealth;
             }
 
-            OnHealthChanged?.Invoke(Health, _maxHealth);
+            OnHealthChanged?.Invoke(Health);
         }
         
     }

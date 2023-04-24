@@ -15,6 +15,9 @@ namespace UI
 
         public void SetIconForItem(int slotIndex, Sprite icon)
         {
+            var previousColor = slots[slotIndex].GetComponent<Image>().color;
+            slots[slotIndex].GetComponent<Image>().color =
+                new Color(previousColor.r, previousColor.g, previousColor.b, 255);
             slots[slotIndex].GetComponent<Image>().sprite = icon;
         }
     }
