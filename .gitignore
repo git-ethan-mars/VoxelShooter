@@ -75,3 +75,6 @@ crashlytics-build.properties
 # Rider IDE configurations
 /.idea/
 .vsconfig
+
+# Aseprite
+*.aseprite
