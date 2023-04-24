@@ -120,10 +120,10 @@ TextureImporter:
       name: Shotgun
       rect:
         serializedVersion: 2
-        x: 72
-        y: 1745
-        width: 300
-        height: 237
+        x: 0
+        y: 1900
+        width: 450
+        height: 100
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,10 +141,10 @@ TextureImporter:
       name: Knife
       rect:
         serializedVersion: 2
-        x: 65
-        y: 1431
-        width: 320
-        height: 320
+        x: 0
+        y: 1798
+        width: 450
+        height: 100
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -162,10 +162,10 @@ TextureImporter:
       name: Revolver
       rect:
         serializedVersion: 2
-        x: 104
-        y: 1187
-        width: 200
-        height: 200
+        x: 0
+        y: 1654
+        width: 450
+        height: 100
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -180,13 +180,13 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Assault Rifle
+      name: Automat
       rect:
         serializedVersion: 2
-        x: 32
-        y: 857
-        width: 350
-        height: 350
+        x: 0
+        y: 1524
+        width: 450
+        height: 100
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -201,15 +201,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Machine Gun
+      name: MP40
       rect:
         serializedVersion: 2
-        x: 60
-        y: 586
-        width: 270
-        height: 270
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 0
+        y: 1372
+        width: 450
+        height: 100
+      alignment: 9
+      pivot: {x: 0.4918711, y: 0.51036865}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -225,10 +225,10 @@ TextureImporter:
       name: Boom
       rect:
         serializedVersion: 2
-        x: 32
-        y: 180
-        width: 400
-        height: 400
+        x: 0
+        y: 1224
+        width: 450
+        height: 100
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -238,6 +238,27 @@ TextureImporter:
       bones: []
       spriteID: ad6cb3cb5b42f694987860ad1f35e6df
       internalID: 631782971
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Rifle
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1097
+        width: 450
+        height: 100
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 896c49bfea13fd349990b20cc4421f0a
+      internalID: -188179433
       vertices: []
       indices: 
       edges: []
@@ -253,11 +274,12 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
+      Automat: 1027491563
       Knife: 1150218188
-      Machine Gun: 1387272548
+      Rifle: -188179433
       Boom: 631782971
       Shotgun: 1629097733
-      Assault Rifle: 1027491563
+      MP40: 1387272548
       Revolver: -510781377
   spritePackingTag: 
   pSDRemoveMatte: 0
