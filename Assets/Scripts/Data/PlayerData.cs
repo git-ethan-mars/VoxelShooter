@@ -10,7 +10,8 @@ namespace Data
         public readonly GameClass GameClass;
         public int Health;
         public readonly int MaxHealth;
-        public readonly Dictionary<int, WeaponData> WeaponsById;
+        public readonly Dictionary<int, RangeWeaponData> RangeWeaponsById;
+        public readonly Dictionary<int, MeleeWeaponData> MeleeWeaponsById;
 
         public PlayerData(GameClass chosenClass, string nick, IStaticDataService staticDataService)
         {
@@ -20,13 +21,18 @@ namespace Data
             Health = characteristic.maxHealth;
             MaxHealth = characteristic.maxHealth;
             var itemIds = staticDataService.GetInventory(chosenClass).Select(item => item.id).ToList();
-            WeaponsById = new Dictionary<int, WeaponData>();
+            RangeWeaponsById = new Dictionary<int, RangeWeaponData>();
+            MeleeWeaponsById = new Dictionary<int, MeleeWeaponData>();
             foreach (var itemId in itemIds)
             {
                 var item = staticDataService.GetItem(itemId);
-                if (item.itemType == ItemType.Weapon)
+                if (item.itemType == ItemType.RangeWeapon)
                 {
-                    WeaponsById[itemId] = new WeaponData((WeaponItem) item);
+                    RangeWeaponsById[itemId] = new RangeWeaponData((RangeWeaponItem) item);
+                }
+                if (item.itemType == ItemType.MeleeWeapon)
+                {
+                    MeleeWeaponsById[itemId] = new MeleeWeaponData((MeleeWeaponItem) item);
                 }
             }
         }

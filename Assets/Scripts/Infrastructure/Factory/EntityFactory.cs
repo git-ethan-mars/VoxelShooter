@@ -87,7 +87,8 @@ namespace Infrastructure.Factory
         {
             var characteristic = _staticData.GetPlayerCharacteristic(gameClass);
             player.GetComponent<Player>().Construct(characteristic);
-            player.GetComponent<PlayerMovement>().Construct(characteristic);
+            var movement = player.GetComponent<PlayerMovement>();
+            movement.Construct(characteristic);
             player.GetComponent<HealthSystem>().Construct(characteristic);
             var inventory = _staticData.GetInventory(gameClass).Select(item => item.id).ToArray();
             var playerInventory = player.GetComponent<PlayerLogic.Inventory>();
@@ -102,7 +103,8 @@ namespace Infrastructure.Factory
         {
             player.GetComponent<MapSynchronization>().Construct(_map);
             player.GetComponent<HealthSynchronization>().Construct(_serverData, this);
-            player.GetComponent<WeaponSynchronization>().Construct(_particleFactory, _serverData);
+            player.GetComponent<RangeWeaponSynchronization>().Construct(_particleFactory, _serverData);
+            player.GetComponent<MeleeWeaponSynchronization>().Construct(_particleFactory, _serverData);
         }
     }
 }

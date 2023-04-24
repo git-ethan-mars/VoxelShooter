@@ -35,7 +35,7 @@ namespace Networking
         {
             ServerData = new ServerData(_staticData);
             NetworkServer.RegisterHandler<CharacterMessage>(OnChooseClass);
-            _map = MapReader.ReadFromFile("Atlantis.vxl");
+            _map = MapReader.ReadFromFile("WW1.vxl");
             MapLoaded?.Invoke(_map);
         }
 

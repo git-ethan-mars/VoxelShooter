@@ -10,34 +10,34 @@ using Vector3 = System.Numerics.Vector3;
 
 namespace Inventory
 {
-    public class GunSystem : IInventoryItemView, ILeftMouseButtonDownHandler, ILeftMouseButtonHoldHandler, IUpdated
+    public class RangeWeaponSystem : IInventoryItemView, ILeftMouseButtonDownHandler, ILeftMouseButtonHoldHandler, IUpdated
     {
         public Sprite Icon { get; }
         private GameObject Model { get; }
-        private readonly WeaponData _weapon;
+        private readonly RangeWeaponData _rangeWeapon;
         private readonly GameObject _ammoInfo;
         private readonly TextMeshProUGUI _ammoCount;
         private readonly Transform _attackPoint;
         private readonly Camera _fpsCam;
         private readonly IGameFactory _gameFactory;
-        private readonly WeaponSynchronization _bulletSynchronization;
+        private readonly RangeWeaponSynchronization _bulletSynchronization;
         private readonly IInputService _inputService;
 
 
-        public GunSystem(IGameFactory gameFactory, IInputService inputService, Camera camera,
-            Transform itemPosition, GameObject player, GameObject hud, WeaponData configuration)
+        public RangeWeaponSystem(IGameFactory gameFactory, IInputService inputService, Camera camera,
+            Transform itemPosition, GameObject player, GameObject hud, RangeWeaponData configuration)
         {
             _gameFactory = gameFactory;
             _inputService = inputService;
-            _weapon = configuration;
-            Model = _gameFactory.CreateGameModel(_weapon.Prefab, itemPosition);
+            _rangeWeapon = configuration;
+            Model = _gameFactory.CreateGameModel(_rangeWeapon.Prefab, itemPosition);
             Model.SetActive(false);
-            Icon = _weapon.Icon;
+            Icon = _rangeWeapon.Icon;
             _attackPoint = Model.GetComponentInChildren<Transform>();
             _fpsCam = camera;
             _ammoInfo = hud.GetComponent<Hud>().ammoInfo;
             _ammoCount = hud.GetComponent<Hud>().ammoCount.GetComponent<TextMeshProUGUI>();
-            _bulletSynchronization = player.GetComponent<WeaponSynchronization>();
+            _bulletSynchronization = player.GetComponent<RangeWeaponSynchronization>();
         }
 
         public void Select()
@@ -56,20 +56,20 @@ namespace Inventory
         public void InnerUpdate()
         {
             if (_inputService.IsReloadingButtonDown())
-                _bulletSynchronization.CmdReload(_weapon.ID);
-            _ammoCount.SetText($"{_weapon.BulletsInMagazine} / {_weapon.TotalBullets}");
+                _bulletSynchronization.CmdReload(_rangeWeapon.ID);
+            _ammoCount.SetText($"{_rangeWeapon.BulletsInMagazine} / {_rangeWeapon.TotalBullets}");
         }
 
         public void OnLeftMouseButtonDown()
         {
             var ray = _fpsCam.ViewportPointToRay(new Vector2(0.5f, 0.5f));
-            _bulletSynchronization.CmdShootSingle(ray, _weapon.ID);
+            _bulletSynchronization.CmdShootSingle(ray, _rangeWeapon.ID);
         }
 
         public void OnLeftMouseButtonHold()
         {
             var ray = _fpsCam.ViewportPointToRay(new Vector2(0.5f, 0.5f));
-            _bulletSynchronization.CmdShootAutomatic(ray, _weapon.ID);
+            _bulletSynchronization.CmdShootAutomatic(ray, _rangeWeapon.ID);
         }
     }
 }

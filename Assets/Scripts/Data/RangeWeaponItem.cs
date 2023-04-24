@@ -2,8 +2,8 @@
 
 namespace Data
 {
-    [CreateAssetMenu(fileName = "Weapon", menuName = "Inventory System/Inventory Items/Weapon")]
-    public class WeaponItem : InventoryItem
+    [CreateAssetMenu(fileName = "Range Weapon", menuName = "Inventory System/Inventory Items/Weapon")]
+    public class RangeWeaponItem : InventoryItem
     {
         [Header("Configuration")] 
         public bool isAutomatic;
@@ -36,7 +36,7 @@ namespace Data
 
         private void Awake()
         {
-            itemType = ItemType.Weapon;
+            itemType = ItemType.RangeWeapon;
         }
     }
 }

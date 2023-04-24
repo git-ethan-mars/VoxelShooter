@@ -13,7 +13,7 @@ namespace Data
     }
     public enum ItemType
     {
-        Weapon,
+        RangeWeapon,
         MeleeWeapon,
         Dynamite,
         Block,

@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Networking.Synchronization
 {
-    public class WeaponSynchronization : NetworkBehaviour
+    public class RangeWeaponSynchronization : NetworkBehaviour
     {
         private ServerData _serverData;
         private IParticleFactory _particleFactory;
@@ -21,7 +21,7 @@ namespace Networking.Synchronization
         [Command]
         public void CmdShootSingle(Ray ray, int weaponId, NetworkConnectionToClient conn = null)
         {
-            var weapon = _serverData.GetPlayerData(conn!.connectionId).WeaponsById[weaponId];
+            var weapon = _serverData.GetPlayerData(conn!.connectionId).RangeWeaponsById[weaponId];
             if (!CanShoot(weapon) || weapon.IsAutomatic) return;
             ApplyRaycast(ray, weapon);
             Shoot(weapon);
@@ -30,7 +30,7 @@ namespace Networking.Synchronization
         [Command]
         public void CmdShootAutomatic(Ray ray, int weaponId, NetworkConnectionToClient conn = null)
         {
-            var weapon = _serverData.GetPlayerData(conn!.connectionId).WeaponsById[weaponId];
+            var weapon = _serverData.GetPlayerData(conn!.connectionId).RangeWeaponsById[weaponId];
             if (!CanShoot(weapon) || !weapon.IsAutomatic) return;
             ApplyRaycast(ray, weapon);
             Shoot(weapon);
@@ -39,7 +39,7 @@ namespace Networking.Synchronization
         [Command]
         public void CmdReload(int weaponId, NetworkConnectionToClient conn = null)
         {
-            var weapon = _serverData.GetPlayerData(conn!.connectionId).WeaponsById[weaponId];
+            var weapon = _serverData.GetPlayerData(conn!.connectionId).RangeWeaponsById[weaponId];
             if (CanReload(weapon))
             {
                 Reload(weapon);
@@ -50,7 +50,7 @@ namespace Networking.Synchronization
         [TargetRpc]
         private void SendWeaponState(int weaponId, int bulletsInMagazine)
         {
-            var weapon = GetComponent<PlayerLogic.Inventory>().Weapons[weaponId];
+            var weapon = GetComponent<PlayerLogic.Inventory>().RangeWeapons[weaponId];
             var audioSource = GetComponent<AudioSource>();
             audioSource.clip = weapon.ShootingAudioClip;
             audioSource.volume = weapon.ShootingVolume;
@@ -61,7 +61,7 @@ namespace Networking.Synchronization
         [TargetRpc]
         private void SendReload(int weaponId, int totalBullets, int bulletsInMagazine)
         {
-            var weapon = GetComponent<PlayerLogic.Inventory>().Weapons[weaponId];
+            var weapon = GetComponent<PlayerLogic.Inventory>().RangeWeapons[weaponId];
             var audioSource = GetComponent<AudioSource>();
             audioSource.clip = weapon.ReloadingAudioClip;
             audioSource.volume = weapon.ReloadingVolume;
@@ -71,10 +71,10 @@ namespace Networking.Synchronization
         }
 
         [Server]
-        private void StartShootCoroutines(WeaponData weapon)
+        private void StartShootCoroutines(RangeWeaponData rangeWeapon)
         {
-            StartCoroutine(WaitForSeconds(() => ResetShoot(weapon), weapon.TimeBetweenShooting));
-            StartCoroutine(WaitForSeconds(() => ResetRecoil(weapon), weapon.ResetTimeRecoil));
+            StartCoroutine(WaitForSeconds(() => ResetShoot(rangeWeapon), rangeWeapon.TimeBetweenShooting));
+            StartCoroutine(WaitForSeconds(() => ResetRecoil(rangeWeapon), rangeWeapon.ResetTimeRecoil));
             /*if (weapon.BulletsPerShot > 0 && weapon.BulletsInMagazine > 0)
             {
                 Shoot(weapon);
@@ -83,89 +83,89 @@ namespace Networking.Synchronization
         }
 
         [Server]
-        private void StartReloadCoroutine(WeaponData weapon)
+        private void StartReloadCoroutine(RangeWeaponData rangeWeapon)
         {
-            StartCoroutine(WaitForSeconds(() => ReloadFinished(weapon), weapon.ReloadTime));
+            StartCoroutine(WaitForSeconds(() => ReloadFinished(rangeWeapon), rangeWeapon.ReloadTime));
         }
 
         [Server]
-        private void ResetRecoil(WeaponData weapon)
+        private void ResetRecoil(RangeWeaponData rangeWeapon)
         {
-            weapon.RecoilModifier -= weapon.StepRecoil;
+            rangeWeapon.RecoilModifier -= rangeWeapon.StepRecoil;
         }
 
         [Server]
-        private void ResetShoot(WeaponData weapon)
+        private void ResetShoot(RangeWeaponData rangeWeapon)
         {
-            weapon.IsReady = true;
+            rangeWeapon.IsReady = true;
         }
 
         [Server]
-        private void Reload(WeaponData weapon)
+        private void Reload(RangeWeaponData rangeWeapon)
         {
-            weapon.IsReloading = true;
-            if (weapon.TotalBullets + weapon.BulletsInMagazine - weapon.MagazineSize <= 0)
+            rangeWeapon.IsReloading = true;
+            if (rangeWeapon.TotalBullets + rangeWeapon.BulletsInMagazine - rangeWeapon.MagazineSize <= 0)
             {
-                weapon.BulletsInMagazine += weapon.TotalBullets;
-                weapon.TotalBullets = 0;
+                rangeWeapon.BulletsInMagazine += rangeWeapon.TotalBullets;
+                rangeWeapon.TotalBullets = 0;
             }
             else
             {
-                weapon.TotalBullets -= weapon.MagazineSize - weapon.BulletsInMagazine;
-                weapon.BulletsInMagazine = weapon.MagazineSize;
+                rangeWeapon.TotalBullets -= rangeWeapon.MagazineSize - rangeWeapon.BulletsInMagazine;
+                rangeWeapon.BulletsInMagazine = rangeWeapon.MagazineSize;
             }
-            SendReload(weapon.ID, weapon.TotalBullets, weapon.BulletsInMagazine);
-            StartReloadCoroutine(weapon);
+            SendReload(rangeWeapon.ID, rangeWeapon.TotalBullets, rangeWeapon.BulletsInMagazine);
+            StartReloadCoroutine(rangeWeapon);
         }
 
         [Server]
-        private void ReloadFinished(WeaponData weapon)
+        private void ReloadFinished(RangeWeaponData rangeWeapon)
         {
-            weapon.IsReloading = false;
+            rangeWeapon.IsReloading = false;
         }
 
         [Server]
-        private void Shoot(WeaponData weapon)
+        private void Shoot(RangeWeaponData rangeWeapon)
         {
-            weapon.BulletsInMagazine -= weapon.BulletsPerShot;
-            if (weapon.BulletsInMagazine <= 0)
-                weapon.BulletsInMagazine = 0;
-            weapon.IsReady = false;
-            weapon.RecoilModifier += weapon.StepRecoil;
-            SendWeaponState(weapon.ID, weapon.BulletsInMagazine);
-            StartShootCoroutines(weapon);
+            rangeWeapon.BulletsInMagazine -= rangeWeapon.BulletsPerShot;
+            if (rangeWeapon.BulletsInMagazine <= 0)
+                rangeWeapon.BulletsInMagazine = 0;
+            rangeWeapon.IsReady = false;
+            rangeWeapon.RecoilModifier += rangeWeapon.StepRecoil;
+            SendWeaponState(rangeWeapon.ID, rangeWeapon.BulletsInMagazine);
+            StartShootCoroutines(rangeWeapon);
         }
 
         [Server]
-        private void ApplyRaycast(Ray ray, WeaponData weapon)
+        private void ApplyRaycast(Ray ray, RangeWeaponData rangeWeapon)
         {
-            var x = Math.Abs(weapon.RecoilModifier) < 0.00001
+            var x = Math.Abs(rangeWeapon.RecoilModifier) < 0.00001
                 ? 0
-                : UnityEngine.Random.Range(-weapon.BaseRecoil, weapon.BaseRecoil) * (weapon.RecoilModifier + 1);
-            var y = Math.Abs(weapon.RecoilModifier) < 0.00001
+                : UnityEngine.Random.Range(-rangeWeapon.BaseRecoil, rangeWeapon.BaseRecoil) * (rangeWeapon.RecoilModifier + 1);
+            var y = Math.Abs(rangeWeapon.RecoilModifier) < 0.00001
                 ? 0
-                : UnityEngine.Random.Range(-weapon.BaseRecoil, weapon.BaseRecoil) * (weapon.RecoilModifier + 1);
+                : UnityEngine.Random.Range(-rangeWeapon.BaseRecoil, rangeWeapon.BaseRecoil) * (rangeWeapon.RecoilModifier + 1);
             ray = new Ray(ray.origin, ray.direction + new Vector3(x, y));
-            var raycastResult = Physics.Raycast(ray, out var rayHit, weapon.Range);
+            var raycastResult = Physics.Raycast(ray, out var rayHit, rangeWeapon.Range);
             if (!raycastResult) return;
             if (rayHit.collider.CompareTag("Head"))
             {
-                ShootImpact(rayHit, (int) (weapon.HeadMultiplier * weapon.Damage));
+                ShootImpact(rayHit, (int) (rangeWeapon.HeadMultiplier * rangeWeapon.Damage));
             }
 
             if (rayHit.collider.CompareTag("Leg"))
             {
-                ShootImpact(rayHit, (int) (weapon.LegMultiplier * weapon.Damage));
+                ShootImpact(rayHit, (int) (rangeWeapon.LegMultiplier * rangeWeapon.Damage));
             }
 
             if (rayHit.collider.CompareTag("Chest"))
             {
-                ShootImpact(rayHit, (int) (weapon.ChestMultiplier * weapon.Damage));
+                ShootImpact(rayHit, (int) (rangeWeapon.ChestMultiplier * rangeWeapon.Damage));
             }
 
             if (rayHit.collider.CompareTag("Arm"))
             {
-                ShootImpact(rayHit, (int) (weapon.ArmMultiplier * weapon.Damage));
+                ShootImpact(rayHit, (int) (rangeWeapon.ArmMultiplier * rangeWeapon.Damage));
             }
 
             if (rayHit.collider.CompareTag("Chunk"))
@@ -183,11 +183,11 @@ namespace Networking.Synchronization
         }
 
         [Server]
-        private bool CanShoot(WeaponData weapon) => weapon.IsReady && !weapon.IsReloading && weapon.BulletsInMagazine > 0;
+        private bool CanShoot(RangeWeaponData rangeWeapon) => rangeWeapon.IsReady && !rangeWeapon.IsReloading && rangeWeapon.BulletsInMagazine > 0;
 
         [Server]
-        private bool CanReload(WeaponData weapon) => weapon.BulletsInMagazine < weapon.MagazineSize &&
-                                                 !weapon.IsReloading && weapon.TotalBullets > 0;
+        private bool CanReload(RangeWeaponData rangeWeapon) => rangeWeapon.BulletsInMagazine < rangeWeapon.MagazineSize &&
+                                                 !rangeWeapon.IsReloading && rangeWeapon.TotalBullets > 0;
 
         private static IEnumerator WaitForSeconds(Action action, float timeInSeconds)
         {

@@ -82,11 +82,17 @@ namespace Inventory
                 }
             }
 
-            foreach (var (_,weapon) in _player.GetComponent<PlayerLogic.Inventory>().Weapons)
+            foreach (var (_,weapon) in _player.GetComponent<PlayerLogic.Inventory>().RangeWeapons)
             {
-                inventory.Add(new GunSystem(_gameFactory, _inputService, _mainCamera, _itemPosition, _player, _hud, weapon));
+                inventory.Add(new RangeWeaponSystem(_gameFactory, _inputService, _mainCamera, _itemPosition, _player, _hud, weapon));
             }
-
+            
+            foreach (var (_,weapon) in _player.GetComponent<PlayerLogic.Inventory>().MeleeWeapons)
+            {
+                inventory.Add(new MeleeWeaponSystem(_gameFactory, _inputService, _mainCamera, _itemPosition, 
+                    _player, _hud, weapon, _cubeRenderer, _mapSynchronization));
+            }
+            
             return inventory;
         }
 

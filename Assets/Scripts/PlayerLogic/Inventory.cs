@@ -9,7 +9,8 @@ namespace PlayerLogic
     {
         public readonly SyncList<int> Ids = new();
         public List<InventoryItem> inventory;
-        public Dictionary<int,WeaponData> Weapons;
+        public Dictionary<int,RangeWeaponData> RangeWeapons;
+        public Dictionary<int,MeleeWeaponData> MeleeWeapons;
         private IStaticDataService _staticData;
         
         private void Awake()
@@ -29,13 +30,18 @@ namespace PlayerLogic
             {
                 inventory.Add(_staticData.GetItem(id));
             }
-            Weapons = new Dictionary<int, WeaponData>();
+            RangeWeapons = new Dictionary<int, RangeWeaponData>();
+            MeleeWeapons = new Dictionary<int, MeleeWeaponData>();
             foreach (var id in Ids)
             {
                 var item = _staticData.GetItem(id);
-                if (item.itemType == ItemType.Weapon)
+                if (item.itemType == ItemType.RangeWeapon)
                 {
-                    Weapons[id] = new WeaponData((WeaponItem) item);
+                    RangeWeapons[id] = new RangeWeaponData((RangeWeaponItem) item);
+                }
+                if (item.itemType == ItemType.MeleeWeapon)
+                {
+                    MeleeWeapons[id] = new MeleeWeaponData((MeleeWeaponItem) item);
                 }
             }
         }
