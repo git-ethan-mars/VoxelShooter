@@ -11,6 +11,14 @@ namespace PlayerLogic
         [HideInInspector] [SyncVar] public float placeDistance;
         [HideInInspector] [SyncVar] public int blockCount;
         public Transform itemPosition;
+        [Header("Body parts")] 
+        [SerializeField]private Transform head;
+        [SerializeField]private Transform leftArm;
+        [SerializeField]private Transform rightArm;
+        [SerializeField]private Transform chest;
+        [SerializeField] private Transform leftLeg;
+        [SerializeField] private Transform rightLeg;
+
         private GameObject _hud;
 
         public void Construct(PlayerCharacteristic characteristic)
@@ -22,11 +30,22 @@ namespace PlayerLogic
         public override void OnStartLocalPlayer()
         {
             _hud = AllServices.Container.Single<IGameFactory>().CreateHud(gameObject);
+            TurnOffBodyRender();
         }
 
         public void OnDestroy()
         {
             Destroy(_hud);
+        }
+
+        private void TurnOffBodyRender()
+        {
+            head.gameObject.GetComponent<Renderer>().enabled = false;
+            leftArm.gameObject.GetComponent<Renderer>().enabled = false;
+            rightArm.gameObject.GetComponent<Renderer>().enabled = false;
+            chest.gameObject.GetComponent<Renderer>().enabled = false;
+            leftLeg.gameObject.GetComponent<Renderer>().enabled = false;
+            rightLeg.gameObject.GetComponent<Renderer>().enabled = false;
         }
     }
 }

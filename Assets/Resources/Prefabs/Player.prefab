@@ -763,6 +763,12 @@ MonoBehaviour:
   placeDistance: 0
   blockCount: 0
   itemPosition: {fileID: 7893378094424813921}
+  head: {fileID: 3276943837764328836}
+  leftArm: {fileID: 5157539354050062272}
+  rightArm: {fileID: 8023773675403276542}
+  chest: {fileID: 4526016867100299288}
+  leftLeg: {fileID: 358407574529616767}
+  rightLeg: {fileID: 1089694921998829717}
 --- !u!143 &4442746436690766187
 CharacterController:
   m_ObjectHideFlags: 0

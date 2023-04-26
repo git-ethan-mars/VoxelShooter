@@ -36,7 +36,7 @@ namespace Rendering
             _lineRenderer.enabled = false;
         }
 
-        public void UpdateCube()
+        public void UpdateCube(bool isBuilding)
         {
             var raycastResult = GetRayCastHit(out var raycastHit);
             if (!raycastResult)
@@ -45,7 +45,7 @@ namespace Rendering
                 return;
             }
 
-            var blockStartPosition = Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2);
+            var blockStartPosition = Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2 * (isBuilding ? 1 : -1));
             DrawCube(blockStartPosition);
         }
 

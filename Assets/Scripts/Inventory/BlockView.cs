@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Inventory
 {
-    public class BlockView : IInventoryItemView, ILeftMouseButtonDownHandler, IRightMouseButtonDownHandler, IUpdated
+    public class BlockView : IInventoryItemView, ILeftMouseButtonDownHandler, IUpdated
     {
         public Sprite Icon { get; }
         private GameObject Model { get; }
@@ -50,14 +50,9 @@ namespace Inventory
             PlaceBlock(_currentColor);
         }
 
-        public void OnRightMouseButtonDown()
-        {
-            DestroyBlock();
-        }
-
         public void InnerUpdate()
         {
-            _cubeRenderer.UpdateCube();
+            _cubeRenderer.UpdateCube(true);
         }
 
         private void PlaceBlock(Color32 color)
@@ -80,13 +75,6 @@ namespace Inventory
             _blockCount = blockCount;
         }
 
-        private void DestroyBlock()
-        {
-            var raycastResult = _cubeRenderer.GetRayCastHit(out var raycastHit);
-            if (!raycastResult) return;
-            _mapSynchronization.UpdateBlocksOnServer(
-                new [] {Vector3Int.FloorToInt(raycastHit.point - raycastHit.normal / 2)},
-                new[] {new BlockData(BlockColor.Empty)});
-        }
+        
     }
 }
