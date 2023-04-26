@@ -17,15 +17,14 @@ MonoBehaviour:
   inventoryIcon: {fileID: 1150218188, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
   prefab: {fileID: 9106257655567110729, guid: 14e2f5cb0b4f31549ab9430a94006d71, type: 3}
   range: 5
-  reloadTime: 0
   timeBetweenHit: 0
-  damageToPlayer: 0
-  headMultiplier: 0
-  chestMultiplier: 0
-  legMultiplier: 0
-  armMultiplier: 0
+  damageToPlayer: 30
+  headMultiplier: 2
+  chestMultiplier: 1.2
+  legMultiplier: 0.8
+  armMultiplier: 0.6
   damageToBlock: 0
   diggingAudioClip: {fileID: 0}
-  diggingVolume: 0
-  hitAudioClip: {fileID: 0}
-  hitVolume: 0
+  diggingVolume: 1
+  hitAudioClip: {fileID: 8300000, guid: e6db5f93c2b2b60449af0f77edbc6e14, type: 3}
+  hitVolume: 1
