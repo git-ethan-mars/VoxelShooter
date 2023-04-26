@@ -28,7 +28,7 @@ namespace PlayerLogic
             _inputService = AllServices.Container.Single<IInputService>();
         }
 
-        public override void OnStartLocalPlayer()
+        public void Start()
         {
             _characterController = GetComponent<CharacterController>();
         }
