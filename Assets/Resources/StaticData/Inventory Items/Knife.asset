@@ -19,7 +19,7 @@ MonoBehaviour:
   range: 5
   timeBetweenHit: 0
   damageToPlayer: 30
-  headMultiplier: 2
+  headMultiplier: 1.5
   chestMultiplier: 1.2
   legMultiplier: 0.8
   armMultiplier: 0.6
