@@ -32,5 +32,11 @@ namespace Networking
             return _dataByConnectionId.TryGetValue(id, out var playerData) ? playerData : null;
         }
 
+        public void UpdatePlayer(NetworkConnectionToClient conn)
+        {
+            var chosenClass = _dataByConnectionId[conn.connectionId].GameClass;
+            var nickName = _dataByConnectionId[conn.connectionId].NickName;
+            _dataByConnectionId[conn.connectionId] = new PlayerData(chosenClass, nickName, _staticData);
+        }
     }
 }

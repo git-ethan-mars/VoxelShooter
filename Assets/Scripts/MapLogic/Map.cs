@@ -24,18 +24,18 @@ namespace MapLogic
             }
             var mapData = new MapData(chunks, width, height, depth, new List<SpawnPoint>());
             var map = new Map(mapData);
-            map.AddWater();
+            //map.AddWater();
             return map;
         }
 
-        public void AddWater()
+        private void AddWater()
         {
             var waterColor = new Color32();
             for (var x = 0; x < MapData.Width; x++)
             {
                 for (var z = 0; z < MapData.Depth; z++)
                 {
-                    waterColor = MapData.Chunks[FindChunkNumberByPosition(new Vector3Int(x, 0, z))]
+                    waterColor = MapData.Chunks[FindChunkNumberByPosition(x, 0, z)]
                         .Blocks[
                             (x & ChunkData.ChunkSize - 1) * ChunkData.ChunkSizeSquared +
                             (z & (ChunkData.ChunkSize - 1))].Color;
@@ -49,17 +49,48 @@ namespace MapLogic
             {
                 for (var z = 0; z < MapData.Depth; z++)
                 {
-                    var blocks = MapData.Chunks[FindChunkNumberByPosition(new Vector3Int(x, 0, z))].Blocks;
+                    var blocks = MapData.Chunks[FindChunkNumberByPosition(x, 0, z)].Blocks;
                     var block = blocks[
                         (x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
                         (z & (ChunkData.ChunkSize - 1))];
                     if (!block.Color
                             .Equals(BlockColor.Empty)) continue;
-                    block.Color = waterColor;
                     blocks[(x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
-                           (z & (ChunkData.ChunkSize - 1))] = block;
+                           (z & (ChunkData.ChunkSize - 1))] = new BlockData(waterColor);
                 }
             }
+        }
+
+
+        public BlockData GetBlockByGlobalPosition(int x, int y, int z)
+        {
+            return MapData.Chunks[FindChunkNumberByPosition(x,y,z)]
+                .Blocks[
+                    x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
+                                      y % ChunkData.ChunkSize * ChunkData.ChunkSize + z % ChunkData.ChunkSize];
+        }
+        
+        public BlockData GetBlockByGlobalPosition(Vector3Int position) =>
+            GetBlockByGlobalPosition(position.x, position.y, position.z);
+
+        public void SetBlockByGlobalPosition(Vector3Int position, BlockData blockData) =>
+            SetBlockByGlobalPosition(position.x, position.y, position.z, blockData);
+        
+        public void SetBlockByGlobalPosition(int x, int y, int z, BlockData blockData)
+        {
+            MapData.Chunks[FindChunkNumberByPosition(x, y, z)]
+                .Blocks[
+                    x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
+                    y % ChunkData.ChunkSize * ChunkData.ChunkSize + z % ChunkData.ChunkSize] = blockData;
+        }
+        
+        public int FindChunkNumberByPosition(int x, int y, int z)
+        {
+            return z / ChunkData.ChunkSize +
+                   y / ChunkData.ChunkSize * (MapData.Depth / ChunkData.ChunkSize) +
+                   x / ChunkData.ChunkSize *
+                   (MapData.Height / ChunkData.ChunkSize * MapData.Depth / ChunkData.ChunkSize);
+
         }
 
         public int FindChunkNumberByPosition(Vector3Int position)

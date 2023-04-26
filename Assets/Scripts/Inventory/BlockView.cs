@@ -1,41 +1,47 @@
-﻿using System.Collections.Generic;
-using Data;
-using Networking.Synchronization;
+﻿using Data;
+using Infrastructure.Factory;
+using PlayerLogic;
 using Rendering;
 using UI;
 using UnityEngine;
 
 namespace Inventory
 {
-    public class BlockView : IInventoryItemView, ILeftMouseButtonDownHandler, IRightMouseButtonDownHandler, IUpdated
+    public class BlockView : IInventoryItemView, ILeftMouseButtonDownHandler, IUpdated
     {
         public Sprite Icon { get; }
-        public GameObject Model { get; }
+        private GameObject Model { get; }
         private Color32 _currentColor;
-        private readonly GameObject _palette;
         private readonly CubeRenderer _cubeRenderer;
         private readonly MapSynchronization _mapSynchronization;
-        private readonly BlockItem _blockItem;
+        private int _blockCount;
+        private readonly GameObject _blockInfo;
 
 
-        public BlockView(CubeRenderer cubeRender, MapSynchronization mapSynchronization, GameObject palette, BlockItem configuration)
+        public BlockView(IGameFactory gameFactory, CubeRenderer cubeRender, MapSynchronization mapSynchronization, GameObject hud, BlockItem configuration, GameObject player)
         {
             _cubeRenderer = cubeRender;
             _mapSynchronization = mapSynchronization;
-            _palette = palette;
-            Icon = configuration.icon;
+            var palette = hud.GetComponent<Hud>().palette;
+            _blockInfo = hud.GetComponent<Hud>().blockInfo;
+            Icon = configuration.inventoryIcon;
+            Model = gameFactory.CreateGameModel(configuration.prefab, player.GetComponent<Player>().itemPosition);
+            Model.SetActive(false);
             palette.GetComponent<PaletteCreator>().OnColorUpdate += UpdateColor;
+            _blockCount = player.GetComponent<Player>().blockCount;
         }
 
         public void Select()
         {
-            _palette.SetActive(true);
+            Model.SetActive(true);
+            _blockInfo.SetActive(true);
             _cubeRenderer.EnableCube();
         }
 
         public void Unselect()
         {
-            _palette.SetActive(false);
+            Model.SetActive(false);
+            _blockInfo.SetActive(false);
             _cubeRenderer.DisableCube();
         }
 
@@ -44,24 +50,19 @@ namespace Inventory
             PlaceBlock(_currentColor);
         }
 
-        public void OnRightMouseButtonDown()
-        {
-            DestroyBlock();
-        }
-
         public void InnerUpdate()
         {
-            _cubeRenderer.UpdateCube();
+            _cubeRenderer.UpdateCube(true);
         }
 
         private void PlaceBlock(Color32 color)
         {
             var raycastResult = _cubeRenderer.GetRayCastHit(out var raycastHit);
             if (!raycastResult) return;
-            _mapSynchronization.ChangeBlockState(
-                new List<Vector3Int>() {Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2)},
-                new[] {new BlockData() {Color = color}});
-        }
+            _mapSynchronization.UpdateBlocksOnServer(
+                new[] {Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2)},
+                new[] {new BlockData(color)});
+    }
 
 
         private void UpdateColor(Color32 newColor)
@@ -69,13 +70,11 @@ namespace Inventory
             _currentColor = newColor;
         }
 
-        private void DestroyBlock()
+        private void UpdateBlockCount(int blockCount)
         {
-            var raycastResult = _cubeRenderer.GetRayCastHit(out var raycastHit);
-            if (!raycastResult) return;
-            _mapSynchronization.ChangeBlockState(
-                new List<Vector3Int>() {Vector3Int.FloorToInt(raycastHit.point - raycastHit.normal / 2)},
-                new[] {new BlockData() {Color = BlockColor.Empty}});
+            _blockCount = blockCount;
         }
+
+        
     }
 }

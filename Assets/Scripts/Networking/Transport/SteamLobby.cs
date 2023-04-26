@@ -12,7 +12,6 @@ namespace Networking.Transport
         protected Callback<LobbyEnter_t> LobbyEntered;
         private NetworkManager _networkManager;
         private const string HostAddressKey = "HostAddress";
-        [SerializeField] private GameObject button;
         private void Start()
         {
             _networkManager = GetComponent<NetworkManager>();
@@ -22,10 +21,18 @@ namespace Networking.Transport
             LobbyEntered = Callback<LobbyEnter_t>.Create(OnLobbyEntered);
         }
 
-        public void HostLobby()
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.P))
+            {
+                HostLobby();
+                enabled = false;
+            }    
+        }
+
+        private void HostLobby()
         {
             SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, _networkManager.maxConnections);
-            Destroy(button);
         }
 
 

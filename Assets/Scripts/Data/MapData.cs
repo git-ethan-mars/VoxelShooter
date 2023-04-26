@@ -5,6 +5,7 @@ namespace Data
 {
     public class MapData
     {
+        public readonly Color32 SolidColor = new(89, 53, 47, 255);
         public readonly int Width;
         public readonly int Depth;
         public readonly int Height;
@@ -18,18 +19,6 @@ namespace Data
             Height = height;
             Depth = depth;
             SpawnPoints = spawnPoints;
-        }
-    }
-
-    public struct SpawnPoint
-    {
-        public int X;
-        public int Y;
-        public int Z;
-
-        public Vector3 ToUnityVector()
-        {
-            return new Vector3(X, Y, Z);
         }
     }
 }

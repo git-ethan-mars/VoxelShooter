@@ -7,20 +7,20 @@ namespace Rendering
         private const string ChunkTag = "Chunk";
         private readonly LineRenderer _lineRenderer;
         private readonly Camera _camera;
-        private readonly float _placeDistance;
+        public float PlaceDistance;
 
         public CubeRenderer(LineRenderer lineRenderer, Camera camera, float placeDistance)
         {
             _lineRenderer = lineRenderer;
             _camera = camera;
-            _placeDistance = placeDistance;
+            PlaceDistance = placeDistance;
         }
 
 
         public bool GetRayCastHit(out RaycastHit raycastHit)
         {
             var ray = _camera.ViewportPointToRay(new Vector3(0.5f, 0.5f));
-            var raycastResult = Physics.Raycast(ray, out raycastHit, _placeDistance);
+            var raycastResult = Physics.Raycast(ray, out raycastHit, PlaceDistance);
             return raycastResult && raycastHit.collider.gameObject.CompareTag(ChunkTag);
         }
 
@@ -36,7 +36,7 @@ namespace Rendering
             _lineRenderer.enabled = false;
         }
 
-        public void UpdateCube()
+        public void UpdateCube(bool isBuilding)
         {
             var raycastResult = GetRayCastHit(out var raycastHit);
             if (!raycastResult)
@@ -45,7 +45,7 @@ namespace Rendering
                 return;
             }
 
-            var blockStartPosition = Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2);
+            var blockStartPosition = Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2 * (isBuilding ? 1 : -1));
             DrawCube(blockStartPosition);
         }
 

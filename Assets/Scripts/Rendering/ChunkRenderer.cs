@@ -130,48 +130,51 @@ namespace Rendering
             AddColor(colors, color);
         }
 
-        public void SpawnBlocks(List<Vector3Int> blockPositions, List<Color32> colors)
+        public void SpawnBlocks(List<(Vector3Int,BlockData)> data)
         {
             var neighbourChunksToRegenerate = Faces.None;
-            for (var i = 0; i < blockPositions.Count; i++)
+            for (var i = 0; i < data.Count; i++)
             {
+                var blockPosition = data[i].Item1;
+                var blockData = data[i].Item2;
                 ChunkData.Blocks[
-                    blockPositions[i].x * ChunkData.ChunkSizeSquared + blockPositions[i].y * ChunkData.ChunkSize +
-                    blockPositions[i].z] = new BlockData {Color = colors[i]};
-                SetFaces(blockPositions[i].x, blockPositions[i].y, blockPositions[i].z);
-                SetNeighboursFaces(blockPositions[i]);
-                if (blockPositions[i].z == ChunkData.ChunkSize - 1 && FrontNeighbour is not null)
+                    blockPosition.x * ChunkData.ChunkSizeSquared + blockPosition.y * ChunkData.ChunkSize +
+                    blockPosition.z] = blockData;
+                SetFaces(blockPosition.x, blockPosition.y, blockPosition.z);
+                SetNeighboursFaces(blockPosition);
+                if (blockPosition.z == ChunkData.ChunkSize - 1 && FrontNeighbour is not null)
                 {
-                    FrontNeighbour.SetFaces(blockPositions[i].x, blockPositions[i].y, 0);
+                    FrontNeighbour.SetFaces(blockPosition.x, blockPosition.y, 0);
                     neighbourChunksToRegenerate |= Faces.Front;
                 }
 
-                if (blockPositions[i].z == 0 && BackNeighbour is not null)
+                if (blockPosition.z == 0 && BackNeighbour is not null)
                 {
-                    BackNeighbour.SetFaces(blockPositions[i].x, blockPositions[i].y, ChunkData.ChunkSize - 1);
+                    BackNeighbour.SetFaces(blockPosition.x, blockPosition.y, ChunkData.ChunkSize - 1);
                     neighbourChunksToRegenerate |= Faces.Back;
                 }
 
-                if (blockPositions[i].y == ChunkData.ChunkSize - 1 && UpperNeighbour is not null)
+                if (blockPosition.y == ChunkData.ChunkSize - 1)
                 {
-                    UpperNeighbour.SetFaces(blockPositions[i].x, 0, blockPositions[i].z);
+                    if (UpperNeighbour is not null)
+                        UpperNeighbour.SetFaces(blockPosition.x, 0, blockPosition.z);
                     neighbourChunksToRegenerate |= Faces.Top;
                 }
 
-                if (blockPositions[i].y == 0 && LowerNeighbour is not null)
+                if (blockPosition.y == 0 && LowerNeighbour is not null)
                 {
-                    LowerNeighbour.SetFaces(blockPositions[i].x, ChunkData.ChunkSize - 1, blockPositions[i].z);
+                    LowerNeighbour.SetFaces(blockPosition.x, ChunkData.ChunkSize - 1, blockPosition.z);
                     neighbourChunksToRegenerate |= Faces.Bottom;
                 }
 
-                if (blockPositions[i].x == ChunkData.ChunkSize - 1 && RightNeighbour is not null)
+                if (blockPosition.x == ChunkData.ChunkSize - 1 && RightNeighbour is not null)
                 {
-                    RightNeighbour.SetFaces(0, blockPositions[i].y, blockPositions[i].z);
+                    RightNeighbour.SetFaces(0, blockPosition.y, blockPosition.z);
                     neighbourChunksToRegenerate |= Faces.Right;
                 }
-                else if (blockPositions[i].x == 0 && LeftNeighbour is not null)
+                else if (blockPosition.x == 0 && LeftNeighbour is not null)
                 {
-                    LeftNeighbour.SetFaces(ChunkData.ChunkSize - 1, blockPositions[i].y, blockPositions[i].z);
+                    LeftNeighbour.SetFaces(ChunkData.ChunkSize - 1, blockPosition.y, blockPosition.z);
                     neighbourChunksToRegenerate |= Faces.Left;
                 }
             }
@@ -187,7 +190,7 @@ namespace Rendering
                 BackNeighbour.RegenerateMesh();
             }
 
-            if (neighbourChunksToRegenerate.HasFlag(Faces.Top))
+            if (neighbourChunksToRegenerate.HasFlag(Faces.Top) && UpperNeighbour is not null)
             {
                 UpperNeighbour.RegenerateMesh();
             }
@@ -327,8 +330,8 @@ namespace Rendering
             ChunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] = Faces.None;
             if (ChunkData.Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
                 .Equals(BlockColor.Empty)) return;
-            if (!IsValidPosition(x, y + 1, z) && UpperNeighbour is not null &&
-                UpperNeighbour.ChunkData.Blocks[x * ChunkData.ChunkSizeSquared + z].Color.Equals(BlockColor.Empty) ||
+            if (!IsValidPosition(x, y + 1, z) && (UpperNeighbour is null || UpperNeighbour is not null &&
+                UpperNeighbour.ChunkData.Blocks[x * ChunkData.ChunkSizeSquared + z].Color.Equals(BlockColor.Empty)) ||
                 IsValidPosition(x, y + 1, z) && ChunkData
                     .Blocks[x * ChunkData.ChunkSizeSquared + (y + 1) * ChunkData.ChunkSize + z].Color
                     .Equals(BlockColor.Empty))

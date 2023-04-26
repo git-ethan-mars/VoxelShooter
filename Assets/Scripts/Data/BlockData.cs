@@ -1,9 +1,30 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Data
 {
-    public struct BlockData
+    public readonly struct BlockData : IEquatable<BlockData>
     {
-        public Color32 Color { get; set; }
+        public readonly Color32 Color;
+
+        public BlockData(Color32 color)
+        {
+            Color = color;
+        }
+
+        public bool Equals(BlockData other)
+        {
+            return Color.Equals(other.Color);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is BlockData other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return Color.GetHashCode();
+        }
     }
 }

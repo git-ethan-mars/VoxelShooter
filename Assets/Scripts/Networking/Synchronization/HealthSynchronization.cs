@@ -1,35 +1,48 @@
-﻿using Mirror;
-using Player;
-using UnityEngine;
+﻿using System;
+using Infrastructure.Factory;
+using Mirror;
+using Networking.Messages;
 
 namespace Networking.Synchronization
 {
     public class HealthSynchronization : NetworkBehaviour
     {
-        [SerializeField] private HealthSystem healthSystem; 
         private ServerData _serverData;
+        private IEntityFactory _entityFactory;
 
-        public void Construct(ServerData serverData)
+        public void Construct(ServerData serverData, IEntityFactory entityFactory)
         {
             _serverData = serverData;
+            _entityFactory = entityFactory;
         }
         
         
-        [Command]
-        public void CmdTakeDamage(int damage, NetworkConnectionToClient conn = null)
+        [Server]
+        public void Damage(NetworkConnectionToClient connection, int totalDamage)
         {
-            _serverData.GetPlayerData(conn.connectionId).Characteristic.health -= damage;
-            if (_serverData.GetPlayerData(conn.connectionId).Characteristic.health <= 0)
+            var playerData = _serverData.GetPlayerData(connection.connectionId);
+            playerData.Health -= totalDamage;
+            connection.Send(new HealthMessage()
+                {CurrentHealth = Math.Max(playerData.Health, 0), MaxHealth = playerData.MaxHealth});
+            if (playerData.Health <= 0)
             {
-                Debug.Log("DIED");
+                _serverData.UpdatePlayer(connection);
+                var gameClass = _serverData.GetPlayerData(connection.connectionId).GameClass;
+                var player = _entityFactory.RespawnPlayer(connection, gameClass); 
+                var oldPlayer = connection.identity.gameObject;
+                NetworkServer.ReplacePlayerForConnection(connection, player, true);
+                Destroy(oldPlayer, 0.1f);
             }
-            SendHealth(_serverData.GetPlayerData(conn.connectionId).Characteristic.health);
         }
-
-        [TargetRpc]
-        private void SendHealth(int health)
+        [Command]
+        public void Die(NetworkConnectionToClient connection = null)
         {
-            healthSystem.Health = health;
+            _serverData.UpdatePlayer(connection);
+            var gameClass = _serverData.GetPlayerData(connection.connectionId).GameClass;
+            var player = _entityFactory.RespawnPlayer(connection, gameClass); 
+            var oldPlayer = connection.identity.gameObject;
+            NetworkServer.ReplacePlayerForConnection(connection, player, true);
+            Destroy(oldPlayer, 0.1f);
         }
     }
 }

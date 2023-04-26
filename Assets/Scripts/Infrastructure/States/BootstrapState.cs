@@ -2,7 +2,6 @@
 using Infrastructure.Factory;
 using Infrastructure.Services;
 using Infrastructure.Services.Input;
-using MapLogic;
 
 namespace Infrastructure.States
 {
@@ -12,12 +11,15 @@ namespace Infrastructure.States
         private readonly GameStateMachine _stateMachine;
         private readonly SceneLoader _sceneLoader;
         private readonly AllServices _allServices;
+        private ICoroutineRunner _coroutineRunner;
 
-        public BootstrapState(GameStateMachine stateMachine, SceneLoader sceneLoader, AllServices allServices)
+        public BootstrapState(GameStateMachine stateMachine, SceneLoader sceneLoader, AllServices allServices,
+            ICoroutineRunner coroutineRunner)
         {
             _stateMachine = stateMachine;
             _sceneLoader = sceneLoader;
             _allServices = allServices;
+            _coroutineRunner = coroutineRunner;
             RegisterServices();
         }
 
@@ -42,11 +44,11 @@ namespace Infrastructure.States
             staticData.LoadItems();
             staticData.LoadInventories();
             staticData.LoadPlayerCharacteristics();
-            _allServices.RegisterSingle<IMapProvider>(new MapProvider(Map.CreateNewMap(32,32,32)));
             _allServices.RegisterSingle<IInputService>(new StandaloneInputService());
             _allServices.RegisterSingle<IAssetProvider>(new AssetProvider());
+            _allServices.RegisterSingle<IParticleFactory>(new ParticleFactory(_allServices.Single<IAssetProvider>(), _coroutineRunner));
             _allServices.RegisterSingle<IGameFactory>(
-                new GameFactory(_allServices.Single<IAssetProvider>(),_allServices.Single<IInputService>(), _allServices.Single<IMapProvider>(), _allServices.Single<IStaticDataService>()));
+                new GameFactory(_allServices.Single<IAssetProvider>(),_allServices.Single<IInputService>(), staticData));
         }
     }
 }

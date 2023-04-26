@@ -34,8 +34,8 @@ namespace Optimization
                 var x = i / ChunkData.ChunkSizeSquared;
                 var y = (i - x * ChunkData.ChunkSizeSquared) / ChunkData.ChunkSize;
                 var z = i - x * ChunkData.ChunkSizeSquared - y * ChunkData.ChunkSize;
-                if (!ChunkRenderer.IsValidPosition(x, y + 1, z) && UpperNeighbour.Length != 0 &&
-                    UpperNeighbour[x * ChunkData.ChunkSize + z].Color.IsEquals(BlockColor.Empty) ||
+                if (!ChunkRenderer.IsValidPosition(x, y + 1, z) && (UpperNeighbour.Length == 0 || UpperNeighbour.Length != 0 &&
+                    UpperNeighbour[x * ChunkData.ChunkSize + z].Color.IsEquals(BlockColor.Empty)) ||
                     ChunkRenderer.IsValidPosition(x, y + 1, z) &&
                     Blocks[x * ChunkData.ChunkSizeSquared + (y + 1) * ChunkData.ChunkSize + z].Color
                         .IsEquals(BlockColor.Empty))

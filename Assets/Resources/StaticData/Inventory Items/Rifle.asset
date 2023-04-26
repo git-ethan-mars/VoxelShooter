@@ -12,23 +12,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 285b4a900c7a4edb9d7a5c6d6172ded8, type: 3}
   m_Name: Rifle
   m_EditorClassIdentifier: 
-  id: 3
+  id: 5
   itemType: 0
-  icon: {fileID: 21300000, guid: fb939fb7dfca8844f95933ac4447a56b, type: 3}
+  inventoryIcon: {fileID: 21300000, guid: fb939fb7dfca8844f95933ac4447a56b, type: 3}
   prefab: {fileID: 9083155961026743931, guid: 462a6032c614baf41836da3cb2513325, type: 3}
-  isAutomatic: 1
-  timeBetweenShooting: 0.05
-  baseRecoil: 0.02
+  isAutomatic: 0
+  timeBetweenShooting: 1
+  baseRecoil: 0.01
   stepRecoil: 0.03
   resetTimeRecoil: 2
-  range: 100
-  reloadTime: 1
+  range: 150
+  reloadTime: 3
   timeBetweenShots: 0
-  magazineSize: 100
+  magazineSize: 5
   bulletsPerTap: 1
-  totalBullets: 900
-  damage: 33
-  headMultiplier: 0
-  chestMultiplier: 0
-  legMultiplier: 0
-  armMultiplier: 0
+  totalBullets: 15
+  damage: 50
+  headMultiplier: 3.5
+  chestMultiplier: 1.5
+  legMultiplier: 0.8
+  armMultiplier: 0.5
+  shootingAudioClip: {fileID: 8300000, guid: 2e459cd27f71f224ebbcde1e5950f9d9, type: 3}
+  shootingVolume: 0.7
+  reloadingAudioClip: {fileID: 8300000, guid: 27795beba10a55e4da2b4c1210e0080a, type: 3}
+  reloadingVolume: 0.5
