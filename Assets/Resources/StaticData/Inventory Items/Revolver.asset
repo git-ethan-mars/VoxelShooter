@@ -24,10 +24,10 @@ MonoBehaviour:
   range: 70
   reloadTime: 1.5
   timeBetweenShots: 0
-  magazineSize: 12
+  magazineSize: 6
   bulletsPerTap: 1
-  totalBullets: 36
-  damage: 20
+  totalBullets: 24
+  damage: 30
   headMultiplier: 2.5
   chestMultiplier: 1.2
   legMultiplier: 0.8
