@@ -26,7 +26,7 @@ namespace Infrastructure.Factory
         private const string MapRendererPath = "Prefabs/MapCreation/MapRenderer";
         private const string ChunkRendererPath = "Prefabs/MapCreation/Chunk";
         private const string HudPath = "Prefabs/UI/HUD";
-        private const string ChangeClassMenu = "Prefabs/UI/Change Class Menu";
+        private const string ChangeClassMenu = "Prefabs/UI/ChangeClassMenu";
         private const string Wall = "Prefabs/MapCreation/Wall";
         private GameObject _networkManager;
 

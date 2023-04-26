@@ -5,8 +5,7 @@ using Networking.Synchronization;
 using TMPro;
 using UI;
 using UnityEngine;
-using Object = UnityEngine.Object;
-using Vector3 = System.Numerics.Vector3;
+using UnityEngine.UI;
 
 namespace Inventory
 {
@@ -17,32 +16,32 @@ namespace Inventory
         private readonly RangeWeaponData _rangeWeapon;
         private readonly GameObject _ammoInfo;
         private readonly TextMeshProUGUI _ammoCount;
-        private readonly Transform _attackPoint;
         private readonly Camera _fpsCam;
-        private readonly IGameFactory _gameFactory;
         private readonly RangeWeaponSynchronization _bulletSynchronization;
         private readonly IInputService _inputService;
+        private readonly Image _ammoType;
 
 
         public RangeWeaponView(IGameFactory gameFactory, IInputService inputService, Camera camera,
             Transform itemPosition, GameObject player, GameObject hud, RangeWeaponData configuration)
         {
-            _gameFactory = gameFactory;
             _inputService = inputService;
             _rangeWeapon = configuration;
-            Model = _gameFactory.CreateGameModel(_rangeWeapon.Prefab, itemPosition);
+            Model = gameFactory.CreateGameModel(_rangeWeapon.Prefab, itemPosition);
             Model.SetActive(false);
-            Icon = _rangeWeapon.Icon;
-            _attackPoint = Model.GetComponentInChildren<Transform>();
+            Icon = _rangeWeapon.InventoryIcon;
+            Model.GetComponentInChildren<Transform>();
             _fpsCam = camera;
             _ammoInfo = hud.GetComponent<Hud>().ammoInfo;
             _ammoCount = hud.GetComponent<Hud>().ammoCount.GetComponent<TextMeshProUGUI>();
+            _ammoType = hud.GetComponent<Hud>().ammoType;
             _bulletSynchronization = player.GetComponent<RangeWeaponSynchronization>();
         }
 
         public void Select()
         {
             _ammoInfo.SetActive(true);
+            _ammoType.sprite = _rangeWeapon.AmmoTypeIcon;
             Model.SetActive(true);
         }
 

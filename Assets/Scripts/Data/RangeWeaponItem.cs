@@ -5,6 +5,7 @@ namespace Data
     [CreateAssetMenu(fileName = "Range Weapon", menuName = "Inventory System/Inventory Items/Weapon")]
     public class RangeWeaponItem : InventoryItem
     {
+        public Sprite ammoIcon;
         [Header("Configuration")] 
         public bool isAutomatic;
         public float timeBetweenShooting;
