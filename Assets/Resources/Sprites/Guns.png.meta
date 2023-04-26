@@ -120,8 +120,8 @@ TextureImporter:
       name: Shotgun
       rect:
         serializedVersion: 2
-        x: 30
-        y: 1871
+        x: 33
+        y: 1872
         width: 400
         height: 400
       alignment: 0
@@ -142,7 +142,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 2294
+        y: 2295
         width: 450
         height: 450
       alignment: 0
@@ -163,7 +163,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 121
-        y: 2884
+        y: 2872
         width: 200
         height: 200
       alignment: 0
@@ -184,7 +184,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 3199
+        y: 3204
         width: 450
         height: 450
       alignment: 0
@@ -204,8 +204,8 @@ TextureImporter:
       name: Machine Gun
       rect:
         serializedVersion: 2
-        x: 100
-        y: 3769
+        x: 101
+        y: 3760
         width: 250
         height: 250
       alignment: 9
@@ -225,10 +225,10 @@ TextureImporter:
       name: Grenade Launcher
       rect:
         serializedVersion: 2
-        x: 29
-        y: 4282
-        width: 385
-        height: 87
+        x: 0
+        y: 4100
+        width: 450
+        height: 450
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -268,7 +268,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 1407
+        y: 1401
         width: 450
         height: 450
       alignment: 0
@@ -278,8 +278,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: bb9c33f67cc6c064296c828f932a7e96
-      internalID: 723421947
+      spriteID: 2ac3d144401fa0d40ac8169ef8972a7a
+      internalID: -968327103
       vertices: []
       indices: 
       edges: []
@@ -302,7 +302,7 @@ TextureImporter:
       Shotgun: 1629097733
       Assault Rifle: 1027491563
       Revolver: -510781377
-      Spade: 723421947
+      Spade: -968327103
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0
