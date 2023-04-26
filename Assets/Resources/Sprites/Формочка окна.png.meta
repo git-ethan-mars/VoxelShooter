@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: e7634cc0bf7762649a525e59875cd9d1
+guid: e7a90ea79c356f24c931cf189e3a1a52
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -42,7 +42,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -115,134 +115,18 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites:
-    - serializedVersion: 2
-      name: assaultRifleBullets
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 354
-        width: 100
-        height: 100
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 0afa29879a9c3d64ea6219d59b2e1f90
-      internalID: -183867098
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: shotgunPellets
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 185
-        width: 100
-        height: 100
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 1f84fe0ac2b79cb4a95e84cd5d8bab66
-      internalID: 2005296590
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: revolverRounds
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 102
-        width: 100
-        height: 58
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: d5509563db3072a4090a5c06a43b7275
-      internalID: 1304307358
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: rifleBullets
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 58
-        width: 100
-        height: 19
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: f3c74f3d5ac58b441a3e9b6f5c07a6e4
-      internalID: -465812234
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: rocketMissiles
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 6
-        width: 100
-        height: 19
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 4fc83436106d3a74fb3cd95e11c322e9
-      internalID: 886209943
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
+    sprites: []
     outline: []
     physicsShape: []
     bones: []
-    spriteID: 4af464ab3debdea4da82d2cc148371ba
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable:
-      Guns_7: -702351045
-      Guns_8: -919499819
-      Guns_2: -1880600435
-      rifleBullets: -465812234
-      revolverRounds: 1304307358
-      Guns_1: 2080269000
-      Guns_6: -147945630
-      rocketMissiles: 886209943
-      assaultRifleBullets: -183867098
-      shotgunPellets: 2005296590
-      Guns_4: 817565282
+    nameFileIdTable: {}
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0

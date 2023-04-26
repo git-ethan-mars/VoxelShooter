@@ -120,8 +120,8 @@ TextureImporter:
       name: Shotgun
       rect:
         serializedVersion: 2
-        x: 21
-        y: 4243
+        x: 33
+        y: 1872
         width: 400
         height: 400
       alignment: 0
@@ -142,7 +142,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 3466
+        y: 2295
         width: 450
         height: 450
       alignment: 0
@@ -162,8 +162,8 @@ TextureImporter:
       name: Revolver
       rect:
         serializedVersion: 2
-        x: 110
-        y: 3048
+        x: 121
+        y: 2872
         width: 200
         height: 200
       alignment: 0
@@ -184,7 +184,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 2243
+        y: 3204
         width: 450
         height: 450
       alignment: 0
@@ -204,8 +204,8 @@ TextureImporter:
       name: Machine Gun
       rect:
         serializedVersion: 2
-        x: 82
-        y: 1602
+        x: 101
+        y: 3760
         width: 250
         height: 250
       alignment: 9
@@ -226,7 +226,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 736
+        y: 4100
         width: 450
         height: 450
       alignment: 0
@@ -247,7 +247,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 208
+        y: 4550
         width: 450
         height: 450
       alignment: 0
@@ -259,6 +259,27 @@ TextureImporter:
       bones: []
       spriteID: 896c49bfea13fd349990b20cc4421f0a
       internalID: -188179433
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Spade
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1401
+        width: 450
+        height: 450
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2ac3d144401fa0d40ac8169ef8972a7a
+      internalID: -968327103
       vertices: []
       indices: 
       edges: []
@@ -281,6 +302,7 @@ TextureImporter:
       Shotgun: 1629097733
       Assault Rifle: 1027491563
       Revolver: -510781377
+      Spade: -968327103
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0
