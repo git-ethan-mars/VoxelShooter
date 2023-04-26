@@ -19,5 +19,6 @@ namespace Infrastructure.Factory
         GameObject CreateGameModel(GameObject model, Transform parent);
         GameObject CreateChangeClassMenu();
         GameObject CreateMapSynchronization();
+        void CreateWalls(Map map);
     }
 }

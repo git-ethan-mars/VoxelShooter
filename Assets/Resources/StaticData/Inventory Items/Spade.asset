@@ -14,10 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 7
   itemType: 1
-  inventoryIcon: {fileID: 21300000, guid: afe568999128694408a804b4790c942d, type: 3}
+  inventoryIcon: {fileID: 723421947, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
   prefab: {fileID: 7922214257710745971, guid: 6a3125bea274d394bb39c24f7e77ae9d, type: 3}
   range: 5
-  reloadTime: 1
   timeBetweenHit: 1
   damageToPlayer: 10
   headMultiplier: 1.23

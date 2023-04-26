@@ -24,42 +24,9 @@ namespace MapLogic
             }
             var mapData = new MapData(chunks, width, height, depth, new List<SpawnPoint>());
             var map = new Map(mapData);
-            //map.AddWater();
             return map;
         }
-
-        private void AddWater()
-        {
-            var waterColor = new Color32();
-            for (var x = 0; x < MapData.Width; x++)
-            {
-                for (var z = 0; z < MapData.Depth; z++)
-                {
-                    waterColor = MapData.Chunks[FindChunkNumberByPosition(x, 0, z)]
-                        .Blocks[
-                            (x & ChunkData.ChunkSize - 1) * ChunkData.ChunkSizeSquared +
-                            (z & (ChunkData.ChunkSize - 1))].Color;
-                }
-            }
-
-            if (waterColor.Equals(BlockColor.Empty))
-                waterColor = new Color32(9, 20, 60, 255);
-
-            for (var x = 0; x < MapData.Width; x++)
-            {
-                for (var z = 0; z < MapData.Depth; z++)
-                {
-                    var blocks = MapData.Chunks[FindChunkNumberByPosition(x, 0, z)].Blocks;
-                    var block = blocks[
-                        (x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
-                        (z & (ChunkData.ChunkSize - 1))];
-                    if (!block.Color
-                            .Equals(BlockColor.Empty)) continue;
-                    blocks[(x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
-                           (z & (ChunkData.ChunkSize - 1))] = new BlockData(waterColor);
-                }
-            }
-        }
+        
 
 
         public BlockData GetBlockByGlobalPosition(int x, int y, int z)

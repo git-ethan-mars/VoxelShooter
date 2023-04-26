@@ -55,6 +55,7 @@ namespace Infrastructure.States
         {
             Debug.Log("Loaded map from disk");
             mapMessageHandler.Map = map;
+            _gameFactory.CreateWalls(map);
             _gameFactory.CreateMapRenderer(map, mapMessageHandler.Buffer);
             CreateServerEntityFactory(map);
             _stateMachine.Enter<GameLoopState>();
@@ -63,6 +64,7 @@ namespace Infrastructure.States
         private void OnMapDownloaded(Map map)
         {
             mapMessageHandler.Map = map;
+            _gameFactory.CreateWalls(map);
             Debug.Log("Downloaded map from server");
             _gameFactory.CreateMapRenderer(map, mapMessageHandler.Buffer);
             _stateMachine.Enter<GameLoopState>();

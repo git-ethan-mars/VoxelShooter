@@ -91,8 +91,27 @@ namespace MapLogic
                 var z = binaryReader.ReadInt32();
                 spawnPoints.Add(new SpawnPoint() {X = x, Y = y, Z = z});
             }
+            AddWater(map, new Color32(3, 58, 135, 255));
 
             return map;
+        }
+        
+        private static void AddWater(Map map,Color32 waterColor)
+        {
+            for (var x = 0; x < map.MapData.Width; x++)
+            {
+                for (var z = 0; z < map.MapData.Depth; z++)
+                {
+                    var blocks = map.MapData.Chunks[map.FindChunkNumberByPosition(x, 0, z)].Blocks;
+                    var block = blocks[
+                        (x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
+                        (z & (ChunkData.ChunkSize - 1))];
+                    if (!block.Color
+                            .Equals(BlockColor.Empty)) continue;
+                    blocks[(x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
+                           (z & (ChunkData.ChunkSize - 1))] = new BlockData(waterColor);
+                }
+            }
         }
     }
 }

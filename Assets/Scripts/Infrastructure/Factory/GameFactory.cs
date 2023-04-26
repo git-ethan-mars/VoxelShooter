@@ -27,6 +27,7 @@ namespace Infrastructure.Factory
         private const string ChunkRendererPath = "Prefabs/MapCreation/Chunk";
         private const string HudPath = "Prefabs/UI/HUD";
         private const string ChangeClassMenu = "Prefabs/UI/Change Class Menu";
+        private const string Wall = "Prefabs/MapCreation/Wall";
         private GameObject _networkManager;
 
 
@@ -56,6 +57,16 @@ namespace Infrastructure.Factory
             var mapSynchronization = _assets.Instantiate(MapSynchronization);
             NetworkServer.Spawn(mapSynchronization);
             return mapSynchronization;
+        }
+
+        public void CreateWalls(Map map)
+        {
+            _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(map, Faces.Top);
+            _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(map, Faces.Bottom);
+            _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(map, Faces.Right);
+            _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(map, Faces.Left);
+            _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(map, Faces.Front);
+            _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(map, Faces.Back);
         }
 
         public GameObject CreateMapRenderer(Map map,Dictionary<Vector3Int, BlockData> buffer)
