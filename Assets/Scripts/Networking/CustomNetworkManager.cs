@@ -88,7 +88,8 @@ namespace Networking
 
         private void OnHealthChange(HealthMessage healthMessage)
         {
-            NetworkClient.localPlayer.gameObject.GetComponent<HealthSystem>()
+            if (healthMessage.CurrentHealth != 0)
+                NetworkClient.localPlayer.gameObject.GetComponent<HealthSystem>()
                 .UpdateHealth(healthMessage.CurrentHealth, healthMessage.MaxHealth);
         }
 
