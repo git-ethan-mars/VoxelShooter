@@ -121,7 +121,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 354
+        y: 294
         width: 100
         height: 100
       alignment: 0
@@ -159,13 +159,13 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: revolverRounds
+      name: MachineGun Bullets
       rect:
         serializedVersion: 2
         x: 0
-        y: 102
+        y: 84
         width: 100
-        height: 58
+        height: 100
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -221,6 +221,27 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Revolver rounds
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 400
+        width: 100
+        height: 100
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8b0098d613d6a404d9438417f795a117
+      internalID: 66241751
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
@@ -233,16 +254,17 @@ TextureImporter:
     secondaryTextures: []
     nameFileIdTable:
       Guns_7: -702351045
+      Revolver rounds: 66241751
       Guns_8: -919499819
       Guns_2: -1880600435
       rifleBullets: -465812234
-      revolverRounds: 1304307358
       Guns_1: 2080269000
       Guns_6: -147945630
       rocketMissiles: 886209943
       assaultRifleBullets: -183867098
       shotgunPellets: 2005296590
       Guns_4: 817565282
+      MachineGun Bullets: 1304307358
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0
