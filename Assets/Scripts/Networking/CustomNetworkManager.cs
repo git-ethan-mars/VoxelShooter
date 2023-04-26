@@ -35,7 +35,7 @@ namespace Networking
         {
             ServerData = new ServerData(_staticData);
             NetworkServer.RegisterHandler<CharacterMessage>(OnChooseClass);
-            _map = MapReader.ReadFromFile("WW1.vxl");
+            _map = MapReader.ReadFromFile("Crossroads.rch");
             MapLoaded?.Invoke(_map);
         }
 
@@ -68,7 +68,6 @@ namespace Networking
 
         public override void OnStopServer()
         {
-            MapWriter.SaveMap("lastsav.rch", _map);
         }
 
         public void ChangeClass(GameClass gameClass)

@@ -36,7 +36,7 @@ namespace Inventory
 
         public void InnerUpdate()
         {
-            _cubeRenderer.UpdateCube();
+            _cubeRenderer.UpdateCube(true);
         }
 
         private void CreateSpawnPoint()
