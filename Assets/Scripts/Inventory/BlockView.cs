@@ -62,7 +62,7 @@ namespace Inventory
             _mapSynchronization.UpdateBlocksOnServer(
                 new[] {Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2)},
                 new[] {new BlockData(color)});
-    }
+        }
 
 
         private void UpdateColor(Color32 newColor)

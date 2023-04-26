@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Inventory
 {
-    public class MeleeWeaponView : IInventoryItemView, ILeftMouseButtonDownHandler, ILeftMouseButtonHoldHandler, IUpdated
+    public class MeleeWeaponView : IInventoryItemView, ILeftMouseButtonDownHandler, IUpdated
     { 
         public Sprite Icon { get; }
         private GameObject Model { get; }
@@ -55,33 +55,25 @@ namespace Inventory
             _cubeRenderer.DisableCube();
         }
         
-
         public void OnLeftMouseButtonDown()
         {
-            DestroyBlock();
+            var raycastResult = _cubeRenderer.GetRayCastHit(out var raycastHit);
+            if (raycastResult)
+            {
+                if (_meleeWeapon.IsReady)
+                {
+                    _mapSynchronization.UpdateBlocksOnServer(
+                        new[] { Vector3Int.FloorToInt(raycastHit.point - raycastHit.normal / 2) },
+                        new[] { new BlockData(BlockColor.Empty) });
+                }
+            }
             var ray = _fpsCam.ViewportPointToRay(new Vector2(0.5f, 0.5f));
-            _meleeWeaponSynchronization.CmdHitSingle(ray, _meleeWeapon.ID);
-        }
-
-        public void OnLeftMouseButtonHold()
-        {
-            var ray = _fpsCam.ViewportPointToRay(new Vector2(0.5f, 0.5f));
-            _meleeWeaponSynchronization.CmdHitAutomatic(ray, _meleeWeapon.ID);
+            _meleeWeaponSynchronization.CmdHit(ray, _meleeWeapon.ID, raycastResult);
         }
 
         public void InnerUpdate()
         {
             _cubeRenderer.UpdateCube(false);
-        }
-        
-        
-        private void DestroyBlock()
-        {
-            var raycastResult = _cubeRenderer.GetRayCastHit(out var raycastHit);
-            if (!raycastResult) return;
-            _mapSynchronization.UpdateBlocksOnServer(
-                new [] {Vector3Int.FloorToInt(raycastHit.point - raycastHit.normal / 2)},
-                new[] {new BlockData(BlockColor.Empty)});
         }
     }
 }

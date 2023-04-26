@@ -3,6 +3,7 @@ using System.Collections;
 using Data;
 using Infrastructure.Factory;
 using Mirror;
+using PlayerLogic;
 using UnityEngine;
 
 namespace Networking.Synchronization
@@ -19,30 +20,22 @@ namespace Networking.Synchronization
         }
 
         [Command]
-        public void CmdHitSingle(Ray ray, int weaponId, NetworkConnectionToClient conn = null)
+        public void CmdHit(Ray ray, int weaponId, bool isSurface, NetworkConnectionToClient conn = null)
         {
             var weapon = _serverData.GetPlayerData(conn!.connectionId).MeleeWeaponsById[weaponId];
             if (!CanHit(weapon)) return;
             ApplyRaycast(ray, weapon);
-            Hit(weapon);
-        }
-
-        [Command]
-        public void CmdHitAutomatic(Ray ray, int weaponId, NetworkConnectionToClient conn = null)
-        {
-            var weapon = _serverData.GetPlayerData(conn!.connectionId).MeleeWeaponsById[weaponId];
-            if (!CanHit(weapon)) return;
-            ApplyRaycast(ray, weapon);
-            Hit(weapon);
+            Hit(weapon, isSurface);
         }
 
         [TargetRpc]
-        private void SendWeaponState(int weaponId)
+        private void SendWeaponState(int weaponId, bool isSurface)
         {
             var weapon = GetComponent<PlayerLogic.Inventory>().MeleeWeapons[weaponId];
+            weapon.IsReady = false;
             var audioSource = GetComponent<AudioSource>();
-            audioSource.clip = weapon.HitAudioClip;
-            audioSource.volume = weapon.HitVolume;
+            audioSource.clip = isSurface ? weapon.DiggingAudioClip : weapon.HitAudioClip;
+            audioSource.volume = isSurface ? weapon.DiggingVolume : weapon.HitVolume;
             audioSource.Play();
         }
 
@@ -56,13 +49,21 @@ namespace Networking.Synchronization
         private void ResetHit(MeleeWeaponData meleeWeapon)
         {
             meleeWeapon.IsReady = true;
+            ResetOnClient(meleeWeapon.ID);
+        }
+
+        [TargetRpc]
+        private void ResetOnClient(int weaponId)
+        {
+            var weapon = GetComponent<PlayerLogic.Inventory>().MeleeWeapons[weaponId];
+            weapon.IsReady = true;
         }
 
         [Server]
-        private void Hit(MeleeWeaponData meleeWeapon)
+        private void Hit(MeleeWeaponData meleeWeapon, bool isSurface)
         {
             meleeWeapon.IsReady = false;
-            SendWeaponState(meleeWeapon.ID);
+            SendWeaponState(meleeWeapon.ID, isSurface);
             StartHitCoroutines(meleeWeapon);
         }
 
@@ -100,7 +101,7 @@ namespace Networking.Synchronization
         }
 
         [Server]
-        private bool CanHit(MeleeWeaponData meleeWeapon) => meleeWeapon.IsReady && !meleeWeapon.IsReloading;
+        private bool CanHit(MeleeWeaponData meleeWeapon) => meleeWeapon.IsReady;
 
         private static IEnumerator WaitForSeconds(Action action, float timeInSeconds)
         {

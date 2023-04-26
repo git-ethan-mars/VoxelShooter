@@ -45,8 +45,7 @@ namespace Networking.Synchronization
                 Reload(weapon);
             }
         }
-
-
+        
         [TargetRpc]
         private void SendWeaponState(int weaponId, int bulletsInMagazine)
         {
