@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 0bd23bb2cfdbb0240ac3e3c8092e9d51
+guid: 9193d5ec70a5d6d4f8d1ad3b32561a80
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -9,10 +9,10 @@ TrueTypeFontImporter:
   characterPadding: 1
   includeFontData: 1
   fontNames:
-  - Hardpixel
+  - Aldo the Apache
   fallbackFontReferences: []
   customCharacters: 
-  fontRenderingMode: 1
+  fontRenderingMode: 0
   ascentCalculationMode: 1
   useLegacyBoundsCalculation: 0
   shouldRoundAdvanceValue: 1
