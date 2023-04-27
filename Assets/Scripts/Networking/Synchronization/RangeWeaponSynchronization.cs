@@ -25,6 +25,7 @@ namespace Networking.Synchronization
             if (!CanShoot(weapon) || weapon.IsAutomatic) return;
             ApplyRaycast(ray, weapon);
             Shoot(weapon);
+            SendSoundInRadius(weapon, conn.identity.gameObject.transform.position, Radius, SoundType.Shooting);
         }
 
         [Command]
@@ -34,26 +35,25 @@ namespace Networking.Synchronization
             if (!CanShoot(weapon) || !weapon.IsAutomatic) return;
             ApplyRaycast(ray, weapon);
             Shoot(weapon);
+            SendSoundInRadius(weapon, conn.identity.gameObject.transform.position, Radius, SoundType.Shooting);
+
         }
 
         [Command]
         public void CmdReload(int weaponId, NetworkConnectionToClient conn = null)
         {
             var weapon = _serverData.GetPlayerData(conn!.connectionId).RangeWeaponsById[weaponId];
-            if (CanReload(weapon))
-            {
-                Reload(weapon);
-            }
+            if (!CanReload(weapon)) return;
+            Reload(weapon);
+            SendSoundInRadius(weapon, conn.identity.gameObject.transform.position, Radius, SoundType.Reloading);
         }
-        
+
+        private const float Radius = 100;
+
         [TargetRpc]
         private void SendWeaponState(int weaponId, int bulletsInMagazine)
         {
             var weapon = GetComponent<PlayerLogic.Inventory>().RangeWeapons[weaponId];
-            var audioSource = GetComponent<AudioSource>();
-            audioSource.clip = weapon.ShootingAudioClip;
-            audioSource.volume = weapon.ShootingVolume;
-            audioSource.Play();
             weapon.BulletsInMagazine = bulletsInMagazine;
         }
 
@@ -61,10 +61,6 @@ namespace Networking.Synchronization
         private void SendReload(int weaponId, int totalBullets, int bulletsInMagazine)
         {
             var weapon = GetComponent<PlayerLogic.Inventory>().RangeWeapons[weaponId];
-            var audioSource = GetComponent<AudioSource>();
-            audioSource.clip = weapon.ReloadingAudioClip;
-            audioSource.volume = weapon.ReloadingVolume;
-            audioSource.Play();
             weapon.TotalBullets = totalBullets;
             weapon.BulletsInMagazine = bulletsInMagazine;
         }
@@ -80,6 +76,8 @@ namespace Networking.Synchronization
                 weapon.BulletsPerShot--;
             }*/
         }
+
+       
 
         [Server]
         private void StartReloadCoroutine(RangeWeaponData rangeWeapon)
@@ -179,6 +177,20 @@ namespace Networking.Synchronization
             var connection = rayHit.collider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
             GetComponent<HealthSynchronization>().Damage(connection, damage);
             _particleFactory.CreateBlood(rayHit.point);
+        }
+
+        [Server]
+        private void SendSoundInRadius(RangeWeaponData weapon, Vector3 sourcePosition, float radius, SoundType soundType)
+        {
+            foreach (var connection in NetworkServer.connections.Values)
+            {
+                if (!connection.identity) continue;
+                var playerPosition = connection.identity.gameObject.transform.position;
+                if (Vector3.Distance(sourcePosition, playerPosition) < radius)
+                {
+                    connection.identity.GetComponent<SoundSynchronization>().PlayAudioClip(weapon.ID, soundType);
+                }
+            }
         }
 
         [Server]

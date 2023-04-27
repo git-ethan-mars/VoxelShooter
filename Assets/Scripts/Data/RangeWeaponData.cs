@@ -26,10 +26,6 @@ namespace Data
         public readonly float ChestMultiplier;
         public readonly float LegMultiplier;
         public readonly float ArmMultiplier;
-        public readonly AudioClip ShootingAudioClip;
-        public readonly float ShootingVolume;
-        public readonly AudioClip ReloadingAudioClip;
-        public readonly float ReloadingVolume;
         public readonly Sprite AmmoTypeIcon;
 
         public RangeWeaponData(RangeWeaponItem primaryRangeWeapon)
@@ -56,10 +52,6 @@ namespace Data
             AmmoTypeIcon = primaryRangeWeapon.ammoIcon;
             ID = primaryRangeWeapon.id;
             Range = primaryRangeWeapon.range;
-            ShootingAudioClip = primaryRangeWeapon.shootingAudioClip;
-            ShootingVolume = primaryRangeWeapon.shootingVolume;
-            ReloadingAudioClip = primaryRangeWeapon.reloadingAudioClip;
-            ReloadingVolume = primaryRangeWeapon.reloadingVolume;
         }
     }
 }

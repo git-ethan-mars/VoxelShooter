@@ -38,17 +38,17 @@ namespace Infrastructure.Factory
             _staticData = staticData;
         }
 
-        public GameObject CreateLocalNetworkManager(MapMessageHandler mapSynchronization)
+        public GameObject CreateLocalNetworkManager(MapMessageHandler mapMessageHandler)
         {
             _networkManager = _assets.Instantiate(NetworkManagerPath);
-            _networkManager.GetComponent<CustomNetworkManager>().Construct(_staticData, mapSynchronization);
+            _networkManager.GetComponent<CustomNetworkManager>().Construct(_staticData, mapMessageHandler);
             return _networkManager;
         }
 
-        public GameObject CreateSteamNetworkManager(MapMessageHandler mapSynchronization)
+        public GameObject CreateSteamNetworkManager(MapMessageHandler mapMessageHandler)
         {
             _networkManager = _assets.Instantiate(SteamNetworkManagerPath);
-            _networkManager.GetComponent<CustomNetworkManager>().Construct(_staticData, mapSynchronization);
+            _networkManager.GetComponent<CustomNetworkManager>().Construct(_staticData, mapMessageHandler);
             return _networkManager;
         }
 

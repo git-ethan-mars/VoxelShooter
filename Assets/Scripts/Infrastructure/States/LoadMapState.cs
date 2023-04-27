@@ -17,7 +17,7 @@ namespace Infrastructure.States
         private readonly IAssetProvider _assets;
         private CustomNetworkManager _networkManager;
         private readonly IParticleFactory _particleFactory;
-        private MapMessageHandler mapMessageHandler;
+        private MapMessageHandler _mapMessageHandler;
         private readonly bool _isLocalBuild;
 
         public LoadMapState(GameStateMachine stateMachine, SceneLoader sceneLoader, IGameFactory gameFactory,
@@ -43,30 +43,30 @@ namespace Infrastructure.States
 
         private void OnLoaded()
         {
-            mapMessageHandler = new MapMessageHandler();
+            _mapMessageHandler = new MapMessageHandler();
             _networkManager = _isLocalBuild
-                ? _gameFactory.CreateLocalNetworkManager(mapMessageHandler).GetComponent<CustomNetworkManager>()
-                : _gameFactory.CreateSteamNetworkManager(mapMessageHandler).GetComponent<CustomNetworkManager>();
+                ? _gameFactory.CreateLocalNetworkManager(_mapMessageHandler).GetComponent<CustomNetworkManager>()
+                : _gameFactory.CreateSteamNetworkManager(_mapMessageHandler).GetComponent<CustomNetworkManager>();
             _networkManager.MapLoaded += OnMapLoaded;
-            mapMessageHandler.MapDownloaded += OnMapDownloaded;
+            _mapMessageHandler.MapDownloaded += OnMapDownloaded;
         }
         
         private void OnMapLoaded(Map map)
         {
             Debug.Log("Loaded map from disk");
-            mapMessageHandler.Map = map;
+            _mapMessageHandler.Map = map;
             _gameFactory.CreateWalls(map);
-            _gameFactory.CreateMapRenderer(map, mapMessageHandler.Buffer);
+            _gameFactory.CreateMapRenderer(map, _mapMessageHandler.Buffer);
             CreateServerEntityFactory(map);
             _stateMachine.Enter<GameLoopState>();
         }
 
         private void OnMapDownloaded(Map map)
         {
-            mapMessageHandler.Map = map;
+            _mapMessageHandler.Map = map;
             _gameFactory.CreateWalls(map);
             Debug.Log("Downloaded map from server");
-            _gameFactory.CreateMapRenderer(map, mapMessageHandler.Buffer);
+            _gameFactory.CreateMapRenderer(map, _mapMessageHandler.Buffer);
             _stateMachine.Enter<GameLoopState>();
         }
 
