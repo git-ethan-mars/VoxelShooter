@@ -121,7 +121,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 354
+        y: 794
         width: 100
         height: 100
       alignment: 0
@@ -142,7 +142,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 185
+        y: 685
         width: 100
         height: 100
       alignment: 0
@@ -163,9 +163,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 102
+        y: 899
         width: 100
-        height: 58
+        height: 100
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -184,9 +184,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 58
+        y: 482
         width: 100
-        height: 19
+        height: 100
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -205,9 +205,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 6
+        y: 406
         width: 100
-        height: 19
+        height: 100
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -217,6 +217,48 @@ TextureImporter:
       bones: []
       spriteID: 4fc83436106d3a74fb3cd95e11c322e9
       internalID: 886209943
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MachinGunBullets
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 585
+        width: 100
+        height: 100
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3a933c3d81139374ea7c9afcfd7f3511
+      internalID: -129081338
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DynamiteIcon
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 292
+        width: 100
+        height: 100
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ea63f192a44631d4880548bd8f05cc1b
+      internalID: 2038079468
       vertices: []
       indices: 
       edges: []
@@ -236,11 +278,13 @@ TextureImporter:
       Guns_8: -919499819
       Guns_2: -1880600435
       rifleBullets: -465812234
+      DynamiteIcon: 2038079468
       revolverRounds: 1304307358
       Guns_1: 2080269000
       Guns_6: -147945630
       rocketMissiles: 886209943
       assaultRifleBullets: -183867098
+      MachinGunBullets: -129081338
       shotgunPellets: 2005296590
       Guns_4: 817565282
   spritePackingTag: 
