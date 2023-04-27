@@ -1171,7 +1171,7 @@ GameObject:
   - component: {fileID: 8406597632269180979}
   - component: {fileID: 7638450332812517253}
   m_Layer: 0
-  m_Name: ChangeClassMenu
+  m_Name: ChooseClassMenu
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1846,7 +1846,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Change Class
+  m_text: Choose Class
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 826f3a6926e5ed14583e9ab0a32696ab, type: 2}
   m_sharedMaterial: {fileID: -5574846122589945228, guid: 826f3a6926e5ed14583e9ab0a32696ab, type: 2}

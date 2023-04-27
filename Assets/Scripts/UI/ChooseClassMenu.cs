@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace UI
 {
-    public class ChangeClassMenu : MonoBehaviour
+    public class ChooseClassMenu : MonoBehaviour
     {
         [SerializeField] private Button builderButton;
         [SerializeField] private Button sniperButton;

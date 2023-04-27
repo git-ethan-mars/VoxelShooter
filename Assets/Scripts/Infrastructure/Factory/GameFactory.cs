@@ -26,7 +26,7 @@ namespace Infrastructure.Factory
         private const string MapRendererPath = "Prefabs/MapCreation/MapRenderer";
         private const string ChunkRendererPath = "Prefabs/MapCreation/Chunk";
         private const string HudPath = "Prefabs/UI/HUD";
-        private const string ChangeClassMenu = "Prefabs/UI/ChangeClassMenu";
+        private const string ChangeClassMenu = "Prefabs/UI/ChooseClassMenu";
         private const string Wall = "Prefabs/MapCreation/Wall";
         private GameObject _networkManager;
 
@@ -91,7 +91,7 @@ namespace Infrastructure.Factory
         public GameObject CreateChangeClassMenu()
         {
             var menu = _assets.Instantiate(ChangeClassMenu);
-            menu.GetComponent<ChangeClassMenu>().Construct(_networkManager.GetComponent<CustomNetworkManager>()); 
+            menu.GetComponent<ChooseClassMenu>().Construct(_networkManager.GetComponent<CustomNetworkManager>()); 
             return menu;
         }
 
