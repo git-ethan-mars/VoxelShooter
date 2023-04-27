@@ -9,26 +9,28 @@ using MapLogic;
 using Mirror;
 using Networking.Messages;
 using Networking.Synchronization;
+using Networking.Transport;
 using PlayerLogic;
+using Steamworks;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Networking
 {
     public class CustomNetworkManager : NetworkManager
     {
+        public event Action<Map> MapLoaded;
         public ServerData ServerData { get; private set; }
         public IEntityFactory EntityFactory { get; set; }
-        public event Action<Map> MapLoaded;
-        private int _spawnPointIndex;
-
+        
         private Map _map;
         private IStaticDataService _staticData;
-        private MapMessageHandler _mapSynchronization;
+        private MapMessageHandler _mapMessageHandler;
 
-        public void Construct(IStaticDataService staticData, MapMessageHandler mapSynchronization)
+        public void Construct(IStaticDataService staticData, MapMessageHandler mapMessageHandler)
         {
             _staticData = staticData;
-            _mapSynchronization = mapSynchronization;
+            _mapMessageHandler = mapMessageHandler;
         }
 
         public override void OnStartServer()
@@ -41,8 +43,8 @@ namespace Networking
 
         public override void OnStartClient()
         {
-            NetworkClient.RegisterHandler<DownloadMapMessage>(_mapSynchronization.OnMapDownloadMessage);
-            NetworkClient.RegisterHandler<UpdateMapMessage>(_mapSynchronization.OnMapUpdateMessage);
+            NetworkClient.RegisterHandler<DownloadMapMessage>(_mapMessageHandler.OnMapDownloadMessage);
+            NetworkClient.RegisterHandler<UpdateMapMessage>(_mapMessageHandler.OnMapUpdateMessage);
             NetworkClient.RegisterHandler<HealthMessage>(OnHealthChange);
         }
 
@@ -73,14 +75,14 @@ namespace Networking
         public void ChangeClass(GameClass gameClass)
         {
             CharacterMessage characterMessage = new CharacterMessage()
-                {GameClass = gameClass, NickName = ""};
+                {GameClass = gameClass, NickName = GetComponent<SteamManager>() is not null ? SteamFriends.GetPersonaName() : ""};
             NetworkClient.Send(characterMessage);
         }
 
 
         private void OnChooseClass(NetworkConnectionToClient conn, CharacterMessage message)
         {
-            var player = EntityFactory.CreatePlayer(conn, message);
+            var player = EntityFactory.CreatePlayer(conn, message.GameClass, message.NickName);
             NetworkServer.AddPlayerForConnection(conn, player);
             ServerData.AddPlayer(conn, message.GameClass, message.NickName);
         }
@@ -91,6 +93,7 @@ namespace Networking
             NetworkClient.localPlayer.gameObject.GetComponent<HealthSystem>()
                 .UpdateHealth(healthMessage.CurrentHealth, healthMessage.MaxHealth);
         }
+        
 
 
         private DownloadMapMessage[] SplitMap(int packageSize)

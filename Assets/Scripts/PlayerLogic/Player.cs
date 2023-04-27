@@ -10,6 +10,7 @@ namespace PlayerLogic
     {
         [HideInInspector] [SyncVar] public float placeDistance;
         [HideInInspector] [SyncVar] public int blockCount;
+        [SyncVar] public string nickName;
         public Transform itemPosition;
         [Header("Body parts")] 
         [SerializeField]private Transform head;
@@ -21,10 +22,11 @@ namespace PlayerLogic
 
         private GameObject _hud;
 
-        public void Construct(PlayerCharacteristic characteristic)
+        public void Construct(PlayerCharacteristic characteristic, string nick)
         {
             placeDistance = characteristic.placeDistance;
             blockCount = characteristic.blockCount;
+            nickName = nick;
         }
         
         public override void OnStartLocalPlayer()

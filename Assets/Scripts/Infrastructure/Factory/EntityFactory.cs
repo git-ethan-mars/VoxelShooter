@@ -6,7 +6,6 @@ using Infrastructure.Services;
 using MapLogic;
 using Mirror;
 using Networking;
-using Networking.Messages;
 using Networking.Synchronization;
 using PlayerLogic;
 using UnityEngine;
@@ -36,57 +35,52 @@ namespace Infrastructure.Factory
             _particleFactory = particleFactory;
         }
 
-        public GameObject CreatePlayer(NetworkConnectionToClient conn, CharacterMessage message)
-        {
-            var gameClass = message.GameClass;
-            var player = CreatePlayer(gameClass);
-            ConfigureSynchronization(player);
-            return player;
-
-        }
-
-        public GameObject RespawnPlayer(NetworkConnectionToClient connection, GameClass gameClass)
-        {
-            var player = CreatePlayer(gameClass);
-            ConfigureSynchronization(player);
-            return player;
-        }
-
-        private GameObject CreatePlayer(GameClass gameClass)
+        public GameObject CreatePlayer(NetworkConnectionToClient connection, GameClass gameClass, string nickName)
         {
             GameObject player;
             if (_spawnPoints.Count == 0)
             {
-                player = CreatePlayerWithoutSpawnPoint(gameClass);
+                player = CreatePlayerWithoutSpawnPoint(gameClass, nickName);
             }
             else
             {
-                player = CreatePlayerWithSpawnPoint(gameClass, _spawnPoints[_spawnPointIndex].ToUnityVector(),
+                player = CreatePlayerWithSpawnPoint(gameClass, nickName, _spawnPoints[_spawnPointIndex].ToUnityVector(),
                     Quaternion.identity);
                 _spawnPointIndex = (_spawnPointIndex + 1) % _spawnPoints.Count;
             }
 
+            ConfigureSynchronization(player);
             return player;
         }
 
-        private GameObject CreatePlayerWithSpawnPoint(GameClass gameClass, Vector3 position, Quaternion rotation)
+        public GameObject RespawnPlayer(NetworkConnectionToClient connection, GameClass gameClass)
+        {
+            var player = CreatePlayer(connection, gameClass,
+                _serverData.GetPlayerData(connection.connectionId).NickName);
+            ConfigureSynchronization(player);
+            return player;
+        }
+
+
+        private GameObject CreatePlayerWithSpawnPoint(GameClass gameClass, string nickName, Vector3 position,
+            Quaternion rotation)
         {
             var player = _assets.Instantiate(PlayerPath, position, rotation);
-            ConfigurePlayer(player, gameClass);
+            ConfigurePlayer(player, gameClass, nickName);
             return player;
         }
 
-        private GameObject CreatePlayerWithoutSpawnPoint(GameClass gameClass)
+        private GameObject CreatePlayerWithoutSpawnPoint(GameClass gameClass, string nickName)
         {
             var player = _assets.Instantiate(PlayerPath);
-            ConfigurePlayer(player, gameClass);
+            ConfigurePlayer(player, gameClass, nickName);
             return player;
         }
 
-        private void ConfigurePlayer(GameObject player, GameClass gameClass)
+        private void ConfigurePlayer(GameObject player, GameClass gameClass, string nickName)
         {
             var characteristic = _staticData.GetPlayerCharacteristic(gameClass);
-            player.GetComponent<Player>().Construct(characteristic);
+            player.GetComponent<Player>().Construct(characteristic, nickName);
             var movement = player.GetComponent<PlayerMovement>();
             movement.Construct(characteristic);
             player.GetComponent<HealthSystem>().Construct(characteristic);
@@ -96,7 +90,6 @@ namespace Infrastructure.Factory
             {
                 playerInventory.Ids.Add(itemId);
             }
-            
         }
 
         private void ConfigureSynchronization(GameObject player)
