@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Inventory
 {
-    public class MeleeWeaponView : IInventoryItemView, ILeftMouseButtonDownHandler, IUpdated
+    public class MeleeWeaponView : IInventoryItemView, ILeftMouseButtonDownHandler, IRightMouseButtonDownHandler, IUpdated
     { 
         public Sprite Icon { get; }
         private GameObject Model { get; }
@@ -65,6 +65,28 @@ namespace Inventory
                     _mapSynchronization.UpdateBlocksOnServer(
                         new[] { Vector3Int.FloorToInt(raycastHit.point - raycastHit.normal / 2) },
                         new[] { new BlockData(BlockColor.Empty) });
+                }
+            }
+            var ray = _fpsCam.ViewportPointToRay(new Vector2(0.5f, 0.5f));
+            _meleeWeaponSynchronization.CmdHit(ray, _meleeWeapon.ID, raycastResult);
+        }
+        
+        public void OnRightMouseButtonDown()
+        {
+            var raycastResult = _cubeRenderer.GetRayCastHit(out var raycastHit);
+            if (raycastResult)
+            {
+                if (_meleeWeapon.IsReady)
+                {
+                    var targetBlock = Vector3Int.FloorToInt(raycastHit.point - raycastHit.normal / 2);
+                    _mapSynchronization.UpdateBlocksOnServer(
+                        new[]
+                        {
+                            targetBlock, new Vector3Int(targetBlock.x, targetBlock.y + 1, targetBlock.z),
+                            new Vector3Int(targetBlock.x, targetBlock.y - 1, targetBlock.z)
+                        },
+                        new[] { new BlockData(BlockColor.Empty), new BlockData(BlockColor.Empty), 
+                            new BlockData(BlockColor.Empty) });
                 }
             }
             var ray = _fpsCam.ViewportPointToRay(new Vector2(0.5f, 0.5f));
