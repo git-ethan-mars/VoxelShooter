@@ -49,7 +49,7 @@ namespace Inventory
                 inventoryView.SetIconForItem(i, _inventoryHandlers[i].Icon);
             }
 
-            _inventoryHandlers[_itemIndex].Select();
+            ChangeSlotIndex(_itemIndex);
         }
 
         private void AddEventHandlers(InventoryInput inventoryInput)
@@ -64,6 +64,16 @@ namespace Inventory
         private List<IInventoryItemView> InitializeInventoryViews(List<InventoryItem> items)
         {
             var inventory = new List<IInventoryItemView>();
+            foreach (var (_,weapon) in _player.GetComponent<PlayerLogic.Inventory>().RangeWeapons)
+            {
+                inventory.Add(new RangeWeaponView(_gameFactory, _inputService, _mainCamera, _itemPosition, _player, _hud, weapon));
+            }
+            
+            foreach (var (_,weapon) in _player.GetComponent<PlayerLogic.Inventory>().MeleeWeapons)
+            {
+                inventory.Add(new MeleeWeaponView(_gameFactory, _inputService, _mainCamera, _itemPosition, 
+                    _player, _hud, weapon, _cubeRenderer, _mapSynchronization));
+            }
             foreach (var item in items)
             {
                 if (item.itemType == ItemType.Block)
@@ -82,17 +92,6 @@ namespace Inventory
                 }
             }
 
-            foreach (var (_,weapon) in _player.GetComponent<PlayerLogic.Inventory>().RangeWeapons)
-            {
-                inventory.Add(new RangeWeaponView(_gameFactory, _inputService, _mainCamera, _itemPosition, _player, _hud, weapon));
-            }
-            
-            foreach (var (_,weapon) in _player.GetComponent<PlayerLogic.Inventory>().MeleeWeapons)
-            {
-                inventory.Add(new MeleeWeaponView(_gameFactory, _inputService, _mainCamera, _itemPosition, 
-                    _player, _hud, weapon, _cubeRenderer, _mapSynchronization));
-            }
-            
             return inventory;
         }
 
