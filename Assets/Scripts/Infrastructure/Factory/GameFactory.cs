@@ -26,7 +26,8 @@ namespace Infrastructure.Factory
         private readonly IParticleFactory _particleFactory;
 
 
-        public GameFactory(IAssetProvider assets, IEntityFactory entityFactory, IParticleFactory particleFactory, IStaticDataService staticData)
+        public GameFactory(IAssetProvider assets, IEntityFactory entityFactory, IParticleFactory particleFactory,
+            IStaticDataService staticData)
         {
             _assets = assets;
             _entityFactory = entityFactory;
@@ -37,14 +38,16 @@ namespace Infrastructure.Factory
         public GameObject CreateLocalNetworkManager(bool isLocalBuild)
         {
             _networkManager = _assets.Instantiate(NetworkManagerPath);
-            _networkManager.GetComponent<CustomNetworkManager>().Construct(_staticData, _entityFactory, _particleFactory, _assets, isLocalBuild);
+            _networkManager.GetComponent<CustomNetworkManager>().Construct(_staticData, _entityFactory,
+                _particleFactory, _assets, isLocalBuild);
             return _networkManager;
         }
 
         public GameObject CreateSteamNetworkManager(bool isLocalBuild)
         {
             _networkManager = _assets.Instantiate(SteamNetworkManagerPath);
-            _networkManager.GetComponent<CustomNetworkManager>().Construct(_staticData, _entityFactory, _particleFactory, _assets, isLocalBuild);
+            _networkManager.GetComponent<CustomNetworkManager>().Construct(_staticData, _entityFactory,
+                _particleFactory, _assets, isLocalBuild);
             return _networkManager;
         }
 
@@ -73,7 +76,6 @@ namespace Infrastructure.Factory
             return mapGenerator;
         }
 
-
         public ChunkRenderer CreateChunkRenderer(Vector3Int position, Quaternion rotation, Transform transform)
         {
             var chunkRenderer = _assets.Instantiate(ChunkRendererPath, position, rotation, transform)
@@ -81,6 +83,5 @@ namespace Infrastructure.Factory
             chunkRenderer.Construct();
             return chunkRenderer;
         }
-        
     }
 }
