@@ -1,25 +1,25 @@
 ﻿using System.Collections.Generic;
 using Data;
 using Infrastructure.Factory;
+using MapLogic;
 using Optimization;
-using Rendering;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 
-namespace MapLogic
+namespace Rendering
 {
     public class MapRenderer : MonoBehaviour
     {
         private ChunkRenderer[] Chunks { get; set; }
         private Map Map { get; set; }
-        private IGameFactory _chunkFactory;
+        private IGameFactory _gameFactory;
         private Dictionary<Vector3Int, BlockData> _buffer;
 
         public void Construct(Map map, IGameFactory gameFactory, Dictionary<Vector3Int, BlockData> buffer)
         {
             Map = map;
-            _chunkFactory = gameFactory;
+            _gameFactory = gameFactory;
             _buffer = buffer;
             CreateChunkRenderers();
             SetNeighbours();
@@ -249,7 +249,7 @@ namespace MapLogic
                                     x * Map.MapData.Height / ChunkData.ChunkSize *
                                     Map.MapData.Depth /
                                     ChunkData.ChunkSize;
-                        var chunkRenderer = _chunkFactory.CreateChunkRenderer(new Vector3Int(x * ChunkData.ChunkSize,
+                        var chunkRenderer = _gameFactory.CreateChunkRenderer(new Vector3Int(x * ChunkData.ChunkSize,
                             y * ChunkData.ChunkSize,
                             z * ChunkData.ChunkSize), Quaternion.identity, transform);
                         Chunks[index] = chunkRenderer.GetComponent<ChunkRenderer>();

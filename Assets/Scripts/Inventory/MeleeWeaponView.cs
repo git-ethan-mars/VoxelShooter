@@ -1,11 +1,8 @@
 using Data;
 using Infrastructure.Factory;
-using Infrastructure.Services.Input;
 using Networking.Synchronization;
 using PlayerLogic;
 using Rendering;
-using TMPro;
-using UI;
 using UnityEngine;
 
 namespace Inventory
@@ -15,29 +12,23 @@ namespace Inventory
         public Sprite Icon { get; }
         private GameObject Model { get; }
         private readonly MeleeWeaponData _meleeWeapon;
-        private readonly Transform _attackPoint;
         private readonly Camera _fpsCam;
         private readonly IGameFactory _gameFactory;
         private readonly MeleeWeaponSynchronization _meleeWeaponSynchronization;
-        private readonly IInputService _inputService;
-        private MapSynchronization _mapSynchronization;
-        private CubeRenderer _cubeRenderer;
+        private readonly MapSynchronization _mapSynchronization;
+        private readonly CubeRenderer _cubeRenderer;
 
 
-        public MeleeWeaponView(IGameFactory gameFactory, IInputService inputService, Camera camera,
-            Transform itemPosition, GameObject player, GameObject hud, MeleeWeaponData configuration, CubeRenderer cubeRenderer,
+        public MeleeWeaponView(InventoryModelFactory modelFactory, Camera camera,
+            Transform itemPosition, GameObject player, MeleeWeaponData configuration, CubeRenderer cubeRenderer,
             MapSynchronization mapSynchronization)
         {
-            _gameFactory = gameFactory;
-            _inputService = inputService;
             _meleeWeapon = configuration;
             _cubeRenderer = cubeRenderer;
-            _cubeRenderer.PlaceDistance = _meleeWeapon.Range;
             _mapSynchronization = mapSynchronization;
-            Model = _gameFactory.CreateGameModel(_meleeWeapon.Prefab, itemPosition);
+            Model = modelFactory.CreateGameModel(_meleeWeapon.Prefab, itemPosition);
             Model.SetActive(false);
             Icon = _meleeWeapon.Icon;
-            _attackPoint = Model.GetComponentInChildren<Transform>();
             _fpsCam = camera;
             _meleeWeaponSynchronization = player.GetComponent<MeleeWeaponSynchronization>();
         }

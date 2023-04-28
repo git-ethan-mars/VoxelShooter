@@ -1,28 +1,19 @@
-﻿using UnityEngine;
+﻿using Inventory;
+using UnityEngine;
 
 namespace Rendering
 {
     public class CubeRenderer
     {
-        private const string ChunkTag = "Chunk";
         private readonly LineRenderer _lineRenderer;
-        private readonly Camera _camera;
-        public float PlaceDistance;
+        private readonly Raycaster _raycaster;
 
-        public CubeRenderer(LineRenderer lineRenderer, Camera camera, float placeDistance)
+        public CubeRenderer(LineRenderer lineRenderer, Raycaster raycaster)
         {
             _lineRenderer = lineRenderer;
-            _camera = camera;
-            PlaceDistance = placeDistance;
+            _raycaster = raycaster;
         }
-
-
-        public bool GetRayCastHit(out RaycastHit raycastHit)
-        {
-            var ray = _camera.ViewportPointToRay(new Vector3(0.5f, 0.5f));
-            var raycastResult = Physics.Raycast(ray, out raycastHit, PlaceDistance);
-            return raycastResult && raycastHit.collider.gameObject.CompareTag(ChunkTag);
-        }
+        
 
         public void EnableCube()
         {
@@ -38,16 +29,20 @@ namespace Rendering
 
         public void UpdateCube(bool isBuilding)
         {
-            var raycastResult = GetRayCastHit(out var raycastHit);
+            var raycastResult = _raycaster.GetRayCastHit(out var raycastHit);
             if (!raycastResult)
             {
                 _lineRenderer.positionCount = 0;
                 return;
             }
 
-            var blockStartPosition = Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2 * (isBuilding ? 1 : -1));
+            var blockStartPosition =
+                Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2 * (isBuilding ? 1 : -1));
             DrawCube(blockStartPosition);
         }
+
+
+        public bool GetRayCastHit(out RaycastHit raycastHit) => _raycaster.GetRayCastHit(out raycastHit);
 
         private void DrawCube(Vector3Int startPosition)
         {

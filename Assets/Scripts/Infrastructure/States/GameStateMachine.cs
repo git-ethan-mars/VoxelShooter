@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
 using Infrastructure.Services;
 
@@ -17,10 +16,9 @@ namespace Infrastructure.States
             _states = new Dictionary<Type, IExitableState>
             {
                 [typeof(BootstrapState)] = new BootstrapState(this, sceneLoader, allServices, coroutineRunner),
-                [typeof(LoadMapState)] = new LoadMapState(this, sceneLoader, allServices.Single<IGameFactory>(),
-                    allServices.Single<IStaticDataService>(), allServices.Single<IAssetProvider>(), allServices.Single<IParticleFactory>(), isLocalBuild),
+                [typeof(LoadMapState)] = new LoadMapState(this, sceneLoader, allServices.Single<IGameFactory>(), isLocalBuild),
                 [typeof(GameLoopState)] =
-                    new GameLoopState(allServices.Single<IGameFactory>())
+                    new GameLoopState(allServices.Single<IUIFactory>())
             };
             
         }

@@ -1,19 +1,18 @@
-﻿using System;
-using Infrastructure.Factory;
+﻿using Infrastructure.Factory;
 using Mirror;
-using Networking.Messages;
+using PlayerLogic;
 
 namespace Networking.Synchronization
 {
     public class HealthSynchronization : NetworkBehaviour
     {
         private ServerData _serverData;
-        private IEntityFactory _entityFactory;
+        private IPlayerFactory _playerFactory;
 
-        public void Construct(ServerData serverData, IEntityFactory entityFactory)
+        public void Construct(ServerData serverData, IPlayerFactory playerFactory)
         {
             _serverData = serverData;
-            _entityFactory = entityFactory;
+            _playerFactory = playerFactory;
         }
 
 
@@ -27,15 +26,14 @@ namespace Networking.Synchronization
                 playerData.Health = 0;
                 _serverData.UpdatePlayer(connection);
                 var gameClass = _serverData.GetPlayerData(connection.connectionId).GameClass;
-                var player = _entityFactory.RespawnPlayer(connection, gameClass);
+                var player = _playerFactory.RespawnPlayer(connection, gameClass);
                 var oldPlayer = connection.identity.gameObject;
                 NetworkServer.ReplacePlayerForConnection(connection, player, true);
                 Destroy(oldPlayer, 0.1f);
             }
             else
             {
-                connection.Send(new HealthMessage()
-                    {CurrentHealth = playerData.Health, MaxHealth = playerData.MaxHealth});
+                connection.identity.gameObject.GetComponent<HealthSystem>().health = playerData.Health; 
             }
         }
 
@@ -44,7 +42,7 @@ namespace Networking.Synchronization
         {
             _serverData.UpdatePlayer(connection);
             var gameClass = _serverData.GetPlayerData(connection.connectionId).GameClass;
-            var player = _entityFactory.RespawnPlayer(connection, gameClass); 
+            var player = _playerFactory.RespawnPlayer(connection, gameClass); 
             var oldPlayer = connection.identity.gameObject;
             NetworkServer.ReplacePlayerForConnection(connection, player, true);
             Destroy(oldPlayer, 0.1f);

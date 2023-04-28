@@ -8,7 +8,7 @@ namespace PlayerLogic
     public class HealthSystem : NetworkBehaviour
     {
         public event Action<int> OnHealthChanged;
-        [HideInInspector] [SyncVar] public int health;
+        [HideInInspector] [SyncVar(hook = nameof(UpdateHealth))] public int health;
         [SyncVar] private int _maxHealth;
         
 
@@ -18,12 +18,10 @@ namespace PlayerLogic
             health = _maxHealth;
         }
 
-        public void UpdateHealth(int currentHealth, int maxHealth)
+        private void UpdateHealth(int oldHealth, int newHealth)
         {
-            _maxHealth = maxHealth;
-            health = currentHealth >= _maxHealth ? _maxHealth : currentHealth;
-            OnHealthChanged?.Invoke(health);
+            OnHealthChanged?.Invoke(newHealth);
         }
-        
+
     }
 }

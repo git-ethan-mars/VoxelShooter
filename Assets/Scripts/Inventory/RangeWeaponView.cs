@@ -22,7 +22,7 @@ namespace Inventory
         private readonly Image _ammoType;
 
 
-        public RangeWeaponView(IGameFactory gameFactory, IInputService inputService, Camera camera,
+        public RangeWeaponView(IInventoryModelFactory gameFactory, IInputService inputService, Camera camera,
             Transform itemPosition, GameObject player, GameObject hud, RangeWeaponData configuration)
         {
             _inputService = inputService;

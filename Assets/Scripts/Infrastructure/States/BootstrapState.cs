@@ -47,8 +47,10 @@ namespace Infrastructure.States
             _allServices.RegisterSingle<IInputService>(new StandaloneInputService());
             _allServices.RegisterSingle<IAssetProvider>(new AssetProvider());
             _allServices.RegisterSingle<IParticleFactory>(new ParticleFactory(_allServices.Single<IAssetProvider>(), _coroutineRunner));
+            _allServices.RegisterSingle<IEntityFactory>(new EntityFactory(_allServices.Single<IAssetProvider>()));
             _allServices.RegisterSingle<IGameFactory>(
-                new GameFactory(_allServices.Single<IAssetProvider>(),_allServices.Single<IInputService>(), staticData));
+                new GameFactory(_allServices.Single<IAssetProvider>(), _allServices.Single<IEntityFactory>(), _allServices.Single<IParticleFactory>(), staticData));
+            _allServices.RegisterSingle<IUIFactory>(new UIFactory(_allServices.Single<IAssetProvider>(), _allServices.Single<IInputService>(), _allServices.Single<IEntityFactory>()));
         }
     }
 }

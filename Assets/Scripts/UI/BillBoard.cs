@@ -16,7 +16,6 @@ namespace UI
         
         }
 
-        // Update is called once per frame
         private void LateUpdate()
         {
             transform.LookAt(transform.position + _cameraTransform.rotation * Vector3.forward, _cameraTransform.rotation * Vector3.up);

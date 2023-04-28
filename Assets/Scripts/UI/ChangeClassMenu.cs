@@ -1,5 +1,7 @@
 using Data;
+using Mirror;
 using Networking;
+using Networking.Messages;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,13 +13,8 @@ namespace UI
         [SerializeField] private Button sniperButton;
         [SerializeField] private Button combatantButton;
         [SerializeField] private Button grenadierButton;
-        private CustomNetworkManager _networkManager;
-
-
-        public void Construct(CustomNetworkManager networkManager)
-        {
-            _networkManager = networkManager;
-        }
+        
+        
         
         private void Start()
         {
@@ -29,7 +26,7 @@ namespace UI
 
         private void ChangeClass(GameClass gameClass)
         {
-            _networkManager.ChangeClass(gameClass);
+            NetworkClient.Send(new ChangeClassRequest(gameClass));
             gameObject.SetActive(false);
         }
         

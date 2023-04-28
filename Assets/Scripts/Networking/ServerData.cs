@@ -1,20 +1,24 @@
 ﻿using System.Collections.Generic;
 using Data;
 using Infrastructure.Services;
+using MapLogic;
 using Mirror;
 
 namespace Networking
 {
     public class ServerData
     {
+        public Map Map { get; set; }
         private readonly IStaticDataService _staticData;
         private readonly Dictionary<int, PlayerData> _dataByConnectionId;
+        
 
 
-        public ServerData(IStaticDataService staticDataService)
+        public ServerData(IStaticDataService staticDataService, Map map)
         {
             _dataByConnectionId = new Dictionary<int, PlayerData>();
             _staticData = staticDataService;
+            Map = map;
         }
 
         public void AddPlayer(NetworkConnectionToClient connection, GameClass chosenClass, string nick)
