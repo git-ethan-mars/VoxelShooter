@@ -9,7 +9,7 @@ namespace Infrastructure.Factory
     public class UIFactory : IUIFactory
     {
         private const string HudPath = "Prefabs/UI/HUD";
-        private const string ChangeClassMenu = "Prefabs/UI/ChangeClassMenu";
+        private const string ChooseClassMenu = "Prefabs/UI/ChooseClassMenu";
         private readonly IAssetProvider _assets;
         private readonly IInputService _inputService;
         private IUIFactory _iuiFactoryImplementation;
@@ -33,7 +33,7 @@ namespace Infrastructure.Factory
 
         public void CreateChangeClassMenu()
         {
-            _assets.Instantiate(ChangeClassMenu);
+            _assets.Instantiate(ChooseClassMenu);
         }
     }
 }
