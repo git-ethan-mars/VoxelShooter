@@ -24,22 +24,27 @@ namespace Inventory
         private Camera _mainCamera;
         private MapSynchronization _mapSynchronization;
         private GameObject _palette;
-        private IGameFactory _gameFactory;
+        private InventoryModelFactory _modelFactory;
         private GameObject _player;
         private GameObject _hud;
         private PlayerCharacteristic _characteristic;
+        private Raycaster _raycaster;
+        private IEntityFactory _entityFactory;
 
-        public void Construct(IInputService inputService, IGameFactory gameFactory, GameObject hud, GameObject player)
+        public void Construct(IInputService inputService, IEntityFactory entityFactory, GameObject hud,
+            GameObject player)
         {
             AddEventHandlers(player.GetComponent<InventoryInput>());
+            _entityFactory = entityFactory;
             _player = player;
             _hud = hud;
             _mainCamera = Camera.main;
-            _cubeRenderer = new CubeRenderer(player.GetComponent<LineRenderer>(), _mainCamera, player.GetComponent<Player>().placeDistance);
+            _raycaster = new Raycaster(_mainCamera, player.GetComponent<Player>().placeDistance);
+            _cubeRenderer = new CubeRenderer(player.GetComponent<LineRenderer>(), _raycaster);
             _itemPosition = player.GetComponent<Player>().itemPosition;
             _mapSynchronization = player.GetComponent<MapSynchronization>();
             _palette = hud.GetComponent<Hud>().palette;
-            _gameFactory = gameFactory;
+            _modelFactory = new InventoryModelFactory();
             _inputService = inputService;
             _inventoryHandlers = InitializeInventoryViews(player.GetComponent<PlayerLogic.Inventory>().inventory);
             _maxIndex = Math.Min(_inventoryHandlers.Count, inventoryView.SlotsCount);
@@ -49,7 +54,7 @@ namespace Inventory
                 inventoryView.SetIconForItem(i, _inventoryHandlers[i].Icon);
             }
 
-            _inventoryHandlers[_itemIndex].Select();
+            ChangeSlotIndex(_itemIndex);
         }
 
         private void AddEventHandlers(InventoryInput inventoryInput)
@@ -64,35 +69,43 @@ namespace Inventory
         private List<IInventoryItemView> InitializeInventoryViews(List<InventoryItem> items)
         {
             var inventory = new List<IInventoryItemView>();
+            foreach (var (_, weapon) in _player.GetComponent<PlayerLogic.Inventory>().RangeWeapons)
+            {
+                inventory.Add(new RangeWeaponView(_modelFactory, _inputService, _mainCamera, _itemPosition, _player,
+                    _hud, weapon));
+            }
+
+            foreach (var (_, weapon) in _player.GetComponent<PlayerLogic.Inventory>().MeleeWeapons)
+            {
+                inventory.Add(new MeleeWeaponView(_modelFactory, _mainCamera, _itemPosition,
+                    _player, weapon, _cubeRenderer, _mapSynchronization));
+            }
+
             foreach (var item in items)
             {
                 if (item.itemType == ItemType.Block)
                 {
-                    inventory.Add(new BlockView(_gameFactory, _cubeRenderer, _mapSynchronization, _hud, (BlockItem)item, _player));
+                    inventory.Add(new BlockView(_modelFactory, _cubeRenderer, _mapSynchronization, _hud,
+                        (BlockItem) item, _player));
                 }
 
                 if (item.itemType == ItemType.Brush)
                 {
-                    inventory.Add(new BrushView(_gameFactory, _cubeRenderer, _mapSynchronization, _palette, (BrushItem)item, _player));
+                    inventory.Add(new BrushView(_modelFactory, _cubeRenderer, _mapSynchronization, _palette,
+                        (BrushItem) item, _player));
                 }
 
                 if (item.itemType == ItemType.SpawnPoint)
                 {
-                    inventory.Add(new SpawnPointView(_cubeRenderer, _mapSynchronization, (SpawnPointItem)item));
+                    inventory.Add(new SpawnPointView(_cubeRenderer, _mapSynchronization, (SpawnPointItem) item));
+                }
+
+                if (item.itemType == ItemType.Tnt)
+                {
+                    inventory.Add(new TntView(_raycaster, (TntItem) item));
                 }
             }
 
-            foreach (var (_,weapon) in _player.GetComponent<PlayerLogic.Inventory>().RangeWeapons)
-            {
-                inventory.Add(new RangeWeaponView(_gameFactory, _inputService, _mainCamera, _itemPosition, _player, _hud, weapon));
-            }
-            
-            foreach (var (_,weapon) in _player.GetComponent<PlayerLogic.Inventory>().MeleeWeapons)
-            {
-                inventory.Add(new MeleeWeaponView(_gameFactory, _inputService, _mainCamera, _itemPosition, 
-                    _player, _hud, weapon, _cubeRenderer, _mapSynchronization));
-            }
-            
             return inventory;
         }
 

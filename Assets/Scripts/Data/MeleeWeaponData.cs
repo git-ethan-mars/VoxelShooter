@@ -26,8 +26,7 @@ namespace Data
         public float HitVolume;
         
         public bool IsReady;
-        public bool IsReloading;
-        
+
         public MeleeWeaponData(MeleeWeaponItem primaryMeleeWeapon)
         {
             Range = primaryMeleeWeapon.range;

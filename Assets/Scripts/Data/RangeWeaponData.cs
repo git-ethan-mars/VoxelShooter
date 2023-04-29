@@ -19,17 +19,14 @@ namespace Data
         public readonly GameObject Prefab;
         public readonly int BulletsPerShot;
         public readonly int Damage;
-        public readonly Sprite Icon;
+        public readonly Sprite InventoryIcon;
         public readonly int ID;
         public bool IsReloading;
         public readonly float HeadMultiplier;
         public readonly float ChestMultiplier;
         public readonly float LegMultiplier;
         public readonly float ArmMultiplier;
-        public AudioClip ShootingAudioClip;
-        public float ShootingVolume;
-        public AudioClip ReloadingAudioClip;
-        public float ReloadingVolume;
+        public readonly Sprite AmmoTypeIcon;
 
         public RangeWeaponData(RangeWeaponItem primaryRangeWeapon)
         {
@@ -51,13 +48,10 @@ namespace Data
             IsAutomatic = primaryRangeWeapon.isAutomatic;
             Damage = primaryRangeWeapon.damage;
             Prefab = primaryRangeWeapon.prefab;
-            Icon = primaryRangeWeapon.inventoryIcon;
+            InventoryIcon = primaryRangeWeapon.inventoryIcon;
+            AmmoTypeIcon = primaryRangeWeapon.ammoIcon;
             ID = primaryRangeWeapon.id;
             Range = primaryRangeWeapon.range;
-            ShootingAudioClip = primaryRangeWeapon.shootingAudioClip;
-            ShootingVolume = primaryRangeWeapon.shootingVolume;
-            ReloadingAudioClip = primaryRangeWeapon.reloadingAudioClip;
-            ReloadingVolume = primaryRangeWeapon.reloadingVolume;
         }
     }
 }

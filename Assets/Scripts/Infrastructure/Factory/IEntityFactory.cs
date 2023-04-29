@@ -1,15 +1,10 @@
-﻿using Data;
-using Infrastructure.Services;
-using Mirror;
-using Networking;
-using Networking.Messages;
+﻿using Infrastructure.Services;
 using UnityEngine;
 
 namespace Infrastructure.Factory
 {
     public interface IEntityFactory : IService
     {
-        GameObject CreatePlayer(NetworkConnectionToClient conn, CharacterMessage message);
-        GameObject RespawnPlayer(NetworkConnectionToClient connection, GameClass gameClass);
+        GameObject CreateTnt(Vector3 position, Quaternion rotation);
     }
 }

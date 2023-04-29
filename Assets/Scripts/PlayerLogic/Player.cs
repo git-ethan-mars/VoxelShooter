@@ -10,26 +10,28 @@ namespace PlayerLogic
     {
         [HideInInspector] [SyncVar] public float placeDistance;
         [HideInInspector] [SyncVar] public int blockCount;
+        [SyncVar] public string nickName;
         public Transform itemPosition;
-        [Header("Body parts")] 
-        [SerializeField]private Transform head;
-        [SerializeField]private Transform leftArm;
-        [SerializeField]private Transform rightArm;
-        [SerializeField]private Transform chest;
+        [Header("Body parts")] [SerializeField]
+        private Transform head;
+        [SerializeField] private Transform leftArm;
+        [SerializeField] private Transform rightArm;
+        [SerializeField] private Transform chest;
         [SerializeField] private Transform leftLeg;
         [SerializeField] private Transform rightLeg;
 
         private GameObject _hud;
 
-        public void Construct(PlayerCharacteristic characteristic)
+        public void Construct(PlayerCharacteristic characteristic, string nick)
         {
             placeDistance = characteristic.placeDistance;
             blockCount = characteristic.blockCount;
+            nickName = nick;
         }
-        
+
         public override void OnStartLocalPlayer()
         {
-            _hud = AllServices.Container.Single<IGameFactory>().CreateHud(gameObject);
+            _hud = AllServices.Container.Single<IUIFactory>().CreateHud(gameObject);
             TurnOffBodyRender();
         }
 

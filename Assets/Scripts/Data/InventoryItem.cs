@@ -15,7 +15,7 @@ namespace Data
     {
         RangeWeapon,
         MeleeWeapon,
-        Dynamite,
+        Tnt,
         Block,
         Brush,
         SpawnPoint,

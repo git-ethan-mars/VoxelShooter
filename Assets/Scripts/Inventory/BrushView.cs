@@ -18,7 +18,7 @@ namespace Inventory
         private readonly MapSynchronization _mapSynchronization;
 
 
-        public BrushView(IGameFactory gameFactory, CubeRenderer cubeRenderer, MapSynchronization mapSynchronization,
+        public BrushView(InventoryModelFactory gameFactory, CubeRenderer cubeRenderer, MapSynchronization mapSynchronization,
             GameObject palette, BrushItem configuration, GameObject player)
         {
             palette.GetComponent<PaletteCreator>().OnColorUpdate += UpdateColor;

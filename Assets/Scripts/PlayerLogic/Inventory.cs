@@ -2,13 +2,14 @@
 using Data;
 using Infrastructure.Services;
 using Mirror;
+using UnityEngine;
 
 namespace PlayerLogic
 {
     public class Inventory : NetworkBehaviour
     {
         public readonly SyncList<int> Ids = new();
-        public List<InventoryItem> inventory;
+        [HideInInspector] public List<InventoryItem> inventory;
         public Dictionary<int,RangeWeaponData> RangeWeapons;
         public Dictionary<int,MeleeWeaponData> MeleeWeapons;
         private IStaticDataService _staticData;

@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1e3934e220d437eb4fad4d4c1a11dee, type: 3}
+  m_Name: Tnt
+  m_EditorClassIdentifier: 
+  id: 10
+  itemType: 2
+  inventoryIcon: {fileID: 21300000, guid: 61ac40b257b3a994f841856ad38b2b6b, type: 3}
+  prefab: {fileID: 8009858165730397543, guid: c2a01d48d01d91447b0e60f5a94e9e66, type: 3}
+  count: 5

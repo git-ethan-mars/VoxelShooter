@@ -18,7 +18,7 @@ namespace Inventory
         private readonly GameObject _blockInfo;
 
 
-        public BlockView(IGameFactory gameFactory, CubeRenderer cubeRender, MapSynchronization mapSynchronization, GameObject hud, BlockItem configuration, GameObject player)
+        public BlockView(InventoryModelFactory gameFactory, CubeRenderer cubeRender, MapSynchronization mapSynchronization, GameObject hud, BlockItem configuration, GameObject player)
         {
             _cubeRenderer = cubeRender;
             _mapSynchronization = mapSynchronization;
@@ -62,7 +62,7 @@ namespace Inventory
             _mapSynchronization.UpdateBlocksOnServer(
                 new[] {Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2)},
                 new[] {new BlockData(color)});
-    }
+        }
 
 
         private void UpdateColor(Color32 newColor)

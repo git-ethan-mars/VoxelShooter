@@ -4,15 +4,15 @@ namespace Infrastructure.States
 {
     public class GameLoopState : IState
     {
-        private readonly IGameFactory _gameFactory;
+        private readonly IUIFactory _uiFactory;
 
-        public GameLoopState(IGameFactory gameFactory)
+        public GameLoopState(IUIFactory uiFactory)
         {
-            _gameFactory = gameFactory;
+            _uiFactory = uiFactory;
         }
         public void Enter()
         {
-            _gameFactory.CreateChangeClassMenu();
+            _uiFactory.CreateChangeClassMenu();
         }
 
         public void Exit()

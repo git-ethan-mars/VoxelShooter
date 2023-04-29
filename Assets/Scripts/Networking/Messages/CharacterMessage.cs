@@ -3,9 +3,13 @@ using Mirror;
 
 namespace Networking.Messages
 {
-    public struct CharacterMessage : NetworkMessage
+    public struct ChangeClassRequest : NetworkMessage
     {
         public GameClass GameClass;
-        public string NickName;
+
+        public ChangeClassRequest(GameClass gameClass)
+        {
+            GameClass = gameClass;
+        }
     }
 }

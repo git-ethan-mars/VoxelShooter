@@ -2637,6 +2637,7 @@ MonoBehaviour:
   palette: {fileID: 684630227827703790}
   inventory: {fileID: 1007571750086494738}
   ammoInfo: {fileID: 3965871264559929169}
+  ammoType: {fileID: 3965871265337293365}
   ammoCount: {fileID: 3965871264164992123}
   blockInfo: {fileID: 3403961828662525452}
   blockCount: {fileID: 3241190784514822645}
@@ -6775,7 +6776,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -183867098, guid: e7634cc0bf7762649a525e59875cd9d1, type: 3}
+  m_Sprite: {fileID: 0}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
