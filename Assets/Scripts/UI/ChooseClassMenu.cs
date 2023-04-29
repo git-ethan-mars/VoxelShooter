@@ -1,6 +1,5 @@
 using Data;
 using Mirror;
-using Networking;
 using Networking.Messages;
 using UnityEngine;
 using UnityEngine.UI;

@@ -14,12 +14,14 @@ namespace Inventory
         private readonly GameObject _transparentTnt;
         private readonly float _delayInSeconds;
         private readonly int _radius;
+        private readonly int _itemId;
 
         public TntView(Raycaster raycaster, TntItem configuration)
         {
             Icon = configuration.inventoryIcon;
             _delayInSeconds = configuration.delayInSeconds;
             _radius = configuration.radius;
+            _itemId = configuration.id;
             _raycaster = raycaster;
             var transparentMeshRenderer = new TransparentMeshRenderer();
             _transparentTnt =
@@ -41,9 +43,11 @@ namespace Inventory
         {
             var raycastResult = _raycaster.GetRayCastHit(out var raycastHit);
             if (!raycastResult) return;
-            NetworkClient.Send(new TntSpawnRequest(Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2) +
+            NetworkClient.Send(new TntSpawnRequest(_itemId,Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2) +
                                                    GetTntOffsetPosition(raycastHit.normal),
-                GetTntRotation(raycastHit.normal), _delayInSeconds, _radius));
+                GetTntRotation(raycastHit.normal), _delayInSeconds,
+                Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2), _radius));
+            
         }
 
 

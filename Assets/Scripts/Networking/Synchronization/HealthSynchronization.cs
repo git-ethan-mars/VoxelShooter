@@ -19,13 +19,13 @@ namespace Networking.Synchronization
         [Server]
         public void Damage(NetworkConnectionToClient connection, int totalDamage)
         {
-            var playerData = _serverData.GetPlayerData(connection.connectionId);
+            var playerData = _serverData.GetPlayerData(connection);
             playerData.Health -= totalDamage;
             if (playerData.Health <= 0)
             {
                 playerData.Health = 0;
                 _serverData.UpdatePlayer(connection);
-                var gameClass = _serverData.GetPlayerData(connection.connectionId).GameClass;
+                var gameClass = playerData.GameClass;
                 var player = _playerFactory.RespawnPlayer(connection, gameClass);
                 var oldPlayer = connection.identity.gameObject;
                 NetworkServer.ReplacePlayerForConnection(connection, player, true);
@@ -41,7 +41,7 @@ namespace Networking.Synchronization
         public void Die(NetworkConnectionToClient connection = null)
         {
             _serverData.UpdatePlayer(connection);
-            var gameClass = _serverData.GetPlayerData(connection.connectionId).GameClass;
+            var gameClass = _serverData.GetPlayerData(connection).GameClass;
             var player = _playerFactory.RespawnPlayer(connection, gameClass); 
             var oldPlayer = connection.identity.gameObject;
             NetworkServer.ReplacePlayerForConnection(connection, player, true);

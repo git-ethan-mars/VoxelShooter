@@ -7,7 +7,6 @@ namespace Data
     {
         public int count;
         public float delayInSeconds;
-        [Range(0, int.MaxValue)]
         public int radius;
 
         public void Awake()

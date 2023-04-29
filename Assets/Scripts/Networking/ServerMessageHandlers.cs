@@ -50,9 +50,14 @@ namespace Networking
 
         private void OnTntSpawn(NetworkConnectionToClient connection, TntSpawnRequest message)
         {
+            var tntCount = _serverData.GetItemCount(connection, message.ItemId);
+            if (tntCount <= 0)
+                return;
             var tnt = _entityFactory.CreateTnt(message.Position, message.Rotation);
-            _coroutineRunner.StartCoroutine(ExplodeWithDelay(Vector3Int.FloorToInt(message.Position), tnt, message.DelayInSecond,
+            _coroutineRunner.StartCoroutine(ExplodeWithDelay(Vector3Int.FloorToInt(message.ExplosionCenter), tnt,
+                message.DelayInSecond,
                 message.Radius));
+            _serverData.SetItemCount(connection, message.ItemId, tntCount - 1);
         }
 
         private IEnumerator ExplodeWithDelay(Vector3Int explosionCenter, GameObject tnt, float delayInSeconds,
@@ -60,18 +65,15 @@ namespace Networking
         {
             yield return new WaitForSeconds(delayInSeconds);
             var validPositions = new List<Vector3Int>();
-            for (var x = -radius; x < radius; x++)
+            for (var x = -radius; x <= radius; x++)
             {
-                for (var y = -radius; y < radius; y++)
+                for (var y = -radius; y <= radius; y++)
                 {
-                    for (var z = -radius; z < radius; z++)
+                    for (var z = -radius; z <= radius; z++)
                     {
                         var blockPosition = new Vector3Int(explosionCenter.x,
                             explosionCenter.y, explosionCenter.z) + new Vector3Int(x, y, z);
-                        if ((blockPosition.x - explosionCenter.x) * (blockPosition.x - explosionCenter.x)
-                            + (blockPosition.y - explosionCenter.y) * (blockPosition.y - explosionCenter.y)
-                            + (blockPosition.z - explosionCenter.z) * (blockPosition.z - explosionCenter.z) <=
-                            radius * radius)
+                        if (Vector3Int.Distance(blockPosition, explosionCenter) <= radius)
                             validPositions.Add(blockPosition);
                     }
                 }

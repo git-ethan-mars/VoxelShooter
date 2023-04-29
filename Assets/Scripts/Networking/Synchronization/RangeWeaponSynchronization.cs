@@ -19,33 +19,33 @@ namespace Networking.Synchronization
         }
 
         [Command]
-        public void CmdShootSingle(Ray ray, int weaponId, NetworkConnectionToClient conn = null)
+        public void CmdShootSingle(Ray ray, int weaponId, NetworkConnectionToClient connection = null)
         {
-            var weapon = _serverData.GetPlayerData(conn!.connectionId).RangeWeaponsById[weaponId];
+            var weapon = _serverData.GetPlayerData(connection).RangeWeaponsById[weaponId];
             if (!CanShoot(weapon) || weapon.IsAutomatic) return;
             ApplyRaycast(ray, weapon);
             Shoot(weapon);
-            SendSoundInRadius(weapon, conn.identity.gameObject.transform.position, Radius, SoundType.Shooting);
+            SendSoundInRadius(weapon, connection!.identity.gameObject.transform.position, Radius, SoundType.Shooting);
         }
 
         [Command]
-        public void CmdShootAutomatic(Ray ray, int weaponId, NetworkConnectionToClient conn = null)
+        public void CmdShootAutomatic(Ray ray, int weaponId, NetworkConnectionToClient connection = null)
         {
-            var weapon = _serverData.GetPlayerData(conn!.connectionId).RangeWeaponsById[weaponId];
+            var weapon = _serverData.GetPlayerData(connection).RangeWeaponsById[weaponId];
             if (!CanShoot(weapon) || !weapon.IsAutomatic) return;
             ApplyRaycast(ray, weapon);
             Shoot(weapon);
-            SendSoundInRadius(weapon, conn.identity.gameObject.transform.position, Radius, SoundType.Shooting);
+            SendSoundInRadius(weapon, connection!.identity.gameObject.transform.position, Radius, SoundType.Shooting);
 
         }
 
         [Command]
-        public void CmdReload(int weaponId, NetworkConnectionToClient conn = null)
+        public void CmdReload(int weaponId, NetworkConnectionToClient connection = null)
         {
-            var weapon = _serverData.GetPlayerData(conn!.connectionId).RangeWeaponsById[weaponId];
+            var weapon = _serverData.GetPlayerData(connection).RangeWeaponsById[weaponId];
             if (!CanReload(weapon)) return;
             Reload(weapon);
-            SendSoundInRadius(weapon, conn.identity.gameObject.transform.position, Radius, SoundType.Reloading);
+            SendSoundInRadius(weapon, connection!.identity.gameObject.transform.position, Radius, SoundType.Reloading);
         }
 
         private const float Radius = 100;

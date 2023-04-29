@@ -3,7 +3,6 @@ using System.Collections;
 using Data;
 using Infrastructure.Factory;
 using Mirror;
-using PlayerLogic;
 using UnityEngine;
 
 namespace Networking.Synchronization
@@ -20,9 +19,9 @@ namespace Networking.Synchronization
         }
 
         [Command]
-        public void CmdHit(Ray ray, int weaponId, bool isSurface, NetworkConnectionToClient conn = null)
+        public void CmdHit(Ray ray, int weaponId, bool isSurface, NetworkConnectionToClient connection = null)
         {
-            var weapon = _serverData.GetPlayerData(conn!.connectionId).MeleeWeaponsById[weaponId];
+            var weapon = _serverData.GetPlayerData(connection).MeleeWeaponsById[weaponId];
             if (!CanHit(weapon)) return;
             ApplyRaycast(ray, weapon);
             Hit(weapon, isSurface);

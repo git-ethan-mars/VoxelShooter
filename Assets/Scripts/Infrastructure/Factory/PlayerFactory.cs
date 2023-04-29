@@ -55,7 +55,7 @@ namespace Infrastructure.Factory
         public GameObject RespawnPlayer(NetworkConnectionToClient connection, GameClass gameClass)
         {
             var player = CreatePlayer(gameClass,
-                _serverData.GetPlayerData(connection.connectionId).NickName);
+                _serverData.GetPlayerData(connection).NickName);
             ConfigureSynchronization(player);
             return player;
         }
