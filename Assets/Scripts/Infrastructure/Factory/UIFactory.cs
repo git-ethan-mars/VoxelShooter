@@ -13,20 +13,18 @@ namespace Infrastructure.Factory
         private readonly IAssetProvider _assets;
         private readonly IInputService _inputService;
         private IUIFactory _iuiFactoryImplementation;
-        private readonly IEntityFactory _entityFactory;
 
-        public UIFactory(IAssetProvider assets, IInputService inputService, IEntityFactory entityFactory)
+        public UIFactory(IAssetProvider assets, IInputService inputService)
         {
             _assets = assets;
             _inputService = inputService;
-            _entityFactory = entityFactory;
         }
         
         public GameObject CreateHud(GameObject player)
         {
             var hud = _assets.Instantiate(HudPath);
             var inventoryController = hud.GetComponent<Hud>().inventory.GetComponent<InventoryController>();
-            inventoryController.Construct(_inputService, _entityFactory, hud, player);
+            inventoryController.Construct(_inputService, hud, player);
             hud.GetComponent<Hud>().healthCounter.Construct(player);
             return hud;
         }

@@ -42,8 +42,8 @@ namespace MapLogic
 
         public void SetBlockByGlobalPosition(Vector3Int position, BlockData blockData) =>
             SetBlockByGlobalPosition(position.x, position.y, position.z, blockData);
-        
-        public void SetBlockByGlobalPosition(int x, int y, int z, BlockData blockData)
+
+        private void SetBlockByGlobalPosition(int x, int y, int z, BlockData blockData)
         {
             MapData.Chunks[FindChunkNumberByPosition(x, y, z)]
                 .Blocks[

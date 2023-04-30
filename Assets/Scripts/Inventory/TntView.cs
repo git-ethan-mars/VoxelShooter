@@ -3,51 +3,74 @@ using Data;
 using Mirror;
 using Networking.Messages;
 using Rendering;
+using TMPro;
+using UI;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Inventory
 {
-    public class TntView : IInventoryItemView, ILeftMouseButtonDownHandler, IUpdated
+    public class TntView : IInventoryItemView, IConsumable, ILeftMouseButtonDownHandler, IUpdated
     {
         public Sprite Icon { get; }
+        public int Count { get; set; }
         private readonly Raycaster _raycaster;
         private readonly GameObject _transparentTnt;
         private readonly float _delayInSeconds;
         private readonly int _radius;
         private readonly int _itemId;
+        private readonly GameObject _tntInfo;
+        private readonly TextMeshProUGUI _tntCountText;
+        private readonly Sprite _tntCountIcon;
+        private readonly Sprite _itemTypeIcon;
+        private readonly Image _itemType;
 
-        public TntView(Raycaster raycaster, TntItem configuration)
+        public TntView(Raycaster raycaster, TntItem configuration, Hud hud, TransparentMeshRenderer transparentMeshRenderer)
         {
             Icon = configuration.inventoryIcon;
+            
             _delayInSeconds = configuration.delayInSeconds;
             _radius = configuration.radius;
             _itemId = configuration.id;
+            _tntInfo = hud.itemInfo;
+            _tntCountText = hud.itemCount;
+            _tntCountIcon = configuration.countIcon;
+            _itemType = hud.itemIcon;
+            Count = configuration.count;
             _raycaster = raycaster;
-            var transparentMeshRenderer = new TransparentMeshRenderer();
             _transparentTnt =
-                transparentMeshRenderer.CreateTransparentGameObject(configuration.prefab, new Color32(255, 0, 0, 255));
+                transparentMeshRenderer.CreateTransparentGameObject(configuration.prefab, new Color32(255, 0, 0, 100));
+        }
+
+        public void OnCountChanged()
+        {
+            _tntCountText.SetText(Count.ToString());
         }
 
         public void Select()
         {
             _transparentTnt.SetActive(true);
+            _tntInfo.SetActive(true);
+            _itemType.sprite = _tntCountIcon;
+            _tntCountText.SetText(Count.ToString());
         }
 
 
         public void Unselect()
         {
             _transparentTnt.gameObject.SetActive(false);
+            _tntInfo.SetActive(false);
         }
 
         public void OnLeftMouseButtonDown()
         {
             var raycastResult = _raycaster.GetRayCastHit(out var raycastHit);
             if (!raycastResult) return;
-            NetworkClient.Send(new TntSpawnRequest(_itemId,Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2) +
-                                                   GetTntOffsetPosition(raycastHit.normal),
+            NetworkClient.Send(new TntSpawnRequest(_itemId,
+                Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2) +
+                GetTntOffsetPosition(raycastHit.normal),
                 GetTntRotation(raycastHit.normal), _delayInSeconds,
                 Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2), _radius));
-            
         }
 
 

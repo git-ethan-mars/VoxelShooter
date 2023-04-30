@@ -6,13 +6,14 @@ namespace UI
 {
     public class Hud : MonoBehaviour
     {
+        public GameObject inventory;
         public GameObject palette;
-        public InventoryView inventory;
         public GameObject ammoInfo;
         public Image ammoType;
-        public GameObject ammoCount;
-        public GameObject blockInfo;
-        public TextMeshProUGUI blockCount;
+        public TextMeshProUGUI ammoCount;
+        public GameObject itemInfo;
+        public Image itemIcon;
+        public TextMeshProUGUI itemCount;
         public HealthCounter healthCounter;
     }
 }

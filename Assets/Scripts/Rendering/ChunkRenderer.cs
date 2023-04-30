@@ -329,32 +329,32 @@ namespace Rendering
         {
             ChunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] = Faces.None;
             if (ChunkData.Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
-                .Equals(BlockColor.Empty)) return;
+                .Equals(BlockColor.empty)) return;
             if (!IsValidPosition(x, y + 1, z) && (UpperNeighbour is null || UpperNeighbour is not null &&
-                UpperNeighbour.ChunkData.Blocks[x * ChunkData.ChunkSizeSquared + z].Color.Equals(BlockColor.Empty)) ||
+                UpperNeighbour.ChunkData.Blocks[x * ChunkData.ChunkSizeSquared + z].Color.Equals(BlockColor.empty)) ||
                 IsValidPosition(x, y + 1, z) && ChunkData
                     .Blocks[x * ChunkData.ChunkSizeSquared + (y + 1) * ChunkData.ChunkSize + z].Color
-                    .Equals(BlockColor.Empty))
+                    .Equals(BlockColor.empty))
             {
                 ChunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Top;
             }
 
             if (!IsValidPosition(x, y - 1, z) && LowerNeighbour is not null && LowerNeighbour.ChunkData
                     .Blocks[x * ChunkData.ChunkSizeSquared + (ChunkData.ChunkSize - 1) * ChunkData.ChunkSize + z].Color
-                    .Equals(BlockColor.Empty) ||
+                    .Equals(BlockColor.empty) ||
                 IsValidPosition(x, y - 1, z) && ChunkData
                     .Blocks[x * ChunkData.ChunkSizeSquared + (y - 1) * ChunkData.ChunkSize + z].Color
-                    .Equals(BlockColor.Empty))
+                    .Equals(BlockColor.empty))
             {
                 ChunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Bottom;
             }
 
             if (!IsValidPosition(x, y, z + 1) && FrontNeighbour is not null &&
                 FrontNeighbour.ChunkData.Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize].Color
-                    .Equals(BlockColor.Empty) ||
+                    .Equals(BlockColor.empty) ||
                 IsValidPosition(x, y, z + 1) && ChunkData
                     .Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z + 1].Color
-                    .Equals(BlockColor.Empty))
+                    .Equals(BlockColor.empty))
             {
                 ChunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Front;
             }
@@ -362,29 +362,29 @@ namespace Rendering
             if (!IsValidPosition(x, y, z - 1) && BackNeighbour is not null &&
                 BackNeighbour.ChunkData
                     .Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + ChunkData.ChunkSize - 1].Color
-                    .Equals(BlockColor.Empty) ||
+                    .Equals(BlockColor.empty) ||
                 IsValidPosition(x, y, z - 1) && ChunkData
                     .Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z - 1].Color
-                    .Equals(BlockColor.Empty))
+                    .Equals(BlockColor.empty))
             {
                 ChunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Back;
             }
 
             if (!IsValidPosition(x + 1, y, z) && RightNeighbour is not null &&
-                RightNeighbour.ChunkData.Blocks[y * ChunkData.ChunkSize + z].Color.Equals(BlockColor.Empty) ||
+                RightNeighbour.ChunkData.Blocks[y * ChunkData.ChunkSize + z].Color.Equals(BlockColor.empty) ||
                 IsValidPosition(x + 1, y, z) && ChunkData
                     .Blocks[(x + 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
-                    .Equals(BlockColor.Empty))
+                    .Equals(BlockColor.empty))
             {
                 ChunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Right;
             }
 
             if (!IsValidPosition(x - 1, y, z) && LeftNeighbour is not null && LeftNeighbour.ChunkData
                     .Blocks[(ChunkData.ChunkSize - 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
-                    .Equals(BlockColor.Empty) ||
+                    .Equals(BlockColor.empty) ||
                 IsValidPosition(x - 1, y, z) && ChunkData
                     .Blocks[(x - 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
-                    .Equals(BlockColor.Empty))
+                    .Equals(BlockColor.empty))
             {
                 ChunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Left;
             }

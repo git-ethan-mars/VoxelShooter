@@ -9,7 +9,7 @@ namespace Rendering
 
         public TransparentMeshRenderer()
         {
-            _transparentMaterial = Resources.Load<Material>("Materials/Transparent - TNT");
+            _transparentMaterial = Resources.Load<Material>("Materials/Transparent");
         }
 
         public GameObject CreateTransparentGameObject(GameObject prefab, Color32 color)
@@ -17,8 +17,11 @@ namespace Rendering
             var gameObject = new GameObject();
             gameObject.name = $"{prefab.name} - transparent";
             gameObject.AddComponent<MeshFilter>().mesh = prefab.GetComponent<MeshFilter>().sharedMesh;
-            _transparentMaterial.color = color;
-            gameObject.AddComponent<MeshRenderer>().material = new Material(_transparentMaterial);
+            var material = new Material(_transparentMaterial)
+            {
+                color = color
+            };
+            gameObject.AddComponent<MeshRenderer>().material = material;
             gameObject.transform.localScale = prefab.transform.localScale;
             return gameObject;
         }

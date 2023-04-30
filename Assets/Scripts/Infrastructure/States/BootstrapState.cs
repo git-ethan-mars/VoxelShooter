@@ -50,7 +50,7 @@ namespace Infrastructure.States
             _allServices.RegisterSingle<IEntityFactory>(new EntityFactory(_allServices.Single<IAssetProvider>()));
             _allServices.RegisterSingle<IGameFactory>(
                 new GameFactory(_allServices.Single<IAssetProvider>(), _allServices.Single<IEntityFactory>(), _allServices.Single<IParticleFactory>(), staticData));
-            _allServices.RegisterSingle<IUIFactory>(new UIFactory(_allServices.Single<IAssetProvider>(), _allServices.Single<IInputService>(), _allServices.Single<IEntityFactory>()));
+            _allServices.RegisterSingle<IUIFactory>(new UIFactory(_allServices.Single<IAssetProvider>(), _allServices.Single<IInputService>()));
         }
     }
 }

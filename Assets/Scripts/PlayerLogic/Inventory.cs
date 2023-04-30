@@ -27,7 +27,7 @@ namespace PlayerLogic
         private void InitInventory()
         {
             inventory = new List<InventoryItem>();
-            foreach (var id in Ids)
+            foreach (var id in Ids) 
             {
                 inventory.Add(_staticData.GetItem(id));
             }

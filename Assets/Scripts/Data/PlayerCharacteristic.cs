@@ -9,7 +9,6 @@ namespace Data
         public int maxHealth;
         public float speed;
         public float jumpMultiplier;
-        public int blockCount;
         public float placeDistance = 15;
 
     }

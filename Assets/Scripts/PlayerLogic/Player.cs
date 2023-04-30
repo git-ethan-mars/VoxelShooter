@@ -9,7 +9,6 @@ namespace PlayerLogic
     public class Player : NetworkBehaviour
     {
         [HideInInspector] [SyncVar] public float placeDistance;
-        [HideInInspector] [SyncVar] public int blockCount;
         [SyncVar] public string nickName;
         public Transform itemPosition;
         [Header("Body parts")] [SerializeField]
@@ -25,7 +24,6 @@ namespace PlayerLogic
         public void Construct(PlayerCharacteristic characteristic, string nick)
         {
             placeDistance = characteristic.placeDistance;
-            blockCount = characteristic.blockCount;
             nickName = nick;
         }
 

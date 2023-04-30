@@ -61,7 +61,7 @@ namespace MapLogic
                             continue;
                         }
 
-                        if (block.Color.IsEquals(BlockColor.Empty))
+                        if (block.Color.IsEquals(BlockColor.empty))
                         {
                             TryWriteColoredRun(map, binaryWriter, x, z, ref coloredStart, ref coloredEnd);
                             TryWriteSolidRun(binaryWriter, ref solidStart, ref solidEnd);

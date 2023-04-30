@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Data;
 using Infrastructure;
@@ -32,12 +33,16 @@ namespace Networking
         {
             NetworkServer.RegisterHandler<ChangeClassRequest>(OnChangeClass);
             NetworkServer.RegisterHandler<TntSpawnRequest>(OnTntSpawn);
+            NetworkServer.RegisterHandler<AddBlocksRequest>(OnAddBlocks);
+            NetworkServer.RegisterHandler<RemoveBlocksRequest>(OnRemoveBlocks);
         }
 
         public void RemoveHandlers()
         {
             NetworkServer.UnregisterHandler<ChangeClassRequest>();
             NetworkServer.UnregisterHandler<TntSpawnRequest>();
+            NetworkServer.UnregisterHandler<AddBlocksRequest>();
+            NetworkServer.UnregisterHandler<RemoveBlocksRequest>();
         }
 
         private void OnChangeClass(NetworkConnectionToClient conn, ChangeClassRequest message)
@@ -46,6 +51,38 @@ namespace Networking
             var player = _playerFactory.CreatePlayer(message.GameClass, nick);
             NetworkServer.AddPlayerForConnection(conn, player);
             _serverData.AddPlayer(conn, message.GameClass, nick);
+        }
+
+        private void OnAddBlocks(NetworkConnectionToClient connection, AddBlocksRequest message)
+        {
+            var blockAmount = _serverData.GetItemCount(connection, message.ItemId);
+            var validPositionList = new List<Vector3Int>();
+            var validBlockDataList = new List<BlockData>();
+            var blocksUsed = Math.Min(blockAmount, message.GlobalPositions.Length);
+            for (var i = 0; i < blocksUsed; i++)
+            {
+                if (!_serverData.Map.IsValidPosition(message.GlobalPositions[i])) continue;
+                var currentBlock = _serverData.Map.GetBlockByGlobalPosition(message.GlobalPositions[i]);
+                if (currentBlock.Equals(message.Blocks[i])) continue;
+                validPositionList.Add(message.GlobalPositions[i]);
+                validBlockDataList.Add(message.Blocks[i]);
+            }
+            _serverData.SetItemCount(connection, message.ItemId, blockAmount - blocksUsed);
+            NetworkServer.SendToAll(new UpdateMapMessage(validPositionList.ToArray(), validBlockDataList.ToArray()));
+            connection.Send(new ItemUseResult(message.ItemId, blockAmount - blocksUsed));
+        }
+
+        private void OnRemoveBlocks(NetworkConnectionToClient connection, RemoveBlocksRequest message)
+        {
+            var validPositionList = new List<Vector3Int>();
+            for (var i = 0; i < message.GlobalPositions.Length; i++)
+            {
+                if (!_serverData.Map.IsValidPosition(message.GlobalPositions[i])) continue;
+                validPositionList.Add(message.GlobalPositions[i]);
+            }
+
+            NetworkServer.SendToAll(new UpdateMapMessage(validPositionList.ToArray(),
+                new BlockData[validPositionList.Count]));
         }
 
         private void OnTntSpawn(NetworkConnectionToClient connection, TntSpawnRequest message)
@@ -58,6 +95,7 @@ namespace Networking
                 message.DelayInSecond,
                 message.Radius));
             _serverData.SetItemCount(connection, message.ItemId, tntCount - 1);
+            connection.Send(new ItemUseResult(message.ItemId, tntCount - 1));
         }
 
         private IEnumerator ExplodeWithDelay(Vector3Int explosionCenter, GameObject tnt, float delayInSeconds,
@@ -73,7 +111,7 @@ namespace Networking
                     {
                         var blockPosition = new Vector3Int(explosionCenter.x,
                             explosionCenter.y, explosionCenter.z) + new Vector3Int(x, y, z);
-                        if (Vector3Int.Distance(blockPosition, explosionCenter) <= radius)
+                        if (_serverData.Map.IsValidPosition(blockPosition) && Vector3Int.Distance(blockPosition, explosionCenter) <= radius)
                             validPositions.Add(blockPosition);
                     }
                 }

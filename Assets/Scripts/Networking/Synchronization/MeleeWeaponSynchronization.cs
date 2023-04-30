@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Data;
 using Infrastructure.Factory;
 using Mirror;
+using Networking.Messages;
 using UnityEngine;
 
 namespace Networking.Synchronization
@@ -19,11 +21,11 @@ namespace Networking.Synchronization
         }
 
         [Command]
-        public void CmdHit(Ray ray, int weaponId, bool isSurface, NetworkConnectionToClient connection = null)
+        public void CmdHit(Ray ray, int weaponId, bool isStrongHit, NetworkConnectionToClient connection = null)
         {
             var weapon = _serverData.GetPlayerData(connection).MeleeWeaponsById[weaponId];
             if (!CanHit(weapon)) return;
-            ApplyRaycast(ray, weapon);
+            var isSurface = ApplyRaycast(ray, weapon, isStrongHit);
             Hit(weapon, isSurface);
         }
 
@@ -48,15 +50,8 @@ namespace Networking.Synchronization
         private void ResetHit(MeleeWeaponData meleeWeapon)
         {
             meleeWeapon.IsReady = true;
-            ResetOnClient(meleeWeapon.ID);
         }
-
-        [TargetRpc]
-        private void ResetOnClient(int weaponId)
-        {
-            var weapon = GetComponent<PlayerLogic.Inventory>().MeleeWeapons[weaponId];
-            weapon.IsReady = true;
-        }
+        
 
         [Server]
         private void Hit(MeleeWeaponData meleeWeapon, bool isSurface)
@@ -67,10 +62,10 @@ namespace Networking.Synchronization
         }
 
         [Server]
-        private void ApplyRaycast(Ray ray, MeleeWeaponData meleeWeapon)
+        private bool ApplyRaycast(Ray ray, MeleeWeaponData meleeWeapon, bool isStrongHit)
         {
             var raycastResult = Physics.Raycast(ray, out var rayHit, meleeWeapon.Range);
-            if (!raycastResult) return;
+            if (!raycastResult) return false;
             if (rayHit.collider.CompareTag("Head"))
             {
                 HitImpact(rayHit, (int) (meleeWeapon.HeadMultiplier * meleeWeapon.DamageToPlayer));
@@ -90,6 +85,39 @@ namespace Networking.Synchronization
             {
                 HitImpact(rayHit, (int) (meleeWeapon.ArmMultiplier * meleeWeapon.DamageToPlayer));
             }
+
+            if (rayHit.collider.CompareTag("Chunk"))
+            {
+                var targetBlock = Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2);
+                if (isStrongHit)
+                {
+                    var validPositions = new List<Vector3Int>();
+                    for (var i = -1; i <= 1; i++)
+                    {
+                        if (_serverData.Map.IsValidPosition(targetBlock + new Vector3Int(0, i, 0)))
+                        {
+                            _serverData.Map.SetBlockByGlobalPosition(targetBlock + new Vector3Int(0, i, 0), new BlockData());
+                            validPositions.Add(targetBlock + new Vector3Int(0, i, 0));
+                        }
+                    }
+
+
+                    NetworkServer.SendToAll(new UpdateMapMessage(
+                        validPositions.ToArray(), new BlockData[validPositions.Count]));
+                }
+                else
+                {
+                    if (_serverData.Map.IsValidPosition(targetBlock))
+                    {
+                        _serverData.Map.SetBlockByGlobalPosition(targetBlock, new BlockData());
+                        NetworkServer.SendToAll(new UpdateMapMessage(new[] {targetBlock}, new BlockData[1]));
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
         }
 
         private void HitImpact(RaycastHit rayHit, int damage)

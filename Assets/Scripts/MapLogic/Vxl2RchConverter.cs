@@ -47,7 +47,7 @@ namespace MapLogic
                         uint color;
                         for (; z < topColorStart; ++z)
                         {
-                            colors[GetPosition(x, z, y)] = BlockColor.Empty;
+                            colors[GetPosition(x, z, y)] = BlockColor.empty;
                         }
                         
                         for (; z <= topColorEnd; z++)

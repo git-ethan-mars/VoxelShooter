@@ -2,7 +2,9 @@ using System;
 using System.Collections;
 using Data;
 using Infrastructure.Factory;
+using Inventory;
 using Mirror;
+using Networking.Messages;
 using UnityEngine;
 
 namespace Networking.Synchronization
@@ -24,7 +26,7 @@ namespace Networking.Synchronization
             var weapon = _serverData.GetPlayerData(connection).RangeWeaponsById[weaponId];
             if (!CanShoot(weapon) || weapon.IsAutomatic) return;
             ApplyRaycast(ray, weapon);
-            Shoot(weapon);
+            Shoot(weapon, connection);
             SendSoundInRadius(weapon, connection!.identity.gameObject.transform.position, Radius, SoundType.Shooting);
         }
 
@@ -34,7 +36,7 @@ namespace Networking.Synchronization
             var weapon = _serverData.GetPlayerData(connection).RangeWeaponsById[weaponId];
             if (!CanShoot(weapon) || !weapon.IsAutomatic) return;
             ApplyRaycast(ray, weapon);
-            Shoot(weapon);
+            Shoot(weapon, connection);
             SendSoundInRadius(weapon, connection!.identity.gameObject.transform.position, Radius, SoundType.Shooting);
 
         }
@@ -44,26 +46,13 @@ namespace Networking.Synchronization
         {
             var weapon = _serverData.GetPlayerData(connection).RangeWeaponsById[weaponId];
             if (!CanReload(weapon)) return;
-            Reload(weapon);
+            Reload(weapon, connection);
             SendSoundInRadius(weapon, connection!.identity.gameObject.transform.position, Radius, SoundType.Reloading);
         }
 
         private const float Radius = 100;
 
-        [TargetRpc]
-        private void SendWeaponState(int weaponId, int bulletsInMagazine)
-        {
-            var weapon = GetComponent<PlayerLogic.Inventory>().RangeWeapons[weaponId];
-            weapon.BulletsInMagazine = bulletsInMagazine;
-        }
-
-        [TargetRpc]
-        private void SendReload(int weaponId, int totalBullets, int bulletsInMagazine)
-        {
-            var weapon = GetComponent<PlayerLogic.Inventory>().RangeWeapons[weaponId];
-            weapon.TotalBullets = totalBullets;
-            weapon.BulletsInMagazine = bulletsInMagazine;
-        }
+        
 
         [Server]
         private void StartShootCoroutines(RangeWeaponData rangeWeapon)
@@ -98,7 +87,7 @@ namespace Networking.Synchronization
         }
 
         [Server]
-        private void Reload(RangeWeaponData rangeWeapon)
+        private void Reload(RangeWeaponData rangeWeapon, NetworkConnectionToClient connection)
         {
             rangeWeapon.IsReloading = true;
             if (rangeWeapon.TotalBullets + rangeWeapon.BulletsInMagazine - rangeWeapon.MagazineSize <= 0)
@@ -111,7 +100,7 @@ namespace Networking.Synchronization
                 rangeWeapon.TotalBullets -= rangeWeapon.MagazineSize - rangeWeapon.BulletsInMagazine;
                 rangeWeapon.BulletsInMagazine = rangeWeapon.MagazineSize;
             }
-            SendReload(rangeWeapon.ID, rangeWeapon.TotalBullets, rangeWeapon.BulletsInMagazine);
+            connection.Send(new ReloadResult(rangeWeapon.ID, rangeWeapon.TotalBullets, rangeWeapon.BulletsInMagazine));
             StartReloadCoroutine(rangeWeapon);
         }
 
@@ -122,14 +111,14 @@ namespace Networking.Synchronization
         }
 
         [Server]
-        private void Shoot(RangeWeaponData rangeWeapon)
+        private void Shoot(RangeWeaponData rangeWeapon, NetworkConnectionToClient connection)
         {
             rangeWeapon.BulletsInMagazine -= rangeWeapon.BulletsPerShot;
             if (rangeWeapon.BulletsInMagazine <= 0)
                 rangeWeapon.BulletsInMagazine = 0;
             rangeWeapon.IsReady = false;
             rangeWeapon.RecoilModifier += rangeWeapon.StepRecoil;
-            SendWeaponState(rangeWeapon.ID, rangeWeapon.BulletsInMagazine);
+            connection.Send(new ShootResult(rangeWeapon.ID, rangeWeapon.BulletsInMagazine));
             StartShootCoroutines(rangeWeapon);
         }
 

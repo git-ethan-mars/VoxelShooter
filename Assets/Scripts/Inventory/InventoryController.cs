@@ -4,6 +4,9 @@ using Data;
 using Infrastructure;
 using Infrastructure.Factory;
 using Infrastructure.Services.Input;
+using Mirror;
+using Networking.Messages;
+using Networking.Synchronization;
 using PlayerLogic;
 using Rendering;
 using UI;
@@ -16,7 +19,7 @@ namespace Inventory
         [SerializeField] private InventoryView inventoryView;
         private Transform _itemPosition;
         private IInputService _inputService;
-        private List<IInventoryItemView> _inventoryHandlers;
+        private Dictionary<int, IInventoryItemView> _inventoryHandlerByItemId;
         private int _itemIndex;
         private int _maxIndex;
         private GameObject[] _boarders;
@@ -29,32 +32,43 @@ namespace Inventory
         private GameObject _hud;
         private PlayerCharacteristic _characteristic;
         private Raycaster _raycaster;
-        private IEntityFactory _entityFactory;
+        private List<IInventoryItemView> _inventory;
+        private TransparentMeshRenderer _transparentMeshFactory;
 
-        public void Construct(IInputService inputService, IEntityFactory entityFactory, GameObject hud,
+        public void Construct(IInputService inputService, GameObject hud,
             GameObject player)
         {
             AddEventHandlers(player.GetComponent<InventoryInput>());
-            _entityFactory = entityFactory;
             _player = player;
             _hud = hud;
             _mainCamera = Camera.main;
+            _transparentMeshFactory = new TransparentMeshRenderer();
+            _inventory = new List<IInventoryItemView>();
             _raycaster = new Raycaster(_mainCamera, player.GetComponent<Player>().placeDistance);
-            _cubeRenderer = new CubeRenderer(player.GetComponent<LineRenderer>(), _raycaster);
             _itemPosition = player.GetComponent<Player>().itemPosition;
             _mapSynchronization = player.GetComponent<MapSynchronization>();
             _palette = hud.GetComponent<Hud>().palette;
             _modelFactory = new InventoryModelFactory();
             _inputService = inputService;
-            _inventoryHandlers = InitializeInventoryViews(player.GetComponent<PlayerLogic.Inventory>().inventory);
-            _maxIndex = Math.Min(_inventoryHandlers.Count, inventoryView.SlotsCount);
+            InitializeInventoryViews(player.GetComponent<PlayerLogic.Inventory>().inventory);
+            _maxIndex = Math.Min(_inventoryHandlerByItemId.Count, inventoryView.SlotsCount);
             _boarders = inventoryView.Boarders;
             for (var i = 0; i < _maxIndex; i++)
             {
-                inventoryView.SetIconForItem(i, _inventoryHandlers[i].Icon);
+                inventoryView.SetIconForItem(i, _inventory[i].Icon);
             }
 
             ChangeSlotIndex(_itemIndex);
+            NetworkClient.RegisterHandler<ItemUseResult>(OnItemUse);
+            NetworkClient.RegisterHandler<ReloadResult>(OnReloadResult);
+            NetworkClient.RegisterHandler<ShootResult>(OnShootResult);
+        }
+
+        public void OnDestroy()
+        {
+            NetworkClient.UnregisterHandler<ItemUseResult>();
+            NetworkClient.UnregisterHandler<ReloadResult>();
+            NetworkClient.UnregisterHandler<ShootResult>();
         }
 
         private void AddEventHandlers(InventoryInput inventoryInput)
@@ -66,70 +80,83 @@ namespace Inventory
             inventoryInput.OnChangeSlot += ChangeSlotIndex;
         }
 
-        private List<IInventoryItemView> InitializeInventoryViews(List<InventoryItem> items)
+        private void InitializeInventoryViews(List<InventoryItem> items)
         {
-            var inventory = new List<IInventoryItemView>();
-            foreach (var (_, weapon) in _player.GetComponent<PlayerLogic.Inventory>().RangeWeapons)
-            {
-                inventory.Add(new RangeWeaponView(_modelFactory, _inputService, _mainCamera, _itemPosition, _player,
-                    _hud, weapon));
-            }
-
-            foreach (var (_, weapon) in _player.GetComponent<PlayerLogic.Inventory>().MeleeWeapons)
-            {
-                inventory.Add(new MeleeWeaponView(_modelFactory, _mainCamera, _itemPosition,
-                    _player, weapon, _cubeRenderer, _mapSynchronization));
-            }
-
+            _inventoryHandlerByItemId = new Dictionary<int, IInventoryItemView>();
             foreach (var item in items)
             {
+                if (item.itemType == ItemType.RangeWeapon)
+                {
+                    var handler = new RangeWeaponView(_modelFactory, _inputService, _mainCamera, _itemPosition, _player,
+                        _hud, new RangeWeaponData((RangeWeaponItem)item));
+                    _inventory.Add(handler); 
+                    _inventoryHandlerByItemId[item.id] = handler;
+                }
+
+                if (item.itemType == ItemType.MeleeWeapon)
+                {
+                    var handler =  new MeleeWeaponView(_modelFactory, _mainCamera, _itemPosition,
+                        _player, new MeleeWeaponData((MeleeWeaponItem) item), _player.GetComponent<LineRenderer>());
+                    _inventory.Add(handler); 
+                    _inventoryHandlerByItemId[item.id] = handler;
+                }
+                
                 if (item.itemType == ItemType.Block)
                 {
-                    inventory.Add(new BlockView(_modelFactory, _cubeRenderer, _mapSynchronization, _hud,
-                        (BlockItem) item, _player));
+                    var handler = new BlockView(_hud,
+                        (BlockItem) item, _transparentMeshFactory, _raycaster);
+                    _inventory.Add(handler); 
+                    _inventoryHandlerByItemId[item.id] = handler;
                 }
 
                 if (item.itemType == ItemType.Brush)
                 {
-                    inventory.Add(new BrushView(_modelFactory, _cubeRenderer, _mapSynchronization, _palette,
-                        (BrushItem) item, _player));
+                    var handler =new BrushView(_modelFactory, _cubeRenderer, _mapSynchronization,
+                        _palette,
+                        (BrushItem) item, _player);
+                    _inventory.Add(handler); 
+                    _inventoryHandlerByItemId[item.id] = handler;
                 }
 
                 if (item.itemType == ItemType.SpawnPoint)
                 {
-                    inventory.Add(new SpawnPointView(_cubeRenderer, _mapSynchronization, (SpawnPointItem) item));
+                    var handler = _inventoryHandlerByItemId[item.id] =
+                        new SpawnPointView(_cubeRenderer, _mapSynchronization, (SpawnPointItem) item);
+                    _inventory.Add(handler); 
+                    _inventoryHandlerByItemId[item.id] = handler;
+                    
                 }
 
                 if (item.itemType == ItemType.Tnt)
                 {
-                    inventory.Add(new TntView(_raycaster, (TntItem) item));
+                    var handler = new TntView(_raycaster, (TntItem) item, _hud.GetComponent<Hud>(), _transparentMeshFactory) ;
+                    _inventory.Add(handler); 
+                    _inventoryHandlerByItemId[item.id] = handler;
                 }
             }
-
-            return inventory;
         }
 
         private void FirstActionButtonDown()
         {
-            if (_inventoryHandlers[_itemIndex] is ILeftMouseButtonDownHandler)
+            if (_inventory[_itemIndex] is ILeftMouseButtonDownHandler)
             {
-                ((ILeftMouseButtonDownHandler) _inventoryHandlers[_itemIndex]).OnLeftMouseButtonDown();
+                ((ILeftMouseButtonDownHandler) (_inventory[_itemIndex])).OnLeftMouseButtonDown();
             }
         }
 
         private void SecondActionButtonDown()
         {
-            if (_inventoryHandlers[_itemIndex] is IRightMouseButtonDownHandler)
+            if (_inventory[_itemIndex] is IRightMouseButtonDownHandler)
             {
-                ((IRightMouseButtonDownHandler) _inventoryHandlers[_itemIndex]).OnRightMouseButtonDown();
+                ((IRightMouseButtonDownHandler) _inventory[_itemIndex]).OnRightMouseButtonDown();
             }
         }
 
         private void FirstActionButtonHold()
         {
-            if (_inventoryHandlers[_itemIndex] is ILeftMouseButtonHoldHandler)
+            if (_inventory[_itemIndex] is ILeftMouseButtonHoldHandler)
             {
-                ((ILeftMouseButtonHoldHandler) _inventoryHandlers[_itemIndex]).OnLeftMouseButtonHold();
+                ((ILeftMouseButtonHoldHandler) _inventory[_itemIndex]).OnLeftMouseButtonHold();
             }
         }
 
@@ -140,9 +167,9 @@ namespace Inventory
 
         private void Update()
         {
-            if (_inventoryHandlers[_itemIndex] is IUpdated)
+            if (_inventory[_itemIndex] is IUpdated)
             {
-                ((IUpdated) _inventoryHandlers[_itemIndex]).InnerUpdate();
+                ((IUpdated) _inventory[_itemIndex]).InnerUpdate();
             }
         }
 
@@ -151,10 +178,31 @@ namespace Inventory
         {
             if (newIndex >= _maxIndex) return;
             _boarders[_itemIndex].SetActive(false);
-            _inventoryHandlers[_itemIndex].Unselect();
+            _inventory[_itemIndex].Unselect();
             _itemIndex = newIndex;
-            _inventoryHandlers[_itemIndex].Select();
+            _inventory[_itemIndex].Select();
             _boarders[_itemIndex].SetActive(true);
+        }
+
+        private void OnItemUse(ItemUseResult message)
+        {
+            ((IConsumable) _inventoryHandlerByItemId[message.ItemId]).Count = message.Count;
+            ((IConsumable) _inventoryHandlerByItemId[message.ItemId]).OnCountChanged();
+        }
+
+        private void OnReloadResult(ReloadResult message)
+        {
+            var reloading = (IReloading) _inventoryHandlerByItemId[message.WeaponId];
+            reloading.TotalBullets = message.TotalBullets;
+            reloading.BulletsInMagazine = message.BulletsInMagazine;
+            reloading.OnReloadResult();
+        }
+
+        private void OnShootResult(ShootResult message)
+        {
+            var shooting = (IShooting) _inventoryHandlerByItemId[message.WeaponId];
+            shooting.BulletsInMagazine = message.BulletsInMagazine;
+            shooting.OnShootResult();
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using Data;
+﻿using Data;
 using Infrastructure.Services;
 using Mirror;
 using UnityEngine;
@@ -9,7 +8,6 @@ namespace Networking.Synchronization
     public class SoundSynchronization : NetworkBehaviour
     {
         [SerializeField] private AudioSource audioSource;
-        [SerializeField] private PlayerLogic.Inventory inventory;
         private IStaticDataService _staticData;
 
         private void Awake()
@@ -20,7 +18,6 @@ namespace Networking.Synchronization
         public void Start()
         {
             audioSource = GetComponent<AudioSource>();
-            inventory = GetComponent<PlayerLogic.Inventory>();
             
         }
         [TargetRpc]
