@@ -107,15 +107,10 @@ namespace Networking
             yield return new WaitForSeconds(delayInSeconds);
             if (!tnt) yield break;
             var explodedTnt = new List<GameObject>();
-            Explode(explosionCenter, tnt, radius, explodedTnt);
-        }
-        
-        private void ExplodeImmediately(Vector3Int explosionCenter, GameObject tnt, int radius, List<GameObject> explodedTnt)
-        {
-            Explode(explosionCenter, tnt, radius, explodedTnt);
+            ExplodeImmediately(explosionCenter, tnt, radius, explodedTnt);
         }
 
-        private void Explode(Vector3Int explosionCenter, GameObject tnt, int radius, List<GameObject> explodedTnt)
+        private void ExplodeImmediately(Vector3Int explosionCenter, GameObject tnt, int radius, List<GameObject> explodedTnt)
         {
             var validPositions = new List<Vector3Int>();
             for (var x = -radius; x <= radius; x++)
