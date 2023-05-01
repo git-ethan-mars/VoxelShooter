@@ -846,7 +846,6 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   audioSource: {fileID: -525354919619175065}
-  inventory: {fileID: -2882850801023109427}
 --- !u!114 &8907822022040828168
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -863,7 +862,6 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   placeDistance: 0
-  blockCount: 0
   nickName: 
   itemPosition: {fileID: 7893378094424813921}
   head: {fileID: 3276943837764328836}
@@ -884,7 +882,7 @@ CharacterController:
   m_Enabled: 1
   serializedVersion: 2
   m_Height: 2.07
-  m_Radius: 0.46
+  m_Radius: 0.31
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08

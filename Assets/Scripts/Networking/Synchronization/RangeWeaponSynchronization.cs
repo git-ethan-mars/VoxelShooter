@@ -157,7 +157,7 @@ namespace Networking.Synchronization
             if (rayHit.collider.CompareTag("Chunk"))
             {
                 _particleFactory.CreateBulletHole(rayHit.point, Quaternion.Euler(rayHit.normal.y * -90,
-                    rayHit.normal.x * 90 + rayHit.normal.z * -180, 0));
+                    rayHit.normal.x * 90 + (rayHit.normal.z == -1 ? 180 : 0), 0));
             }
         }
 

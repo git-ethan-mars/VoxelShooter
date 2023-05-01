@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Data;
 using Infrastructure;
 using Infrastructure.Factory;
 using Mirror;
 using Networking.Messages;
 using Steamworks;
+using Unity.VisualScripting;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Networking
 {
@@ -102,6 +105,18 @@ namespace Networking
             int radius)
         {
             yield return new WaitForSeconds(delayInSeconds);
+            if (!tnt) yield break;
+            var explodedTnt = new List<GameObject>();
+            Explode(explosionCenter, tnt, radius, explodedTnt);
+        }
+        
+        private void ExplodeImmediately(Vector3Int explosionCenter, GameObject tnt, int radius, List<GameObject> explodedTnt)
+        {
+            Explode(explosionCenter, tnt, radius, explodedTnt);
+        }
+
+        private void Explode(Vector3Int explosionCenter, GameObject tnt, int radius, List<GameObject> explodedTnt)
+        {
             var validPositions = new List<Vector3Int>();
             for (var x = -radius; x <= radius; x++)
             {
@@ -111,7 +126,8 @@ namespace Networking
                     {
                         var blockPosition = new Vector3Int(explosionCenter.x,
                             explosionCenter.y, explosionCenter.z) + new Vector3Int(x, y, z);
-                        if (_serverData.Map.IsValidPosition(blockPosition) && Vector3Int.Distance(blockPosition, explosionCenter) <= radius)
+                        if (_serverData.Map.IsValidPosition(blockPosition) &&
+                            Vector3Int.Distance(blockPosition, explosionCenter) <= radius)
                             validPositions.Add(blockPosition);
                     }
                 }
@@ -125,6 +141,17 @@ namespace Networking
             NetworkServer.SendToAll(new UpdateMapMessage(validPositions.ToArray(),
                 new BlockData[validPositions.Count]));
             NetworkServer.Destroy(tnt);
+            explodedTnt.Add(tnt);
+
+            Collider[] hitColliders = Physics.OverlapSphere(explosionCenter, radius);
+            foreach (var hitCollider in hitColliders)
+            {
+                if (hitCollider.CompareTag("TNT") && explodedTnt.All(x => x.gameObject != hitCollider.gameObject))
+                {
+                    ExplodeImmediately(Vector3Int.FloorToInt(hitCollider.gameObject.transform.position),
+                        hitCollider.gameObject, radius, explodedTnt);
+                }
+            }
         }
     }
 }
