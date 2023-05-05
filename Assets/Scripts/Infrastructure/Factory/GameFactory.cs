@@ -2,8 +2,8 @@
 using Data;
 using Infrastructure.AssetManagement;
 using Infrastructure.Services;
+using Infrastructure.States;
 using MapLogic;
-using Mirror;
 using Networking;
 using Rendering;
 using UnityEngine;
@@ -35,27 +35,20 @@ namespace Infrastructure.Factory
             _staticData = staticData;
         }
 
-        public GameObject CreateLocalNetworkManager(bool isLocalBuild)
+        public GameObject CreateLocalNetworkManager(GameStateMachine stateMachine, bool isLocalBuild, ServerSettings serverSettings)
         {
             _networkManager = _assets.Instantiate(NetworkManagerPath);
-            _networkManager.GetComponent<CustomNetworkManager>().Construct(_staticData, _entityFactory,
-                _particleFactory, _assets, isLocalBuild);
+            _networkManager.GetComponent<CustomNetworkManager>().Construct(stateMachine, _staticData, _entityFactory,
+                _particleFactory, _assets, isLocalBuild, serverSettings);
             return _networkManager;
         }
 
-        public GameObject CreateSteamNetworkManager(bool isLocalBuild)
+        public GameObject CreateSteamNetworkManager(GameStateMachine stateMachine, bool isLocalBuild, ServerSettings serverSettings)
         {
             _networkManager = _assets.Instantiate(SteamNetworkManagerPath);
-            _networkManager.GetComponent<CustomNetworkManager>().Construct(_staticData, _entityFactory,
-                _particleFactory, _assets, isLocalBuild);
+            _networkManager.GetComponent<CustomNetworkManager>().Construct(stateMachine, _staticData, _entityFactory,
+                _particleFactory, _assets, isLocalBuild, serverSettings);
             return _networkManager;
-        }
-
-        public GameObject CreateMapSynchronization()
-        {
-            var mapSynchronization = _assets.Instantiate(MapSynchronization);
-            NetworkServer.Spawn(mapSynchronization);
-            return mapSynchronization;
         }
 
         public void CreateWalls(Map map)

@@ -21,23 +21,23 @@ namespace Networking.Synchronization
         }
 
         [Command]
-        public void CmdShootSingle(Ray ray, int weaponId, NetworkConnectionToClient connection = null)
+        public void CmdShootSingle(Ray ray, int weaponId, NetworkConnectionToClient source = null)
         {
-            var weapon = _serverData.GetPlayerData(connection).RangeWeaponsById[weaponId];
+            var weapon = _serverData.GetPlayerData(source).RangeWeaponsById[weaponId];
             if (!CanShoot(weapon) || weapon.IsAutomatic) return;
-            ApplyRaycast(ray, weapon);
-            Shoot(weapon, connection);
-            SendSoundInRadius(weapon, connection!.identity.gameObject.transform.position, Radius, SoundType.Shooting);
+            ApplyRaycast(source, ray, weapon);
+            Shoot(weapon, source);
+            SendSoundInRadius(weapon, source!.identity.gameObject.transform.position, Radius, SoundType.Shooting);
         }
 
         [Command]
-        public void CmdShootAutomatic(Ray ray, int weaponId, NetworkConnectionToClient connection = null)
+        public void CmdShootAutomatic(Ray ray, int weaponId, NetworkConnectionToClient source = null)
         {
-            var weapon = _serverData.GetPlayerData(connection).RangeWeaponsById[weaponId];
+            var weapon = _serverData.GetPlayerData(source).RangeWeaponsById[weaponId];
             if (!CanShoot(weapon) || !weapon.IsAutomatic) return;
-            ApplyRaycast(ray, weapon);
-            Shoot(weapon, connection);
-            SendSoundInRadius(weapon, connection!.identity.gameObject.transform.position, Radius, SoundType.Shooting);
+            ApplyRaycast(source, ray, weapon);
+            Shoot(weapon, source);
+            SendSoundInRadius(weapon, source!.identity.gameObject.transform.position, Radius, SoundType.Shooting);
 
         }
 
@@ -123,7 +123,8 @@ namespace Networking.Synchronization
         }
 
         [Server]
-        private void ApplyRaycast(Ray ray, RangeWeaponData rangeWeapon)
+        private void ApplyRaycast(NetworkConnectionToClient source, Ray ray,
+            RangeWeaponData rangeWeapon)
         {
             var x = Math.Abs(rangeWeapon.RecoilModifier) < 0.00001
                 ? 0
@@ -136,35 +137,36 @@ namespace Networking.Synchronization
             if (!raycastResult) return;
             if (rayHit.collider.CompareTag("Head"))
             {
-                ShootImpact(rayHit, (int) (rangeWeapon.HeadMultiplier * rangeWeapon.Damage));
+                ShootImpact(source, rayHit, (int) (rangeWeapon.HeadMultiplier * rangeWeapon.Damage));
             }
 
             if (rayHit.collider.CompareTag("Leg"))
             {
-                ShootImpact(rayHit, (int) (rangeWeapon.LegMultiplier * rangeWeapon.Damage));
+                ShootImpact(source, rayHit, (int) (rangeWeapon.LegMultiplier * rangeWeapon.Damage));
             }
 
             if (rayHit.collider.CompareTag("Chest"))
             {
-                ShootImpact(rayHit, (int) (rangeWeapon.ChestMultiplier * rangeWeapon.Damage));
+                ShootImpact(source, rayHit, (int) (rangeWeapon.ChestMultiplier * rangeWeapon.Damage));
             }
 
             if (rayHit.collider.CompareTag("Arm"))
             {
-                ShootImpact(rayHit, (int) (rangeWeapon.ArmMultiplier * rangeWeapon.Damage));
+                ShootImpact(source, rayHit, (int) (rangeWeapon.ArmMultiplier * rangeWeapon.Damage));
             }
 
             if (rayHit.collider.CompareTag("Chunk"))
             {
                 _particleFactory.CreateBulletHole(rayHit.point, Quaternion.Euler(rayHit.normal.y * -90,
+                    // ReSharper disable once CompareOfFloatsByEqualityOperator
                     rayHit.normal.x * 90 + (rayHit.normal.z == -1 ? 180 : 0), 0));
             }
         }
 
-        private void ShootImpact(RaycastHit rayHit, int damage)
+        private void ShootImpact(NetworkConnectionToClient source, RaycastHit rayHit, int damage)
         {
-            var connection = rayHit.collider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
-            GetComponent<HealthSynchronization>().Damage(connection, damage);
+            var receiver = rayHit.collider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
+            GetComponent<HealthSynchronization>().Damage(source, receiver, damage);
             _particleFactory.CreateBlood(rayHit.point);
         }
 

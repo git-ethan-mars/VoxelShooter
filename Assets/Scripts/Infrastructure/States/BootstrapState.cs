@@ -11,7 +11,7 @@ namespace Infrastructure.States
         private readonly GameStateMachine _stateMachine;
         private readonly SceneLoader _sceneLoader;
         private readonly AllServices _allServices;
-        private ICoroutineRunner _coroutineRunner;
+        private readonly ICoroutineRunner _coroutineRunner;
 
         public BootstrapState(GameStateMachine stateMachine, SceneLoader sceneLoader, AllServices allServices,
             ICoroutineRunner coroutineRunner)
@@ -34,7 +34,7 @@ namespace Infrastructure.States
 
         private void EnterLoadLevel()
         {
-            _stateMachine.Enter<LoadMapState, string>("Main");
+            _stateMachine.Enter<MainMenuState, string>("MainMenu");
         }
 
         private void RegisterServices()

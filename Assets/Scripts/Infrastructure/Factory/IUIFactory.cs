@@ -1,4 +1,5 @@
 ﻿using Infrastructure.Services;
+using Infrastructure.States;
 using UnityEngine;
 
 namespace Infrastructure.Factory
@@ -7,5 +8,7 @@ namespace Infrastructure.Factory
     {
         GameObject CreateHud(GameObject player);
         void CreateChangeClassMenu();
+        GameObject CreateMainMenu(GameStateMachine gameStateMachine);
+        void CreateMatchMenu(GameStateMachine gameStateMachine);
     }
 }

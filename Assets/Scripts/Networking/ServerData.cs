@@ -8,15 +8,17 @@ namespace Networking
 {
     public class ServerData
     {
-        public Map Map { get; set; }
+        public Map Map { get; }
         private readonly IStaticDataService _staticData;
         private readonly Dictionary<int, PlayerData> _dataByConnectionId;
-        
+        private readonly Dictionary<int, PlayerStatistic> _statisticByConnectionId;
+
 
 
         public ServerData(IStaticDataService staticDataService, Map map)
         {
             _dataByConnectionId = new Dictionary<int, PlayerData>();
+            _statisticByConnectionId = new Dictionary<int, PlayerStatistic>();
             _staticData = staticDataService;
             Map = map;
         }
@@ -24,11 +26,13 @@ namespace Networking
         public void AddPlayer(NetworkConnectionToClient connection, GameClass chosenClass, string nick)
         {
             _dataByConnectionId[connection.connectionId] = new PlayerData(chosenClass, nick, _staticData);
+            _statisticByConnectionId[connection.connectionId] = new PlayerStatistic();
         }
 
         public void DeletePlayer(NetworkConnectionToClient connection)
         {
             _dataByConnectionId.Remove(connection.connectionId);
+            _statisticByConnectionId.Remove(connection.connectionId);
         }
 
         public PlayerData GetPlayerData(NetworkConnectionToClient connection)
@@ -53,6 +57,16 @@ namespace Networking
         {
             var playerData = GetPlayerData(connection);
             playerData.ItemCountById[itemId] = value;
+        }
+
+        public void AddDeath(NetworkConnectionToClient connection)
+        {
+            _statisticByConnectionId[connection.connectionId].Deaths += 1;
+        }
+
+        public void AddKill(NetworkConnectionToClient connection)
+        {
+            _statisticByConnectionId[connection.connectionId].Kills += 1;
         }
     }
 }

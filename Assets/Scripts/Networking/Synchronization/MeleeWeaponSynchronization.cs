@@ -21,12 +21,14 @@ namespace Networking.Synchronization
         }
 
         [Command]
-        public void CmdHit(Ray ray, int weaponId, bool isStrongHit, NetworkConnectionToClient connection = null)
+        public void CmdHit(Ray ray, int weaponId, bool isStrongHit, NetworkConnectionToClient source = null)
         {
-            var weapon = _serverData.GetPlayerData(connection).MeleeWeaponsById[weaponId];
+            var weapon = _serverData.GetPlayerData(source).MeleeWeaponsById[weaponId];
             if (!CanHit(weapon)) return;
-            var isSurface = ApplyRaycast(ray, weapon, isStrongHit);
-            Hit(weapon, isSurface);
+            var isSurface = ApplyRaycast(source, ray, weapon, isStrongHit);
+            weapon.IsReady = false;
+            SendWeaponState(weapon.ID, isSurface);
+            StartHitCoroutines(weapon);
         }
 
         [TargetRpc]
@@ -52,38 +54,29 @@ namespace Networking.Synchronization
             meleeWeapon.IsReady = true;
         }
         
-
         [Server]
-        private void Hit(MeleeWeaponData meleeWeapon, bool isSurface)
-        {
-            meleeWeapon.IsReady = false;
-            SendWeaponState(meleeWeapon.ID, isSurface);
-            StartHitCoroutines(meleeWeapon);
-        }
-
-        [Server]
-        private bool ApplyRaycast(Ray ray, MeleeWeaponData meleeWeapon, bool isStrongHit)
+        private bool ApplyRaycast(NetworkConnectionToClient source,Ray ray, MeleeWeaponData meleeWeapon, bool isStrongHit)
         {
             var raycastResult = Physics.Raycast(ray, out var rayHit, meleeWeapon.Range);
             if (!raycastResult) return false;
             if (rayHit.collider.CompareTag("Head"))
             {
-                HitImpact(rayHit, (int) (meleeWeapon.HeadMultiplier * meleeWeapon.DamageToPlayer));
+                HitImpact(source, rayHit, (int) (meleeWeapon.HeadMultiplier * meleeWeapon.DamageToPlayer));
             }
 
             if (rayHit.collider.CompareTag("Leg"))
             {
-                HitImpact(rayHit, (int) (meleeWeapon.LegMultiplier * meleeWeapon.DamageToPlayer));
+                HitImpact(source, rayHit, (int) (meleeWeapon.LegMultiplier * meleeWeapon.DamageToPlayer));
             }
 
             if (rayHit.collider.CompareTag("Chest"))
             {
-                HitImpact(rayHit, (int) (meleeWeapon.ChestMultiplier * meleeWeapon.DamageToPlayer));
+                HitImpact(source, rayHit, (int) (meleeWeapon.ChestMultiplier * meleeWeapon.DamageToPlayer));
             }
 
             if (rayHit.collider.CompareTag("Arm"))
             {
-                HitImpact(rayHit, (int) (meleeWeapon.ArmMultiplier * meleeWeapon.DamageToPlayer));
+                HitImpact(source, rayHit, (int) (meleeWeapon.ArmMultiplier * meleeWeapon.DamageToPlayer));
             }
 
             if (rayHit.collider.CompareTag("Chunk"))
@@ -119,11 +112,11 @@ namespace Networking.Synchronization
 
             return false;
         }
-
-        private void HitImpact(RaycastHit rayHit, int damage)
+        [Server]
+        private void HitImpact(NetworkConnectionToClient source, RaycastHit rayHit, int damage)
         {
-            var connection = rayHit.collider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
-            GetComponent<HealthSynchronization>().Damage(connection, damage); 
+            var receiver = rayHit.collider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
+            GetComponent<HealthSynchronization>().Damage(source, receiver, damage); 
             _particleFactory.CreateBlood(rayHit.point);
         }
 

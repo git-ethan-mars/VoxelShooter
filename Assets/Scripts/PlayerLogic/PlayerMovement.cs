@@ -44,9 +44,7 @@ namespace PlayerLogic
         private void Update()
         {
             if (!isLocalPlayer) return;
-            if (Input.GetKeyDown(KeyCode.L))
-                GetComponent<HealthSynchronization>().Die();
-            
+           
             HandleSneaking();
             HandleSquatting();
 
