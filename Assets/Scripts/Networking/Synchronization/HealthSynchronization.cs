@@ -1,7 +1,7 @@
-﻿using Infrastructure.Factory;
+﻿using Data;
+using Infrastructure.Factory;
 using Mirror;
 using PlayerLogic;
-using UnityEngine;
 
 namespace Networking.Synchronization
 {
@@ -25,14 +25,11 @@ namespace Networking.Synchronization
             if (playerData.Health <= 0)
             {
                 playerData.Health = 0;
-                _serverData.UpdatePlayer(receiver);
-                _serverData.AddDeath(receiver);
-                _serverData.AddKill(source);
-                Debug.Log($"{source} killed {receiver}");
-                var gameClass = playerData.GameClass;
-                var player = _playerFactory.RespawnPlayer(receiver, gameClass);
+                _serverData.AddKill(source, receiver);
+                _serverData.UpdatePlayerClass(receiver, GameClass.None);
+                var spectator = _playerFactory.CreateSpectatorPlayer(receiver, playerData.GameClass);
                 var oldPlayer = receiver.identity.gameObject;
-                NetworkServer.ReplacePlayerForConnection(receiver, player, true);
+                NetworkServer.ReplacePlayerForConnection(receiver, spectator, true);
                 Destroy(oldPlayer, 0.1f);
             }
             else

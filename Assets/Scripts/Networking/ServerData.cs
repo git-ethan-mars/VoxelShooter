@@ -8,43 +8,34 @@ namespace Networking
 {
     public class ServerData
     {
+        public readonly Dictionary<NetworkConnectionToClient, PlayerData> DataByConnection;
         public Map Map { get; }
         private readonly IStaticDataService _staticData;
-        private readonly Dictionary<int, PlayerData> _dataByConnectionId;
-        private readonly Dictionary<int, PlayerStatistic> _statisticByConnectionId;
-
+        public readonly List<KillData> Kills;
 
 
         public ServerData(IStaticDataService staticDataService, Map map)
         {
-            _dataByConnectionId = new Dictionary<int, PlayerData>();
-            _statisticByConnectionId = new Dictionary<int, PlayerStatistic>();
+            DataByConnection = new Dictionary<NetworkConnectionToClient, PlayerData>();
+            Kills = new List<KillData>();
             _staticData = staticDataService;
             Map = map;
         }
 
         public void AddPlayer(NetworkConnectionToClient connection, GameClass chosenClass, string nick)
         {
-            _dataByConnectionId[connection.connectionId] = new PlayerData(chosenClass, nick, _staticData);
-            _statisticByConnectionId[connection.connectionId] = new PlayerStatistic();
+            DataByConnection[connection] = new PlayerData(chosenClass, nick, _staticData);
         }
-
-        public void DeletePlayer(NetworkConnectionToClient connection)
-        {
-            _dataByConnectionId.Remove(connection.connectionId);
-            _statisticByConnectionId.Remove(connection.connectionId);
-        }
+        
 
         public PlayerData GetPlayerData(NetworkConnectionToClient connection)
         {
-            return _dataByConnectionId.TryGetValue(connection.connectionId, out var playerData) ? playerData : null;
+            return DataByConnection.TryGetValue(connection, out var playerData) ? playerData : null;
         }
 
-        public void UpdatePlayer(NetworkConnectionToClient conn)
+        public void UpdatePlayerClass(NetworkConnectionToClient conn, GameClass newClass)
         {
-            var chosenClass = _dataByConnectionId[conn.connectionId].GameClass;
-            var nickName = _dataByConnectionId[conn.connectionId].NickName;
-            _dataByConnectionId[conn.connectionId] = new PlayerData(chosenClass, nickName, _staticData);
+            DataByConnection[conn] = new PlayerData(newClass, DataByConnection[conn].NickName, _staticData);
         }
 
         public int GetItemCount(NetworkConnectionToClient connection, int itemId)
@@ -59,14 +50,12 @@ namespace Networking
             playerData.ItemCountById[itemId] = value;
         }
 
-        public void AddDeath(NetworkConnectionToClient connection)
+        public void AddKill(NetworkConnectionToClient killer, NetworkConnectionToClient victim)
         {
-            _statisticByConnectionId[connection.connectionId].Deaths += 1;
-        }
-
-        public void AddKill(NetworkConnectionToClient connection)
-        {
-            _statisticByConnectionId[connection.connectionId].Kills += 1;
+            if (killer is not null)
+                DataByConnection[killer].PlayerStatistic.Kills += 1;
+            DataByConnection[victim].PlayerStatistic.Deaths += 1;
+            Kills.Add(new KillData(killer,victim));
         }
     }
 }

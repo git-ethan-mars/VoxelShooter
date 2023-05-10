@@ -17,7 +17,6 @@ namespace Infrastructure.Factory
         private readonly IStaticDataService _staticData;
         private const string NetworkManagerPath = "Prefabs/Network/LocalNetworkManager";
         private const string SteamNetworkManagerPath = "Prefabs/Network/SteamManager";
-        private const string MapSynchronization = "Prefabs/MapCreation/MapSyncronization";
         private const string MapRendererPath = "Prefabs/MapCreation/MapRenderer";
         private const string ChunkRendererPath = "Prefabs/MapCreation/Chunk";
         private const string Wall = "Prefabs/MapCreation/Wall";

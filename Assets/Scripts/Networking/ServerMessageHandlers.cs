@@ -8,9 +8,7 @@ using Infrastructure.Factory;
 using Mirror;
 using Networking.Messages;
 using Steamworks;
-using Unity.VisualScripting;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Networking
 {
@@ -38,6 +36,9 @@ namespace Networking
             NetworkServer.RegisterHandler<TntSpawnRequest>(OnTntSpawn);
             NetworkServer.RegisterHandler<AddBlocksRequest>(OnAddBlocks);
             NetworkServer.RegisterHandler<RemoveBlocksRequest>(OnRemoveBlocks);
+            NetworkServer.RegisterHandler<ChangeSlotRequest>(OnChangeSlot);
+            NetworkServer.RegisterHandler<KillerCameraRequest>(OnKillerCameraRequest);
+            NetworkServer.RegisterHandler<NextPlayerCameraRequest>(OnNextCameraRequest);
         }
 
         public void RemoveHandlers()
@@ -46,6 +47,9 @@ namespace Networking
             NetworkServer.UnregisterHandler<TntSpawnRequest>();
             NetworkServer.UnregisterHandler<AddBlocksRequest>();
             NetworkServer.UnregisterHandler<RemoveBlocksRequest>();
+            NetworkServer.UnregisterHandler<ChangeSlotRequest>();
+            NetworkServer.UnregisterHandler<KillerCameraRequest>();
+            NetworkServer.UnregisterHandler<NextPlayerCameraRequest>();
         }
 
         private void OnChangeClass(NetworkConnectionToClient conn, ChangeClassRequest message)
@@ -70,6 +74,7 @@ namespace Networking
                 validPositionList.Add(message.GlobalPositions[i]);
                 validBlockDataList.Add(message.Blocks[i]);
             }
+
             _serverData.SetItemCount(connection, message.ItemId, blockAmount - blocksUsed);
             NetworkServer.SendToAll(new UpdateMapMessage(validPositionList.ToArray(), validBlockDataList.ToArray()));
             connection.Send(new ItemUseResult(message.ItemId, blockAmount - blocksUsed));
@@ -110,7 +115,8 @@ namespace Networking
             ExplodeImmediately(explosionCenter, tnt, radius, explodedTnt);
         }
 
-        private void ExplodeImmediately(Vector3Int explosionCenter, GameObject tnt, int radius, List<GameObject> explodedTnt)
+        private void ExplodeImmediately(Vector3Int explosionCenter, GameObject tnt, int radius,
+            List<GameObject> explodedTnt)
         {
             var validPositions = new List<Vector3Int>();
             for (var x = -radius; x <= radius; x++)
@@ -147,6 +153,57 @@ namespace Networking
                         hitCollider.gameObject, radius, explodedTnt);
                 }
             }
+        }
+
+        private void OnChangeSlot(NetworkConnectionToClient connection, ChangeSlotRequest message)
+        {
+            connection.identity.gameObject.GetComponent<PlayerLogic.Inventory>().currentSlotId = message.Index;
+            connection.Send(new ChangeSlotResult(message.Index));
+        }
+
+        private void OnNextCameraRequest(NetworkConnectionToClient connection, NextPlayerCameraRequest message)
+        {
+            var alivePlayers = _serverData.DataByConnection.Where(kvp => kvp.Value.GameClass != GameClass.None)
+                .ToList();
+            if (alivePlayers.Count == 0)
+            {
+                var mapWidth = _serverData.Map.MapData.Width;
+                var mapHeight = _serverData.Map.MapData.Height;
+                var mapDepth = _serverData.Map.MapData.Depth;
+                connection.Send(new SpectatorTargetResult(null, new Vector3(mapWidth / 2, mapHeight / 2, mapDepth / 2 )));
+                return;
+            }
+            var index = 0;
+            for (; index < alivePlayers.Count; index++)
+            {
+                if (alivePlayers[index].Key.connectionId == message.ConnectionId)
+                {
+                    connection.Send(
+                        new SpectatorTargetResult(alivePlayers[(index + 1) % alivePlayers.Count].Key.identity, Vector3.zero));
+                    return;
+                }
+            }
+
+            connection.Send(new SpectatorTargetResult(alivePlayers[0].Key.identity, Vector3.zero));
+        }
+
+        private void OnKillerCameraRequest(NetworkConnectionToClient connection, KillerCameraRequest message)
+        {
+            for (var i = _serverData.Kills.Count - 1; i >= 0; i--)
+            {
+                var killData = _serverData.Kills[i];
+                if (killData.Victim != connection) continue;
+                if (_serverData.GetPlayerData(killData.Killer).GameClass == GameClass.None)
+                {
+                    OnNextCameraRequest(connection, new NextPlayerCameraRequest(0));
+                    return;
+                }
+
+                connection.Send(new SpectatorTargetResult(killData.Killer.identity, Vector3.zero));
+                return;
+            }
+
+            OnNextCameraRequest(connection, new NextPlayerCameraRequest(0));
         }
     }
 }

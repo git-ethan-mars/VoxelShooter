@@ -44,7 +44,7 @@ namespace Networking
         public override void OnStartServer()
         {
             _serverData = new ServerData(_staticData, MapReader.ReadFromFile(_serverSettings.MapName + ".rch"));
-            var playerFactory = new PlayerFactory(_assets, _staticData, _serverData, _particleFactory);
+            var playerFactory = new PlayerFactory(this, _assets, _staticData, _serverData, _serverSettings, _particleFactory);
             _serverMessageHandlers =
                 new ServerMessageHandlers(_entityFactory, this, _serverData, playerFactory, _isLocalBuild);
             _serverMessageHandlers.RegisterHandlers();

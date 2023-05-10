@@ -8,6 +8,6 @@ namespace Infrastructure.Factory
     public interface IPlayerFactory : IService
     {
         GameObject CreatePlayer(GameClass gameClass, string nickName);
-        GameObject RespawnPlayer(NetworkConnectionToClient connection, GameClass gameClass);
+        GameObject CreateSpectatorPlayer(NetworkConnectionToClient connection, GameClass gameClass);
     }
 }

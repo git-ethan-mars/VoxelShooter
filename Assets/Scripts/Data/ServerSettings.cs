@@ -2,14 +2,17 @@
 {
     public class ServerSettings
     {
-        public readonly int MaxDuration;
-        public readonly int MaxPlayers;
+        public int MaxDuration;
+        public int MaxPlayers;
+        public int SpawnTime;
         public readonly string MapName;
-        public ServerSettings(string mapName, int maxDuration, int maxPlayers)
+
+        public ServerSettings(int maxDuration, int maxPlayers, int spawnTime, string mapName)
         {
-            MapName = mapName;
             MaxDuration = maxDuration;
             MaxPlayers = maxPlayers;
+            SpawnTime = spawnTime;
+            MapName = mapName;
         }
     }
 }

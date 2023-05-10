@@ -27,20 +27,18 @@ namespace Networking.Synchronization
             if (!CanHit(weapon)) return;
             var isSurface = ApplyRaycast(source, ray, weapon, isStrongHit);
             weapon.IsReady = false;
-            SendWeaponState(weapon.ID, isSurface);
+            //SendSound(weapon.ID, isSurface);
             StartHitCoroutines(weapon);
         }
 
-        [TargetRpc]
+        /*[TargetRpc]
         private void SendWeaponState(int weaponId, bool isSurface)
         {
-            var weapon = GetComponent<PlayerLogic.Inventory>().MeleeWeapons[weaponId];
-            weapon.IsReady = false;
             var audioSource = GetComponent<AudioSource>();
             audioSource.clip = isSurface ? weapon.DiggingAudioClip : weapon.HitAudioClip;
             audioSource.volume = isSurface ? weapon.DiggingVolume : weapon.HitVolume;
             audioSource.Play();
-        }
+        }*/
 
         [Server]
         private void StartHitCoroutines(MeleeWeaponData meleeWeapon)

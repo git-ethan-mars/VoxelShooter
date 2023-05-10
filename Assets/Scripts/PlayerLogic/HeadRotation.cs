@@ -13,12 +13,6 @@ namespace PlayerLogic
         private float XRotation { get; set; }
         private float YRotation { get; set; }
 
-        public void Start()
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }
-
         private void Update()
         {
             if (!isLocalPlayer) return;

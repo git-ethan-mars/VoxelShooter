@@ -30,6 +30,7 @@ namespace UI
         public const int MaxGameTime = 15;
         public const int MinPlayersNumber = 2;
         public const int MaxPlayersNumber = 8;
+        public const int SpawnTime = 7;
         private const string MainMenu = "MainMenu";
         private const string Main = "Main";
 
@@ -42,7 +43,7 @@ namespace UI
             resetButton.onClick.AddListener(ResetLimitations);
             backButton.onClick.AddListener(() => stateMachine.Enter<MainMenuState, string>(MainMenu));
             applyButton.onClick.AddListener(() => _stateMachine.Enter<StartMatchState, string, ServerSettings>(Main,
-                new ServerSettings(mapName.text, _timeLimitation.CurrentValue, _playersLimitation.CurrentValue)));
+                new ServerSettings(_timeLimitation.CurrentValue, _playersLimitation.CurrentValue, SpawnTime, mapName.text)));
             
         }
 

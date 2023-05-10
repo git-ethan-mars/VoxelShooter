@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-using Data;
+﻿using Data;
 using MapLogic;
 using Mirror;
-using Networking.Messages;
 using UnityEngine;
 
 namespace Networking.Synchronization

@@ -1,4 +1,5 @@
 ﻿using Infrastructure.AssetManagement;
+using Infrastructure.Services;
 using Infrastructure.Services.Input;
 using Infrastructure.States;
 using Inventory;
@@ -16,18 +17,20 @@ namespace Infrastructure.Factory
         private readonly IAssetProvider _assets;
         private readonly IInputService _inputService;
         private IUIFactory _iuiFactoryImplementation;
+        private readonly IStaticDataService _staticData;
 
-        public UIFactory(IAssetProvider assets, IInputService inputService)
+        public UIFactory(IAssetProvider assets, IInputService inputService, IStaticDataService staticData)
         {
             _assets = assets;
             _inputService = inputService;
+            _staticData = staticData;
         }
         
         public GameObject CreateHud(GameObject player)
         {
             var hud = _assets.Instantiate(HudPath);
             var inventoryController = hud.GetComponent<Hud>().inventory.GetComponent<InventoryController>();
-            inventoryController.Construct(_inputService, hud, player);
+            inventoryController.Construct(_inputService, _staticData, hud, player);
             hud.GetComponent<Hud>().healthCounter.Construct(player);
             return hud;
         }
