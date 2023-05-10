@@ -1,7 +1,6 @@
 using Infrastructure.States;
 using UnityEngine;
 using UnityEngine.UI;
-using Application = UnityEngine.Device.Application;
 
 namespace UI
 {
@@ -13,10 +12,13 @@ namespace UI
         [SerializeField] private Button exitButton;
         private const string Main = "Main";
 
-        public void Construct(GameStateMachine stateMachine)
+        public void Construct(GameStateMachine stateMachine, bool isLocalBuild)
         {
             createMatchButton.onClick.AddListener(stateMachine.Enter<CreateMatchState>);
-            joinMatchButton.onClick.AddListener(() => stateMachine.Enter<JoinMatchState, string>(Main));
+            if (isLocalBuild)
+                joinMatchButton.onClick.AddListener(() => stateMachine.Enter<JoinLocalMatchState, string>(Main));
+            else
+                joinMatchButton.onClick.AddListener(() => stateMachine.Enter<JoinSteamLobbyState, string>(Main));
             exitButton.onClick.AddListener(Application.Quit);
         }
     }

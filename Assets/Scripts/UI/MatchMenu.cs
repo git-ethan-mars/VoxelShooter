@@ -35,15 +35,21 @@ namespace UI
         private const string Main = "Main";
 
 
-        public void Construct(GameStateMachine stateMachine)
+        public void Construct(GameStateMachine stateMachine, bool isLocalBuild)
         {
             _stateMachine = stateMachine;
             InitPlayersNumber();
             InitGameDuration();
             resetButton.onClick.AddListener(ResetLimitations);
             backButton.onClick.AddListener(() => stateMachine.Enter<MainMenuState, string>(MainMenu));
-            applyButton.onClick.AddListener(() => _stateMachine.Enter<StartMatchState, string, ServerSettings>(Main,
-                new ServerSettings(_timeLimitation.CurrentValue, _playersLimitation.CurrentValue, SpawnTime, mapName.text)));
+            if (isLocalBuild)
+                applyButton.onClick.AddListener(() => _stateMachine.Enter<StartMatchState, string, ServerSettings>(Main,
+                    new ServerSettings(_timeLimitation.CurrentValue, _playersLimitation.CurrentValue, SpawnTime, mapName.text)));
+            else
+            {
+                applyButton.onClick.AddListener(()=>_stateMachine.Enter<StartSteamLobbyState, string, ServerSettings>(Main,
+                    new ServerSettings(_timeLimitation.CurrentValue, _playersLimitation.CurrentValue, SpawnTime, mapName.text)));
+            }
             
         }
 

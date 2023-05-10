@@ -7,39 +7,42 @@ using UnityEngine;
 
 namespace Infrastructure.States
 {
-    public class StartMatchState : IPayloadedState<string, ServerSettings>
+    public class JoinLocalMatchState : IPayloadedState<string>
     {
-        private readonly SceneLoader _sceneLoader;
         private readonly IGameFactory _gameFactory;
-        private CustomNetworkManager _networkManager;
+        private readonly bool _isLocalBuild;
         private readonly GameStateMachine _stateMachine;
+        private CustomNetworkManager _networkManager;
+        private readonly SceneLoader _sceneLoader;
 
-        public StartMatchState(GameStateMachine stateMachine, SceneLoader sceneLoader, IGameFactory gameFactory)
+
+        public JoinLocalMatchState(GameStateMachine stateMachine, SceneLoader sceneLoader, IGameFactory gameFactory)
         {
             _stateMachine = stateMachine;
             _sceneLoader = sceneLoader;
             _gameFactory = gameFactory;
         }
 
-        public void Enter(string sceneName, ServerSettings serverSettings)
+
+        public void Enter(string sceneName)
         {
-            _sceneLoader.Load(sceneName, () => CreateHost(serverSettings));
+            _sceneLoader.Load(sceneName, OnLoaded);
         }
 
-        private void CreateHost(ServerSettings serverSettings)
+        private void OnLoaded()
         {
-            _networkManager = _gameFactory.CreateLocalNetworkManager(_stateMachine, serverSettings)
+            _networkManager = _gameFactory.CreateLocalNetworkManager(_stateMachine, null)
                 .GetComponent<CustomNetworkManager>();
             _networkManager.MapDownloaded += OnMapDownloaded;
-            _networkManager.StartHost();
+            _networkManager.StartClient();
         }
-
         private void OnMapDownloaded(Map map, Dictionary<Vector3Int, BlockData> mapUpdates)
         {
             _gameFactory.CreateWalls(map);
             _gameFactory.CreateMapRenderer(map, mapUpdates);
             _stateMachine.Enter<GameLoopState>();
         }
+
 
         public void Exit()
         {

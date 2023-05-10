@@ -17,8 +17,6 @@ namespace Networking
     {
         public event Action<Map, Dictionary<Vector3Int, BlockData>> MapDownloaded; 
         private ServerData _serverData;
-
-        private bool _isLocalBuild;
         private IStaticDataService _staticData;
         private IEntityFactory _entityFactory;
         private IAssetProvider _assets;
@@ -27,18 +25,19 @@ namespace Networking
         private ServerMessageHandlers _serverMessageHandlers;
         private ServerSettings _serverSettings;
         private GameStateMachine _stateMachine;
+        private bool _isLocalBuild;
 
 
         public void Construct(GameStateMachine stateMachine, IStaticDataService staticData, IEntityFactory entityFactory,
-            IParticleFactory particleFactory, IAssetProvider assets, bool isLocalBuild, ServerSettings serverSettings)
+            IParticleFactory particleFactory, IAssetProvider assets, ServerSettings serverSettings, bool isLocalBuild)
         {
             _stateMachine = stateMachine;
             _assets = assets;
             _staticData = staticData;
             _entityFactory = entityFactory;
             _particleFactory = particleFactory;
-            _isLocalBuild = isLocalBuild;
             _serverSettings = serverSettings;
+            _isLocalBuild = isLocalBuild;
         }
 
         public override void OnStartServer()

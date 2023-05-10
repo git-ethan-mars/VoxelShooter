@@ -5,6 +5,7 @@ using Infrastructure.Services;
 using Infrastructure.States;
 using MapLogic;
 using Networking;
+using Networking.Transport;
 using Rendering;
 using UnityEngine;
 
@@ -34,19 +35,20 @@ namespace Infrastructure.Factory
             _staticData = staticData;
         }
 
-        public GameObject CreateLocalNetworkManager(GameStateMachine stateMachine, bool isLocalBuild, ServerSettings serverSettings)
+        public GameObject CreateLocalNetworkManager(GameStateMachine stateMachine, ServerSettings serverSettings)
         {
             _networkManager = _assets.Instantiate(NetworkManagerPath);
             _networkManager.GetComponent<CustomNetworkManager>().Construct(stateMachine, _staticData, _entityFactory,
-                _particleFactory, _assets, isLocalBuild, serverSettings);
+                _particleFactory, _assets, serverSettings, true);
             return _networkManager;
         }
 
-        public GameObject CreateSteamNetworkManager(GameStateMachine stateMachine, bool isLocalBuild, ServerSettings serverSettings)
+        public GameObject CreateSteamNetworkManager(GameStateMachine stateMachine, ServerSettings serverSettings, bool isHost)
         {
             _networkManager = _assets.Instantiate(SteamNetworkManagerPath);
             _networkManager.GetComponent<CustomNetworkManager>().Construct(stateMachine, _staticData, _entityFactory,
-                _particleFactory, _assets, isLocalBuild, serverSettings);
+                _particleFactory, _assets, serverSettings, false);
+            _networkManager.GetComponent<SteamLobby>().Construct(isHost);
             return _networkManager;
         }
 

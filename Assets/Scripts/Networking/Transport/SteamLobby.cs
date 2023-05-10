@@ -6,12 +6,17 @@ namespace Networking.Transport
 {
     public class SteamLobby : MonoBehaviour
     {
-        //Callbacks
         protected Callback<LobbyCreated_t> LobbyCreated;
         protected Callback<GameLobbyJoinRequested_t> JoinRequested;
         protected Callback<LobbyEnter_t> LobbyEntered;
         private NetworkManager _networkManager;
+        private bool _isHost;
         private const string HostAddressKey = "HostAddress";
+
+        public void Construct(bool isHost)
+        {
+            _isHost = isHost;
+        }
         private void Start()
         {
             _networkManager = GetComponent<NetworkManager>();
@@ -19,16 +24,10 @@ namespace Networking.Transport
             LobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
             JoinRequested = Callback<GameLobbyJoinRequested_t>.Create(OnJoinRequest);
             LobbyEntered = Callback<LobbyEnter_t>.Create(OnLobbyEntered);
-        }
-
-        private void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.P))
-            {
+            if (_isHost)
                 HostLobby();
-                enabled = false;
-            }    
         }
+        
 
         private void HostLobby()
         {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Infrastructure.Factory;
 using Infrastructure.Services;
+using UnityEngine;
 
 namespace Infrastructure.States
 {
@@ -16,10 +17,12 @@ namespace Infrastructure.States
             _states = new Dictionary<Type, IExitableState>
             {
                 [typeof(BootstrapState)] = new BootstrapState(this, sceneLoader, allServices, coroutineRunner),
-                [typeof(MainMenuState)] = new MainMenuState(this, sceneLoader, allServices.Single<IUIFactory>()),
-                [typeof(CreateMatchState)] = new CreateMatchState(this, allServices.Single<IUIFactory>()),
-                [typeof(StartMatchState)] = new StartMatchState(this, sceneLoader, allServices.Single<IGameFactory>(), isLocalBuild),
-                [typeof(JoinMatchState)] = new JoinMatchState(this,  sceneLoader, allServices.Single<IGameFactory>(),isLocalBuild),
+                [typeof(MainMenuState)] = new MainMenuState(this, sceneLoader, allServices.Single<IUIFactory>(), isLocalBuild),
+                [typeof(CreateMatchState)] = new CreateMatchState(this, allServices.Single<IUIFactory>(), isLocalBuild),
+                [typeof(StartSteamLobbyState)] = new StartSteamLobbyState(this, sceneLoader, allServices.Single<IGameFactory>()),
+                [typeof(JoinSteamLobbyState)] = new JoinSteamLobbyState(this, sceneLoader, allServices.Single<IGameFactory>()),
+                [typeof(StartMatchState)] = new StartMatchState(this, sceneLoader, allServices.Single<IGameFactory>()),
+                [typeof(JoinLocalMatchState)] = new JoinLocalMatchState(this,  sceneLoader, allServices.Single<IGameFactory>()),
                 [typeof(GameLoopState)] =
                     new GameLoopState(allServices.Single<IUIFactory>())
             };
@@ -50,6 +53,7 @@ namespace Infrastructure.States
             _activeState?.Exit();
             TState state = GetState<TState>();
             _activeState = state;
+            Debug.Log(_activeState.ToString());
             return state;
         }
 

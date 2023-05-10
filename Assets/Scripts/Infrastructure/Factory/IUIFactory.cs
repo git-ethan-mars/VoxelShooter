@@ -8,7 +8,7 @@ namespace Infrastructure.Factory
     {
         GameObject CreateHud(GameObject player);
         void CreateChangeClassMenu();
-        GameObject CreateMainMenu(GameStateMachine gameStateMachine);
-        void CreateMatchMenu(GameStateMachine gameStateMachine);
-    }
+        GameObject CreateMainMenu(GameStateMachine gameStateMachine, bool isLocalBuild);
+        void CreateMatchMenu(GameStateMachine gameStateMachine, bool isLocalBuild);
+    }   
 }

@@ -7,20 +7,18 @@ using UnityEngine;
 
 namespace Infrastructure.States
 {
-    public class StartMatchState : IPayloadedState<string, ServerSettings>
+    public class StartSteamLobbyState : IPayloadedState<string, ServerSettings>
     {
+        private readonly GameStateMachine _stateMachine;
         private readonly SceneLoader _sceneLoader;
         private readonly IGameFactory _gameFactory;
-        private CustomNetworkManager _networkManager;
-        private readonly GameStateMachine _stateMachine;
-
-        public StartMatchState(GameStateMachine stateMachine, SceneLoader sceneLoader, IGameFactory gameFactory)
+        
+        public StartSteamLobbyState(GameStateMachine stateMachine, SceneLoader sceneLoader, IGameFactory gameFactory)
         {
             _stateMachine = stateMachine;
             _sceneLoader = sceneLoader;
             _gameFactory = gameFactory;
         }
-
         public void Enter(string sceneName, ServerSettings serverSettings)
         {
             _sceneLoader.Load(sceneName, () => CreateHost(serverSettings));
@@ -28,12 +26,10 @@ namespace Infrastructure.States
 
         private void CreateHost(ServerSettings serverSettings)
         {
-            _networkManager = _gameFactory.CreateLocalNetworkManager(_stateMachine, serverSettings)
-                .GetComponent<CustomNetworkManager>();
-            _networkManager.MapDownloaded += OnMapDownloaded;
-            _networkManager.StartHost();
+            var networkManager = _gameFactory.CreateSteamNetworkManager(_stateMachine, serverSettings, true).GetComponent<CustomNetworkManager>();
+            networkManager.MapDownloaded += OnMapDownloaded;
         }
-
+        
         private void OnMapDownloaded(Map map, Dictionary<Vector3Int, BlockData> mapUpdates)
         {
             _gameFactory.CreateWalls(map);

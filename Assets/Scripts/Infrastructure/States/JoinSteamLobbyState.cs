@@ -7,24 +7,18 @@ using UnityEngine;
 
 namespace Infrastructure.States
 {
-    public class JoinMatchState : IPayloadedState<string>
+    public class JoinSteamLobbyState : IPayloadedState<string>
     {
-        private readonly IGameFactory _gameFactory;
-        private readonly bool _isLocalBuild;
         private readonly GameStateMachine _stateMachine;
-        private CustomNetworkManager _networkManager;
         private readonly SceneLoader _sceneLoader;
+        private readonly IGameFactory _gameFactory;
 
-
-        public JoinMatchState(GameStateMachine stateMachine, SceneLoader sceneLoader, IGameFactory gameFactory,
-            bool isLocalBuild)
+        public JoinSteamLobbyState(GameStateMachine stateMachine, SceneLoader sceneLoader, IGameFactory gameFactory)
         {
             _stateMachine = stateMachine;
             _sceneLoader = sceneLoader;
             _gameFactory = gameFactory;
-            _isLocalBuild = isLocalBuild;
         }
-
 
         public void Enter(string sceneName)
         {
@@ -33,21 +27,17 @@ namespace Infrastructure.States
 
         private void OnLoaded()
         {
-            _networkManager = _isLocalBuild
-                ? _gameFactory.CreateLocalNetworkManager(_stateMachine, _isLocalBuild, null)
-                    .GetComponent<CustomNetworkManager>()
-                : _gameFactory.CreateSteamNetworkManager(_stateMachine, _isLocalBuild, null)
-                    .GetComponent<CustomNetworkManager>();
-            _networkManager.MapDownloaded += OnMapDownloaded;
-            _networkManager.StartClient();
+            var networkManager = _gameFactory.CreateSteamNetworkManager(_stateMachine, null, false)
+                .GetComponent<CustomNetworkManager>();
+            networkManager.MapDownloaded += OnMapDownloaded;
         }
+
         private void OnMapDownloaded(Map map, Dictionary<Vector3Int, BlockData> mapUpdates)
         {
             _gameFactory.CreateWalls(map);
             _gameFactory.CreateMapRenderer(map, mapUpdates);
             _stateMachine.Enter<GameLoopState>();
         }
-
 
         public void Exit()
         {

@@ -40,17 +40,17 @@ namespace Infrastructure.Factory
             _assets.Instantiate(ChooseClassMenu);
         }
 
-        public GameObject CreateMainMenu(GameStateMachine gameStateMachine)
+        public GameObject CreateMainMenu(GameStateMachine gameStateMachine, bool isLocalBuild)
         {
             var mainMenu = _assets.Instantiate(MainMenu);
-            mainMenu.GetComponent<MainMenu>().Construct(gameStateMachine);
+            mainMenu.GetComponent<MainMenu>().Construct(gameStateMachine, isLocalBuild);
             return mainMenu;
         }
 
-        public void CreateMatchMenu(GameStateMachine gameStateMachine)
+        public void CreateMatchMenu(GameStateMachine gameStateMachine, bool isLocalBuild)
         {
             var matchMenu = _assets.Instantiate(MatchMenu);
-            matchMenu.GetComponent<MatchMenu>().Construct(gameStateMachine);
+            matchMenu.GetComponent<MatchMenu>().Construct(gameStateMachine, isLocalBuild);
         }
     }
 }

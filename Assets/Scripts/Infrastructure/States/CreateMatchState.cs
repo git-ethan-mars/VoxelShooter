@@ -6,15 +6,17 @@ namespace Infrastructure.States
     {
         private readonly IUIFactory _uiFactory;
         private readonly GameStateMachine _stateMachine;
+        private readonly bool _isLocalBuild;
 
-        public CreateMatchState(GameStateMachine stateMachine, IUIFactory uiFactory)
+        public CreateMatchState(GameStateMachine stateMachine, IUIFactory uiFactory, bool isLocalBuild)
         {
             _uiFactory = uiFactory;
             _stateMachine = stateMachine;
+            _isLocalBuild = isLocalBuild;
         }
         public void Enter()
         {
-            _uiFactory.CreateMatchMenu(_stateMachine);
+            _uiFactory.CreateMatchMenu(_stateMachine, _isLocalBuild);
         }
 
         public void Exit()
