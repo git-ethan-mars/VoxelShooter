@@ -53,7 +53,6 @@ namespace Infrastructure.States
             _activeState?.Exit();
             TState state = GetState<TState>();
             _activeState = state;
-            Debug.Log(_activeState.ToString());
             return state;
         }
 
