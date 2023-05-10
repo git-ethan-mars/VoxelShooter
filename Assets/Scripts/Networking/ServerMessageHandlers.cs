@@ -62,6 +62,7 @@ namespace Networking
 
         private void OnAddBlocks(NetworkConnectionToClient connection, AddBlocksRequest message)
         {
+            if (connection.identity is null) return;
             var blockAmount = _serverData.GetItemCount(connection, message.ItemId);
             var validPositionList = new List<Vector3Int>();
             var validBlockDataList = new List<BlockData>();
@@ -82,6 +83,7 @@ namespace Networking
 
         private void OnRemoveBlocks(NetworkConnectionToClient connection, RemoveBlocksRequest message)
         {
+            if (connection.identity is null) return;
             var validPositionList = new List<Vector3Int>();
             for (var i = 0; i < message.GlobalPositions.Length; i++)
             {
@@ -95,6 +97,7 @@ namespace Networking
 
         private void OnTntSpawn(NetworkConnectionToClient connection, TntSpawnRequest message)
         {
+            if (connection.identity is null) return;
             var tntCount = _serverData.GetItemCount(connection, message.ItemId);
             if (tntCount <= 0)
                 return;
@@ -157,7 +160,8 @@ namespace Networking
 
         private void OnChangeSlot(NetworkConnectionToClient connection, ChangeSlotRequest message)
         {
-            connection.identity.gameObject.GetComponent<PlayerLogic.Inventory>().currentSlotId = message.Index;
+            if (connection.identity is null) return;
+            connection.identity.GetComponent<PlayerLogic.Inventory>().currentSlotId = message.Index;
             connection.Send(new ChangeSlotResult(message.Index));
         }
 
@@ -189,6 +193,7 @@ namespace Networking
 
         private void OnKillerCameraRequest(NetworkConnectionToClient connection, KillerCameraRequest message)
         {
+            if (connection.identity is null) return;
             for (var i = _serverData.Kills.Count - 1; i >= 0; i--)
             {
                 var killData = _serverData.Kills[i];
