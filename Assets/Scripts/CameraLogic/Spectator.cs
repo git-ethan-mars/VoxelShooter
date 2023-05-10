@@ -43,11 +43,6 @@ namespace CameraLogic
             {
                 _staticMapPosition = message.Position;
             }
-            else
-            {
-                _targetConnectionId = _target.connectionToClient.connectionId;
-            }
-
             if (!enabled)
                 enabled = true;
         }
@@ -57,14 +52,14 @@ namespace CameraLogic
             if (!isLocalPlayer) return;
             if (!IsValidCameraPosition)
             {
-                NetworkClient.Send(new NextPlayerCameraRequest(_targetConnectionId));
+                NetworkClient.Send(new NextPlayerCameraRequest());
                 enabled = false;
                 return;
             }
 
             if (_inputService.IsFirstActionButtonDown())
             {
-                NetworkClient.Send(new NextPlayerCameraRequest(_targetConnectionId));
+                NetworkClient.Send(new NextPlayerCameraRequest());
             }
 
             var mouseXInput = _inputService.GetMouseHorizontalAxis();

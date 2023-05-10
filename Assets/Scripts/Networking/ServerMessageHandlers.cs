@@ -180,7 +180,7 @@ namespace Networking
             var index = 0;
             for (; index < alivePlayers.Count; index++)
             {
-                if (alivePlayers[index].Key.connectionId == message.ConnectionId)
+                if (alivePlayers[index].Key == _serverData.GetPlayerData(connection).SpectatedPlayer)
                 {
                     connection.Send(
                         new SpectatorTargetResult(alivePlayers[(index + 1) % alivePlayers.Count].Key.identity, Vector3.zero));
@@ -193,14 +193,13 @@ namespace Networking
 
         private void OnKillerCameraRequest(NetworkConnectionToClient connection, KillerCameraRequest message)
         {
-            if (connection.identity is null) return;
             for (var i = _serverData.Kills.Count - 1; i >= 0; i--)
             {
                 var killData = _serverData.Kills[i];
                 if (killData.Victim != connection) continue;
                 if (_serverData.GetPlayerData(killData.Killer).GameClass == GameClass.None)
                 {
-                    OnNextCameraRequest(connection, new NextPlayerCameraRequest(0));
+                    OnNextCameraRequest(connection, new NextPlayerCameraRequest());
                     return;
                 }
 
@@ -208,7 +207,7 @@ namespace Networking
                 return;
             }
 
-            OnNextCameraRequest(connection, new NextPlayerCameraRequest(0));
+            OnNextCameraRequest(connection, new NextPlayerCameraRequest());
         }
     }
 }

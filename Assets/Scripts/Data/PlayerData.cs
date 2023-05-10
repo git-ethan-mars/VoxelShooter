@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Infrastructure.Services;
+using Mirror;
 
 namespace Data
 {
@@ -13,6 +14,7 @@ namespace Data
         public readonly Dictionary<int, MeleeWeaponData> MeleeWeaponsById;
         public readonly Dictionary<int, int> ItemCountById;
         public int Health;
+        public NetworkConnectionToClient SpectatedPlayer;
 
         public PlayerData(GameClass chosenClass, string nick, IStaticDataService staticDataService)
         {
