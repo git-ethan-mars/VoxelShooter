@@ -73,7 +73,7 @@ namespace Networking
                 var bytes = memoryStream.ToArray();
                 var mapSplitter = new MapSplitter();
                 var mapMessages = mapSplitter.SplitBytesIntoMessages(bytes, 100000);
-                StartCoroutine(mapSplitter.SendMessages(mapMessages, connection, 0.1f));
+                StartCoroutine(mapSplitter.SendMessages(mapMessages, connection, 1f));
             }
         }
         

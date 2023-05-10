@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Data;
 using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
@@ -22,7 +23,7 @@ namespace Networking.Synchronization
         {
             _serverData = serverData;
             _particleFactory = particleFactory;
-            _audioClips = assets.LoadAllInSubdirectories<AudioClip>("Audio/Sounds");
+            _audioClips = assets.LoadAll<AudioClip>("Audio/Sounds").ToList();
         }
 
         [Command]

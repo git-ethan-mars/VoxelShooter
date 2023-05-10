@@ -14,17 +14,10 @@ namespace Infrastructure.AssetManagement
             return obj;
         }
 
-        public List<T> LoadAllInSubdirectories<T>(string path) where T : Object
+        public T[] LoadAll<T>(string path) where T : Object
         {
-            var directories = Directory.GetDirectories(ResourcesPath + path, "*", SearchOption.AllDirectories);
-            var resources = new List<T>();
-            foreach (var directory in directories)
-            {
-                var localPath = path + "/" + directory.Substring((ResourcesPath + path).Length + 1);
-                resources.AddRange(Resources.LoadAll<T>(localPath));
-            }
-
-            return resources;
+            var objects = Resources.LoadAll<T>(path);
+            return objects;
         }
 
         public GameObject Instantiate(string path)

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Data;
 using Infrastructure.AssetManagement;
 using Infrastructure.Services;
@@ -15,7 +16,7 @@ namespace Networking.Synchronization
         private void Awake()
         {
             _assets = AllServices.Container.Single<IAssetProvider>();
-            _audioClips = _assets.LoadAllInSubdirectories<AudioClip>("Audio/Sounds");
+            _audioClips = _assets.LoadAll<AudioClip>("Audio/Sounds").ToList();
         }
 
         [ClientRpc]
