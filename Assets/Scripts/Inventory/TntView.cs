@@ -25,10 +25,9 @@ namespace Inventory
         private readonly Sprite _itemTypeIcon;
         private readonly Image _itemType;
 
-        public TntView(Raycaster raycaster, TntItem configuration, Hud hud, TransparentMeshRenderer transparentMeshRenderer)
+        public TntView(Raycaster raycaster, TntItem configuration, Hud hud, TransparentMeshPool transparentMeshPool)
         {
             Icon = configuration.inventoryIcon;
-            
             _delayInSeconds = configuration.delayInSeconds;
             _radius = configuration.radius;
             _itemId = configuration.id;
@@ -39,8 +38,10 @@ namespace Inventory
             Count = configuration.count;
             _raycaster = raycaster;
             _transparentTnt =
-                transparentMeshRenderer.CreateTransparentGameObject(configuration.prefab, new Color32(255, 0, 0, 100));
+                transparentMeshPool.CreateTransparentGameObject(configuration.prefab, new Color32(255, 0, 0, 100));
+            _transparentTnt.SetActive(false);
         }
+        
 
         public void OnCountChanged()
         {

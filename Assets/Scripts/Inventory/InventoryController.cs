@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Data;
 using Infrastructure;
+using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
 using Infrastructure.Services;
 using Infrastructure.Services.Input;
@@ -33,11 +34,11 @@ namespace Inventory
         private GameObject _hud;
         private PlayerCharacteristic _characteristic;
         private Raycaster _raycaster;
-        private TransparentMeshRenderer _transparentMeshFactory;
+        private TransparentMeshPool _transparentMeshPool;
         private List<Slot> _slots;
         private IStaticDataService _staticData;
 
-        public void Construct(IInputService inputService,IStaticDataService staticData, GameObject hud,
+        public void Construct(IInputService inputService, IAssetProvider assets, IStaticDataService staticData, GameObject hud,
             GameObject player)
         {
             AddEventHandlers(player.GetComponent<InventoryInput>());
@@ -45,7 +46,7 @@ namespace Inventory
             _player = player;
             _hud = hud;
             _mainCamera = Camera.main;
-            _transparentMeshFactory = new TransparentMeshRenderer();
+            _transparentMeshPool = new TransparentMeshPool(assets);
             _raycaster = new Raycaster(_mainCamera, player.GetComponent<Player>().placeDistance);
             _itemPosition = player.GetComponent<Player>().itemPosition;
             _mapSynchronization = player.GetComponent<MapSynchronization>();
@@ -69,6 +70,7 @@ namespace Inventory
 
         public void OnDestroy()
         {
+            _transparentMeshPool.CleanPool();
             NetworkClient.UnregisterHandler<ItemUseResult>();
             NetworkClient.UnregisterHandler<ReloadResult>();
             NetworkClient.UnregisterHandler<ShootResult>();
@@ -108,7 +110,7 @@ namespace Inventory
                 if (item.itemType == ItemType.Block)
                 {
                     var handler = new BlockView(_hud,
-                        (BlockItem) item, _transparentMeshFactory, _raycaster);
+                        (BlockItem) item, _transparentMeshPool, _raycaster);
                     _slots.Add(new Slot(item, handler));
                 }
 
@@ -130,7 +132,7 @@ namespace Inventory
                 if (item.itemType == ItemType.Tnt)
                 {
                     var handler = new TntView(_raycaster, (TntItem) item, _hud.GetComponent<Hud>(),
-                        _transparentMeshFactory);
+                        _transparentMeshPool);
                     _slots.Add(new Slot(item, handler));
                 }
             }

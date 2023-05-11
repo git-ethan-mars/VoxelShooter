@@ -1,15 +1,19 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using Infrastructure.AssetManagement;
+using UnityEngine;
 
 namespace Rendering
 {
     
-    public class TransparentMeshRenderer
+    public class TransparentMeshPool
     {
         private readonly Material _transparentMaterial;
+        private readonly List<GameObject> _pool;
 
-        public TransparentMeshRenderer()
+        public TransparentMeshPool(IAssetProvider assets)
         {
-            _transparentMaterial = Resources.Load<Material>("Materials/Transparent");
+            _transparentMaterial = assets.Load<Material>("Materials/Transparent");
+            _pool = new List<GameObject>();
         }
 
         public GameObject CreateTransparentGameObject(GameObject prefab, Color32 color)
@@ -23,8 +27,16 @@ namespace Rendering
             };
             gameObject.AddComponent<MeshRenderer>().material = material;
             gameObject.transform.localScale = prefab.transform.localScale;
+            _pool.Add(gameObject);
             return gameObject;
         }
-        
+
+        public void CleanPool()
+        {
+            for (var i = 0; i < _pool.Count; i++)
+            {
+                Object.Destroy(_pool[i]);
+            }
+        }
     }
 }

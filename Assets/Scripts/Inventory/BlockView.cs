@@ -24,7 +24,7 @@ namespace Inventory
         private readonly Raycaster _rayCaster;
 
 
-        public BlockView(GameObject hud, BlockItem configuration, TransparentMeshRenderer transparentMeshFactory,
+        public BlockView(GameObject hud, BlockItem configuration, TransparentMeshPool transparentMeshPool,
             Raycaster raycaster)
         {
             _palette = hud.GetComponent<Hud>().palette;
@@ -36,10 +36,12 @@ namespace Inventory
             _palette.GetComponent<PaletteCreator>().OnColorUpdate += UpdateColor;
             Count = configuration.count;
             _id = configuration.id;
-            _transparentBlock =
-                transparentMeshFactory.CreateTransparentGameObject(configuration.prefab, _currentColor);
             _rayCaster = raycaster;
+            _transparentBlock =
+                transparentMeshPool.CreateTransparentGameObject(configuration.prefab, _currentColor);
+            _transparentBlock.SetActive(false);
         }
+        
 
         public void OnCountChanged()
         {
@@ -48,6 +50,7 @@ namespace Inventory
 
         public void Select()
         {
+            _transparentBlock.SetActive(true);
             _palette.SetActive(true);
             _blockInfo.SetActive(true);
             _blockImage.sprite = _blockSprite;
