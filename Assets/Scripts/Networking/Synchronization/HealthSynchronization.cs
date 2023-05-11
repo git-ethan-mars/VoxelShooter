@@ -1,5 +1,4 @@
-﻿using Data;
-using Infrastructure.Factory;
+﻿using Infrastructure.Factory;
 using Mirror;
 using PlayerLogic;
 
@@ -26,11 +25,8 @@ namespace Networking.Synchronization
             {
                 playerData.Health = 0;
                 _serverData.AddKill(source, receiver);
-                _serverData.UpdatePlayerClass(receiver, GameClass.None);
-                var spectator = _playerFactory.CreateSpectatorPlayer(receiver, playerData.GameClass);
-                var oldPlayer = receiver.identity.gameObject;
-                NetworkServer.ReplacePlayerForConnection(receiver, spectator, true);
-                Destroy(oldPlayer, 0.1f);
+                _playerFactory.CreateSpectatorPlayer(receiver, playerData.GameClass);
+                
             }
             else
             {

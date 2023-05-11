@@ -16,9 +16,14 @@ namespace PlayerLogic
             _staticData = AllServices.Container.Single<IStaticDataService>();
         }
 
+        public override void OnStartClient()
+        {
+            OnChangeSlot(0,currentSlotId);
+        }
+
         private void OnChangeSlot(int oldSlotId, int newSlotId)
         {
-            if (_currentItemModel is not null)
+            if (_currentItemModel != null)
                 Destroy(_currentItemModel);
             _currentItemModel = Instantiate(_staticData.GetItem(ItemIds[newSlotId]).prefab, GetComponent<Player>().itemPosition);
         }

@@ -33,9 +33,14 @@ namespace Networking
             return DataByConnection.TryGetValue(connection, out var playerData) ? playerData : null;
         }
 
-        public void UpdatePlayerClass(NetworkConnectionToClient conn, GameClass newClass)
+        public void UpdatePlayerClass(NetworkConnectionToClient connection, GameClass newClass)
         {
-            DataByConnection[conn] = new PlayerData(newClass, DataByConnection[conn].NickName, _staticData);
+            DataByConnection[connection] = new PlayerData(newClass, DataByConnection[connection].NickName, _staticData);
+        }
+
+        public void DeletePlayer(NetworkConnectionToClient connection)
+        {
+            DataByConnection.Remove(connection);
         }
 
         public int GetItemCount(NetworkConnectionToClient connection, int itemId)

@@ -72,7 +72,7 @@ namespace Inventory
             NetworkClient.UnregisterHandler<ItemUseResult>();
             NetworkClient.UnregisterHandler<ReloadResult>();
             NetworkClient.UnregisterHandler<ShootResult>();
-            NetworkServer.UnregisterHandler<ChangeSlotResult>();
+            NetworkClient.UnregisterHandler<ChangeSlotResult>();
         }
 
         private void AddEventHandlers(InventoryInput inventoryInput)

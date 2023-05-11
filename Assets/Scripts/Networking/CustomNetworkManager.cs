@@ -15,7 +15,7 @@ namespace Networking
 {
     public class CustomNetworkManager : NetworkManager, ICoroutineRunner
     {
-        public event Action<Map, Dictionary<Vector3Int, BlockData>> MapDownloaded; 
+        public event Action<Map, Dictionary<Vector3Int, BlockData>> MapDownloaded;
         private ServerData _serverData;
         private IStaticDataService _staticData;
         private IEntityFactory _entityFactory;
@@ -28,7 +28,8 @@ namespace Networking
         private bool _isLocalBuild;
 
 
-        public void Construct(GameStateMachine stateMachine, IStaticDataService staticData, IEntityFactory entityFactory,
+        public void Construct(GameStateMachine stateMachine, IStaticDataService staticData,
+            IEntityFactory entityFactory,
             IParticleFactory particleFactory, IAssetProvider assets, ServerSettings serverSettings, bool isLocalBuild)
         {
             _stateMachine = stateMachine;
@@ -43,7 +44,8 @@ namespace Networking
         public override void OnStartServer()
         {
             _serverData = new ServerData(_staticData, MapReader.ReadFromFile(_serverSettings.MapName + ".rch"));
-            var playerFactory = new PlayerFactory(this, _assets, _staticData, _serverData, _serverSettings, _particleFactory);
+            var playerFactory =
+                new PlayerFactory(this, _assets, _staticData, _serverData, _serverSettings, _particleFactory);
             _serverMessageHandlers =
                 new ServerMessageHandlers(_entityFactory, this, _serverData, playerFactory, _isLocalBuild);
             _serverMessageHandlers.RegisterHandlers();
@@ -54,7 +56,7 @@ namespace Networking
         {
             _clientMessageHandlers = new ClientMessagesHandler();
             _clientMessageHandlers.RegisterHandlers();
-            _clientMessageHandlers.MapDownloaded += (map, mapUpdates)=>MapDownloaded?.Invoke(map, mapUpdates);
+            _clientMessageHandlers.MapDownloaded += (map, mapUpdates) => MapDownloaded?.Invoke(map, mapUpdates);
         }
 
 
@@ -76,7 +78,13 @@ namespace Networking
                 StartCoroutine(mapSplitter.SendMessages(mapMessages, connection, 1f));
             }
         }
-        
+
+        public override void OnServerDisconnect(NetworkConnectionToClient connection)
+        {
+            base.OnServerDisconnect(connection);
+            _serverData.DeletePlayer(connection);
+        }
+
         public override void OnStopClient()
         {
             _clientMessageHandlers.RemoveHandlers();
@@ -89,7 +97,8 @@ namespace Networking
             _serverMessageHandlers.RemoveHandlers();
             _stateMachine.Enter<MainMenuState, string>("MainMenu");
         }
-        
-        private static bool IsHost(NetworkConnection conn) => NetworkClient.connection.connectionId == conn.connectionId;
+
+        private static bool IsHost(NetworkConnection conn) =>
+            NetworkClient.connection.connectionId == conn.connectionId;
     }
 }

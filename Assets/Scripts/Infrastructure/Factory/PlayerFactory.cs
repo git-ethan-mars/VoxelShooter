@@ -39,46 +39,62 @@ namespace Infrastructure.Factory
         }
 
 
-        public GameObject CreatePlayer(GameClass gameClass, string nickName)
+        public void CreatePlayer(NetworkConnectionToClient connection, GameClass gameClass, string nickName)
         {
             GameObject player;
             if (_spawnPoints.Count == 0)
             {
-                player = CreatePlayerWithoutSpawnPoint(gameClass, nickName);
+                player = CreatePlayerWithoutSpawnPoint();
             }
             else
             {
-                player = CreatePlayerWithSpawnPoint(gameClass, nickName, _spawnPoints[_spawnPointIndex].ToUnityVector(),
+                player = CreatePlayerWithSpawnPoint(_spawnPoints[_spawnPointIndex].ToUnityVector(),
                     Quaternion.identity);
                 _spawnPointIndex = (_spawnPointIndex + 1) % _spawnPoints.Count;
             }
 
+            ConfigurePlayer(player, gameClass, nickName);
             ConfigureSynchronization(player);
-            return player;
+            NetworkServer.AddPlayerForConnection(connection, player);
+            _serverData.AddPlayer(connection, gameClass, nickName);
         }
 
-        public GameObject CreateSpectatorPlayer(NetworkConnectionToClient connection,
+        public void CreateSpectatorPlayer(NetworkConnectionToClient connection,
             GameClass gameClass)
         {
             _coroutineRunner.StartCoroutine(Utils.DoActionAfterDelay(_serverSettings.SpawnTime,
-                () => RespawnPlayer(connection, gameClass)));
-            return _assets.Instantiate(SpectatorPlayerPath);
+                () => RespawnPlayer(connection, gameClass,
+                    _serverData.GetPlayerData(connection).NickName)));
+            var spectator = _assets.Instantiate(SpectatorPlayerPath);
+            ReplacePlayer(connection, spectator);
+            _serverData.UpdatePlayerClass(connection, GameClass.None);
         }
 
-        private GameObject CreatePlayerWithSpawnPoint(GameClass gameClass, string nickName, Vector3 position,
-            Quaternion rotation)
+        private void RespawnPlayer(NetworkConnectionToClient connection, GameClass gameClass, string nickName)
         {
-            var player = _assets.Instantiate(PlayerPath, position, rotation);
+            GameObject player;
+            if (_spawnPoints.Count == 0)
+            {
+                player = CreatePlayerWithoutSpawnPoint();
+            }
+            else
+            {
+                player = CreatePlayerWithSpawnPoint(_spawnPoints[_spawnPointIndex].ToUnityVector(),
+                    Quaternion.identity);
+                _spawnPointIndex = (_spawnPointIndex + 1) % _spawnPoints.Count;
+            }
+
             ConfigurePlayer(player, gameClass, nickName);
-            return player;
+            ConfigureSynchronization(player);
+            ReplacePlayer(connection, player);
+            _serverData.UpdatePlayerClass(connection, gameClass);
         }
 
-        private GameObject CreatePlayerWithoutSpawnPoint(GameClass gameClass, string nickName)
-        {
-            var player = _assets.Instantiate(PlayerPath);
-            ConfigurePlayer(player, gameClass, nickName);
-            return player;
-        }
+        private GameObject CreatePlayerWithSpawnPoint(Vector3 position,
+            Quaternion rotation) =>
+            _assets.Instantiate(PlayerPath, position, rotation);
+
+        private GameObject CreatePlayerWithoutSpawnPoint() => _assets.Instantiate(PlayerPath);
 
         private void ConfigurePlayer(GameObject player, GameClass gameClass, string nickName)
         {
@@ -86,8 +102,8 @@ namespace Infrastructure.Factory
             player.GetComponent<Player>().Construct(characteristic, nickName);
             player.GetComponent<PlayerMovement>().Construct(characteristic);
             player.GetComponent<HealthSystem>().Construct(characteristic);
-            var playerInventory = player.GetComponent<PlayerLogic.Inventory>();
-            playerInventory.ItemIds.AddRange(_staticData.GetInventory(gameClass).Select(item => item.id).ToList());
+            player.GetComponent<PlayerLogic.Inventory>().ItemIds
+                .AddRange(_staticData.GetInventory(gameClass).Select(item => item.id).ToList());
         }
 
         private void ConfigureSynchronization(GameObject player)
@@ -98,11 +114,12 @@ namespace Infrastructure.Factory
             player.GetComponent<MeleeWeaponSynchronization>().Construct(_particleFactory, _serverData);
         }
 
-        private void RespawnPlayer(NetworkConnectionToClient connection, GameClass gameClass)
+        private void ReplacePlayer(NetworkConnectionToClient connection, GameObject newPlayer)
         {
-            var player = CreatePlayer(gameClass,
-                _serverData.GetPlayerData(connection).NickName);
-            ConfigureSynchronization(player);
+            if (connection.identity == null) return;
+            var oldPlayer = connection.identity.gameObject;
+            NetworkServer.ReplacePlayerForConnection(connection, newPlayer, true);
+            Object.Destroy(oldPlayer, 0.1f);
         }
     }
 }

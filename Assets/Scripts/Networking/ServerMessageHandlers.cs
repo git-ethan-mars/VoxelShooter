@@ -52,17 +52,15 @@ namespace Networking
             NetworkServer.UnregisterHandler<NextPlayerCameraRequest>();
         }
 
-        private void OnChangeClass(NetworkConnectionToClient conn, ChangeClassRequest message)
+        private void OnChangeClass(NetworkConnectionToClient connection, ChangeClassRequest message)
         {
             var nick = _isLocalBuild ? "" : SteamFriends.GetPersonaName();
-            var player = _playerFactory.CreatePlayer(message.GameClass, nick);
-            NetworkServer.AddPlayerForConnection(conn, player);
-            _serverData.AddPlayer(conn, message.GameClass, nick);
+            _playerFactory.CreatePlayer(connection, message.GameClass, nick);
         }
 
         private void OnAddBlocks(NetworkConnectionToClient connection, AddBlocksRequest message)
         {
-            if (connection.identity is null) return;
+            if (connection.identity == null) return;
             var blockAmount = _serverData.GetItemCount(connection, message.ItemId);
             var validPositionList = new List<Vector3Int>();
             var validBlockDataList = new List<BlockData>();
@@ -83,7 +81,7 @@ namespace Networking
 
         private void OnRemoveBlocks(NetworkConnectionToClient connection, RemoveBlocksRequest message)
         {
-            if (connection.identity is null) return;
+            if (connection.identity == null) return;
             var validPositionList = new List<Vector3Int>();
             for (var i = 0; i < message.GlobalPositions.Length; i++)
             {
@@ -97,7 +95,7 @@ namespace Networking
 
         private void OnTntSpawn(NetworkConnectionToClient connection, TntSpawnRequest message)
         {
-            if (connection.identity is null) return;
+            if (connection.identity == null) return;
             var tntCount = _serverData.GetItemCount(connection, message.ItemId);
             if (tntCount <= 0)
                 return;
@@ -160,7 +158,7 @@ namespace Networking
 
         private void OnChangeSlot(NetworkConnectionToClient connection, ChangeSlotRequest message)
         {
-            if (connection.identity is null) return;
+            if (connection.identity == null) return;
             connection.identity.GetComponent<PlayerLogic.Inventory>().currentSlotId = message.Index;
             connection.Send(new ChangeSlotResult(message.Index));
         }
@@ -184,11 +182,13 @@ namespace Networking
                 {
                     connection.Send(
                         new SpectatorTargetResult(alivePlayers[(index + 1) % alivePlayers.Count].Key.identity, Vector3.zero));
+                    _serverData.GetPlayerData(connection).SpectatedPlayer = alivePlayers[(index + 1) % alivePlayers.Count].Key;
                     return;
                 }
             }
 
             connection.Send(new SpectatorTargetResult(alivePlayers[0].Key.identity, Vector3.zero));
+            _serverData.GetPlayerData(connection).SpectatedPlayer = alivePlayers[0].Key;
         }
 
         private void OnKillerCameraRequest(NetworkConnectionToClient connection, KillerCameraRequest message)
@@ -202,8 +202,9 @@ namespace Networking
                     OnNextCameraRequest(connection, new NextPlayerCameraRequest());
                     return;
                 }
-
+                
                 connection.Send(new SpectatorTargetResult(killData.Killer.identity, Vector3.zero));
+                _serverData.GetPlayerData(connection).SpectatedPlayer = killData.Killer;
                 return;
             }
 

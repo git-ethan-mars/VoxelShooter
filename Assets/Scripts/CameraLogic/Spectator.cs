@@ -39,7 +39,7 @@ namespace CameraLogic
         private void OnCameraTargetReceived(SpectatorTargetResult message)
         {
             _target = message.NewTarget;
-            if (_target is null)
+            if (_target == null)
             {
                 _staticMapPosition = message.Position;
             }
@@ -69,12 +69,12 @@ namespace CameraLogic
             YRotation += mouseX;
             XRotation -= mouseY;
             transform.rotation = Quaternion.Euler(XRotation, YRotation, 0);
-            transform.position = _target is not null
+            transform.position = _target != null
                 ? _target.transform.position - distance * transform.forward
                 : _staticMapPosition - distance * transform.forward;
         }
 
-        private bool IsValidCameraPosition => _target is not null || _staticMapPosition != Vector3.zero;
+        private bool IsValidCameraPosition => _target != null || _staticMapPosition != Vector3.zero;
 
         private void OnDestroy()
         {
