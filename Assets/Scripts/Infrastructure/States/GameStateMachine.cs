@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Infrastructure.Factory;
 using Infrastructure.Services;
-using UnityEngine;
 
 namespace Infrastructure.States
 {
@@ -24,7 +23,7 @@ namespace Infrastructure.States
                 [typeof(StartMatchState)] = new StartMatchState(this, sceneLoader, allServices.Single<IGameFactory>()),
                 [typeof(JoinLocalMatchState)] = new JoinLocalMatchState(this,  sceneLoader, allServices.Single<IGameFactory>()),
                 [typeof(GameLoopState)] =
-                    new GameLoopState(allServices.Single<IUIFactory>())
+                    new GameLoopState(allServices.Single<IUIFactory>(), isLocalBuild)
             };
             
         }

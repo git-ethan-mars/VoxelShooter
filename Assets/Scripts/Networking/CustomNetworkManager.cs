@@ -47,7 +47,7 @@ namespace Networking
             var playerFactory =
                 new PlayerFactory(this, _assets, _staticData, _serverData, _serverSettings, _particleFactory);
             _serverMessageHandlers =
-                new ServerMessageHandlers(_entityFactory, this, _serverData, playerFactory, _isLocalBuild);
+                new ServerMessageHandlers(_entityFactory, this, _serverData, playerFactory);
             _serverMessageHandlers.RegisterHandlers();
         }
 

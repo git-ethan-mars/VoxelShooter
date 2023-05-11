@@ -35,9 +35,9 @@ namespace Infrastructure.Factory
             return hud;
         }
 
-        public void CreateChangeClassMenu()
+        public void CreateChooseClassMenu(bool isLocalBuild)
         {
-            _assets.Instantiate(ChooseClassMenu);
+            _assets.Instantiate(ChooseClassMenu).GetComponent<ChooseClassMenu>().Construct(isLocalBuild);
         }
 
         public GameObject CreateMainMenu(GameStateMachine gameStateMachine, bool isLocalBuild)

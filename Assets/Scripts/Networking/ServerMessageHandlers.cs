@@ -7,9 +7,7 @@ using Infrastructure;
 using Infrastructure.Factory;
 using Mirror;
 using Networking.Messages;
-using Steamworks;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace Networking
 {
@@ -19,16 +17,14 @@ namespace Networking
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly ServerData _serverData;
         private readonly IPlayerFactory _playerFactory;
-        private readonly bool _isLocalBuild;
-
+        
         public ServerMessageHandlers(IEntityFactory entityFactory, ICoroutineRunner coroutineRunner,
-            ServerData serverData, IPlayerFactory playerFactory, bool isLocalBuild)
+            ServerData serverData, IPlayerFactory playerFactory)
         {
             _serverData = serverData;
             _entityFactory = entityFactory;
             _coroutineRunner = coroutineRunner;
             _playerFactory = playerFactory;
-            _isLocalBuild = isLocalBuild;
         }
 
         public void RegisterHandlers()
@@ -55,8 +51,7 @@ namespace Networking
 
         private void OnChangeClass(NetworkConnectionToClient connection, ChangeClassRequest message)
         {
-            var nick = _isLocalBuild ? Random.value.ToString() : SteamFriends.GetPersonaName();
-            _playerFactory.CreatePlayer(connection, message.GameClass, nick);
+            _playerFactory.CreatePlayer(connection, message.GameClass, message.NickName);
         }
 
         private void OnAddBlocks(NetworkConnectionToClient connection, AddBlocksRequest message)
