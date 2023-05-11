@@ -9,6 +9,7 @@ using Mirror;
 using Networking.Messages;
 using Steamworks;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Networking
 {
@@ -54,7 +55,7 @@ namespace Networking
 
         private void OnChangeClass(NetworkConnectionToClient connection, ChangeClassRequest message)
         {
-            var nick = _isLocalBuild ? "" : SteamFriends.GetPersonaName();
+            var nick = _isLocalBuild ? Random.value.ToString() : SteamFriends.GetPersonaName();
             _playerFactory.CreatePlayer(connection, message.GameClass, nick);
         }
 
