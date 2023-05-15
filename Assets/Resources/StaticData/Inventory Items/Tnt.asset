@@ -14,6 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 10
   itemType: 2
-  inventoryIcon: {fileID: 21300000, guid: 61ac40b257b3a994f841856ad38b2b6b, type: 3}
+  inventoryIcon: {fileID: -74087829, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
   prefab: {fileID: 8009858165730397543, guid: c2a01d48d01d91447b0e60f5a94e9e66, type: 3}
-  count: 5
+  countIcon: {fileID: 2038079468, guid: e7634cc0bf7762649a525e59875cd9d1, type: 3}
+  count: 10
+  delayInSeconds: 3
+  radius: 5

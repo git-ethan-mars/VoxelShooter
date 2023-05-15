@@ -51,14 +51,14 @@ MonoBehaviour:
   runInBackground: 1
   autoStartServerBuild: 1
   autoConnectClientBuild: 0
-  sendRate: 30
+  sendRate: 60
   offlineScene: 
   onlineScene: 
   transport: {fileID: 1682307205549550633}
   networkAddress: localhost
   maxConnections: 100
   authenticator: {fileID: 0}
-  playerPrefab: {fileID: 7129409968729204767, guid: a62a82a6bc860fb46a3527ecac0ecee3, type: 3}
+  playerPrefab: {fileID: 0}
   autoCreatePlayer: 0
   playerSpawnMethod: 0
   spawnPrefabs:
@@ -66,6 +66,8 @@ MonoBehaviour:
   - {fileID: 1000010254994808, guid: 9defeac88977c0d448aa4541073ee9e4, type: 3}
   - {fileID: 1000012909287652, guid: abb9f519b142e304d9c45b56afa768bc, type: 3}
   - {fileID: 8009858165730397543, guid: c2a01d48d01d91447b0e60f5a94e9e66, type: 3}
+  - {fileID: 7129409968729204767, guid: a62a82a6bc860fb46a3527ecac0ecee3, type: 3}
+  - {fileID: 7261819779245193037, guid: ec009f7e9e33c6a4bb14607b8d6e5942, type: 3}
   timeInterpolationGui: 0
 --- !u!114 &6009867241373883958
 MonoBehaviour:

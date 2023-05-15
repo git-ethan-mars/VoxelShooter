@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using Data;
-using Infrastructure.Services;
+﻿using Infrastructure.Services;
 using Mirror;
 using UnityEngine;
 
@@ -8,43 +6,26 @@ namespace PlayerLogic
 {
     public class Inventory : NetworkBehaviour
     {
-        public readonly SyncList<int> Ids = new();
-        [HideInInspector] public List<InventoryItem> inventory;
-        public Dictionary<int,RangeWeaponData> RangeWeapons;
-        public Dictionary<int,MeleeWeaponData> MeleeWeapons;
+        public readonly SyncList<int> ItemIds = new();
+        [HideInInspector] [SyncVar(hook = nameof(OnChangeSlot))] public int currentSlotId;
         private IStaticDataService _staticData;
+        private GameObject _currentItemModel;
         
         private void Awake()
         {
             _staticData = AllServices.Container.Single<IStaticDataService>();
         }
 
-        public override void OnStartLocalPlayer()
+        public override void OnStartClient()
         {
-            InitInventory();
+            OnChangeSlot(0,currentSlotId);
         }
 
-        private void InitInventory()
+        private void OnChangeSlot(int oldSlotId, int newSlotId)
         {
-            inventory = new List<InventoryItem>();
-            foreach (var id in Ids)
-            {
-                inventory.Add(_staticData.GetItem(id));
-            }
-            RangeWeapons = new Dictionary<int, RangeWeaponData>();
-            MeleeWeapons = new Dictionary<int, MeleeWeaponData>();
-            foreach (var id in Ids)
-            {
-                var item = _staticData.GetItem(id);
-                if (item.itemType == ItemType.RangeWeapon)
-                {
-                    RangeWeapons[id] = new RangeWeaponData((RangeWeaponItem) item);
-                }
-                if (item.itemType == ItemType.MeleeWeapon)
-                {
-                    MeleeWeapons[id] = new MeleeWeaponData((MeleeWeaponItem) item);
-                }
-            }
+            if (_currentItemModel != null)
+                Destroy(_currentItemModel);
+            _currentItemModel = Instantiate(_staticData.GetItem(ItemIds[newSlotId]).prefab, GetComponent<Player>().itemPosition);
         }
     }
 }

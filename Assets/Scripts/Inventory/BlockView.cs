@@ -1,48 +1,67 @@
 ﻿using Data;
-using Infrastructure.Factory;
-using PlayerLogic;
+using Mirror;
+using Networking.Messages;
 using Rendering;
+using TMPro;
 using UI;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Inventory
 {
-    public class BlockView : IInventoryItemView, ILeftMouseButtonDownHandler, IUpdated
+    public class BlockView : IInventoryItemView, IConsumable, ILeftMouseButtonDownHandler, IUpdated
     {
+        public int Count { get; set; }
         public Sprite Icon { get; }
-        private GameObject Model { get; }
         private Color32 _currentColor;
-        private readonly CubeRenderer _cubeRenderer;
-        private readonly MapSynchronization _mapSynchronization;
-        private int _blockCount;
         private readonly GameObject _blockInfo;
+        private readonly TextMeshProUGUI _blockCountText;
+        private readonly int _id;
+        private readonly Image _blockImage;
+        private readonly Sprite _blockSprite;
+        private readonly GameObject _palette;
+        private readonly GameObject _transparentBlock;
+        private readonly Raycaster _rayCaster;
 
 
-        public BlockView(InventoryModelFactory gameFactory, CubeRenderer cubeRender, MapSynchronization mapSynchronization, GameObject hud, BlockItem configuration, GameObject player)
+        public BlockView(GameObject hud, BlockItem configuration, TransparentMeshPool transparentMeshPool,
+            Raycaster raycaster)
         {
-            _cubeRenderer = cubeRender;
-            _mapSynchronization = mapSynchronization;
-            var palette = hud.GetComponent<Hud>().palette;
-            _blockInfo = hud.GetComponent<Hud>().blockInfo;
+            _palette = hud.GetComponent<Hud>().palette;
+            _blockInfo = hud.GetComponent<Hud>().itemInfo;
+            _blockImage = hud.GetComponent<Hud>().itemIcon;
+            _blockCountText = hud.GetComponent<Hud>().itemCount;
             Icon = configuration.inventoryIcon;
-            Model = gameFactory.CreateGameModel(configuration.prefab, player.GetComponent<Player>().itemPosition);
-            Model.SetActive(false);
-            palette.GetComponent<PaletteCreator>().OnColorUpdate += UpdateColor;
-            _blockCount = player.GetComponent<Player>().blockCount;
+            _blockSprite = configuration.itemSprite;
+            _palette.GetComponent<PaletteCreator>().OnColorUpdate += UpdateColor;
+            Count = configuration.count;
+            _id = configuration.id;
+            _rayCaster = raycaster;
+            _transparentBlock =
+                transparentMeshPool.CreateTransparentGameObject(configuration.prefab, _currentColor);
+            _transparentBlock.SetActive(false);
+        }
+        
+
+        public void OnCountChanged()
+        {
+            _blockCountText.SetText(Count.ToString());
         }
 
         public void Select()
         {
-            Model.SetActive(true);
+            _transparentBlock.SetActive(true);
+            _palette.SetActive(true);
             _blockInfo.SetActive(true);
-            _cubeRenderer.EnableCube();
+            _blockImage.sprite = _blockSprite;
+            _blockCountText.SetText(Count.ToString());
         }
 
         public void Unselect()
         {
-            Model.SetActive(false);
+            _palette.SetActive(false);
             _blockInfo.SetActive(false);
-            _cubeRenderer.DisableCube();
+            _transparentBlock.SetActive(false);
         }
 
         public void OnLeftMouseButtonDown()
@@ -52,29 +71,32 @@ namespace Inventory
 
         public void InnerUpdate()
         {
-            _cubeRenderer.UpdateCube(true);
+            var raycastResult = _rayCaster.GetRayCastHit(out var raycastHit);
+            if (!raycastResult)
+                _transparentBlock.SetActive(false);
+            else
+            {
+                _transparentBlock.SetActive(true);
+                _transparentBlock.transform.position = Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2) +
+                                                       new Vector3(0.5f, 0.5f, 0.5f);
+            }
         }
 
         private void PlaceBlock(Color32 color)
         {
-            var raycastResult = _cubeRenderer.GetRayCastHit(out var raycastHit);
+            var raycastResult = _rayCaster.GetRayCastHit(out var raycastHit);
             if (!raycastResult) return;
-            _mapSynchronization.UpdateBlocksOnServer(
+            NetworkClient.Send(new AddBlocksRequest(
                 new[] {Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2)},
-                new[] {new BlockData(color)});
+                new[] {new BlockData(color)}, _id));
         }
 
 
         private void UpdateColor(Color32 newColor)
         {
             _currentColor = newColor;
+            _transparentBlock.GetComponent<MeshRenderer>().material.color = new Color(newColor.r / 255f,
+                newColor.g / 255f, newColor.b / 255f, 100 / 255f);
         }
-
-        private void UpdateBlockCount(int blockCount)
-        {
-            _blockCount = blockCount;
-        }
-
-        
     }
 }

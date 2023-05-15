@@ -16,9 +16,14 @@ namespace Infrastructure.States
             _states = new Dictionary<Type, IExitableState>
             {
                 [typeof(BootstrapState)] = new BootstrapState(this, sceneLoader, allServices, coroutineRunner),
-                [typeof(LoadMapState)] = new LoadMapState(this, sceneLoader, allServices.Single<IGameFactory>(), isLocalBuild),
+                [typeof(MainMenuState)] = new MainMenuState(this, sceneLoader, allServices.Single<IUIFactory>(), isLocalBuild),
+                [typeof(CreateMatchState)] = new CreateMatchState(this, allServices.Single<IUIFactory>(), isLocalBuild),
+                [typeof(StartSteamLobbyState)] = new StartSteamLobbyState(this, sceneLoader, allServices.Single<IGameFactory>()),
+                [typeof(JoinSteamLobbyState)] = new JoinSteamLobbyState(this, sceneLoader, allServices.Single<IGameFactory>()),
+                [typeof(StartMatchState)] = new StartMatchState(this, sceneLoader, allServices.Single<IGameFactory>()),
+                [typeof(JoinLocalMatchState)] = new JoinLocalMatchState(this,  sceneLoader, allServices.Single<IGameFactory>()),
                 [typeof(GameLoopState)] =
-                    new GameLoopState(allServices.Single<IUIFactory>())
+                    new GameLoopState(allServices.Single<IUIFactory>(), isLocalBuild)
             };
             
         }
@@ -33,6 +38,13 @@ namespace Infrastructure.States
         {
             var state = ChangeState<TState>();
             state.Enter(payload);
+        }
+
+        public void Enter<TState, TPayload1, TPayload2>(TPayload1 payload1, TPayload2 payload2)
+            where TState : class, IPayloadedState<TPayload1, TPayload2>
+        {
+            var state = ChangeState<TState>();
+            state.Enter(payload1, payload2);
         }
 
         private TState ChangeState<TState>() where TState : class, IExitableState

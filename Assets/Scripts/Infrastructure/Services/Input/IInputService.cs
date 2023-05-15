@@ -9,8 +9,9 @@ namespace Infrastructure.Services.Input
         bool IsSecondActionButtonDown();
         bool IsReloadingButtonDown();
         bool IsFirstActionButtonHold();
-        bool IsSecondActionButtonHold();
         bool IsJumpButtonDown();
         float GetScrollSpeed();
+        float GetMouseVerticalAxis();
+        float GetMouseHorizontalAxis();
     }
 }

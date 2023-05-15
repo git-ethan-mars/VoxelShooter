@@ -107,7 +107,7 @@ namespace MapLogic
                         (x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
                         (z & (ChunkData.ChunkSize - 1))];
                     if (!block.Color
-                            .Equals(BlockColor.Empty)) continue;
+                            .Equals(BlockColor.empty)) continue;
                     blocks[(x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
                            (z & (ChunkData.ChunkSize - 1))] = new BlockData(waterColor);
                 }

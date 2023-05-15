@@ -16,3 +16,5 @@ MonoBehaviour:
   itemType: 3
   inventoryIcon: {fileID: 21300000, guid: ede331431870261449d4d10f4a679bfe, type: 3}
   prefab: {fileID: 8095424271465804933, guid: e7405952fd04e7d44882e05434800af4, type: 3}
+  itemSprite: {fileID: 21300000, guid: bdba8651c9955fe46ab98523b5600518, type: 3}
+  count: 50

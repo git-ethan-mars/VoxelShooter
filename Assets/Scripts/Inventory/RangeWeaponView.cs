@@ -9,27 +9,33 @@ using UnityEngine.UI;
 
 namespace Inventory
 {
-    public class RangeWeaponView : IInventoryItemView, ILeftMouseButtonDownHandler, ILeftMouseButtonHoldHandler, IUpdated
+    public class RangeWeaponView : IInventoryItemView, IReloading, IShooting, ILeftMouseButtonDownHandler, ILeftMouseButtonHoldHandler, IUpdated
     {
         public Sprite Icon { get; }
         private GameObject Model { get; }
-        private readonly RangeWeaponData _rangeWeapon;
+        public int BulletsInMagazine { get; set; }
+        public int TotalBullets { get; set; }
+        private readonly IInputService _inputService;
         private readonly GameObject _ammoInfo;
         private readonly TextMeshProUGUI _ammoCount;
         private readonly Camera _fpsCam;
         private readonly RangeWeaponSynchronization _bulletSynchronization;
-        private readonly IInputService _inputService;
         private readonly Image _ammoType;
+        private readonly Sprite _ammoTypeIcon;
+        private readonly int _id;
 
 
         public RangeWeaponView(IInventoryModelFactory gameFactory, IInputService inputService, Camera camera,
             Transform itemPosition, GameObject player, GameObject hud, RangeWeaponData configuration)
         {
             _inputService = inputService;
-            _rangeWeapon = configuration;
-            Model = gameFactory.CreateGameModel(_rangeWeapon.Prefab, itemPosition);
+            Model = gameFactory.CreateGameModel(configuration.Prefab, itemPosition);
             Model.SetActive(false);
-            Icon = _rangeWeapon.InventoryIcon;
+            Icon = configuration.InventoryIcon;
+            _ammoTypeIcon = configuration.AmmoTypeIcon;
+            _id = configuration.ID;
+            BulletsInMagazine = configuration.BulletsInMagazine;
+            TotalBullets = configuration.TotalBullets;
             Model.GetComponentInChildren<Transform>();
             _fpsCam = camera;
             _ammoInfo = hud.GetComponent<Hud>().ammoInfo;
@@ -38,10 +44,12 @@ namespace Inventory
             _bulletSynchronization = player.GetComponent<RangeWeaponSynchronization>();
         }
 
+
         public void Select()
         {
             _ammoInfo.SetActive(true);
-            _ammoType.sprite = _rangeWeapon.AmmoTypeIcon;
+            _ammoType.sprite = _ammoTypeIcon;
+            _ammoCount.SetText($"{BulletsInMagazine} / {TotalBullets}");
             Model.SetActive(true);
         }
 
@@ -55,20 +63,30 @@ namespace Inventory
         public void InnerUpdate()
         {
             if (_inputService.IsReloadingButtonDown())
-                _bulletSynchronization.CmdReload(_rangeWeapon.ID);
-            _ammoCount.SetText($"{_rangeWeapon.BulletsInMagazine} / {_rangeWeapon.TotalBullets}");
+                _bulletSynchronization.CmdReload(_id);
         }
 
         public void OnLeftMouseButtonDown()
         {
             var ray = _fpsCam.ViewportPointToRay(new Vector2(0.5f, 0.5f));
-            _bulletSynchronization.CmdShootSingle(ray, _rangeWeapon.ID);
+            _bulletSynchronization.CmdShootSingle(ray, _id);
         }
 
         public void OnLeftMouseButtonHold()
         {
             var ray = _fpsCam.ViewportPointToRay(new Vector2(0.5f, 0.5f));
-            _bulletSynchronization.CmdShootAutomatic(ray, _rangeWeapon.ID);
+            _bulletSynchronization.CmdShootAutomatic(ray, _id);
+        }
+
+
+        public void OnReloadResult()
+        {
+            _ammoCount.SetText($"{BulletsInMagazine} / {TotalBullets}");
+        }
+
+        public void OnShootResult()
+        {
+            _ammoCount.SetText($"{BulletsInMagazine} / {TotalBullets}");
         }
     }
 }

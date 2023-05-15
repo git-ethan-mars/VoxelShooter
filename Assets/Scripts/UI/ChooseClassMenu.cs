@@ -1,6 +1,7 @@
 using Data;
 using Mirror;
 using Networking.Messages;
+using Steamworks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,8 +13,13 @@ namespace UI
         [SerializeField] private Button sniperButton;
         [SerializeField] private Button combatantButton;
         [SerializeField] private Button grenadierButton;
-        
-        
+        private bool _isLocalBuild;
+
+
+        public void Construct(bool isLocalBuild)
+        {
+            _isLocalBuild = isLocalBuild;
+        }
         
         private void Start()
         {
@@ -25,7 +31,7 @@ namespace UI
 
         private void ChangeClass(GameClass gameClass)
         {
-            NetworkClient.Send(new ChangeClassRequest(gameClass));
+            NetworkClient.Send(new ChangeClassRequest(gameClass, _isLocalBuild ? Random.value.ToString() : SteamFriends.GetPersonaName()));
             gameObject.SetActive(false);
         }
         

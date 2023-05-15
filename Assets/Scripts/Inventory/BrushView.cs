@@ -1,5 +1,6 @@
 ﻿using Data;
 using Infrastructure.Factory;
+using Networking.Synchronization;
 using PlayerLogic;
 using Rendering;
 using UI;
@@ -52,9 +53,9 @@ namespace Inventory
             var raycastResult = _cubeRenderer.GetRayCastHit(out var raycastHit);
             if (!raycastResult) return;
             {
-                _mapSynchronization.UpdateBlocksOnServer(
+                /*_mapSynchronization.UpdateBlocksOnServer(
                     new[] {Vector3Int.FloorToInt(raycastHit.point - raycastHit.normal / 2)},
-                    new[] {new BlockData(color)});
+                    new[] {new BlockData(color)});*/
             }
         }
 

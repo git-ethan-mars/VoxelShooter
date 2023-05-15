@@ -6,5 +6,6 @@
         Sniper,
         Combatant,
         Grenadier,
+        None,
     }
 }

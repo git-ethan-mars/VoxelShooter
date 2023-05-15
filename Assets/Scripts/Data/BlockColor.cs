@@ -18,7 +18,7 @@ namespace Data
             }
         }
 
-        public static readonly Color32 Empty = new(0, 0, 0, 0);
+        public static readonly Color32 empty = new(0, 0, 0, 0);
 
         private static Dictionary<byte, Color> _colorById;
         public static Dictionary<byte, Color> ColorById => _colorById ??= CacheColorByIdDictionary();

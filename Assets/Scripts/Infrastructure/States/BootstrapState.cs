@@ -11,7 +11,7 @@ namespace Infrastructure.States
         private readonly GameStateMachine _stateMachine;
         private readonly SceneLoader _sceneLoader;
         private readonly AllServices _allServices;
-        private ICoroutineRunner _coroutineRunner;
+        private readonly ICoroutineRunner _coroutineRunner;
 
         public BootstrapState(GameStateMachine stateMachine, SceneLoader sceneLoader, AllServices allServices,
             ICoroutineRunner coroutineRunner)
@@ -34,7 +34,7 @@ namespace Infrastructure.States
 
         private void EnterLoadLevel()
         {
-            _stateMachine.Enter<LoadMapState, string>("Main");
+            _stateMachine.Enter<MainMenuState, string>("MainMenu");
         }
 
         private void RegisterServices()
@@ -46,11 +46,14 @@ namespace Infrastructure.States
             staticData.LoadPlayerCharacteristics();
             _allServices.RegisterSingle<IInputService>(new StandaloneInputService());
             _allServices.RegisterSingle<IAssetProvider>(new AssetProvider());
-            _allServices.RegisterSingle<IParticleFactory>(new ParticleFactory(_allServices.Single<IAssetProvider>(), _coroutineRunner));
+            _allServices.RegisterSingle<IParticleFactory>(new ParticleFactory(_allServices.Single<IAssetProvider>(),
+                _coroutineRunner));
             _allServices.RegisterSingle<IEntityFactory>(new EntityFactory(_allServices.Single<IAssetProvider>()));
             _allServices.RegisterSingle<IGameFactory>(
-                new GameFactory(_allServices.Single<IAssetProvider>(), _allServices.Single<IEntityFactory>(), _allServices.Single<IParticleFactory>(), staticData));
-            _allServices.RegisterSingle<IUIFactory>(new UIFactory(_allServices.Single<IAssetProvider>(), _allServices.Single<IInputService>(), _allServices.Single<IEntityFactory>()));
+                new GameFactory(_allServices.Single<IAssetProvider>(), _allServices.Single<IEntityFactory>(),
+                    _allServices.Single<IParticleFactory>(), staticData));
+            _allServices.RegisterSingle<IUIFactory>(new UIFactory(_allServices.Single<IAssetProvider>(),
+                _allServices.Single<IInputService>(), _allServices.Single<IStaticDataService>()));
         }
     }
 }

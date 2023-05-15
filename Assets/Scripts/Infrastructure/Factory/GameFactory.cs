@@ -2,9 +2,10 @@
 using Data;
 using Infrastructure.AssetManagement;
 using Infrastructure.Services;
+using Infrastructure.States;
 using MapLogic;
-using Mirror;
 using Networking;
+using Networking.Transport;
 using Rendering;
 using UnityEngine;
 
@@ -17,7 +18,6 @@ namespace Infrastructure.Factory
         private readonly IStaticDataService _staticData;
         private const string NetworkManagerPath = "Prefabs/Network/LocalNetworkManager";
         private const string SteamNetworkManagerPath = "Prefabs/Network/SteamManager";
-        private const string MapSynchronization = "Prefabs/MapCreation/MapSyncronization";
         private const string MapRendererPath = "Prefabs/MapCreation/MapRenderer";
         private const string ChunkRendererPath = "Prefabs/MapCreation/Chunk";
         private const string Wall = "Prefabs/MapCreation/Wall";
@@ -35,27 +35,21 @@ namespace Infrastructure.Factory
             _staticData = staticData;
         }
 
-        public GameObject CreateLocalNetworkManager(bool isLocalBuild)
+        public GameObject CreateLocalNetworkManager(GameStateMachine stateMachine, ServerSettings serverSettings)
         {
             _networkManager = _assets.Instantiate(NetworkManagerPath);
-            _networkManager.GetComponent<CustomNetworkManager>().Construct(_staticData, _entityFactory,
-                _particleFactory, _assets, isLocalBuild);
+            _networkManager.GetComponent<CustomNetworkManager>().Construct(stateMachine, _staticData, _entityFactory,
+                _particleFactory, _assets, serverSettings, true);
             return _networkManager;
         }
 
-        public GameObject CreateSteamNetworkManager(bool isLocalBuild)
+        public GameObject CreateSteamNetworkManager(GameStateMachine stateMachine, ServerSettings serverSettings, bool isHost)
         {
             _networkManager = _assets.Instantiate(SteamNetworkManagerPath);
-            _networkManager.GetComponent<CustomNetworkManager>().Construct(_staticData, _entityFactory,
-                _particleFactory, _assets, isLocalBuild);
+            _networkManager.GetComponent<CustomNetworkManager>().Construct(stateMachine, _staticData, _entityFactory,
+                _particleFactory, _assets, serverSettings, false);
+            _networkManager.GetComponent<SteamLobby>().Construct(isHost);
             return _networkManager;
-        }
-
-        public GameObject CreateMapSynchronization()
-        {
-            var mapSynchronization = _assets.Instantiate(MapSynchronization);
-            NetworkServer.Spawn(mapSynchronization);
-            return mapSynchronization;
         }
 
         public void CreateWalls(Map map)
