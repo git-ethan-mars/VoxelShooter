@@ -87,18 +87,9 @@ namespace Inventory
         private void PlaceBlock(Color32 color)
         {
             var raycastResult = _rayCaster.GetRayCastHit(out var raycastHit);
-            var blockPosition = Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2);
-            var playerPosition = _player.transform.position;
             if (!raycastResult) return;
-            if (playerPosition.x > blockPosition.x 
-                && playerPosition.x < blockPosition.x + 1 
-                && playerPosition.z > blockPosition.z
-                && playerPosition.z < blockPosition.z + 1
-                && playerPosition.y > blockPosition.y - 2
-                && playerPosition.y < blockPosition.y + 2)
-                return;
             NetworkClient.Send(new AddBlocksRequest(
-                new[] {blockPosition},
+                new[] {Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2)},
                 new[] {new BlockData(color)}, _id));
         }
 

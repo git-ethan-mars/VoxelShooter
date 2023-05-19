@@ -61,11 +61,28 @@ namespace Networking
             var validPositionList = new List<Vector3Int>();
             var validBlockDataList = new List<BlockData>();
             var blocksUsed = Math.Min(blockAmount, message.GlobalPositions.Length);
+            
             for (var i = 0; i < blocksUsed; i++)
             {
-                if (!_serverData.Map.IsValidPosition(message.GlobalPositions[i])) continue;
+                foreach (var player in _serverData.DataByConnection.Keys)
+                {
+                    if (player.identity != null)
+                    {
+                        var playerPosition = player.identity.gameObject.transform.position;
+                        var blockPosition = message.GlobalPositions[i];
+                        if (playerPosition.x > blockPosition.x
+                            && playerPosition.x < blockPosition.x + 1
+                            && playerPosition.z > blockPosition.z
+                            && playerPosition.z < blockPosition.z + 1
+                            && playerPosition.y > blockPosition.y - 2
+                            && playerPosition.y < blockPosition.y + 2)
+                            return;
+                    }
+                }
+                
+                if (!_serverData.Map.IsValidPosition(message.GlobalPositions[i])) return;
                 var currentBlock = _serverData.Map.GetBlockByGlobalPosition(message.GlobalPositions[i]);
-                if (currentBlock.Equals(message.Blocks[i])) continue;
+                if (currentBlock.Equals(message.Blocks[i])) return;
                 validPositionList.Add(message.GlobalPositions[i]);
                 validBlockDataList.Add(message.Blocks[i]);
             }
