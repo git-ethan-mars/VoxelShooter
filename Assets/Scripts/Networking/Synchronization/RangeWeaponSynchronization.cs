@@ -31,8 +31,9 @@ namespace Networking.Synchronization
         {
             var weapon = _serverData.GetPlayerData(connection).RangeWeaponsById[weaponId];
             if (!CanShoot(weapon) || weapon.IsAutomatic) return;
-            ApplyRaycast(connection, ray, weapon);
             Shoot(weapon, connection);
+            for (var i = 0; i < weapon.BulletsPerShot; i++)
+                ApplyRaycast(connection, ray, weapon);
             GetComponent<SoundSynchronization>().PlayAudioClip(connection!.identity,
                 _audioClips.FindIndex(audioClip => audioClip == weapon.ShootAudioClip), 100);
         }
@@ -42,8 +43,9 @@ namespace Networking.Synchronization
         {
             var weapon = _serverData.GetPlayerData(connection).RangeWeaponsById[weaponId];
             if (!CanShoot(weapon) || !weapon.IsAutomatic) return;
-            ApplyRaycast(connection, ray, weapon);
             Shoot(weapon, connection);
+            for (var i = 0; i < weapon.BulletsPerShot; i++)
+                ApplyRaycast(connection, ray, weapon);
             GetComponent<SoundSynchronization>().PlayAudioClip(connection!.identity,
                 _audioClips.FindIndex(audioClip => audioClip == weapon.ShootAudioClip), 100);
         }
@@ -63,11 +65,6 @@ namespace Networking.Synchronization
         {
             StartCoroutine(WaitForSeconds(() => ResetShoot(rangeWeapon), rangeWeapon.TimeBetweenShooting));
             StartCoroutine(WaitForSeconds(() => ResetRecoil(rangeWeapon), rangeWeapon.ResetTimeRecoil));
-            /*if (weapon.BulletsPerShot > 0 && weapon.BulletsInMagazine > 0)
-            {
-                Shoot(weapon);
-                weapon.BulletsPerShot--;
-            }*/
         }
 
 
@@ -117,7 +114,7 @@ namespace Networking.Synchronization
         [Server]
         private void Shoot(RangeWeaponData rangeWeapon, NetworkConnectionToClient connection)
         {
-            rangeWeapon.BulletsInMagazine -= rangeWeapon.BulletsPerShot;
+            rangeWeapon.BulletsInMagazine -= 1;
             if (rangeWeapon.BulletsInMagazine <= 0)
                 rangeWeapon.BulletsInMagazine = 0;
             rangeWeapon.IsReady = false;
@@ -138,7 +135,11 @@ namespace Networking.Synchronization
                 ? 0
                 : UnityEngine.Random.Range(-rangeWeapon.BaseRecoil, rangeWeapon.BaseRecoil) *
                   (rangeWeapon.RecoilModifier + 1);
-            ray = new Ray(ray.origin, ray.direction + new Vector3(x, y));
+            var z = Math.Abs(rangeWeapon.RecoilModifier) < 0.00001
+                ? 0
+                : UnityEngine.Random.Range(-rangeWeapon.BaseRecoil, rangeWeapon.BaseRecoil) *
+                  (rangeWeapon.RecoilModifier + 1);
+            ray = new Ray(ray.origin, ray.direction + new Vector3(x, y, z));
             var raycastResult = Physics.Raycast(ray, out var rayHit, rangeWeapon.Range);
             if (!raycastResult) return;
             if (rayHit.collider.CompareTag("Head"))

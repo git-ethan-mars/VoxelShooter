@@ -14,7 +14,6 @@ namespace Data
         public float resetTimeRecoil;
         public float range;
         public float reloadTime;
-        public float timeBetweenShots;
         public int magazineSize;
         public int bulletsPerTap;
         public int totalBullets;
