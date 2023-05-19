@@ -110,7 +110,7 @@ namespace Inventory
                 if (item.itemType == ItemType.Block)
                 {
                     var handler = new BlockView(_hud,
-                        (BlockItem) item, _transparentMeshPool, _raycaster);
+                        (BlockItem) item, _transparentMeshPool, _raycaster, _player);
                     _slots.Add(new Slot(item, handler));
                 }
 
