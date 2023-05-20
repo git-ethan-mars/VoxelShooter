@@ -69,7 +69,7 @@ MonoBehaviour:
   m_text: Player name
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 826f3a6926e5ed14583e9ab0a32696ab, type: 2}
-  m_sharedMaterial: {fileID: -5574846122589945228, guid: 826f3a6926e5ed14583e9ab0a32696ab, type: 2}
+  m_sharedMaterial: {fileID: -4699972163460073869, guid: 826f3a6926e5ed14583e9ab0a32696ab, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -863,6 +863,7 @@ MonoBehaviour:
   placeDistance: 0
   nickName: 
   itemPosition: {fileID: 7893378094424813921}
+  nickNameCanvas: {fileID: 1450820302951618227}
   head: {fileID: 3276943837764328836}
   leftArm: {fileID: 5157539354050062272}
   rightArm: {fileID: 8023773675403276542}

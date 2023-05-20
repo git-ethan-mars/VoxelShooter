@@ -2,18 +2,20 @@
 using Data;
 using Infrastructure.Factory;
 using MapLogic;
+using Mirror;
 using Networking;
 using UnityEngine;
 
 namespace Infrastructure.States
 {
-    public class JoinLocalMatchState : IPayloadedState<string>
+    public class JoinLocalMatchState : IState
     {
         private readonly IGameFactory _gameFactory;
         private readonly bool _isLocalBuild;
         private readonly GameStateMachine _stateMachine;
         private CustomNetworkManager _networkManager;
         private readonly SceneLoader _sceneLoader;
+        private const string Main = "Main";
 
 
         public JoinLocalMatchState(GameStateMachine stateMachine, SceneLoader sceneLoader, IGameFactory gameFactory)
@@ -24,9 +26,9 @@ namespace Infrastructure.States
         }
 
 
-        public void Enter(string sceneName)
+        public void Enter()
         {
-            _sceneLoader.Load(sceneName, OnLoaded);
+            _sceneLoader.Load(Main, OnLoaded);
         }
 
         private void OnLoaded()
@@ -40,7 +42,7 @@ namespace Infrastructure.States
         {
             _gameFactory.CreateWalls(map);
             _gameFactory.CreateMapRenderer(map, mapUpdates);
-            _stateMachine.Enter<GameLoopState>();
+            _stateMachine.Enter<GameLoopState ,CustomNetworkManager>(_networkManager);
         }
 
 

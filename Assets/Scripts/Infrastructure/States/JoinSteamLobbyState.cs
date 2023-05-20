@@ -7,11 +7,13 @@ using UnityEngine;
 
 namespace Infrastructure.States
 {
-    public class JoinSteamLobbyState : IPayloadedState<string>
+    public class JoinSteamLobbyState : IState
     {
         private readonly GameStateMachine _stateMachine;
         private readonly SceneLoader _sceneLoader;
         private readonly IGameFactory _gameFactory;
+        private CustomNetworkManager _networkManager;
+        private const string Main = "Main";
 
         public JoinSteamLobbyState(GameStateMachine stateMachine, SceneLoader sceneLoader, IGameFactory gameFactory)
         {
@@ -20,23 +22,23 @@ namespace Infrastructure.States
             _gameFactory = gameFactory;
         }
 
-        public void Enter(string sceneName)
+        public void Enter()
         {
-            _sceneLoader.Load(sceneName, OnLoaded);
+            _sceneLoader.Load(Main, OnLoaded);
         }
 
         private void OnLoaded()
         {
-            var networkManager = _gameFactory.CreateSteamNetworkManager(_stateMachine, null, false)
+            _networkManager = _gameFactory.CreateSteamNetworkManager(_stateMachine, null, false)
                 .GetComponent<CustomNetworkManager>();
-            networkManager.MapDownloaded += OnMapDownloaded;
+            _networkManager.MapDownloaded += OnMapDownloaded;
         }
 
         private void OnMapDownloaded(Map map, Dictionary<Vector3Int, BlockData> mapUpdates)
         {
             _gameFactory.CreateWalls(map);
             _gameFactory.CreateMapRenderer(map, mapUpdates);
-            _stateMachine.Enter<GameLoopState>();
+            _stateMachine.Enter<GameLoopState, CustomNetworkManager>(_networkManager);
         }
 
         public void Exit()

@@ -15,7 +15,7 @@ namespace Infrastructure.States
         {
             _states = new Dictionary<Type, IExitableState>
             {
-                [typeof(BootstrapState)] = new BootstrapState(this, sceneLoader, allServices, coroutineRunner),
+                [typeof(BootstrapState)] = new BootstrapState(this, sceneLoader, allServices, coroutineRunner, isLocalBuild),
                 [typeof(MainMenuState)] = new MainMenuState(this, sceneLoader, allServices.Single<IUIFactory>(), isLocalBuild),
                 [typeof(CreateMatchState)] = new CreateMatchState(this, allServices.Single<IUIFactory>(), isLocalBuild),
                 [typeof(StartSteamLobbyState)] = new StartSteamLobbyState(this, sceneLoader, allServices.Single<IGameFactory>()),
@@ -38,13 +38,6 @@ namespace Infrastructure.States
         {
             var state = ChangeState<TState>();
             state.Enter(payload);
-        }
-
-        public void Enter<TState, TPayload1, TPayload2>(TPayload1 payload1, TPayload2 payload2)
-            where TState : class, IPayloadedState<TPayload1, TPayload2>
-        {
-            var state = ChangeState<TState>();
-            state.Enter(payload1, payload2);
         }
 
         private TState ChangeState<TState>() where TState : class, IExitableState

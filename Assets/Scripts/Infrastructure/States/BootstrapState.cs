@@ -2,6 +2,8 @@
 using Infrastructure.Factory;
 using Infrastructure.Services;
 using Infrastructure.Services.Input;
+using Infrastructure.Services.PlayerDataLoader;
+using Infrastructure.Services.StaticData;
 
 namespace Infrastructure.States
 {
@@ -12,14 +14,16 @@ namespace Infrastructure.States
         private readonly SceneLoader _sceneLoader;
         private readonly AllServices _allServices;
         private readonly ICoroutineRunner _coroutineRunner;
+        private readonly bool _isLocalBuild;
 
         public BootstrapState(GameStateMachine stateMachine, SceneLoader sceneLoader, AllServices allServices,
-            ICoroutineRunner coroutineRunner)
+            ICoroutineRunner coroutineRunner, bool isLocalBuild)
         {
             _stateMachine = stateMachine;
             _sceneLoader = sceneLoader;
             _allServices = allServices;
             _coroutineRunner = coroutineRunner;
+            _isLocalBuild = isLocalBuild;
             RegisterServices();
         }
 
@@ -34,7 +38,7 @@ namespace Infrastructure.States
 
         private void EnterLoadLevel()
         {
-            _stateMachine.Enter<MainMenuState, string>("MainMenu");
+            _stateMachine.Enter<MainMenuState>();
         }
 
         private void RegisterServices()
@@ -46,14 +50,25 @@ namespace Infrastructure.States
             staticData.LoadPlayerCharacteristics();
             _allServices.RegisterSingle<IInputService>(new StandaloneInputService());
             _allServices.RegisterSingle<IAssetProvider>(new AssetProvider());
+            if (_isLocalBuild)
+            {
+                _allServices.RegisterSingle<IAvatarLoader>(new LocalAvatarLoader(_allServices.Single<IAssetProvider>()));
+            }
+            else
+            {
+                _allServices.RegisterSingle<IAvatarLoader>(new SteamAvatarLoader());
+            }
+
             _allServices.RegisterSingle<IParticleFactory>(new ParticleFactory(_allServices.Single<IAssetProvider>(),
                 _coroutineRunner));
+            _allServices.RegisterSingle<IInventoryModelFactory>(new InventoryModelFactory());
             _allServices.RegisterSingle<IEntityFactory>(new EntityFactory(_allServices.Single<IAssetProvider>()));
             _allServices.RegisterSingle<IGameFactory>(
                 new GameFactory(_allServices.Single<IAssetProvider>(), _allServices.Single<IEntityFactory>(),
-                    _allServices.Single<IParticleFactory>(), staticData));
+                    staticData, _allServices.Single<IParticleFactory>()));
             _allServices.RegisterSingle<IUIFactory>(new UIFactory(_allServices.Single<IAssetProvider>(),
-                _allServices.Single<IInputService>(), _allServices.Single<IStaticDataService>()));
+                _allServices.Single<IInputService>(), _allServices.Single<IStaticDataService>(),
+                _allServices.Single<IAvatarLoader>()));
         }
     }
 }

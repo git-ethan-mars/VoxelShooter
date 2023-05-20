@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using Data;
 using Infrastructure.AssetManagement;
-using Infrastructure.Services;
+using Infrastructure.Services.PlayerDataLoader;
+using Infrastructure.Services.StaticData;
 using Infrastructure.States;
 using MapLogic;
 using Networking;
@@ -23,11 +24,13 @@ namespace Infrastructure.Factory
         private const string Wall = "Prefabs/MapCreation/Wall";
         private GameObject _networkManager;
         private readonly IEntityFactory _entityFactory;
+        private readonly IAvatarLoader _avatarLoader;
+        private readonly IPlayerFactory _playerFactory;
         private readonly IParticleFactory _particleFactory;
 
 
-        public GameFactory(IAssetProvider assets, IEntityFactory entityFactory, IParticleFactory particleFactory,
-            IStaticDataService staticData)
+        public GameFactory(IAssetProvider assets, IEntityFactory entityFactory,
+            IStaticDataService staticData, IParticleFactory particleFactory)
         {
             _assets = assets;
             _entityFactory = entityFactory;
@@ -39,15 +42,16 @@ namespace Infrastructure.Factory
         {
             _networkManager = _assets.Instantiate(NetworkManagerPath);
             _networkManager.GetComponent<CustomNetworkManager>().Construct(stateMachine, _staticData, _entityFactory,
-                _particleFactory, _assets, serverSettings, true);
+                _particleFactory, _assets, serverSettings);
             return _networkManager;
         }
 
-        public GameObject CreateSteamNetworkManager(GameStateMachine stateMachine, ServerSettings serverSettings, bool isHost)
+        public GameObject CreateSteamNetworkManager(GameStateMachine stateMachine, ServerSettings serverSettings,
+            bool isHost)
         {
             _networkManager = _assets.Instantiate(SteamNetworkManagerPath);
             _networkManager.GetComponent<CustomNetworkManager>().Construct(stateMachine, _staticData, _entityFactory,
-                _particleFactory, _assets, serverSettings, false);
+                _particleFactory, _assets, serverSettings);
             _networkManager.GetComponent<SteamLobby>().Construct(isHost);
             return _networkManager;
         }

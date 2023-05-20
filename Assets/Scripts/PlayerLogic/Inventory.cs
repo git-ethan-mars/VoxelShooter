@@ -1,4 +1,5 @@
 ﻿using Infrastructure.Services;
+using Infrastructure.Services.StaticData;
 using Mirror;
 using UnityEngine;
 

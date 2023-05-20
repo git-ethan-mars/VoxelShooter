@@ -3,14 +3,15 @@ using UnityEngine;
 
 namespace Infrastructure.States
 {
-    public class MainMenuState : IPayloadedState<string>
+    public class MainMenuState : IState
     {
         private readonly SceneLoader _sceneLoader;
         private readonly IUIFactory _uiFactory;
         private readonly GameStateMachine _stateMachine;
         private GameObject _mainMenu;
         private readonly bool _isLocalBuild;
-
+        private const string MainMenu = "MainMenu";
+        
         public MainMenuState(GameStateMachine stateMachine, SceneLoader sceneLoader, IUIFactory uiFactory,
             bool isLocalBuild)
         {
@@ -20,10 +21,11 @@ namespace Infrastructure.States
             _isLocalBuild = isLocalBuild;
         }
 
-        public void Enter(string sceneName)
+        public void Enter()
         {
-            _sceneLoader.Load(sceneName, EnterLoadLevel);
+            _sceneLoader.Load(MainMenu, EnterLoadLevel);
         }
+
 
         private void EnterLoadLevel()
         {

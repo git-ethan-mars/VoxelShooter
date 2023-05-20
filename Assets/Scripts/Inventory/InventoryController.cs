@@ -7,6 +7,7 @@ using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
 using Infrastructure.Services;
 using Infrastructure.Services.Input;
+using Infrastructure.Services.StaticData;
 using Mirror;
 using Networking.Messages;
 using Networking.Synchronization;

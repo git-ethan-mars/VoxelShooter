@@ -1,8 +1,14 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Data;
-using Infrastructure.Services;
+using Infrastructure;
+using Infrastructure.AssetManagement;
+using Infrastructure.Factory;
+using Infrastructure.Services.StaticData;
 using MapLogic;
 using Mirror;
+using Networking.Messages;
+using Steamworks;
 
 namespace Networking
 {
@@ -10,37 +16,78 @@ namespace Networking
     {
         public readonly Dictionary<NetworkConnectionToClient, PlayerData> DataByConnection;
         public Map Map { get; }
-        private readonly IStaticDataService _staticData;
         public readonly List<KillData> Kills;
+        private readonly IStaticDataService _staticData;
+        private readonly IPlayerFactory _playerFactory;
+        private readonly ICoroutineRunner _coroutineRunner;
+        private readonly ServerSettings _serverSettings;
 
-
-        public ServerData(IStaticDataService staticDataService, Map map)
+        public ServerData(ICoroutineRunner coroutineRunner, IAssetProvider assets, IStaticDataService staticDataService,
+            IParticleFactory particleFactory, Map map, ServerSettings serverSettings)
         {
+            _coroutineRunner = coroutineRunner;
             DataByConnection = new Dictionary<NetworkConnectionToClient, PlayerData>();
             Kills = new List<KillData>();
             _staticData = staticDataService;
             Map = map;
+            _serverSettings = serverSettings;
+            _playerFactory = new PlayerFactory(assets, this, particleFactory);
         }
 
-        public void AddPlayer(NetworkConnectionToClient connection, GameClass chosenClass, string nick)
+        public void AddPlayer(NetworkConnectionToClient connection, GameClass chosenClass, CSteamID steamID,
+            string nickname)
         {
-            DataByConnection[connection] = new PlayerData(chosenClass, nick, _staticData);
+            var playerData = new PlayerData(steamID, nickname);
+            playerData.IsAlive = true;
+            DataByConnection[connection] = playerData;
+            ChangeClassInternal(DataByConnection[connection], chosenClass);
+            NetworkServer.SendToAll(new ScoreboardMessage(GetScoreData()));
+            _playerFactory.CreatePlayer(connection);
         }
-        
 
-        public PlayerData GetPlayerData(NetworkConnectionToClient connection)
+        public void ChangeClass(NetworkConnectionToClient connection, GameClass chosenClass)
         {
-            return DataByConnection.TryGetValue(connection, out var playerData) ? playerData : null;
+            var playerData = GetPlayerData(connection);
+            if (playerData.GameClass == chosenClass) return;
+            ChangeClassInternal(playerData, chosenClass);
+            if (playerData.IsAlive)
+            {
+                playerData.IsAlive = false;
+                playerData.Deaths += 1;
+                _playerFactory.CreateSpectatorPlayer(connection);
+                var respawnTimer = new RespawnTimer(_coroutineRunner, connection, _serverSettings.SpawnTime,
+                    () => Respawn(connection, playerData));
+                respawnTimer.Start();
+            }
+            NetworkServer.SendToAll(new ScoreboardMessage(GetScoreData()));
+
         }
 
-        public void UpdatePlayerClass(NetworkConnectionToClient connection, GameClass newClass)
+        private void Respawn(NetworkConnectionToClient connection, PlayerData playerData)
         {
-            DataByConnection[connection] = new PlayerData(newClass, DataByConnection[connection].NickName, _staticData);
+            playerData.IsAlive = true;
+            _playerFactory.RespawnPlayer(connection, playerData);
         }
 
         public void DeletePlayer(NetworkConnectionToClient connection)
         {
             DataByConnection.Remove(connection);
+            NetworkServer.SendToAll(new ScoreboardMessage(GetScoreData()));
+        }
+
+
+        public void AddKill(NetworkConnectionToClient killer, NetworkConnectionToClient victim)
+        {
+            if (killer is not null)
+                DataByConnection[killer].Kills += 1;
+            DataByConnection[victim].Deaths += 1;
+            Kills.Add(new KillData(killer, victim));
+            NetworkServer.SendToAll(new ScoreboardMessage(GetScoreData()));
+        }
+
+        public PlayerData GetPlayerData(NetworkConnectionToClient connection)
+        {
+            return DataByConnection.TryGetValue(connection, out var playerData) ? playerData : null;
         }
 
         public int GetItemCount(NetworkConnectionToClient connection, int itemId)
@@ -55,12 +102,55 @@ namespace Networking
             playerData.ItemCountById[itemId] = value;
         }
 
-        public void AddKill(NetworkConnectionToClient killer, NetworkConnectionToClient victim)
+        private void ChangeClassInternal(PlayerData playerData, GameClass chosenClass)
         {
-            if (killer is not null)
-                DataByConnection[killer].PlayerStatistic.Kills += 1;
-            DataByConnection[victim].PlayerStatistic.Deaths += 1;
-            Kills.Add(new KillData(killer,victim));
+            playerData.GameClass = chosenClass;
+            playerData.Characteristic = _staticData.GetPlayerCharacteristic(playerData.GameClass);
+            playerData.Health = playerData.Characteristic.maxHealth;
+            playerData.ItemCountById = new Dictionary<int, int>();
+            playerData.ItemsId = _staticData.GetInventory(playerData.GameClass).Select(item => item.id).ToList();
+            playerData.RangeWeaponsById = new Dictionary<int, RangeWeaponData>();
+            playerData.MeleeWeaponsById = new Dictionary<int, MeleeWeaponData>();
+            playerData.ItemCountById = new Dictionary<int, int>();
+            foreach (var itemId in playerData.ItemsId)
+            {
+                var item = _staticData.GetItem(itemId);
+                if (item.itemType == ItemType.RangeWeapon)
+                {
+                    playerData.RangeWeaponsById[itemId] = new RangeWeaponData((RangeWeaponItem) item);
+                }
+
+                if (item.itemType == ItemType.MeleeWeapon)
+                {
+                    playerData.MeleeWeaponsById[itemId] = new MeleeWeaponData((MeleeWeaponItem) item);
+                }
+
+                if (item.itemType == ItemType.Tnt)
+                {
+                    playerData.ItemCountById[itemId] = ((TntItem) item).count;
+                    continue;
+                }
+
+                if (item.itemType == ItemType.Block)
+                {
+                    playerData.ItemCountById[itemId] = ((BlockItem) item).count;
+                    continue;
+                }
+
+                playerData.ItemCountById[itemId] = 1;
+            }
+        }
+
+        private List<ScoreData> GetScoreData()
+        {
+            var scoreData = new SortedSet<ScoreData>();
+            foreach (var playerData in DataByConnection.Values)
+            {
+                scoreData.Add(new ScoreData(playerData.SteamID, playerData.NickName, playerData.Kills,
+                    playerData.Deaths, playerData.GameClass));
+            }
+
+            return scoreData.ToList();
         }
     }
 }

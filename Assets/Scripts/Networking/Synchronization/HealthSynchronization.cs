@@ -25,7 +25,7 @@ namespace Networking.Synchronization
             {
                 playerData.Health = 0;
                 _serverData.AddKill(source, receiver);
-                _playerFactory.CreateSpectatorPlayer(receiver, playerData.GameClass);
+                _playerFactory.CreateSpectatorPlayer(receiver);
                 
             }
             else

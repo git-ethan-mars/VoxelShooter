@@ -13,5 +13,7 @@ namespace Infrastructure.Services.Input
         float GetScrollSpeed();
         float GetMouseVerticalAxis();
         float GetMouseHorizontalAxis();
+        bool IsScoreboardButtonHold();
+        bool IsChooseClassButtonDown();
     }
 }

@@ -11,7 +11,10 @@ namespace Networking
 {
     public class ClientMessagesHandler
     {
-        public event Action<Map, Dictionary<Vector3Int, BlockData>> MapDownloaded;  
+        public event Action<ServerTime> ServerTimeUpdated;
+        public event Action<ServerTime> RespawnTimeUpdated; 
+        public event Action<Map, Dictionary<Vector3Int, BlockData>> MapDownloaded;
+        public event Action<List<ScoreData>> ScoreboardUpdated;
         public readonly Dictionary<Vector3Int, BlockData> MapUpdates;
         private readonly List<byte> _byteChunks = new();
         
@@ -23,12 +26,18 @@ namespace Networking
         {
             NetworkClient.RegisterHandler<DownloadMapMessage>(OnMapDownloadMessage);
             NetworkClient.RegisterHandler<UpdateMapMessage>(OnMapUpdateMessage);
+            NetworkClient.RegisterHandler<ServerTimeMessage>(OnServerTimeMessage);
+            NetworkClient.RegisterHandler<RespawnTimeMessage>(OnRespawnTimeMessage);
+            NetworkClient.RegisterHandler<ScoreboardMessage>(OnScoreboardMessage);
         }
 
         public void RemoveHandlers()
         {
             NetworkClient.UnregisterHandler<DownloadMapMessage>();
             NetworkClient.UnregisterHandler<UpdateMapMessage>();
+            NetworkClient.UnregisterHandler<ServerTimeMessage>();
+            NetworkClient.UnregisterHandler<RespawnTimeMessage>();
+            NetworkClient.UnregisterHandler<ScoreboardMessage>();
         }
 
         private void OnMapDownloadMessage(DownloadMapMessage mapMessage)
@@ -51,6 +60,21 @@ namespace Networking
                 MapUpdates[message.Positions[i]] = message.BlockData[i];
             }
             
+        }
+
+        private void OnServerTimeMessage(ServerTimeMessage message)
+        {
+            ServerTimeUpdated?.Invoke(message.TimeLeft);
+        }
+
+        private void OnRespawnTimeMessage(RespawnTimeMessage message)
+        {
+            RespawnTimeUpdated?.Invoke(message.TimeLeft);
+        }
+
+        private void OnScoreboardMessage(ScoreboardMessage message)
+        {
+            ScoreboardUpdated?.Invoke(message.Scores);
         }
     }
 }

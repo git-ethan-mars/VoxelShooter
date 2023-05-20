@@ -1,8 +1,9 @@
 ﻿using Infrastructure.Factory;
+using Networking;
 
 namespace Infrastructure.States
 {
-    public class GameLoopState : IState
+    public class GameLoopState : IPayloadedState<CustomNetworkManager>
     {
         private readonly IUIFactory _uiFactory;
         private readonly bool _isLocalBuild;
@@ -12,9 +13,12 @@ namespace Infrastructure.States
             _uiFactory = uiFactory;
             _isLocalBuild = isLocalBuild;
         }
-        public void Enter()
+
+        public void Enter(CustomNetworkManager networkManager)
         {
             _uiFactory.CreateChooseClassMenu(_isLocalBuild);
+            _uiFactory.CreateTimeCounter(networkManager);
+            _uiFactory.CreateScoreboard(networkManager);
         }
 
         public void Exit()

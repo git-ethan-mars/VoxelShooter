@@ -9,28 +9,29 @@ namespace PlayerLogic
     public class Player : NetworkBehaviour
     {
         [HideInInspector] [SyncVar] public float placeDistance;
-        [SyncVar] public string nickName;
-        public Transform itemPosition;
-        [Header("Body parts")] [SerializeField]
-        private Transform head;
+        [HideInInspector] [SyncVar] public string nickName;
+        public Transform itemPosition; 
+        [SerializeField] private GameObject nickNameCanvas;
+        [Header("Body parts")] 
+        [SerializeField] private Transform head;
         [SerializeField] private Transform leftArm;
         [SerializeField] private Transform rightArm;
         [SerializeField] private Transform chest;
         [SerializeField] private Transform leftLeg;
         [SerializeField] private Transform rightLeg;
-
         private GameObject _hud;
 
-        public void Construct(PlayerCharacteristic characteristic, string nick)
+        public void Construct(PlayerData playerData)
         {
-            placeDistance = characteristic.placeDistance;
-            nickName = nick;
+            placeDistance = playerData.Characteristic.placeDistance;
+            nickName = playerData.NickName;
         }
 
         public override void OnStartLocalPlayer()
         {
             _hud = AllServices.Container.Single<IUIFactory>().CreateHud(gameObject);
             TurnOffBodyRender();
+            TurnOffNickName();
         }
 
         public void OnDestroy()
@@ -46,6 +47,11 @@ namespace PlayerLogic
             chest.gameObject.GetComponent<Renderer>().enabled = false;
             leftLeg.gameObject.GetComponent<Renderer>().enabled = false;
             rightLeg.gameObject.GetComponent<Renderer>().enabled = false;
+        }
+
+        private void TurnOffNickName()
+        {
+            nickNameCanvas.SetActive(false);
         }
     }
 }

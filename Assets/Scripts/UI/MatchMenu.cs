@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace UI
 {
-    public class MatchMenu : MonoBehaviour
+    public class MatchMenu : Window
     {
         [SerializeField] private Button backButton;
         [SerializeField] private Button resetButton;
@@ -26,13 +26,11 @@ namespace UI
         private Limitation _playersLimitation;
         private Limitation _timeLimitation;
         private GameStateMachine _stateMachine;
-        public const int MinGameTime = 5;
-        public const int MaxGameTime = 15;
-        public const int MinPlayersNumber = 2;
-        public const int MaxPlayersNumber = 8;
-        public const int SpawnTime = 7;
-        private const string MainMenu = "MainMenu";
-        private const string Main = "Main";
+        private const int MinGameTime = 1;
+        private const int MaxGameTime = 15;
+        private const int MinPlayersNumber = 2;
+        private const int MaxPlayersNumber = 8;
+        private const int SpawnTime = 7;
 
 
         public void Construct(GameStateMachine stateMachine, bool isLocalBuild)
@@ -41,16 +39,25 @@ namespace UI
             InitPlayersNumber();
             InitGameDuration();
             resetButton.onClick.AddListener(ResetLimitations);
-            backButton.onClick.AddListener(() => stateMachine.Enter<MainMenuState, string>(MainMenu));
+            backButton.onClick.AddListener(stateMachine.Enter<MainMenuState>);
             if (isLocalBuild)
-                applyButton.onClick.AddListener(() => _stateMachine.Enter<StartMatchState, string, ServerSettings>(Main,
-                    new ServerSettings(_timeLimitation.CurrentValue, _playersLimitation.CurrentValue, SpawnTime, mapName.text)));
+                applyButton.onClick.AddListener(() => _stateMachine.Enter<StartMatchState, ServerSettings>(new ServerSettings(_timeLimitation.CurrentValue, _playersLimitation.CurrentValue, SpawnTime, mapName.text)));
             else
             {
-                applyButton.onClick.AddListener(()=>_stateMachine.Enter<StartSteamLobbyState, string, ServerSettings>(Main,
+                applyButton.onClick.AddListener(()=>_stateMachine.Enter<StartSteamLobbyState, ServerSettings>(
                     new ServerSettings(_timeLimitation.CurrentValue, _playersLimitation.CurrentValue, SpawnTime, mapName.text)));
             }
             
+        }
+
+        private void OnEnable()
+        {
+            ShowCursor();
+        }
+
+        private void OnDisable()
+        {
+            HideCursor();
         }
 
         private void InitGameDuration()

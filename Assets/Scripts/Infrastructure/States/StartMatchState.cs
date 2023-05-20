@@ -7,12 +7,13 @@ using UnityEngine;
 
 namespace Infrastructure.States
 {
-    public class StartMatchState : IPayloadedState<string, ServerSettings>
+    public class StartMatchState : IPayloadedState<ServerSettings>
     {
+        private CustomNetworkManager _networkManager;
         private readonly SceneLoader _sceneLoader;
         private readonly IGameFactory _gameFactory;
-        private CustomNetworkManager _networkManager;
         private readonly GameStateMachine _stateMachine;
+        private const string Main = "Main";
 
         public StartMatchState(GameStateMachine stateMachine, SceneLoader sceneLoader, IGameFactory gameFactory)
         {
@@ -21,9 +22,9 @@ namespace Infrastructure.States
             _gameFactory = gameFactory;
         }
 
-        public void Enter(string sceneName, ServerSettings serverSettings)
+        public void Enter(ServerSettings serverSettings)
         {
-            _sceneLoader.Load(sceneName, () => CreateHost(serverSettings));
+            _sceneLoader.Load(Main, () => CreateHost(serverSettings));
         }
 
         private void CreateHost(ServerSettings serverSettings)
@@ -38,7 +39,7 @@ namespace Infrastructure.States
         {
             _gameFactory.CreateWalls(map);
             _gameFactory.CreateMapRenderer(map, mapUpdates);
-            _stateMachine.Enter<GameLoopState>();
+            _stateMachine.Enter<GameLoopState,CustomNetworkManager>(_networkManager);
         }
 
         public void Exit()

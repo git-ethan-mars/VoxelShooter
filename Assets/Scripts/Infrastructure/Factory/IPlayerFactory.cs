@@ -1,12 +1,12 @@
 ﻿using Data;
-using Infrastructure.Services;
 using Mirror;
 
 namespace Infrastructure.Factory
 {
-    public interface IPlayerFactory : IService
+    public interface IPlayerFactory
     {
-        void CreatePlayer(NetworkConnectionToClient connection, GameClass gameClass, string nickName);
-        void CreateSpectatorPlayer(NetworkConnectionToClient connection, GameClass gameClass);
+        void CreatePlayer(NetworkConnectionToClient connection);
+        void CreateSpectatorPlayer(NetworkConnectionToClient connection);
+        void RespawnPlayer(NetworkConnectionToClient connection, PlayerData playerData);
     }
 }

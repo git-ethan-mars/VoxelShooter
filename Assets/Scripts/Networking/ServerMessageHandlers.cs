@@ -16,15 +16,13 @@ namespace Networking
         private readonly IEntityFactory _entityFactory;
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly ServerData _serverData;
-        private readonly IPlayerFactory _playerFactory;
         
         public ServerMessageHandlers(IEntityFactory entityFactory, ICoroutineRunner coroutineRunner,
-            ServerData serverData, IPlayerFactory playerFactory)
+            ServerData serverData)
         {
             _serverData = serverData;
             _entityFactory = entityFactory;
             _coroutineRunner = coroutineRunner;
-            _playerFactory = playerFactory;
         }
 
         public void RegisterHandlers()
@@ -51,7 +49,16 @@ namespace Networking
 
         private void OnChangeClass(NetworkConnectionToClient connection, ChangeClassRequest message)
         {
-            _playerFactory.CreatePlayer(connection, message.GameClass, message.NickName);
+            var playerData = _serverData.GetPlayerData(connection);
+            if (playerData is null)
+            {
+                _serverData.AddPlayer(connection, message.GameClass, message.SteamID, message.Nickname);
+               
+            }
+            else
+            {
+                _serverData.ChangeClass(connection, message.GameClass);
+            }
         }
 
         private void OnAddBlocks(NetworkConnectionToClient connection, AddBlocksRequest message)
@@ -178,7 +185,7 @@ namespace Networking
 
         private void OnNextCameraRequest(NetworkConnectionToClient connection, NextPlayerCameraRequest message)
         {
-            var alivePlayers = _serverData.DataByConnection.Where(kvp => kvp.Value.GameClass != GameClass.None)
+            var alivePlayers = _serverData.DataByConnection.Where(kvp => kvp.Value.IsAlive)
                 .ToList();
             if (alivePlayers.Count == 0)
             {
@@ -210,7 +217,7 @@ namespace Networking
             {
                 var killData = _serverData.Kills[i];
                 if (killData.Victim != connection) continue;
-                if (_serverData.GetPlayerData(killData.Killer).GameClass == GameClass.None)
+                if (!_serverData.GetPlayerData(killData.Killer).IsAlive)
                 {
                     OnNextCameraRequest(connection, new NextPlayerCameraRequest());
                     return;

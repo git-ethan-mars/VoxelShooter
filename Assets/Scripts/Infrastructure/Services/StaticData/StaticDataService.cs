@@ -3,7 +3,7 @@ using System.Linq;
 using Data;
 using UnityEngine;
 
-namespace Infrastructure.Services
+namespace Infrastructure.Services.StaticData
 {
     public class StaticDataService : IStaticDataService
     {

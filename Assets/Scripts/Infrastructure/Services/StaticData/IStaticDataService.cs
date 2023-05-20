@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Data;
 
-namespace Infrastructure.Services
+namespace Infrastructure.Services.StaticData
 {
     public interface IStaticDataService : IService
     {
