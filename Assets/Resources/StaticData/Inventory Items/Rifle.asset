@@ -24,7 +24,6 @@ MonoBehaviour:
   resetTimeRecoil: 2
   range: 150
   reloadTime: 3
-  timeBetweenShots: 0
   magazineSize: 5
   bulletsPerTap: 1
   totalBullets: 15
@@ -34,6 +33,6 @@ MonoBehaviour:
   legMultiplier: 0.8
   armMultiplier: 0.5
   shootingAudioClip: {fileID: 8300000, guid: 2e459cd27f71f224ebbcde1e5950f9d9, type: 3}
-  shootingVolume: 0.7
+  shootingVolume: 0.3
   reloadingAudioClip: {fileID: 8300000, guid: 27795beba10a55e4da2b4c1210e0080a, type: 3}
-  reloadingVolume: 0.5
+  reloadingVolume: 0.3
