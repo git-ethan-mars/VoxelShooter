@@ -51,9 +51,11 @@ namespace Inventory
 
         public void OnRightMouseButtonDown()
         {
-
-            var ray = _fpsCam.ViewportPointToRay(new Vector2(0.5f, 0.5f));
-            _meleeWeaponSynchronization.CmdHit(ray, _meleeWeapon.ID, true);
+            if (_meleeWeapon.HasStrongHit)
+            {
+                var ray = _fpsCam.ViewportPointToRay(new Vector2(0.5f, 0.5f));
+                _meleeWeaponSynchronization.CmdHit(ray, _meleeWeapon.ID, true);
+            }
         }
 
         public void InnerUpdate()

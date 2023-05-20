@@ -20,6 +20,7 @@ namespace Data
         [Range(0,5)]
         public float armMultiplier;
         public int damageToBlock;
+        public bool hasStrongHit;
         
         [Header("Audio")]
         public AudioClip diggingAudioClip;

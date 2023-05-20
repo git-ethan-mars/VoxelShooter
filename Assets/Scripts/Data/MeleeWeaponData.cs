@@ -26,6 +26,7 @@ namespace Data
         public float HitVolume;
         
         public bool IsReady;
+        public bool HasStrongHit;
 
         public MeleeWeaponData(MeleeWeaponItem primaryMeleeWeapon)
         {
@@ -44,6 +45,7 @@ namespace Data
             TimeBetweenHit = primaryMeleeWeapon.timeBetweenHit;
             Prefab = primaryMeleeWeapon.prefab;
             Icon = primaryMeleeWeapon.inventoryIcon;
+            HasStrongHit = primaryMeleeWeapon.hasStrongHit;
             IsReady = true;
         }
     }
