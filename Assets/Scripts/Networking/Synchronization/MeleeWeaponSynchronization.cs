@@ -118,7 +118,7 @@ namespace Networking.Synchronization
         private void HitImpact(NetworkConnectionToClient source, RaycastHit rayHit, int damage)
         {
             var receiver = rayHit.collider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
-            if (!receiver.identity.isLocalPlayer)
+            if (source != receiver)
             {
                 GetComponent<HealthSynchronization>().Damage(source, receiver, damage);
                 _particleFactory.CreateBlood(rayHit.point);

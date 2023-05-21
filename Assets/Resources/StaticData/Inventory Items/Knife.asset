@@ -24,7 +24,8 @@ MonoBehaviour:
   legMultiplier: 0.8
   armMultiplier: 0.6
   damageToBlock: 0
+  hasStrongHit: 0
   diggingAudioClip: {fileID: 8300000, guid: 613f72723faec4849a39244e8dbf5d0a, type: 3}
-  diggingVolume: 1
+  diggingVolume: 0.228
   hitAudioClip: {fileID: 8300000, guid: d38f24af2fdf21246b10fb75a6d880af, type: 3}
-  hitVolume: 1
+  hitVolume: 0.246

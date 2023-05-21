@@ -11,8 +11,9 @@ namespace Networking.Messages
         public readonly float DelayInSecond;
         public readonly Vector3Int ExplosionCenter;
         public readonly int Radius;
+        public readonly int Damage;
 
-        public TntSpawnRequest(int id, Vector3 position, Quaternion rotation, float delayInSecond, Vector3Int explosionCenter, int radius)
+        public TntSpawnRequest(int id, Vector3 position, Quaternion rotation, float delayInSecond, Vector3Int explosionCenter, int radius, int damage)
         {
             ItemId = id;
             Position = position;
@@ -20,6 +21,7 @@ namespace Networking.Messages
             DelayInSecond = delayInSecond;
             ExplosionCenter = explosionCenter;
             Radius = radius;
+            Damage = damage;
         }
     }
 }

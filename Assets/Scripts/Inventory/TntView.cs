@@ -18,6 +18,7 @@ namespace Inventory
         private readonly GameObject _transparentTnt;
         private readonly float _delayInSeconds;
         private readonly int _radius;
+        private readonly int _damage;
         private readonly int _itemId;
         private readonly GameObject _tntInfo;
         private readonly TextMeshProUGUI _tntCountText;
@@ -30,6 +31,7 @@ namespace Inventory
             Icon = configuration.inventoryIcon;
             _delayInSeconds = configuration.delayInSeconds;
             _radius = configuration.radius;
+            _damage = configuration.damage;
             _itemId = configuration.id;
             _tntInfo = hud.itemInfo;
             _tntCountText = hud.itemCount;
@@ -71,7 +73,7 @@ namespace Inventory
                 Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2) +
                 GetTntOffsetPosition(raycastHit.normal),
                 GetTntRotation(raycastHit.normal), _delayInSeconds,
-                Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2), _radius));
+                Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2), _radius, _damage));
         }
 
 

@@ -7,6 +7,8 @@ using Infrastructure;
 using Infrastructure.Factory;
 using Mirror;
 using Networking.Messages;
+using Networking.Synchronization;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Networking
@@ -117,22 +119,22 @@ namespace Networking
             var tnt = _entityFactory.CreateTnt(message.Position, message.Rotation);
             _coroutineRunner.StartCoroutine(ExplodeWithDelay(Vector3Int.FloorToInt(message.ExplosionCenter), tnt,
                 message.DelayInSecond,
-                message.Radius));
+                message.Radius, connection, message));
             _serverData.SetItemCount(connection, message.ItemId, tntCount - 1);
             connection.Send(new ItemUseResult(message.ItemId, tntCount - 1));
         }
 
         private IEnumerator ExplodeWithDelay(Vector3Int explosionCenter, GameObject tnt, float delayInSeconds,
-            int radius)
+            int radius, NetworkConnectionToClient connection, TntSpawnRequest message)
         {
             yield return new WaitForSeconds(delayInSeconds);
             if (!tnt) yield break;
             var explodedTnt = new List<GameObject>();
-            ExplodeImmediately(explosionCenter, tnt, radius, explodedTnt);
+            ExplodeImmediately(explosionCenter, tnt, radius, explodedTnt, connection, message);
         }
 
         private void ExplodeImmediately(Vector3Int explosionCenter, GameObject tnt, int radius,
-            List<GameObject> explodedTnt)
+            List<GameObject> explodedTnt, NetworkConnectionToClient connection, TntSpawnRequest message)
         {
             var validPositions = new List<Vector3Int>();
             for (var x = -radius; x <= radius; x++)
@@ -166,7 +168,13 @@ namespace Networking
                 if (hitCollider.CompareTag("TNT") && explodedTnt.All(x => x.gameObject != hitCollider.gameObject))
                 {
                     ExplodeImmediately(Vector3Int.FloorToInt(hitCollider.gameObject.transform.position),
-                        hitCollider.gameObject, radius, explodedTnt);
+                        hitCollider.gameObject, radius, explodedTnt, connection, message);
+                }
+
+                if (hitCollider.CompareTag("Player"))
+                {
+                    var receiver = hitCollider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
+                    receiver.identity.GetComponent<HealthSynchronization>().Damage(connection, receiver, message.Damage);
                 }
             }
         }

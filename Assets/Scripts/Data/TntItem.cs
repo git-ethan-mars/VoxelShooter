@@ -9,6 +9,7 @@ namespace Data
         public int count;
         public float delayInSeconds;
         public int radius;
+        public int damage;
 
         public void Awake()
         {
