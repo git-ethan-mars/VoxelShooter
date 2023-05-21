@@ -35,7 +35,7 @@ namespace Networking.Synchronization
             for (var i = 0; i < weapon.BulletsPerShot; i++)
                 ApplyRaycast(connection, ray, weapon);
             GetComponent<SoundSynchronization>().PlayAudioClip(connection!.identity,
-                _audioClips.FindIndex(audioClip => audioClip == weapon.ShootAudioClip), 100);
+                _audioClips.FindIndex(audioClip => audioClip == weapon.ShootAudioClip), weapon.ShootingVolume);
         }
 
         [Command]
@@ -47,7 +47,7 @@ namespace Networking.Synchronization
             for (var i = 0; i < weapon.BulletsPerShot; i++)
                 ApplyRaycast(connection, ray, weapon);
             GetComponent<SoundSynchronization>().PlayAudioClip(connection!.identity,
-                _audioClips.FindIndex(audioClip => audioClip == weapon.ShootAudioClip), 100);
+                _audioClips.FindIndex(audioClip => audioClip == weapon.ShootAudioClip), weapon.ShootingVolume);
         }
 
         [Command]
@@ -57,7 +57,7 @@ namespace Networking.Synchronization
             if (!CanReload(weapon)) return;
             Reload(weapon, connection);
             GetComponent<SoundSynchronization>().PlayAudioClip(connection!.identity,
-                _audioClips.FindIndex(audioClip => audioClip == weapon.ReloadingAudioClip), 100);
+                _audioClips.FindIndex(audioClip => audioClip == weapon.ReloadingAudioClip), weapon.ReloadingVolume);
         }
         
         [Server]
@@ -173,7 +173,7 @@ namespace Networking.Synchronization
         private void ShootImpact(NetworkConnectionToClient source, RaycastHit rayHit, int damage)
         {
             var receiver = rayHit.collider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
-            if (!receiver.identity.isLocalPlayer)
+            if (source != receiver)
             {
                 GetComponent<HealthSynchronization>().Damage(source, receiver, damage);
                 _particleFactory.CreateBlood(rayHit.point);

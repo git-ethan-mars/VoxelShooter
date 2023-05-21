@@ -9,6 +9,7 @@ using MapLogic;
 using Mirror;
 using Networking.Messages;
 using Steamworks;
+using UnityEngine;
 
 namespace Networking
 {
@@ -82,6 +83,12 @@ namespace Networking
                 DataByConnection[killer].Kills += 1;
             DataByConnection[victim].Deaths += 1;
             Kills.Add(new KillData(killer, victim));
+            var playerData = DataByConnection[victim];
+            playerData.IsAlive = false;
+            _playerFactory.CreateSpectatorPlayer(victim);
+            var respawnTimer = new RespawnTimer(_coroutineRunner, victim, _serverSettings.SpawnTime,
+                () => Respawn(victim, playerData));
+            respawnTimer.Start();
             NetworkServer.SendToAll(new ScoreboardMessage(GetScoreData()));
         }
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using CameraLogic;
 using Data;
 using Infrastructure.AssetManagement;
 using Mirror;
@@ -55,6 +56,7 @@ namespace Infrastructure.Factory
         public void CreateSpectatorPlayer(NetworkConnectionToClient connection)
         {
             var spectator = _assets.Instantiate(SpectatorPlayerPath);
+            spectator.GetComponent<Spectator>().Construct(_serverData);
             ReplacePlayer(connection, spectator);
         }
 
@@ -95,7 +97,7 @@ namespace Infrastructure.Factory
         private void ConfigureSynchronization(GameObject player)
         {
             player.GetComponent<MapSynchronization>().Construct(_serverData.Map);
-            player.GetComponent<HealthSynchronization>().Construct(_serverData, this);
+            player.GetComponent<HealthSynchronization>().Construct(_serverData);
             player.GetComponent<RangeWeaponSynchronization>().Construct(_particleFactory, _assets, _serverData);
             player.GetComponent<MeleeWeaponSynchronization>().Construct(_particleFactory, _serverData);
         }

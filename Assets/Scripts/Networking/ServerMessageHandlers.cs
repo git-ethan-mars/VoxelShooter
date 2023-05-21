@@ -16,7 +16,7 @@ namespace Networking
         private readonly IEntityFactory _entityFactory;
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly ServerData _serverData;
-        
+
         public ServerMessageHandlers(IEntityFactory entityFactory, ICoroutineRunner coroutineRunner,
             ServerData serverData)
         {
@@ -32,8 +32,6 @@ namespace Networking
             NetworkServer.RegisterHandler<AddBlocksRequest>(OnAddBlocks);
             NetworkServer.RegisterHandler<RemoveBlocksRequest>(OnRemoveBlocks);
             NetworkServer.RegisterHandler<ChangeSlotRequest>(OnChangeSlot);
-            NetworkServer.RegisterHandler<KillerCameraRequest>(OnKillerCameraRequest);
-            NetworkServer.RegisterHandler<NextPlayerCameraRequest>(OnNextCameraRequest);
         }
 
         public void RemoveHandlers()
@@ -43,8 +41,6 @@ namespace Networking
             NetworkServer.UnregisterHandler<AddBlocksRequest>();
             NetworkServer.UnregisterHandler<RemoveBlocksRequest>();
             NetworkServer.UnregisterHandler<ChangeSlotRequest>();
-            NetworkServer.UnregisterHandler<KillerCameraRequest>();
-            NetworkServer.UnregisterHandler<NextPlayerCameraRequest>();
         }
 
         private void OnChangeClass(NetworkConnectionToClient connection, ChangeClassRequest message)
@@ -53,7 +49,6 @@ namespace Networking
             if (playerData is null)
             {
                 _serverData.AddPlayer(connection, message.GameClass, message.SteamID, message.Nickname);
-               
             }
             else
             {
@@ -68,7 +63,7 @@ namespace Networking
             var validPositionList = new List<Vector3Int>();
             var validBlockDataList = new List<BlockData>();
             var blocksUsed = Math.Min(blockAmount, message.GlobalPositions.Length);
-            
+
             for (var i = 0; i < blocksUsed; i++)
             {
                 foreach (var player in _serverData.DataByConnection.Keys)
@@ -86,7 +81,7 @@ namespace Networking
                             return;
                     }
                 }
-                
+
                 if (!_serverData.Map.IsValidPosition(message.GlobalPositions[i])) return;
                 var currentBlock = _serverData.Map.GetBlockByGlobalPosition(message.GlobalPositions[i]);
                 if (currentBlock.Equals(message.Blocks[i])) return;
@@ -181,54 +176,6 @@ namespace Networking
             if (connection.identity == null) return;
             connection.identity.GetComponent<PlayerLogic.Inventory>().currentSlotId = message.Index;
             connection.Send(new ChangeSlotResult(message.Index));
-        }
-
-        private void OnNextCameraRequest(NetworkConnectionToClient connection, NextPlayerCameraRequest message)
-        {
-            var alivePlayers = _serverData.DataByConnection.Where(kvp => kvp.Value.IsAlive)
-                .ToList();
-            if (alivePlayers.Count == 0)
-            {
-                var mapWidth = _serverData.Map.MapData.Width;
-                var mapHeight = _serverData.Map.MapData.Height;
-                var mapDepth = _serverData.Map.MapData.Depth;
-                connection.Send(new SpectatorTargetResult(null, new Vector3(mapWidth / 2, mapHeight / 2, mapDepth / 2 )));
-                return;
-            }
-            var index = 0;
-            for (; index < alivePlayers.Count; index++)
-            {
-                if (alivePlayers[index].Key == _serverData.GetPlayerData(connection).SpectatedPlayer)
-                {
-                    connection.Send(
-                        new SpectatorTargetResult(alivePlayers[(index + 1) % alivePlayers.Count].Key.identity, Vector3.zero));
-                    _serverData.GetPlayerData(connection).SpectatedPlayer = alivePlayers[(index + 1) % alivePlayers.Count].Key;
-                    return;
-                }
-            }
-
-            connection.Send(new SpectatorTargetResult(alivePlayers[0].Key.identity, Vector3.zero));
-            _serverData.GetPlayerData(connection).SpectatedPlayer = alivePlayers[0].Key;
-        }
-
-        private void OnKillerCameraRequest(NetworkConnectionToClient connection, KillerCameraRequest message)
-        {
-            for (var i = _serverData.Kills.Count - 1; i >= 0; i--)
-            {
-                var killData = _serverData.Kills[i];
-                if (killData.Victim != connection) continue;
-                if (!_serverData.GetPlayerData(killData.Killer).IsAlive)
-                {
-                    OnNextCameraRequest(connection, new NextPlayerCameraRequest());
-                    return;
-                }
-                
-                connection.Send(new SpectatorTargetResult(killData.Killer.identity, Vector3.zero));
-                _serverData.GetPlayerData(connection).SpectatedPlayer = killData.Killer;
-                return;
-            }
-
-            OnNextCameraRequest(connection, new NextPlayerCameraRequest());
         }
     }
 }

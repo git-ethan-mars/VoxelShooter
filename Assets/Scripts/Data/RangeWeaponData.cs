@@ -29,6 +29,8 @@ namespace Data
         public readonly AudioClip ReloadingAudioClip;
         public readonly AudioClip ShootAudioClip;
         public readonly Sprite AmmoTypeIcon;
+        public readonly float ReloadingVolume;
+        public readonly float ShootingVolume;
 
 
         public RangeWeaponData(RangeWeaponItem primaryRangeWeapon)
@@ -57,6 +59,8 @@ namespace Data
             Range = primaryRangeWeapon.range;
             ReloadingAudioClip = primaryRangeWeapon.reloadingAudioClip;
             ShootAudioClip = primaryRangeWeapon.shootingAudioClip;
+            ReloadingVolume = primaryRangeWeapon.reloadingVolume;
+            ShootingVolume = primaryRangeWeapon.shootingVolume;
         }
     }
 }

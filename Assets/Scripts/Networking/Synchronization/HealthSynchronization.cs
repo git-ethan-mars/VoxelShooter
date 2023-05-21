@@ -1,5 +1,4 @@
-﻿using Infrastructure.Factory;
-using Mirror;
+﻿using Mirror;
 using PlayerLogic;
 
 namespace Networking.Synchronization
@@ -7,12 +6,10 @@ namespace Networking.Synchronization
     public class HealthSynchronization : NetworkBehaviour
     {
         private ServerData _serverData;
-        private IPlayerFactory _playerFactory;
 
-        public void Construct(ServerData serverData, IPlayerFactory playerFactory)
+        public void Construct(ServerData serverData)
         {
             _serverData = serverData;
-            _playerFactory = playerFactory;
         }
 
 
@@ -25,8 +22,6 @@ namespace Networking.Synchronization
             {
                 playerData.Health = 0;
                 _serverData.AddKill(source, receiver);
-                _playerFactory.CreateSpectatorPlayer(receiver);
-                
             }
             else
             {
