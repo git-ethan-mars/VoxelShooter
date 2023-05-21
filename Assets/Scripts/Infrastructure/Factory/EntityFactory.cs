@@ -7,7 +7,7 @@ namespace Infrastructure.Factory
     public class EntityFactory : IEntityFactory
     {
         private readonly IAssetProvider _assets;
-        private const string TntPath = "Prefabs/Tnt";
+        private const string TntPath = "Prefabs/SpawningTnt";
 
         public EntityFactory(IAssetProvider assets)
         {
