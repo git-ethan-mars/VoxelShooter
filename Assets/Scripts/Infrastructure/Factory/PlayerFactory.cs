@@ -99,7 +99,7 @@ namespace Infrastructure.Factory
             player.GetComponent<MapSynchronization>().Construct(_serverData.Map);
             player.GetComponent<HealthSynchronization>().Construct(_serverData);
             player.GetComponent<RangeWeaponSynchronization>().Construct(_particleFactory, _assets, _serverData);
-            player.GetComponent<MeleeWeaponSynchronization>().Construct(_particleFactory, _serverData);
+            player.GetComponent<MeleeWeaponSynchronization>().Construct(_particleFactory, _assets, _serverData);
         }
 
         private void ReplacePlayer(NetworkConnectionToClient connection, GameObject newPlayer)

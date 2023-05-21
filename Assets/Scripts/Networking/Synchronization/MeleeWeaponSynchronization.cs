@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Data;
+using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
 using Mirror;
 using Networking.Messages;
@@ -13,11 +15,13 @@ namespace Networking.Synchronization
     {
         private ServerData _serverData;
         private IParticleFactory _particleFactory;
+        private List<AudioClip> _audioClips;
 
-        public void Construct(IParticleFactory particleFactory, ServerData serverData)
+        public void Construct(IParticleFactory particleFactory, IAssetProvider assets, ServerData serverData)
         {
             _serverData = serverData;
             _particleFactory = particleFactory;
+            _audioClips = assets.LoadAll<AudioClip>("Audio/Sounds").ToList();
         }
 
         [Command]
@@ -27,18 +31,18 @@ namespace Networking.Synchronization
             if (!CanHit(weapon)) return;
             var isSurface = ApplyRaycast(source, ray, weapon, isStrongHit);
             weapon.IsReady = false;
-            //SendSound(weapon.ID, isSurface);
+            if (isSurface)
+            {
+                GetComponent<SoundSynchronization>().PlayAudioClip(source!.identity,
+                    _audioClips.FindIndex(audioClip => audioClip == weapon.DiggingAudioClip), weapon.DiggingVolume);
+            }
+            else
+            {
+                GetComponent<SoundSynchronization>().PlayAudioClip(source!.identity,
+                    _audioClips.FindIndex(audioClip => audioClip == weapon.HitAudioClip), weapon.HitVolume);
+            }
             StartHitCoroutines(weapon);
         }
-
-        /*[TargetRpc]
-        private void SendWeaponState(int weaponId, bool isSurface)
-        {
-            var audioSource = GetComponent<AudioSource>();
-            audioSource.clip = isSurface ? weapon.DiggingAudioClip : weapon.HitAudioClip;
-            audioSource.volume = isSurface ? weapon.DiggingVolume : weapon.HitVolume;
-            audioSource.Play();
-        }*/
 
         [Server]
         private void StartHitCoroutines(MeleeWeaponData meleeWeapon)
