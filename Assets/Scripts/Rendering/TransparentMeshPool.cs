@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Infrastructure.AssetManagement;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Rendering
 {
@@ -26,6 +27,7 @@ namespace Rendering
                 color = color
             };
             gameObject.AddComponent<MeshRenderer>().material = material;
+            gameObject.GetComponent<MeshRenderer>().shadowCastingMode = ShadowCastingMode.Off;
             gameObject.transform.localScale = prefab.transform.localScale;
             _pool.Add(gameObject);
             return gameObject;
