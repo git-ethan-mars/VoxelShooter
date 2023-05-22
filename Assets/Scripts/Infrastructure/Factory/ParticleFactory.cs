@@ -41,7 +41,8 @@ namespace Infrastructure.Factory
         private static IEnumerator DestroyParticle(GameObject particle)
         {
             yield return new WaitForSeconds(particle.GetComponent<ParticleSystem>().main.duration);
-            NetworkServer.Destroy(particle);
+            if (particle != null)
+                NetworkServer.Destroy(particle);
         }
     }
 }
