@@ -19,5 +19,5 @@ MonoBehaviour:
   countIcon: {fileID: 2038079468, guid: e7634cc0bf7762649a525e59875cd9d1, type: 3}
   count: 6
   delayInSeconds: 3
-  radius: 5
+  radius: 15
   damage: 10
