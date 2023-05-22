@@ -38,6 +38,13 @@ namespace Infrastructure.Factory
             return blood;
         }
 
+        public void CreateRchParticle(Vector3 position)
+        {
+            var rchParticle = _assets.Instantiate(ParticlePath.RchParticlePath, position, Quaternion.identity);
+            NetworkServer.Spawn(rchParticle);
+            _coroutineRunner.StartCoroutine(DestroyParticle(rchParticle));
+        }
+
         private static IEnumerator DestroyParticle(GameObject particle)
         {
             yield return new WaitForSeconds(particle.GetComponent<ParticleSystem>().main.duration);

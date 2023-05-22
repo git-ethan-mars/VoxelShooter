@@ -19,14 +19,16 @@ namespace Networking
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly ServerData _serverData;
         private readonly IStaticDataService _staticData;
+        private IParticleFactory _particleFactory;
 
         public ServerMessageHandlers(IEntityFactory entityFactory, ICoroutineRunner coroutineRunner,
-            ServerData serverData, IStaticDataService staticData)
+            ServerData serverData, IStaticDataService staticData, IParticleFactory particleFactory)
         {
             _serverData = serverData;
             _entityFactory = entityFactory;
             _coroutineRunner = coroutineRunner;
             _staticData = staticData;
+            _particleFactory = particleFactory;
         }
 
         public void RegisterHandlers()
@@ -243,6 +245,7 @@ namespace Networking
             foreach (var position in validPositions)
             {
                 _serverData.Map.SetBlockByGlobalPosition(position, new BlockData());
+                _particleFactory.CreateRchParticle(position);
             }
 
             NetworkServer.SendToAll(new UpdateMapMessage(validPositions.ToArray(),

@@ -48,7 +48,7 @@ namespace Networking
             _serverData = new ServerData(this, _assets, _staticData, _particleFactory,
                 MapReader.ReadFromFile(_serverSettings.MapName + ".rch"), _serverSettings);
             _serverMessageHandlers =
-                new ServerMessageHandlers(_entityFactory, this, _serverData, _staticData);
+                new ServerMessageHandlers(_entityFactory, this, _serverData, _staticData, _particleFactory);
             _serverMessageHandlers.RegisterHandlers();
             _serverTimer = new ServerTimer(this, _serverSettings.MaxDuration, StopLobby);
             _serverTimer.Start();
