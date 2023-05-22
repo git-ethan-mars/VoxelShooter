@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 3322668320336600084}
   - component: {fileID: 6009867241373883958}
   - component: {fileID: 1682307205549550633}
+  - component: {fileID: -6228336123309348496}
+  - component: {fileID: 2298760212594314448}
   m_Layer: 0
   m_Name: SteamManager
   m_TagString: Untagged
@@ -67,6 +69,7 @@ MonoBehaviour:
   - {fileID: 8009858165730397543, guid: 906d10a161728b24bb6c0e575987dc75, type: 3}
   - {fileID: 7129409968729204767, guid: a62a82a6bc860fb46a3527ecac0ecee3, type: 3}
   - {fileID: 7261819779245193037, guid: ec009f7e9e33c6a4bb14607b8d6e5942, type: 3}
+  - {fileID: 7084881398813862784, guid: 92084cda6074de54a811b7f455e35a62, type: 3}
   timeInterpolationGui: 0
 --- !u!114 &6009867241373883958
 MonoBehaviour:
@@ -96,3 +99,32 @@ MonoBehaviour:
   Timeout: 25
   AllowSteamRelay: 1
   UseNextGenSteamNetworking: 1
+--- !u!54 &-6228336123309348496
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3322668320336600069}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!65 &2298760212594314448
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3322668320336600069}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}

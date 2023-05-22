@@ -20,5 +20,16 @@ namespace Rendering
             var raycastResult = Physics.Raycast(ray, out raycastHit, _placeDistance);
             return raycastResult && raycastHit.collider.gameObject.CompareTag(ChunkTag);
         }
+
+        public Ray GetRay()
+        {
+            var ray = _camera.ViewportPointToRay(new Vector3(0.5f, 0.5f));
+            return ray;
+        }
+
+        public Vector3 GetPos()
+        {
+            return _camera.transform.position;
+        }
     }
 }

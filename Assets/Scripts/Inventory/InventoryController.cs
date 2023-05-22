@@ -136,6 +136,12 @@ namespace Inventory
                         _transparentMeshPool);
                     _slots.Add(new Slot(item, handler));
                 }
+
+                if (item.itemType == ItemType.Grenade)
+                {
+                    var handler = new GrenadeView(_raycaster, (GrenadeItem) item, _hud.GetComponent<Hud>());
+                    _slots.Add(new Slot(item, handler));
+                }
             }
         }
 

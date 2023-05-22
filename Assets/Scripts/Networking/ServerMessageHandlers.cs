@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using Data;
 using Infrastructure;
+using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
 using Mirror;
 using Networking.Messages;
 using Networking.Synchronization;
 using Unity.VisualScripting;
+using UnityEditor.SceneTemplate;
 using UnityEngine;
 
 namespace Networking
@@ -31,6 +33,7 @@ namespace Networking
         {
             NetworkServer.RegisterHandler<ChangeClassRequest>(OnChangeClass);
             NetworkServer.RegisterHandler<TntSpawnRequest>(OnTntSpawn);
+            NetworkServer.RegisterHandler<GrenadeSpawnRequest>(OnGrenadeSpawn);
             NetworkServer.RegisterHandler<AddBlocksRequest>(OnAddBlocks);
             NetworkServer.RegisterHandler<RemoveBlocksRequest>(OnRemoveBlocks);
             NetworkServer.RegisterHandler<ChangeSlotRequest>(OnChangeSlot);
@@ -109,6 +112,71 @@ namespace Networking
             NetworkServer.SendToAll(new UpdateMapMessage(validPositionList.ToArray(),
                 new BlockData[validPositionList.Count]));
         }
+        
+        private void OnGrenadeSpawn(NetworkConnectionToClient connection, GrenadeSpawnRequest message)
+        {
+            if (connection.identity == null) return;
+            var grenadeCount = _serverData.GetItemCount(connection, message.ItemId);
+            if (grenadeCount <= 0)
+                return;
+            
+            var position = connection.identity.gameObject.transform.position;
+            var spawnPosition = new Vector3(position.x, position.y, position.z) + new Vector3(0, 0, 0);
+            var grenade = _entityFactory.CreateGrenade(spawnPosition, Quaternion.identity);
+            
+            var fromTo = message.Target - spawnPosition;
+            var fromToXZ = new Vector3(fromTo.x, 0f, fromTo.z);
+            var x = fromToXZ.magnitude;
+            var y = fromTo.y;
+            var angleRadians = 40 * Mathf.PI / 180;
+            var v2 = (9.8f * x * x) / (2 * (y - Mathf.Tan(angleRadians) * x) * Mathf.Pow(Mathf.Cos(angleRadians), 2));
+            var v = Mathf.Sqrt(Mathf.Abs(v2));
+            grenade.GetComponent<Rigidbody>().velocity = message.Direction * v;
+            
+            _coroutineRunner.StartCoroutine(ExplodeGrenade(grenade, message.DelayInSecond, message.Radius, message.Damage, connection));
+        }
+
+        private IEnumerator ExplodeGrenade(GameObject grenade, float delayInSeconds, int radius, int damage, NetworkConnectionToClient connection)
+        {
+            yield return new WaitForSeconds(delayInSeconds);
+            if (!grenade) yield break;
+            
+            var validPositions = new List<Vector3Int>();
+            var grenadePosition = new Vector3Int((int)grenade.transform.position.x,
+                (int)grenade.transform.position.y, (int)grenade.transform.position.z);
+            for (var x = -radius; x <= radius; x++)
+            {
+                for (var y = -radius; y <= radius; y++)
+                {
+                    for (var z = -radius; z <= radius; z++)
+                    {
+                        var blockPosition = grenadePosition + new Vector3Int(x, y, z);
+                        if (_serverData.Map.IsValidPosition(blockPosition) &&
+                            Vector3Int.Distance(blockPosition, grenadePosition) <= radius)
+                            validPositions.Add(blockPosition);
+                    }
+                }
+            }
+
+            foreach (var position in validPositions)
+            {
+                _serverData.Map.SetBlockByGlobalPosition(position, new BlockData());
+            }
+
+            NetworkServer.SendToAll(new UpdateMapMessage(validPositions.ToArray(),
+                new BlockData[validPositions.Count]));
+            NetworkServer.Destroy(grenade);
+
+            Collider[] hitColliders = Physics.OverlapSphere(grenadePosition, radius);
+            foreach (var hitCollider in hitColliders)
+            {
+                if (hitCollider.CompareTag("Player"))
+                {
+                    var receiver = hitCollider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
+                    receiver.identity.GetComponent<HealthSynchronization>().Damage(connection, receiver, damage);
+                }
+            }
+        }
 
         private void OnTntSpawn(NetworkConnectionToClient connection, TntSpawnRequest message)
         {
@@ -119,22 +187,22 @@ namespace Networking
             var tnt = _entityFactory.CreateTnt(message.Position, message.Rotation);
             _coroutineRunner.StartCoroutine(ExplodeWithDelay(Vector3Int.FloorToInt(message.ExplosionCenter), tnt,
                 message.DelayInSecond,
-                message.Radius, connection, message));
+                message.Radius, connection, message.Damage));
             _serverData.SetItemCount(connection, message.ItemId, tntCount - 1);
             connection.Send(new ItemUseResult(message.ItemId, tntCount - 1));
         }
 
         private IEnumerator ExplodeWithDelay(Vector3Int explosionCenter, GameObject tnt, float delayInSeconds,
-            int radius, NetworkConnectionToClient connection, TntSpawnRequest message)
+            int radius, NetworkConnectionToClient connection, int damage)
         {
             yield return new WaitForSeconds(delayInSeconds);
             if (!tnt) yield break;
             var explodedTnt = new List<GameObject>();
-            ExplodeImmediately(explosionCenter, tnt, radius, explodedTnt, connection, message);
+            ExplodeImmediately(explosionCenter, tnt, radius, explodedTnt, connection, damage);
         }
 
         private void ExplodeImmediately(Vector3Int explosionCenter, GameObject tnt, int radius,
-            List<GameObject> explodedTnt, NetworkConnectionToClient connection, TntSpawnRequest message)
+            List<GameObject> explodedTnt, NetworkConnectionToClient connection, int damage)
         {
             var validPositions = new List<Vector3Int>();
             for (var x = -radius; x <= radius; x++)
@@ -168,13 +236,13 @@ namespace Networking
                 if (hitCollider.CompareTag("TNT") && explodedTnt.All(x => x.gameObject != hitCollider.gameObject))
                 {
                     ExplodeImmediately(Vector3Int.FloorToInt(hitCollider.gameObject.transform.position),
-                        hitCollider.gameObject, radius, explodedTnt, connection, message);
+                        hitCollider.gameObject, radius, explodedTnt, connection, damage);
                 }
 
                 if (hitCollider.CompareTag("Player"))
                 {
                     var receiver = hitCollider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
-                    receiver.identity.GetComponent<HealthSynchronization>().Damage(connection, receiver, message.Damage);
+                    receiver.identity.GetComponent<HealthSynchronization>().Damage(connection, receiver, damage);
                 }
             }
         }
