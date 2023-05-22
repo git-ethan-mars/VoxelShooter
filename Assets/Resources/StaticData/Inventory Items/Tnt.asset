@@ -20,4 +20,4 @@ MonoBehaviour:
   count: 6
   delayInSeconds: 3
   radius: 6
-  damage: 10
+  damage: 100

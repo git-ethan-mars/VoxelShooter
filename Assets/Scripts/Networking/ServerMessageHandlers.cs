@@ -261,8 +261,14 @@ namespace Networking
 
                 if (hitCollider.CompareTag("Player"))
                 {
+                    var playerPosition = hitCollider.transform.position;
+                    var distance = Math.Sqrt(
+                        (explosionCenter.x - playerPosition.x) * (explosionCenter.x - playerPosition.x) +
+                        (explosionCenter.y - playerPosition.y) * (explosionCenter.y - playerPosition.y) +
+                        (explosionCenter.z - playerPosition.z) * (explosionCenter.z - playerPosition.z));
+                    var currentDamage = (int)(damage - damage * (distance / radius));
                     var receiver = hitCollider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
-                    receiver.identity.GetComponent<HealthSynchronization>().Damage(connection, receiver, damage);
+                    receiver.identity.GetComponent<HealthSynchronization>().Damage(connection, receiver, currentDamage);
                 }
             }
         }
