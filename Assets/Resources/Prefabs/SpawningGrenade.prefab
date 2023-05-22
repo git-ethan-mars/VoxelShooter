@@ -13,7 +13,8 @@ GameObject:
   - component: {fileID: 366537711928845669}
   - component: {fileID: -8471271700833301178}
   - component: {fileID: 3755994351845431698}
-  - component: {fileID: 5270142446184935787}
+  - component: {fileID: 6849381094176965432}
+  - component: {fileID: -4685652171039545383}
   m_Layer: 0
   m_Name: SpawningGrenade
   m_TagString: Untagged
@@ -43,7 +44,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7084881398813862784}
-  m_Mesh: {fileID: -2432090755550338912, guid: caad35b7aa8765b4f894bbaa26f98979, type: 3}
+  m_Mesh: {fileID: 4300000, guid: 765b8004f9fcc2b4b9bbf8a50f6c6c43, type: 2}
 --- !u!23 &366537711928845669
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -118,8 +119,8 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
---- !u!65 &5270142446184935787
+  m_CollisionDetection: 1
+--- !u!65 &6849381094176965432
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -130,5 +131,33 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1.6999998, y: 3.1, z: 2.1}
-  m_Center: {x: -11.35, y: 5.95, z: -0.55}
+  m_Size: {x: 1.7, y: 3.1, z: 2.1}
+  m_Center: {x: 0.042852998, y: -0.081074, z: -0.023611963}
+--- !u!114 &-4685652171039545383
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7084881398813862784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  target: {fileID: 2081966387912030395}
+  clientAuthority: 0
+  syncPosition: 1
+  syncRotation: 1
+  syncScale: 0
+  showGizmos: 0
+  showOverlay: 0
+  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+  onlySyncOnChange: 1
+  bufferResetMultiplier: 5
+  positionSensitivity: 0.01
+  rotationSensitivity: 0.01
+  scaleSensitivity: 0.01

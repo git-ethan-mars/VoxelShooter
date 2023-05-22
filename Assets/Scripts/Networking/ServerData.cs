@@ -137,6 +137,12 @@ namespace Networking
                     playerData.ItemCountById[itemId] = ((TntItem) item).count;
                     continue;
                 }
+                
+                if (item.itemType == ItemType.Grenade)
+                {
+                    playerData.ItemCountById[itemId] = ((GrenadeItem) item).count;
+                    continue;
+                }
 
                 if (item.itemType == ItemType.Block)
                 {

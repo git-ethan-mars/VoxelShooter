@@ -82,6 +82,7 @@ namespace Inventory
         {
             inventoryInput.OnFirstActionButtonDown += FirstActionButtonDown;
             inventoryInput.OnSecondActionButtonDown += SecondActionButtonDown;
+            inventoryInput.OnFirstActionButtonUp += FirstActionButtonUp;
             inventoryInput.OnFirstActionButtonHold += FirstActionButtonHold;
             inventoryInput.OnScroll +=
                 () => SendChangeSlotRequest(_itemIndex + Math.Sign(_inputService.GetScrollSpeed()));
@@ -158,6 +159,14 @@ namespace Inventory
             if (_slots[_itemIndex].ItemHandler is IRightMouseButtonDownHandler)
             {
                 ((IRightMouseButtonDownHandler) _slots[_itemIndex].ItemHandler).OnRightMouseButtonDown();
+            }
+        }
+        
+        private void FirstActionButtonUp()
+        {
+            if (_slots[_itemIndex].ItemHandler is ILeftMouseButtonUpHandler)
+            {
+                ((ILeftMouseButtonUpHandler) _slots[_itemIndex].ItemHandler).OnLeftMouseButtonUp();
             }
         }
 

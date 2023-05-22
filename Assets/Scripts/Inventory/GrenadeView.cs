@@ -10,7 +10,7 @@ using UnityEngine.UI;
 
 namespace Inventory
 {
-    public class GrenadeView : IInventoryItemView, IConsumable, ILeftMouseButtonDownHandler
+    public class GrenadeView : IInventoryItemView, IConsumable, ILeftMouseButtonDownHandler, ILeftMouseButtonUpHandler
     {
         public Sprite Icon { get; }
         public int Count { get; set; }
@@ -18,13 +18,14 @@ namespace Inventory
         private readonly float _delayInSeconds;
         private readonly int _radius;
         private readonly int _damage;
-        private readonly int _throwForce;
+        private readonly float _throwForce;
         private readonly int _itemId;
         private readonly GameObject _grenadeInfo;
         private readonly TextMeshProUGUI _grenadeCountText;
         private readonly Sprite _grenadeCountIcon;
         private readonly Sprite _itemTypeIcon;
         private readonly Image _itemType;
+        private float _holdDownStartTime;
 
         public GrenadeView(Raycaster raycaster, GrenadeItem configuration, Hud hud)
         {
@@ -54,20 +55,23 @@ namespace Inventory
             _itemType.sprite = _grenadeCountIcon;
             _grenadeCountText.SetText(Count.ToString());
         }
-
+        
+        public void OnLeftMouseButtonDown()
+        {
+            _holdDownStartTime = Time.time;
+        }
 
         public void Unselect()
         {
             _grenadeInfo.SetActive(false);
         }
 
-        public void OnLeftMouseButtonDown()
+        public void OnLeftMouseButtonUp()
         {
-            var raycastResult = _raycaster.GetRayCastHit(out var raycastHit);
-            var ray = _raycaster.GetRay();
-            NetworkClient.Send(new GrenadeSpawnRequest(_itemId, ray.direction,
-                Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2), 
-                _delayInSeconds, _radius, _damage, _throwForce));
+            var holdTime = Time.time - _holdDownStartTime;
+            var throwForce = holdTime * 1000;
+            var ray = _raycaster.GetCentredRay();
+            NetworkClient.Send(new GrenadeSpawnRequest(_itemId, ray, throwForce));
         }
     }
 }

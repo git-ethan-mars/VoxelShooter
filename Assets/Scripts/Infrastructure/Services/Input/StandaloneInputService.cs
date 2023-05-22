@@ -8,6 +8,7 @@ namespace Infrastructure.Services.Input
             new Vector2(UnityEngine.Input.GetAxisRaw("Vertical"), UnityEngine.Input.GetAxisRaw("Horizontal"));
 
         public bool IsFirstActionButtonDown() => UnityEngine.Input.GetMouseButtonDown(0);
+        public bool IsFirstActionButtonUp() => UnityEngine.Input.GetMouseButtonUp(0);
         public bool IsSecondActionButtonDown() => UnityEngine.Input.GetMouseButtonDown(1);
         public bool IsReloadingButtonDown() => UnityEngine.Input.GetKeyDown(KeyCode.R);
         public bool IsJumpButtonDown() => UnityEngine.Input.GetKeyDown(KeyCode.Space);

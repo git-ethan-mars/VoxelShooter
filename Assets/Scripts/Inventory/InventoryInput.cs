@@ -11,6 +11,7 @@ namespace Inventory
     {
         public event Action OnScroll;
         public event Action OnFirstActionButtonDown;
+        public event Action OnFirstActionButtonUp;
         public event Action OnFirstActionButtonHold;
         public event Action OnSecondActionButtonDown;
         public event Action<int> OnChangeSlot;
@@ -62,6 +63,11 @@ namespace Inventory
             if (_inputService.IsFirstActionButtonHold())
             {
                 OnFirstActionButtonHold?.Invoke();
+            }
+            
+            if (_inputService.IsFirstActionButtonUp())
+            {
+                OnFirstActionButtonUp?.Invoke();
             }
         }
     }

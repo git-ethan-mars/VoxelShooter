@@ -6,13 +6,12 @@ namespace Data
 
     public class GrenadeItem : InventoryItem
     {
-        public Sprite grenadeCountIcon;
+        public Sprite countIcon;
         public int count;
         public float delayInSeconds;
         public int radius;
         public int damage;
         public int throwForce;
-        public Sprite countIcon;
 
         public void Awake()
         {

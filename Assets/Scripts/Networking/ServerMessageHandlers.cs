@@ -6,6 +6,7 @@ using Data;
 using Infrastructure;
 using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
+using Infrastructure.Services.StaticData;
 using Mirror;
 using Networking.Messages;
 using Networking.Synchronization;
@@ -20,13 +21,15 @@ namespace Networking
         private readonly IEntityFactory _entityFactory;
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly ServerData _serverData;
+        private readonly IStaticDataService _staticData;
 
         public ServerMessageHandlers(IEntityFactory entityFactory, ICoroutineRunner coroutineRunner,
-            ServerData serverData)
+            ServerData serverData, IStaticDataService staticData)
         {
             _serverData = serverData;
             _entityFactory = entityFactory;
             _coroutineRunner = coroutineRunner;
+            _staticData = staticData;
         }
 
         public void RegisterHandlers()
@@ -119,13 +122,16 @@ namespace Networking
             var grenadeCount = _serverData.GetItemCount(connection, message.ItemId);
             if (grenadeCount <= 0)
                 return;
+
+            _serverData.SetItemCount(connection, message.ItemId, grenadeCount - 1);
+            connection.Send(new ItemUseResult(message.ItemId, grenadeCount - 1));
             
-            var position = connection.identity.gameObject.transform.position;
-            var spawnPosition = new Vector3(position.x, position.y, position.z);
-            var grenade = _entityFactory.CreateGrenade(spawnPosition, Quaternion.identity);
-            grenade.GetComponent<Rigidbody>().velocity = message.Direction * message.ThrowForce;
+            var grenade = _entityFactory.CreateGrenade(message.Ray.origin, Quaternion.identity);
+            grenade.GetComponent<Rigidbody>().AddForce(message.Ray.direction * message.ThrowForce);
+            var grenadeData = (GrenadeItem)_staticData.GetItem(message.ItemId);
             
-            _coroutineRunner.StartCoroutine(ExplodeGrenade(grenade, message.DelayInSecond, message.Radius, message.Damage, connection));
+            _coroutineRunner.StartCoroutine(ExplodeGrenade(grenade, grenadeData.delayInSeconds, grenadeData.radius, 
+                grenadeData.damage, connection));
         }
 
         private IEnumerator ExplodeGrenade(GameObject grenade, float delayInSeconds, int radius, int damage, NetworkConnectionToClient connection)
@@ -164,8 +170,14 @@ namespace Networking
             {
                 if (hitCollider.CompareTag("Player"))
                 {
+                    var playerPosition = hitCollider.transform.position;
+                    var distance = Math.Sqrt(
+                        (grenadePosition.x - playerPosition.x) * (grenadePosition.x - playerPosition.x) +
+                        (grenadePosition.y - playerPosition.y) * (grenadePosition.y - playerPosition.y) +
+                        (grenadePosition.z - playerPosition.z) * (grenadePosition.z - playerPosition.z));
+                    var currentDamage = (int)(damage - damage * (distance / radius));
                     var receiver = hitCollider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
-                    receiver.identity.GetComponent<HealthSynchronization>().Damage(connection, receiver, damage);
+                    receiver.identity.GetComponent<HealthSynchronization>().Damage(connection, receiver, currentDamage);
                 }
             }
         }
