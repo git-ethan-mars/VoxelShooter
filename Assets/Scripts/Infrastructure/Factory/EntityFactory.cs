@@ -1,5 +1,7 @@
-﻿using Infrastructure.AssetManagement;
+﻿using Data;
+using Infrastructure.AssetManagement;
 using Mirror;
+using Networking;
 using UnityEngine;
 
 namespace Infrastructure.Factory
@@ -9,6 +11,7 @@ namespace Infrastructure.Factory
         private readonly IAssetProvider _assets;
         private const string TntPath = "Prefabs/SpawningTnt";
         private const string GrenadePath = "Prefabs/SpawningGrenade";
+        private const string RocketPath = "Prefabs/Rocket";
 
         public EntityFactory(IAssetProvider assets)
         {
@@ -26,6 +29,14 @@ namespace Infrastructure.Factory
             var grenade = _assets.Instantiate(GrenadePath, position, rotation);
             NetworkServer.Spawn(grenade);
             return grenade;
+        }
+        
+        public GameObject CreateRocket(Vector3 position, Quaternion rotation, ServerData serverData, RocketLauncherItem rocketData, NetworkConnectionToClient owner)
+        {
+            var rocket = _assets.Instantiate(RocketPath, position, rotation);
+            rocket.GetComponent<Rocket>().Construct(serverData, rocketData, owner);
+            NetworkServer.Spawn(rocket);
+            return rocket;
         }
     }
 }

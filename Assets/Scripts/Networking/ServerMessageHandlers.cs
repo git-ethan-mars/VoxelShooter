@@ -4,14 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Data;
 using Infrastructure;
-using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
 using Infrastructure.Services.StaticData;
 using Mirror;
 using Networking.Messages;
 using Networking.Synchronization;
-using Unity.VisualScripting;
-using UnityEditor.SceneTemplate;
 using UnityEngine;
 
 namespace Networking
@@ -37,6 +34,7 @@ namespace Networking
             NetworkServer.RegisterHandler<ChangeClassRequest>(OnChangeClass);
             NetworkServer.RegisterHandler<TntSpawnRequest>(OnTntSpawn);
             NetworkServer.RegisterHandler<GrenadeSpawnRequest>(OnGrenadeSpawn);
+            NetworkServer.RegisterHandler<RocketLauncherSpawnRequest>(OnRocketLauncherSpawn);
             NetworkServer.RegisterHandler<AddBlocksRequest>(OnAddBlocks);
             NetworkServer.RegisterHandler<RemoveBlocksRequest>(OnRemoveBlocks);
             NetworkServer.RegisterHandler<ChangeSlotRequest>(OnChangeSlot);
@@ -46,6 +44,8 @@ namespace Networking
         {
             NetworkServer.UnregisterHandler<ChangeClassRequest>();
             NetworkServer.UnregisterHandler<TntSpawnRequest>();
+            NetworkServer.UnregisterHandler<GrenadeSpawnRequest>();
+            NetworkServer.UnregisterHandler<RocketLauncherSpawnRequest>();
             NetworkServer.UnregisterHandler<AddBlocksRequest>();
             NetworkServer.UnregisterHandler<RemoveBlocksRequest>();
             NetworkServer.UnregisterHandler<ChangeSlotRequest>();
@@ -115,7 +115,23 @@ namespace Networking
             NetworkServer.SendToAll(new UpdateMapMessage(validPositionList.ToArray(),
                 new BlockData[validPositionList.Count]));
         }
-        
+
+        private void OnRocketLauncherSpawn(NetworkConnectionToClient connection, RocketLauncherSpawnRequest message)
+        {
+            if (connection.identity == null) return;
+            var rocketCount = _serverData.GetItemCount(connection, message.ItemId);
+            if (rocketCount <= 0)
+                return;
+            
+            _serverData.SetItemCount(connection, message.ItemId, rocketCount - 1);
+            connection.Send(new ItemUseResult(message.ItemId, rocketCount - 1));
+            
+            var rocketData = (RocketLauncherItem)_staticData.GetItem(message.ItemId);
+            var direction = message.Ray.direction;
+            var rocket = _entityFactory.CreateRocket(message.Ray.origin + direction * 2, Quaternion.LookRotation(direction), _serverData, rocketData, connection);
+            rocket.GetComponent<Rigidbody>().velocity = direction * rocketData.speed;
+        }
+
         private void OnGrenadeSpawn(NetworkConnectionToClient connection, GrenadeSpawnRequest message)
         {
             if (connection.identity == null) return;
@@ -133,7 +149,7 @@ namespace Networking
             _coroutineRunner.StartCoroutine(ExplodeGrenade(grenade, grenadeData.delayInSeconds, grenadeData.radius, 
                 grenadeData.damage, connection));
         }
-
+        
         private IEnumerator ExplodeGrenade(GameObject grenade, float delayInSeconds, int radius, int damage, NetworkConnectionToClient connection)
         {
             yield return new WaitForSeconds(delayInSeconds);

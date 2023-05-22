@@ -143,6 +143,12 @@ namespace Inventory
                     var handler = new GrenadeView(_raycaster, (GrenadeItem) item, _hud.GetComponent<Hud>());
                     _slots.Add(new Slot(item, handler));
                 }
+                
+                if (item.itemType == ItemType.RocketLauncher)
+                {
+                    var handler = new RocketLauncherView(_raycaster, (RocketLauncherItem) item, _hud.GetComponent<Hud>());
+                    _slots.Add(new Slot(item, handler));
+                }
             }
         }
 

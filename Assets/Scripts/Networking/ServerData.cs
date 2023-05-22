@@ -149,6 +149,12 @@ namespace Networking
                     playerData.ItemCountById[itemId] = ((BlockItem) item).count;
                     continue;
                 }
+                
+                if (item.itemType == ItemType.RocketLauncher)
+                {
+                    playerData.ItemCountById[itemId] = ((RocketLauncherItem) item).count;
+                    continue;
+                }
 
                 playerData.ItemCountById[itemId] = 1;
             }
