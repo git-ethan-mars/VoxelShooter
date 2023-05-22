@@ -38,11 +38,11 @@ namespace Infrastructure.Factory
             return blood;
         }
 
-        public void CreateRchParticle(Vector3 position)
+        public void CreateRchParticle(Vector3 position, Color32 blockColor)
         {
             var rchParticle = _assets.Instantiate(ParticlePath.RchParticlePath, position, Quaternion.identity);
+            rchParticle.GetComponent<ParticleSystem>().startColor = blockColor;
             NetworkServer.Spawn(rchParticle);
-            _coroutineRunner.StartCoroutine(DestroyParticle(rchParticle));
         }
 
         private static IEnumerator DestroyParticle(GameObject particle)
