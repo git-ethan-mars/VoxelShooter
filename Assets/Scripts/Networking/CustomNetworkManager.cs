@@ -18,7 +18,8 @@ namespace Networking
         public event Action<Map, Dictionary<Vector3Int, BlockData>> MapDownloaded;
         public event Action<ServerTime> ServerTimeChanged;
         public event Action<ServerTime> RespawnTimeChanged;
-        public event Action<List<ScoreData>> ScoreboardChanged; 
+        public event Action<List<ScoreData>> ScoreboardChanged;
+        public event Action<float> OnLoadProgress;
         private ServerData _serverData;
         private IStaticDataService _staticData;
         private IEntityFactory _entityFactory;
@@ -49,7 +50,7 @@ namespace Networking
             _serverMessageHandlers =
                 new ServerMessageHandlers(_entityFactory, this, _serverData);
             _serverMessageHandlers.RegisterHandlers();
-            _serverTimer = new ServerTimer(this, _serverSettings.MaxDuration, _stateMachine.Enter<MainMenuState>);
+            _serverTimer = new ServerTimer(this, _serverSettings.MaxDuration, StopLobby);
             _serverTimer.Start();
         }
 
@@ -62,6 +63,7 @@ namespace Networking
             _clientMessageHandlers.ServerTimeUpdated += timeLeft => ServerTimeChanged?.Invoke(timeLeft);
             _clientMessageHandlers.RespawnTimeUpdated += timeLeft => RespawnTimeChanged?.Invoke(timeLeft);
             _clientMessageHandlers.ScoreboardUpdated += scores => ScoreboardChanged?.Invoke(scores);
+            _clientMessageHandlers.MapProgress += progress => OnLoadProgress?.Invoke(progress);
         }
 
 
@@ -106,7 +108,8 @@ namespace Networking
         private static bool IsHost(NetworkConnection conn) =>
             NetworkClient.connection.connectionId == conn.connectionId;
 
-        public override void OnDestroy()
+
+        public void StopLobby()
         {
             if (NetworkClient.isConnected)
             {

@@ -18,6 +18,7 @@ namespace Infrastructure.Factory
         private const string MatchMenuPath = "Prefabs/UI/CreateMatchMenu";
         private const string TimeCounterPath = "Prefabs/UI/TimeInfo";
         private const string ScoreboardPath = "Prefabs/UI/Scoreboard";
+        private const string LoadingWindowPath = "Prefabs/UI/LoadingWindow";
         private readonly IAssetProvider _assets;
         private readonly IInputService _inputService;
         private readonly IStaticDataService _staticData;
@@ -69,6 +70,11 @@ namespace Infrastructure.Factory
         public void CreateScoreboard(CustomNetworkManager networkManager)
         {
             _assets.Instantiate(ScoreboardPath).GetComponent<Scoreboard>().Construct(_inputService, _avatarLoader, networkManager);
+        }
+
+        public void CreateLoadingWindow(CustomNetworkManager networkManager)
+        {
+            _assets.Instantiate(LoadingWindowPath).GetComponent<LoadingWindow>().Construct(networkManager);
         }
     }
 }

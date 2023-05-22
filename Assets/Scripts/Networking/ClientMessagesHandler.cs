@@ -15,6 +15,7 @@ namespace Networking
         public event Action<ServerTime> RespawnTimeUpdated; 
         public event Action<Map, Dictionary<Vector3Int, BlockData>> MapDownloaded;
         public event Action<List<ScoreData>> ScoreboardUpdated;
+        public event Action<float> MapProgress;
         public readonly Dictionary<Vector3Int, BlockData> MapUpdates;
         private readonly List<byte> _byteChunks = new();
         
@@ -43,7 +44,8 @@ namespace Networking
         private void OnMapDownloadMessage(DownloadMapMessage mapMessage)
         {
             _byteChunks.AddRange(mapMessage.ByteChunk);
-            if (!mapMessage.IsFinalChunk) return;
+            MapProgress?.Invoke(mapMessage.Progress);
+            if (mapMessage.Progress != 1) return;
             var map = MapReader.ReadFromStream(new MemoryStream(_byteChunks.ToArray()));
             MapDownloaded?.Invoke(map, MapUpdates);
         }

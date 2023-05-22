@@ -13,5 +13,6 @@ namespace Infrastructure.Factory
         void CreateMatchMenu(GameStateMachine gameStateMachine, bool isLocalBuild);
         void CreateTimeCounter(CustomNetworkManager networkManager);
         void CreateScoreboard(CustomNetworkManager networkManager);
+        void CreateLoadingWindow(CustomNetworkManager networkManager);
     }   
 }

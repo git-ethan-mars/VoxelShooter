@@ -15,14 +15,16 @@ namespace Infrastructure.States
         private readonly GameStateMachine _stateMachine;
         private CustomNetworkManager _networkManager;
         private readonly SceneLoader _sceneLoader;
+        private readonly IUIFactory _uiFactory;
         private const string Main = "Main";
 
 
-        public JoinLocalMatchState(GameStateMachine stateMachine, SceneLoader sceneLoader, IGameFactory gameFactory)
+        public JoinLocalMatchState(GameStateMachine stateMachine, SceneLoader sceneLoader, IGameFactory gameFactory, IUIFactory uiFactory)
         {
             _stateMachine = stateMachine;
             _sceneLoader = sceneLoader;
             _gameFactory = gameFactory;
+            _uiFactory = uiFactory;
         }
 
 
@@ -36,6 +38,7 @@ namespace Infrastructure.States
             _networkManager = _gameFactory.CreateLocalNetworkManager(_stateMachine, null)
                 .GetComponent<CustomNetworkManager>();
             _networkManager.MapDownloaded += OnMapDownloaded;
+            _uiFactory.CreateLoadingWindow(_networkManager);
             _networkManager.StartClient();
         }
         private void OnMapDownloaded(Map map, Dictionary<Vector3Int, BlockData> mapUpdates)

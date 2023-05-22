@@ -5,12 +5,12 @@ namespace Networking.Messages
     public struct DownloadMapMessage : NetworkMessage
     {
         public readonly byte[] ByteChunk;
-        public readonly bool IsFinalChunk;
+        public readonly float Progress;
 
-        public DownloadMapMessage(byte[] byteChunk, bool isFinalChunk)
+        public DownloadMapMessage(byte[] byteChunk, float progress)
         {
             ByteChunk = byteChunk;
-            IsFinalChunk = isFinalChunk;
+            Progress = progress;
         }
     }
 }

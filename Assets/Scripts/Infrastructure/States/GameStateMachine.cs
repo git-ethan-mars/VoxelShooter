@@ -19,9 +19,9 @@ namespace Infrastructure.States
                 [typeof(MainMenuState)] = new MainMenuState(this, sceneLoader, allServices.Single<IUIFactory>(), isLocalBuild),
                 [typeof(CreateMatchState)] = new CreateMatchState(this, allServices.Single<IUIFactory>(), isLocalBuild),
                 [typeof(StartSteamLobbyState)] = new StartSteamLobbyState(this, sceneLoader, allServices.Single<IGameFactory>()),
-                [typeof(JoinSteamLobbyState)] = new JoinSteamLobbyState(this, sceneLoader, allServices.Single<IGameFactory>()),
+                [typeof(JoinSteamLobbyState)] = new JoinSteamLobbyState(this, sceneLoader, allServices.Single<IGameFactory>(), allServices.Single<IUIFactory>()),
                 [typeof(StartMatchState)] = new StartMatchState(this, sceneLoader, allServices.Single<IGameFactory>()),
-                [typeof(JoinLocalMatchState)] = new JoinLocalMatchState(this,  sceneLoader, allServices.Single<IGameFactory>()),
+                [typeof(JoinLocalMatchState)] = new JoinLocalMatchState(this,  sceneLoader, allServices.Single<IGameFactory>(), allServices.Single<IUIFactory>()),
                 [typeof(GameLoopState)] =
                     new GameLoopState(allServices.Single<IUIFactory>(), isLocalBuild)
             };

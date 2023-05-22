@@ -13,13 +13,16 @@ namespace Infrastructure.States
         private readonly SceneLoader _sceneLoader;
         private readonly IGameFactory _gameFactory;
         private CustomNetworkManager _networkManager;
+        private IUIFactory _uiFactory;
         private const string Main = "Main";
 
-        public JoinSteamLobbyState(GameStateMachine stateMachine, SceneLoader sceneLoader, IGameFactory gameFactory)
+        public JoinSteamLobbyState(GameStateMachine stateMachine, SceneLoader sceneLoader, IGameFactory gameFactory,
+            IUIFactory uiFactory)
         {
             _stateMachine = stateMachine;
             _sceneLoader = sceneLoader;
             _gameFactory = gameFactory;
+            _uiFactory = uiFactory;
         }
 
         public void Enter()
@@ -32,6 +35,7 @@ namespace Infrastructure.States
             _networkManager = _gameFactory.CreateSteamNetworkManager(_stateMachine, null, false)
                 .GetComponent<CustomNetworkManager>();
             _networkManager.MapDownloaded += OnMapDownloaded;
+            _uiFactory.CreateLoadingWindow(_networkManager);
         }
 
         private void OnMapDownloaded(Map map, Dictionary<Vector3Int, BlockData> mapUpdates)

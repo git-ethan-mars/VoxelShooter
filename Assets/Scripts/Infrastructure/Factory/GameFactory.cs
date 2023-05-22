@@ -6,7 +6,6 @@ using Infrastructure.Services.StaticData;
 using Infrastructure.States;
 using MapLogic;
 using Networking;
-using Networking.Transport;
 using Rendering;
 using UnityEngine;
 
