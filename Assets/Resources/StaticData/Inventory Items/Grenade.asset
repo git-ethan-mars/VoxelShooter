@@ -20,3 +20,6 @@ MonoBehaviour:
   count: 3
   delayInSeconds: 2
   radius: 3
+  damage: 0
+  throwForce: 20
+  countIcon: {fileID: 0}

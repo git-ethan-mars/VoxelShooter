@@ -18,6 +18,7 @@ namespace Inventory
         private readonly float _delayInSeconds;
         private readonly int _radius;
         private readonly int _damage;
+        private readonly int _throwForce;
         private readonly int _itemId;
         private readonly GameObject _grenadeInfo;
         private readonly TextMeshProUGUI _grenadeCountText;
@@ -31,6 +32,7 @@ namespace Inventory
             _delayInSeconds = configuration.delayInSeconds;
             _radius = configuration.radius;
             _damage = configuration.damage;
+            _throwForce = configuration.throwForce;
             _itemId = configuration.id;
             _grenadeInfo = hud.itemInfo;
             _grenadeCountText = hud.itemCount;
@@ -65,7 +67,7 @@ namespace Inventory
             var ray = _raycaster.GetRay();
             NetworkClient.Send(new GrenadeSpawnRequest(_itemId, ray.direction,
                 Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2), 
-                _delayInSeconds, _radius, _damage));
+                _delayInSeconds, _radius, _damage, _throwForce));
         }
     }
 }
