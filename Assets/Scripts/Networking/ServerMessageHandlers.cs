@@ -121,17 +121,9 @@ namespace Networking
                 return;
             
             var position = connection.identity.gameObject.transform.position;
-            var spawnPosition = new Vector3(position.x, position.y, position.z) + new Vector3(0, 0, 0);
+            var spawnPosition = new Vector3(position.x, position.y, position.z);
             var grenade = _entityFactory.CreateGrenade(spawnPosition, Quaternion.identity);
-            
-            var fromTo = message.Target - spawnPosition;
-            var fromToXZ = new Vector3(fromTo.x, 0f, fromTo.z);
-            var x = fromToXZ.magnitude;
-            var y = fromTo.y;
-            var angleRadians = 40 * Mathf.PI / 180;
-            var v2 = (9.8f * x * x) / (2 * (y - Mathf.Tan(angleRadians) * x) * Mathf.Pow(Mathf.Cos(angleRadians), 2));
-            var v = Mathf.Sqrt(Mathf.Abs(v2));
-            grenade.GetComponent<Rigidbody>().velocity = message.Direction * v;
+            grenade.GetComponent<Rigidbody>().velocity = message.Direction * message.ThrowForce;
             
             _coroutineRunner.StartCoroutine(ExplodeGrenade(grenade, message.DelayInSecond, message.Radius, message.Damage, connection));
         }

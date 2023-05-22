@@ -12,8 +12,9 @@ namespace Networking.Messages
         public readonly float DelayInSecond;
         public readonly int Radius;
         public readonly int Damage;
+        public readonly int ThrowForce;
 
-        public GrenadeSpawnRequest(int id, Vector3 direction, Vector3 target, float delayInSecond, int radius, int damage)
+        public GrenadeSpawnRequest(int id, Vector3 direction, Vector3 target, float delayInSecond, int radius, int damage, int throwForce)
         {
             GrenadePath = "Prefabs/SpawningGrenade";
             ItemId = id;
@@ -22,6 +23,7 @@ namespace Networking.Messages
             Target = target;
             Radius = radius;
             Damage = damage;
+            ThrowForce = throwForce;
         }
     }
 }
