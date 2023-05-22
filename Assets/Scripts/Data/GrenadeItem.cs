@@ -11,7 +11,8 @@ namespace Data
         public float delayInSeconds;
         public int radius;
         public int damage;
-        public int throwForce;
+        public float maxThrowDuration;
+        public float throwForceModifier;
 
         public void Awake()
         {

@@ -15,10 +15,8 @@ namespace Inventory
         public Sprite Icon { get; }
         public int Count { get; set; }
         private readonly Raycaster _raycaster;
-        private readonly float _delayInSeconds;
-        private readonly int _radius;
-        private readonly int _damage;
-        private readonly float _throwForce;
+        private readonly float _maxThrowDuration;
+        private readonly float _throwForceModifier;
         private readonly int _itemId;
         private readonly GameObject _grenadeInfo;
         private readonly TextMeshProUGUI _grenadeCountText;
@@ -30,10 +28,8 @@ namespace Inventory
         public GrenadeView(Raycaster raycaster, GrenadeItem configuration, Hud hud)
         {
             Icon = configuration.inventoryIcon;
-            _delayInSeconds = configuration.delayInSeconds;
-            _radius = configuration.radius;
-            _damage = configuration.damage;
-            _throwForce = configuration.throwForce;
+            _maxThrowDuration = configuration.maxThrowDuration;
+            _throwForceModifier = configuration.throwForceModifier;
             _itemId = configuration.id;
             _grenadeInfo = hud.itemInfo;
             _grenadeCountText = hud.itemCount;
@@ -68,8 +64,8 @@ namespace Inventory
 
         public void OnLeftMouseButtonUp()
         {
-            var holdTime = Time.time - _holdDownStartTime;
-            var throwForce = holdTime * 1000;
+            var holdTime = Math.Min(Time.time - _holdDownStartTime, _maxThrowDuration);
+            var throwForce = holdTime * _throwForceModifier;
             var ray = _raycaster.GetCentredRay();
             NetworkClient.Send(new GrenadeSpawnRequest(_itemId, ray, throwForce));
         }
