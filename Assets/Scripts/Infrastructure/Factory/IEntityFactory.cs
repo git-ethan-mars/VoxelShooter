@@ -12,6 +12,7 @@ namespace Infrastructure.Factory
         
         GameObject CreateGrenade(Vector3 position, Quaternion rotation);
         
-        GameObject CreateRocket(Vector3 rayOrigin, Quaternion identity, ServerData serverData, RocketLauncherItem rocketData, NetworkConnectionToClient owner);
+        GameObject CreateRocket(Vector3 rayOrigin, Quaternion identity, ServerData serverData, 
+            IParticleFactory particleFactory, RocketLauncherItem rocketData, NetworkConnectionToClient owner);
     }
 }

@@ -130,7 +130,7 @@ namespace Networking
             
             var rocketData = (RocketLauncherItem)_staticData.GetItem(message.ItemId);
             var direction = message.Ray.direction;
-            var rocket = _entityFactory.CreateRocket(message.Ray.origin + direction * 2, Quaternion.LookRotation(direction), _serverData, rocketData, connection);
+            var rocket = _entityFactory.CreateRocket(message.Ray.origin + direction * 2, Quaternion.LookRotation(direction), _serverData, _particleFactory, rocketData, connection);
             rocket.GetComponent<Rigidbody>().velocity = direction * rocketData.speed;
         }
 
@@ -157,7 +157,9 @@ namespace Networking
             yield return new WaitForSeconds(delayInSeconds);
             if (!grenade) yield break;
             
-            var validPositions = new List<Vector3Int>();
+            var blockPositions = new List<Vector3Int>();
+            var blockColors = new List<Color32>();
+            var emptyBlock = new BlockData().Color;
             var grenadePosition = new Vector3Int((int)grenade.transform.position.x,
                 (int)grenade.transform.position.y, (int)grenade.transform.position.z);
             for (var x = -radius; x <= radius; x++)
@@ -167,20 +169,26 @@ namespace Networking
                     for (var z = -radius; z <= radius; z++)
                     {
                         var blockPosition = grenadePosition + new Vector3Int(x, y, z);
-                        if (_serverData.Map.IsValidPosition(blockPosition) &&
-                            Vector3Int.Distance(blockPosition, grenadePosition) <= radius)
-                            validPositions.Add(blockPosition);
+                        var blockData = _serverData.Map.GetBlockByGlobalPosition(blockPosition);
+                        if (_serverData.Map.IsValidPosition(blockPosition)
+                            && Vector3Int.Distance(blockPosition, grenadePosition) <= radius
+                            && !blockData.Color.Equals(emptyBlock))
+                        {
+                            blockPositions.Add(blockPosition);
+                            blockColors.Add(blockData.Color);
+                        }
                     }
                 }
             }
 
-            foreach (var position in validPositions)
+            foreach (var tuple in blockPositions.Zip(blockColors, Tuple.Create))
             {
-                _serverData.Map.SetBlockByGlobalPosition(position, new BlockData());
+                _serverData.Map.SetBlockByGlobalPosition(tuple.Item1, new BlockData());
+                _particleFactory.CreateRchParticle(tuple.Item1, tuple.Item2);
             }
 
-            NetworkServer.SendToAll(new UpdateMapMessage(validPositions.ToArray(),
-                new BlockData[validPositions.Count]));
+            NetworkServer.SendToAll(new UpdateMapMessage(blockPositions.ToArray(),
+                new BlockData[blockPositions.Count]));
             NetworkServer.Destroy(grenade);
 
             Collider[] hitColliders = Physics.OverlapSphere(grenadePosition, radius);
@@ -226,30 +234,36 @@ namespace Networking
         private void ExplodeImmediately(Vector3Int explosionCenter, GameObject tnt, int radius,
             List<GameObject> explodedTnt, NetworkConnectionToClient connection, int damage)
         {
-            var validPositions = new List<Vector3Int>();
+            var blockPositions = new List<Vector3Int>();
+            var blockColors = new List<Color32>();
+            var emptyBlock = new BlockData().Color;
             for (var x = -radius; x <= radius; x++)
             {
                 for (var y = -radius; y <= radius; y++)
                 {
                     for (var z = -radius; z <= radius; z++)
                     {
-                        var blockPosition = new Vector3Int(explosionCenter.x,
-                            explosionCenter.y, explosionCenter.z) + new Vector3Int(x, y, z);
-                        if (_serverData.Map.IsValidPosition(blockPosition) &&
-                            Vector3Int.Distance(blockPosition, explosionCenter) <= radius)
-                            validPositions.Add(blockPosition);
+                        var blockPosition = explosionCenter + new Vector3Int(x, y, z);
+                        var blockData = _serverData.Map.GetBlockByGlobalPosition(blockPosition);
+                        if (_serverData.Map.IsValidPosition(blockPosition)
+                            && Vector3Int.Distance(blockPosition, explosionCenter) <= radius
+                            && !blockData.Color.Equals(emptyBlock))
+                        {
+                            blockPositions.Add(blockPosition);
+                            blockColors.Add(blockData.Color);
+                        }
                     }
                 }
             }
-
-            foreach (var position in validPositions)
+            
+            foreach (var tuple in blockPositions.Zip(blockColors, Tuple.Create))
             {
-                _serverData.Map.SetBlockByGlobalPosition(position, new BlockData());
-                _particleFactory.CreateRchParticle(position);
+                _serverData.Map.SetBlockByGlobalPosition(tuple.Item1, new BlockData());
+                _particleFactory.CreateRchParticle(tuple.Item1, tuple.Item2);
             }
 
-            NetworkServer.SendToAll(new UpdateMapMessage(validPositions.ToArray(),
-                new BlockData[validPositions.Count]));
+            NetworkServer.SendToAll(new UpdateMapMessage(blockPositions.ToArray(),
+                new BlockData[blockPositions.Count]));
             NetworkServer.Destroy(tnt);
             explodedTnt.Add(tnt);
 

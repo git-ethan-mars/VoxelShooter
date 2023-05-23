@@ -31,10 +31,11 @@ namespace Infrastructure.Factory
             return grenade;
         }
         
-        public GameObject CreateRocket(Vector3 position, Quaternion rotation, ServerData serverData, RocketLauncherItem rocketData, NetworkConnectionToClient owner)
+        public GameObject CreateRocket(Vector3 position, Quaternion rotation, ServerData serverData, 
+            IParticleFactory particleFactory, RocketLauncherItem rocketData, NetworkConnectionToClient owner)
         {
             var rocket = _assets.Instantiate(RocketPath, position, rotation);
-            rocket.GetComponent<Rocket>().Construct(serverData, rocketData, owner);
+            rocket.GetComponent<Rocket>().Construct(serverData, rocketData, owner, particleFactory);
             NetworkServer.Spawn(rocket);
             return rocket;
         }
