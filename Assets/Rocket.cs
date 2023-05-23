@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Data;
@@ -18,7 +17,7 @@ public class Rocket : NetworkBehaviour
     private int _damage;
     private NetworkConnectionToClient _owner;
 
-    public void Construct(ServerData serverData, RocketLauncherItem rocketData, 
+    public void Construct(ServerData serverData, RocketLauncherItem rocketData,
         NetworkConnectionToClient owner, IParticleFactory particleFactory)
     {
         _serverData = serverData;
@@ -27,15 +26,15 @@ public class Rocket : NetworkBehaviour
         _damage = rocketData.damage;
         _owner = owner;
     }
-    
+
     [Server]
     private void OnCollisionEnter(Collision collision)
     {
         var blockPositions = new List<Vector3Int>();
         var blockColors = new List<Color32>();
         var emptyBlock = new BlockData().Color;
-        var rocketPosition = new Vector3Int((int)transform.position.x,
-            (int)transform.position.y, (int)transform.position.z);
+        var rocketPosition = new Vector3Int((int) transform.position.x,
+            (int) transform.position.y, (int) transform.position.z);
         for (var x = -_radius; x <= _radius; x++)
         {
             for (var y = -_radius; y <= _radius; y++)
@@ -43,10 +42,10 @@ public class Rocket : NetworkBehaviour
                 for (var z = -_radius; z <= _radius; z++)
                 {
                     var blockPosition = rocketPosition + new Vector3Int(x, y, z);
+                    if (!_serverData.Map.IsValidPosition(blockPosition)) continue;
                     var blockData = _serverData.Map.GetBlockByGlobalPosition(blockPosition);
-                    if (_serverData.Map.IsValidPosition(blockPosition)
-                        && Vector3Int.Distance(blockPosition, rocketPosition) <= _radius
-                        && !blockData.Color.Equals(emptyBlock))
+                    if (Vector3Int.Distance(blockPosition, rocketPosition) <= _radius &&
+                        !blockData.Color.Equals(emptyBlock))
                     {
                         blockPositions.Add(blockPosition);
                         blockColors.Add(blockData.Color);
@@ -75,7 +74,7 @@ public class Rocket : NetworkBehaviour
                     (rocketPosition.x - playerPosition.x) * (rocketPosition.x - playerPosition.x) +
                     (rocketPosition.y - playerPosition.y) * (rocketPosition.y - playerPosition.y) +
                     (rocketPosition.z - playerPosition.z) * (rocketPosition.z - playerPosition.z));
-                var currentDamage = (int)(_damage - _damage * (distance / _radius));
+                var currentDamage = (int) (_damage - _damage * (distance / _radius));
                 var receiver = hitCollider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
                 receiver.identity.GetComponent<HealthSynchronization>().Damage(_owner, receiver, currentDamage);
             }
