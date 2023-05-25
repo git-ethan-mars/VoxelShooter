@@ -164,9 +164,10 @@ namespace Networking.Synchronization
 
             if (rayHit.collider.CompareTag("Chunk"))
             {
-                _particleFactory.CreateBulletHole(rayHit.point, Quaternion.Euler(rayHit.normal.y * -90,
-                    // ReSharper disable once CompareOfFloatsByEqualityOperator
-                    rayHit.normal.x * 90 + (rayHit.normal.z == -1 ? 180 : 0), 0));
+                var block = _serverData.Map.GetBlockByGlobalPosition(new Vector3Int((int) rayHit.point.x, 
+                    (int) rayHit.point.y, (int) rayHit.point.z));
+                _particleFactory.CreateBulletImpact(rayHit.point, Quaternion.Euler(rayHit.normal.y * -90, 
+                    rayHit.normal.x * 90 + (rayHit.normal.z == -1 ? 180 : 0), 0), block.Color);
             }
         }
 

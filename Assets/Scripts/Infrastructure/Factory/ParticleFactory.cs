@@ -16,12 +16,13 @@ namespace Infrastructure.Factory
             _coroutineRunner = coroutineRunner;
         }
         
-        public GameObject CreateBulletHole(Vector3 position, Quaternion rotation)
+        public GameObject CreateBulletImpact(Vector3 position, Quaternion rotation, Color32 blockColor)
         {
             var bullet = _assets.Instantiate(ParticlePath.BulletHolePath, position, rotation);
             var particleSystem = bullet.GetComponent<ParticleSystem>().main;
+            particleSystem.startColor = new ParticleSystem.MinMaxGradient(blockColor);
             NetworkServer.Spawn(bullet); 
-            _coroutineRunner.StartCoroutine(DestroyParticle(bullet, particleSystem.duration));
+            _coroutineRunner.StartCoroutine(DestroyParticle(bullet, particleSystem.startLifetime.constant));
             return bullet;
         }
 
