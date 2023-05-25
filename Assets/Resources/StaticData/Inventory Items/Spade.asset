@@ -17,7 +17,7 @@ MonoBehaviour:
   inventoryIcon: {fileID: -968327103, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
   prefab: {fileID: 7922214257710745971, guid: 6a3125bea274d394bb39c24f7e77ae9d, type: 3}
   range: 5
-  timeBetweenHit: 1
+  timeBetweenHit: 0.5
   damageToPlayer: 15
   headMultiplier: 1.5
   chestMultiplier: 1.2

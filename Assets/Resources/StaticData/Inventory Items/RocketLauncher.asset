@@ -19,7 +19,7 @@ MonoBehaviour:
   countIcon: {fileID: 886209943, guid: e7634cc0bf7762649a525e59875cd9d1, type: 3}
   count: 8
   radius: 8
-  damage: 95
+  damage: 100
   speed: 70
   particlesSpeed: 7
   particlesCount: 100
