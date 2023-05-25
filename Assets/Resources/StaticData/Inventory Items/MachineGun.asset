@@ -28,7 +28,7 @@ MonoBehaviour:
   bulletsPerTap: 1
   totalBullets: 80
   zoomMultiplier: 1.5
-  damage: 15
+  damage: 10
   headMultiplier: 1.5
   chestMultiplier: 1.2
   legMultiplier: 0.8

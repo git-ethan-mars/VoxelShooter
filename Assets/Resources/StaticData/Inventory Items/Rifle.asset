@@ -30,7 +30,7 @@ MonoBehaviour:
   zoomMultiplier: 3
   damage: 50
   headMultiplier: 3
-  chestMultiplier: 1.5
+  chestMultiplier: 1.2
   legMultiplier: 0.8
   armMultiplier: 0.5
   shootingAudioClip: {fileID: 8300000, guid: 2e459cd27f71f224ebbcde1e5950f9d9, type: 3}
