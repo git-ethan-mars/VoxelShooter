@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Data;
+using Explosions;
 using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
 using Mirror;
@@ -16,12 +17,14 @@ namespace Networking.Synchronization
         private ServerData _serverData;
         private IParticleFactory _particleFactory;
         private List<AudioClip> _audioClips;
+        private LineExplosionArea _lineExplosionArea;
 
         public void Construct(IParticleFactory particleFactory, IAssetProvider assets, ServerData serverData)
         {
             _serverData = serverData;
             _particleFactory = particleFactory;
             _audioClips = assets.LoadAll<AudioClip>("Audio/Sounds").ToList();
+            _lineExplosionArea = new LineExplosionArea(serverData);
         }
 
         [Command]
@@ -86,26 +89,19 @@ namespace Networking.Synchronization
                 var targetBlock = Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2);
                 if (isStrongHit)
                 {
-                    var validPositions = new List<Vector3Int>();
-                    for (var i = -1; i <= 1; i++)
-                    {
-                        if (_serverData.Map.IsValidPosition(targetBlock + new Vector3Int(0, i, 0)))
-                        {
-                            _serverData.Map.SetBlockByGlobalPosition(targetBlock + new Vector3Int(0, i, 0), new BlockData());
-                            validPositions.Add(targetBlock + new Vector3Int(0, i, 0));
-                        }
-                    }
-
-
+                    var validPositions = _lineExplosionArea.GetExplodedBlocks(3, targetBlock);
+                    foreach(var position in validPositions)
+                        _serverData.Map.SetBlockByGlobalPosition(position, new BlockData());
                     NetworkServer.SendToAll(new UpdateMapMessage(
                         validPositions.ToArray(), new BlockData[validPositions.Count]));
                 }
                 else
                 {
-                    if (_serverData.Map.IsValidPosition(targetBlock))
+                    var blocks = _lineExplosionArea.GetExplodedBlocks(1, targetBlock);
+                    if (blocks.Count > 0)
                     {
-                        _serverData.Map.SetBlockByGlobalPosition(targetBlock, new BlockData());
-                        NetworkServer.SendToAll(new UpdateMapMessage(new[] {targetBlock}, new BlockData[1]));
+                        _serverData.Map.SetBlockByGlobalPosition(blocks[0], new BlockData());
+                        NetworkServer.SendToAll(new UpdateMapMessage(new[] { targetBlock }, new BlockData[1]));
                     }
                 }
 

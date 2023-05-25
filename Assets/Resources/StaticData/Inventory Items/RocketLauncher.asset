@@ -21,3 +21,5 @@ MonoBehaviour:
   radius: 8
   damage: 50
   speed: 50
+  particlesSpeed: 7
+  particlesCount: 100

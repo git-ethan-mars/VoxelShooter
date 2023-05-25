@@ -23,3 +23,5 @@ MonoBehaviour:
   damage: 100
   maxThrowDuration: 2
   throwForceModifier: 1000
+  particlesSpeed: 3
+  particlesCount: 30

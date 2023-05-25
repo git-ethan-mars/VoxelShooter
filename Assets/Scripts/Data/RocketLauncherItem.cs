@@ -10,6 +10,8 @@ namespace Data
         public int radius;
         public int damage;
         public int speed;
+        public int particlesSpeed;
+        public int particlesCount;
 
         public void Awake()
         {

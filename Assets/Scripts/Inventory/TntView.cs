@@ -72,8 +72,8 @@ namespace Inventory
             NetworkClient.Send(new TntSpawnRequest(_itemId,
                 Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2) +
                 GetTntOffsetPosition(raycastHit.normal),
-                GetTntRotation(raycastHit.normal), _delayInSeconds,
-                Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2), _radius, _damage));
+                GetTntRotation(raycastHit.normal),
+                Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2)));
         }
 
 

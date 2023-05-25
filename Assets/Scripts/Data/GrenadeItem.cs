@@ -13,6 +13,8 @@ namespace Data
         public int damage;
         public float maxThrowDuration;
         public float throwForceModifier;
+        public int particlesSpeed;
+        public int particlesCount;
 
         public void Awake()
         {

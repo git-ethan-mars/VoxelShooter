@@ -21,3 +21,5 @@ MonoBehaviour:
   delayInSeconds: 3
   radius: 6
   damage: 100
+  particlesSpeed: 6
+  particlesCount: 70

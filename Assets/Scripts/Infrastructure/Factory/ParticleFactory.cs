@@ -38,16 +38,24 @@ namespace Infrastructure.Factory
             return blood;
         }
 
-        public void CreateRchParticle(Vector3 position, Color32 blockColor)
+        public void CreateRchParticle(Vector3 position, int startSpeed, int burstCount)
         {
             var rchParticle = _assets.Instantiate(ParticlePath.RchParticlePath, position, Quaternion.identity);
-            rchParticle.GetComponent<ParticleSystem>().startColor = blockColor;
+            var particleSystem = rchParticle.GetComponent<ParticleSystem>();
+            var main = particleSystem.main;
+            main.startSpeed = startSpeed;
+            var burst = new ParticleSystem.Burst(0f, burstCount, 5, 0.05f)
+            {
+                probability = 1
+            };
+            particleSystem.emission.SetBurst(0, burst);
             NetworkServer.Spawn(rchParticle);
+            _coroutineRunner.StartCoroutine(DestroyParticle(rchParticle));
         }
 
         private static IEnumerator DestroyParticle(GameObject particle)
         {
-            yield return new WaitForSeconds(particle.GetComponent<ParticleSystem>().main.duration);
+            yield return new WaitForSeconds(particle.GetComponent<ParticleSystem>().main.startLifetime.constant);
             if (particle != null)
                 NetworkServer.Destroy(particle);
         }

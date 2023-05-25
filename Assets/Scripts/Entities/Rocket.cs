@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Data;
+using Explosions;
 using Infrastructure.Factory;
 using Mirror;
 using Networking;
@@ -15,7 +16,11 @@ public class Rocket : NetworkBehaviour
     private IParticleFactory _particleFactory;
     private int _radius;
     private int _damage;
+    private int _particlesSpeed;
+    private int _particlesCount;
     private NetworkConnectionToClient _owner;
+    private IExplosionArea _sphereExplosionArea;
+    private bool _isExploded;
 
     public void Construct(ServerData serverData, RocketLauncherItem rocketData,
         NetworkConnectionToClient owner, IParticleFactory particleFactory)
@@ -24,41 +29,26 @@ public class Rocket : NetworkBehaviour
         _particleFactory = particleFactory;
         _radius = rocketData.radius;
         _damage = rocketData.damage;
+        _particlesSpeed = rocketData.particlesSpeed;
+        _particlesCount = rocketData.particlesCount;
         _owner = owner;
+        _sphereExplosionArea = new SphereExplosionArea(serverData);
     }
 
     [Server]
     private void OnCollisionEnter(Collision collision)
     {
-        var blockPositions = new List<Vector3Int>();
-        var blockColors = new List<Color32>();
-        var emptyBlock = new BlockData().Color;
+        if (_isExploded) return;
+        _isExploded = true;
+        
         var rocketPosition = new Vector3Int((int) transform.position.x,
             (int) transform.position.y, (int) transform.position.z);
-        for (var x = -_radius; x <= _radius; x++)
-        {
-            for (var y = -_radius; y <= _radius; y++)
-            {
-                for (var z = -_radius; z <= _radius; z++)
-                {
-                    var blockPosition = rocketPosition + new Vector3Int(x, y, z);
-                    if (!_serverData.Map.IsValidPosition(blockPosition)) continue;
-                    var blockData = _serverData.Map.GetBlockByGlobalPosition(blockPosition);
-                    if (Vector3Int.Distance(blockPosition, rocketPosition) <= _radius &&
-                        !blockData.Color.Equals(emptyBlock))
-                    {
-                        blockPositions.Add(blockPosition);
-                        blockColors.Add(blockData.Color);
-                    }
-                }
-            }
-        }
 
-        foreach (var tuple in blockPositions.Zip(blockColors, Tuple.Create))
-        {
-            _serverData.Map.SetBlockByGlobalPosition(tuple.Item1, new BlockData());
-            _particleFactory.CreateRchParticle(tuple.Item1, tuple.Item2);
-        }
+        var blockPositions = _sphereExplosionArea.GetExplodedBlocks(_radius, rocketPosition);
+
+        foreach (var position in blockPositions)
+            _serverData.Map.SetBlockByGlobalPosition(position, new BlockData());
+        _particleFactory.CreateRchParticle(rocketPosition, _particlesSpeed, _particlesCount);
 
         NetworkServer.SendToAll(new UpdateMapMessage(blockPositions.ToArray(),
             new BlockData[blockPositions.Count]));

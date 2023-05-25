@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Data;
+using Explosions;
 using Infrastructure;
 using Infrastructure.Factory;
 using Infrastructure.Services.StaticData;
@@ -20,6 +21,7 @@ namespace Networking
         private readonly ServerData _serverData;
         private readonly IStaticDataService _staticData;
         private IParticleFactory _particleFactory;
+        private readonly IExplosionArea _sphereExplosionArea;
 
         public ServerMessageHandlers(IEntityFactory entityFactory, ICoroutineRunner coroutineRunner,
             ServerData serverData, IStaticDataService staticData, IParticleFactory particleFactory)
@@ -29,6 +31,7 @@ namespace Networking
             _coroutineRunner = coroutineRunner;
             _staticData = staticData;
             _particleFactory = particleFactory;
+            _sphereExplosionArea = new SphereExplosionArea(serverData);
         }
 
         public void RegisterHandlers()
@@ -149,44 +152,23 @@ namespace Networking
             var grenadeData = (GrenadeItem)_staticData.GetItem(message.ItemId);
             
             _coroutineRunner.StartCoroutine(ExplodeGrenade(grenade, grenadeData.delayInSeconds, grenadeData.radius, 
-                grenadeData.damage, connection));
+                grenadeData.damage, grenadeData.particlesSpeed, grenadeData.particlesCount, connection));
         }
         
-        private IEnumerator ExplodeGrenade(GameObject grenade, float delayInSeconds, int radius, int damage, NetworkConnectionToClient connection)
+        private IEnumerator ExplodeGrenade(GameObject grenade, float delayInSeconds, int radius, int damage, int particlesSpeed, int particlesCount, NetworkConnectionToClient connection)
         {
             yield return new WaitForSeconds(delayInSeconds);
             if (!grenade) yield break;
+
+            var grenadePosition = new Vector3Int((int) grenade.transform.position.x,
+                (int) grenade.transform.position.y, (int) grenade.transform.position.z);
             
-            var blockPositions = new List<Vector3Int>();
-            var blockColors = new List<Color32>();
-            var emptyBlock = new BlockData().Color;
-            var grenadePosition = new Vector3Int((int)grenade.transform.position.x,
-                (int)grenade.transform.position.y, (int)grenade.transform.position.z);
-            for (var x = -radius; x <= radius; x++)
-            {
-                for (var y = -radius; y <= radius; y++)
-                {
-                    for (var z = -radius; z <= radius; z++)
-                    {
-                        var blockPosition = grenadePosition + new Vector3Int(x, y, z);
-                        var blockData = _serverData.Map.GetBlockByGlobalPosition(blockPosition);
-                        if (_serverData.Map.IsValidPosition(blockPosition)
-                            && Vector3Int.Distance(blockPosition, grenadePosition) <= radius
-                            && !blockData.Color.Equals(emptyBlock))
-                        {
-                            blockPositions.Add(blockPosition);
-                            blockColors.Add(blockData.Color);
-                        }
-                    }
-                }
-            }
+            var blockPositions = _sphereExplosionArea.GetExplodedBlocks(radius, grenadePosition);
 
-            foreach (var tuple in blockPositions.Zip(blockColors, Tuple.Create))
-            {
-                _serverData.Map.SetBlockByGlobalPosition(tuple.Item1, new BlockData());
-                _particleFactory.CreateRchParticle(tuple.Item1, tuple.Item2);
-            }
-
+            foreach (var position in blockPositions)
+                _serverData.Map.SetBlockByGlobalPosition(position, new BlockData());
+            _particleFactory.CreateRchParticle(grenadePosition, particlesSpeed, particlesCount);
+            
             NetworkServer.SendToAll(new UpdateMapMessage(blockPositions.ToArray(),
                 new BlockData[blockPositions.Count]));
             NetworkServer.Destroy(grenade);
@@ -215,52 +197,31 @@ namespace Networking
             if (tntCount <= 0)
                 return;
             var tnt = _entityFactory.CreateTnt(message.Position, message.Rotation);
+            var tntData = (TntItem)_staticData.GetItem(message.ItemId);
             _coroutineRunner.StartCoroutine(ExplodeWithDelay(Vector3Int.FloorToInt(message.ExplosionCenter), tnt,
-                message.DelayInSecond,
-                message.Radius, connection, message.Damage));
+                tntData.delayInSeconds,
+                tntData.radius, connection, tntData.damage, tntData.particlesSpeed, tntData.particlesCount));
             _serverData.SetItemCount(connection, message.ItemId, tntCount - 1);
             connection.Send(new ItemUseResult(message.ItemId, tntCount - 1));
         }
 
         private IEnumerator ExplodeWithDelay(Vector3Int explosionCenter, GameObject tnt, float delayInSeconds,
-            int radius, NetworkConnectionToClient connection, int damage)
+            int radius, NetworkConnectionToClient connection, int damage, int particlesSpeed, int particlesCount)
         {
             yield return new WaitForSeconds(delayInSeconds);
             if (!tnt) yield break;
             var explodedTnt = new List<GameObject>();
-            ExplodeImmediately(explosionCenter, tnt, radius, explodedTnt, connection, damage);
+            ExplodeImmediately(explosionCenter, tnt, radius, explodedTnt, connection, damage, particlesSpeed, particlesCount);
         }
 
         private void ExplodeImmediately(Vector3Int explosionCenter, GameObject tnt, int radius,
-            List<GameObject> explodedTnt, NetworkConnectionToClient connection, int damage)
+            List<GameObject> explodedTnt, NetworkConnectionToClient connection, int damage, int particlesSpeed, int particlesCount)
         {
-            var blockPositions = new List<Vector3Int>();
-            var blockColors = new List<Color32>();
-            var emptyBlock = new BlockData().Color;
-            for (var x = -radius; x <= radius; x++)
-            {
-                for (var y = -radius; y <= radius; y++)
-                {
-                    for (var z = -radius; z <= radius; z++)
-                    {
-                        var blockPosition = explosionCenter + new Vector3Int(x, y, z);
-                        var blockData = _serverData.Map.GetBlockByGlobalPosition(blockPosition);
-                        if (_serverData.Map.IsValidPosition(blockPosition)
-                            && Vector3Int.Distance(blockPosition, explosionCenter) <= radius
-                            && !blockData.Color.Equals(emptyBlock))
-                        {
-                            blockPositions.Add(blockPosition);
-                            blockColors.Add(blockData.Color);
-                        }
-                    }
-                }
-            }
+            var blockPositions = _sphereExplosionArea.GetExplodedBlocks(radius, explosionCenter);
             
-            foreach (var tuple in blockPositions.Zip(blockColors, Tuple.Create))
-            {
-                _serverData.Map.SetBlockByGlobalPosition(tuple.Item1, new BlockData());
-                _particleFactory.CreateRchParticle(tuple.Item1, tuple.Item2);
-            }
+            foreach (var position in blockPositions)
+                _serverData.Map.SetBlockByGlobalPosition(position, new BlockData());
+            _particleFactory.CreateRchParticle(explosionCenter, particlesSpeed, particlesCount);
 
             NetworkServer.SendToAll(new UpdateMapMessage(blockPositions.ToArray(),
                 new BlockData[blockPositions.Count]));
@@ -273,7 +234,7 @@ namespace Networking
                 if (hitCollider.CompareTag("TNT") && explodedTnt.All(x => x.gameObject != hitCollider.gameObject))
                 {
                     ExplodeImmediately(Vector3Int.FloorToInt(hitCollider.gameObject.transform.position),
-                        hitCollider.gameObject, radius, explodedTnt, connection, damage);
+                        hitCollider.gameObject, radius, explodedTnt, connection, damage, particlesSpeed, particlesCount);
                 }
 
                 if (hitCollider.CompareTag("Player"))
