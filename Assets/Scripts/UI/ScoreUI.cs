@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace UI
 {
-    public class Score : MonoBehaviour
+    public class ScoreUI : MonoBehaviour
     {
         public RawImage avatar;
         public TextMeshProUGUI nickName;

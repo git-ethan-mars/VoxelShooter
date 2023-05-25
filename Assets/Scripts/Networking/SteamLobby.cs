@@ -10,6 +10,7 @@ namespace Networking
 	    protected Callback<LobbyCreated_t> LobbyCreated;
 	    protected Callback<GameLobbyJoinRequested_t> JoinRequested;
 	    protected Callback<LobbyEnter_t> LobbyEntered;
+	    protected Callback<AvatarImageLoaded_t> AvatarLoaded;
 	    private bool IsInitialized { get; set; }
 	    private NetworkManager _networkManager;
         private bool _isHost;
@@ -112,6 +113,7 @@ namespace Networking
             LobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
             JoinRequested = Callback<GameLobbyJoinRequested_t>.Create(OnJoinRequest);
             LobbyEntered = Callback<LobbyEnter_t>.Create(OnLobbyEntered);
+            AvatarLoaded = Callback<AvatarImageLoaded_t>.Create(OnAvatarLoaded);
             if (_isHost)
                 SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, _networkManager.maxConnections);
         }
@@ -142,7 +144,7 @@ namespace Networking
             SteamMatchmaking.JoinLobby(_steamLobbyId);
         }
 
-        private void OnLobbyEntered(LobbyEnter_t callback)
+		private void OnLobbyEntered(LobbyEnter_t callback)
         {
             if (NetworkServer.active) return;
             _steamLobbyId = new CSteamID(callback.m_ulSteamIDLobby);
@@ -151,7 +153,12 @@ namespace Networking
             _networkManager.StartClient();
         }
 
-        private void OnDestroy()
+		private void OnAvatarLoaded(AvatarImageLoaded_t callback)
+		{
+			
+		}
+
+		private void OnDestroy()
         {
             SteamMatchmaking.LeaveLobby(_steamLobbyId);    
             SteamAPI.Shutdown();

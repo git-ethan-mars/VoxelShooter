@@ -1,4 +1,5 @@
-﻿using Infrastructure.AssetManagement;
+﻿using System;
+using Infrastructure.AssetManagement;
 using Steamworks;
 using UnityEngine;
 
@@ -13,10 +14,11 @@ namespace Infrastructure.Services.PlayerDataLoader
         {
             _assets = assets;
         }
-        
-        public Texture2D LoadAvatar(CSteamID steamID)
+
+        public event Action<CSteamID, Texture2D> OnAvatarLoaded;
+        public void RequestAvatar(CSteamID steamID)
         {
-            return _assets.Load<Texture2D>(SteamAvatarPath);
+            OnAvatarLoaded?.Invoke(steamID, _assets.Load<Texture2D>(SteamAvatarPath));
         }
     }
 }
