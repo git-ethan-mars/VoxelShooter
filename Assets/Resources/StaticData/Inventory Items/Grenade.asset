@@ -20,7 +20,7 @@ MonoBehaviour:
   count: 4
   delayInSeconds: 2
   radius: 3
-  damage: 100
+  damage: 50
   maxThrowDuration: 2
   throwForceModifier: 1000
   particlesSpeed: 3

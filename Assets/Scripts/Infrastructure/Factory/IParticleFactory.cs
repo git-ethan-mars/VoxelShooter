@@ -6,7 +6,7 @@ namespace Infrastructure.Factory
 {
     public interface IParticleFactory : IService
     {
-        GameObject CreateBulletHole(Vector3 position, Quaternion rotation);
+        GameObject CreateBulletImpact(Vector3 position, Quaternion rotation, Color32 blockColor);
         GameObject CreateMuzzleFlash(Transform transform);
         GameObject CreateBlood(Vector3 position);
         void CreateRchParticle(Vector3 position, int startSpeed, int burstCount);

@@ -65,6 +65,8 @@ public class Rocket : NetworkBehaviour
                     (rocketPosition.y - playerPosition.y) * (rocketPosition.y - playerPosition.y) +
                     (rocketPosition.z - playerPosition.z) * (rocketPosition.z - playerPosition.z));
                 var currentDamage = (int) (_damage - _damage * (distance / _radius));
+                var direction = playerPosition - rocketPosition;
+                hitCollider.GetComponent<CharacterController>().Move(direction * _particlesSpeed / 3);
                 var receiver = hitCollider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
                 receiver.identity.GetComponent<HealthSynchronization>().Damage(_owner, receiver, currentDamage);
             }

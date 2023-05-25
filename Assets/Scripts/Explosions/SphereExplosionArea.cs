@@ -24,12 +24,12 @@ namespace Explosions
                     for (var z = -radius; z <= radius; z++)
                     {
                         var blockPosition = targetBlock + new Vector3Int(x, y, z);
-                        var blockData = _serverData.Map.GetBlockByGlobalPosition(blockPosition);
-                        if (_serverData.Map.IsValidPosition(blockPosition)
-                            && Vector3Int.Distance(blockPosition, targetBlock) <= radius
-                            && !blockData.Color.Equals(BlockColor.empty))
+                        if (_serverData.Map.IsValidPosition(blockPosition)) 
                         {
-                            blockPositions.Add(blockPosition);
+                            var blockData = _serverData.Map.GetBlockByGlobalPosition(blockPosition);
+                            if (Vector3Int.Distance(blockPosition, targetBlock) <= radius
+                                && !blockData.Color.Equals(BlockColor.empty))
+                                blockPositions.Add(blockPosition);
                         }
                     }
                 }

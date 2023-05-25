@@ -13,7 +13,10 @@ namespace Inventory
         public event Action OnFirstActionButtonDown;
         public event Action OnFirstActionButtonUp;
         public event Action OnFirstActionButtonHold;
+        
         public event Action OnSecondActionButtonDown;
+        public event Action OnSecondActionButtonUp;
+        
         public event Action<int> OnChangeSlot;
 
         private IInputService _inputService;
@@ -55,11 +58,6 @@ namespace Inventory
                 OnFirstActionButtonDown?.Invoke();
             }
 
-            if (_inputService.IsSecondActionButtonDown())
-            {
-                OnSecondActionButtonDown?.Invoke();
-            }
-
             if (_inputService.IsFirstActionButtonHold())
             {
                 OnFirstActionButtonHold?.Invoke();
@@ -68,6 +66,16 @@ namespace Inventory
             if (_inputService.IsFirstActionButtonUp())
             {
                 OnFirstActionButtonUp?.Invoke();
+            }
+            
+            if (_inputService.IsSecondActionButtonDown())
+            {
+                OnSecondActionButtonDown?.Invoke();
+            }
+            
+            if (_inputService.IsSecondActionButtonUp())
+            {
+                OnSecondActionButtonUp?.Invoke();
             }
         }
     }

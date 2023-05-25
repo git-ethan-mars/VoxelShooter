@@ -19,6 +19,7 @@ namespace Data
         public readonly GameObject Prefab;
         public readonly int BulletsPerShot;
         public readonly int Damage;
+        public readonly float ZoomMultiplier;
         public readonly Sprite InventoryIcon;
         public readonly int ID;
         public bool IsReloading;
@@ -61,6 +62,7 @@ namespace Data
             ShootAudioClip = primaryRangeWeapon.shootingAudioClip;
             ReloadingVolume = primaryRangeWeapon.reloadingVolume;
             ShootingVolume = primaryRangeWeapon.shootingVolume;
+            ZoomMultiplier = primaryRangeWeapon.zoomMultiplier;
         }
     }
 }

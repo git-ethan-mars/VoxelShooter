@@ -2,6 +2,7 @@ using Data;
 using Infrastructure.Factory;
 using Infrastructure.Services.Input;
 using Networking.Synchronization;
+using PlayerLogic;
 using TMPro;
 using UI;
 using UnityEngine;
@@ -9,7 +10,8 @@ using UnityEngine.UI;
 
 namespace Inventory
 {
-    public class RangeWeaponView : IInventoryItemView, IReloading, IShooting, ILeftMouseButtonDownHandler, ILeftMouseButtonHoldHandler, IUpdated
+    public class RangeWeaponView : IInventoryItemView, IReloading, IShooting, ILeftMouseButtonDownHandler, 
+        ILeftMouseButtonHoldHandler, IRightMouseButtonDownHandler, IRightMouseButtonUpHandler, IUpdated
     {
         public Sprite Icon { get; }
         private GameObject Model { get; }
@@ -23,6 +25,7 @@ namespace Inventory
         private readonly Image _ammoType;
         private readonly Sprite _ammoTypeIcon;
         private readonly int _id;
+        private readonly float _zoomMultiplier;
 
 
         public RangeWeaponView(IInventoryModelFactory gameFactory, IInputService inputService, Camera camera,
@@ -36,6 +39,7 @@ namespace Inventory
             _id = configuration.ID;
             BulletsInMagazine = configuration.BulletsInMagazine;
             TotalBullets = configuration.TotalBullets;
+            _zoomMultiplier = configuration.ZoomMultiplier;
             Model.GetComponentInChildren<Transform>();
             _fpsCam = camera;
             _ammoInfo = hud.GetComponent<Hud>().ammoInfo;
@@ -78,6 +82,15 @@ namespace Inventory
             _bulletSynchronization.CmdShootAutomatic(ray, _id);
         }
 
+        public void OnRightMouseButtonDown()
+        {
+            _fpsCam.fieldOfView = Constants.DefaultFov / _zoomMultiplier;
+        }
+        
+        public void OnRightMouseButtonUp()
+        {
+            _fpsCam.fieldOfView = Constants.DefaultFov;
+        }
 
         public void OnReloadResult()
         {

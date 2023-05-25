@@ -18,7 +18,7 @@ MonoBehaviour:
   prefab: {fileID: 7922214257710745971, guid: 6a3125bea274d394bb39c24f7e77ae9d, type: 3}
   range: 5
   timeBetweenHit: 1
-  damageToPlayer: 20
+  damageToPlayer: 15
   headMultiplier: 1.5
   chestMultiplier: 1.2
   legMultiplier: 0.8

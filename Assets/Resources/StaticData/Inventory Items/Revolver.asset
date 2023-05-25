@@ -22,13 +22,13 @@ MonoBehaviour:
   baseRecoil: 0.01
   stepRecoil: 0.03
   resetTimeRecoil: 0.5
-  range: 70
+  range: 100
   reloadTime: 2
-  timeBetweenShots: 0
   magazineSize: 6
   bulletsPerTap: 1
   totalBullets: 24
-  damage: 30
+  zoomMultiplier: 1.5
+  damage: 20
   headMultiplier: 2.5
   chestMultiplier: 1.2
   legMultiplier: 0.8

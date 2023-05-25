@@ -81,9 +81,12 @@ namespace Inventory
         private void AddEventHandlers(InventoryInput inventoryInput)
         {
             inventoryInput.OnFirstActionButtonDown += FirstActionButtonDown;
-            inventoryInput.OnSecondActionButtonDown += SecondActionButtonDown;
             inventoryInput.OnFirstActionButtonUp += FirstActionButtonUp;
             inventoryInput.OnFirstActionButtonHold += FirstActionButtonHold;
+            
+            inventoryInput.OnSecondActionButtonUp += SecondActionButtonUp;
+            inventoryInput.OnSecondActionButtonDown += SecondActionButtonDown;
+            
             inventoryInput.OnScroll +=
                 () => SendChangeSlotRequest(_itemIndex + Math.Sign(_inputService.GetScrollSpeed()));
             inventoryInput.OnChangeSlot += SendChangeSlotRequest;
@@ -165,6 +168,14 @@ namespace Inventory
             if (_slots[_itemIndex].ItemHandler is IRightMouseButtonDownHandler)
             {
                 ((IRightMouseButtonDownHandler) _slots[_itemIndex].ItemHandler).OnRightMouseButtonDown();
+            }
+        }
+        
+        private void SecondActionButtonUp()
+        {
+            if (_slots[_itemIndex].ItemHandler is IRightMouseButtonUpHandler)
+            {
+                ((IRightMouseButtonUpHandler) _slots[_itemIndex].ItemHandler).OnRightMouseButtonUp();
             }
         }
         

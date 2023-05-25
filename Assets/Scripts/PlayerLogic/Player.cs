@@ -10,7 +10,7 @@ namespace PlayerLogic
     {
         [HideInInspector] [SyncVar] public float placeDistance;
         [HideInInspector] [SyncVar] public string nickName;
-        public Transform itemPosition; 
+        public Transform itemPosition;
         [SerializeField] private GameObject nickNameCanvas;
         [Header("Body parts")] 
         [SerializeField] private Transform head;
