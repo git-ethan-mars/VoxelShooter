@@ -164,8 +164,8 @@ namespace Networking.Synchronization
 
             if (rayHit.collider.CompareTag("Chunk"))
             {
-                var block = _serverData.Map.GetBlockByGlobalPosition(new Vector3Int((int) rayHit.point.x, 
-                    (int) rayHit.point.y, (int) rayHit.point.z));
+                var vector = Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2);
+                var block = _serverData.Map.GetBlockByGlobalPosition(new Vector3Int(vector.x, vector.y, vector.z));
                 _particleFactory.CreateBulletImpact(rayHit.point, Quaternion.Euler(rayHit.normal.y * -90, 
                     rayHit.normal.x * 90 + (rayHit.normal.z == -1 ? 180 : 0), 0), block.Color);
             }
