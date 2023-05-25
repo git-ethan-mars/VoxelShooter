@@ -19,10 +19,10 @@ MonoBehaviour:
   ammoIcon: {fileID: -465812234, guid: e7634cc0bf7762649a525e59875cd9d1, type: 3}
   isAutomatic: 0
   timeBetweenShooting: 1
-  baseRecoil: 0.01
+  baseRecoil: 0.005
   stepRecoil: 0.03
   resetTimeRecoil: 2
-  range: 150
+  range: 200
   reloadTime: 3
   magazineSize: 5
   bulletsPerTap: 1
