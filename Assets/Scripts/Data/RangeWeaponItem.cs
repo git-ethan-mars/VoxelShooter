@@ -17,6 +17,7 @@ namespace Data
         public int magazineSize;
         public int bulletsPerTap;
         public int totalBullets;
+        public float zoomMultiplier;
         [Header("Damage")]
         public int damage;
         [Range(0,5)]

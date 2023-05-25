@@ -19,8 +19,9 @@ namespace Infrastructure.Factory
         public GameObject CreateBulletHole(Vector3 position, Quaternion rotation)
         {
             var bullet = _assets.Instantiate(ParticlePath.BulletHolePath, position, rotation);
+            var particleSystem = bullet.GetComponent<ParticleSystem>().main;
             NetworkServer.Spawn(bullet); 
-            _coroutineRunner.StartCoroutine(DestroyParticle(bullet));
+            _coroutineRunner.StartCoroutine(DestroyParticle(bullet, particleSystem.duration));
             return bullet;
         }
 
@@ -33,8 +34,9 @@ namespace Infrastructure.Factory
         public GameObject CreateBlood(Vector3 position)
         {
             var blood = _assets.Instantiate(ParticlePath.BloodSprayPath, position, Quaternion.identity);
+            var particleSystem = blood.GetComponent<ParticleSystem>().main;
             NetworkServer.Spawn(blood);
-            _coroutineRunner.StartCoroutine(DestroyParticle(blood));
+            _coroutineRunner.StartCoroutine(DestroyParticle(blood, particleSystem.startLifetime.constant));
             return blood;
         }
 
@@ -50,12 +52,12 @@ namespace Infrastructure.Factory
             };
             particleSystem.emission.SetBurst(0, burst);
             NetworkServer.Spawn(rchParticle);
-            _coroutineRunner.StartCoroutine(DestroyParticle(rchParticle));
+            _coroutineRunner.StartCoroutine(DestroyParticle(rchParticle, main.startLifetime.constant));
         }
 
-        private static IEnumerator DestroyParticle(GameObject particle)
+        private static IEnumerator DestroyParticle(GameObject particle, float lifetime)
         {
-            yield return new WaitForSeconds(particle.GetComponent<ParticleSystem>().main.startLifetime.constant);
+            yield return new WaitForSeconds(lifetime);
             if (particle != null)
                 NetworkServer.Destroy(particle);
         }

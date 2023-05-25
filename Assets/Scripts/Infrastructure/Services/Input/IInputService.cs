@@ -7,9 +7,10 @@ namespace Infrastructure.Services.Input
         Vector2 Axis { get; }
         bool IsFirstActionButtonDown();
         bool IsFirstActionButtonUp();
-        bool IsSecondActionButtonDown();
-        bool IsReloadingButtonDown();
         bool IsFirstActionButtonHold();
+        bool IsSecondActionButtonDown();
+        bool IsSecondActionButtonUp();
+        bool IsReloadingButtonDown();
         bool IsJumpButtonDown();
         float GetScrollSpeed();
         float GetMouseVerticalAxis();
