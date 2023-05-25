@@ -184,6 +184,8 @@ namespace Networking
                         (grenadePosition.y - playerPosition.y) * (grenadePosition.y - playerPosition.y) +
                         (grenadePosition.z - playerPosition.z) * (grenadePosition.z - playerPosition.z));
                     var currentDamage = (int)(damage - damage * (distance / radius));
+                    var direction = playerPosition - grenadePosition;
+                    hitCollider.GetComponent<CharacterController>().Move(direction * particlesSpeed / 3);
                     var receiver = hitCollider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
                     receiver.identity.GetComponent<HealthSynchronization>().Damage(connection, receiver, currentDamage);
                 }
@@ -245,6 +247,8 @@ namespace Networking
                         (explosionCenter.y - playerPosition.y) * (explosionCenter.y - playerPosition.y) +
                         (explosionCenter.z - playerPosition.z) * (explosionCenter.z - playerPosition.z));
                     var currentDamage = (int)(damage - damage * (distance / radius));
+                    var direction = playerPosition - explosionCenter;
+                    hitCollider.GetComponent<CharacterController>().Move(direction * particlesSpeed / 3);
                     var receiver = hitCollider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
                     receiver.identity.GetComponent<HealthSynchronization>().Damage(connection, receiver, currentDamage);
                 }
