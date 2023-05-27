@@ -19,10 +19,10 @@ namespace Infrastructure.Factory
         public GameObject CreateBulletImpact(Vector3 position, Quaternion rotation, Color32 blockColor)
         {
             var bullet = _assets.Instantiate(ParticlePath.BulletHolePath, position, rotation);
-            var particleSystem = bullet.GetComponent<ParticleSystem>().main;
-            particleSystem.startColor = new ParticleSystem.MinMaxGradient(blockColor);
+            var particleColor = bullet.GetComponent<ParticleColor>();
+            particleColor.color = blockColor;
             NetworkServer.Spawn(bullet); 
-            _coroutineRunner.StartCoroutine(DestroyParticle(bullet, particleSystem.startLifetime.constant));
+            _coroutineRunner.StartCoroutine(DestroyParticle(bullet, bullet.GetComponent<ParticleSystem>().main.startLifetime.constant));
             return bullet;
         }
 
