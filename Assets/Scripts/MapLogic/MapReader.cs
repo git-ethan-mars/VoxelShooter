@@ -29,7 +29,6 @@ namespace MapLogic
             using var file = File.OpenRead(filePath);
             return ReadFromStream(file);
         }
-        
 
         public static Map ReadFromStream(Stream stream)
         {
@@ -44,36 +43,43 @@ namespace MapLogic
             {
                 chunks[i] = new ChunkData();
             }
-
             var spawnPoints = new List<SpawnPoint>();
             var map = new Map(new MapData(chunks, width, height, depth, spawnPoints));
-            for (var i = 0; i < chunks.Length; i++)
+            for (var x = 0; x < width; x++)
             {
-                var mapRun = (MapRun) binaryReader.ReadByte();
-                while (mapRun != MapRun.End)
+                for (var z = 0; z < depth; z++)
                 {
-                    if (mapRun == MapRun.Solid)
+                    byte type = 0;
+                    while (type != 2)
                     {
-                        var solidStart = binaryReader.ReadInt32();
-                        var solidEnd = binaryReader.ReadInt32();
-                        for (int j = solidStart; j <= solidEnd; j++)
+                        type = binaryReader.ReadByte();
+                        if (type == 0)
                         {
-                            chunks[i].Blocks[j] = new BlockData(map.MapData.SolidColor);
+                            var coloredStart = binaryReader.ReadByte();
+                            var coloredEnd = binaryReader.ReadByte();
+                            for (var i = coloredStart; i <= coloredEnd; i++)
+                            {
+                                var color = BlockColor.UInt32ToColor(binaryReader.ReadUInt32());
+                                map.MapData.Chunks[map.FindChunkNumberByPosition(x, i, z)].Blocks[
+                                        x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
+                                        i % ChunkData.ChunkSize * ChunkData.ChunkSize + z % ChunkData.ChunkSize] =
+                                    new BlockData(color);
+                            }
+                        }
+
+                        if (type == 1)
+                        {
+                            var solidStart = binaryReader.ReadByte();
+                            var solidEnd = binaryReader.ReadByte();
+                            for (var i = solidStart; i <= solidEnd; i++)
+                            {
+                                map.MapData.Chunks[map.FindChunkNumberByPosition(x, i, z)].Blocks[
+                                        x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
+                                        i % ChunkData.ChunkSize * ChunkData.ChunkSize + z % ChunkData.ChunkSize] =
+                                    new BlockData(map.MapData.SolidColor);
+                            }
                         }
                     }
-
-                    if (mapRun == MapRun.Colored)
-                    {
-                        var coloredStart = binaryReader.ReadInt32();
-                        var coloredEnd = binaryReader.ReadInt32();
-                        for (int j = coloredStart; j <= coloredEnd; j++)
-                        {
-                            var color = BlockColor.UInt32ToColor(binaryReader.ReadUInt32());
-                            chunks[i].Blocks[j] = new BlockData(color);
-                        }
-                    }
-
-                    mapRun = (MapRun) binaryReader.ReadByte();
                 }
             }
 
@@ -89,8 +95,7 @@ namespace MapLogic
 
             return map;
         }
-
-
+        
         private static void AddWater(Map map,Color32 waterColor)
         {
             for (var x = 0; x < map.MapData.Width; x++)
