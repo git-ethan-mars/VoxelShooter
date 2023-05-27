@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Data;
 using Optimization;
+using Unity.Collections;
+using Unity.Jobs;
 using UnityEngine;
 
 namespace MapLogic
@@ -27,103 +30,49 @@ namespace MapLogic
             WriteMap(map, file);
         }
         
-
+        
         public static void WriteMap(Map map, Stream stream)
         {
-            var binaryWriter = new BinaryWriter(stream);
+            var result = new List<NativeList<byte>>();
+            for (var i = 0; i < map.MapData.Chunks.Length; i++)
+            {
+                result.Add(new NativeList<byte>(Allocator.TempJob));
+            }
+
+            var jobHandles = new NativeList<JobHandle>(Allocator.Temp);
+            for (var i = 0; i < map.MapData.Chunks.Length; i++)
+            {
+                var job = new ChunkSerializer(result[i], map.MapData.Chunks[i].Blocks,
+                    map.MapData.SolidColor);
+                var jobHandle = job.Schedule();
+                jobHandles.Add(jobHandle);
+            }
+
+            JobHandle.CompleteAll(jobHandles);
+            var memoryStream = new MemoryStream();
+            var binaryWriter = new BinaryWriter(memoryStream);
             binaryWriter.Write(map.MapData.Width);
             binaryWriter.Write(map.MapData.Height);
             binaryWriter.Write(map.MapData.Depth);
-            for (var x = 0; x < map.MapData.Width; x++)
+            foreach (var serializedChunk in result)
             {
-                for (var z = 0; z < map.MapData.Depth; z++)
+                for (var i = 0; i < serializedChunk.Length; i++)
                 {
-                    var coloredStart = -1;
-                    var coloredEnd = -1;
-                    var solidStart = -1;
-                    var solidEnd = -1;
-                    for (var y = 0; y < map.MapData.Height; y++)
-                    {
-                        var block = map.GetBlockByGlobalPosition(x, y, z);
-                        if (block.Color.IsEquals(map.MapData.SolidColor))
-                        {
-                            if (solidStart == -1)
-                            {
-                                solidStart = y;
-                                solidEnd = y;
-                            }
-                            else
-                            {
-                                solidEnd++;
-                            }
-
-                            TryWriteColoredRun(map, binaryWriter, x, z, ref coloredStart, ref coloredEnd);
-                            continue;
-                        }
-
-                        if (block.Color.IsEquals(BlockColor.empty))
-                        {
-                            TryWriteColoredRun(map, binaryWriter, x, z, ref coloredStart, ref coloredEnd);
-                            TryWriteSolidRun(binaryWriter, ref solidStart, ref solidEnd);
-                        }
-                        else
-                        {
-                            if (coloredStart == -1)
-                            {
-                                coloredStart = y;
-                                coloredEnd = y;
-                            }
-                            else
-                            {
-                                coloredEnd++;
-                            }
-                            TryWriteSolidRun(binaryWriter, ref solidStart, ref solidEnd);
-                        }
-                    }
-                    TryWriteColoredRun(map, binaryWriter, x, z, ref coloredStart, ref coloredEnd);
-                    TryWriteSolidRun(binaryWriter, ref solidStart, ref solidEnd);
-                    binaryWriter.Write((byte)2);
+                    binaryWriter.Write(serializedChunk[i]);
                 }
-                
+
+                serializedChunk.Dispose();
             }
+
+            jobHandles.Dispose();
             binaryWriter.Write(map.MapData.SpawnPoints.Count);
             for (var i = 0; i < map.MapData.SpawnPoints.Count; i++)
             {
-                var spawnPoint = map.MapData.SpawnPoints[i];
-                binaryWriter.Write(spawnPoint.X);
-                binaryWriter.Write(spawnPoint.Y);
-                binaryWriter.Write(spawnPoint.Z);
+                binaryWriter.Write(map.MapData.SpawnPoints[i].X);
+                binaryWriter.Write(map.MapData.SpawnPoints[i].Y);
+                binaryWriter.Write(map.MapData.SpawnPoints[i].Z);
             }
-        }
-
-        private static void TryWriteSolidRun(BinaryWriter binaryWriter, ref int solidStart, ref int solidEnd)
-        {
-            if (solidStart == -1) return;
-            binaryWriter.Write((byte) 1);
-            binaryWriter.Write((byte) solidStart);
-            binaryWriter.Write((byte) solidEnd);
-            solidStart = -1;
-            solidEnd = -1;
-        }
-
-        private static void TryWriteColoredRun(Map map, BinaryWriter binaryWriter, int x, int z, ref int coloredStart,
-            ref int coloredEnd)
-        {
-            if (coloredStart == -1) return;
-            binaryWriter.Write((byte) 0);
-            binaryWriter.Write((byte) coloredStart);
-            binaryWriter.Write((byte) coloredEnd);
-            for (var i = coloredStart; i <= coloredEnd; i++)
-            {
-                var block = map.GetBlockByGlobalPosition(x, i, z);
-                binaryWriter.Write(block.Color.b);
-                binaryWriter.Write(block.Color.g);
-                binaryWriter.Write(block.Color.r);
-                binaryWriter.Write(block.Color.a);
-            }
-
-            coloredStart = -1;
-            coloredEnd = -1;
+            stream.Write(memoryStream.ToArray());
         }
     }
 }
