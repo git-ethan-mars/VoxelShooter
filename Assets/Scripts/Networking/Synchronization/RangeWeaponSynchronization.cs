@@ -176,7 +176,7 @@ namespace Networking.Synchronization
             if (source != receiver)
             {
                 GetComponent<HealthSynchronization>().Damage(source, receiver, damage);
-                _particleFactory.CreateBlood(rayHit.point);
+                _particleFactory.CreateBlood(rayHit.point, Quaternion.LookRotation(rayHit.normal));
             }
         }
 

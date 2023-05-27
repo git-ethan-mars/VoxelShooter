@@ -32,9 +32,9 @@ namespace Infrastructure.Factory
             return muzzleFlash;
         }
 
-        public GameObject CreateBlood(Vector3 position)
+        public GameObject CreateBlood(Vector3 position, Quaternion rotation)
         {
-            var blood = _assets.Instantiate(ParticlePath.BloodSprayPath, position, Quaternion.identity);
+            var blood = _assets.Instantiate(ParticlePath.BloodSprayPath, position, rotation);
             var particleSystem = blood.GetComponent<ParticleSystem>().main;
             NetworkServer.Spawn(blood);
             _coroutineRunner.StartCoroutine(DestroyParticle(blood, particleSystem.startLifetime.constant));
