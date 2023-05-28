@@ -250,7 +250,8 @@ namespace Networking
                     var direction = playerPosition - explosionCenter;
                     hitCollider.GetComponent<CharacterController>().Move(direction * particlesSpeed / 3);
                     var receiver = hitCollider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
-                    receiver.identity.GetComponent<HealthSynchronization>().Damage(connection, receiver, currentDamage);
+                    if (receiver.identity.TryGetComponent<HealthSynchronization>(out var health));
+                        health.Damage(connection, receiver, currentDamage);
                 }
             }
         }
