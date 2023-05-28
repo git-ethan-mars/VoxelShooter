@@ -2,7 +2,6 @@ using Data;
 using Infrastructure.Factory;
 using Infrastructure.Services.Input;
 using Networking.Synchronization;
-using PlayerLogic;
 using TMPro;
 using UI;
 using UnityEngine;
@@ -62,6 +61,7 @@ namespace Inventory
         {
             _ammoInfo.SetActive(false);
             Model.SetActive(false);
+            _fpsCam.fieldOfView = Constants.DefaultFov;
         }
 
         public void InnerUpdate()
