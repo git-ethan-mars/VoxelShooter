@@ -23,7 +23,6 @@ namespace PlayerLogic.States
             _playerData.RangeWeaponsById  = null;
             _playerData.MeleeWeaponsById  = null;
             _playerData.ItemCountById = null;
-            Debug.Log("Death");
         }
 
         public void Exit()

@@ -65,7 +65,6 @@ namespace PlayerLogic.States
 
                 _playerData.ItemCountById[itemId] = 1;
             }
-            Debug.Log("Life");
         }
 
         public void Exit()
