@@ -29,6 +29,7 @@ namespace Networking.Synchronization
         [Command]
         public void CmdShootSingle(Ray ray, int weaponId, NetworkConnectionToClient connection = null)
         {
+            if (connection == null) return;
             var weapon = _serverData.GetPlayerData(connection).RangeWeaponsById[weaponId];
             if (!CanShoot(weapon) || weapon.IsAutomatic) return;
             Shoot(weapon, connection);
@@ -41,6 +42,7 @@ namespace Networking.Synchronization
         [Command]
         public void CmdShootAutomatic(Ray ray, int weaponId, NetworkConnectionToClient connection = null)
         {
+            if (connection == null) return;
             var weapon = _serverData.GetPlayerData(connection).RangeWeaponsById[weaponId];
             if (!CanShoot(weapon) || !weapon.IsAutomatic) return;
             Shoot(weapon, connection);
@@ -53,6 +55,7 @@ namespace Networking.Synchronization
         [Command]
         public void CmdReload(int weaponId, NetworkConnectionToClient connection = null)
         {
+            if (connection == null) return;
             var weapon = _serverData.GetPlayerData(connection).RangeWeaponsById[weaponId];
             if (!CanReload(weapon)) return;
             Reload(weapon, connection);
@@ -89,6 +92,7 @@ namespace Networking.Synchronization
         [Server]
         private void Reload(RangeWeaponData rangeWeapon, NetworkConnectionToClient connection)
         {
+            if (connection == null) return;
             rangeWeapon.IsReloading = true;
             if (rangeWeapon.TotalBullets + rangeWeapon.BulletsInMagazine - rangeWeapon.MagazineSize <= 0)
             {
@@ -114,6 +118,7 @@ namespace Networking.Synchronization
         [Server]
         private void Shoot(RangeWeaponData rangeWeapon, NetworkConnectionToClient connection)
         {
+            if (connection == null) return;
             rangeWeapon.BulletsInMagazine -= 1;
             if (rangeWeapon.BulletsInMagazine <= 0)
                 rangeWeapon.BulletsInMagazine = 0;
@@ -127,6 +132,7 @@ namespace Networking.Synchronization
         private void ApplyRaycast(NetworkConnectionToClient source, Ray ray,
             RangeWeaponData rangeWeapon)
         {
+            if (source == null) return;
             var x = Math.Abs(rangeWeapon.RecoilModifier) < 0.00001
                 ? 0
                 : UnityEngine.Random.Range(-rangeWeapon.BaseRecoil, rangeWeapon.BaseRecoil) *
@@ -172,6 +178,7 @@ namespace Networking.Synchronization
 
         private void ShootImpact(NetworkConnectionToClient source, RaycastHit rayHit, int damage)
         {
+            if (source == null) return;
             var receiver = rayHit.collider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
             if (source != receiver)
             {
