@@ -17,6 +17,7 @@ namespace Networking.Synchronization
         public void Damage(NetworkConnectionToClient source, NetworkConnectionToClient receiver, int totalDamage)
         {
             var playerData = _serverData.GetPlayerData(receiver);
+            if (!playerData.IsAlive) return;
             playerData.Health -= totalDamage;
             if (playerData.Health <= 0)
             {
