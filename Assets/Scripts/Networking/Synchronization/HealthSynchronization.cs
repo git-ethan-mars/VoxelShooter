@@ -1,6 +1,5 @@
 ﻿using Mirror;
 using PlayerLogic;
-using UnityEngine;
 
 namespace Networking.Synchronization
 {

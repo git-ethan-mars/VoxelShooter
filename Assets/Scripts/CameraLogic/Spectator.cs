@@ -75,9 +75,9 @@ namespace CameraLogic
         {
             if (_serverData.GetPlayerData(connection).SpectatedPlayer == null)
             {
-                for (var i = _serverData.Kills.Count - 1; i >= 0; i--)
+                for (var i = _serverData.KillStatistics.Count - 1; i >= 0; i--)
                 {
-                    var killData = _serverData.Kills[i];
+                    var killData = _serverData.KillStatistics[i];
                     if (killData.Victim != connection) continue;
                     if (!_serverData.GetPlayerData(killData.Killer).IsAlive)
                         break;

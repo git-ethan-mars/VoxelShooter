@@ -5,7 +5,6 @@ using Data;
 using Infrastructure;
 using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
-using Infrastructure.Services;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
 using Mirror;
@@ -206,8 +205,7 @@ namespace Inventory
 
         private void SendChangeSlotRequest(int index)
         {
-            if (index >= _maxIndex || index < 0) return;
-            NetworkClient.Send(new ChangeSlotRequest(index % _maxIndex));
+            NetworkClient.Send(new ChangeSlotRequest((index + _maxIndex) % _maxIndex));
         }
 
 

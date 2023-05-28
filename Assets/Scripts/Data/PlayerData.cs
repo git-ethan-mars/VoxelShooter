@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using Infrastructure.Services.StaticData;
 using Mirror;
+using PlayerLogic.States;
 using Steamworks;
 
 namespace Data
@@ -8,22 +10,24 @@ namespace Data
     {
         public readonly CSteamID SteamID;
         public readonly string NickName;
-        public GameClass GameClass = GameClass.None;
-        public PlayerCharacteristic Characteristic;
-        public bool IsAlive;
-        public int Health;
-        public int Kills;
-        public int Deaths;
-        public Dictionary<int, RangeWeaponData> RangeWeaponsById;
-        public Dictionary<int, MeleeWeaponData> MeleeWeaponsById;
-        public List<int> ItemsId;
-        public Dictionary<int, int> ItemCountById;
-        public NetworkConnectionToClient SpectatedPlayer;
+        public readonly PlayerStateMachine PlayerStateMachine;
+        public GameClass GameClass { get; set; } = GameClass.None;
+        public PlayerCharacteristic Characteristic { get; set; }
+        public bool IsAlive { get; set; }
+        public int Health { get; set; }
+        public int Kills { get; set; }
+        public int Deaths { get; set; }
+        public Dictionary<int, RangeWeaponData> RangeWeaponsById { get; set; }
+        public Dictionary<int, MeleeWeaponData> MeleeWeaponsById { get; set; }
+        public List<int> ItemsId { get; set; }
+        public Dictionary<int, int> ItemCountById { get; set; }
+        public NetworkConnectionToClient SpectatedPlayer { get; set; }
 
-        public PlayerData(CSteamID steamID, string nickName)
+        public PlayerData(CSteamID steamID, string nickName, IStaticDataService staticDataService)
         {
             SteamID = steamID;
             NickName = nickName;
+            PlayerStateMachine = new PlayerStateMachine(this, staticDataService);
         }
     }
 }

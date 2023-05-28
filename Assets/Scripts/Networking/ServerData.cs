@@ -8,8 +8,8 @@ using Infrastructure.Services.StaticData;
 using MapLogic;
 using Mirror;
 using Networking.Messages;
+using PlayerLogic.States;
 using Steamworks;
-using UnityEngine;
 
 namespace Networking
 {
@@ -17,7 +17,7 @@ namespace Networking
     {
         public readonly Dictionary<NetworkConnectionToClient, PlayerData> DataByConnection;
         public Map Map { get; }
-        public readonly List<KillData> Kills;
+        public readonly List<KillData> KillStatistics;
         private readonly IStaticDataService _staticData;
         private readonly IPlayerFactory _playerFactory;
         private readonly ICoroutineRunner _coroutineRunner;
@@ -28,7 +28,7 @@ namespace Networking
         {
             _coroutineRunner = coroutineRunner;
             DataByConnection = new Dictionary<NetworkConnectionToClient, PlayerData>();
-            Kills = new List<KillData>();
+            KillStatistics = new List<KillData>();
             _staticData = staticDataService;
             Map = map;
             _serverSettings = serverSettings;
@@ -38,23 +38,22 @@ namespace Networking
         public void AddPlayer(NetworkConnectionToClient connection, GameClass chosenClass, CSteamID steamID,
             string nickname)
         {
-            var playerData = new PlayerData(steamID, nickname);
-            playerData.IsAlive = true;
+            var playerData = new PlayerData(steamID, nickname, _staticData);
+            playerData.GameClass = chosenClass;
+            playerData.PlayerStateMachine.Enter<LifeState>();
             DataByConnection[connection] = playerData;
-            ChangeClassInternal(DataByConnection[connection], chosenClass);
             NetworkServer.SendToAll(new ScoreboardMessage(GetScoreData()));
             _playerFactory.CreatePlayer(connection);
         }
 
         public void ChangeClass(NetworkConnectionToClient connection, GameClass chosenClass)
         {
-            var playerData = GetPlayerData(connection);
+            var playerData = DataByConnection[connection];
             if (playerData.GameClass == chosenClass) return;
-            ChangeClassInternal(playerData, chosenClass);
+            playerData.GameClass = chosenClass;
             if (playerData.IsAlive)
             {
-                playerData.IsAlive = false;
-                playerData.Deaths += 1;
+                playerData.PlayerStateMachine.Enter<DeathState>();
                 _playerFactory.CreateSpectatorPlayer(connection);
                 var respawnTimer = new RespawnTimer(_coroutineRunner, connection, _serverSettings.SpawnTime,
                     () => Respawn(connection, playerData));
@@ -66,7 +65,7 @@ namespace Networking
 
         private void Respawn(NetworkConnectionToClient connection, PlayerData playerData)
         {
-            playerData.IsAlive = true;
+            playerData.PlayerStateMachine.Enter<LifeState>();
             _playerFactory.RespawnPlayer(connection, playerData);
         }
 
@@ -79,12 +78,11 @@ namespace Networking
 
         public void AddKill(NetworkConnectionToClient killer, NetworkConnectionToClient victim)
         {
-            if (killer is not null)
+            if (killer is not null && killer != victim)
                 DataByConnection[killer].Kills += 1;
-            DataByConnection[victim].Deaths += 1;
-            Kills.Add(new KillData(killer, victim));
+            KillStatistics.Add(new KillData(killer, victim));
             var playerData = DataByConnection[victim];
-            playerData.IsAlive = false;
+            playerData.PlayerStateMachine.Enter<DeathState>();
             _playerFactory.CreateSpectatorPlayer(victim);
             var respawnTimer = new RespawnTimer(_coroutineRunner, victim, _serverSettings.SpawnTime,
                 () => Respawn(victim, playerData));
@@ -99,65 +97,14 @@ namespace Networking
 
         public int GetItemCount(NetworkConnectionToClient connection, int itemId)
         {
-            var playerData = GetPlayerData(connection);
+            var playerData = DataByConnection[connection];
             return playerData.ItemCountById[itemId];
         }
 
         public void SetItemCount(NetworkConnectionToClient connection, int itemId, int value)
         {
-            var playerData = GetPlayerData(connection);
+            var playerData = DataByConnection[connection];
             playerData.ItemCountById[itemId] = value;
-        }
-
-        private void ChangeClassInternal(PlayerData playerData, GameClass chosenClass)
-        {
-            playerData.GameClass = chosenClass;
-            playerData.Characteristic = _staticData.GetPlayerCharacteristic(playerData.GameClass);
-            playerData.Health = playerData.Characteristic.maxHealth;
-            playerData.ItemCountById = new Dictionary<int, int>();
-            playerData.ItemsId = _staticData.GetInventory(playerData.GameClass).Select(item => item.id).ToList();
-            playerData.RangeWeaponsById = new Dictionary<int, RangeWeaponData>();
-            playerData.MeleeWeaponsById = new Dictionary<int, MeleeWeaponData>();
-            playerData.ItemCountById = new Dictionary<int, int>();
-            foreach (var itemId in playerData.ItemsId)
-            {
-                var item = _staticData.GetItem(itemId);
-                if (item.itemType == ItemType.RangeWeapon)
-                {
-                    playerData.RangeWeaponsById[itemId] = new RangeWeaponData((RangeWeaponItem) item);
-                }
-
-                if (item.itemType == ItemType.MeleeWeapon)
-                {
-                    playerData.MeleeWeaponsById[itemId] = new MeleeWeaponData((MeleeWeaponItem) item);
-                }
-
-                if (item.itemType == ItemType.Tnt)
-                {
-                    playerData.ItemCountById[itemId] = ((TntItem) item).count;
-                    continue;
-                }
-                
-                if (item.itemType == ItemType.Grenade)
-                {
-                    playerData.ItemCountById[itemId] = ((GrenadeItem) item).count;
-                    continue;
-                }
-
-                if (item.itemType == ItemType.Block)
-                {
-                    playerData.ItemCountById[itemId] = ((BlockItem) item).count;
-                    continue;
-                }
-                
-                if (item.itemType == ItemType.RocketLauncher)
-                {
-                    playerData.ItemCountById[itemId] = ((RocketLauncherItem) item).count;
-                    continue;
-                }
-
-                playerData.ItemCountById[itemId] = 1;
-            }
         }
 
         private List<ScoreData> GetScoreData()
