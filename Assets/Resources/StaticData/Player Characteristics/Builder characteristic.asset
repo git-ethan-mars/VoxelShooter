@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Builder characteristic
   m_EditorClassIdentifier: 
   gameClass: 0
-  maxHealth: 150
+  maxHealth: 125
   speed: 9.5
   jumpMultiplier: 9
   placeDistance: 8
