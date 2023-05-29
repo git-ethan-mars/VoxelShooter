@@ -18,10 +18,10 @@ MonoBehaviour:
   prefab: {fileID: 7084881398813862784, guid: d4d627f48efc0ca49a8822c4cadd8c41, type: 3}
   countIcon: {fileID: 21300000, guid: 9721a1bd44132464cab96dd63e203df2, type: 3}
   count: 6
-  delayInSeconds: 2
+  delayInSeconds: 3
   radius: 4
   damage: 75
   maxThrowDuration: 2
-  throwForceModifier: 1500
+  throwForceModifier: 700
   particlesSpeed: 3
   particlesCount: 30
