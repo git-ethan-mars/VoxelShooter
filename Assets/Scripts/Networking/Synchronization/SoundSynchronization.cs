@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Data;
 using Infrastructure.AssetManagement;
 using Infrastructure.Services;
 using Mirror;
@@ -22,6 +21,7 @@ namespace Networking.Synchronization
         [ClientRpc]
         public void PlayAudioClip(NetworkIdentity source, int audioClipId, float volume)
         {
+            if (source is null) return;
             var audioSource = source.GetComponent<AudioSource>();
             audioSource.clip = _audioClips[audioClipId];
             audioSource.volume = volume;

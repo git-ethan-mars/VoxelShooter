@@ -1,3 +1,4 @@
+using System;
 using Data;
 using Infrastructure.Factory;
 using Infrastructure.Services;
@@ -8,8 +9,10 @@ namespace PlayerLogic
 {
     public class Player : NetworkBehaviour
     {
+        public event Action<int> OnHealthChanged;
         [HideInInspector] [SyncVar] public float placeDistance;
         [HideInInspector] [SyncVar] public string nickName;
+        [SyncVar(hook = nameof(UpdateHealth))] [HideInInspector] public int health;
         public Transform itemPosition;
         [SerializeField] private GameObject nickNameCanvas;
         [Header("Body parts")] 
@@ -25,6 +28,7 @@ namespace PlayerLogic
         {
             placeDistance = playerData.Characteristic.placeDistance;
             nickName = playerData.NickName;
+            health = playerData.Characteristic.maxHealth;
         }
 
         public override void OnStartLocalPlayer()
@@ -32,6 +36,11 @@ namespace PlayerLogic
             _hud = AllServices.Container.Single<IUIFactory>().CreateHud(gameObject);
             TurnOffBodyRender();
             TurnOffNickName();
+        }
+
+        private void UpdateHealth(int oldHealth, int newHealth)
+        {
+            OnHealthChanged?.Invoke(newHealth);
         }
 
         public void OnDestroy()

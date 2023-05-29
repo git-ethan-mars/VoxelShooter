@@ -12,40 +12,36 @@ namespace UI
         [SerializeField] private Button resetButton;
         [SerializeField] private Button applyButton;
         [SerializeField] private TextMeshProUGUI mapName;
-        [Header("Player Number")] [SerializeField]
-        private TextMeshProUGUI playersNumber;
-
+        [Header("Spawn Time")] [SerializeField]
+        private TextMeshProUGUI spawnTimeText;
         [SerializeField] private Button incrementPlayerNumber;
         [SerializeField] private Button decrementPlayerNumber;
-
         [Header("Game Duration")] [SerializeField]
         private TextMeshProUGUI gameDuration;
-
         [SerializeField] private Button incrementGameDuration;
         [SerializeField] private Button decrementGameDuration;
-        private Limitation _playersLimitation;
+        private Limitation _spawnTimeLimitation;
         private Limitation _timeLimitation;
         private GameStateMachine _stateMachine;
         private const int MinGameTime = 1;
         private const int MaxGameTime = 15;
-        private const int MinPlayersNumber = 2;
-        private const int MaxPlayersNumber = 8;
-        private const int SpawnTime = 7;
+        private const int MinSpawnTime = 1;
+        private const int MaxSpawnTime = 10;
 
 
         public void Construct(GameStateMachine stateMachine, bool isLocalBuild)
         {
             _stateMachine = stateMachine;
-            InitPlayersNumber();
+            InitSpawnTime();
             InitGameDuration();
             resetButton.onClick.AddListener(ResetLimitations);
             backButton.onClick.AddListener(stateMachine.Enter<MainMenuState>);
             if (isLocalBuild)
-                applyButton.onClick.AddListener(() => _stateMachine.Enter<StartMatchState, ServerSettings>(new ServerSettings(_timeLimitation.CurrentValue, _playersLimitation.CurrentValue, SpawnTime, mapName.text)));
+                applyButton.onClick.AddListener(() => _stateMachine.Enter<StartMatchState, ServerSettings>(new ServerSettings(_timeLimitation.CurrentValue, _spawnTimeLimitation.CurrentValue, mapName.text)));
             else
             {
                 applyButton.onClick.AddListener(()=>_stateMachine.Enter<StartSteamLobbyState, ServerSettings>(
-                    new ServerSettings(_timeLimitation.CurrentValue, _playersLimitation.CurrentValue, SpawnTime, mapName.text)));
+                    new ServerSettings(_timeLimitation.CurrentValue, _spawnTimeLimitation.CurrentValue, mapName.text)));
             }
             
         }
@@ -69,19 +65,19 @@ namespace UI
             gameDuration.SetText(_timeLimitation.CurrentValue.ToString());
         }
 
-        private void InitPlayersNumber()
+        private void InitSpawnTime()
         {
-            _playersLimitation = new Limitation(MinPlayersNumber, MaxPlayersNumber);
-            _playersLimitation.OnCurrentValueUpdate +=
-                () => playersNumber.SetText(_playersLimitation.CurrentValue.ToString());
-            incrementPlayerNumber.onClick.AddListener(_playersLimitation.Increment);
-            decrementPlayerNumber.onClick.AddListener(_playersLimitation.Decrement);
-            playersNumber.SetText(_playersLimitation.CurrentValue.ToString());
+            _spawnTimeLimitation = new Limitation(MinSpawnTime, MaxSpawnTime);
+            _spawnTimeLimitation.OnCurrentValueUpdate +=
+                () => spawnTimeText.SetText(_spawnTimeLimitation.CurrentValue.ToString());
+            incrementPlayerNumber.onClick.AddListener(_spawnTimeLimitation.Increment);
+            decrementPlayerNumber.onClick.AddListener(_spawnTimeLimitation.Decrement);
+            spawnTimeText.SetText(_spawnTimeLimitation.CurrentValue.ToString());
         }
 
         private void ResetLimitations()
         {
-            _playersLimitation.Reset();
+            _spawnTimeLimitation.Reset();
             _timeLimitation.Reset();
         }
     }

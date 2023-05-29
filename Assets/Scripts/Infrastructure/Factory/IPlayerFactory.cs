@@ -7,6 +7,6 @@ namespace Infrastructure.Factory
     {
         void CreatePlayer(NetworkConnectionToClient connection);
         void CreateSpectatorPlayer(NetworkConnectionToClient connection);
-        void RespawnPlayer(NetworkConnectionToClient connection, PlayerData playerData);
+        void RespawnPlayer(NetworkConnectionToClient connection);
     }
 }

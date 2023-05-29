@@ -1,5 +1,4 @@
 ﻿using Data;
-using UnityEngine;
 
 namespace PlayerLogic.States
 {

@@ -30,7 +30,9 @@ namespace Networking.Synchronization
         [Command]
         public void CmdHit(Ray ray, int weaponId, bool isStrongHit, NetworkConnectionToClient source = null)
         {
-            var weapon = _serverData.GetPlayerData(source).MeleeWeaponsById[weaponId];
+            var result = _serverData.TryGetPlayerData(source, out var playerData);
+            if (!result || !playerData.IsAlive) return;
+            var weapon = playerData.MeleeWeaponsById[weaponId];
             if (!CanHit(weapon)) return;
             var isSurface = ApplyRaycast(source, ray, weapon, isStrongHit);
             weapon.IsReady = false;
@@ -44,6 +46,7 @@ namespace Networking.Synchronization
                 GetComponent<SoundSynchronization>().PlayAudioClip(source!.identity,
                     _audioClips.FindIndex(audioClip => audioClip == weapon.HitAudioClip), weapon.HitVolume);
             }
+
             StartHitCoroutines(weapon);
         }
 
@@ -58,9 +61,10 @@ namespace Networking.Synchronization
         {
             meleeWeapon.IsReady = true;
         }
-        
+
         [Server]
-        private bool ApplyRaycast(NetworkConnectionToClient source,Ray ray, MeleeWeaponData meleeWeapon, bool isStrongHit)
+        private bool ApplyRaycast(NetworkConnectionToClient source, Ray ray, MeleeWeaponData meleeWeapon,
+            bool isStrongHit)
         {
             var raycastResult = Physics.Raycast(ray, out var rayHit, meleeWeapon.Range);
             if (!raycastResult) return false;
@@ -90,7 +94,7 @@ namespace Networking.Synchronization
                 if (isStrongHit)
                 {
                     var validPositions = _lineExplosionArea.GetExplodedBlocks(3, targetBlock);
-                    foreach(var position in validPositions)
+                    foreach (var position in validPositions)
                         _serverData.Map.SetBlockByGlobalPosition(position, new BlockData());
                     NetworkServer.SendToAll(new UpdateMapMessage(
                         validPositions.ToArray(), new BlockData[validPositions.Count]));
@@ -101,7 +105,7 @@ namespace Networking.Synchronization
                     if (blocks.Count > 0)
                     {
                         _serverData.Map.SetBlockByGlobalPosition(blocks[0], new BlockData());
-                        NetworkServer.SendToAll(new UpdateMapMessage(new[] { targetBlock }, new BlockData[1]));
+                        NetworkServer.SendToAll(new UpdateMapMessage(new[] {targetBlock}, new BlockData[1]));
                     }
                 }
 
@@ -110,6 +114,7 @@ namespace Networking.Synchronization
 
             return false;
         }
+
         [Server]
         private void HitImpact(NetworkConnectionToClient source, RaycastHit rayHit, int damage)
         {

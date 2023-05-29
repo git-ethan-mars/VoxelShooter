@@ -10,8 +10,8 @@ namespace UI
         
         public void Construct(GameObject player)
         {
-            player.GetComponent<HealthSystem>().OnHealthChanged += OnHealthChanged; 
-            OnHealthChanged(player.GetComponent<HealthSystem>().health);
+            player.GetComponent<Player>().OnHealthChanged += OnHealthChanged; 
+            OnHealthChanged(player.GetComponent<Player>().health);
         }
 
         private void OnHealthChanged(int currentHealth)

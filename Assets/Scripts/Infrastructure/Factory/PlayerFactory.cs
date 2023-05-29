@@ -6,6 +6,7 @@ using Mirror;
 using Networking;
 using Networking.Synchronization;
 using PlayerLogic;
+using PlayerLogic.States;
 using UnityEngine;
 
 namespace Infrastructure.Factory
@@ -50,21 +51,17 @@ namespace Infrastructure.Factory
             }
 
             var playerData = _serverData.GetPlayerData(connection);
+            playerData.PlayerStateMachine.Enter<LifeState>();
             ConfigurePlayer(player, playerData);
             ConfigureSynchronization(player);
             NetworkServer.AddPlayerForConnection(connection, player);
             
         }
 
-        public void CreateSpectatorPlayer(NetworkConnectionToClient connection)
+        public void RespawnPlayer(NetworkConnectionToClient connection)
         {
-            var spectator = _assets.Instantiate(SpectatorPlayerPath);
-            spectator.GetComponent<Spectator>().Construct(_serverData);
-            ReplacePlayer(connection, spectator);
-        }
-
-        public void RespawnPlayer(NetworkConnectionToClient connection, PlayerData playerData)
-        {
+            var result = _serverData.TryGetPlayerData(connection, out var playerData);
+            if (!result) return;
             GameObject player;
             if (_spawnPoints.Count == 0)
             {
@@ -76,10 +73,17 @@ namespace Infrastructure.Factory
                     Quaternion.identity);
                 _spawnPointIndex = (_spawnPointIndex + 1) % _spawnPoints.Count;
             }
-
+            playerData.PlayerStateMachine.Enter<LifeState>();
             ConfigurePlayer(player, playerData);
             ConfigureSynchronization(player);
             ReplacePlayer(connection, player);
+        }
+
+        public void CreateSpectatorPlayer(NetworkConnectionToClient connection)
+        {
+            var spectator = _assets.Instantiate(SpectatorPlayerPath);
+            spectator.GetComponent<Spectator>().Construct(_serverData);
+            ReplacePlayer(connection, spectator);
         }
 
         private GameObject CreatePlayerWithSpawnPoint(Vector3 position,
@@ -92,7 +96,6 @@ namespace Infrastructure.Factory
         {
             player.GetComponent<Player>().Construct(playerData);
             player.GetComponent<PlayerMovement>().Construct(playerData.Characteristic);
-            player.GetComponent<HealthSystem>().Construct(playerData.Characteristic);
             player.GetComponent<PlayerLogic.Inventory>().ItemIds
                 .AddRange(playerData.ItemsId);
         }

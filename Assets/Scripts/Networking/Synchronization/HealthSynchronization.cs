@@ -20,10 +20,10 @@ namespace Networking.Synchronization
         [Server]
         public void Damage(NetworkConnectionToClient source, NetworkConnectionToClient receiver, int totalDamage)
         {
-            var playerData = _serverData.GetPlayerData(receiver);
+            var result = _serverData.TryGetPlayerData(receiver, out var playerData);
+            if (!result || !playerData.IsAlive) return;
             var receiverPosition = receiver.identity.transform.position;
             var tombstonePosition = new Vector3(receiverPosition.x, receiverPosition.y, receiverPosition.z);
-            if (!playerData.IsAlive) return;
             playerData.Health -= totalDamage;
             if (playerData.Health <= 0)
             {
@@ -33,7 +33,7 @@ namespace Networking.Synchronization
             }
             else
             {
-                receiver.identity.gameObject.GetComponent<HealthSystem>().health = playerData.Health;
+                receiver.identity.gameObject.GetComponent<Player>().health = playerData.Health;
             }
         }
     }

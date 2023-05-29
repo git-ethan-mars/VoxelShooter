@@ -2,7 +2,6 @@
 using System.Linq;
 using Data;
 using Infrastructure.Services.StaticData;
-using UnityEngine;
 
 namespace PlayerLogic.States
 {

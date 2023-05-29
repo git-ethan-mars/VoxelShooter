@@ -1,9 +1,7 @@
-using System.Linq;
 using Infrastructure.Services;
 using Infrastructure.Services.Input;
 using Mirror;
 using Networking;
-using Networking.Synchronization;
 using UnityEngine;
 
 namespace CameraLogic
@@ -73,22 +71,26 @@ namespace CameraLogic
         [Command]
         private void RequestNextIdentity(NetworkConnectionToClient connection = null)
         {
-            if (_serverData.GetPlayerData(connection).SpectatedPlayer == null)
+            var result = _serverData.TryGetPlayerData(connection, out var playerData);
+            if (!result) return;
+            if (playerData.SpectatedPlayer == null)
             {
                 for (var i = _serverData.KillStatistics.Count - 1; i >= 0; i--)
                 {
                     var killData = _serverData.KillStatistics[i];
                     if (killData.Victim != connection) continue;
-                    if (!_serverData.GetPlayerData(killData.Killer).IsAlive)
+                    result = _serverData.TryGetPlayerData(killData.Killer, out var killerData);
+                    if (!result) continue;
+                    if (!killerData.IsAlive)
                         break;
                     SetCameraTarget(killData.Killer.identity);
-                    _serverData.GetPlayerData(connection).SpectatedPlayer = killData.Killer;
+                    playerData.SpectatedPlayer = killData.Killer;
                     return;
                 }
 
             }
-            var alivePlayers = _serverData.DataByConnection.Where(kvp => kvp.Value.IsAlive && connection != kvp.Key)
-                .ToList();
+
+            var alivePlayers = _serverData.GetAlivePlayers(connection);
             if (alivePlayers.Count == 0)
             {
                 var mapWidth = _serverData.Map.MapData.Width;
@@ -101,17 +103,17 @@ namespace CameraLogic
             var index = 0;
             for (; index < alivePlayers.Count; index++)
             {
-                if (alivePlayers[index].Key == _serverData.GetPlayerData(connection).SpectatedPlayer)
+                if (alivePlayers[index].Key == playerData.SpectatedPlayer)
                 {
                     SetCameraTarget(alivePlayers[(index + 1) % alivePlayers.Count].Key.identity);
-                    _serverData.GetPlayerData(connection).SpectatedPlayer =
+                    playerData.SpectatedPlayer =
                         alivePlayers[(index + 1) % alivePlayers.Count].Key;
                     return;
                 }
             }
 
             SetCameraTarget(alivePlayers[0].Key.identity);
-            _serverData.GetPlayerData(connection).SpectatedPlayer = alivePlayers[0].Key;
+            playerData.SpectatedPlayer = alivePlayers[0].Key;
         }
 
         [TargetRpc]

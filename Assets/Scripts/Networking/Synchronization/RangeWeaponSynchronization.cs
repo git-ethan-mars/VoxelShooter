@@ -29,7 +29,9 @@ namespace Networking.Synchronization
         [Command]
         public void CmdShootSingle(Ray ray, int weaponId, NetworkConnectionToClient connection = null)
         {
-            var weapon = _serverData.GetPlayerData(connection).RangeWeaponsById[weaponId];
+            var result = _serverData.TryGetPlayerData(connection, out var playerData);
+            if (!result) return;
+            var weapon = playerData.RangeWeaponsById[weaponId];
             if (!CanShoot(weapon) || weapon.IsAutomatic) return;
             Shoot(weapon, connection);
             for (var i = 0; i < weapon.BulletsPerShot; i++)
@@ -41,7 +43,9 @@ namespace Networking.Synchronization
         [Command]
         public void CmdShootAutomatic(Ray ray, int weaponId, NetworkConnectionToClient connection = null)
         {
-            var weapon = _serverData.GetPlayerData(connection).RangeWeaponsById[weaponId];
+            var result = _serverData.TryGetPlayerData(connection, out var playerData);
+            if (!result) return;
+            var weapon = playerData.RangeWeaponsById[weaponId];
             if (!CanShoot(weapon) || !weapon.IsAutomatic) return;
             Shoot(weapon, connection);
             for (var i = 0; i < weapon.BulletsPerShot; i++)
@@ -53,7 +57,9 @@ namespace Networking.Synchronization
         [Command]
         public void CmdReload(int weaponId, NetworkConnectionToClient connection = null)
         {
-            var weapon = _serverData.GetPlayerData(connection).RangeWeaponsById[weaponId];
+            var result = _serverData.TryGetPlayerData(connection, out var playerData);
+            if (!result) return;
+            var weapon = playerData.RangeWeaponsById[weaponId];
             if (!CanReload(weapon)) return;
             Reload(weapon, connection);
             GetComponent<SoundSynchronization>().PlayAudioClip(connection!.identity,

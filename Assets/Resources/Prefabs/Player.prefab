@@ -659,7 +659,6 @@ GameObject:
   - component: {fileID: 951460950341307336}
   - component: {fileID: 3881894797543075076}
   - component: {fileID: 5496113448558553160}
-  - component: {fileID: -721941239004690369}
   - component: {fileID: -2882850801023109427}
   - component: {fileID: 6343140105835637004}
   - component: {fileID: -1628332264695727715}
@@ -738,22 +737,6 @@ MonoBehaviour:
   sensitivityX: 200
   sensitivityY: 200
   headTransform: {fileID: 3276943837764328836}
---- !u!114 &-721941239004690369
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7129409968729204767}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 175592f64b8e4923bb6e8c125e40b621, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0.1
-  health: 0
 --- !u!114 &-2882850801023109427
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -862,6 +845,7 @@ MonoBehaviour:
   syncInterval: 0.1
   placeDistance: 0
   nickName: 
+  health: 0
   itemPosition: {fileID: 7893378094424813921}
   nickNameCanvas: {fileID: 1450820302951618227}
   head: {fileID: 3276943837764328836}

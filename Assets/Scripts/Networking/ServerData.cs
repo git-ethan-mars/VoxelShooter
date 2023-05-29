@@ -15,9 +15,9 @@ namespace Networking
 {
     public class ServerData
     {
-        public readonly Dictionary<NetworkConnectionToClient, PlayerData> DataByConnection;
         public Map Map { get; }
         public readonly List<KillData> KillStatistics;
+        private readonly Dictionary<NetworkConnectionToClient, PlayerData> _dataByConnection;
         private readonly IStaticDataService _staticData;
         private readonly IPlayerFactory _playerFactory;
         private readonly ICoroutineRunner _coroutineRunner;
@@ -27,7 +27,7 @@ namespace Networking
             IParticleFactory particleFactory, Map map, ServerSettings serverSettings, IEntityFactory entityFactory)
         {
             _coroutineRunner = coroutineRunner;
-            DataByConnection = new Dictionary<NetworkConnectionToClient, PlayerData>();
+            _dataByConnection = new Dictionary<NetworkConnectionToClient, PlayerData>();
             KillStatistics = new List<KillData>();
             _staticData = staticDataService;
             Map = map;
@@ -40,15 +40,14 @@ namespace Networking
         {
             var playerData = new PlayerData(steamID, nickname, _staticData);
             playerData.GameClass = chosenClass;
-            playerData.PlayerStateMachine.Enter<LifeState>();
-            DataByConnection[connection] = playerData;
-            NetworkServer.SendToAll(new ScoreboardMessage(GetScoreData()));
+            _dataByConnection[connection] = playerData;
             _playerFactory.CreatePlayer(connection);
+            NetworkServer.SendToAll(new ScoreboardMessage(GetScoreData()));
         }
 
         public void ChangeClass(NetworkConnectionToClient connection, GameClass chosenClass)
         {
-            var playerData = DataByConnection[connection];
+            var playerData = _dataByConnection[connection];
             if (playerData.GameClass == chosenClass) return;
             playerData.GameClass = chosenClass;
             if (playerData.IsAlive)
@@ -56,22 +55,16 @@ namespace Networking
                 playerData.PlayerStateMachine.Enter<DeathState>();
                 _playerFactory.CreateSpectatorPlayer(connection);
                 var respawnTimer = new RespawnTimer(_coroutineRunner, connection, _serverSettings.SpawnTime,
-                    () => Respawn(connection, playerData));
+                    () => _playerFactory.RespawnPlayer(connection));
                 respawnTimer.Start();
             }
             NetworkServer.SendToAll(new ScoreboardMessage(GetScoreData()));
 
         }
 
-        private void Respawn(NetworkConnectionToClient connection, PlayerData playerData)
-        {
-            playerData.PlayerStateMachine.Enter<LifeState>();
-            _playerFactory.RespawnPlayer(connection, playerData);
-        }
-
         public void DeletePlayer(NetworkConnectionToClient connection)
         {
-            DataByConnection.Remove(connection);
+            _dataByConnection.Remove(connection);
             NetworkServer.SendToAll(new ScoreboardMessage(GetScoreData()));
         }
 
@@ -79,38 +72,46 @@ namespace Networking
         public void AddKill(NetworkConnectionToClient killer, NetworkConnectionToClient victim)
         {
             if (killer is not null && killer != victim)
-                DataByConnection[killer].Kills += 1;
+                _dataByConnection[killer].Kills += 1;
             KillStatistics.Add(new KillData(killer, victim));
-            var playerData = DataByConnection[victim];
+            var playerData = _dataByConnection[victim];
             playerData.PlayerStateMachine.Enter<DeathState>();
             _playerFactory.CreateSpectatorPlayer(victim);
             var respawnTimer = new RespawnTimer(_coroutineRunner, victim, _serverSettings.SpawnTime,
-                () => Respawn(victim, playerData));
+                () => _playerFactory.RespawnPlayer(victim));
             respawnTimer.Start();
             NetworkServer.SendToAll(new ScoreboardMessage(GetScoreData()));
         }
 
-        public PlayerData GetPlayerData(NetworkConnectionToClient connection)
+        public bool TryGetPlayerData(NetworkConnectionToClient connection, out PlayerData playerData)
         {
-            return DataByConnection.TryGetValue(connection, out var playerData) ? playerData : null;
+            if (connection is null)
+            {
+                playerData = null;
+                return false;
+            }
+            return _dataByConnection.TryGetValue(connection, out playerData);
         }
 
-        public int GetItemCount(NetworkConnectionToClient connection, int itemId)
+        public PlayerData GetPlayerData(NetworkConnectionToClient connectionToClient)
         {
-            var playerData = DataByConnection[connection];
-            return playerData.ItemCountById[itemId];
+            return _dataByConnection[connectionToClient];
         }
 
-        public void SetItemCount(NetworkConnectionToClient connection, int itemId, int value)
+        public List<KeyValuePair<NetworkConnectionToClient, PlayerData>> GetAlivePlayers(NetworkConnectionToClient except)
         {
-            var playerData = DataByConnection[connection];
-            playerData.ItemCountById[itemId] = value;
+            return _dataByConnection.Where(kvp => kvp.Value.IsAlive && except != kvp.Key).ToList();
+        }
+
+        public IEnumerable<NetworkConnectionToClient> GetConnections()
+        {
+            return _dataByConnection.Keys.ToArray();
         }
 
         private List<ScoreData> GetScoreData()
         {
             var scoreData = new SortedSet<ScoreData>();
-            foreach (var playerData in DataByConnection.Values)
+            foreach (var playerData in _dataByConnection.Values)
             {
                 scoreData.Add(new ScoreData(playerData.SteamID, playerData.NickName, playerData.Kills,
                     playerData.Deaths, playerData.GameClass));

@@ -20,7 +20,7 @@ namespace Networking
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly ServerData _serverData;
         private readonly IStaticDataService _staticData;
-        private IParticleFactory _particleFactory;
+        private readonly IParticleFactory _particleFactory;
         private readonly IExplosionArea _sphereExplosionArea;
 
         public ServerMessageHandlers(IEntityFactory entityFactory, ICoroutineRunner coroutineRunner,
@@ -41,7 +41,6 @@ namespace Networking
             NetworkServer.RegisterHandler<GrenadeSpawnRequest>(OnGrenadeSpawn);
             NetworkServer.RegisterHandler<RocketLauncherSpawnRequest>(OnRocketLauncherSpawn);
             NetworkServer.RegisterHandler<AddBlocksRequest>(OnAddBlocks);
-            NetworkServer.RegisterHandler<RemoveBlocksRequest>(OnRemoveBlocks);
             NetworkServer.RegisterHandler<ChangeSlotRequest>(OnChangeSlot);
         }
 
@@ -52,14 +51,13 @@ namespace Networking
             NetworkServer.UnregisterHandler<GrenadeSpawnRequest>();
             NetworkServer.UnregisterHandler<RocketLauncherSpawnRequest>();
             NetworkServer.UnregisterHandler<AddBlocksRequest>();
-            NetworkServer.UnregisterHandler<RemoveBlocksRequest>();
             NetworkServer.UnregisterHandler<ChangeSlotRequest>();
         }
 
         private void OnChangeClass(NetworkConnectionToClient connection, ChangeClassRequest message)
         {
-            var playerData = _serverData.GetPlayerData(connection);
-            if (playerData is null)
+            var result = _serverData.TryGetPlayerData(connection, out _);
+            if (!result)
             {
                 _serverData.AddPlayer(connection, message.GameClass, message.SteamID, message.Nickname);
             }
@@ -71,104 +69,88 @@ namespace Networking
 
         private void OnAddBlocks(NetworkConnectionToClient connection, AddBlocksRequest message)
         {
-            if (connection.identity == null) return;
-            var blockAmount = _serverData.GetItemCount(connection, message.ItemId);
-            var validPositionList = new List<Vector3Int>();
-            var validBlockDataList = new List<BlockData>();
+            var result = _serverData.TryGetPlayerData(connection, out var playerData);
+            if (!result) return;
+            var blockAmount = playerData.ItemCountById[message.ItemId];
+            var validPositions = new List<Vector3Int>();
+            var validBlockData = new List<BlockData>();
             var blocksUsed = Math.Min(blockAmount, message.GlobalPositions.Length);
-
             for (var i = 0; i < blocksUsed; i++)
             {
-                foreach (var player in _serverData.DataByConnection.Keys)
+                foreach (var otherConnection in _serverData.GetConnections())
                 {
-                    if (player.identity != null)
-                    {
-                        var playerPosition = player.identity.gameObject.transform.position;
-                        var blockPosition = message.GlobalPositions[i];
-                        if (playerPosition.x > blockPosition.x
-                            && playerPosition.x < blockPosition.x + 1
-                            && playerPosition.z > blockPosition.z
-                            && playerPosition.z < blockPosition.z + 1
-                            && playerPosition.y > blockPosition.y - 2
-                            && playerPosition.y < blockPosition.y + 2)
-                            return;
-                    }
+                    result = _serverData.TryGetPlayerData(otherConnection, out var otherPlayer);
+                    if (!result || !otherPlayer.IsAlive) continue;
+                    var playerPosition = otherConnection.identity.gameObject.transform.position;
+                    var blockPosition = message.GlobalPositions[i];
+                    if (playerPosition.x > blockPosition.x
+                        && playerPosition.x < blockPosition.x + 1
+                        && playerPosition.z > blockPosition.z
+                        && playerPosition.z < blockPosition.z + 1
+                        && playerPosition.y > blockPosition.y - 2
+                        && playerPosition.y < blockPosition.y + 2)
+                        return;
                 }
 
                 if (!_serverData.Map.IsValidPosition(message.GlobalPositions[i])) return;
                 var currentBlock = _serverData.Map.GetBlockByGlobalPosition(message.GlobalPositions[i]);
                 if (currentBlock.Equals(message.Blocks[i])) return;
-                validPositionList.Add(message.GlobalPositions[i]);
-                validBlockDataList.Add(message.Blocks[i]);
+                validPositions.Add(message.GlobalPositions[i]);
+                validBlockData.Add(message.Blocks[i]);
             }
 
-            _serverData.SetItemCount(connection, message.ItemId, blockAmount - blocksUsed);
-            NetworkServer.SendToAll(new UpdateMapMessage(validPositionList.ToArray(), validBlockDataList.ToArray()));
+            playerData.ItemCountById[message.ItemId] = blockAmount - blocksUsed;
+            NetworkServer.SendToAll(new UpdateMapMessage(validPositions.ToArray(), validBlockData.ToArray()));
             connection.Send(new ItemUseResult(message.ItemId, blockAmount - blocksUsed));
-        }
-
-        private void OnRemoveBlocks(NetworkConnectionToClient connection, RemoveBlocksRequest message)
-        {
-            if (connection.identity == null) return;
-            var validPositionList = new List<Vector3Int>();
-            for (var i = 0; i < message.GlobalPositions.Length; i++)
-            {
-                if (!_serverData.Map.IsValidPosition(message.GlobalPositions[i])) continue;
-                validPositionList.Add(message.GlobalPositions[i]);
-            }
-
-            NetworkServer.SendToAll(new UpdateMapMessage(validPositionList.ToArray(),
-                new BlockData[validPositionList.Count]));
         }
 
         private void OnRocketLauncherSpawn(NetworkConnectionToClient connection, RocketLauncherSpawnRequest message)
         {
-            if (connection.identity == null) return;
-            var rocketCount = _serverData.GetItemCount(connection, message.ItemId);
+            var result = _serverData.TryGetPlayerData(connection, out var playerData);
+            if (!result) return;
+            var rocketCount = playerData.ItemCountById[message.ItemId];
             if (rocketCount <= 0)
                 return;
-            
-            _serverData.SetItemCount(connection, message.ItemId, rocketCount - 1);
+            playerData.ItemCountById[message.ItemId] = rocketCount - 1;
             connection.Send(new ItemUseResult(message.ItemId, rocketCount - 1));
-            
-            var rocketData = (RocketLauncherItem)_staticData.GetItem(message.ItemId);
+            var rocketData = (RocketLauncherItem) _staticData.GetItem(message.ItemId);
             var direction = message.Ray.direction;
-            var rocket = _entityFactory.CreateRocket(message.Ray.origin + direction * 2, Quaternion.LookRotation(direction), _serverData, _particleFactory, rocketData, connection);
+            var rocket = _entityFactory.CreateRocket(message.Ray.origin + direction * 2,
+                Quaternion.LookRotation(direction), _serverData, _particleFactory, rocketData, connection);
             rocket.GetComponent<Rigidbody>().velocity = direction * rocketData.speed;
         }
 
         private void OnGrenadeSpawn(NetworkConnectionToClient connection, GrenadeSpawnRequest message)
         {
-            if (connection.identity == null) return;
-            var grenadeCount = _serverData.GetItemCount(connection, message.ItemId);
+            var result = _serverData.TryGetPlayerData(connection, out var playerData);
+            if (!result) return;
+            var grenadeCount = playerData.ItemCountById[message.ItemId];
             if (grenadeCount <= 0)
                 return;
-
-            _serverData.SetItemCount(connection, message.ItemId, grenadeCount - 1);
+            playerData.ItemCountById[message.ItemId] = grenadeCount - 1;
             connection.Send(new ItemUseResult(message.ItemId, grenadeCount - 1));
-            
             var grenade = _entityFactory.CreateGrenade(message.Ray.origin, Quaternion.identity);
             grenade.GetComponent<Rigidbody>().AddForce(message.Ray.direction * message.ThrowForce);
-            var grenadeData = (GrenadeItem)_staticData.GetItem(message.ItemId);
-            
-            _coroutineRunner.StartCoroutine(ExplodeGrenade(grenade, grenadeData.delayInSeconds, grenadeData.radius, 
+            var grenadeData = (GrenadeItem) _staticData.GetItem(message.ItemId);
+            _coroutineRunner.StartCoroutine(ExplodeGrenade(grenade, grenadeData.delayInSeconds, grenadeData.radius,
                 grenadeData.damage, grenadeData.particlesSpeed, grenadeData.particlesCount, connection));
         }
-        
-        private IEnumerator ExplodeGrenade(GameObject grenade, float delayInSeconds, int radius, int damage, int particlesSpeed, int particlesCount, NetworkConnectionToClient connection)
+
+        private IEnumerator ExplodeGrenade(GameObject grenade, float delayInSeconds, int radius, int damage,
+            int particlesSpeed, int particlesCount, NetworkConnectionToClient connection)
         {
             yield return new WaitForSeconds(delayInSeconds);
             if (!grenade) yield break;
 
             var grenadePosition = new Vector3Int((int) grenade.transform.position.x,
                 (int) grenade.transform.position.y, (int) grenade.transform.position.z);
-            
+
             var blockPositions = _sphereExplosionArea.GetExplodedBlocks(radius, grenadePosition);
 
             foreach (var position in blockPositions)
                 _serverData.Map.SetBlockByGlobalPosition(position, new BlockData());
             _particleFactory.CreateRchParticle(grenadePosition, particlesSpeed, particlesCount);
-            
+
             NetworkServer.SendToAll(new UpdateMapMessage(blockPositions.ToArray(),
                 new BlockData[blockPositions.Count]));
             NetworkServer.Destroy(grenade);
@@ -183,7 +165,7 @@ namespace Networking
                         (grenadePosition.x - playerPosition.x) * (grenadePosition.x - playerPosition.x) +
                         (grenadePosition.y - playerPosition.y) * (grenadePosition.y - playerPosition.y) +
                         (grenadePosition.z - playerPosition.z) * (grenadePosition.z - playerPosition.z));
-                    var currentDamage = (int)(damage - damage * (distance / radius));
+                    var currentDamage = (int) (damage - damage * (distance / radius));
                     var direction = playerPosition - grenadePosition;
                     hitCollider.GetComponent<CharacterController>().Move(direction * particlesSpeed / 3);
                     var receiver = hitCollider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
@@ -194,16 +176,17 @@ namespace Networking
 
         private void OnTntSpawn(NetworkConnectionToClient connection, TntSpawnRequest message)
         {
-            if (connection.identity == null) return;
-            var tntCount = _serverData.GetItemCount(connection, message.ItemId);
+            var result = _serverData.TryGetPlayerData(connection, out var playerData);
+            if (!result) return;
+            var tntCount = playerData.ItemCountById[message.ItemId];
             if (tntCount <= 0)
                 return;
             var tnt = _entityFactory.CreateTnt(message.Position, message.Rotation);
-            var tntData = (TntItem)_staticData.GetItem(message.ItemId);
+            var tntData = (TntItem) _staticData.GetItem(message.ItemId);
+            playerData.ItemCountById[message.ItemId] = tntCount - 1;
             _coroutineRunner.StartCoroutine(ExplodeWithDelay(Vector3Int.FloorToInt(message.ExplosionCenter), tnt,
                 tntData.delayInSeconds,
                 tntData.radius, connection, tntData.damage, tntData.particlesSpeed, tntData.particlesCount));
-            _serverData.SetItemCount(connection, message.ItemId, tntCount - 1);
             connection.Send(new ItemUseResult(message.ItemId, tntCount - 1));
         }
 
@@ -213,14 +196,16 @@ namespace Networking
             yield return new WaitForSeconds(delayInSeconds);
             if (!tnt) yield break;
             var explodedTnt = new List<GameObject>();
-            ExplodeImmediately(explosionCenter, tnt, radius, explodedTnt, connection, damage, particlesSpeed, particlesCount);
+            ExplodeImmediately(explosionCenter, tnt, radius, explodedTnt, connection, damage, particlesSpeed,
+                particlesCount);
         }
 
         private void ExplodeImmediately(Vector3Int explosionCenter, GameObject tnt, int radius,
-            List<GameObject> explodedTnt, NetworkConnectionToClient connection, int damage, int particlesSpeed, int particlesCount)
+            List<GameObject> explodedTnt, NetworkConnectionToClient connection, int damage, int particlesSpeed,
+            int particlesCount)
         {
             var blockPositions = _sphereExplosionArea.GetExplodedBlocks(radius, explosionCenter);
-            
+
             foreach (var position in blockPositions)
                 _serverData.Map.SetBlockByGlobalPosition(position, new BlockData());
             _particleFactory.CreateRchParticle(explosionCenter, particlesSpeed, particlesCount);
@@ -236,7 +221,8 @@ namespace Networking
                 if (hitCollider.CompareTag("TNT") && explodedTnt.All(x => x.gameObject != hitCollider.gameObject))
                 {
                     ExplodeImmediately(Vector3Int.FloorToInt(hitCollider.gameObject.transform.position),
-                        hitCollider.gameObject, radius, explodedTnt, connection, damage, particlesSpeed, particlesCount);
+                        hitCollider.gameObject, radius, explodedTnt, connection, damage, particlesSpeed,
+                        particlesCount);
                 }
 
                 if (hitCollider.CompareTag("Player"))
@@ -246,7 +232,7 @@ namespace Networking
                         (explosionCenter.x - playerPosition.x) * (explosionCenter.x - playerPosition.x) +
                         (explosionCenter.y - playerPosition.y) * (explosionCenter.y - playerPosition.y) +
                         (explosionCenter.z - playerPosition.z) * (explosionCenter.z - playerPosition.z));
-                    var currentDamage = (int)(damage - damage * (distance / radius));
+                    var currentDamage = (int) (damage - damage * (distance / radius));
                     var direction = playerPosition - explosionCenter;
                     hitCollider.GetComponent<CharacterController>().Move(direction * particlesSpeed / 3);
                     var receiver = hitCollider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
@@ -258,7 +244,8 @@ namespace Networking
 
         private void OnChangeSlot(NetworkConnectionToClient connection, ChangeSlotRequest message)
         {
-            if (connection.identity == null) return;
+            var result = _serverData.TryGetPlayerData(connection, out _);
+            if (!result) return;
             connection.identity.GetComponent<PlayerLogic.Inventory>().currentSlotId = message.Index;
             connection.Send(new ChangeSlotResult(message.Index));
         }

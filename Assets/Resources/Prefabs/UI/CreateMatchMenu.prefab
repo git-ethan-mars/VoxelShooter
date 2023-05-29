@@ -251,7 +251,7 @@ GameObject:
   - component: {fileID: 7988933472591288346}
   - component: {fileID: 8904782676911541895}
   m_Layer: 0
-  m_Name: ChooseNumberOfPlayers
+  m_Name: ChooseSpawnTime
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -891,7 +891,7 @@ MonoBehaviour:
   resetButton: {fileID: 3061433538795144814}
   applyButton: {fileID: 8746748109361143213}
   mapName: {fileID: 6763337806940708623}
-  playersNumber: {fileID: 424774279460095848}
+  spawnTimeText: {fileID: 424774279460095848}
   incrementPlayerNumber: {fileID: 7257078759865093498}
   decrementPlayerNumber: {fileID: 2072952055281921019}
   gameDuration: {fileID: 7263906329179727706}
@@ -2259,7 +2259,7 @@ GameObject:
   - component: {fileID: 3811433157187248271}
   - component: {fileID: 6856847288011340202}
   m_Layer: 0
-  m_Name: Text
+  m_Name: Description
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2876,7 +2876,7 @@ GameObject:
   - component: {fileID: 7467661787953920237}
   - component: {fileID: 7166691067123227870}
   m_Layer: 0
-  m_Name: Text
+  m_Name: Description
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2930,7 +2930,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Players number
+  m_text: Spawn time
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 826f3a6926e5ed14583e9ab0a32696ab, type: 2}
   m_sharedMaterial: {fileID: -4699972163460073869, guid: 826f3a6926e5ed14583e9ab0a32696ab, type: 2}
@@ -3133,7 +3133,7 @@ GameObject:
   - component: {fileID: 2045392649947405193}
   - component: {fileID: 890730752937357711}
   m_Layer: 0
-  m_Name: Text
+  m_Name: Description
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
