@@ -9,7 +9,7 @@ namespace Infrastructure.Services.PlayerDataLoader
     public class SteamAvatarLoader : IAvatarLoader
     {
         public event Action OnAvatarLoaded;
-        public Dictionary<CSteamID, Texture2D> AvatarBySteamId { get; set; }
+        public Dictionary<CSteamID, Texture2D> AvatarBySteamId { get; }
         protected Callback<AvatarImageLoaded_t> AvatarLoaded;
         private readonly IAssetProvider _assets;
         private const string SteamAvatarPath = "Sprites/steam-question-mark";

@@ -14,7 +14,6 @@ namespace UI
         private IInputService _inputService;
         private CanvasGroup _canvasGroup;
         private IAvatarLoader _avatarLoader;
-        private List<ScoreData> _currentScoreData;
 
 
         public void Construct(IInputService inputService, IAvatarLoader avatarLoader,
@@ -24,7 +23,6 @@ namespace UI
             networkManager.GameFinished += ShowFinalStatistics;
             _inputService = inputService;
             _avatarLoader = avatarLoader;
-            _avatarLoader.OnAvatarLoaded += () => UpdateScoreboard(_currentScoreData);
             _canvasGroup = GetComponent<CanvasGroup>();
             _canvasGroup.alpha = 0;
         }
@@ -42,7 +40,6 @@ namespace UI
 
         private void UpdateScoreboard(List<ScoreData> scoreBoardData)
         {
-            _currentScoreData = scoreBoardData;
             for (var i = 0; i < scores.Count; i++)
             {
                 scores[i].gameObject.SetActive(false);
