@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 4483501228228306228}
   - component: {fileID: 8636970725215761551}
   - component: {fileID: 5445392466756361913}
+  - component: {fileID: 1544599875961925772}
   m_Layer: 0
   m_Name: Tombstone
   m_TagString: Untagged
@@ -117,7 +118,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!65 &5445392466756361913
 BoxCollider:
@@ -132,3 +133,31 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 9.499999, y: 12, z: 6.5}
   m_Center: {x: 0.06850147, y: -1.647018, z: -0.5873089}
+--- !u!114 &1544599875961925772
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5146989472639942367}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  target: {fileID: 4169181901698821604}
+  clientAuthority: 0
+  syncPosition: 1
+  syncRotation: 0
+  syncScale: 0
+  showGizmos: 0
+  showOverlay: 0
+  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+  onlySyncOnChange: 1
+  bufferResetMultiplier: 5
+  positionSensitivity: 0.01
+  rotationSensitivity: 0.01
+  scaleSensitivity: 0.01

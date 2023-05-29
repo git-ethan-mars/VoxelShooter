@@ -671,8 +671,8 @@ GameObject:
   - component: {fileID: 2734791800071418437}
   - component: {fileID: -525354919619175065}
   - component: {fileID: 1559136694788600597}
-  - component: {fileID: -6329305967111660050}
-  - component: {fileID: -6127922277515605196}
+  - component: {fileID: 1864132953276379790}
+  - component: {fileID: 1304852672885579959}
   - component: {fileID: 1347592026688706292}
   m_Layer: 2
   m_Name: Player
@@ -1097,7 +1097,7 @@ LineRenderer:
     generateLightingData: 0
   m_UseWorldSpace: 1
   m_Loop: 0
---- !u!114 &-6329305967111660050
+--- !u!114 &1864132953276379790
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1106,7 +1106,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7129409968729204767}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8ff3ba0becae47b8b9381191598957c8, type: 3}
+  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   syncDirection: 1
@@ -1121,12 +1121,11 @@ MonoBehaviour:
   showOverlay: 0
   overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
   onlySyncOnChange: 1
-  onlySyncOnChangeCorrectionMultiplier: 2
+  bufferResetMultiplier: 5
+  positionSensitivity: 0.01
   rotationSensitivity: 0.01
-  compressRotation: 0
-  positionPrecision: 0.01
-  scalePrecision: 0.01
---- !u!114 &-6127922277515605196
+  scaleSensitivity: 0.01
+--- !u!114 &1304852672885579959
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1135,7 +1134,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7129409968729204767}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8ff3ba0becae47b8b9381191598957c8, type: 3}
+  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   syncDirection: 1
@@ -1150,11 +1149,10 @@ MonoBehaviour:
   showOverlay: 0
   overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
   onlySyncOnChange: 1
-  onlySyncOnChangeCorrectionMultiplier: 2
+  bufferResetMultiplier: 5
+  positionSensitivity: 0.01
   rotationSensitivity: 0.01
-  compressRotation: 0
-  positionPrecision: 0.01
-  scalePrecision: 0.01
+  scaleSensitivity: 0.01
 --- !u!114 &1347592026688706292
 MonoBehaviour:
   m_ObjectHideFlags: 0
