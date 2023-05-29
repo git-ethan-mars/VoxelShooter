@@ -24,7 +24,7 @@ namespace Networking
         private readonly ServerSettings _serverSettings;
 
         public ServerData(ICoroutineRunner coroutineRunner, IAssetProvider assets, IStaticDataService staticDataService,
-            IParticleFactory particleFactory, Map map, ServerSettings serverSettings)
+            IParticleFactory particleFactory, Map map, ServerSettings serverSettings, IEntityFactory entityFactory)
         {
             _coroutineRunner = coroutineRunner;
             DataByConnection = new Dictionary<NetworkConnectionToClient, PlayerData>();
@@ -32,7 +32,7 @@ namespace Networking
             _staticData = staticDataService;
             Map = map;
             _serverSettings = serverSettings;
-            _playerFactory = new PlayerFactory(assets, this, particleFactory);
+            _playerFactory = new PlayerFactory(assets, this, particleFactory, entityFactory);
         }
 
         public void AddPlayer(NetworkConnectionToClient connection, GameClass chosenClass, CSteamID steamID,

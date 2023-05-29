@@ -17,18 +17,21 @@ namespace Infrastructure.Factory
         private readonly IAssetProvider _assets;
         private readonly ServerData _serverData;
         private readonly IParticleFactory _particleFactory;
+        private readonly IEntityFactory _entityFactory;
         private const string PlayerPath = "Prefabs/Player";
         private const string SpectatorPlayerPath = "Prefabs/Spectator player";
 
 
         public PlayerFactory(IAssetProvider assets,
             ServerData serverData,
-            IParticleFactory particleFactory)
+            IParticleFactory particleFactory,
+            IEntityFactory entityFactory)
         {
             _serverData = serverData;
             _spawnPoints = _serverData.Map.MapData.SpawnPoints;
             _assets = assets;
             _particleFactory = particleFactory;
+            _entityFactory = entityFactory;
         }
 
 
@@ -97,7 +100,7 @@ namespace Infrastructure.Factory
         private void ConfigureSynchronization(GameObject player)
         {
             player.GetComponent<MapSynchronization>().Construct(_serverData.Map);
-            player.GetComponent<HealthSynchronization>().Construct(_serverData);
+            player.GetComponent<HealthSynchronization>().Construct(_serverData, _entityFactory);
             player.GetComponent<RangeWeaponSynchronization>().Construct(_particleFactory, _assets, _serverData);
             player.GetComponent<MeleeWeaponSynchronization>().Construct(_particleFactory, _assets, _serverData);
         }
