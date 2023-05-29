@@ -7,7 +7,7 @@ namespace Explosions
 {
     public class SphereExplosionArea : IExplosionArea
     {
-        private ServerData _serverData;
+        private readonly ServerData _serverData;
 
         public SphereExplosionArea(ServerData serverData)
         {

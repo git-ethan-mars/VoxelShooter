@@ -63,6 +63,10 @@ namespace Entities
                         (rocketPosition.x - playerPosition.x) * (rocketPosition.x - playerPosition.x) +
                         (rocketPosition.y - playerPosition.y) * (rocketPosition.y - playerPosition.y) +
                         (rocketPosition.z - playerPosition.z) * (rocketPosition.z - playerPosition.z));
+                    if (distance >= _radius)
+                    {
+                        distance = _radius;
+                    }
                     var currentDamage = (int) (_damage - _damage * (distance / _radius));
                     var direction = playerPosition - rocketPosition;
                     hitCollider.GetComponent<CharacterController>().Move(direction * _particlesSpeed / 3);
