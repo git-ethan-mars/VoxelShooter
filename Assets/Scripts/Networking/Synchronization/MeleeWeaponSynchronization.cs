@@ -59,7 +59,8 @@ namespace Networking.Synchronization
         [Server]
         private void ResetHit(MeleeWeaponData meleeWeapon)
         {
-            meleeWeapon.IsReady = true;
+            if (meleeWeapon is not null)
+                meleeWeapon.IsReady = true;
         }
 
         [Server]

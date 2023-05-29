@@ -70,7 +70,7 @@ namespace Networking
         private void OnAddBlocks(NetworkConnectionToClient connection, AddBlocksRequest message)
         {
             var result = _serverData.TryGetPlayerData(connection, out var playerData);
-            if (!result) return;
+            if (!result || !playerData.IsAlive) return;
             var blockAmount = playerData.ItemCountById[message.ItemId];
             var validPositions = new List<Vector3Int>();
             var validBlockData = new List<BlockData>();
@@ -107,7 +107,7 @@ namespace Networking
         private void OnRocketLauncherSpawn(NetworkConnectionToClient connection, RocketLauncherSpawnRequest message)
         {
             var result = _serverData.TryGetPlayerData(connection, out var playerData);
-            if (!result) return;
+            if (!result || !playerData.IsAlive) return;
             var rocketCount = playerData.ItemCountById[message.ItemId];
             if (rocketCount <= 0)
                 return;
@@ -123,7 +123,7 @@ namespace Networking
         private void OnGrenadeSpawn(NetworkConnectionToClient connection, GrenadeSpawnRequest message)
         {
             var result = _serverData.TryGetPlayerData(connection, out var playerData);
-            if (!result) return;
+            if (!result || !playerData.IsAlive) return;
             var grenadeCount = playerData.ItemCountById[message.ItemId];
             if (grenadeCount <= 0)
                 return;
@@ -177,7 +177,7 @@ namespace Networking
         private void OnTntSpawn(NetworkConnectionToClient connection, TntSpawnRequest message)
         {
             var result = _serverData.TryGetPlayerData(connection, out var playerData);
-            if (!result) return;
+            if (!result || !playerData.IsAlive) return;
             var tntCount = playerData.ItemCountById[message.ItemId];
             if (tntCount <= 0)
                 return;
@@ -244,8 +244,8 @@ namespace Networking
 
         private void OnChangeSlot(NetworkConnectionToClient connection, ChangeSlotRequest message)
         {
-            var result = _serverData.TryGetPlayerData(connection, out _);
-            if (!result) return;
+            var result = _serverData.TryGetPlayerData(connection, out var playerData);
+            if (!result || !playerData.IsAlive) return;
             connection.identity.GetComponent<PlayerLogic.Inventory>().currentSlotId = message.Index;
             connection.Send(new ChangeSlotResult(message.Index));
         }

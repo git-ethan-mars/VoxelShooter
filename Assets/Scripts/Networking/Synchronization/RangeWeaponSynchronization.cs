@@ -30,7 +30,7 @@ namespace Networking.Synchronization
         public void CmdShootSingle(Ray ray, int weaponId, NetworkConnectionToClient connection = null)
         {
             var result = _serverData.TryGetPlayerData(connection, out var playerData);
-            if (!result) return;
+            if (!result || !playerData.IsAlive) return;
             var weapon = playerData.RangeWeaponsById[weaponId];
             if (!CanShoot(weapon) || weapon.IsAutomatic) return;
             Shoot(weapon, connection);
@@ -44,7 +44,7 @@ namespace Networking.Synchronization
         public void CmdShootAutomatic(Ray ray, int weaponId, NetworkConnectionToClient connection = null)
         {
             var result = _serverData.TryGetPlayerData(connection, out var playerData);
-            if (!result) return;
+            if (!result || !playerData.IsAlive) return;
             var weapon = playerData.RangeWeaponsById[weaponId];
             if (!CanShoot(weapon) || !weapon.IsAutomatic) return;
             Shoot(weapon, connection);
@@ -58,14 +58,14 @@ namespace Networking.Synchronization
         public void CmdReload(int weaponId, NetworkConnectionToClient connection = null)
         {
             var result = _serverData.TryGetPlayerData(connection, out var playerData);
-            if (!result) return;
+            if (!result || !playerData.IsAlive) return;
             var weapon = playerData.RangeWeaponsById[weaponId];
             if (!CanReload(weapon)) return;
             Reload(weapon, connection);
             GetComponent<SoundSynchronization>().PlayAudioClip(connection!.identity,
                 _audioClips.FindIndex(audioClip => audioClip == weapon.ReloadingAudioClip), weapon.ReloadingVolume);
         }
-        
+
         [Server]
         private void StartShootCoroutines(RangeWeaponData rangeWeapon)
         {
@@ -83,13 +83,15 @@ namespace Networking.Synchronization
         [Server]
         private void ResetRecoil(RangeWeaponData rangeWeapon)
         {
-            rangeWeapon.RecoilModifier -= rangeWeapon.StepRecoil;
+            if (rangeWeapon is not null)
+                rangeWeapon.RecoilModifier -= rangeWeapon.StepRecoil;
         }
 
         [Server]
         private void ResetShoot(RangeWeaponData rangeWeapon)
         {
-            rangeWeapon.IsReady = true;
+            if (rangeWeapon is not null)
+                rangeWeapon.IsReady = true;
         }
 
         [Server]
@@ -114,7 +116,8 @@ namespace Networking.Synchronization
         [Server]
         private void ReloadFinished(RangeWeaponData rangeWeapon)
         {
-            rangeWeapon.IsReloading = false;
+            if (rangeWeapon is not null)
+                rangeWeapon.IsReloading = false;
         }
 
         [Server]
@@ -170,8 +173,9 @@ namespace Networking.Synchronization
 
             if (rayHit.collider.CompareTag("Chunk"))
             {
-                var block = _serverData.Map.GetBlockByGlobalPosition(Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2));
-                _particleFactory.CreateBulletImpact(rayHit.point, Quaternion.Euler(rayHit.normal.y * -90, 
+                var block = _serverData.Map.GetBlockByGlobalPosition(
+                    Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2));
+                _particleFactory.CreateBulletImpact(rayHit.point, Quaternion.Euler(rayHit.normal.y * -90,
                     rayHit.normal.x * 90 + (rayHit.normal.z == -1 ? 180 : 0), 0), block.Color);
             }
         }
