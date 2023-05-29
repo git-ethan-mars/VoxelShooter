@@ -73,6 +73,7 @@ namespace Infrastructure.Services.PlayerDataLoader
             texture.LoadRawTextureData(avatarBuffer);
             texture.Apply();
             AvatarBySteamId[avatarImageResult.m_steamID] = texture;
+            OnAvatarLoaded?.Invoke();
         }
     }
 }
