@@ -18,6 +18,7 @@ namespace UI
         {
             _inputService = inputService;
             _canvasGroup = GetComponent<CanvasGroup>();
+            networkManager.GameFinished += () => gameObject.SetActive(false);
             networkManager.ServerTimeChanged += ChangeServerTime;
             networkManager.RespawnTimeChanged += ChangeRespawnTime;
         }

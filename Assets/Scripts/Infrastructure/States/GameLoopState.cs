@@ -7,7 +7,7 @@ namespace Infrastructure.States
     {
         private readonly IUIFactory _uiFactory;
         private readonly bool _isLocalBuild;
-
+        
         public GameLoopState(IUIFactory uiFactory, bool isLocalBuild)
         {
             _uiFactory = uiFactory;
@@ -16,7 +16,7 @@ namespace Infrastructure.States
 
         public void Enter(CustomNetworkManager networkManager)
         {
-            _uiFactory.CreateChooseClassMenu(_isLocalBuild);
+            _uiFactory.CreateChooseClassMenu(networkManager, _isLocalBuild);
             _uiFactory.CreateTimeCounter(networkManager);
             _uiFactory.CreateScoreboard(networkManager);
         }

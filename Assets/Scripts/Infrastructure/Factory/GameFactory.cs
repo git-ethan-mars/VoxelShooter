@@ -41,7 +41,7 @@ namespace Infrastructure.Factory
         {
             _networkManager = _assets.Instantiate(NetworkManagerPath);
             _networkManager.GetComponent<CustomNetworkManager>().Construct(stateMachine, _staticData, _entityFactory,
-                _particleFactory, _assets, serverSettings);
+                _particleFactory, _assets, this, serverSettings);
             return _networkManager;
         }
 
@@ -50,7 +50,7 @@ namespace Infrastructure.Factory
         {
             _networkManager = _assets.Instantiate(SteamNetworkManagerPath);
             _networkManager.GetComponent<CustomNetworkManager>().Construct(stateMachine, _staticData, _entityFactory,
-                _particleFactory, _assets, serverSettings);
+                _particleFactory, _assets, this, serverSettings);
             _networkManager.GetComponent<SteamLobby>().Construct(isHost);
             return _networkManager;
         }
@@ -79,6 +79,11 @@ namespace Infrastructure.Factory
                 .GetComponent<ChunkRenderer>();
             chunkRenderer.Construct();
             return chunkRenderer;
+        }
+
+        public void CreateCamera()
+        {
+            new GameObject().AddComponent<Camera>();
         }
     }
 }

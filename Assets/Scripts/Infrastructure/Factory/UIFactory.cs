@@ -44,9 +44,9 @@ namespace Infrastructure.Factory
             return hud;
         }
 
-        public void CreateChooseClassMenu(bool isLocalBuild)
+        public void CreateChooseClassMenu(CustomNetworkManager networkManager, bool isLocalBuild)
         {
-            _assets.Instantiate(ChooseClassMenuPath).GetComponent<ChooseClassMenu>().Construct(_inputService, isLocalBuild);
+            _assets.Instantiate(ChooseClassMenuPath).GetComponent<ChooseClassMenu>().Construct(networkManager, _inputService, isLocalBuild);
         }
 
         public GameObject CreateMainMenu(GameStateMachine gameStateMachine, bool isLocalBuild)

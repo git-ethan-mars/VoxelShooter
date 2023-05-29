@@ -20,6 +20,7 @@ namespace Networking
         public event Action<ServerTime> RespawnTimeChanged;
         public event Action<List<ScoreData>> ScoreboardChanged;
         public event Action<float> OnLoadProgress;
+        public event Action GameFinished;
         private ServerData _serverData;
         private IStaticDataService _staticData;
         private IEntityFactory _entityFactory;
@@ -30,16 +31,21 @@ namespace Networking
         private ServerTimer _serverTimer;
         private IParticleFactory _particleFactory;
         private IAssetProvider _assets;
+        private IGameFactory _gameFactory;
+        private const float ShowResultsDuration = 10;
 
 
         public void Construct(GameStateMachine stateMachine, IStaticDataService staticData,
-            IEntityFactory entityFactory, IParticleFactory particleFactory, IAssetProvider assets, ServerSettings serverSettings)
+            IEntityFactory entityFactory, IParticleFactory particleFactory, IAssetProvider assets,
+            IGameFactory gameFactory,
+            ServerSettings serverSettings)
         {
             _stateMachine = stateMachine;
             _staticData = staticData;
             _entityFactory = entityFactory;
             _particleFactory = particleFactory;
             _assets = assets;
+            _gameFactory = gameFactory;
             _serverSettings = serverSettings;
         }
 
@@ -50,7 +56,7 @@ namespace Networking
             _serverMessageHandlers =
                 new ServerMessageHandlers(_entityFactory, this, _serverData, _staticData, _particleFactory);
             _serverMessageHandlers.RegisterHandlers();
-            _serverTimer = new ServerTimer(this, _serverSettings.MaxDuration, StopLobby);
+            _serverTimer = new ServerTimer(this, _serverSettings.MaxDuration, StopHost);
             _serverTimer.Start();
         }
 
@@ -86,6 +92,10 @@ namespace Networking
             }
         }
 
+        public override void OnClientDisconnect()
+        {
+        }
+
         public override void OnServerDisconnect(NetworkConnectionToClient connection)
         {
             base.OnServerDisconnect(connection);
@@ -95,31 +105,24 @@ namespace Networking
         public override void OnStopClient()
         {
             _clientMessageHandlers.RemoveHandlers();
-            if (!NetworkClient.activeHost)
-                _stateMachine.Enter<MainMenuState>();
+            if (NetworkClient.activeHost) return;
+            _gameFactory.CreateCamera();
+            GameFinished?.Invoke();
+            StartCoroutine(Utils.DoActionAfterDelay(ShowResultsDuration,
+                _stateMachine.Enter<MainMenuState>));
         }
 
         public override void OnStopServer()
         {
             _serverMessageHandlers.RemoveHandlers();
-            _stateMachine.Enter<MainMenuState>();
+            _gameFactory.CreateCamera();
+            GameFinished?.Invoke();
+            StartCoroutine(Utils.DoActionAfterDelay(ShowResultsDuration,
+                _stateMachine.Enter<MainMenuState>));
         }
+
 
         private static bool IsHost(NetworkConnection conn) =>
             NetworkClient.connection.connectionId == conn.connectionId;
-
-
-        public void StopLobby()
-        {
-            if (NetworkClient.isConnected)
-            {
-                StopClient();
-            }
-
-            if (NetworkServer.active)
-            {
-                StopServer();
-            }
-        }
     }
 }

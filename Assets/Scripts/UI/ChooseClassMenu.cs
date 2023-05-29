@@ -2,6 +2,7 @@ using System;
 using Data;
 using Infrastructure.Services.Input;
 using Mirror;
+using Networking;
 using Networking.Messages;
 using Steamworks;
 using UnityEngine;
@@ -21,10 +22,11 @@ namespace UI
         private CanvasGroup _canvasGroup;
         private bool _isLocalBuild;
 
-        public void Construct(IInputService inputService, bool isLocalBuild)
+        public void Construct(CustomNetworkManager networkManager, IInputService inputService, bool isLocalBuild)
         {
             _isLocalBuild = isLocalBuild;
             _inputService = inputService;
+            networkManager.GameFinished += () => gameObject.SetActive(false);
             _canvasGroup = GetComponent<CanvasGroup>();
             builderButton.onClick.AddListener(() => ChangeClass(GameClass.Builder));
             sniperButton.onClick.AddListener(() => ChangeClass(GameClass.Sniper));

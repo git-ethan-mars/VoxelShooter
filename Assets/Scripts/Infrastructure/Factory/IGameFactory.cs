@@ -18,5 +18,6 @@ namespace Infrastructure.Factory
         ChunkRenderer CreateChunkRenderer(Vector3Int vector3Int, Quaternion identity, Transform transform);
 
         void CreateWalls(Map map);
+        void CreateCamera();
     }
 }

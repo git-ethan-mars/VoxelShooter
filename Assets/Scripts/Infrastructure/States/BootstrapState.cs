@@ -56,7 +56,7 @@ namespace Infrastructure.States
             }
             else
             {
-                _allServices.RegisterSingle<IAvatarLoader>(new SteamAvatarLoader());
+                _allServices.RegisterSingle<IAvatarLoader>(new SteamAvatarLoader(_allServices.Single<IAssetProvider>()));
             }
 
             _allServices.RegisterSingle<IParticleFactory>(new ParticleFactory(_allServices.Single<IAssetProvider>(),
