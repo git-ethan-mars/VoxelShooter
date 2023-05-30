@@ -46,7 +46,6 @@ namespace PlayerLogic
         private void Update()
         {
             if (!isLocalPlayer) return;
-
             HandleSneaking();
             HandleSquatting();
             var axis = _inputService.Axis;
@@ -90,6 +89,7 @@ namespace PlayerLogic
                 _speedModifier = SquattingSpeed;
                 _characterController.height = SquattingHeight;
                 _characterController.center = _squattingColliderCenter;
+                _playerLegAnimator.PlayCrouch();
             }
 
             if (Input.GetKeyUp(KeyCode.LeftControl))
@@ -97,6 +97,7 @@ namespace PlayerLogic
                 _speedModifier = NormalSpeed;
                 _characterController.height = NormalHeight;
                 _characterController.center = _normalColliderCenter;
+                _playerLegAnimator.StopCrouch();
             }
         }
     }
