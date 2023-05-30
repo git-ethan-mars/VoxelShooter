@@ -22,15 +22,16 @@ namespace PlayerLogic
         private const float SquattingSpeed = 0.4f;
         private const float NormalHeight = 2.07f;
         private const float SquattingHeight = 1.57f;
-        private readonly Vector3 _normalColliderCenter = new (0, 0.3f, 0);
-        private readonly Vector3 _squattingColliderCenter = new (0, 0, 0);
+        private readonly Vector3 _normalColliderCenter = new(0, 0.3f, 0);
+        private readonly Vector3 _squattingColliderCenter = new(0, 0, 0);
+        private PlayerLegAnimator _playerLegAnimator;
 
         public void Construct(PlayerCharacteristic characteristic)
         {
             _speed = characteristic.speed;
             _jumpMultiplier = characteristic.jumpMultiplier;
         }
-        
+
         private void Awake()
         {
             _inputService = AllServices.Container.Single<IInputService>();
@@ -39,16 +40,17 @@ namespace PlayerLogic
         public void Start()
         {
             _characterController = GetComponent<CharacterController>();
+            _playerLegAnimator = GetComponent<PlayerLegAnimator>();
         }
 
         private void Update()
         {
             if (!isLocalPlayer) return;
-           
             HandleSneaking();
             HandleSquatting();
-
-            var axis = _inputService.Axis.normalized;
+            var axis = _inputService.Axis;
+            if (_characterController.velocity == Vector3.zero) _playerLegAnimator.PlayIdle();
+            else _playerLegAnimator.PlayMove();
             var playerTransform = transform;
             _movementDirection = (axis.x * playerTransform.forward + axis.y * playerTransform.right).normalized;
             if (_characterController.isGrounded)
@@ -59,8 +61,9 @@ namespace PlayerLogic
                     _jumpSpeed = _jumpMultiplier;
                 }
             }
+
             _jumpSpeed += Gravity * Time.deltaTime;
-            Vector3 direction = new Vector3(_movementDirection.x * _speed * _speedModifier * Time.deltaTime, 
+            Vector3 direction = new Vector3(_movementDirection.x * _speed * _speedModifier * Time.deltaTime,
                 _jumpSpeed * Time.deltaTime,
                 _movementDirection.z * Time.deltaTime * _speed * _speedModifier);
             _characterController.Move(direction);
@@ -78,7 +81,7 @@ namespace PlayerLogic
                 _speedModifier = NormalSpeed;
             }
         }
-        
+
         private void HandleSquatting()
         {
             if (Input.GetKeyDown(KeyCode.LeftControl))
@@ -86,6 +89,7 @@ namespace PlayerLogic
                 _speedModifier = SquattingSpeed;
                 _characterController.height = SquattingHeight;
                 _characterController.center = _squattingColliderCenter;
+                _playerLegAnimator.PlayCrouch();
             }
 
             if (Input.GetKeyUp(KeyCode.LeftControl))
@@ -93,6 +97,7 @@ namespace PlayerLogic
                 _speedModifier = NormalSpeed;
                 _characterController.height = NormalHeight;
                 _characterController.center = _normalColliderCenter;
+                _playerLegAnimator.StopCrouch();
             }
         }
     }
