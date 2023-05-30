@@ -15,13 +15,6 @@ namespace PlayerLogic
         [SyncVar(hook = nameof(UpdateHealth))] [HideInInspector] public int health;
         public Transform itemPosition;
         [SerializeField] private GameObject nickNameCanvas;
-        [Header("Body parts")] 
-        [SerializeField] private Transform head;
-        [SerializeField] private Transform leftArm;
-        [SerializeField] private Transform rightArm;
-        [SerializeField] private Transform chest;
-        [SerializeField] private Transform leftLeg;
-        [SerializeField] private Transform rightLeg;
         private GameObject _hud;
 
         public void Construct(PlayerData playerData)
@@ -34,7 +27,7 @@ namespace PlayerLogic
         public override void OnStartLocalPlayer()
         {
             _hud = AllServices.Container.Single<IUIFactory>().CreateHud(gameObject);
-            TurnOffBodyRender();
+            //TurnOffBodyRender();
             TurnOffNickName();
         }
 
@@ -50,12 +43,10 @@ namespace PlayerLogic
 
         private void TurnOffBodyRender()
         {
-            head.gameObject.GetComponent<Renderer>().enabled = false;
-            leftArm.gameObject.GetComponent<Renderer>().enabled = false;
-            rightArm.gameObject.GetComponent<Renderer>().enabled = false;
-            chest.gameObject.GetComponent<Renderer>().enabled = false;
-            leftLeg.gameObject.GetComponent<Renderer>().enabled = false;
-            rightLeg.gameObject.GetComponent<Renderer>().enabled = false;
+            foreach (var component in GetComponentsInChildren<Renderer>())
+            {
+                component.enabled = false;
+            }
         }
 
         private void TurnOffNickName()
