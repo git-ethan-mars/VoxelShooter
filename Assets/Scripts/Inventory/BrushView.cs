@@ -1,7 +1,4 @@
 ﻿using Data;
-using Infrastructure.Factory;
-using Networking.Synchronization;
-using PlayerLogic;
 using Rendering;
 using UI;
 using UnityEngine;
@@ -10,36 +7,29 @@ namespace Inventory
 {
     public class BrushView : IInventoryItemView, ILeftMouseButtonHoldHandler
     {
-        private GameObject Model { get; }
         public Sprite Icon { get; }
         private readonly GameObject _palette;
         private Color32 _currentColor;
         private readonly float _placeDistance;
         private readonly CubeRenderer _cubeRenderer;
-        private readonly MapSynchronization _mapSynchronization;
+        
 
-
-        public BrushView(InventoryModelFactory gameFactory, CubeRenderer cubeRenderer, MapSynchronization mapSynchronization,
-            GameObject palette, BrushItem configuration, GameObject player)
+        public BrushView(CubeRenderer cubeRenderer,
+            GameObject palette, BrushItem configuration)
         {
             palette.GetComponent<PaletteCreator>().OnColorUpdate += UpdateColor;
             _cubeRenderer = cubeRenderer;
-            _mapSynchronization = mapSynchronization;
             _palette = palette;
-            Model = gameFactory.CreateGameModel(configuration.prefab, player.GetComponent<Player>().itemPosition);
-            Model.SetActive(false);
             Icon = configuration.inventoryIcon;
         }
 
         public void Select()
         {
-            Model.SetActive(true);
             _palette.SetActive(true);
         }
 
         public void Unselect()
         {
-            Model.SetActive(false);
             _palette.SetActive(false);
         }
 

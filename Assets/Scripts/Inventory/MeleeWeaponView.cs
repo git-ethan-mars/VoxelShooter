@@ -10,7 +10,6 @@ namespace Inventory
         IUpdated
     {
         public Sprite Icon { get; }
-        private GameObject Model { get; }
         private readonly MeleeWeaponData _meleeWeapon;
         private readonly Camera _fpsCam;
         private readonly IGameFactory _gameFactory;
@@ -18,13 +17,10 @@ namespace Inventory
         private readonly CubeRenderer _cubeRenderer;
 
 
-        public MeleeWeaponView(InventoryModelFactory modelFactory, Camera camera,
-            Transform itemPosition, GameObject player, MeleeWeaponData configuration, LineRenderer lineRenderer)
+        public MeleeWeaponView(Camera camera, GameObject player, MeleeWeaponData configuration, LineRenderer lineRenderer)
         {
             _meleeWeapon = configuration;
             _cubeRenderer = new CubeRenderer(lineRenderer, new Raycaster(camera, _meleeWeapon.Range));
-            Model = modelFactory.CreateGameModel(_meleeWeapon.Prefab, itemPosition);
-            Model.SetActive(false);
             Icon = _meleeWeapon.Icon;
             _fpsCam = camera;
             _meleeWeaponSynchronization = player.GetComponent<MeleeWeaponSynchronization>();
@@ -32,14 +28,12 @@ namespace Inventory
 
         public void Select()
         {
-            Model.SetActive(true);
             _cubeRenderer.EnableCube();
         }
 
 
         public void Unselect()
         {
-            Model.SetActive(false);
             _cubeRenderer.DisableCube();
         }
 

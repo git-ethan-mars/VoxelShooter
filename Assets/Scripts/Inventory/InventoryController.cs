@@ -99,14 +99,14 @@ namespace Inventory
             {
                 if (item.itemType == ItemType.RangeWeapon)
                 {
-                    var handler = new RangeWeaponView(_modelFactory, _inputService, _mainCamera, _itemPosition, _player,
+                    var handler = new RangeWeaponView(_inputService, _mainCamera, _player,
                         _hud, new RangeWeaponData((RangeWeaponItem) item));
                     _slots.Add(new Slot(item, handler));
                 }
 
                 if (item.itemType == ItemType.MeleeWeapon)
                 {
-                    var handler = new MeleeWeaponView(_modelFactory, _mainCamera, _itemPosition,
+                    var handler = new MeleeWeaponView(_mainCamera,
                         _player, new MeleeWeaponData((MeleeWeaponItem) item), _player.GetComponent<LineRenderer>());
                     _slots.Add(new Slot(item, handler));
                 }
@@ -120,9 +120,9 @@ namespace Inventory
 
                 if (item.itemType == ItemType.Brush)
                 {
-                    var handler = new BrushView(_modelFactory, _cubeRenderer, _mapSynchronization,
+                    var handler = new BrushView(_cubeRenderer,
                         _palette,
-                        (BrushItem) item, _player);
+                        (BrushItem) item);
                     _slots.Add(new Slot(item, handler));
                 }
 

@@ -1,5 +1,4 @@
 using Data;
-using Infrastructure.Factory;
 using Infrastructure.Services.Input;
 using Networking.Synchronization;
 using TMPro;
@@ -13,7 +12,6 @@ namespace Inventory
         ILeftMouseButtonHoldHandler, IRightMouseButtonDownHandler, IRightMouseButtonUpHandler, IUpdated
     {
         public Sprite Icon { get; }
-        private GameObject Model { get; }
         public int BulletsInMagazine { get; set; }
         public int TotalBullets { get; set; }
         private readonly IInputService _inputService;
@@ -27,19 +25,15 @@ namespace Inventory
         private readonly float _zoomMultiplier;
 
 
-        public RangeWeaponView(IInventoryModelFactory gameFactory, IInputService inputService, Camera camera,
-            Transform itemPosition, GameObject player, GameObject hud, RangeWeaponData configuration)
+        public RangeWeaponView(IInputService inputService, Camera camera, GameObject player, GameObject hud, RangeWeaponData configuration)
         {
             _inputService = inputService;
-            Model = gameFactory.CreateGameModel(configuration.Prefab, itemPosition);
-            Model.SetActive(false);
             Icon = configuration.InventoryIcon;
             _ammoTypeIcon = configuration.AmmoTypeIcon;
             _id = configuration.ID;
             BulletsInMagazine = configuration.BulletsInMagazine;
             TotalBullets = configuration.TotalBullets;
             _zoomMultiplier = configuration.ZoomMultiplier;
-            Model.GetComponentInChildren<Transform>();
             _fpsCam = camera;
             _ammoInfo = hud.GetComponent<Hud>().ammoInfo;
             _ammoCount = hud.GetComponent<Hud>().ammoCount.GetComponent<TextMeshProUGUI>();
@@ -53,14 +47,12 @@ namespace Inventory
             _ammoInfo.SetActive(true);
             _ammoType.sprite = _ammoTypeIcon;
             _ammoCount.SetText($"{BulletsInMagazine} / {TotalBullets}");
-            Model.SetActive(true);
         }
 
 
         public void Unselect()
         {
             _ammoInfo.SetActive(false);
-            Model.SetActive(false);
             _fpsCam.fieldOfView = Constants.DefaultFov;
         }
 
