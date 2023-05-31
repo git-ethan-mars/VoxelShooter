@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Data;
 using Infrastructure.Factory;
 using Mirror;
@@ -11,20 +9,21 @@ using UnityEngine;
 
 namespace Explosions
 {
-    public class ExplosionManager : IExplosionManager
+    public class ExplosionManager
     {
         private readonly IExplosionArea _explosionArea;
         private readonly ServerData _serverData;
         private readonly IParticleFactory _particleFactory;
 
-        public ExplosionManager(ServerData serverData, IParticleFactory particleFactory, IExplosionArea explosionArea)
+        public ExplosionManager(ServerData serverData, IParticleFactory particleFactory, 
+            IExplosionArea explosionArea)
         {
             _explosionArea = explosionArea;
             _serverData = serverData;
             _particleFactory = particleFactory;
         }
         
-        public void DamagePlayer(Collider hitCollider, Vector3 explosionCenter, int radius, int damage, 
+        protected void DamagePlayer(Collider hitCollider, Vector3 explosionCenter, int radius, int damage, 
             int particlesSpeed, NetworkConnectionToClient connection)
         {
             if (hitCollider.CompareTag("Player"))
@@ -45,13 +44,7 @@ namespace Explosions
             }
         }
 
-        public void DetonateExplosive(Action action, Collider hitCollider, List<GameObject> exploded, string explosiveTag)
-        {
-            if (hitCollider.CompareTag(explosiveTag) && exploded.All(x => x.gameObject != hitCollider.gameObject))
-                action();
-        }
-        
-        public void DestroyExplosiveWithBlocks(Vector3Int explosionCenter, GameObject explosive, int radius, 
+        protected void DestroyExplosiveWithBlocks(Vector3Int explosionCenter, GameObject explosive, int radius, 
             int particlesSpeed, int particlesCount)
         {
             var blockPositions = _explosionArea.GetExplodedBlocks(radius, explosionCenter);
