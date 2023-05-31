@@ -11,6 +11,7 @@ TagManager:
   - Arm
   - Hand
   - TNT
+  - Rocket
   layers:
   - Default
   - TransparentFX

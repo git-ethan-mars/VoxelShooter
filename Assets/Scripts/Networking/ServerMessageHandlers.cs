@@ -18,7 +18,8 @@ namespace Networking
         private readonly ServerData _serverData;
         private readonly IStaticDataService _staticData;
         private readonly IParticleFactory _particleFactory;
-        private readonly IExplosionManager _explosionManager;
+        private readonly IExplosionManager _singleExplosionManager;
+        private readonly IExplosionManager _chainExplosionManager;
 
         public ServerMessageHandlers(IEntityFactory entityFactory, ICoroutineRunner coroutineRunner,
             ServerData serverData, IStaticDataService staticData, IParticleFactory particleFactory)
@@ -28,7 +29,9 @@ namespace Networking
             _coroutineRunner = coroutineRunner;
             _staticData = staticData;
             _particleFactory = particleFactory;
-            _explosionManager = new ExplosionManager(serverData, particleFactory, new SphereExplosionArea(serverData));
+            _singleExplosionManager =
+                new SingleExplosionManager(serverData, particleFactory, new SphereExplosionArea(serverData));
+            _chainExplosionManager = new ChainExplosionManager(serverData, particleFactory, new SphereExplosionArea(serverData));
         }
 
         public void RegisterHandlers()

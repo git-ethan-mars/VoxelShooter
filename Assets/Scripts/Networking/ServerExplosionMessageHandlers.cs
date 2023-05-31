@@ -30,13 +30,13 @@ namespace Networking
         {
             yield return new WaitForSeconds(delayInSeconds);
             if (!grenade) yield break;
-            var grenadePosition = new Vector3Int((int) grenade.transform.position.x,
-                (int) grenade.transform.position.y, (int) grenade.transform.position.z);
+            var position = grenade.transform.position;
+            var grenadePosition = new Vector3Int((int) position.x,
+                (int) position.y, (int) position.z);
 
-            _explosionManager.DestroyExplosiveWithBlocks(grenadePosition, grenade, radius, particlesSpeed, particlesCount);
-            Collider[] hitColliders = Physics.OverlapSphere(grenadePosition, radius);
-            foreach (var hitCollider in hitColliders)
-                _explosionManager.DamagePlayer(hitCollider, grenadePosition, radius, damage, particlesSpeed, connection);
+            var explodedGrenades = new List<GameObject>();
+            _singleExplosionManager.Explode(grenadePosition, grenade, radius, connection, damage,
+                particlesSpeed, particlesCount, explodedGrenades, grenade.tag);
         }
         
         private void OnRocketLauncherSpawn(NetworkConnectionToClient connection, RocketLauncherSpawnRequest message)
@@ -65,37 +65,21 @@ namespace Networking
             var tnt = _entityFactory.CreateTnt(message.Position, message.Rotation);
             var tntData = (TntItem) _staticData.GetItem(message.ItemId);
             playerData.ItemCountById[message.ItemId] = tntCount - 1;
-            _coroutineRunner.StartCoroutine(ExplodeTntWithDelay(Vector3Int.FloorToInt(message.ExplosionCenter), tnt,
+            _coroutineRunner.StartCoroutine(ExplodeTnt(Vector3Int.FloorToInt(message.ExplosionCenter), tnt,
                 tntData.delayInSeconds,
                 tntData.radius, connection, tntData.damage, tntData.particlesSpeed, tntData.particlesCount));
             connection.Send(new ItemUseResult(message.ItemId, tntCount - 1));
         }
 
-        private IEnumerator ExplodeTntWithDelay(Vector3Int explosionCenter, GameObject tnt, float delayInSeconds,
+        private IEnumerator ExplodeTnt(Vector3Int explosionCenter, GameObject tnt, float delayInSeconds,
             int radius, NetworkConnectionToClient connection, int damage, int particlesSpeed, int particlesCount)
         {
             yield return new WaitForSeconds(delayInSeconds);
             if (!tnt) yield break;
-            var explodedTnt = new List<GameObject>();
-            ExplodeTntImmediately(explosionCenter, tnt, radius, explodedTnt, connection, damage, particlesSpeed,
-                particlesCount);
-        }
-
-        private void ExplodeTntImmediately(Vector3Int explosionCenter, GameObject tnt, int radius,
-            List<GameObject> explodedTnt, NetworkConnectionToClient connection, int damage, int particlesSpeed,
-            int particlesCount)
-        {
-            explodedTnt.Add(tnt);
             
-            _explosionManager.DestroyExplosiveWithBlocks(explosionCenter, tnt, radius, particlesSpeed, particlesCount);
-            Collider[] hitColliders = Physics.OverlapSphere(explosionCenter, radius);
-            foreach (var hitCollider in hitColliders)
-            {
-                _explosionManager.DetonateExplosive(() => ExplodeTntImmediately(Vector3Int.FloorToInt(hitCollider.gameObject.transform.position),
-                    hitCollider.gameObject, radius, explodedTnt, connection, damage, particlesSpeed,
-                    particlesCount), hitCollider, explodedTnt, "TNT");
-                _explosionManager.DamagePlayer(hitCollider, explosionCenter, radius, damage, particlesSpeed, connection);
-            }
+            var explodedTnt = new List<GameObject>();
+            _chainExplosionManager.Explode(explosionCenter, tnt, radius, connection, damage, particlesSpeed,
+                particlesCount, explodedTnt, tnt.tag);
         }
     }
 }
