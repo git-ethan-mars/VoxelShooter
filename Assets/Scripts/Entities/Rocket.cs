@@ -10,7 +10,7 @@ namespace Entities
 {
     public class Rocket : NetworkBehaviour
     {
-        private IExplosionManager _explosionManager;
+        private ExplosionBehaviour _explosionBehaviour;
         private int _radius;
         private int _damage;
         private int _particlesSpeed;
@@ -26,7 +26,7 @@ namespace Entities
             _particlesSpeed = rocketData.particlesSpeed;
             _particlesCount = rocketData.particlesCount;
             _owner = owner;
-            _explosionManager = new SingleExplosionManager(serverData, particleFactory, new SphereExplosionArea(serverData));
+            _explosionBehaviour = new SingleExplosionBehaviour(serverData, particleFactory, new SphereExplosionArea(serverData));
         }
         
         private void OnCollisionEnter(Collision collision)
@@ -38,7 +38,7 @@ namespace Entities
                 (int) position.y, (int) position.z);
 
             var explodedRockets = new List<GameObject>();
-            _explosionManager.Explode(rocketPosition, gameObject, _radius,_owner, _damage, 
+            _explosionBehaviour.Explode(rocketPosition, gameObject, _radius,_owner, _damage, 
                 _particlesSpeed, _particlesCount, explodedRockets, gameObject.tag);
         }
     }

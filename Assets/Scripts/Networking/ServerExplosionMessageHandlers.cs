@@ -35,7 +35,7 @@ namespace Networking
                 (int) position.y, (int) position.z);
 
             var explodedGrenades = new List<GameObject>();
-            _singleExplosionManager.Explode(grenadePosition, grenade, radius, connection, damage,
+            _singleExplosionBehaviour.Explode(grenadePosition, grenade, radius, connection, damage,
                 particlesSpeed, particlesCount, explodedGrenades, grenade.tag);
         }
         
@@ -78,7 +78,7 @@ namespace Networking
             if (!tnt) yield break;
             
             var explodedTnt = new List<GameObject>();
-            _chainExplosionManager.Explode(explosionCenter, tnt, radius, connection, damage, particlesSpeed,
+            _chainExplosionBehaviour.Explode(explosionCenter, tnt, radius, connection, damage, particlesSpeed,
                 particlesCount, explodedTnt, tnt.tag);
         }
     }

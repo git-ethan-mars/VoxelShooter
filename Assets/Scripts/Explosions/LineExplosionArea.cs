@@ -6,7 +6,7 @@ namespace Explosions
 {
     public class LineExplosionArea : IExplosionArea
     {
-        private ServerData _serverData;
+        private readonly ServerData _serverData;
 
         public LineExplosionArea(ServerData serverData)
         {

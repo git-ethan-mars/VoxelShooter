@@ -27,7 +27,7 @@ namespace PlayerLogic
         public override void OnStartLocalPlayer()
         {
             _hud = AllServices.Container.Single<IUIFactory>().CreateHud(gameObject);
-            //TurnOffBodyRender();
+            TurnOffBodyRender();
             TurnOffNickName();
         }
 

@@ -7,12 +7,12 @@ using UnityEngine;
 
 namespace Explosions
 {
-    public class ChainExplosionManager : ExplosionManager, IExplosionManager
+    public class ChainExplosionBehaviour : ExplosionBehaviour
     {
-        public ChainExplosionManager(ServerData serverData, IParticleFactory particleFactory, IExplosionArea explosionArea) 
+        public ChainExplosionBehaviour(ServerData serverData, IParticleFactory particleFactory, IExplosionArea explosionArea) 
             : base(serverData, particleFactory, explosionArea) { }
 
-        public void Explode(Vector3Int explosionCenter, GameObject explosive, int radius, 
+        public override void Explode(Vector3Int explosionCenter, GameObject explosive, int radius, 
             NetworkConnectionToClient connection, int damage, int particlesSpeed, 
             int particlesCount, List<GameObject> exploded, string explosiveTag)
         {

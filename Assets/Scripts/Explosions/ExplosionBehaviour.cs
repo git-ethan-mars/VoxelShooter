@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Data;
 using Infrastructure.Factory;
 using Mirror;
@@ -9,13 +10,13 @@ using UnityEngine;
 
 namespace Explosions
 {
-    public class ExplosionManager
+    public abstract class ExplosionBehaviour
     {
         private readonly IExplosionArea _explosionArea;
         private readonly ServerData _serverData;
         private readonly IParticleFactory _particleFactory;
 
-        public ExplosionManager(ServerData serverData, IParticleFactory particleFactory, 
+        protected ExplosionBehaviour(ServerData serverData, IParticleFactory particleFactory, 
             IExplosionArea explosionArea)
         {
             _explosionArea = explosionArea;
@@ -55,5 +56,10 @@ namespace Explosions
                 new BlockData[blockPositions.Count]));
             NetworkServer.Destroy(explosive);
         }
+        
+        public abstract void Explode(Vector3Int explosionCenter, GameObject explosive, int radius, 
+            NetworkConnectionToClient connection, int damage, int particlesSpeed, 
+            int particlesCount, List<GameObject> exploded, string explosiveTag);
+        
     }
 }
