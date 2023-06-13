@@ -14,6 +14,7 @@ namespace PlayerLogic
         [HideInInspector] [SyncVar] public string nickName;
         [SyncVar(hook = nameof(UpdateHealth))] [HideInInspector] public int health;
         public Transform itemPosition;
+        [SerializeField] private MeshRenderer[] bodyParts;
         [SerializeField] private GameObject nickNameCanvas;
         private GameObject _hud;
 
@@ -36,22 +37,22 @@ namespace PlayerLogic
             OnHealthChanged?.Invoke(newHealth);
         }
 
-        public void OnDestroy()
-        {
-            Destroy(_hud);
-        }
-
         private void TurnOffBodyRender()
         {
-            foreach (var component in GetComponentsInChildren<Renderer>())
+            foreach (var part in bodyParts)
             {
-                component.enabled = false;
+                part.enabled = false;
             }
         }
 
         private void TurnOffNickName()
         {
             nickNameCanvas.SetActive(false);
+        }
+
+        private void OnDestroy()
+        {
+            Destroy(_hud);
         }
     }
 }
