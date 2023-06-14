@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Infrastructure.AssetManagement;
 using Steamworks;
 using UnityEngine;
@@ -8,7 +7,6 @@ namespace Infrastructure.Services.PlayerDataLoader
 {
     public class SteamAvatarLoader : IAvatarLoader
     {
-        public event Action OnAvatarLoaded;
         public Dictionary<CSteamID, Texture2D> AvatarBySteamId { get; }
         protected Callback<AvatarImageLoaded_t> AvatarLoaded;
         private readonly IAssetProvider _assets;
@@ -22,20 +20,16 @@ namespace Infrastructure.Services.PlayerDataLoader
             AvatarBySteamId = new Dictionary<CSteamID, Texture2D>();
         }
 
-        public void RequestAvatar(CSteamID steamID)
+        public Texture2D RequestAvatar(CSteamID steamID)
         {
+            if (AvatarBySteamId.TryGetValue(steamID, out var texture)) return texture;
             var avatarHandle = SteamFriends.GetLargeFriendAvatar(steamID);
-            if (avatarHandle <= 0)
-            {
-                var texture = _assets.Load<Texture2D>(SteamAvatarPath);
-                AvatarBySteamId[steamID] = texture;
-                OnAvatarLoaded?.Invoke();
-            }
-            else
-                LoadAvatarFast(steamID, avatarHandle);
+            texture = avatarHandle <= 0 ? _assets.Load<Texture2D>(SteamAvatarPath) : LoadAvatarFast(avatarHandle);
+            AvatarBySteamId[steamID] = texture;
+            return texture;
         }
 
-        private void LoadAvatarFast(CSteamID steamID, int imageHandle)
+        private Texture2D LoadAvatarFast(int imageHandle)
         {
             if (!SteamUtils.GetImageSize(imageHandle, out var avatarWidth, out var avatarHeight))
             {
@@ -51,8 +45,7 @@ namespace Infrastructure.Services.PlayerDataLoader
             var texture = new Texture2D((int) avatarWidth, (int) avatarHeight, TextureFormat.RGBA32, false, true);
             texture.LoadRawTextureData(avatarBuffer);
             texture.Apply();
-            AvatarBySteamId[steamID] = texture;
-            OnAvatarLoaded?.Invoke();
+            return texture;
         }
 
         private void LoadAvatarSlow(AvatarImageLoaded_t avatarImageResult)
@@ -73,7 +66,6 @@ namespace Infrastructure.Services.PlayerDataLoader
             texture.LoadRawTextureData(avatarBuffer);
             texture.Apply();
             AvatarBySteamId[avatarImageResult.m_steamID] = texture;
-            OnAvatarLoaded?.Invoke();
         }
     }
 }

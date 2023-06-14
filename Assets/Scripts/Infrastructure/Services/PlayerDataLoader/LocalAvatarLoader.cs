@@ -8,9 +8,9 @@ namespace Infrastructure.Services.PlayerDataLoader
     public class LocalAvatarLoader : IAvatarLoader
     {
         private const string SteamAvatarPath = "Sprites/steam-question-mark";
+        private readonly Dictionary<CSteamID, Texture2D> AvatarBySteamId;
         private readonly IAssetProvider _assets;
 
-        public Dictionary<CSteamID, Texture2D> AvatarBySteamId { get; }
 
         public LocalAvatarLoader(IAssetProvider assets)
         {
@@ -18,10 +18,16 @@ namespace Infrastructure.Services.PlayerDataLoader
             AvatarBySteamId = new Dictionary<CSteamID, Texture2D>();
         }
 
-        public void RequestAvatar(CSteamID steamID)
+        public Texture2D RequestAvatar(CSteamID steamID)
         {
-            var texture = _assets.Load<Texture2D>(SteamAvatarPath);
-            AvatarBySteamId[steamID] = texture;
+            if (!AvatarBySteamId.TryGetValue(steamID, out var texture))
+            {
+                texture = _assets.Load<Texture2D>(SteamAvatarPath);
+                AvatarBySteamId[steamID] = texture;
+            }
+
+            return texture;
+
         }
     }
 }

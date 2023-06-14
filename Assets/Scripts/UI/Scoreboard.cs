@@ -51,13 +51,7 @@ namespace UI
                 scores[i].kills.SetText(scoreBoardData[i].Kills.ToString());
                 scores[i].deaths.SetText(scoreBoardData[i].Deaths.ToString());
                 scores[i].classText.SetText(scoreBoardData[i].GameClass.ToString());
-                if (_avatarLoader.AvatarBySteamId.TryGetValue(scoreBoardData[i].SteamID, out var avatarTexture))
-                    scores[i].avatar.texture = avatarTexture;
-                else
-                {
-                    _avatarLoader.RequestAvatar(scoreBoardData[i].SteamID);
-                }
-
+                scores[i].avatar.texture = _avatarLoader.RequestAvatar(scoreBoardData[i].SteamID);;
                 scores[i].gameObject.SetActive(true);
             }
         }
