@@ -30,7 +30,7 @@ namespace PlayerLogic
             _hud = AllServices.Container.Single<IUIFactory>().CreateHud(gameObject);
             TurnOffNickName();
             TurnOffBodyRender();
-            TurnOffColliders();
+            //TurnOffColliders();
         }
 
         private void UpdateHealth(int oldHealth, int newHealth)
