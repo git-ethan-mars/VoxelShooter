@@ -32,10 +32,8 @@ namespace CameraLogic
         }
 
 
-        public void Start()
+        public override void OnStartLocalPlayer()
         {
-            if (!isLocalPlayer)
-                return;
             SetupCamera();
             RequestNextIdentity();
         }
@@ -65,6 +63,7 @@ namespace CameraLogic
             _cameraTransform.parent = transform;
             _cameraTransform.position = Vector3.zero;
             _cameraTransform.rotation = Quaternion.identity;
+            Camera.main.fieldOfView = Constants.DefaultFov;
         }
         
 
