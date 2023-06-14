@@ -41,7 +41,6 @@ namespace Inventory
         {
             var ray = _fpsCam.ViewportPointToRay(new Vector2(0.5f, 0.5f));
             _meleeWeaponSynchronization.CmdHit(ray, _meleeWeapon.ID, false);
-            Debug.DrawRay(ray.origin, ray.direction, Color.blue, 1);
         }
 
         public void OnRightMouseButtonDown()

@@ -30,7 +30,6 @@ namespace Rendering
         public void UpdateCube(bool isBuilding)
         {
             var raycastResult = _raycaster.GetRayCastHit(out var raycastHit);
-            Debug.Log(raycastResult);
             if (!raycastResult)
             {
                 _lineRenderer.positionCount = 0;
