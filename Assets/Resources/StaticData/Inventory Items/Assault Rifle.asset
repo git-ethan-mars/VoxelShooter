@@ -18,15 +18,15 @@ MonoBehaviour:
   prefab: {fileID: 6832412113328611646, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
   ammoIcon: {fileID: -183867098, guid: e7634cc0bf7762649a525e59875cd9d1, type: 3}
   isAutomatic: 1
-  timeBetweenShooting: 0.08
+  timeBetweenShooting: 0.06
   baseRecoil: 0.006
   stepRecoil: 0.05
   resetTimeRecoil: 0.5
   range: 100
   reloadTime: 1
-  magazineSize: 30
+  magazineSize: 60
   bulletsPerTap: 1
-  totalBullets: 120
+  totalBullets: 300
   zoomMultiplier: 1.75
   damage: 18
   headMultiplier: 2
