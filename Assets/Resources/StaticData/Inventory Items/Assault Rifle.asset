@@ -27,7 +27,7 @@ MonoBehaviour:
   magazineSize: 60
   bulletsPerTap: 1
   totalBullets: 300
-  zoomMultiplier: 1.75
+  zoomMultiplier: 1.5
   damage: 20
   headMultiplier: 1.5
   chestMultiplier: 1
