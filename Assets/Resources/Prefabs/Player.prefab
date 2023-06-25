@@ -648,6 +648,38 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 2, y: 5.3, z: 2.4}
   m_Center: {x: 0.00001001358, y: 1.167354, z: 0.14470601}
+--- !u!1 &3967419563786792330
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 162809396587092744}
+  m_Layer: 2
+  m_Name: Head Pivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &162809396587092744
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3967419563786792330}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.8, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3276943837764328836}
+  m_Father: {fileID: 951460950341307336}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4171014233673176982
 GameObject:
   m_ObjectHideFlags: 0
@@ -902,13 +934,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6038241266318642879}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.1, z: 0}
+  m_LocalPosition: {x: 0, y: 0.25, z: 0}
   m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8664586988098286231}
   - {fileID: 7893378094424813921}
-  m_Father: {fileID: 951460950341307336}
+  m_Father: {fileID: 162809396587092744}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &409023078685418702
@@ -1192,7 +1224,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6797134190196297826}
   m_LocalRotation: {x: -0, y: -0.00000004196695, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1343,7 +1375,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 3276943837764328836}
+  - {fileID: 162809396587092744}
   - {fileID: 4526016867100299288}
   - {fileID: 8217119693751340438}
   - {fileID: 7085777246420524792}
@@ -1386,7 +1418,7 @@ MonoBehaviour:
   syncInterval: 0.1
   sensitivityX: 200
   sensitivityY: 200
-  headTransform: {fileID: 3276943837764328836}
+  headTransform: {fileID: 162809396587092744}
 --- !u!114 &-2882850801023109427
 MonoBehaviour:
   m_ObjectHideFlags: 0
