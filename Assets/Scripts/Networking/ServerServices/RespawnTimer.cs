@@ -6,7 +6,7 @@ using Mirror;
 using Networking.Messages;
 using UnityEngine;
 
-namespace Networking
+namespace Networking.ServerServices
 {
     public class RespawnTimer
     {
