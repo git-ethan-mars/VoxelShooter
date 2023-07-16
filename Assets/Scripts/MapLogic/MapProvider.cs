@@ -4,17 +4,16 @@ using UnityEngine;
 
 namespace MapLogic
 {
-    public class Map
+    public class MapProvider
     {
-        public MapData MapData { get; }
+        public readonly MapData MapData;
 
-        public Map(MapData mapData)
+        public MapProvider(MapData mapData)
         {
             MapData = mapData;
         }
 
-
-        public static Map CreateNewMap(int width = 512, int height = 64, int depth = 512)
+        public static MapProvider CreateNewMap(int width = 512, int height = 64, int depth = 512)
         {
             var chunks = new ChunkData[width / ChunkData.ChunkSize * height / ChunkData.ChunkSize * depth /
                                        ChunkData.ChunkSize];
@@ -22,42 +21,31 @@ namespace MapLogic
             {
                 chunks[i] = new ChunkData();
             }
+
             var mapData = new MapData(chunks, width, height, depth, new List<SpawnPoint>());
-            var map = new Map(mapData);
-            return map;
+            var mapProvider = new MapProvider(mapData);
+            return mapProvider;
         }
-        
 
 
-        public BlockData GetBlockByGlobalPosition(int x, int y, int z)
-        {
-            return MapData.Chunks[FindChunkNumberByPosition(x,y,z)]
-                .Blocks[
-                    x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
-                                      y % ChunkData.ChunkSize * ChunkData.ChunkSize + z % ChunkData.ChunkSize];
-        }
-        
         public BlockData GetBlockByGlobalPosition(Vector3Int position) =>
             GetBlockByGlobalPosition(position.x, position.y, position.z);
 
-        public void SetBlockByGlobalPosition(Vector3Int position, BlockData blockData) =>
-            SetBlockByGlobalPosition(position.x, position.y, position.z, blockData);
-
-        private void SetBlockByGlobalPosition(int x, int y, int z, BlockData blockData)
+        public BlockData GetBlockByGlobalPosition(int x, int y, int z)
         {
-            MapData.Chunks[FindChunkNumberByPosition(x, y, z)]
+            return MapData.Chunks[FindChunkNumberByPosition(x, y, z)]
                 .Blocks[
                     x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
-                    y % ChunkData.ChunkSize * ChunkData.ChunkSize + z % ChunkData.ChunkSize] = blockData;
+                    y % ChunkData.ChunkSize * ChunkData.ChunkSize + z % ChunkData.ChunkSize];
         }
-        
+
+
         public int FindChunkNumberByPosition(int x, int y, int z)
         {
             return z / ChunkData.ChunkSize +
                    y / ChunkData.ChunkSize * (MapData.Depth / ChunkData.ChunkSize) +
                    x / ChunkData.ChunkSize *
                    (MapData.Height / ChunkData.ChunkSize * MapData.Depth / ChunkData.ChunkSize);
-
         }
 
         public int FindChunkNumberByPosition(Vector3Int position)

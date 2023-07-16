@@ -55,22 +55,21 @@ namespace Infrastructure.Factory
             return _networkManager;
         }
 
-        public void CreateWalls(Map map)
+        public void CreateWalls(MapProvider mapProvider)
         {
-            _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(map, Faces.Top);
-            _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(map, Faces.Bottom);
-            _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(map, Faces.Right);
-            _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(map, Faces.Left);
-            _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(map, Faces.Front);
-            _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(map, Faces.Back);
+            _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(mapProvider, Faces.Top);
+            _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(mapProvider, Faces.Bottom);
+            _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(mapProvider, Faces.Right);
+            _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(mapProvider, Faces.Left);
+            _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(mapProvider, Faces.Front);
+            _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(mapProvider, Faces.Back);
         }
 
-        public GameObject CreateMapRenderer(Map map, Dictionary<Vector3Int, BlockData> buffer)
+        public void CreateMapRenderer(MapProvider mapProvider, Dictionary<Vector3Int, BlockData> buffer)
         {
             var mapGenerator = _assets.Instantiate(MapRendererPath);
             _mapGenerator = mapGenerator.GetComponent<MapRenderer>();
-            _mapGenerator.Construct(map, this, buffer);
-            return mapGenerator;
+            _mapGenerator.Construct(mapProvider, this, buffer);
         }
 
         public ChunkRenderer CreateChunkRenderer(Vector3Int position, Quaternion rotation, Transform transform)

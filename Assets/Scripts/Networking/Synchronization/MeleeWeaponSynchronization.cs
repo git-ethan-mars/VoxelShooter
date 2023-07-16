@@ -67,7 +67,7 @@ namespace Networking.Synchronization
         private bool ApplyRaycast(NetworkConnectionToClient source, Ray ray, MeleeWeaponData meleeWeapon,
             bool isStrongHit)
         {
-            var raycastResult = Physics.Raycast(ray, out var rayHit, meleeWeapon.Range);
+            var raycastResult = Physics.Raycast(ray, out var rayHit, meleeWeapon.Range, Constants.AttackMask);
             if (!raycastResult) return false;
             if (rayHit.collider.CompareTag("Head"))
             {
@@ -96,7 +96,7 @@ namespace Networking.Synchronization
                 {
                     var validPositions = _lineExplosionArea.GetExplodedBlocks(3, targetBlock);
                     foreach (var position in validPositions)
-                        _serverData.Map.SetBlockByGlobalPosition(position, new BlockData());
+                        _serverData.MapUpdater.SetBlockByGlobalPosition(position, new BlockData());
                     NetworkServer.SendToAll(new UpdateMapMessage(
                         validPositions.ToArray(), new BlockData[validPositions.Count]));
                 }
@@ -105,7 +105,7 @@ namespace Networking.Synchronization
                     var blocks = _lineExplosionArea.GetExplodedBlocks(1, targetBlock);
                     if (blocks.Count > 0)
                     {
-                        _serverData.Map.SetBlockByGlobalPosition(blocks[0], new BlockData());
+                        _serverData.MapUpdater.SetBlockByGlobalPosition(blocks[0], new BlockData());
                         NetworkServer.SendToAll(new UpdateMapMessage(new[] {targetBlock}, new BlockData[1]));
                     }
                 }

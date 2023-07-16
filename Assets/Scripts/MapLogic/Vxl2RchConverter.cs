@@ -12,7 +12,7 @@ namespace MapLogic
         private static int _height;
         private const int Depth = 512;
 
-        public static Map LoadVxl(string mapName)
+        public static MapProvider LoadVxl(string mapName)
         {
             var data = File.ReadAllBytes(Application.dataPath + $"/Maps/{mapName}");
             _height = GetMapHeight(data);
@@ -49,7 +49,7 @@ namespace MapLogic
                         {
                             colors[GetPosition(x, z, y)] = BlockColor.empty;
                         }
-                        
+
                         for (; z <= topColorEnd; z++)
                         {
                             color = BitConverter.ToUInt32(data, colorPosition);
@@ -92,14 +92,14 @@ namespace MapLogic
                 chunks[i] = new ChunkData();
             }
 
-            var map = new Map(new MapData(chunks, Width, _height, Depth, new List<SpawnPoint>()));
+            var mapProvider = new MapProvider(new MapData(chunks, Width, _height, Depth, new List<SpawnPoint>()));
             for (var x = 0; x < Width; x++)
             {
                 for (var y = 0; y < _height - heightOffset; y++)
                 {
                     for (var z = 0; z < Depth; z++)
                     {
-                        var chunk = chunks[map.FindChunkNumberByPosition(
+                        var chunk = chunks[mapProvider.FindChunkNumberByPosition(
                             Width - 1 - x, _height - heightOffset - 1 - y, z)];
                         chunk.Blocks[((Width - 1 - x) & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
                                      ((_height - heightOffset - 1 - y) & (ChunkData.ChunkSize - 1)) *
@@ -109,7 +109,7 @@ namespace MapLogic
                 }
             }
 
-            return map;
+            return mapProvider;
         }
 
 

@@ -149,7 +149,7 @@ namespace Networking.Synchronization
                 : UnityEngine.Random.Range(-rangeWeapon.BaseRecoil, rangeWeapon.BaseRecoil) *
                   (rangeWeapon.RecoilModifier + 1);
             ray = new Ray(ray.origin, ray.direction + new Vector3(x, y, z));
-            var raycastResult = Physics.Raycast(ray, out var rayHit, rangeWeapon.Range);
+            var raycastResult = Physics.Raycast(ray, out var rayHit, rangeWeapon.Range, Constants.AttackMask);
             if (!raycastResult) return;
             if (rayHit.collider.CompareTag("Head"))
             {
@@ -173,7 +173,7 @@ namespace Networking.Synchronization
 
             if (rayHit.collider.CompareTag("Chunk"))
             {
-                var block = _serverData.Map.GetBlockByGlobalPosition(
+                var block = _serverData.MapProvider.GetBlockByGlobalPosition(
                     Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2));
                 _particleFactory.CreateBulletImpact(rayHit.point, Quaternion.Euler(rayHit.normal.y * -90,
                     rayHit.normal.x * 90 + (rayHit.normal.z == -1 ? 180 : 0), 0), block.Color);

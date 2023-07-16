@@ -18,7 +18,7 @@ namespace Explosions
             var blocks = new List<Vector3Int>();
             for (var i = - radius / 2; i <= radius / 2; i++)
             {
-                if (_serverData.Map.IsValidPosition(targetBlock + new Vector3Int(0, i, 0)))
+                if (_serverData.MapProvider.IsValidPosition(targetBlock + new Vector3Int(0, i, 0)))
                 {
                     blocks.Add(targetBlock + new Vector3Int(0, i, 0));
                 }

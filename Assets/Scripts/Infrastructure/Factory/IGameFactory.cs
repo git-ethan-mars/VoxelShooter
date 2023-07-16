@@ -14,10 +14,10 @@ namespace Infrastructure.Factory
 
         GameObject CreateSteamNetworkManager(GameStateMachine stateMachine, ServerSettings serverSettings, bool isHost);
 
-        GameObject CreateMapRenderer(Map map, Dictionary<Vector3Int, BlockData> buffer);
         ChunkRenderer CreateChunkRenderer(Vector3Int vector3Int, Quaternion identity, Transform transform);
+        void CreateMapRenderer(MapProvider mapProvider, Dictionary<Vector3Int, BlockData> buffer);
 
-        void CreateWalls(Map map);
+        void CreateWalls(MapProvider mapProvider);
         void CreateCamera();
     }
 }

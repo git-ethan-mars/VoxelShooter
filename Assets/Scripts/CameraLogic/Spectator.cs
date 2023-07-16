@@ -92,9 +92,9 @@ namespace CameraLogic
             var alivePlayers = _serverData.GetAlivePlayers(connection);
             if (alivePlayers.Count == 0)
             {
-                var mapWidth = _serverData.Map.MapData.Width;
-                var mapHeight = _serverData.Map.MapData.Height;
-                var mapDepth = _serverData.Map.MapData.Depth;
+                var mapWidth = _serverData.MapProvider.MapData.Width;
+                var mapHeight = _serverData.MapProvider.MapData.Height;
+                var mapDepth = _serverData.MapProvider.MapData.Depth;
                 SetCameraTarget(new Vector3(mapWidth / 2, mapHeight / 2, mapDepth / 2));
                 return;
             }

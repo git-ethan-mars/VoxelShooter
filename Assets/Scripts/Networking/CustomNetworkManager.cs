@@ -15,7 +15,7 @@ namespace Networking
 {
     public class CustomNetworkManager : NetworkManager, ICoroutineRunner
     {
-        public event Action<Map, Dictionary<Vector3Int, BlockData>> MapDownloaded;
+        public event Action<MapProvider, Dictionary<Vector3Int, BlockData>> MapDownloaded;
         public event Action<ServerTime> ServerTimeChanged;
         public event Action<ServerTime> RespawnTimeChanged;
         public event Action<List<ScoreData>> ScoreboardChanged;
@@ -65,7 +65,7 @@ namespace Networking
         {
             _clientMessageHandlers = new ClientMessagesHandler();
             _clientMessageHandlers.RegisterHandlers();
-            _clientMessageHandlers.MapDownloaded += (map, mapUpdates) => MapDownloaded?.Invoke(map, mapUpdates);
+            _clientMessageHandlers.MapDownloaded += (mapProvider, mapUpdates) => MapDownloaded?.Invoke(mapProvider, mapUpdates);
             _clientMessageHandlers.ServerTimeUpdated += timeLeft => ServerTimeChanged?.Invoke(timeLeft);
             _clientMessageHandlers.RespawnTimeUpdated += timeLeft => RespawnTimeChanged?.Invoke(timeLeft);
             _clientMessageHandlers.ScoreboardUpdated += scores => ScoreboardChanged?.Invoke(scores);
@@ -78,13 +78,13 @@ namespace Networking
             base.OnServerReady(connection);
             if (IsHost(connection))
             {
-                MapDownloaded?.Invoke(_serverData.Map, _clientMessageHandlers.MapUpdates);
+                MapDownloaded?.Invoke(_serverData.MapProvider, _clientMessageHandlers.MapUpdates);
             }
 
             else
             {
                 var memoryStream = new MemoryStream();
-                MapWriter.WriteMap(_serverData.Map, memoryStream);
+                MapWriter.WriteMap(_serverData.MapProvider, memoryStream);
                 var bytes = memoryStream.ToArray();
                 var mapSplitter = new MapSplitter();
                 var mapMessages = mapSplitter.SplitBytesIntoMessages(bytes, 100000);

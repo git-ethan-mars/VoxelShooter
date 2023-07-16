@@ -8,7 +8,7 @@ namespace MapLogic
 {
     public static class MapReader
     {
-        public static Map ReadFromFile(string fileName)
+        public static MapProvider ReadFromFile(string fileName)
         {
             if (Path.GetExtension(fileName) != ".rch")
             {
@@ -23,15 +23,15 @@ namespace MapLogic
             var filePath = Application.dataPath + $"/Maps/{fileName}";
             if (!File.Exists(filePath))
             {
-                return Map.CreateNewMap();
+                return MapProvider.CreateNewMap();
             }
 
             using var file = File.OpenRead(filePath);
             return ReadFromStream(file);
         }
-        
 
-        public static Map ReadFromStream(Stream stream)
+
+        public static MapProvider ReadFromStream(Stream stream)
         {
             stream.Seek(0, SeekOrigin.Begin);
             var binaryReader = new BinaryReader(stream);
@@ -46,7 +46,7 @@ namespace MapLogic
             }
 
             var spawnPoints = new List<SpawnPoint>();
-            var map = new Map(new MapData(chunks, width, height, depth, spawnPoints));
+            var mapProvider = new MapProvider(new MapData(chunks, width, height, depth, spawnPoints));
             for (var i = 0; i < chunks.Length; i++)
             {
                 var mapRun = (MapRun) binaryReader.ReadByte();
@@ -58,7 +58,7 @@ namespace MapLogic
                         var solidEnd = binaryReader.ReadInt32();
                         for (int j = solidStart; j <= solidEnd; j++)
                         {
-                            chunks[i].Blocks[j] = new BlockData(map.MapData.SolidColor);
+                            chunks[i].Blocks[j] = new BlockData(mapProvider.MapData.SolidColor);
                         }
                     }
 
@@ -85,19 +85,20 @@ namespace MapLogic
                 var z = binaryReader.ReadInt32();
                 spawnPoints.Add(new SpawnPoint() {X = x, Y = y, Z = z});
             }
-            AddWater(map, new Color32(3, 58, 135, 255));
 
-            return map;
+            AddWater(mapProvider, new Color32(3, 58, 135, 255));
+
+            return mapProvider;
         }
 
 
-        private static void AddWater(Map map,Color32 waterColor)
+        private static void AddWater(MapProvider mapProvider, Color32 waterColor)
         {
-            for (var x = 0; x < map.MapData.Width; x++)
+            for (var x = 0; x < mapProvider.MapData.Width; x++)
             {
-                for (var z = 0; z < map.MapData.Depth; z++)
+                for (var z = 0; z < mapProvider.MapData.Depth; z++)
                 {
-                    var blocks = map.MapData.Chunks[map.FindChunkNumberByPosition(x, 0, z)].Blocks;
+                    var blocks = mapProvider.MapData.Chunks[mapProvider.FindChunkNumberByPosition(x, 0, z)].Blocks;
                     var block = blocks[
                         (x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
                         (z & (ChunkData.ChunkSize - 1))];

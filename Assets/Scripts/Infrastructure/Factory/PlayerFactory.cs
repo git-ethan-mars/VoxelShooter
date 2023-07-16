@@ -18,21 +18,18 @@ namespace Infrastructure.Factory
         private readonly IAssetProvider _assets;
         private readonly ServerData _serverData;
         private readonly IParticleFactory _particleFactory;
-        private readonly IEntityFactory _entityFactory;
         private const string PlayerPath = "Prefabs/Player";
         private const string SpectatorPlayerPath = "Prefabs/Spectator player";
 
 
         public PlayerFactory(IAssetProvider assets,
             ServerData serverData,
-            IParticleFactory particleFactory,
-            IEntityFactory entityFactory)
+            IParticleFactory particleFactory)
         {
             _serverData = serverData;
-            _spawnPoints = _serverData.Map.MapData.SpawnPoints;
+            _spawnPoints = _serverData.MapProvider.MapData.SpawnPoints;
             _assets = assets;
             _particleFactory = particleFactory;
-            _entityFactory = entityFactory;
         }
 
 
@@ -55,7 +52,6 @@ namespace Infrastructure.Factory
             ConfigurePlayer(player, playerData);
             ConfigureSynchronization(player);
             NetworkServer.AddPlayerForConnection(connection, player);
-            
         }
 
         public void RespawnPlayer(NetworkConnectionToClient connection)
@@ -73,6 +69,7 @@ namespace Infrastructure.Factory
                     Quaternion.identity);
                 _spawnPointIndex = (_spawnPointIndex + 1) % _spawnPoints.Count;
             }
+
             playerData.PlayerStateMachine.Enter<LifeState>();
             ConfigurePlayer(player, playerData);
             ConfigureSynchronization(player);
@@ -102,8 +99,8 @@ namespace Infrastructure.Factory
 
         private void ConfigureSynchronization(GameObject player)
         {
-            player.GetComponent<MapSynchronization>().Construct(_serverData.Map);
-            player.GetComponent<HealthSynchronization>().Construct(_serverData, _entityFactory);
+            player.GetComponent<MapSynchronization>().Construct(_serverData.MapProvider);
+            player.GetComponent<HealthSynchronization>().Construct(_serverData);
             player.GetComponent<RangeWeaponSynchronization>().Construct(_particleFactory, _assets, _serverData);
             player.GetComponent<MeleeWeaponSynchronization>().Construct(_particleFactory, _assets, _serverData);
         }

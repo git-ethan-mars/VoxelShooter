@@ -31,7 +31,8 @@ namespace Networking
             _particleFactory = particleFactory;
             _singleExplosionBehaviour =
                 new SingleExplosionBehaviour(serverData, particleFactory, new SphereExplosionArea(serverData));
-            _chainExplosionBehaviour = new ChainExplosionBehaviour(serverData, particleFactory, new SphereExplosionArea(serverData));
+            _chainExplosionBehaviour =
+                new ChainExplosionBehaviour(serverData, particleFactory, new SphereExplosionArea(serverData));
         }
 
         public void RegisterHandlers()
@@ -88,9 +89,10 @@ namespace Networking
                         return;
                 }
 
-                if (!_serverData.Map.IsValidPosition(message.GlobalPositions[i])) return;
-                var currentBlock = _serverData.Map.GetBlockByGlobalPosition(message.GlobalPositions[i]);
+                if (!_serverData.MapProvider.IsValidPosition(message.GlobalPositions[i])) return;
+                var currentBlock = _serverData.MapProvider.GetBlockByGlobalPosition(message.GlobalPositions[i]);
                 if (currentBlock.Equals(message.Blocks[i])) return;
+                _serverData.MapUpdater.SetBlockByGlobalPosition(message.GlobalPositions[i], message.Blocks[i]);
                 validPositions.Add(message.GlobalPositions[i]);
                 validBlockData.Add(message.Blocks[i]);
             }

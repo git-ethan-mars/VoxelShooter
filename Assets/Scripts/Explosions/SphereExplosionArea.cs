@@ -24,9 +24,9 @@ namespace Explosions
                     for (var z = -radius; z <= radius; z++)
                     {
                         var blockPosition = targetBlock + new Vector3Int(x, y, z);
-                        if (_serverData.Map.IsValidPosition(blockPosition)) 
+                        if (_serverData.MapProvider.IsValidPosition(blockPosition)) 
                         {
-                            var blockData = _serverData.Map.GetBlockByGlobalPosition(blockPosition);
+                            var blockData = _serverData.MapProvider.GetBlockByGlobalPosition(blockPosition);
                             if (Vector3Int.Distance(blockPosition, targetBlock) <= radius
                                 && !blockData.Color.Equals(BlockColor.empty))
                                 blockPositions.Add(blockPosition);

@@ -41,10 +41,10 @@ namespace Infrastructure.States
             _uiFactory.CreateLoadingWindow(_networkManager);
             _networkManager.StartClient();
         }
-        private void OnMapDownloaded(Map map, Dictionary<Vector3Int, BlockData> mapUpdates)
+        private void OnMapDownloaded(MapProvider mapProvider, Dictionary<Vector3Int, BlockData> mapUpdates)
         {
-            _gameFactory.CreateWalls(map);
-            _gameFactory.CreateMapRenderer(map, mapUpdates);
+            _gameFactory.CreateWalls(mapProvider);
+            _gameFactory.CreateMapRenderer(mapProvider, mapUpdates);
             _stateMachine.Enter<GameLoopState ,CustomNetworkManager>(_networkManager);
         }
 

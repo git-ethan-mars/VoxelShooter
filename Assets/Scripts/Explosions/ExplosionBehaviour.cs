@@ -50,7 +50,7 @@ namespace Explosions
         {
             var blockPositions = _explosionArea.GetExplodedBlocks(radius, explosionCenter);
             foreach (var position in blockPositions)
-                _serverData.Map.SetBlockByGlobalPosition(position, new BlockData());
+                _serverData.MapUpdater.SetBlockByGlobalPosition(position, new BlockData());
             _particleFactory.CreateRchParticle(explosionCenter, particlesSpeed, particlesCount);
             NetworkServer.SendToAll(new UpdateMapMessage(blockPositions.ToArray(),
                 new BlockData[blockPositions.Count]));
