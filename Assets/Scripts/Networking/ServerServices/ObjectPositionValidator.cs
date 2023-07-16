@@ -4,7 +4,7 @@ using Entities;
 using MapLogic;
 using UnityEngine;
 
-namespace Infrastructure.Services.ObjectCorrectors
+namespace Networking.ServerServices
 {
     public class ObjectPositionValidator
     {
