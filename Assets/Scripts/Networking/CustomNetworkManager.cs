@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using Data;
 using Infrastructure;
 using Infrastructure.AssetManagement;
@@ -10,18 +9,18 @@ using Infrastructure.States;
 using MapLogic;
 using Mirror;
 using UnityEngine;
+using MemoryStream = System.IO.MemoryStream;
 
 namespace Networking
 {
     public class CustomNetworkManager : NetworkManager, ICoroutineRunner
     {
-        public event Action<MapProvider, Dictionary<Vector3Int, BlockData>> MapDownloaded;
+        public event Action<IMapProvider, Dictionary<Vector3Int, BlockData>> MapDownloaded;
         public event Action<ServerTime> ServerTimeChanged;
         public event Action<ServerTime> RespawnTimeChanged;
         public event Action<List<ScoreData>> ScoreboardChanged;
         public event Action<float> OnLoadProgress;
         public event Action GameFinished;
-        private ServerData _serverData;
         private IStaticDataService _staticData;
         private IEntityFactory _entityFactory;
         private ClientMessagesHandler _clientMessageHandlers;
@@ -32,6 +31,7 @@ namespace Networking
         private IParticleFactory _particleFactory;
         private IAssetProvider _assets;
         private IGameFactory _gameFactory;
+        private Server _server;
         private const float ShowResultsDuration = 10;
 
 
@@ -51,10 +51,9 @@ namespace Networking
 
         public override void OnStartServer()
         {
-            _serverData = new ServerData(this, _assets, _staticData, _particleFactory,
-                MapReader.ReadFromFile(_serverSettings.MapName + ".rch"), _serverSettings, _entityFactory);
+            _server = new Server(this, _staticData, _serverSettings, _assets, _particleFactory, _entityFactory);
             _serverMessageHandlers =
-                new ServerMessageHandlers(_entityFactory, this, _serverData, _staticData, _particleFactory);
+                new ServerMessageHandlers(_entityFactory, this, _server, _staticData, _particleFactory);
             _serverMessageHandlers.RegisterHandlers();
             _serverTimer = new ServerTimer(this, _serverSettings.MaxDuration, StopHost);
             _serverTimer.Start();
@@ -65,7 +64,8 @@ namespace Networking
         {
             _clientMessageHandlers = new ClientMessagesHandler();
             _clientMessageHandlers.RegisterHandlers();
-            _clientMessageHandlers.MapDownloaded += (mapProvider, mapUpdates) => MapDownloaded?.Invoke(mapProvider, mapUpdates);
+            _clientMessageHandlers.MapDownloaded +=
+                (mapProvider, mapUpdates) => MapDownloaded?.Invoke(mapProvider, mapUpdates);
             _clientMessageHandlers.ServerTimeUpdated += timeLeft => ServerTimeChanged?.Invoke(timeLeft);
             _clientMessageHandlers.RespawnTimeUpdated += timeLeft => RespawnTimeChanged?.Invoke(timeLeft);
             _clientMessageHandlers.ScoreboardUpdated += scores => ScoreboardChanged?.Invoke(scores);
@@ -78,13 +78,13 @@ namespace Networking
             base.OnServerReady(connection);
             if (IsHost(connection))
             {
-                MapDownloaded?.Invoke(_serverData.MapProvider, _clientMessageHandlers.MapUpdates);
+                MapDownloaded?.Invoke(_server.MapProvider, _clientMessageHandlers.MapUpdates);
             }
 
             else
             {
                 var memoryStream = new MemoryStream();
-                MapWriter.WriteMap(_serverData.MapProvider, memoryStream);
+                MapWriter.WriteMap(_server.MapProvider, memoryStream);
                 var bytes = memoryStream.ToArray();
                 var mapSplitter = new MapSplitter();
                 var mapMessages = mapSplitter.SplitBytesIntoMessages(bytes, 100000);
@@ -99,7 +99,7 @@ namespace Networking
         public override void OnServerDisconnect(NetworkConnectionToClient connection)
         {
             base.OnServerDisconnect(connection);
-            _serverData.DeletePlayer(connection);
+            _server.DeletePlayer(connection);
         }
 
         public override void OnStopClient()

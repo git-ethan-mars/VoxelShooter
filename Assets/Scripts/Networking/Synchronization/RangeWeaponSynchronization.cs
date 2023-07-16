@@ -14,14 +14,14 @@ namespace Networking.Synchronization
 {
     public class RangeWeaponSynchronization : NetworkBehaviour
     {
-        private ServerData _serverData;
+        private IServer _server;
         private IParticleFactory _particleFactory;
         private IAssetProvider _assets;
         private List<AudioClip> _audioClips;
 
-        public void Construct(IParticleFactory particleFactory, IAssetProvider assets, ServerData serverData)
+        public void Construct(IParticleFactory particleFactory, IAssetProvider assets, IServer server)
         {
-            _serverData = serverData;
+            _server = server;
             _particleFactory = particleFactory;
             _audioClips = assets.LoadAll<AudioClip>("Audio/Sounds").ToList();
         }
@@ -29,7 +29,7 @@ namespace Networking.Synchronization
         [Command]
         public void CmdShootSingle(Ray ray, int weaponId, NetworkConnectionToClient connection = null)
         {
-            var result = _serverData.TryGetPlayerData(connection, out var playerData);
+            var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
             if (!result || !playerData.IsAlive) return;
             var weapon = playerData.RangeWeaponsById[weaponId];
             if (!CanShoot(weapon) || weapon.IsAutomatic) return;
@@ -43,7 +43,7 @@ namespace Networking.Synchronization
         [Command]
         public void CmdShootAutomatic(Ray ray, int weaponId, NetworkConnectionToClient connection = null)
         {
-            var result = _serverData.TryGetPlayerData(connection, out var playerData);
+            var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
             if (!result || !playerData.IsAlive) return;
             var weapon = playerData.RangeWeaponsById[weaponId];
             if (!CanShoot(weapon) || !weapon.IsAutomatic) return;
@@ -57,7 +57,7 @@ namespace Networking.Synchronization
         [Command]
         public void CmdReload(int weaponId, NetworkConnectionToClient connection = null)
         {
-            var result = _serverData.TryGetPlayerData(connection, out var playerData);
+            var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
             if (!result || !playerData.IsAlive) return;
             var weapon = playerData.RangeWeaponsById[weaponId];
             if (!CanReload(weapon)) return;
@@ -173,7 +173,7 @@ namespace Networking.Synchronization
 
             if (rayHit.collider.CompareTag("Chunk"))
             {
-                var block = _serverData.MapProvider.GetBlockByGlobalPosition(
+                var block = _server.MapProvider.GetBlockByGlobalPosition(
                     Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2));
                 _particleFactory.CreateBulletImpact(rayHit.point, Quaternion.Euler(rayHit.normal.y * -90,
                     rayHit.normal.x * 90 + (rayHit.normal.z == -1 ? 180 : 0), 0), block.Color);

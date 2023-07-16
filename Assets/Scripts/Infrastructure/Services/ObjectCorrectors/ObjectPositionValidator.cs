@@ -9,10 +9,10 @@ namespace Infrastructure.Services.ObjectCorrectors
     public class ObjectPositionValidator
     {
         private readonly List<PushableObject> _pushableObjects;
-        private readonly MapProvider _mapProvider;
+        private readonly IMapProvider _mapProvider;
 
-        public ObjectPositionValidator(MapUpdater mapUpdater,
-            MapProvider mapProvider)
+        public ObjectPositionValidator(IMapUpdater mapUpdater,
+            IMapProvider mapProvider)
         {
             _pushableObjects = new List<PushableObject>();
             _mapProvider = mapProvider;

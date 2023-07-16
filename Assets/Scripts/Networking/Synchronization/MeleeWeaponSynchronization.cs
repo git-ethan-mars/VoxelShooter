@@ -14,23 +14,23 @@ namespace Networking.Synchronization
 {
     public class MeleeWeaponSynchronization : NetworkBehaviour
     {
-        private ServerData _serverData;
+        private IServer _server;
         private IParticleFactory _particleFactory;
         private List<AudioClip> _audioClips;
         private LineExplosionArea _lineExplosionArea;
 
-        public void Construct(IParticleFactory particleFactory, IAssetProvider assets, ServerData serverData)
+        public void Construct(IParticleFactory particleFactory, IAssetProvider assets, IServer server)
         {
-            _serverData = serverData;
+            _server = server;
             _particleFactory = particleFactory;
             _audioClips = assets.LoadAll<AudioClip>("Audio/Sounds").ToList();
-            _lineExplosionArea = new LineExplosionArea(serverData);
+            _lineExplosionArea = new LineExplosionArea(_server.MapProvider);
         }
 
         [Command]
         public void CmdHit(Ray ray, int weaponId, bool isStrongHit, NetworkConnectionToClient source = null)
         {
-            var result = _serverData.TryGetPlayerData(source, out var playerData);
+            var result = _server.ServerData.TryGetPlayerData(source, out var playerData);
             if (!result || !playerData.IsAlive) return;
             var weapon = playerData.MeleeWeaponsById[weaponId];
             if (!CanHit(weapon)) return;
@@ -96,7 +96,7 @@ namespace Networking.Synchronization
                 {
                     var validPositions = _lineExplosionArea.GetExplodedBlocks(3, targetBlock);
                     foreach (var position in validPositions)
-                        _serverData.MapUpdater.SetBlockByGlobalPosition(position, new BlockData());
+                        _server.MapUpdater.SetBlockByGlobalPosition(position, new BlockData());
                     NetworkServer.SendToAll(new UpdateMapMessage(
                         validPositions.ToArray(), new BlockData[validPositions.Count]));
                 }
@@ -105,7 +105,7 @@ namespace Networking.Synchronization
                     var blocks = _lineExplosionArea.GetExplodedBlocks(1, targetBlock);
                     if (blocks.Count > 0)
                     {
-                        _serverData.MapUpdater.SetBlockByGlobalPosition(blocks[0], new BlockData());
+                        _server.MapUpdater.SetBlockByGlobalPosition(blocks[0], new BlockData());
                         NetworkServer.SendToAll(new UpdateMapMessage(new[] {targetBlock}, new BlockData[1]));
                     }
                 }

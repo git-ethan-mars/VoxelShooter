@@ -15,9 +15,9 @@ namespace Infrastructure.Factory
         GameObject CreateSteamNetworkManager(GameStateMachine stateMachine, ServerSettings serverSettings, bool isHost);
 
         ChunkRenderer CreateChunkRenderer(Vector3Int vector3Int, Quaternion identity, Transform transform);
-        void CreateMapRenderer(MapProvider mapProvider, Dictionary<Vector3Int, BlockData> buffer);
+        void CreateMapRenderer(IMapProvider mapProvider, Dictionary<Vector3Int, BlockData> buffer);
 
-        void CreateWalls(MapProvider mapProvider);
+        void CreateWalls(IMapProvider mapProvider);
         void CreateCamera();
     }
 }

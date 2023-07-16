@@ -1,17 +1,17 @@
 using System.Collections.Generic;
 using Data;
-using Networking;
+using MapLogic;
 using UnityEngine;
 
 namespace Explosions
 {
     public class SphereExplosionArea : IExplosionArea
     {
-        private readonly ServerData _serverData;
+        private readonly IMapProvider _mapProvider;
 
-        public SphereExplosionArea(ServerData serverData)
+        public SphereExplosionArea(IMapProvider mapProvider)
         {
-            _serverData = serverData;
+            _mapProvider = mapProvider;
         }
 
         public List<Vector3Int> GetExplodedBlocks(int radius, Vector3Int targetBlock)
@@ -24,9 +24,9 @@ namespace Explosions
                     for (var z = -radius; z <= radius; z++)
                     {
                         var blockPosition = targetBlock + new Vector3Int(x, y, z);
-                        if (_serverData.MapProvider.IsValidPosition(blockPosition)) 
+                        if (_mapProvider.IsValidPosition(blockPosition))
                         {
-                            var blockData = _serverData.MapProvider.GetBlockByGlobalPosition(blockPosition);
+                            var blockData = _mapProvider.GetBlockByGlobalPosition(blockPosition);
                             if (Vector3Int.Distance(blockPosition, targetBlock) <= radius
                                 && !blockData.Color.Equals(BlockColor.empty))
                                 blockPositions.Add(blockPosition);
@@ -34,6 +34,7 @@ namespace Explosions
                     }
                 }
             }
+
             return blockPositions;
         }
     }

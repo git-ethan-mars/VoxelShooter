@@ -4,9 +4,9 @@ using UnityEngine;
 
 namespace MapLogic
 {
-    public class MapProvider
+    public class MapProvider : IMapProvider
     {
-        public readonly MapData MapData;
+        public MapData MapData { get; }
 
         public MapProvider(MapData mapData)
         {
@@ -62,5 +62,15 @@ namespace MapLogic
                      globalPosition.y >= MapData.Height ||
                      globalPosition.z < 0 || globalPosition.z >= MapData.Depth);
         }
+    }
+
+    public interface IMapProvider
+    {
+        BlockData GetBlockByGlobalPosition(Vector3Int position);
+        BlockData GetBlockByGlobalPosition(int x, int y, int z);
+        int FindChunkNumberByPosition(int x, int y, int z);
+        int FindChunkNumberByPosition(Vector3Int position);
+        bool IsValidPosition(Vector3Int globalPosition);
+        MapData MapData { get; }
     }
 }

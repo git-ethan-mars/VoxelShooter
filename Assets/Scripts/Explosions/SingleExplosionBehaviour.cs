@@ -1,15 +1,15 @@
 using System.Collections.Generic;
 using Infrastructure.Factory;
+using MapLogic;
 using Mirror;
-using Networking;
 using UnityEngine;
 
 namespace Explosions
 {
     public class SingleExplosionBehaviour : ExplosionBehaviour
     {
-        public SingleExplosionBehaviour(ServerData serverData, IParticleFactory particleFactory, 
-            IExplosionArea explosionArea) : base(serverData, particleFactory, explosionArea) { }
+        public SingleExplosionBehaviour(IMapUpdater mapUpdater, IParticleFactory particleFactory, 
+            IExplosionArea explosionArea) : base(mapUpdater, particleFactory, explosionArea) { }
         
         public override void Explode(Vector3Int explosionCenter, GameObject explosive, int radius, 
             NetworkConnectionToClient connection, int damage, int particlesSpeed, 

@@ -14,20 +14,20 @@ namespace Infrastructure.Factory
     public class PlayerFactory : IPlayerFactory
     {
         private readonly List<SpawnPoint> _spawnPoints;
-        private int _spawnPointIndex;
         private readonly IAssetProvider _assets;
-        private readonly ServerData _serverData;
         private readonly IParticleFactory _particleFactory;
+        private readonly IServer _server;
+        private int _spawnPointIndex;
         private const string PlayerPath = "Prefabs/Player";
         private const string SpectatorPlayerPath = "Prefabs/Spectator player";
 
 
         public PlayerFactory(IAssetProvider assets,
-            ServerData serverData,
+            IServer server,
             IParticleFactory particleFactory)
         {
-            _serverData = serverData;
-            _spawnPoints = _serverData.MapProvider.MapData.SpawnPoints;
+            _server = server;
+            _spawnPoints = _server.MapProvider.MapData.SpawnPoints;
             _assets = assets;
             _particleFactory = particleFactory;
         }
@@ -47,7 +47,7 @@ namespace Infrastructure.Factory
                 _spawnPointIndex = (_spawnPointIndex + 1) % _spawnPoints.Count;
             }
 
-            var playerData = _serverData.GetPlayerData(connection);
+            var playerData = _server.ServerData.GetPlayerData(connection);
             playerData.PlayerStateMachine.Enter<LifeState>();
             ConfigurePlayer(player, playerData);
             ConfigureSynchronization(player);
@@ -56,7 +56,7 @@ namespace Infrastructure.Factory
 
         public void RespawnPlayer(NetworkConnectionToClient connection)
         {
-            var result = _serverData.TryGetPlayerData(connection, out var playerData);
+            var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
             if (!result) return;
             GameObject player;
             if (_spawnPoints.Count == 0)
@@ -79,7 +79,7 @@ namespace Infrastructure.Factory
         public void CreateSpectatorPlayer(NetworkConnectionToClient connection)
         {
             var spectator = _assets.Instantiate(SpectatorPlayerPath);
-            spectator.GetComponent<Spectator>().Construct(_serverData);
+            spectator.GetComponent<Spectator>().Construct(_server);
             ReplacePlayer(connection, spectator);
         }
 
@@ -99,10 +99,10 @@ namespace Infrastructure.Factory
 
         private void ConfigureSynchronization(GameObject player)
         {
-            player.GetComponent<MapSynchronization>().Construct(_serverData.MapProvider);
-            player.GetComponent<HealthSynchronization>().Construct(_serverData);
-            player.GetComponent<RangeWeaponSynchronization>().Construct(_particleFactory, _assets, _serverData);
-            player.GetComponent<MeleeWeaponSynchronization>().Construct(_particleFactory, _assets, _serverData);
+            player.GetComponent<MapSynchronization>().Construct(_server.MapProvider);
+            player.GetComponent<HealthSynchronization>().Construct(_server);
+            player.GetComponent<RangeWeaponSynchronization>().Construct(_particleFactory, _assets, _server);
+            player.GetComponent<MeleeWeaponSynchronization>().Construct(_particleFactory, _assets, _server);
         }
 
         private void ReplacePlayer(NetworkConnectionToClient connection, GameObject newPlayer)

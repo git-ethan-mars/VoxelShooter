@@ -55,7 +55,7 @@ namespace Infrastructure.Factory
             return _networkManager;
         }
 
-        public void CreateWalls(MapProvider mapProvider)
+        public void CreateWalls(IMapProvider mapProvider)
         {
             _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(mapProvider, Faces.Top);
             _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(mapProvider, Faces.Bottom);
@@ -65,7 +65,7 @@ namespace Infrastructure.Factory
             _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(mapProvider, Faces.Back);
         }
 
-        public void CreateMapRenderer(MapProvider mapProvider, Dictionary<Vector3Int, BlockData> buffer)
+        public void CreateMapRenderer(IMapProvider mapProvider, Dictionary<Vector3Int, BlockData> buffer)
         {
             var mapGenerator = _assets.Instantiate(MapRendererPath);
             _mapGenerator = mapGenerator.GetComponent<MapRenderer>();

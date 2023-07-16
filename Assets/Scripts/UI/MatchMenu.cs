@@ -12,12 +12,16 @@ namespace UI
         [SerializeField] private Button resetButton;
         [SerializeField] private Button applyButton;
         [SerializeField] private TextMeshProUGUI mapName;
+
         [Header("Spawn Time")] [SerializeField]
         private TextMeshProUGUI spawnTimeText;
+
         [SerializeField] private Button incrementPlayerNumber;
         [SerializeField] private Button decrementPlayerNumber;
+
         [Header("Game Duration")] [SerializeField]
         private TextMeshProUGUI gameDuration;
+
         [SerializeField] private Button incrementGameDuration;
         [SerializeField] private Button decrementGameDuration;
         private Limitation _spawnTimeLimitation;
@@ -37,13 +41,15 @@ namespace UI
             resetButton.onClick.AddListener(ResetLimitations);
             backButton.onClick.AddListener(stateMachine.Enter<MainMenuState>);
             if (isLocalBuild)
-                applyButton.onClick.AddListener(() => _stateMachine.Enter<StartMatchState, ServerSettings>(new ServerSettings(_timeLimitation.CurrentValue, _spawnTimeLimitation.CurrentValue, mapName.text)));
+                applyButton.onClick.AddListener(() =>
+                    _stateMachine.Enter<StartMatchState, ServerSettings>(
+                        new ServerSettings(_timeLimitation.CurrentValue, _spawnTimeLimitation.CurrentValue,
+                            mapName.text)));
             else
             {
-                applyButton.onClick.AddListener(()=>_stateMachine.Enter<StartSteamLobbyState, ServerSettings>(
+                applyButton.onClick.AddListener(() => _stateMachine.Enter<StartSteamLobbyState, ServerSettings>(
                     new ServerSettings(_timeLimitation.CurrentValue, _spawnTimeLimitation.CurrentValue, mapName.text)));
             }
-            
         }
 
         private void OnEnable()

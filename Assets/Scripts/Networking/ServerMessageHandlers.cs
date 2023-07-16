@@ -13,26 +13,28 @@ namespace Networking
 {
     public partial class ServerMessageHandlers
     {
+        private readonly Server _server;
         private readonly IEntityFactory _entityFactory;
         private readonly ICoroutineRunner _coroutineRunner;
-        private readonly ServerData _serverData;
         private readonly IStaticDataService _staticData;
         private readonly IParticleFactory _particleFactory;
         private readonly ExplosionBehaviour _singleExplosionBehaviour;
         private readonly ExplosionBehaviour _chainExplosionBehaviour;
 
         public ServerMessageHandlers(IEntityFactory entityFactory, ICoroutineRunner coroutineRunner,
-            ServerData serverData, IStaticDataService staticData, IParticleFactory particleFactory)
+            Server server, IStaticDataService staticData, IParticleFactory particleFactory)
         {
-            _serverData = serverData;
+            _server = server;
             _entityFactory = entityFactory;
             _coroutineRunner = coroutineRunner;
             _staticData = staticData;
             _particleFactory = particleFactory;
             _singleExplosionBehaviour =
-                new SingleExplosionBehaviour(serverData, particleFactory, new SphereExplosionArea(serverData));
+                new SingleExplosionBehaviour(_server.MapUpdater, particleFactory,
+                    new SphereExplosionArea(_server.MapProvider));
             _chainExplosionBehaviour =
-                new ChainExplosionBehaviour(serverData, particleFactory, new SphereExplosionArea(serverData));
+                new ChainExplosionBehaviour(_server.MapUpdater, particleFactory,
+                    new SphereExplosionArea(_server.MapProvider));
         }
 
         public void RegisterHandlers()
@@ -57,16 +59,16 @@ namespace Networking
 
         private void OnChangeClass(NetworkConnectionToClient connection, ChangeClassRequest message)
         {
-            var result = _serverData.TryGetPlayerData(connection, out _);
+            var result = _server.ServerData.TryGetPlayerData(connection, out _);
             if (!result)
-                _serverData.AddPlayer(connection, message.GameClass, message.SteamID, message.Nickname);
+                _server.AddPlayer(connection, message.GameClass, message.SteamID, message.Nickname);
             else
-                _serverData.ChangeClass(connection, message.GameClass);
+                _server.ChangeClass(connection, message.GameClass);
         }
 
         private void OnAddBlocks(NetworkConnectionToClient connection, AddBlocksRequest message)
         {
-            var result = _serverData.TryGetPlayerData(connection, out var playerData);
+            var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
             if (!result || !playerData.IsAlive) return;
             var blockAmount = playerData.ItemCountById[message.ItemId];
             var validPositions = new List<Vector3Int>();
@@ -74,9 +76,9 @@ namespace Networking
             var blocksUsed = Math.Min(blockAmount, message.GlobalPositions.Length);
             for (var i = 0; i < blocksUsed; i++)
             {
-                foreach (var otherConnection in _serverData.GetConnections())
+                foreach (var otherConnection in _server.ServerData.GetConnections())
                 {
-                    result = _serverData.TryGetPlayerData(otherConnection, out var otherPlayer);
+                    result = _server.ServerData.TryGetPlayerData(otherConnection, out var otherPlayer);
                     if (!result || !otherPlayer.IsAlive) continue;
                     var playerPosition = otherConnection.identity.gameObject.transform.position;
                     var blockPosition = message.GlobalPositions[i];
@@ -89,10 +91,10 @@ namespace Networking
                         return;
                 }
 
-                if (!_serverData.MapProvider.IsValidPosition(message.GlobalPositions[i])) return;
-                var currentBlock = _serverData.MapProvider.GetBlockByGlobalPosition(message.GlobalPositions[i]);
+                if (!_server.MapProvider.IsValidPosition(message.GlobalPositions[i])) return;
+                var currentBlock = _server.MapProvider.GetBlockByGlobalPosition(message.GlobalPositions[i]);
                 if (currentBlock.Equals(message.Blocks[i])) return;
-                _serverData.MapUpdater.SetBlockByGlobalPosition(message.GlobalPositions[i], message.Blocks[i]);
+                _server.MapUpdater.SetBlockByGlobalPosition(message.GlobalPositions[i], message.Blocks[i]);
                 validPositions.Add(message.GlobalPositions[i]);
                 validBlockData.Add(message.Blocks[i]);
             }
@@ -104,7 +106,7 @@ namespace Networking
 
         private void OnChangeSlot(NetworkConnectionToClient connection, ChangeSlotRequest message)
         {
-            var result = _serverData.TryGetPlayerData(connection, out var playerData);
+            var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
             if (!result || !playerData.IsAlive) return;
             connection.identity.GetComponent<PlayerLogic.Inventory>().currentSlotId = message.Index;
             connection.Send(new ChangeSlotResult(message.Index));

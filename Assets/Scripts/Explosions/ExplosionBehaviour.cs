@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using Data;
 using Infrastructure.Factory;
+using MapLogic;
 using Mirror;
-using Networking;
 using Networking.Messages;
 using Networking.Synchronization;
 using UnityEngine;
@@ -13,14 +13,14 @@ namespace Explosions
     public abstract class ExplosionBehaviour
     {
         private readonly IExplosionArea _explosionArea;
-        private readonly ServerData _serverData;
         private readonly IParticleFactory _particleFactory;
+        private readonly IMapUpdater _mapUpdater;
 
-        protected ExplosionBehaviour(ServerData serverData, IParticleFactory particleFactory, 
+        protected ExplosionBehaviour(IMapUpdater mapUpdater, IParticleFactory particleFactory, 
             IExplosionArea explosionArea)
         {
             _explosionArea = explosionArea;
-            _serverData = serverData;
+            _mapUpdater = mapUpdater;
             _particleFactory = particleFactory;
         }
         
@@ -50,7 +50,7 @@ namespace Explosions
         {
             var blockPositions = _explosionArea.GetExplodedBlocks(radius, explosionCenter);
             foreach (var position in blockPositions)
-                _serverData.MapUpdater.SetBlockByGlobalPosition(position, new BlockData());
+                _mapUpdater.SetBlockByGlobalPosition(position, new BlockData());
             _particleFactory.CreateRchParticle(explosionCenter, particlesSpeed, particlesCount);
             NetworkServer.SendToAll(new UpdateMapMessage(blockPositions.ToArray(),
                 new BlockData[blockPositions.Count]));

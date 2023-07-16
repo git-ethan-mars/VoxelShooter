@@ -12,11 +12,11 @@ namespace Rendering
     public class MapRenderer : MonoBehaviour
     {
         private ChunkRenderer[] Chunks { get; set; }
-        private MapProvider MapProvider { get; set; }
+        private IMapProvider MapProvider { get; set; }
         private IGameFactory _gameFactory;
         private Dictionary<Vector3Int, BlockData> _buffer;
 
-        public void Construct(MapProvider mapProvider, IGameFactory gameFactory, Dictionary<Vector3Int, BlockData> buffer)
+        public void Construct(IMapProvider mapProvider, IGameFactory gameFactory, Dictionary<Vector3Int, BlockData> buffer)
         {
             MapProvider = mapProvider;
             _gameFactory = gameFactory;

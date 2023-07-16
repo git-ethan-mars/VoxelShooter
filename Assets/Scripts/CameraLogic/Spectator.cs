@@ -12,18 +12,18 @@ namespace CameraLogic
         [SerializeField] private float sensitivityY;
         [SerializeField] private float distance;
         private IInputService _inputService;
-        private ServerData _serverData;
         private Transform _cameraTransform;
         private NetworkIdentity _target;
         private Vector3 _staticMapPosition;
         private bool _messageSent;
+        private IServer _server;
 
         private float XRotation { get; set; }
         private float YRotation { get; set; }
 
-        public void Construct(ServerData serverData)
+        public void Construct(IServer server)
         {
-            _serverData = serverData;
+            _server = server;
         }
 
         public void Awake()
@@ -65,20 +65,20 @@ namespace CameraLogic
             _cameraTransform.rotation = Quaternion.identity;
             Camera.main.fieldOfView = Constants.DefaultFov;
         }
-        
+
 
         [Command]
         private void RequestNextIdentity(NetworkConnectionToClient connection = null)
         {
-            var result = _serverData.TryGetPlayerData(connection, out var playerData);
+            var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
             if (!result) return;
             if (playerData.SpectatedPlayer == null)
             {
-                for (var i = _serverData.KillStatistics.Count - 1; i >= 0; i--)
+                for (var i = _server.ServerData.KillStatistics.Count - 1; i >= 0; i--)
                 {
-                    var killData = _serverData.KillStatistics[i];
+                    var killData = _server.ServerData.KillStatistics[i];
                     if (killData.Victim != connection) continue;
-                    result = _serverData.TryGetPlayerData(killData.Killer, out var killerData);
+                    result = _server.ServerData.TryGetPlayerData(killData.Killer, out var killerData);
                     if (!result) continue;
                     if (!killerData.IsAlive)
                         break;
@@ -86,15 +86,14 @@ namespace CameraLogic
                     playerData.SpectatedPlayer = killData.Killer;
                     return;
                 }
-
             }
 
-            var alivePlayers = _serverData.GetAlivePlayers(connection);
+            var alivePlayers = _server.ServerData.GetAlivePlayers(connection);
             if (alivePlayers.Count == 0)
             {
-                var mapWidth = _serverData.MapProvider.MapData.Width;
-                var mapHeight = _serverData.MapProvider.MapData.Height;
-                var mapDepth = _serverData.MapProvider.MapData.Depth;
+                var mapWidth = _server.MapProvider.MapData.Width;
+                var mapHeight = _server.MapProvider.MapData.Height;
+                var mapDepth = _server.MapProvider.MapData.Depth;
                 SetCameraTarget(new Vector3(mapWidth / 2, mapHeight / 2, mapDepth / 2));
                 return;
             }

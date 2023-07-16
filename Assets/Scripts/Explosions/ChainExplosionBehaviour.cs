@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Infrastructure.Factory;
+using MapLogic;
 using Mirror;
 using Networking;
 using UnityEngine;
@@ -9,8 +10,8 @@ namespace Explosions
 {
     public class ChainExplosionBehaviour : ExplosionBehaviour
     {
-        public ChainExplosionBehaviour(ServerData serverData, IParticleFactory particleFactory, IExplosionArea explosionArea) 
-            : base(serverData, particleFactory, explosionArea) { }
+        public ChainExplosionBehaviour(IMapUpdater mapUpdater, IParticleFactory particleFactory, IExplosionArea explosionArea) 
+            : base(mapUpdater, particleFactory, explosionArea) { }
 
         public override void Explode(Vector3Int explosionCenter, GameObject explosive, int radius, 
             NetworkConnectionToClient connection, int damage, int particlesSpeed, 

@@ -11,7 +11,7 @@ namespace Networking
     {
         private void OnGrenadeSpawn(NetworkConnectionToClient connection, GrenadeSpawnRequest message)
         {
-            var result = _serverData.TryGetPlayerData(connection, out var playerData);
+            var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
             if (!result || !playerData.IsAlive) return;
             var grenadeCount = playerData.ItemCountById[message.ItemId];
             if (grenadeCount <= 0)
@@ -38,10 +38,10 @@ namespace Networking
             _singleExplosionBehaviour.Explode(grenadePosition, grenade, radius, connection, damage,
                 particlesSpeed, particlesCount, explodedGrenades, grenade.tag);
         }
-        
+
         private void OnRocketLauncherSpawn(NetworkConnectionToClient connection, RocketLauncherSpawnRequest message)
         {
-            var result = _serverData.TryGetPlayerData(connection, out var playerData);
+            var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
             if (!result || !playerData.IsAlive) return;
             var rocketCount = playerData.ItemCountById[message.ItemId];
             if (rocketCount <= 0)
@@ -51,13 +51,13 @@ namespace Networking
             var rocketData = (RocketLauncherItem) _staticData.GetItem(message.ItemId);
             var direction = message.Ray.direction;
             var rocket = _entityFactory.CreateRocket(message.Ray.origin + direction * 2,
-                Quaternion.LookRotation(direction), _serverData, _particleFactory, rocketData, connection);
+                Quaternion.LookRotation(direction), _server.MapProvider, _server.MapUpdater, _particleFactory, rocketData, connection);
             rocket.GetComponent<Rigidbody>().velocity = direction * rocketData.speed;
         }
 
         private void OnTntSpawn(NetworkConnectionToClient connection, TntSpawnRequest message)
         {
-            var result = _serverData.TryGetPlayerData(connection, out var playerData);
+            var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
             if (!result || !playerData.IsAlive) return;
             var tntCount = playerData.ItemCountById[message.ItemId];
             if (tntCount <= 0)
@@ -76,7 +76,7 @@ namespace Networking
         {
             yield return new WaitForSeconds(delayInSeconds);
             if (!tnt) yield break;
-            
+
             var explodedTnt = new List<GameObject>();
             _chainExplosionBehaviour.Explode(explosionCenter, tnt, radius, connection, damage, particlesSpeed,
                 particlesCount, explodedTnt, tnt.tag);

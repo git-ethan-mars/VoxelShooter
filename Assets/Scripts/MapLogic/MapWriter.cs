@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Data;
 using Optimization;
 using Unity.Collections;
 using Unity.Jobs;
@@ -31,7 +30,7 @@ namespace MapLogic
         }
         
         
-        public static void WriteMap(MapProvider mapProvider, Stream stream)
+        public static void WriteMap(IMapProvider mapProvider, Stream stream)
         {
             var result = new List<NativeList<byte>>();
             for (var i = 0; i < mapProvider.MapData.Chunks.Length; i++)

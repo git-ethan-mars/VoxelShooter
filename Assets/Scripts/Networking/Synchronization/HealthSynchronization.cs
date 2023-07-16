@@ -5,24 +5,24 @@ namespace Networking.Synchronization
 {
     public class HealthSynchronization : NetworkBehaviour
     {
-        private ServerData _serverData;
+        private IServer _server;
 
-        public void Construct(ServerData serverData)
+        public void Construct(IServer server)
         {
-            _serverData = serverData;
+            _server = server;
         }
 
 
         [Server]
         public void Damage(NetworkConnectionToClient source, NetworkConnectionToClient receiver, int totalDamage)
         {
-            var result = _serverData.TryGetPlayerData(receiver, out var playerData);
+            var result = _server.ServerData.TryGetPlayerData(receiver, out var playerData);
             if (!result || !playerData.IsAlive) return;
             playerData.Health -= totalDamage;
             if (playerData.Health <= 0)
             {
                 playerData.Health = 0;
-                _serverData.AddKill(source, receiver);
+                _server.AddKill(source, receiver);
             }
             else
             {

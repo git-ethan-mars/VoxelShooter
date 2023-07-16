@@ -38,7 +38,7 @@ namespace Infrastructure.States
             _uiFactory.CreateLoadingWindow(_networkManager);
         }
 
-        private void OnMapDownloaded(MapProvider mapProvider, Dictionary<Vector3Int, BlockData> mapUpdates)
+        private void OnMapDownloaded(IMapProvider mapProvider, Dictionary<Vector3Int, BlockData> mapUpdates)
         {
             _gameFactory.CreateWalls(mapProvider);
             _gameFactory.CreateMapRenderer(mapProvider, mapUpdates);

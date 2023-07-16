@@ -4,12 +4,12 @@ using UnityEngine;
 
 namespace MapLogic
 {
-    public class MapUpdater
+    public class MapUpdater : IMapUpdater
     {
         public event Action<Vector3Int, BlockData> MapUpdated;
-        private readonly MapProvider _mapProvider;
+        private readonly IMapProvider _mapProvider;
 
-        public MapUpdater(MapProvider mapProvider)
+        public MapUpdater(IMapProvider mapProvider)
         {
             _mapProvider = mapProvider;
         }
