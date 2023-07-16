@@ -1,4 +1,3 @@
-using System;
 using Data;
 using Mirror;
 using Networking.Messages;
@@ -16,8 +15,6 @@ namespace Inventory
         public int Count { get; set; }
         private readonly Raycaster _raycaster;
         private readonly float _delayInSeconds;
-        private readonly int _radius;
-        private readonly int _damage;
         private readonly int _itemId;
         private readonly GameObject _rocketLauncherInfo;
         private readonly TextMeshProUGUI _rocketLauncherCountText;
@@ -28,8 +25,6 @@ namespace Inventory
         public RocketLauncherView(Raycaster raycaster, RocketLauncherItem configuration, Hud hud)
         {
             Icon = configuration.inventoryIcon;
-            _radius = configuration.radius;
-            _damage = configuration.damage;
             _itemId = configuration.id;
             _rocketLauncherInfo = hud.itemInfo;
             _rocketLauncherCountText = hud.itemCount;
@@ -61,7 +56,7 @@ namespace Inventory
         public void OnLeftMouseButtonDown()
         {
             NetworkClient.Send(new RocketLauncherSpawnRequest(_itemId,
-                _raycaster.GetCentredRay()));
+                _raycaster.CentredRay));
         }
     }
 }

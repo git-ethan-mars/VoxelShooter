@@ -1,38 +1,59 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Data;
+using Entities;
 using Infrastructure;
 using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
+using Infrastructure.Services.ObjectCorrectors;
 using Infrastructure.Services.StaticData;
 using MapLogic;
 using Mirror;
 using Networking.Messages;
 using PlayerLogic.States;
 using Steamworks;
+using UnityEngine;
 
 namespace Networking
 {
     public class ServerData
     {
-        public Map Map { get; }
+        public MapProvider MapProvider { get; }
+        public readonly MapUpdater MapUpdater;
         public readonly List<KillData> KillStatistics;
         private readonly Dictionary<NetworkConnectionToClient, PlayerData> _dataByConnection;
         private readonly IStaticDataService _staticData;
         private readonly IPlayerFactory _playerFactory;
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly ServerSettings _serverSettings;
+        private readonly ObjectPositionValidator _objectPositionValidator;
+        private readonly IEntityFactory _entityFactory;
 
         public ServerData(ICoroutineRunner coroutineRunner, IAssetProvider assets, IStaticDataService staticDataService,
-            IParticleFactory particleFactory, Map map, ServerSettings serverSettings, IEntityFactory entityFactory)
+            IParticleFactory particleFactory, MapProvider mapProvider, ServerSettings serverSettings,
+            IEntityFactory entityFactory)
         {
             _coroutineRunner = coroutineRunner;
             _dataByConnection = new Dictionary<NetworkConnectionToClient, PlayerData>();
             KillStatistics = new List<KillData>();
             _staticData = staticDataService;
-            Map = map;
+            MapProvider = mapProvider;
+            MapUpdater = new MapUpdater(mapProvider);
             _serverSettings = serverSettings;
-            _playerFactory = new PlayerFactory(assets, this, particleFactory, entityFactory);
+            _entityFactory = entityFactory;
+            _playerFactory = new PlayerFactory(assets, this, particleFactory);
+            _objectPositionValidator = new ObjectPositionValidator(MapUpdater, MapProvider);
+            AddSpawnPoint();
+        }
+
+        private void AddSpawnPoint()
+        {
+            foreach (var spawnPosition in MapProvider.MapData.SpawnPoints)
+            {
+                Debug.Log(spawnPosition);
+                var spawnPoint = _entityFactory.CreateSpawnPoint(spawnPosition.ToUnityVector());
+                _objectPositionValidator.AddPushable(spawnPoint.GetComponent<PushableObject>());
+            }
         }
 
         public void AddPlayer(NetworkConnectionToClient connection, GameClass chosenClass, CSteamID steamID,
@@ -58,8 +79,8 @@ namespace Networking
                     () => _playerFactory.RespawnPlayer(connection));
                 respawnTimer.Start();
             }
-            NetworkServer.SendToAll(new ScoreboardMessage(GetScoreData()));
 
+            NetworkServer.SendToAll(new ScoreboardMessage(GetScoreData()));
         }
 
         public void DeletePlayer(NetworkConnectionToClient connection)
@@ -71,6 +92,11 @@ namespace Networking
 
         public void AddKill(NetworkConnectionToClient killer, NetworkConnectionToClient victim)
         {
+            var tombstonePosition = Vector3Int.FloorToInt(victim.identity.transform.position) +
+                                    new Vector3(0.5f, 0.5f, 0.5f);
+            Debug.Log(tombstonePosition);
+            var tombstone = _entityFactory.CreateTombstone(tombstonePosition);
+            _objectPositionValidator.AddPushable(tombstone.GetComponent<PushableObject>());
             if (killer is not null && killer != victim)
                 _dataByConnection[killer].Kills += 1;
             KillStatistics.Add(new KillData(killer, victim));
@@ -90,6 +116,7 @@ namespace Networking
                 playerData = null;
                 return false;
             }
+
             return _dataByConnection.TryGetValue(connection, out playerData);
         }
 
@@ -98,7 +125,8 @@ namespace Networking
             return _dataByConnection[connectionToClient];
         }
 
-        public List<KeyValuePair<NetworkConnectionToClient, PlayerData>> GetAlivePlayers(NetworkConnectionToClient except)
+        public List<KeyValuePair<NetworkConnectionToClient, PlayerData>> GetAlivePlayers(
+            NetworkConnectionToClient except)
         {
             return _dataByConnection.Where(kvp => kvp.Value.IsAlive && except != kvp.Key).ToList();
         }

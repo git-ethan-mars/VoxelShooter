@@ -38,7 +38,7 @@ namespace Inventory
             Count = configuration.count;
             _raycaster = raycaster;
         }
-        
+
 
         public void OnCountChanged()
         {
@@ -51,7 +51,7 @@ namespace Inventory
             _itemType.sprite = _grenadeCountIcon;
             _grenadeCountText.SetText(Count.ToString());
         }
-        
+
         public void OnLeftMouseButtonDown()
         {
             _holdDownStartTime = Time.time;
@@ -66,8 +66,7 @@ namespace Inventory
         {
             var holdTime = Math.Min(Time.time - _holdDownStartTime, _maxThrowDuration);
             var throwForce = holdTime * _throwForceModifier;
-            var ray = _raycaster.GetCentredRay();
-            NetworkClient.Send(new GrenadeSpawnRequest(_itemId, ray, throwForce));
+            NetworkClient.Send(new GrenadeSpawnRequest(_itemId, _raycaster.CentredRay, throwForce));
         }
     }
 }

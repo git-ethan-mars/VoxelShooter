@@ -6,25 +6,17 @@ namespace Rendering
     {
         private readonly Camera _camera;
         private readonly float _placeDistance;
-        private const string ChunkTag = "Chunk";
 
-        public Raycaster(Camera mainCamera, float placeDistance)
+        public Raycaster(Camera mainCamera)
         {
             _camera = mainCamera;
-            _placeDistance = placeDistance;
-        }
-        
-        public bool GetRayCastHit(out RaycastHit raycastHit)
-        {
-            var ray = _camera.ViewportPointToRay(new Vector3(0.5f, 0.5f));
-            var raycastResult = Physics.Raycast(ray, out raycastHit, _placeDistance);
-            return raycastResult && raycastHit.collider.gameObject.CompareTag(ChunkTag);
         }
 
-        public Ray GetCentredRay()
+        public bool GetRayCastHit(out RaycastHit raycastHit, float distance, LayerMask layerMask)
         {
-            var ray = _camera.ViewportPointToRay(new Vector3(0.5f, 0.5f));
-            return ray;
+            return Physics.Raycast(CentredRay, out raycastHit, distance, layerMask);
         }
+
+        public Ray CentredRay => _camera.ViewportPointToRay(new Vector3(0.5f, 0.5f));
     }
 }

@@ -4,7 +4,6 @@ using System.Linq;
 using Data;
 using Infrastructure;
 using Infrastructure.AssetManagement;
-using Infrastructure.Factory;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
 using Mirror;
@@ -20,7 +19,6 @@ namespace Inventory
     public class InventoryController : MonoBehaviour, ICoroutineRunner
     {
         [SerializeField] private InventoryView inventoryView;
-        private Transform _itemPosition;
         private IInputService _inputService;
         private int _itemIndex;
         private int _maxIndex;
@@ -29,29 +27,26 @@ namespace Inventory
         private Camera _mainCamera;
         private MapSynchronization _mapSynchronization;
         private GameObject _palette;
-        private InventoryModelFactory _modelFactory;
-        private GameObject _player;
-        private GameObject _hud;
+        private Player _player;
+        private Hud _hud;
         private PlayerCharacteristic _characteristic;
-        private Raycaster _raycaster;
         private TransparentMeshPool _transparentMeshPool;
         private List<Slot> _slots;
         private IStaticDataService _staticData;
+        private Raycaster _rayCaster;
 
-        public void Construct(IInputService inputService, IAssetProvider assets, IStaticDataService staticData, GameObject hud,
+        public void Construct(IInputService inputService, IAssetProvider assets, IStaticDataService staticData,
+            GameObject hud,
             GameObject player)
         {
             AddEventHandlers(player.GetComponent<InventoryInput>());
             _staticData = staticData;
-            _player = player;
-            _hud = hud;
-            _mainCamera = Camera.main;
+            _player = player.GetComponent<Player>();
+            _rayCaster = new Raycaster(Camera.main);
             _transparentMeshPool = new TransparentMeshPool(assets);
-            _raycaster = new Raycaster(_mainCamera, player.GetComponent<Player>().placeDistance);
-            _itemPosition = player.GetComponent<Player>().itemPosition;
             _mapSynchronization = player.GetComponent<MapSynchronization>();
-            _palette = hud.GetComponent<Hud>().palette;
-            _modelFactory = new InventoryModelFactory();
+            _hud = hud.GetComponent<Hud>();
+            _palette = _hud.palette;
             _inputService = inputService;
             InitializeInventoryViews(player.GetComponent<PlayerLogic.Inventory>().ItemIds);
             _maxIndex = Math.Min(_slots.Count, inventoryView.SlotsCount);
@@ -82,10 +77,10 @@ namespace Inventory
             inventoryInput.OnFirstActionButtonDown += FirstActionButtonDown;
             inventoryInput.OnFirstActionButtonUp += FirstActionButtonUp;
             inventoryInput.OnFirstActionButtonHold += FirstActionButtonHold;
-            
+
             inventoryInput.OnSecondActionButtonUp += SecondActionButtonUp;
             inventoryInput.OnSecondActionButtonDown += SecondActionButtonDown;
-            
+
             inventoryInput.OnScroll +=
                 () => SendChangeSlotRequest(_itemIndex + Math.Sign(_inputService.GetScrollSpeed()));
             inventoryInput.OnChangeSlot += SendChangeSlotRequest;
@@ -99,22 +94,22 @@ namespace Inventory
             {
                 if (item.itemType == ItemType.RangeWeapon)
                 {
-                    var handler = new RangeWeaponView(_inputService, _mainCamera, _player,
+                    var handler = new RangeWeaponView(_inputService, Camera.main, _player,
                         _hud, new RangeWeaponData((RangeWeaponItem) item));
                     _slots.Add(new Slot(item, handler));
                 }
 
                 if (item.itemType == ItemType.MeleeWeapon)
                 {
-                    var handler = new MeleeWeaponView(_mainCamera,
-                        _player, new MeleeWeaponData((MeleeWeaponItem) item), _player.GetComponent<LineRenderer>());
+                    var handler = new MeleeWeaponView(_rayCaster,
+                        _player, new MeleeWeaponData((MeleeWeaponItem) item));
                     _slots.Add(new Slot(item, handler));
                 }
 
                 if (item.itemType == ItemType.Block)
                 {
-                    var handler = new BlockView(_hud,
-                        (BlockItem) item, _transparentMeshPool, _raycaster, _player);
+                    var handler = new BlockView(_rayCaster, _hud,
+                        (BlockItem) item, _transparentMeshPool, _player);
                     _slots.Add(new Slot(item, handler));
                 }
 
@@ -135,20 +130,21 @@ namespace Inventory
 
                 if (item.itemType == ItemType.Tnt)
                 {
-                    var handler = new TntView(_raycaster, (TntItem) item, _hud.GetComponent<Hud>(),
-                        _transparentMeshPool);
+                    var handler = new TntView(_rayCaster, (TntItem) item, _hud,
+                        _transparentMeshPool, _player);
                     _slots.Add(new Slot(item, handler));
                 }
 
                 if (item.itemType == ItemType.Grenade)
                 {
-                    var handler = new GrenadeView(_raycaster, (GrenadeItem) item, _hud.GetComponent<Hud>());
+                    var handler = new GrenadeView(_rayCaster, (GrenadeItem) item, _hud.GetComponent<Hud>());
                     _slots.Add(new Slot(item, handler));
                 }
-                
+
                 if (item.itemType == ItemType.RocketLauncher)
                 {
-                    var handler = new RocketLauncherView(_raycaster, (RocketLauncherItem) item, _hud.GetComponent<Hud>());
+                    var handler = new RocketLauncherView(_rayCaster, (RocketLauncherItem) item,
+                        _hud.GetComponent<Hud>());
                     _slots.Add(new Slot(item, handler));
                 }
             }
@@ -169,7 +165,7 @@ namespace Inventory
                 ((IRightMouseButtonDownHandler) _slots[_itemIndex].ItemHandler).OnRightMouseButtonDown();
             }
         }
-        
+
         private void SecondActionButtonUp()
         {
             if (_slots[_itemIndex].ItemHandler is IRightMouseButtonUpHandler)
@@ -177,7 +173,7 @@ namespace Inventory
                 ((IRightMouseButtonUpHandler) _slots[_itemIndex].ItemHandler).OnRightMouseButtonUp();
             }
         }
-        
+
         private void FirstActionButtonUp()
         {
             if (_slots[_itemIndex].ItemHandler is ILeftMouseButtonUpHandler)
