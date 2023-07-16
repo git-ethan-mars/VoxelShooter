@@ -25,14 +25,14 @@ namespace Networking
         private IStaticDataService _staticData;
         private IEntityFactory _entityFactory;
         private ClientMessagesHandler _clientMessageHandlers;
-        private ServerMessageHandlers _serverMessageHandlers;
+        private ServerServices.ServerMessageHandlers _serverMessageHandlers;
         private ServerSettings _serverSettings;
         private GameStateMachine _stateMachine;
         private ServerTimer _serverTimer;
         private IParticleFactory _particleFactory;
         private IAssetProvider _assets;
         private IGameFactory _gameFactory;
-        private Server _server;
+        private IServer _server;
         private const float ShowResultsDuration = 10;
 
 
@@ -54,7 +54,7 @@ namespace Networking
         {
             _server = new Server(this, _staticData, _serverSettings, _assets, _particleFactory, _entityFactory);
             _serverMessageHandlers =
-                new ServerMessageHandlers(_entityFactory, this, _server, _staticData, _particleFactory);
+                new ServerServices.ServerMessageHandlers(_entityFactory, this, _server, _staticData, _particleFactory);
             _serverMessageHandlers.RegisterHandlers();
             _serverTimer = new ServerTimer(this, _serverSettings.MaxDuration, StopHost);
             _serverTimer.Start();

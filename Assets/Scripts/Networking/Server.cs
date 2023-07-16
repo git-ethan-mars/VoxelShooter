@@ -87,7 +87,7 @@ namespace Networking
             NetworkServer.SendToAll(new ScoreboardMessage(ServerData.GetScoreData()));
         }
 
-        private void AddSpawnPoint()
+        public void CreateSpawnPoints()
         {
             foreach (var spawnPosition in MapProvider.MapData.SpawnPoints)
             {

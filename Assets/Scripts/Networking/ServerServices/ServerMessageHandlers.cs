@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using Data;
+using Explosions;
 using Infrastructure;
 using Infrastructure.Factory;
 using Infrastructure.Services.StaticData;
 using Mirror;
 using Networking.Messages;
 using UnityEngine;
-using Explosions;
 
-namespace Networking
+namespace Networking.ServerServices
 {
     public partial class ServerMessageHandlers
     {
-        private readonly Server _server;
+        private readonly IServer _server;
         private readonly IEntityFactory _entityFactory;
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly IStaticDataService _staticData;
@@ -22,7 +22,7 @@ namespace Networking
         private readonly ExplosionBehaviour _chainExplosionBehaviour;
 
         public ServerMessageHandlers(IEntityFactory entityFactory, ICoroutineRunner coroutineRunner,
-            Server server, IStaticDataService staticData, IParticleFactory particleFactory)
+            IServer server, IStaticDataService staticData, IParticleFactory particleFactory)
         {
             _server = server;
             _entityFactory = entityFactory;

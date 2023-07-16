@@ -1,5 +1,7 @@
-﻿using MapLogic;
+﻿using Data;
+using MapLogic;
 using Mirror;
+using Steamworks;
 
 namespace Networking
 {
@@ -9,5 +11,11 @@ namespace Networking
         ServerData ServerData { get; }
         IMapUpdater MapUpdater { get; }
         void AddKill(NetworkConnectionToClient source, NetworkConnectionToClient receiver);
+
+        void AddPlayer(NetworkConnectionToClient connection, GameClass chosenClass, CSteamID steamID,
+            string nickname);
+
+        void ChangeClass(NetworkConnectionToClient connection, GameClass chosenClass);
+        void DeletePlayer(NetworkConnectionToClient connection);
     }
 }

@@ -5,7 +5,7 @@ using Mirror;
 using Networking.Messages;
 using UnityEngine;
 
-namespace Networking
+namespace Networking.ServerServices
 {
     public partial class ServerMessageHandlers
     {
