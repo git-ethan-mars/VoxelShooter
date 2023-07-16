@@ -21,7 +21,7 @@ namespace Networking
         public ServerData ServerData { get; set; }
         public IMapUpdater MapUpdater { get; set; }
         private readonly ServerSettings _serverSettings;
-        private readonly ObjectPositionValidator _objectPositionValidator;
+        private readonly EntityPositionValidator _objectPositionValidator;
         private readonly IEntityFactory _entityFactory;
         private readonly IPlayerFactory _playerFactory;
         private readonly ICoroutineRunner _coroutineRunner;
@@ -36,7 +36,7 @@ namespace Networking
             MapProvider = MapReader.ReadFromFile(_serverSettings.MapName + ".rch");
             MapUpdater = new MapUpdater(MapProvider);
             ServerData = new ServerData(staticDataService);
-            _objectPositionValidator = new ObjectPositionValidator(MapUpdater, MapProvider);
+            _objectPositionValidator = new EntityPositionValidator(MapUpdater, MapProvider);
             _playerFactory = new PlayerFactory(assets, this, particleFactory);
         }
 

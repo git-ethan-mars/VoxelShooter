@@ -6,12 +6,12 @@ using UnityEngine;
 
 namespace Networking.ServerServices
 {
-    public class ObjectPositionValidator
+    public class EntityPositionValidator
     {
         private readonly List<PushableObject> _pushableObjects;
         private readonly IMapProvider _mapProvider;
 
-        public ObjectPositionValidator(IMapUpdater mapUpdater,
+        public EntityPositionValidator(IMapUpdater mapUpdater,
             IMapProvider mapProvider)
         {
             _pushableObjects = new List<PushableObject>();
