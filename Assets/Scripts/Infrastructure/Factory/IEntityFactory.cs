@@ -16,5 +16,7 @@ namespace Infrastructure.Factory
         
         GameObject CreateRocket(Vector3 rayOrigin, Quaternion identity, ServerData serverData, 
             IParticleFactory particleFactory, RocketLauncherItem rocketData, NetworkConnectionToClient owner);
+
+        GameObject CreateSpawnPoint(Vector3 position);
     }
 }

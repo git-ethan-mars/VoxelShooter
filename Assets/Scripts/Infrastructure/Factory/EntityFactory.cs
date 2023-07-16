@@ -14,18 +14,20 @@ namespace Infrastructure.Factory
         private const string GrenadePath = "Prefabs/SpawningGrenade";
         private const string RocketPath = "Prefabs/Rocket";
         private const string TombstonePath = "Prefabs/Tombstone";
+        private const string SpawnPointPath = "Prefabs/Spawnpoint";
 
         public EntityFactory(IAssetProvider assets)
         {
             _assets = assets;
         }
+
         public GameObject CreateTnt(Vector3 position, Quaternion rotation)
         {
             var tnt = _assets.Instantiate(TntPath, position, rotation);
             NetworkServer.Spawn(tnt);
             return tnt;
         }
-        
+
         public GameObject CreateGrenade(Vector3 position, Quaternion rotation)
         {
             var grenade = _assets.Instantiate(GrenadePath, position, rotation);
@@ -35,18 +37,23 @@ namespace Infrastructure.Factory
 
         public GameObject CreateTombstone(Vector3 position)
         {
-            var tombstone = _assets.Instantiate(TombstonePath, position, Quaternion.identity);  
+            var tombstone = _assets.Instantiate(TombstonePath, position, Quaternion.identity);
             NetworkServer.Spawn(tombstone);
             return tombstone;
         }
 
-        public GameObject CreateRocket(Vector3 position, Quaternion rotation, ServerData serverData, 
+        public GameObject CreateRocket(Vector3 position, Quaternion rotation, ServerData serverData,
             IParticleFactory particleFactory, RocketLauncherItem rocketData, NetworkConnectionToClient owner)
         {
             var rocket = _assets.Instantiate(RocketPath, position, rotation);
             rocket.GetComponent<Rocket>().Construct(serverData, rocketData, owner, particleFactory);
             NetworkServer.Spawn(rocket);
             return rocket;
+        }
+
+        public GameObject CreateSpawnPoint(Vector3 position)
+        {
+            return _assets.Instantiate(SpawnPointPath, position, Quaternion.identity);
         }
     }
 }
