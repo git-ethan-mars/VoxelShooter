@@ -2,6 +2,7 @@
 using System.Linq;
 using Data;
 using Infrastructure.Services.StaticData;
+using MapLogic;
 using Mirror;
 using Steamworks;
 
@@ -10,10 +11,14 @@ namespace Networking
     public class ServerData
     {
         public readonly List<KillData> KillStatistics;
+        private readonly List<SpawnPoint> _dynamicSpawnPoints;
         private readonly Dictionary<NetworkConnectionToClient, PlayerData> _dataByConnection;
         private readonly IStaticDataService _staticData;
-        public ServerData(IStaticDataService staticDataService)
+
+        public ServerData(IStaticDataService staticDataService, IMapProvider mapProvider)
         {
+            _dynamicSpawnPoints = new List<SpawnPoint>();
+            mapProvider.MapData.SpawnPoints.CopyTo(_dynamicSpawnPoints);
             _dataByConnection = new Dictionary<NetworkConnectionToClient, PlayerData>();
             KillStatistics = new List<KillData>();
             _staticData = staticDataService;
@@ -77,6 +82,12 @@ namespace Networking
             }
 
             return scoreData.ToList();
+        }
+
+        public void UpdateSpawnPoint(SpawnPoint oldSpawnPoint, SpawnPoint newSpawnPoint)
+        {
+            var index = _dynamicSpawnPoints.FindIndex(spawnPoint => spawnPoint.Equals(oldSpawnPoint));
+            _dynamicSpawnPoints[index] = newSpawnPoint;
         }
     }
 }

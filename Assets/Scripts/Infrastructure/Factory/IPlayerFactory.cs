@@ -1,5 +1,4 @@
-﻿using Data;
-using Mirror;
+﻿using Mirror;
 
 namespace Infrastructure.Factory
 {

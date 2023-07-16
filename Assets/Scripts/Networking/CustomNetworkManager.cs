@@ -53,6 +53,7 @@ namespace Networking
         public override void OnStartServer()
         {
             _server = new Server(this, _staticData, _serverSettings, _assets, _particleFactory, _entityFactory);
+            _server.CreateSpawnPoints();
             _serverMessageHandlers =
                 new ServerMessageHandlers(_entityFactory, this, _server, _staticData, _particleFactory);
             _serverMessageHandlers.RegisterHandlers();

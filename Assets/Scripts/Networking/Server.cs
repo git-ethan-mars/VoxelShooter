@@ -11,7 +11,6 @@ using Networking.ServerServices;
 using PlayerLogic.States;
 using Steamworks;
 using UnityEngine;
-using Vector3 = UnityEngine.Vector3;
 
 namespace Networking
 {
@@ -35,7 +34,7 @@ namespace Networking
             _entityFactory = entityFactory;
             MapProvider = MapReader.ReadFromFile(_serverSettings.MapName + ".rch");
             MapUpdater = new MapUpdater(MapProvider);
-            ServerData = new ServerData(staticDataService);
+            ServerData = new ServerData(staticDataService, MapProvider);
             _objectPositionValidator = new EntityPositionValidator(MapUpdater, MapProvider);
             _playerFactory = new PlayerFactory(assets, this, particleFactory);
         }
@@ -74,7 +73,7 @@ namespace Networking
         public void AddKill(NetworkConnectionToClient killer, NetworkConnectionToClient victim)
         {
             var tombstonePosition = Vector3Int.FloorToInt(victim.identity.transform.position) +
-                                    new Vector3(0.5f, 0.5f, 0.5f);
+                                    Constants.WorldOffset;
             var tombstone = _entityFactory.CreateTombstone(tombstonePosition);
             _objectPositionValidator.AddPushable(tombstone.GetComponent<PushableObject>());
             ServerData.AddKill(killer, victim);
@@ -91,8 +90,10 @@ namespace Networking
         {
             foreach (var spawnPosition in MapProvider.MapData.SpawnPoints)
             {
-                var spawnPoint = _entityFactory.CreateSpawnPoint(spawnPosition.ToUnityVector());
-                _objectPositionValidator.AddPushable(spawnPoint.GetComponent<PushableObject>());
+                var spawnPoint = _entityFactory.CreateSpawnPoint(spawnPosition.ToVectorWithOffset());
+                var pushable = spawnPoint.GetComponent<PushableObject>();
+                _objectPositionValidator.AddPushable(pushable);
+                pushable.PositionUpdated += MapUpdater.UpdateSpawnPoint;
             }
         }
     }

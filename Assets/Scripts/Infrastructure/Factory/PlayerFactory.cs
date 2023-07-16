@@ -42,7 +42,7 @@ namespace Infrastructure.Factory
             }
             else
             {
-                player = CreatePlayerWithSpawnPoint(_spawnPoints[_spawnPointIndex].ToUnityVector(),
+                player = CreatePlayerWithSpawnPoint(_spawnPoints[_spawnPointIndex].ToVectorWithOffset(),
                     Quaternion.identity);
                 _spawnPointIndex = (_spawnPointIndex + 1) % _spawnPoints.Count;
             }
@@ -65,7 +65,7 @@ namespace Infrastructure.Factory
             }
             else
             {
-                player = CreatePlayerWithSpawnPoint(_spawnPoints[_spawnPointIndex].ToUnityVector(),
+                player = CreatePlayerWithSpawnPoint(_spawnPoints[_spawnPointIndex].ToVectorWithOffset(),
                     Quaternion.identity);
                 _spawnPointIndex = (_spawnPointIndex + 1) % _spawnPoints.Count;
             }

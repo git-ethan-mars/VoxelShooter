@@ -17,5 +17,6 @@ namespace Networking
 
         void ChangeClass(NetworkConnectionToClient connection, GameClass chosenClass);
         void DeletePlayer(NetworkConnectionToClient connection);
+        void CreateSpawnPoints();
     }
 }

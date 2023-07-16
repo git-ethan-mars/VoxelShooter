@@ -8,9 +8,16 @@ namespace Data
         public int Y;
         public int Z;
 
-        public Vector3 ToUnityVector()
+        public SpawnPoint(Vector3Int position)
         {
-            return new Vector3(X, Y, Z);
+            X = position.x;
+            Y = position.y;
+            Z = position.z;
+        }
+
+        public Vector3 ToVectorWithOffset()
+        {
+            return new Vector3(X, Y, Z) + Constants.WorldOffset;
         }
     }
 }

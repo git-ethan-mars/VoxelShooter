@@ -30,7 +30,7 @@ namespace Networking.ServerServices
             {
                 while (!IsFreeSpace(pushable))
                 {
-                    pushable.transform.position += Vector3.up;
+                    pushable.UpdatePosition(pushable.transform.position + Vector3.up);
                 }
             }
         }
