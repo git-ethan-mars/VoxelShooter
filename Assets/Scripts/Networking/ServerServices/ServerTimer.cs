@@ -5,7 +5,7 @@ using Infrastructure;
 using Mirror;
 using UnityEngine;
 
-namespace Networking
+namespace Networking.ServerServices
 {
     public class ServerTimer
     {

@@ -3,11 +3,11 @@ using Entities;
 using Infrastructure;
 using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
-using Infrastructure.Services.ObjectCorrectors;
 using Infrastructure.Services.StaticData;
 using MapLogic;
 using Mirror;
 using Networking.Messages;
+using Networking.ServerServices;
 using PlayerLogic.States;
 using Steamworks;
 using UnityEngine;
@@ -20,10 +20,10 @@ namespace Networking
         public IMapProvider MapProvider { get; set; }
         public ServerData ServerData { get; set; }
         public IMapUpdater MapUpdater { get; set; }
+        private readonly ServerSettings _serverSettings;
         private readonly ObjectPositionValidator _objectPositionValidator;
         private readonly IEntityFactory _entityFactory;
-        private readonly PlayerFactory _playerFactory;
-        private readonly ServerSettings _serverSettings;
+        private readonly IPlayerFactory _playerFactory;
         private readonly ICoroutineRunner _coroutineRunner;
 
         public Server(ICoroutineRunner coroutineRunner, IStaticDataService staticDataService,
