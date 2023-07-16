@@ -54,7 +54,7 @@ namespace Networking
         {
             _server = new Server(this, _staticData, _serverSettings, _assets, _particleFactory, _entityFactory);
             _serverMessageHandlers =
-                new ServerServices.ServerMessageHandlers(_entityFactory, this, _server, _staticData, _particleFactory);
+                new ServerMessageHandlers(_entityFactory, this, _server, _staticData, _particleFactory);
             _serverMessageHandlers.RegisterHandlers();
             _serverTimer = new ServerTimer(this, _serverSettings.MaxDuration, StopHost);
             _serverTimer.Start();
