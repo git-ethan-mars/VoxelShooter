@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using Infrastructure.AssetManagement;
 using Mirror;
+using Particles;
 using UnityEngine;
 
 namespace Infrastructure.Factory

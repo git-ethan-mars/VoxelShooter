@@ -1,13 +1,16 @@
 using Mirror;
 using UnityEngine;
 
-public class ParticleColor : NetworkBehaviour
+namespace Particles
 {
-    [SyncVar(hook = nameof(OnColorChanged))] public Color color;
-
-    public void OnColorChanged(Color oldColor, Color newColor)
+    public class ParticleColor : NetworkBehaviour
     {
-        var main = GetComponent<ParticleSystem>().main;
-        main.startColor = newColor;
+        [SyncVar(hook = nameof(OnColorChanged))] public Color color;
+
+        public void OnColorChanged(Color oldColor, Color newColor)
+        {
+            var main = GetComponent<ParticleSystem>().main;
+            main.startColor = newColor;
+        }
     }
 }
