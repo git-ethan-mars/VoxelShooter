@@ -46,11 +46,12 @@ namespace PlayerLogic
         private void Update()
         {
             if (!isLocalPlayer) return;
-            HandleSneaking();
+            /*HandleSneaking();
             HandleSquatting();
+            */
             var axis = _inputService.Axis;
-            if (_characterController.velocity == Vector3.zero) _playerLegAnimator.PlayIdle();
-            else _playerLegAnimator.PlayMove();
+            /*if (_characterController.velocity == Vector3.zero) _playerLegAnimator.PlayIdle();
+            else _playerLegAnimator.PlayMove();*/
             var playerTransform = transform;
             _movementDirection = (axis.x * playerTransform.forward + axis.y * playerTransform.right).normalized;
             if (_characterController.isGrounded)
