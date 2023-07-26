@@ -20,7 +20,7 @@ namespace Networking
         public ServerData ServerData { get; set; }
         public IMapUpdater MapUpdater { get; set; }
         private readonly ServerSettings _serverSettings;
-        private readonly EntityPositionValidator _objectPositionValidator;
+        private readonly EntityPositionValidator _entityPositionValidator;
         private readonly IEntityFactory _entityFactory;
         private readonly IPlayerFactory _playerFactory;
         private readonly ICoroutineRunner _coroutineRunner;
@@ -35,7 +35,7 @@ namespace Networking
             MapProvider = MapReader.ReadFromFile(_serverSettings.MapName + ".rch");
             MapUpdater = new MapUpdater(MapProvider);
             ServerData = new ServerData(staticDataService, MapProvider);
-            _objectPositionValidator = new EntityPositionValidator(MapUpdater, MapProvider);
+            _entityPositionValidator = new EntityPositionValidator(MapUpdater, MapProvider);
             _playerFactory = new PlayerFactory(assets, this, particleFactory);
         }
 
@@ -75,7 +75,7 @@ namespace Networking
             var tombstonePosition = Vector3Int.FloorToInt(victim.identity.transform.position) +
                                     Constants.WorldOffset;
             var tombstone = _entityFactory.CreateTombstone(tombstonePosition);
-            _objectPositionValidator.AddPushable(tombstone.GetComponent<PushableObject>());
+            _entityPositionValidator.AddEntity(tombstone.GetComponent<PushableObject>());
             ServerData.AddKill(killer, victim);
             var playerData = ServerData.GetPlayerData(victim);
             playerData.PlayerStateMachine.Enter<DeathState>();
@@ -88,12 +88,12 @@ namespace Networking
 
         public void CreateSpawnPoints()
         {
-            foreach (var spawnPosition in MapProvider.MapData.SpawnPoints)
+            foreach (var spawnPointData in MapProvider.MapData.SpawnPoints)
             {
-                var spawnPoint = _entityFactory.CreateSpawnPoint(spawnPosition.ToVectorWithOffset());
-                var pushable = spawnPoint.GetComponent<PushableObject>();
-                _objectPositionValidator.AddPushable(pushable);
-                pushable.PositionUpdated += MapUpdater.UpdateSpawnPoint;
+                var spawnPoint = _entityFactory.CreateSpawnPoint(spawnPointData.ToVectorWithOffset()).GetComponent<SpawnPoint>();
+                spawnPoint.Construct(spawnPointData);
+                _entityPositionValidator.AddEntity(spawnPoint);
+                spawnPoint.PositionUpdated += MapUpdater.UpdateSpawnPoint;
             }
         }
     }

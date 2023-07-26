@@ -14,11 +14,10 @@ namespace MapLogic
             _mapProvider = mapProvider;
         }
 
-        public void UpdateSpawnPoint(Vector3 oldPosition, Vector3 position)
+        public void UpdateSpawnPoint(SpawnPointData oldPosition, SpawnPointData position)
         {
-            var oldSpawnPoint = new SpawnPoint(Vector3Int.FloorToInt(oldPosition));
-            var index = _mapProvider.MapData.SpawnPoints.FindIndex(point => point.Equals(oldSpawnPoint));
-            _mapProvider.MapData.SpawnPoints[index] = new SpawnPoint(Vector3Int.FloorToInt(position));
+            var index = _mapProvider.MapData.SpawnPoints.FindIndex(point => point.Equals(oldPosition));
+            _mapProvider.MapData.SpawnPoints[index] = position;
         }
 
         public void SetBlockByGlobalPosition(Vector3Int position, BlockData blockData) =>

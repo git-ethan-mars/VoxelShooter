@@ -10,9 +10,9 @@ namespace Data
         public readonly int Depth;
         public readonly int Height;
         public readonly ChunkData[] Chunks;
-        public readonly List<SpawnPoint> SpawnPoints;
+        public readonly List<SpawnPointData> SpawnPoints;
 
-        public MapData(ChunkData[] chunks, int width, int height, int depth, List<SpawnPoint> spawnPoints)
+        public MapData(ChunkData[] chunks, int width, int height, int depth, List<SpawnPointData> spawnPoints)
         {
             Chunks = chunks;
             Width = width;

@@ -45,7 +45,7 @@ namespace MapLogic
                 chunks[i] = new ChunkData();
             }
 
-            var spawnPoints = new List<SpawnPoint>();
+            var spawnPoints = new List<SpawnPointData>();
             var mapProvider = new MapProvider(new MapData(chunks, width, height, depth, spawnPoints));
             for (var i = 0; i < chunks.Length; i++)
             {
@@ -83,7 +83,7 @@ namespace MapLogic
                 var x = binaryReader.ReadInt32();
                 var y = binaryReader.ReadInt32();
                 var z = binaryReader.ReadInt32();
-                spawnPoints.Add(new SpawnPoint() {X = x, Y = y, Z = z});
+                spawnPoints.Add(new SpawnPointData() {X = x, Y = y, Z = z});
             }
 
             AddWater(mapProvider, new Color32(3, 58, 135, 255));

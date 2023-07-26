@@ -22,7 +22,7 @@ namespace MapLogic
                 chunks[i] = new ChunkData();
             }
 
-            var mapData = new MapData(chunks, width, height, depth, new List<SpawnPoint>());
+            var mapData = new MapData(chunks, width, height, depth, new List<SpawnPointData>());
             var mapProvider = new MapProvider(mapData);
             return mapProvider;
         }

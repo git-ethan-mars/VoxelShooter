@@ -13,7 +13,7 @@ namespace Infrastructure.Factory
 {
     public class PlayerFactory : IPlayerFactory
     {
-        private readonly List<SpawnPoint> _spawnPoints;
+        private readonly List<SpawnPointData> _spawnPoints;
         private readonly IAssetProvider _assets;
         private readonly IParticleFactory _particleFactory;
         private readonly IServer _server;

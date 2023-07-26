@@ -8,29 +8,38 @@ namespace Networking.ServerServices
 {
     public class EntityPositionValidator
     {
-        private readonly List<PushableObject> _pushableObjects;
+        private readonly List<PushableObject> _pushableEntities;
         private readonly IMapProvider _mapProvider;
 
         public EntityPositionValidator(IMapUpdater mapUpdater,
             IMapProvider mapProvider)
         {
-            _pushableObjects = new List<PushableObject>();
+            _pushableEntities = new List<PushableObject>();
             _mapProvider = mapProvider;
             mapUpdater.MapUpdated += OnMapUpdate;
         }
 
-        public void AddPushable(PushableObject pushableObject)
+        public void AddEntity(PushableObject entity)
         {
-            _pushableObjects.Add(pushableObject);
+            _pushableEntities.Add(entity);
         }
+
 
         private void OnMapUpdate(Vector3Int globalPosition, BlockData blockData)
         {
-            foreach (var pushable in _pushableObjects)
+            foreach (var spawnPoint in _pushableEntities)
+            {
+                if (IsFreeSpace(spawnPoint))
+                {
+                    spawnPoint.Fall();
+                }
+            }
+
+            foreach (var pushable in _pushableEntities)
             {
                 while (!IsFreeSpace(pushable))
                 {
-                    pushable.UpdatePosition(pushable.transform.position + Vector3.up);
+                    pushable.Push();
                 }
             }
         }

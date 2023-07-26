@@ -2,13 +2,13 @@
 
 namespace Data
 {
-    public struct SpawnPoint
+    public struct SpawnPointData
     {
         public int X;
         public int Y;
         public int Z;
 
-        public SpawnPoint(Vector3Int position)
+        public SpawnPointData(Vector3Int position)
         {
             X = position.x;
             Y = position.y;

@@ -92,7 +92,7 @@ namespace MapLogic
                 chunks[i] = new ChunkData();
             }
 
-            var mapProvider = new MapProvider(new MapData(chunks, Width, _height, Depth, new List<SpawnPoint>()));
+            var mapProvider = new MapProvider(new MapData(chunks, Width, _height, Depth, new List<SpawnPointData>()));
             for (var x = 0; x < Width; x++)
             {
                 for (var y = 0; y < _height - heightOffset; y++)

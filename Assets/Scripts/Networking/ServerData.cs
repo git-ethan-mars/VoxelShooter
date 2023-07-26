@@ -11,13 +11,13 @@ namespace Networking
     public class ServerData
     {
         public readonly List<KillData> KillStatistics;
-        private readonly List<SpawnPoint> _dynamicSpawnPoints;
+        private readonly List<SpawnPointData> _dynamicSpawnPoints;
         private readonly Dictionary<NetworkConnectionToClient, PlayerData> _dataByConnection;
         private readonly IStaticDataService _staticData;
 
         public ServerData(IStaticDataService staticDataService, IMapProvider mapProvider)
         {
-            _dynamicSpawnPoints = new List<SpawnPoint>();
+            _dynamicSpawnPoints = new List<SpawnPointData>();
             mapProvider.MapData.SpawnPoints.CopyTo(_dynamicSpawnPoints);
             _dataByConnection = new Dictionary<NetworkConnectionToClient, PlayerData>();
             KillStatistics = new List<KillData>();
@@ -84,7 +84,7 @@ namespace Networking
             return scoreData.ToList();
         }
 
-        public void UpdateSpawnPoint(SpawnPoint oldSpawnPoint, SpawnPoint newSpawnPoint)
+        public void UpdateSpawnPoint(SpawnPointData oldSpawnPoint, SpawnPointData newSpawnPoint)
         {
             var index = _dynamicSpawnPoints.FindIndex(spawnPoint => spawnPoint.Equals(oldSpawnPoint));
             _dynamicSpawnPoints[index] = newSpawnPoint;

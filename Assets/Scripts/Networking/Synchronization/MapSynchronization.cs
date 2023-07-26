@@ -17,7 +17,7 @@ namespace Networking.Synchronization
         [Command]
         public void SendSpawnPointOnServer(Vector3Int position)
         {
-            MapProvider.MapData.SpawnPoints.Add(new SpawnPoint()
+            MapProvider.MapData.SpawnPoints.Add(new SpawnPointData()
             {
                 X = position.x,
                 Y = position.y,
