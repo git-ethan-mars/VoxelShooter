@@ -57,7 +57,7 @@ namespace MapLogic
                 {
                     for (var z = 0; z < _depth; z++)
                     {
-                        var currentBlock = x * _width * _width + y * _width + z;
+                        var currentBlock = y * _width * _width + z * _width + x;
                         var currentBlockData = MapProvider.GetBlockByGlobalPosition(x, y, z);
                         if (currentBlockData.IsSolid())
                             MapProvider.MapData._solidBlocks.Add(currentBlock);
@@ -68,14 +68,14 @@ namespace MapLogic
 
         public int GetVertexIndex(Vector3Int vertex)
         {
-            return vertex.x * _width * _width + vertex.y * _width + vertex.z;
+            return vertex.y * _width * _width + vertex.z * _width + vertex.x;
         }
         
         private Vector3Int GetVertexCoordinates(int index)
         {
-            var x = index / (_width * _width);
-            var y = (index - x * (_width * _width)) / _width;
-            var z = index - x * _width * _width - y * _width;
+            var y = index / (_width * _width);
+            var z = (index - y * (_width * _width)) / _width;
+            var x = index - y * _width * _width - z * _width;
             return new Vector3Int(x, y, z);
         }
 
