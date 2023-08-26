@@ -10,7 +10,7 @@ namespace Networking
         IMapProvider MapProvider { get; }
         ServerData ServerData { get; }
         IMapUpdater MapUpdater { get; }
-        Algorithm Algorithm { get; }
+        MapDestructionAlgorithm MapDestructionAlgorithm { get; }
         void AddKill(NetworkConnectionToClient source, NetworkConnectionToClient receiver);
 
         void AddPlayer(NetworkConnectionToClient connection, GameClass chosenClass, CSteamID steamID,

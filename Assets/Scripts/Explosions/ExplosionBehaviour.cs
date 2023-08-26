@@ -15,15 +15,15 @@ namespace Explosions
         private readonly IExplosionArea _explosionArea;
         private readonly IParticleFactory _particleFactory;
         private readonly IMapUpdater _mapUpdater;
-        private readonly Algorithm _algorithm;
+        private readonly MapDestructionAlgorithm _mapDestructionAlgorithm;
 
         protected ExplosionBehaviour(IMapUpdater mapUpdater, IParticleFactory particleFactory, 
-            IExplosionArea explosionArea, Algorithm algorithm)
+            IExplosionArea explosionArea, MapDestructionAlgorithm mapDestructionAlgorithm)
         {
             _explosionArea = explosionArea;
             _mapUpdater = mapUpdater;
             _particleFactory = particleFactory;
-            _algorithm = algorithm;
+            _mapDestructionAlgorithm = mapDestructionAlgorithm;
         }
         
         protected void DamagePlayer(Collider hitCollider, Vector3 explosionCenter, int radius, int damage, 
@@ -50,7 +50,7 @@ namespace Explosions
         protected void DestroyExplosiveWithBlocks(Vector3Int explosionCenter, GameObject explosive, int radius, 
             int particlesSpeed, int particlesCount)
         {
-            _algorithm.Start(explosionCenter, radius);
+            _mapDestructionAlgorithm.StartDestruction(explosionCenter, radius);
             _particleFactory.CreateRchParticle(explosionCenter, particlesSpeed, particlesCount);
             NetworkServer.Destroy(explosive);
         }

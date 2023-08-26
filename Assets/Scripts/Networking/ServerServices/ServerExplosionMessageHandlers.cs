@@ -51,7 +51,7 @@ namespace Networking.ServerServices
             var rocketData = (RocketLauncherItem) _staticData.GetItem(message.ItemId);
             var direction = message.Ray.direction;
             var rocket = _entityFactory.CreateRocket(message.Ray.origin + direction * 2,
-                Quaternion.LookRotation(direction), _server.MapProvider, _server.MapUpdater, _particleFactory, rocketData, connection, _server.Algorithm);
+                Quaternion.LookRotation(direction), _server.MapProvider, _server.MapUpdater, _particleFactory, rocketData, connection, _server.MapDestructionAlgorithm);
             rocket.GetComponent<Rigidbody>().velocity = direction * rocketData.speed;
         }
 

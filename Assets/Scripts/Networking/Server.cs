@@ -19,7 +19,7 @@ namespace Networking
         public IMapProvider MapProvider { get; set; }
         public ServerData ServerData { get; set; }
         public IMapUpdater MapUpdater { get; set; }
-        public Algorithm Algorithm { get; set; }
+        public MapDestructionAlgorithm MapDestructionAlgorithm { get; set; }
         private readonly ServerSettings _serverSettings;
         private readonly EntityPositionValidator _entityPositionValidator;
         private readonly IEntityFactory _entityFactory;
@@ -35,7 +35,7 @@ namespace Networking
             _entityFactory = entityFactory;
             MapProvider = MapReader.ReadFromFile(_serverSettings.MapName + ".rch");
             MapUpdater = new MapUpdater(MapProvider);
-            Algorithm = new Algorithm(MapProvider, MapUpdater);
+            MapDestructionAlgorithm = new MapDestructionAlgorithm(MapProvider, MapUpdater);
             ServerData = new ServerData(staticDataService, MapProvider);
             _entityPositionValidator = new EntityPositionValidator(MapUpdater, MapProvider);
             _playerFactory = new PlayerFactory(assets, this, particleFactory);

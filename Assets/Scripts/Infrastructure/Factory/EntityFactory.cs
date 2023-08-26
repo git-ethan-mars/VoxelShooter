@@ -44,10 +44,10 @@ namespace Infrastructure.Factory
 
         public GameObject CreateRocket(Vector3 position, Quaternion rotation, IMapProvider mapProvider,
             IMapUpdater mapUpdater,
-            IParticleFactory particleFactory, RocketLauncherItem rocketData, NetworkConnectionToClient owner, Algorithm algorithm)
+            IParticleFactory particleFactory, RocketLauncherItem rocketData, NetworkConnectionToClient owner, MapDestructionAlgorithm mapDestructionAlgorithm)
         {
             var rocket = _assets.Instantiate(RocketPath, position, rotation);
-            rocket.GetComponent<Rocket>().Construct(mapProvider, mapUpdater, rocketData, owner, particleFactory, algorithm);
+            rocket.GetComponent<Rocket>().Construct(mapProvider, mapUpdater, rocketData, owner, particleFactory, mapDestructionAlgorithm);
             NetworkServer.Spawn(rocket);
             return rocket;
         }

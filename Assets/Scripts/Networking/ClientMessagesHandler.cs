@@ -61,7 +61,6 @@ namespace Networking
             {
                 MapUpdates[message.Positions[i]] = message.BlockData[i];
             }
-            
         }
 
         private void OnServerTimeMessage(ServerTimeMessage message)

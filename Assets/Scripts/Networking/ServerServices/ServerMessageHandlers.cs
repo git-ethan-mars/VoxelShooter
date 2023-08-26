@@ -31,10 +31,10 @@ namespace Networking.ServerServices
             _particleFactory = particleFactory;
             _singleExplosionBehaviour =
                 new SingleExplosionBehaviour(_server.MapUpdater, particleFactory,
-                    new SphereExplosionArea(_server.MapProvider), _server.Algorithm);
+                    new SphereExplosionArea(_server.MapProvider), _server.MapDestructionAlgorithm);
             _chainExplosionBehaviour =
                 new ChainExplosionBehaviour(_server.MapUpdater, particleFactory,
-                    new SphereExplosionArea(_server.MapProvider), _server.Algorithm);
+                    new SphereExplosionArea(_server.MapProvider), _server.MapDestructionAlgorithm);
         }
 
         public void RegisterHandlers()
@@ -68,6 +68,13 @@ namespace Networking.ServerServices
 
         private void OnAddBlocks(NetworkConnectionToClient connection, AddBlocksRequest message)
         {
+            for (var i = 0; i < message.GlobalPositions.Length; i++)
+            {
+                var index = _server.MapDestructionAlgorithm.GetVertexIndex(message.GlobalPositions[i]);
+                if (!_server.MapProvider.MapData._solidBlocks.Contains(index))
+                     _server.MapProvider.MapData._solidBlocks.Add(index);
+            }
+            
             var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
             if (!result || !playerData.IsAlive) return;
             var blockAmount = playerData.ItemCountById[message.ItemId];

@@ -112,7 +112,7 @@ namespace Networking.Synchronization
         private void UpdateBlocks(List<Vector3Int> blocks, int radius)
         {
             foreach (var block in blocks)
-                _server.Algorithm.Start(block, radius);
+                _server.MapDestructionAlgorithm.StartDestruction(block, radius);
         }
 
         [Server]

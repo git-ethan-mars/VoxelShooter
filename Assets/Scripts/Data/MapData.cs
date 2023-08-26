@@ -11,6 +11,7 @@ namespace Data
         public readonly int Height;
         public readonly ChunkData[] Chunks;
         public readonly List<SpawnPointData> SpawnPoints;
+        public HashSet<int> _solidBlocks = new();
 
         public MapData(ChunkData[] chunks, int width, int height, int depth, List<SpawnPointData> spawnPoints)
         {
