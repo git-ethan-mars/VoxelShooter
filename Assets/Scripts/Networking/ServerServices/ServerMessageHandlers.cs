@@ -31,10 +31,10 @@ namespace Networking.ServerServices
             _particleFactory = particleFactory;
             _singleExplosionBehaviour =
                 new SingleExplosionBehaviour(_server.MapUpdater, particleFactory,
-                    new SphereExplosionArea(_server.MapProvider));
+                    new SphereExplosionArea(_server.MapProvider), _server.Algorithm);
             _chainExplosionBehaviour =
                 new ChainExplosionBehaviour(_server.MapUpdater, particleFactory,
-                    new SphereExplosionArea(_server.MapProvider));
+                    new SphereExplosionArea(_server.MapProvider), _server.Algorithm);
         }
 
         public void RegisterHandlers()

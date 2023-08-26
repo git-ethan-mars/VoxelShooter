@@ -95,25 +95,24 @@ namespace Networking.Synchronization
                 if (isStrongHit)
                 {
                     var validPositions = _lineExplosionArea.GetExplodedBlocks(3, targetBlock);
-                    foreach (var position in validPositions)
-                        _server.MapUpdater.SetBlockByGlobalPosition(position, new BlockData());
-                    NetworkServer.SendToAll(new UpdateMapMessage(
-                        validPositions.ToArray(), new BlockData[validPositions.Count]));
+                    UpdateBlocks(validPositions, 3);
                 }
                 else
                 {
                     var blocks = _lineExplosionArea.GetExplodedBlocks(1, targetBlock);
-                    if (blocks.Count > 0)
-                    {
-                        _server.MapUpdater.SetBlockByGlobalPosition(blocks[0], new BlockData());
-                        NetworkServer.SendToAll(new UpdateMapMessage(new[] {targetBlock}, new BlockData[1]));
-                    }
+                    UpdateBlocks(blocks, 1);
                 }
 
                 return true;
             }
 
             return false;
+        }
+
+        private void UpdateBlocks(List<Vector3Int> blocks, int radius)
+        {
+            foreach (var block in blocks)
+                _server.Algorithm.Start(block, radius);
         }
 
         [Server]

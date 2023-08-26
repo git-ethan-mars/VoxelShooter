@@ -24,7 +24,6 @@ namespace Networking
             _staticData = staticDataService;
         }
 
-
         public void AddPlayer(NetworkConnectionToClient connection, GameClass chosenClass, CSteamID steamID,
             string nickname)
         {

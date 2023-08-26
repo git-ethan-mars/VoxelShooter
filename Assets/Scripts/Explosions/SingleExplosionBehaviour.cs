@@ -9,7 +9,7 @@ namespace Explosions
     public class SingleExplosionBehaviour : ExplosionBehaviour
     {
         public SingleExplosionBehaviour(IMapUpdater mapUpdater, IParticleFactory particleFactory, 
-            IExplosionArea explosionArea) : base(mapUpdater, particleFactory, explosionArea) { }
+            IExplosionArea explosionArea, Algorithm algorithm) : base(mapUpdater, particleFactory, explosionArea, algorithm) { }
         
         public override void Explode(Vector3Int explosionCenter, GameObject explosive, int radius, 
             NetworkConnectionToClient connection, int damage, int particlesSpeed, 
