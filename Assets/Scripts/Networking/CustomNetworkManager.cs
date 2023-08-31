@@ -9,14 +9,13 @@ using Infrastructure.States;
 using MapLogic;
 using Mirror;
 using Networking.ServerServices;
-using UnityEngine;
 using MemoryStream = System.IO.MemoryStream;
 
 namespace Networking
 {
     public class CustomNetworkManager : NetworkManager, ICoroutineRunner
     {
-        public event Action<IMapProvider, Dictionary<Vector3Int, BlockData>> MapDownloaded;
+        public event Action MapDownloaded;
         public event Action<ServerTime> ServerTimeChanged;
         public event Action<ServerTime> RespawnTimeChanged;
         public event Action<List<ScoreData>> ScoreboardChanged;
@@ -25,13 +24,14 @@ namespace Networking
         private IStaticDataService _staticData;
         private IEntityFactory _entityFactory;
         private ClientMessagesHandler _clientMessageHandlers;
-        private ServerServices.ServerMessageHandlers _serverMessageHandlers;
+        private RequestHandlers _serverMessageHandlers;
         private ServerSettings _serverSettings;
         private GameStateMachine _stateMachine;
         private ServerTimer _serverTimer;
         private IParticleFactory _particleFactory;
         private IAssetProvider _assets;
         private IGameFactory _gameFactory;
+        public ClientData Client;
         private IServer _server;
         private const float ShowResultsDuration = 10;
 
@@ -55,7 +55,7 @@ namespace Networking
             _server = new Server(this, _staticData, _serverSettings, _assets, _particleFactory, _entityFactory);
             _server.CreateSpawnPoints();
             _serverMessageHandlers =
-                new ServerMessageHandlers(_entityFactory, this, _server, _staticData, _particleFactory);
+                new RequestHandlers(_entityFactory, this, _server, _staticData, _particleFactory);
             _serverMessageHandlers.RegisterHandlers();
             _serverTimer = new ServerTimer(this, _serverSettings.MaxDuration, StopHost);
             _serverTimer.Start();
@@ -64,14 +64,12 @@ namespace Networking
 
         public override void OnStartClient()
         {
-            _clientMessageHandlers = new ClientMessagesHandler();
-            _clientMessageHandlers.RegisterHandlers();
-            _clientMessageHandlers.MapDownloaded +=
-                (mapProvider, mapUpdates) => MapDownloaded?.Invoke(mapProvider, mapUpdates);
-            _clientMessageHandlers.ServerTimeUpdated += timeLeft => ServerTimeChanged?.Invoke(timeLeft);
-            _clientMessageHandlers.RespawnTimeUpdated += timeLeft => RespawnTimeChanged?.Invoke(timeLeft);
-            _clientMessageHandlers.ScoreboardUpdated += scores => ScoreboardChanged?.Invoke(scores);
-            _clientMessageHandlers.MapProgress += progress => OnLoadProgress?.Invoke(progress);
+            Client = new ClientData();
+            _clientMessageHandlers = new ClientMessagesHandler(Client,
+                mapProgress => OnLoadProgress?.Invoke(mapProgress), () => MapDownloaded?.Invoke(),
+                serverTime => ServerTimeChanged?.Invoke(serverTime),
+                RespawnTimeChanged, ScoreboardChanged);
+            _clientMessageHandlers.RegisterHandlers(); // TODO: REFACTOR THIS SHIT
         }
 
 
@@ -80,9 +78,9 @@ namespace Networking
             base.OnServerReady(connection);
             if (IsHost(connection))
             {
-                MapDownloaded?.Invoke(_server.MapProvider, _clientMessageHandlers.MapUpdates);
+                Client.MapProvider = _server.MapProvider;
+                MapDownloaded?.Invoke();
             }
-
             else
             {
                 var memoryStream = new MemoryStream();
@@ -92,10 +90,6 @@ namespace Networking
                 var mapMessages = mapSplitter.SplitBytesIntoMessages(bytes, 100000);
                 StartCoroutine(mapSplitter.SendMessages(mapMessages, connection, 1f));
             }
-        }
-
-        public override void OnClientDisconnect()
-        {
         }
 
         public override void OnServerDisconnect(NetworkConnectionToClient connection)
@@ -122,7 +116,6 @@ namespace Networking
             StartCoroutine(Utils.DoActionAfterDelay(ShowResultsDuration,
                 _stateMachine.Enter<MainMenuState>));
         }
-
 
         private static bool IsHost(NetworkConnection conn) =>
             NetworkClient.connection.connectionId == conn.connectionId;

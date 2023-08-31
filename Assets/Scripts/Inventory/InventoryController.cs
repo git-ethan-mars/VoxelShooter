@@ -8,6 +8,8 @@ using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
 using Mirror;
 using Networking.Messages;
+using Networking.Messages.Requests;
+using Networking.Messages.Responses;
 using Networking.Synchronization;
 using PlayerLogic;
 using Rendering;
@@ -57,19 +59,19 @@ namespace Inventory
             }
 
             SendChangeSlotRequest(_itemIndex);
-            NetworkClient.RegisterHandler<ItemUseResult>(OnItemUse);
-            NetworkClient.RegisterHandler<ReloadResult>(OnReloadResult);
-            NetworkClient.RegisterHandler<ShootResult>(OnShootResult);
-            NetworkClient.RegisterHandler<ChangeSlotResult>(OnChangeSlotResult);
+            NetworkClient.RegisterHandler<ItemUseResponse>(OnItemUseResponse);
+            NetworkClient.RegisterHandler<ReloadResponse>(OnReloadResponse);
+            NetworkClient.RegisterHandler<ShootResponse>(OnShootResponse);
+            NetworkClient.RegisterHandler<ChangeSlotResponse>(OnChangeSlotResponse);
         }
 
         public void OnDestroy()
         {
             _transparentMeshPool.CleanPool();
-            NetworkClient.UnregisterHandler<ItemUseResult>();
-            NetworkClient.UnregisterHandler<ReloadResult>();
-            NetworkClient.UnregisterHandler<ShootResult>();
-            NetworkClient.UnregisterHandler<ChangeSlotResult>();
+            NetworkClient.UnregisterHandler<ItemUseResponse>();
+            NetworkClient.UnregisterHandler<ReloadResponse>();
+            NetworkClient.UnregisterHandler<ShootResponse>();
+            NetworkClient.UnregisterHandler<ChangeSlotResponse>();
         }
 
         private void AddEventHandlers(InventoryInput inventoryInput)
@@ -205,7 +207,7 @@ namespace Inventory
         }
 
 
-        private void OnChangeSlotResult(ChangeSlotResult message)
+        private void OnChangeSlotResponse(ChangeSlotResponse message)
         {
             _boarders[_itemIndex].SetActive(false);
             _slots[_itemIndex].ItemHandler.Unselect();
@@ -214,14 +216,14 @@ namespace Inventory
             _boarders[_itemIndex].SetActive(true);
         }
 
-        private void OnItemUse(ItemUseResult message)
+        private void OnItemUseResponse(ItemUseResponse message)
         {
             ((IConsumable) _slots.Find(slot => slot.InventoryItem.id == message.ItemId).ItemHandler).Count =
                 message.Count;
             ((IConsumable) _slots.Find(slot => slot.InventoryItem.id == message.ItemId).ItemHandler).OnCountChanged();
         }
 
-        private void OnReloadResult(ReloadResult message)
+        private void OnReloadResponse(ReloadResponse message)
         {
             var reloading = (IReloading) _slots.Find(slot => slot.InventoryItem.id == message.WeaponId).ItemHandler;
             reloading.TotalBullets = message.TotalBullets;
@@ -229,7 +231,7 @@ namespace Inventory
             reloading.OnReloadResult();
         }
 
-        private void OnShootResult(ShootResult message)
+        private void OnShootResponse(ShootResponse message)
         {
             var shooting = (IShooting) _slots.Find(slot => slot.InventoryItem.id == message.WeaponId).ItemHandler;
             shooting.BulletsInMagazine = message.BulletsInMagazine;

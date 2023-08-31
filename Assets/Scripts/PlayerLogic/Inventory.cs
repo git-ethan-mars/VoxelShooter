@@ -15,12 +15,12 @@ namespace PlayerLogic
 
         private IStaticDataService _staticData;
         private GameObject _currentItemModel;
-        private IInventoryModelFactory _inventoryModelFactory;
+        private IMeshFactory _meshFactory;
 
         private void Awake()
         {
             _staticData = AllServices.Container.Single<IStaticDataService>();
-            _inventoryModelFactory = AllServices.Container.Single<IInventoryModelFactory>();
+            _meshFactory = AllServices.Container.Single<IMeshFactory>();
         }
 
         public override void OnStartClient()
@@ -32,7 +32,7 @@ namespace PlayerLogic
         {
             if (_currentItemModel != null)
                 Destroy(_currentItemModel);
-            _currentItemModel = _inventoryModelFactory.CreateGameModel(_staticData.GetItem(ItemIds[newSlotId]).prefab,
+            _currentItemModel = _meshFactory.CreateGameModel(_staticData.GetItem(ItemIds[newSlotId]).prefab,
                 GetComponent<Player>().itemPosition);
         }
     }

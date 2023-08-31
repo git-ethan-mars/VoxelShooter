@@ -6,6 +6,8 @@ using Infrastructure.Services.StaticData;
 using Infrastructure.States;
 using MapLogic;
 using Networking;
+using Networking.Messages;
+using Networking.ServerServices;
 using Rendering;
 using UnityEngine;
 
@@ -26,14 +28,16 @@ namespace Infrastructure.Factory
         private readonly IAvatarLoader _avatarLoader;
         private readonly IPlayerFactory _playerFactory;
         private readonly IParticleFactory _particleFactory;
+        private readonly IMeshFactory _meshFactory;
 
 
         public GameFactory(IAssetProvider assets, IEntityFactory entityFactory,
-            IStaticDataService staticData, IParticleFactory particleFactory)
+            IStaticDataService staticData, IParticleFactory particleFactory, IMeshFactory meshFactory)
         {
             _assets = assets;
             _entityFactory = entityFactory;
             _particleFactory = particleFactory;
+            _meshFactory = meshFactory;
             _staticData = staticData;
         }
 
@@ -65,11 +69,11 @@ namespace Infrastructure.Factory
             _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(mapProvider, Faces.Back);
         }
 
-        public void CreateMapRenderer(IMapProvider mapProvider, Dictionary<Vector3Int, BlockData> buffer)
+        public void CreateMapRenderer(ClientData client)
         {
             var mapGenerator = _assets.Instantiate(MapRendererPath);
             _mapGenerator = mapGenerator.GetComponent<MapRenderer>();
-            _mapGenerator.Construct(mapProvider, this, buffer);
+            _mapGenerator.Construct(this, _meshFactory, client);
         }
 
         public ChunkRenderer CreateChunkRenderer(Vector3Int position, Quaternion rotation, Transform transform)
