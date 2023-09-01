@@ -8,26 +8,25 @@ namespace MapLogic
 {
     public static class MapReader
     {
+        private const string RchExtension = ".rch";
+        private const string VxlExtension = ".vxl";
+
         public static MapProvider ReadFromFile(string fileName)
         {
-            if (Path.GetExtension(fileName) != ".rch")
+            var rchFilePath = Application.dataPath + $"/Maps/{fileName}" + RchExtension;
+            var vxlFilePath = Application.dataPath + $"/Maps/{fileName}" + VxlExtension;
+            if (File.Exists(rchFilePath))
             {
-                if (Path.GetExtension(fileName) == ".vxl")
-                {
-                    return Vxl2RchConverter.LoadVxl(fileName);
-                }
-
-                throw new ArgumentException("Неправильный путь до файла");
+                using var file = File.OpenRead(rchFilePath);
+                return ReadFromStream(file);
             }
 
-            var filePath = Application.dataPath + $"/Maps/{fileName}";
-            if (!File.Exists(filePath))
+            if (File.Exists(vxlFilePath))
             {
-                return MapProvider.CreateNewMap();
+                return Vxl2RchConverter.LoadVxl(vxlFilePath);
             }
 
-            using var file = File.OpenRead(filePath);
-            return ReadFromStream(file);
+            return MapProvider.CreateNewMap();
         }
 
 

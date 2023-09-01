@@ -12,9 +12,9 @@ namespace MapLogic
         private static int _height;
         private const int Depth = 512;
 
-        public static MapProvider LoadVxl(string mapName)
+        public static MapProvider LoadVxl(string mapPath)
         {
-            var data = File.ReadAllBytes(Application.dataPath + $"/Maps/{mapName}");
+            var data = File.ReadAllBytes(mapPath);
             _height = GetMapHeight(data);
             var heightOffset = 0;
             if (_height % ChunkData.ChunkSize != 0)
