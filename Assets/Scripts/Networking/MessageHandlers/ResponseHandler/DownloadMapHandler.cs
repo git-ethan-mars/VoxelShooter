@@ -5,9 +5,9 @@ using Generators;
 using MapLogic;
 using Networking.Messages.Responses;
 
-namespace Networking
+namespace Networking.MessageHandlers.ResponseHandler
 {
-    public class DownloadMapHandler : MessageHandler<DownloadMapResponse>
+    public class DownloadMapHandler : ResponseHandler<DownloadMapResponse>
     {
         public event Action<float> MapLoadProgressed;
         public event Action MapDownloaded;
@@ -19,7 +19,7 @@ namespace Networking
             _client = client;
         }
 
-        protected override void OnMessageReceived(DownloadMapResponse message)
+        protected override void OnResponseReceived(DownloadMapResponse message)
         {
             _byteChunks.AddRange(message.ByteChunk);
             MapLoadProgressed?.Invoke(message.Progress);

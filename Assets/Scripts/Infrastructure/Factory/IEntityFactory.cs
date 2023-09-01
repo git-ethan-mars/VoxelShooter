@@ -18,6 +18,6 @@ namespace Infrastructure.Factory
             IMapUpdater mapUpdater,
             IParticleFactory particleFactory, RocketLauncherItem rocketData, NetworkConnectionToClient owner, MapDestructionAlgorithm mapDestructionAlgorithm);
 
-        GameObject CreateSpawnPoint(Vector3 position);
+        GameObject CreateSpawnPoint(Vector3 position, Transform parent);
     }
 }

@@ -3,6 +3,7 @@ using MapLogic;
 using Mirror;
 using Networking.ServerServices;
 using Steamworks;
+using UnityEngine;
 
 namespace Networking
 {
@@ -19,6 +20,8 @@ namespace Networking
 
         void ChangeClass(NetworkConnectionToClient connection, GameClass chosenClass);
         void DeletePlayer(NetworkConnectionToClient connection);
-        void CreateSpawnPoints();
+        void CreateSpawnPoints(Transform parent);
+        void RegisterHandlers();
+        void UnregisterHandlers();
     }
 }

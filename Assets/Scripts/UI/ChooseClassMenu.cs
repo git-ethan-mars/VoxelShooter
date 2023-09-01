@@ -3,7 +3,6 @@ using Data;
 using Infrastructure.Services.Input;
 using Mirror;
 using Networking;
-using Networking.Messages;
 using Networking.Messages.Requests;
 using Steamworks;
 using UnityEngine;
@@ -15,24 +14,40 @@ namespace UI
     [RequireComponent(typeof(CanvasGroup))]
     public class ChooseClassMenu : Window
     {
-        [SerializeField] private Button builderButton;
-        [SerializeField] private Button sniperButton;
-        [SerializeField] private Button combatantButton;
-        [SerializeField] private Button grenadierButton;
+        [SerializeField]
+        private Button builderButton;
+
+        [SerializeField]
+        private Button sniperButton;
+
+        [SerializeField]
+        private Button combatantButton;
+
+        [SerializeField]
+        private Button grenadierButton;
+
         private IInputService _inputService;
         private CanvasGroup _canvasGroup;
         private bool _isLocalBuild;
+        private CustomNetworkManager _networkManager;
 
         public void Construct(CustomNetworkManager networkManager, IInputService inputService, bool isLocalBuild)
         {
             _isLocalBuild = isLocalBuild;
             _inputService = inputService;
-            networkManager.GameFinished += () => gameObject.SetActive(false);
+            _networkManager = networkManager;
+            _networkManager.GameFinished += HideWindow;
             _canvasGroup = GetComponent<CanvasGroup>();
             builderButton.onClick.AddListener(() => ChangeClass(GameClass.Builder));
             sniperButton.onClick.AddListener(() => ChangeClass(GameClass.Sniper));
             combatantButton.onClick.AddListener(() => ChangeClass(GameClass.Combatant));
             grenadierButton.onClick.AddListener(() => ChangeClass(GameClass.Grenadier));
+        }
+
+        private void HideWindow()
+        {
+            _networkManager.GameFinished -= HideWindow;
+            gameObject.SetActive(false);
         }
 
         private void OnEnable()

@@ -1,8 +1,8 @@
 ﻿using Networking.Messages.Responses;
 
-namespace Networking
+namespace Networking.MessageHandlers.ResponseHandler
 {
-    public class FallBlockHandler : MessageHandler<FallBlockResponse>
+    public class FallBlockHandler : ResponseHandler<FallBlockResponse>
     {
         private readonly Client _client;
 
@@ -11,7 +11,7 @@ namespace Networking
             _client = client;
         }
 
-        protected override void OnMessageReceived(FallBlockResponse message)
+        protected override void OnResponseReceived(FallBlockResponse message)
         {
             _client.FallMeshGenerator.GenerateFallBlocks(message.Positions, message.BlockData);
         }

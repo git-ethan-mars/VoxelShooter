@@ -52,9 +52,9 @@ namespace Infrastructure.Factory
             return rocket;
         }
 
-        public GameObject CreateSpawnPoint(Vector3 position)
+        public GameObject CreateSpawnPoint(Vector3 position, Transform parent)
         {
-            return _assets.Instantiate(SpawnPointPath, position, Quaternion.identity);
+            return _assets.Instantiate(SpawnPointPath, position, Quaternion.identity, parent);
         }
     }
 }

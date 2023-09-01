@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 using Data;
+using Networking.ClientServices;
 using Networking.Messages.Responses;
 using UnityEngine;
 
-namespace Networking
+namespace Networking.MessageHandlers.ResponseHandler
 {
-    public class UpdateMapHandler : MessageHandler<UpdateMapResponse>
+    public class UpdateMapHandler : ResponseHandler<UpdateMapResponse>
     {
         private readonly Client _client;
 
@@ -14,7 +15,7 @@ namespace Networking
             _client = client;
         }
 
-        protected override void OnMessageReceived(UpdateMapResponse message)
+        protected override void OnResponseReceived(UpdateMapResponse message)
         {
             _client.Data.BufferToUpdateMap.Add(message);
             if (_client.Data.State == ClientState.Connecting)

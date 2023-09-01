@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Data;
 using Generators;
 using Infrastructure;
@@ -9,6 +8,7 @@ using Infrastructure.Services.StaticData;
 using Infrastructure.States;
 using MapLogic;
 using Mirror;
+using Networking.ClientServices;
 using Networking.ServerServices;
 using MemoryStream = System.IO.MemoryStream;
 
@@ -16,11 +16,11 @@ namespace Networking
 {
     public class CustomNetworkManager : NetworkManager, ICoroutineRunner
     {
-        public event Action GameFinished; // Unsubscribe please
+        public event Action GameFinished;
+        private const string SpawnPointContainerName = "SpawnPointContainer";
         public Client Client;
         private IStaticDataService _staticData;
         private IEntityFactory _entityFactory;
-        private RequestHandlers _serverMessageHandlers;
         private ServerSettings _serverSettings;
         private GameStateMachine _stateMachine;
         private ServerTimer _serverTimer;
@@ -50,10 +50,9 @@ namespace Networking
         public override void OnStartServer()
         {
             _server = new Server(this, _staticData, _serverSettings, _assets, _particleFactory, _entityFactory);
-            _server.CreateSpawnPoints();
-            _serverMessageHandlers =
-                new RequestHandlers(_entityFactory, this, _server, _staticData, _particleFactory);
-            _serverMessageHandlers.RegisterHandlers();
+            _server.RegisterHandlers();
+            var spawnPointContainer = _gameFactory.CreateGameObjectContainer(SpawnPointContainerName);
+            _server.CreateSpawnPoints(spawnPointContainer.transform);
             _serverTimer = new ServerTimer(this, _serverSettings.MaxDuration, StopHost);
             _serverTimer.Start();
         }
@@ -105,7 +104,7 @@ namespace Networking
 
         public override void OnStopServer()
         {
-            _serverMessageHandlers.RemoveHandlers();
+            _server.UnregisterHandlers();
             _gameFactory.CreateCamera();
             GameFinished?.Invoke();
             StartCoroutine(Utils.DoActionAfterDelay(ShowResultsDuration,

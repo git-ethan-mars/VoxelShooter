@@ -2,13 +2,13 @@
 using Data;
 using Networking.Messages.Responses;
 
-namespace Networking
+namespace Networking.MessageHandlers.ResponseHandler
 {
-    public class GameTimeHandler : MessageHandler<GameTimeResponse>
+    public class GameTimeHandler : ResponseHandler<GameTimeResponse>
     {
         public event Action<ServerTime> GameTimeChanged;
 
-        protected override void OnMessageReceived(GameTimeResponse message)
+        protected override void OnResponseReceived(GameTimeResponse message)
         {
             GameTimeChanged?.Invoke(message.TimeLeft);
         }

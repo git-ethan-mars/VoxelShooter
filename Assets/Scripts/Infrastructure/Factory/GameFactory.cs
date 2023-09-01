@@ -52,7 +52,7 @@ namespace Infrastructure.Factory
 
         public GameObject CreateGameObjectContainer(string containerName)
         {
-            return _assets.Instantiate(new GameObject(containerName));
+            return new GameObject(containerName);
         }
 
         public void CreateCamera()

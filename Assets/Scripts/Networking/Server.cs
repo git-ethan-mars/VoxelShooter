@@ -1,12 +1,13 @@
 ﻿using Data;
 using Entities;
+using Explosions;
 using Infrastructure;
 using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
 using Infrastructure.Services.StaticData;
 using MapLogic;
 using Mirror;
-using Networking.Messages;
+using Networking.MessageHandlers.RequestHandlers;
 using Networking.Messages.Responses;
 using Networking.ServerServices;
 using PlayerLogic.States;
@@ -26,20 +27,55 @@ namespace Networking
         private readonly IEntityFactory _entityFactory;
         private readonly IPlayerFactory _playerFactory;
         private readonly ICoroutineRunner _coroutineRunner;
+        private readonly AddBlocksHandler _addBlocksHandler;
+        private readonly ChangeClassHandler _changeClassHandler;
+        private readonly GrenadeSpawnHandler _grenadeSpawnHandler;
+        private readonly TntSpawnHandler _tntSpawnHandler;
+        private readonly ChangeSlotHandler _changeSlotHandler;
 
-        public Server(ICoroutineRunner coroutineRunner, IStaticDataService staticDataService,
+        public Server(ICoroutineRunner coroutineRunner, IStaticDataService staticData,
             ServerSettings serverSettings, IAssetProvider assets,
             IParticleFactory particleFactory, IEntityFactory entityFactory)
         {
             _coroutineRunner = coroutineRunner;
             _serverSettings = serverSettings;
             _entityFactory = entityFactory;
-            MapProvider = MapReader.ReadFromFile(_serverSettings.MapName + ".rch");
+            MapProvider = MapReader.ReadFromFile(_serverSettings.MapName);
             MapUpdater = new MapUpdater(MapProvider);
             MapDestructionAlgorithm = new MapDestructionAlgorithm(MapProvider, MapUpdater);
-            ServerData = new ServerData(staticDataService, MapProvider);
+            ServerData = new ServerData(staticData, MapProvider);
             _entityPositionValidator = new EntityPositionValidator(MapUpdater, MapProvider);
             _playerFactory = new PlayerFactory(assets, this, particleFactory);
+            var sphereExplosionArea = new SphereExplosionArea(MapProvider);
+            var singleExplosionBehaviour = new SingleExplosionBehaviour(MapUpdater, particleFactory,
+                sphereExplosionArea, MapDestructionAlgorithm);
+            var chainExplosionBehaviour = new ChainExplosionBehaviour(MapUpdater, particleFactory,
+                sphereExplosionArea, MapDestructionAlgorithm);
+            _addBlocksHandler = new AddBlocksHandler(this);
+            _changeClassHandler = new ChangeClassHandler(this);
+            _changeSlotHandler = new ChangeSlotHandler(this);
+            _grenadeSpawnHandler = new GrenadeSpawnHandler(this, coroutineRunner, entityFactory, staticData,
+                singleExplosionBehaviour);
+            _tntSpawnHandler =
+                new TntSpawnHandler(this, coroutineRunner, entityFactory, staticData, chainExplosionBehaviour);
+        }
+
+        public void RegisterHandlers()
+        {
+            _addBlocksHandler.Register();
+            _changeClassHandler.Register();
+            _changeSlotHandler.Register();
+            _grenadeSpawnHandler.Register();
+            _tntSpawnHandler.Register();
+        }
+
+        public void UnregisterHandlers()
+        {
+            _addBlocksHandler.Unregister();
+            _changeClassHandler.Unregister();
+            _changeSlotHandler.Unregister();
+            _grenadeSpawnHandler.Unregister();
+            _tntSpawnHandler.Unregister();
         }
 
         public void AddPlayer(NetworkConnectionToClient connection, GameClass chosenClass, CSteamID steamID,
@@ -89,14 +125,15 @@ namespace Networking
             NetworkServer.SendToAll(new ScoreboardResponse(ServerData.GetScoreData()));
         }
 
-        public void CreateSpawnPoints()
+        public void CreateSpawnPoints(Transform parent)
         {
             foreach (var spawnPointData in MapProvider.MapData.SpawnPoints)
             {
-                var spawnPoint = _entityFactory.CreateSpawnPoint(spawnPointData.ToVectorWithOffset()).GetComponent<SpawnPoint>();
-                spawnPoint.Construct(spawnPointData);
-                _entityPositionValidator.AddEntity(spawnPoint);
-                spawnPoint.PositionUpdated += MapUpdater.UpdateSpawnPoint;
+                var spawnPointScript = _entityFactory.CreateSpawnPoint(spawnPointData.ToVectorWithOffset(), parent)
+                    .GetComponent<SpawnPoint>();
+                spawnPointScript.Construct(spawnPointData);
+                _entityPositionValidator.AddEntity(spawnPointScript);
+                spawnPointScript.PositionUpdated += MapUpdater.UpdateSpawnPoint;
             }
         }
     }

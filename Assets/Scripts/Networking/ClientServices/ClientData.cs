@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Networking.Messages.Responses;
 
-namespace Networking
+namespace Networking.ClientServices
 {
     public class ClientData
     {

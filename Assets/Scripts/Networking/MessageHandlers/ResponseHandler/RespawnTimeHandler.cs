@@ -2,13 +2,13 @@
 using Data;
 using Networking.Messages.Responses;
 
-namespace Networking
+namespace Networking.MessageHandlers.ResponseHandler
 {
-    public class RespawnTimeHandler : MessageHandler<RespawnTimeResponse>
+    public class RespawnTimeHandler : ResponseHandler<RespawnTimeResponse>
     {
         public event Action<ServerTime> RespawnTimeChanged;
 
-        protected override void OnMessageReceived(RespawnTimeResponse message)
+        protected override void OnResponseReceived(RespawnTimeResponse message)
         {
             RespawnTimeChanged?.Invoke(message.TimeLeft);
         }

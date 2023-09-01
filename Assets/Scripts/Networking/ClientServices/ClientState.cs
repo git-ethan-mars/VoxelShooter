@@ -1,4 +1,4 @@
-﻿namespace Networking
+﻿namespace Networking.ClientServices
 {
     public enum ClientState
     {
