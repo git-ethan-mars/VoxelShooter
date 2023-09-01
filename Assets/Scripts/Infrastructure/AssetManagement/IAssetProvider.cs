@@ -13,5 +13,6 @@ namespace Infrastructure.AssetManagement
         T Load<T>(string path) where T : Object;
         T[] LoadAll<T>(string path) where T : Object;
         GameObject Instantiate(GameObject prefab, Transform itemPosition);
+        GameObject Instantiate(GameObject gameObject);
     }
 }

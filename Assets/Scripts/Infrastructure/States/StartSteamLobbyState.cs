@@ -9,7 +9,6 @@ namespace Infrastructure.States
         private readonly GameStateMachine _stateMachine;
         private readonly SceneLoader _sceneLoader;
         private readonly IGameFactory _gameFactory;
-        private CustomNetworkManager _networkManager;
         private const string Main = "Main";
 
 
@@ -27,16 +26,8 @@ namespace Infrastructure.States
 
         private void CreateHost(ServerSettings serverSettings)
         {
-            _networkManager = _gameFactory.CreateSteamNetworkManager(_stateMachine, serverSettings, true)
+            _gameFactory.CreateSteamNetworkManager(_stateMachine, serverSettings, true)
                 .GetComponent<CustomNetworkManager>();
-            _networkManager.MapDownloaded += OnMapDownloaded;
-        }
-
-        private void OnMapDownloaded()
-        {
-            _gameFactory.CreateWalls(_networkManager.Client.MapProvider);
-            _gameFactory.CreateMapRenderer(_networkManager.Client);
-            _stateMachine.Enter<GameLoopState, CustomNetworkManager>(_networkManager);
         }
 
         public void Exit()

@@ -21,6 +21,11 @@ namespace Infrastructure.AssetManagement
             return Object.Instantiate(prefab, itemPosition);
         }
 
+        public GameObject Instantiate(GameObject gameObject)
+        {
+            return Object.Instantiate(gameObject);
+        }
+
         public GameObject Instantiate(string path)
         {
             var prefab = Resources.Load<GameObject>(path);

@@ -1,5 +1,6 @@
 ﻿using Data;
 using Extensions;
+using Generators;
 using Rendering;
 using Unity.Burst;
 using Unity.Collections;
@@ -9,7 +10,7 @@ using UnityEngine;
 namespace Optimization
 {
     [BurstCompile]
-    public struct UpdateChunkMeshJob : IJob
+    public struct ChunkMeshGeneration : IJob
     {
         public NativeArray<BlockData> UpperNeighbour;
         public NativeArray<BlockData> LowerNeighbour;
@@ -35,67 +36,67 @@ namespace Optimization
                 var x = i / ChunkData.ChunkSizeSquared;
                 var y = (i - x * ChunkData.ChunkSizeSquared) / ChunkData.ChunkSize;
                 var z = i - x * ChunkData.ChunkSizeSquared - y * ChunkData.ChunkSize;
-                if (!ChunkRenderer.IsValidPosition(x, y + 1, z) && (UpperNeighbour.Length == 0 || UpperNeighbour.Length != 0 &&
+                if (!ChunkData.IsValidPosition(x, y + 1, z) && (UpperNeighbour.Length == 0 || UpperNeighbour.Length != 0 &&
                     UpperNeighbour[x * ChunkData.ChunkSize + z].Color.IsEquals(BlockColor.empty)) ||
-                    ChunkRenderer.IsValidPosition(x, y + 1, z) &&
+                    ChunkData.IsValidPosition(x, y + 1, z) &&
                     Blocks[x * ChunkData.ChunkSizeSquared + (y + 1) * ChunkData.ChunkSize + z].Color
                         .IsEquals(BlockColor.empty))
                 {
                     Faces[i] |= Data.Faces.Top;
-                    ChunkRenderer.GenerateTopSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
+                    ChunkGeneratorHelper.GenerateTopSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
                 }
 
-                if (!ChunkRenderer.IsValidPosition(x, y - 1, z) && LowerNeighbour.Length != 0 &&
+                if (!ChunkData.IsValidPosition(x, y - 1, z) && LowerNeighbour.Length != 0 &&
                     LowerNeighbour[x * ChunkData.ChunkSize + z].Color.IsEquals(BlockColor.empty) ||
-                    ChunkRenderer.IsValidPosition(x, y - 1, z) &&
+                    ChunkData.IsValidPosition(x, y - 1, z) &&
                     Blocks[x * ChunkData.ChunkSizeSquared + (y - 1) * ChunkData.ChunkSize + z].Color
                         .IsEquals(BlockColor.empty))
                 {
                     Faces[i] |= Data.Faces.Bottom;
-                    ChunkRenderer.GenerateBottomSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
+                    ChunkGeneratorHelper.GenerateBottomSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
                 }
 
-                if (!ChunkRenderer.IsValidPosition(x, y, z + 1) && FrontNeighbour.Length != 0 &&
+                if (!ChunkData.IsValidPosition(x, y, z + 1) && FrontNeighbour.Length != 0 &&
                     FrontNeighbour[x * ChunkData.ChunkSize + y].Color
                         .IsEquals(BlockColor.empty) ||
-                    ChunkRenderer.IsValidPosition(x, y, z + 1) &&
+                    ChunkData.IsValidPosition(x, y, z + 1) &&
                     Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z + 1].Color
                         .IsEquals(BlockColor.empty))
                 {
                     Faces[i] |= Data.Faces.Front;
-                    ChunkRenderer.GenerateFrontSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
+                    ChunkGeneratorHelper.GenerateFrontSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
                 }
 
-                if (!ChunkRenderer.IsValidPosition(x, y, z - 1) && BackNeighbour.Length != 0 &&
+                if (!ChunkData.IsValidPosition(x, y, z - 1) && BackNeighbour.Length != 0 &&
                     BackNeighbour[x * ChunkData.ChunkSize + y].Color
                         .IsEquals(BlockColor.empty) ||
-                    ChunkRenderer.IsValidPosition(x, y, z - 1) &&
+                    ChunkData.IsValidPosition(x, y, z - 1) &&
                     Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z - 1].Color
                         .IsEquals(BlockColor.empty))
                 {
                     Faces[i] |= Data.Faces.Back;
-                    ChunkRenderer.GenerateBackSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
+                    ChunkGeneratorHelper.GenerateBackSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
                 }
 
-                if (!ChunkRenderer.IsValidPosition(x + 1, y, z) && RightNeighbour.Length != 0 &&
+                if (!ChunkData.IsValidPosition(x + 1, y, z) && RightNeighbour.Length != 0 &&
                     RightNeighbour[y * ChunkData.ChunkSize + z].Color.IsEquals(BlockColor.empty) ||
-                    ChunkRenderer.IsValidPosition(x + 1, y, z) &&
+                    ChunkData.IsValidPosition(x + 1, y, z) &&
                     Blocks[(x + 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
                         .IsEquals(BlockColor.empty))
                 {
                     Faces[i] |= Data.Faces.Right;
-                    ChunkRenderer.GenerateRightSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
+                    ChunkGeneratorHelper.GenerateRightSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
                 }
 
-                if (!ChunkRenderer.IsValidPosition(x - 1, y, z) && LeftNeighbour.Length != 0 &&
+                if (!ChunkData.IsValidPosition(x - 1, y, z) && LeftNeighbour.Length != 0 &&
                     LeftNeighbour[y * ChunkData.ChunkSize + z].Color
                         .IsEquals(BlockColor.empty) ||
-                    ChunkRenderer.IsValidPosition(x - 1, y, z) &&
+                    ChunkData.IsValidPosition(x - 1, y, z) &&
                     Blocks[(x - 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
                         .IsEquals(BlockColor.empty))
                 {
                     Faces[i] |= Data.Faces.Left;
-                    ChunkRenderer.GenerateLeftSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
+                    ChunkGeneratorHelper.GenerateLeftSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
                 }
             }
         }

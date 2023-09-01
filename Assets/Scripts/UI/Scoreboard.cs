@@ -10,7 +10,9 @@ namespace UI
     [RequireComponent(typeof(CanvasGroup))]
     public class Scoreboard : MonoBehaviour
     {
-        [SerializeField] private List<ScoreUI> scores;
+        [SerializeField]
+        private List<ScoreUI> scores;
+
         private IInputService _inputService;
         private CanvasGroup _canvasGroup;
         private IAvatarLoader _avatarLoader;
@@ -19,7 +21,7 @@ namespace UI
         public void Construct(IInputService inputService, IAvatarLoader avatarLoader,
             CustomNetworkManager networkManager)
         {
-            networkManager.ScoreboardChanged += UpdateScoreboard;
+            networkManager.Client.ScoreboardChanged += UpdateScoreboard;
             networkManager.GameFinished += ShowFinalStatistics;
             _inputService = inputService;
             _avatarLoader = avatarLoader;

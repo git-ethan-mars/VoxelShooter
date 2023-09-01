@@ -1,40 +1,45 @@
-﻿using System.Collections.Generic;
-using Data;
+﻿using Data;
 using Infrastructure.Factory;
 using MapLogic;
 using Networking;
-using Networking.Messages;
-using Networking.Messages.Responses;
 using Optimization;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 
-namespace Rendering
+namespace Generators
 {
-    public class MapRenderer : MonoBehaviour
+    public class MapGenerator
     {
-        private ChunkRenderer[] _chunks;
-        private IMapProvider _mapProvider;
-        private IGameFactory _gameFactory;
-        private List<UpdateMapResponse> _bufferToUpdateMap;
+        private const string ChunkContainerName = "ChunkContainer";
+        private const string WallContainerName = "WallContainer";
+        public ChunkMeshGenerator[] ChunksGenerators { get; private set; }
+        private readonly IMapProvider _mapProvider;
+        private readonly IMeshFactory _meshFactory;
+        private readonly GameObject _chunkContainer;
 
-        public void Construct(IGameFactory gameFactory, IMeshFactory meshFactory, ClientData client)
+        public MapGenerator(Client client)
         {
             _mapProvider = client.MapProvider;
-            _gameFactory = gameFactory;
-            _bufferToUpdateMap = client.BufferToUpdateMap;
-            var fallMeshGenerator = new FallMeshGenerator(meshFactory);
-            CreateChunkRenderers();
+            _meshFactory = client.MeshFactory;
+            _chunkContainer = client.GameFactory.CreateGameObjectContainer(ChunkContainerName);
+            CreateChunkGenerators();
             SetNeighbours();
-            var dataToDispose1 = new NativeArray<BlockData>[_chunks.Length];
-            var dataToDispose2 = new NativeArray<BlockData>[_chunks.Length];
-            var dataToDispose3 = new NativeArray<BlockData>[_chunks.Length];
-            var dataToDispose4 = new NativeArray<BlockData>[_chunks.Length];
-            var dataToDispose5 = new NativeArray<BlockData>[_chunks.Length];
-            var dataToDispose6 = new NativeArray<BlockData>[_chunks.Length];
+            InitializeChunkData();
+            var wallContainer = client.GameFactory.CreateGameObjectContainer(WallContainerName);
+            client.MeshFactory.CreateWalls(_mapProvider, wallContainer.transform);
+        }
+
+        private void InitializeChunkData()
+        {
+            var dataToDispose1 = new NativeArray<BlockData>[ChunksGenerators.Length];
+            var dataToDispose2 = new NativeArray<BlockData>[ChunksGenerators.Length];
+            var dataToDispose3 = new NativeArray<BlockData>[ChunksGenerators.Length];
+            var dataToDispose4 = new NativeArray<BlockData>[ChunksGenerators.Length];
+            var dataToDispose5 = new NativeArray<BlockData>[ChunksGenerators.Length];
+            var dataToDispose6 = new NativeArray<BlockData>[ChunksGenerators.Length];
             var jobHandlesList = new NativeList<JobHandle>(Allocator.Temp);
-            for (var i = 0; i < _chunks.Length; i++)
+            for (var i = 0; i < ChunksGenerators.Length; i++)
             {
                 var frontNeighbourBlocks = new NativeArray<BlockData>(0, Allocator.TempJob);
                 var backNeighbourBlocks = new NativeArray<BlockData>(0, Allocator.TempJob);
@@ -42,7 +47,7 @@ namespace Rendering
                 var lowerNeighbourBlocks = new NativeArray<BlockData>(0, Allocator.TempJob);
                 var rightNeighbourBlocks = new NativeArray<BlockData>(0, Allocator.TempJob);
                 var leftNeighbourBlocks = new NativeArray<BlockData>(0, Allocator.TempJob);
-                if (i + 1 < _chunks.Length &&
+                if (i + 1 < ChunksGenerators.Length &&
                     i / (_mapProvider.MapData.Depth / ChunkData.ChunkSize) ==
                     (i + 1) / (_mapProvider.MapData.Depth / ChunkData.ChunkSize))
                 {
@@ -54,7 +59,7 @@ namespace Rendering
                         for (var y = 0; y < ChunkData.ChunkSize; y++)
                         {
                             frontNeighbourBlocks[x * ChunkData.ChunkSize + y] =
-                                _chunks[i + 1].ChunkData
+                                ChunksGenerators[i + 1].ChunkData
                                     .Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize];
                         }
                     }
@@ -71,13 +76,13 @@ namespace Rendering
                         for (var y = 0; y < ChunkData.ChunkSize; y++)
                         {
                             backNeighbourBlocks[x * ChunkData.ChunkSize + y] =
-                                _chunks[i - 1].ChunkData.Blocks[
+                                ChunksGenerators[i - 1].ChunkData.Blocks[
                                     x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + ChunkData.ChunkSize - 1];
                         }
                     }
                 }
 
-                if (i + _mapProvider.MapData.Depth / ChunkData.ChunkSize < _chunks.Length &&
+                if (i + _mapProvider.MapData.Depth / ChunkData.ChunkSize < ChunksGenerators.Length &&
                     i / (_mapProvider.MapData.Depth / ChunkData.ChunkSize * _mapProvider.MapData.Height /
                          ChunkData.ChunkSize) ==
                     (i + _mapProvider.MapData.Depth / ChunkData.ChunkSize) /
@@ -92,7 +97,7 @@ namespace Rendering
                         for (var z = 0; z < ChunkData.ChunkSize; z++)
                         {
                             upperNeighbourBlocks[x * ChunkData.ChunkSize + z] =
-                                _chunks[i + _mapProvider.MapData.Depth / ChunkData.ChunkSize].ChunkData
+                                ChunksGenerators[i + _mapProvider.MapData.Depth / ChunkData.ChunkSize].ChunkData
                                     .Blocks[x * ChunkData.ChunkSizeSquared + z];
                         }
                     }
@@ -113,7 +118,7 @@ namespace Rendering
                         for (var z = 0; z < ChunkData.ChunkSize; z++)
                         {
                             lowerNeighbourBlocks[x * ChunkData.ChunkSize + z] =
-                                _chunks[i - _mapProvider.MapData.Depth / ChunkData.ChunkSize].ChunkData
+                                ChunksGenerators[i - _mapProvider.MapData.Depth / ChunkData.ChunkSize].ChunkData
                                     .Blocks[
                                         x * ChunkData.ChunkSizeSquared +
                                         (ChunkData.ChunkSize - 1) * ChunkData.ChunkSize + z];
@@ -122,7 +127,7 @@ namespace Rendering
                 }
 
                 if (i + _mapProvider.MapData.Height / ChunkData.ChunkSize * _mapProvider.MapData.Depth /
-                    ChunkData.ChunkSize < _chunks.Length)
+                    ChunkData.ChunkSize < ChunksGenerators.Length)
                 {
                     rightNeighbourBlocks.Dispose();
                     rightNeighbourBlocks =
@@ -132,7 +137,7 @@ namespace Rendering
                         for (var z = 0; z < ChunkData.ChunkSize; z++)
                         {
                             rightNeighbourBlocks[y * ChunkData.ChunkSize + z] =
-                                _chunks[
+                                ChunksGenerators[
                                         i + _mapProvider.MapData.Height / ChunkData.ChunkSize *
                                         _mapProvider.MapData.Depth / ChunkData.ChunkSize].ChunkData
                                     .Blocks[y * ChunkData.ChunkSize + z];
@@ -151,7 +156,7 @@ namespace Rendering
                         for (var z = 0; z < ChunkData.ChunkSize; z++)
                         {
                             leftNeighbourBlocks[y * ChunkData.ChunkSize + z] =
-                                _chunks[
+                                ChunksGenerators[
                                         i - _mapProvider.MapData.Height / ChunkData.ChunkSize *
                                         _mapProvider.MapData.Depth / ChunkData.ChunkSize].ChunkData
                                     .Blocks[(ChunkData.ChunkSize - 1) * ChunkData.ChunkSizeSquared +
@@ -168,10 +173,10 @@ namespace Rendering
                 dataToDispose6[i] = leftNeighbourBlocks;
             }
 
-            for (var i = 0; i < _chunks.Length; i++)
+            for (var i = 0; i < ChunksGenerators.Length; i++)
             {
-                var chunk = _chunks[i];
-                var jobHandle = new UpdateChunkMeshJob()
+                var chunk = ChunksGenerators[i];
+                var jobHandle = new ChunkMeshGeneration()
                 {
                     FrontNeighbour = dataToDispose1[i], BackNeighbour = dataToDispose2[i],
                     UpperNeighbour = dataToDispose3[i], LowerNeighbour = dataToDispose4[i],
@@ -184,7 +189,7 @@ namespace Rendering
             }
 
             JobHandle.CompleteAll(jobHandlesList);
-            for (var i = 0; i < _chunks.Length; i++)
+            for (var i = 0; i < ChunksGenerators.Length; i++)
             {
                 dataToDispose1[i].Dispose();
                 dataToDispose2[i].Dispose();
@@ -192,57 +197,59 @@ namespace Rendering
                 dataToDispose4[i].Dispose();
                 dataToDispose5[i].Dispose();
                 dataToDispose6[i].Dispose();
-                _chunks[i].ApplyMesh();
+                ChunksGenerators[i].ApplyMesh();
             }
         }
 
         private void SetNeighbours()
         {
-            for (var i = 0; i < _chunks.Length; i++)
+            for (var i = 0; i < ChunksGenerators.Length; i++)
             {
-                if (i + 1 < _chunks.Length &&
+                if (i + 1 < ChunksGenerators.Length &&
                     i / (_mapProvider.MapData.Depth / ChunkData.ChunkSize) ==
                     (i + 1) / (_mapProvider.MapData.Depth / ChunkData.ChunkSize))
-                    _chunks[i].FrontNeighbour = _chunks[i + 1];
+                    ChunksGenerators[i].FrontNeighbour = ChunksGenerators[i + 1];
                 if (i - 1 >= 0 && i / (_mapProvider.MapData.Depth / ChunkData.ChunkSize) ==
                     (i - 1) / (_mapProvider.MapData.Depth / ChunkData.ChunkSize))
-                    _chunks[i].BackNeighbour = _chunks[i - 1];
-                if (i + _mapProvider.MapData.Depth / ChunkData.ChunkSize < _chunks.Length &&
+                    ChunksGenerators[i].BackNeighbour = ChunksGenerators[i - 1];
+                if (i + _mapProvider.MapData.Depth / ChunkData.ChunkSize < ChunksGenerators.Length &&
                     i / (_mapProvider.MapData.Depth / ChunkData.ChunkSize * _mapProvider.MapData.Height /
                          ChunkData.ChunkSize) ==
                     (i + _mapProvider.MapData.Depth / ChunkData.ChunkSize) /
                     (_mapProvider.MapData.Depth / ChunkData.ChunkSize * _mapProvider.MapData.Height /
                      ChunkData.ChunkSize))
-                    _chunks[i].UpperNeighbour = _chunks[i + _mapProvider.MapData.Depth / ChunkData.ChunkSize];
+                    ChunksGenerators[i].UpperNeighbour =
+                        ChunksGenerators[i + _mapProvider.MapData.Depth / ChunkData.ChunkSize];
                 if (i - _mapProvider.MapData.Depth / ChunkData.ChunkSize >= 0 &&
                     i / (_mapProvider.MapData.Depth / ChunkData.ChunkSize * _mapProvider.MapData.Height /
                          ChunkData.ChunkSize) ==
                     (i - _mapProvider.MapData.Depth / ChunkData.ChunkSize) /
                     (_mapProvider.MapData.Depth / ChunkData.ChunkSize * _mapProvider.MapData.Height /
                      ChunkData.ChunkSize))
-                    _chunks[i].LowerNeighbour = _chunks[i - _mapProvider.MapData.Depth / ChunkData.ChunkSize];
+                    ChunksGenerators[i].LowerNeighbour =
+                        ChunksGenerators[i - _mapProvider.MapData.Depth / ChunkData.ChunkSize];
                 if (i + _mapProvider.MapData.Height / ChunkData.ChunkSize * _mapProvider.MapData.Depth /
-                    ChunkData.ChunkSize < _chunks.Length)
-                    _chunks[i].RightNeighbour =
-                        _chunks[
+                    ChunkData.ChunkSize < ChunksGenerators.Length)
+                    ChunksGenerators[i].RightNeighbour =
+                        ChunksGenerators[
                             i + _mapProvider.MapData.Height / ChunkData.ChunkSize * _mapProvider.MapData.Depth /
                             ChunkData.ChunkSize];
                 if (i - _mapProvider.MapData.Height / ChunkData.ChunkSize * _mapProvider.MapData.Depth /
                     ChunkData.ChunkSize >= 0)
-                    _chunks[i].LeftNeighbour =
-                        _chunks[
+                    ChunksGenerators[i].LeftNeighbour =
+                        ChunksGenerators[
                             i - _mapProvider.MapData.Height / ChunkData.ChunkSize * _mapProvider.MapData.Depth /
                             ChunkData.ChunkSize];
             }
         }
 
-        private void CreateChunkRenderers()
+        private void CreateChunkGenerators()
         {
-            _chunks = new ChunkRenderer[_mapProvider.MapData.Width / ChunkData.ChunkSize *
-                                        _mapProvider.MapData.Height /
-                                        ChunkData.ChunkSize *
-                                        _mapProvider.MapData.Depth /
-                                        ChunkData.ChunkSize];
+            ChunksGenerators = new ChunkMeshGenerator[_mapProvider.MapData.Width / ChunkData.ChunkSize *
+                                                      _mapProvider.MapData.Height /
+                                                      ChunkData.ChunkSize *
+                                                      _mapProvider.MapData.Depth /
+                                                      ChunkData.ChunkSize];
             for (var x = 0; x < _mapProvider.MapData.Width / ChunkData.ChunkSize; x++)
             {
                 for (var y = 0; y < _mapProvider.MapData.Height / ChunkData.ChunkSize; y++)
@@ -253,43 +260,15 @@ namespace Rendering
                                     x * _mapProvider.MapData.Height / ChunkData.ChunkSize *
                                     _mapProvider.MapData.Depth /
                                     ChunkData.ChunkSize;
-                        var chunkRenderer = _gameFactory.CreateChunkRenderer(new Vector3Int(x * ChunkData.ChunkSize,
+                        var chunkMeshRenderer = _meshFactory.CreateChunkMeshRender(new Vector3Int(
+                            x * ChunkData.ChunkSize,
                             y * ChunkData.ChunkSize,
-                            z * ChunkData.ChunkSize), Quaternion.identity, transform);
-                        _chunks[index] = chunkRenderer.GetComponent<ChunkRenderer>();
-                        _chunks[index].ChunkData = _mapProvider.MapData.Chunks[index];
+                            z * ChunkData.ChunkSize), Quaternion.identity, _chunkContainer.transform);
+                        ChunksGenerators[index] = new ChunkMeshGenerator(chunkMeshRenderer);
+                        ChunksGenerators[index].ChunkData = _mapProvider.MapData.Chunks[index];
                     }
                 }
             }
-        }
-
-        private void Update()
-        {
-            if (_bufferToUpdateMap.Count == 0) return;
-            var dataByChunkIndex = new Dictionary<int, List<(Vector3Int, BlockData)>>();
-            for (var i = 0; i < _bufferToUpdateMap.Count; i++)
-            {
-                for (var j = 0; j < _bufferToUpdateMap[i].Positions.Length; j++)
-                {
-                    var chunkIndex = _mapProvider.FindChunkNumberByPosition(_bufferToUpdateMap[i].Positions[j]);
-                    if (!dataByChunkIndex.ContainsKey(chunkIndex))
-                    {
-                        dataByChunkIndex[chunkIndex] = new List<(Vector3Int, BlockData)>();
-                    }
-
-                    var localPosition = new Vector3Int(_bufferToUpdateMap[i].Positions[j].x % ChunkData.ChunkSize,
-                        _bufferToUpdateMap[i].Positions[j].y % ChunkData.ChunkSize,
-                        _bufferToUpdateMap[i].Positions[j].z % ChunkData.ChunkSize);
-                    dataByChunkIndex[chunkIndex].Add((localPosition, _bufferToUpdateMap[i].BlockData[j]));
-                }
-            }
-
-            foreach (var (chunkIndex, data) in dataByChunkIndex)
-            {
-                _chunks[chunkIndex].SpawnBlocks(data);
-            }
-
-            _bufferToUpdateMap.Clear();
         }
     }
 }

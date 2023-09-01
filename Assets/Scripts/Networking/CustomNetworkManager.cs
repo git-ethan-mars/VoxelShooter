@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Data;
+using Generators;
 using Infrastructure;
 using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
@@ -15,30 +16,25 @@ namespace Networking
 {
     public class CustomNetworkManager : NetworkManager, ICoroutineRunner
     {
-        public event Action MapDownloaded;
-        public event Action<ServerTime> ServerTimeChanged;
-        public event Action<ServerTime> RespawnTimeChanged;
-        public event Action<List<ScoreData>> ScoreboardChanged;
-        public event Action<float> OnLoadProgress;
-        public event Action GameFinished;
+        public event Action GameFinished; // Unsubscribe please
+        public Client Client;
         private IStaticDataService _staticData;
         private IEntityFactory _entityFactory;
-        private ClientMessagesHandler _clientMessageHandlers;
         private RequestHandlers _serverMessageHandlers;
         private ServerSettings _serverSettings;
         private GameStateMachine _stateMachine;
         private ServerTimer _serverTimer;
         private IParticleFactory _particleFactory;
+        private IMeshFactory _meshFactory;
         private IAssetProvider _assets;
         private IGameFactory _gameFactory;
-        public ClientData Client;
         private IServer _server;
         private const float ShowResultsDuration = 10;
 
 
         public void Construct(GameStateMachine stateMachine, IStaticDataService staticData,
             IEntityFactory entityFactory, IParticleFactory particleFactory, IAssetProvider assets,
-            IGameFactory gameFactory,
+            IGameFactory gameFactory, IMeshFactory meshFactory,
             ServerSettings serverSettings)
         {
             _stateMachine = stateMachine;
@@ -47,6 +43,7 @@ namespace Networking
             _particleFactory = particleFactory;
             _assets = assets;
             _gameFactory = gameFactory;
+            _meshFactory = meshFactory;
             _serverSettings = serverSettings;
         }
 
@@ -64,14 +61,11 @@ namespace Networking
 
         public override void OnStartClient()
         {
-            Client = new ClientData();
-            _clientMessageHandlers = new ClientMessagesHandler(Client,
-                mapProgress => OnLoadProgress?.Invoke(mapProgress), () => MapDownloaded?.Invoke(),
-                serverTime => ServerTimeChanged?.Invoke(serverTime),
-                RespawnTimeChanged, ScoreboardChanged);
-            _clientMessageHandlers.RegisterHandlers(); // TODO: REFACTOR THIS SHIT
+            Client = new Client(_gameFactory, _meshFactory);
+            Client.RegisterHandlers();
+            Client.Data.State = ClientState.Connecting;
+            Client.MapDownloaded += OnMapDownloaded;
         }
-
 
         public override void OnServerReady(NetworkConnectionToClient connection)
         {
@@ -79,7 +73,7 @@ namespace Networking
             if (IsHost(connection))
             {
                 Client.MapProvider = _server.MapProvider;
-                MapDownloaded?.Invoke();
+                OnMapDownloaded();
             }
             else
             {
@@ -100,7 +94,8 @@ namespace Networking
 
         public override void OnStopClient()
         {
-            _clientMessageHandlers.RemoveHandlers();
+            Client.UnregisterHandlers();
+            Client.Data.State = ClientState.NotConnected;
             if (NetworkClient.activeHost) return;
             _gameFactory.CreateCamera();
             GameFinished?.Invoke();
@@ -115,6 +110,14 @@ namespace Networking
             GameFinished?.Invoke();
             StartCoroutine(Utils.DoActionAfterDelay(ShowResultsDuration,
                 _stateMachine.Enter<MainMenuState>));
+        }
+
+        private void OnMapDownloaded()
+        {
+            Client.MapDownloaded -= OnMapDownloaded;
+            Client.Data.State = ClientState.Connected;
+            Client.MapGenerator = new MapGenerator(Client);
+            _stateMachine.Enter<GameLoopState, CustomNetworkManager>(this);
         }
 
         private static bool IsHost(NetworkConnection conn) =>
