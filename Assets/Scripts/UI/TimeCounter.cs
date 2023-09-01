@@ -9,18 +9,24 @@ namespace UI
     [RequireComponent(typeof(CanvasGroup))]
     public class TimeCounter : MonoBehaviour
     {
-        [SerializeField] private TextMeshProUGUI serverTimeText;
-        [SerializeField] private TextMeshProUGUI respawnTimeText;
+        [SerializeField]
+        private TextMeshProUGUI serverTimeText;
+
+        [SerializeField]
+        private TextMeshProUGUI respawnTimeText;
+
         private IInputService _inputService;
         private CanvasGroup _canvasGroup;
+        private CustomNetworkManager _networkManager;
 
         public void Construct(IInputService inputService, CustomNetworkManager networkManager)
         {
             _inputService = inputService;
+            _networkManager = networkManager;
             _canvasGroup = GetComponent<CanvasGroup>();
             networkManager.GameFinished += () => gameObject.SetActive(false);
-            networkManager.ServerTimeChanged += ChangeServerTime;
-            networkManager.RespawnTimeChanged += ChangeRespawnTime;
+            networkManager.Client.GameTimeChanged += ChangeGameTime;
+            networkManager.Client.RespawnTimeChanged += ChangeRespawnTime;
         }
 
         public void Update()
@@ -28,7 +34,7 @@ namespace UI
             _canvasGroup.alpha = _inputService.IsScoreboardButtonHold() ? 0 : 1;
         }
 
-        private void ChangeServerTime(ServerTime timeLeft)
+        private void ChangeGameTime(ServerTime timeLeft)
         {
             serverTimeText.SetText($"{timeLeft.Minutes}:{timeLeft.Seconds:00}");
         }
@@ -45,6 +51,12 @@ namespace UI
             {
                 StartCoroutine(Utils.DoActionAfterDelay(1, () => respawnTimeText.gameObject.SetActive(false)));
             }
+        }
+
+        private void OnDestroy()
+        {
+            _networkManager.Client.GameTimeChanged -= ChangeGameTime;
+            _networkManager.Client.RespawnTimeChanged -= ChangeRespawnTime;
         }
     }
 }

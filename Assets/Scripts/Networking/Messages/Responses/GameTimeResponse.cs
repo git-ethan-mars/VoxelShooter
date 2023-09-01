@@ -3,10 +3,10 @@ using Mirror;
 
 namespace Networking.Messages.Responses
 {
-    public struct ServerTimeResponse : NetworkMessage
+    public struct GameTimeResponse : NetworkMessage
     {
         public readonly ServerTime TimeLeft;
-        public ServerTimeResponse(ServerTime timeLeft)
+        public GameTimeResponse(ServerTime timeLeft)
         {
             TimeLeft = timeLeft;
         }

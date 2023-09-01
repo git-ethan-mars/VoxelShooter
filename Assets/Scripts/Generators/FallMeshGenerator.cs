@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
+using Data;
 using Infrastructure.Factory;
-using Mirror;
-using Networking.Messages;
-using Networking.Messages.Responses;
+using Rendering;
 using UnityEngine;
 
-namespace Rendering
+namespace Generators
 {
     public class FallMeshGenerator
     {
@@ -22,27 +21,26 @@ namespace Rendering
             _triangles = new List<int>();
             _colors = new List<Color32>();
             _normals = new List<Vector3>();
-            NetworkClient.RegisterHandler<FallBlockResponse>(OnFallBlockMessage);
         }
 
-        private void OnFallBlockMessage(FallBlockResponse response)
+        public void GenerateFallBlocks(Vector3Int[] positions, BlockData[] blockData)
         {
-            for (var i = 0; i < response.Positions.Length; i++)
+            for (var i = 0; i < positions.Length; i++)
             {
-                var x = response.Positions[i].x;
-                var y = response.Positions[i].y;
-                var z = response.Positions[i].z;
-                GenerateTopSide(x, y, z, response.BlockData[i].Color, _vertices, _normals, _colors,
+                var x = positions[i].x;
+                var y = positions[i].y;
+                var z = positions[i].z;
+                GenerateTopSide(x, y, z, blockData[i].Color, _vertices, _normals, _colors,
                     _triangles);
-                GenerateBottomSide(x, y, z, response.BlockData[i].Color, _vertices, _normals, _colors,
+                GenerateBottomSide(x, y, z, blockData[i].Color, _vertices, _normals, _colors,
                     _triangles);
-                GenerateLeftSide(x, y, z, response.BlockData[i].Color, _vertices, _normals, _colors,
+                GenerateLeftSide(x, y, z, blockData[i].Color, _vertices, _normals, _colors,
                     _triangles);
-                GenerateRightSide(x, y, z, response.BlockData[i].Color, _vertices, _normals, _colors,
+                GenerateRightSide(x, y, z, blockData[i].Color, _vertices, _normals, _colors,
                     _triangles);
-                GenerateFrontSide(x, y, z, response.BlockData[i].Color, _vertices, _normals, _colors,
+                GenerateFrontSide(x, y, z, blockData[i].Color, _vertices, _normals, _colors,
                     _triangles);
-                GenerateBackSide(x, y, z, response.BlockData[i].Color, _vertices, _normals, _colors,
+                GenerateBackSide(x, y, z, blockData[i].Color, _vertices, _normals, _colors,
                     _triangles);
             }
 
