@@ -13,7 +13,7 @@ namespace Networking
 
         protected override void OnMessageReceived(FallBlockResponse message)
         {
-            _client.FallMeshGenerator.GenerateFallBlocks(message.Positions, message.BlockData);
+            _client.FallMeshGenerator.GenerateFallBlocks(message.Positions, message.Colors);
         }
     }
 }

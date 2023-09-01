@@ -1,5 +1,4 @@
-﻿using Data;
-using Mirror;
+﻿using Mirror;
 using UnityEngine;
 
 namespace Networking.Messages.Responses
@@ -7,13 +6,13 @@ namespace Networking.Messages.Responses
     public struct FallBlockResponse : NetworkMessage
     {
         public readonly Vector3Int[] Positions;
-        public readonly BlockData[] BlockData;
+        public readonly Color32[] Colors;
         public uint ComponentId;
 
-        public FallBlockResponse(Vector3Int[] positions, BlockData[] blockData, uint componentId)
+        public FallBlockResponse(Vector3Int[] positions, Color32[] colors, uint componentId)
         {
             Positions = positions;
-            BlockData = blockData;
+            Colors = colors;
             ComponentId = componentId;
         }
     }

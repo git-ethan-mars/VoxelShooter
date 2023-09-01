@@ -6,7 +6,6 @@ using Infrastructure;
 using Infrastructure.Factory;
 using Infrastructure.Services.StaticData;
 using Mirror;
-using Networking.Messages;
 using Networking.Messages.Requests;
 using Networking.Messages.Responses;
 using UnityEngine;
@@ -74,6 +73,7 @@ namespace Networking.ServerServices
             {
                 var index = _server.MapDestructionAlgorithm.GetVertexIndex(message.GlobalPositions[i]);
                 _server.MapProvider.MapData._solidBlocks.Add(index);
+                _server.MapProvider.MapData._blockColors.Add(index, message.Blocks[i].Color);
             }
 
             var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);

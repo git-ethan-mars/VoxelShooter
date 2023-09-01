@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Data;
 using Infrastructure.Factory;
 using Rendering;
 using UnityEngine;
@@ -23,24 +22,24 @@ namespace Generators
             _normals = new List<Vector3>();
         }
 
-        public void GenerateFallBlocks(Vector3Int[] positions, BlockData[] blockData)
+        public void GenerateFallBlocks(Vector3Int[] positions, Color32[] colors)
         {
             for (var i = 0; i < positions.Length; i++)
             {
                 var x = positions[i].x;
                 var y = positions[i].y;
                 var z = positions[i].z;
-                GenerateTopSide(x, y, z, blockData[i].Color, _vertices, _normals, _colors,
+                GenerateTopSide(x, y, z, colors[i], _vertices, _normals, _colors,
                     _triangles);
-                GenerateBottomSide(x, y, z, blockData[i].Color, _vertices, _normals, _colors,
+                GenerateBottomSide(x, y, z, colors[i], _vertices, _normals, _colors,
                     _triangles);
-                GenerateLeftSide(x, y, z, blockData[i].Color, _vertices, _normals, _colors,
+                GenerateLeftSide(x, y, z, colors[i], _vertices, _normals, _colors,
                     _triangles);
-                GenerateRightSide(x, y, z, blockData[i].Color, _vertices, _normals, _colors,
+                GenerateRightSide(x, y, z, colors[i], _vertices, _normals, _colors,
                     _triangles);
-                GenerateFrontSide(x, y, z, blockData[i].Color, _vertices, _normals, _colors,
+                GenerateFrontSide(x, y, z, colors[i], _vertices, _normals, _colors,
                     _triangles);
-                GenerateBackSide(x, y, z, blockData[i].Color, _vertices, _normals, _colors,
+                GenerateBackSide(x, y, z, colors[i], _vertices, _normals, _colors,
                     _triangles);
             }
 

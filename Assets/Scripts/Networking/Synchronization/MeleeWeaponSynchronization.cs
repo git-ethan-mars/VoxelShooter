@@ -7,7 +7,6 @@ using Explosions;
 using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
 using Mirror;
-using Networking.Messages;
 using UnityEngine;
 
 namespace Networking.Synchronization
