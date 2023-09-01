@@ -73,7 +73,7 @@ namespace Networking.ServerServices
             {
                 var index = _server.MapDestructionAlgorithm.GetVertexIndex(message.GlobalPositions[i]);
                 _server.MapProvider.MapData._solidBlocks.Add(index);
-                _server.MapProvider.MapData._blockColors.Add(index, message.Blocks[i].Color);
+                _server.MapProvider.MapData._blockColors[index] = message.Blocks[i].Color;
             }
 
             var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
