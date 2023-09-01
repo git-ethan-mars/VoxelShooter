@@ -18,10 +18,10 @@ namespace Networking
 {
     public class Server : IServer
     {
-        public IMapProvider MapProvider { get; set; }
-        public ServerData ServerData { get; set; }
-        public IMapUpdater MapUpdater { get; set; }
-        public MapDestructionAlgorithm MapDestructionAlgorithm { get; set; }
+        public IMapProvider MapProvider { get; }
+        public ServerData ServerData { get; }
+        public IMapUpdater MapUpdater { get; }
+        public MapDestructionAlgorithm MapDestructionAlgorithm { get; }
         private readonly ServerSettings _serverSettings;
         private readonly EntityPositionValidator _entityPositionValidator;
         private readonly IEntityFactory _entityFactory;

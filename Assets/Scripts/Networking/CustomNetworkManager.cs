@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using Data;
 using Generators;
 using Infrastructure;
@@ -10,6 +11,7 @@ using MapLogic;
 using Mirror;
 using Networking.ClientServices;
 using Networking.ServerServices;
+using Debug = UnityEngine.Debug;
 using MemoryStream = System.IO.MemoryStream;
 
 namespace Networking
@@ -18,7 +20,7 @@ namespace Networking
     {
         public event Action GameFinished;
         private const string SpawnPointContainerName = "SpawnPointContainer";
-        public Client Client;
+        public IClient Client;
         private IStaticDataService _staticData;
         private IEntityFactory _entityFactory;
         private ServerSettings _serverSettings;
@@ -96,6 +98,7 @@ namespace Networking
             Client.UnregisterHandlers();
             Client.Data.State = ClientState.NotConnected;
             if (NetworkClient.activeHost) return;
+            ReleaseMapResources();
             _gameFactory.CreateCamera();
             GameFinished?.Invoke();
             StartCoroutine(Utils.DoActionAfterDelay(ShowResultsDuration,
@@ -105,17 +108,27 @@ namespace Networking
         public override void OnStopServer()
         {
             _server.UnregisterHandlers();
+            ReleaseMapResources();
             _gameFactory.CreateCamera();
             GameFinished?.Invoke();
             StartCoroutine(Utils.DoActionAfterDelay(ShowResultsDuration,
                 _stateMachine.Enter<MainMenuState>));
         }
 
+        private void ReleaseMapResources()
+        {
+            Client.MapGenerator.Dispose();
+            Client.MapProvider.Dispose();
+        }
+
         private void OnMapDownloaded()
         {
             Client.MapDownloaded -= OnMapDownloaded;
             Client.Data.State = ClientState.Connected;
-            Client.MapGenerator = new MapGenerator(Client);
+            var sw = Stopwatch.StartNew();
+            Client.MapGenerator = new MapGenerator(Client.MapProvider, Client.GameFactory, Client.MeshFactory);
+            sw.Stop();
+            Debug.Log(sw.ElapsedMilliseconds);
             _stateMachine.Enter<GameLoopState, CustomNetworkManager>(this);
         }
 

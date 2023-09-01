@@ -9,7 +9,7 @@ using Networking.MessageHandlers.ResponseHandler;
 
 namespace Networking
 {
-    public class Client
+    public class Client : IClient
     {
         public event Action MapDownloaded
         {
@@ -41,13 +41,13 @@ namespace Networking
             remove => _scoreboardHandler.ScoreboardChanged -= value;
         }
 
-        public readonly ClientData Data;
-        public readonly IGameFactory GameFactory;
-        public readonly IMeshFactory MeshFactory;
-        public readonly FallMeshGenerator FallMeshGenerator;
+        public ClientData Data { get; set; }
+        public IGameFactory GameFactory { get; set; }
+        public IMeshFactory MeshFactory { get; set; }
         public IMapProvider MapProvider { get; set; }
         public MapGenerator MapGenerator { get; set; }
 
+        public readonly FallMeshGenerator FallMeshGenerator;
         private readonly DownloadMapHandler _downloadMapHandler;
         private readonly UpdateMapHandler _updateMapHandler;
         private readonly FallBlockHandler _fallBlockHandler;

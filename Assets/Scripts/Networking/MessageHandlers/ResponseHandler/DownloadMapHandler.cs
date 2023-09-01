@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Generators;
 using MapLogic;
 using Networking.Messages.Responses;
 
@@ -25,7 +24,6 @@ namespace Networking.MessageHandlers.ResponseHandler
             MapLoadProgressed?.Invoke(message.Progress);
             if (message.Progress != 1) return;
             _client.MapProvider = MapReader.ReadFromStream(new MemoryStream(_byteChunks.ToArray()));
-            _client.MapGenerator = new MapGenerator(_client);
             MapDownloaded?.Invoke();
         }
     }

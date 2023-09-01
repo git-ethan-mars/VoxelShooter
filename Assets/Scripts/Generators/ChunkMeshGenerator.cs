@@ -1,12 +1,12 @@
+using System;
 using System.Collections.Generic;
 using Data;
-using Infrastructure.Factory;
 using Unity.Collections;
 using UnityEngine;
 
 namespace Generators
 {
-    public class ChunkMeshGenerator
+    public class ChunkMeshGenerator : IDisposable
     {
         private readonly GameObject _chunkMeshRenderer;
         public ChunkMeshGenerator UpperNeighbour { get; set; }
@@ -15,12 +15,12 @@ namespace Generators
         public ChunkMeshGenerator RightNeighbour { get; set; }
         public ChunkMeshGenerator FrontNeighbour { get; set; }
         public ChunkMeshGenerator BackNeighbour { get; set; }
-        private Mesh ChunkMesh { get; set; }
+        private Mesh ChunkMesh { get; }
         public ChunkData ChunkData { get; set; }
-        public NativeList<Vector3> Vertices { get; private set; }
-        public NativeList<int> Triangles { get; private set; }
-        public NativeList<Color32> Colors { get; private set; }
-        public NativeList<Vector3> Normals { get; private set; }
+        public NativeList<Vector3> Vertices { get; }
+        public NativeList<int> Triangles { get; }
+        public NativeList<Color32> Colors { get; }
+        public NativeList<Vector3> Normals { get; }
 
         public ChunkMeshGenerator(GameObject chunkMeshRenderer)
         {
@@ -54,7 +54,7 @@ namespace Generators
                 _chunkMeshRenderer.GetComponent<MeshCollider>().sharedMesh = ChunkMesh;
             }
         }
-        
+
         public void SpawnBlocks(List<(Vector3Int, BlockData)> data)
         {
             var neighbourChunksToRegenerate = Faces.None;
@@ -278,14 +278,12 @@ namespace Generators
             }
         }
 
-        private void OnDestroy()
+        public void Dispose()
         {
             Vertices.Dispose();
             Normals.Dispose();
             Colors.Dispose();
             Triangles.Dispose();
-            ChunkData.Blocks.Dispose();
-            ChunkData.Faces.Dispose();
         }
     }
 }

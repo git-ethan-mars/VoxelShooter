@@ -1,8 +1,9 @@
+using System;
 using Unity.Collections;
 
 namespace Data
 {
-    public class ChunkData
+    public class ChunkData : IDisposable
     {
         public NativeArray<Faces> Faces = new(ChunkSizeCubed, Allocator.Persistent,
             NativeArrayOptions.UninitializedMemory);
@@ -14,8 +15,14 @@ namespace Data
 
         public static bool IsValidPosition(int x, int y, int z)
         {
-            return x is >= 0 and < ChunkData.ChunkSize && y is >= 0 and < ChunkData.ChunkSize &&
-                   z is >= 0 and < ChunkData.ChunkSize;
+            return x is >= 0 and < ChunkSize && y is >= 0 and < ChunkSize &&
+                   z is >= 0 and < ChunkSize;
+        }
+
+        public void Dispose()
+        {
+            Faces.Dispose();
+            Blocks.Dispose();
         }
     }
 }

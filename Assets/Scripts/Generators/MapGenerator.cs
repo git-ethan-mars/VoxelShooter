@@ -1,7 +1,7 @@
-﻿using Data;
+﻿using System;
+using Data;
 using Infrastructure.Factory;
 using MapLogic;
-using Networking;
 using Optimization;
 using Unity.Collections;
 using Unity.Jobs;
@@ -9,35 +9,52 @@ using UnityEngine;
 
 namespace Generators
 {
-    public class MapGenerator
+    public class MapGenerator : IDisposable
     {
         private const string ChunkContainerName = "ChunkContainer";
         private const string WallContainerName = "WallContainer";
         public ChunkMeshGenerator[] ChunksGenerators { get; private set; }
+        
         private readonly IMapProvider _mapProvider;
         private readonly IMeshFactory _meshFactory;
-        private readonly GameObject _chunkContainer;
+        private readonly IGameFactory _gameFactory;
 
-        public MapGenerator(Client client)
+        public MapGenerator(IMapProvider mapProvider, IGameFactory gameFactory, IMeshFactory meshFactory)
         {
-            _mapProvider = client.MapProvider;
-            _meshFactory = client.MeshFactory;
-            _chunkContainer = client.GameFactory.CreateGameObjectContainer(ChunkContainerName);
+            _mapProvider = mapProvider;
+            _gameFactory = gameFactory;
+            _meshFactory = meshFactory;
+        }
+
+        public void GenerateMap()
+        {
             CreateChunkGenerators();
             SetNeighbours();
             InitializeChunkData();
-            var wallContainer = client.GameFactory.CreateGameObjectContainer(WallContainerName);
-            client.MeshFactory.CreateWalls(_mapProvider, wallContainer.transform);
+        }
+
+        public void GenerateWalls()
+        {
+            var wallContainer = _gameFactory.CreateGameObjectContainer(WallContainerName);
+            _meshFactory.CreateWalls(_mapProvider, wallContainer.transform);
+        }
+
+        public void Dispose()
+        {
+            for (var i = 0; i < ChunksGenerators.Length; i++)
+            {
+                ChunksGenerators[i].Dispose();
+            }
         }
 
         private void InitializeChunkData()
         {
-            var dataToDispose1 = new NativeArray<BlockData>[ChunksGenerators.Length];
-            var dataToDispose2 = new NativeArray<BlockData>[ChunksGenerators.Length];
-            var dataToDispose3 = new NativeArray<BlockData>[ChunksGenerators.Length];
-            var dataToDispose4 = new NativeArray<BlockData>[ChunksGenerators.Length];
-            var dataToDispose5 = new NativeArray<BlockData>[ChunksGenerators.Length];
-            var dataToDispose6 = new NativeArray<BlockData>[ChunksGenerators.Length];
+            var frontNeighbourByChunk = new NativeArray<BlockData>[ChunksGenerators.Length];
+            var backNeighbourByChunk = new NativeArray<BlockData>[ChunksGenerators.Length];
+            var upperNeighbourByChunk = new NativeArray<BlockData>[ChunksGenerators.Length];
+            var lowerNeighbourByChunk = new NativeArray<BlockData>[ChunksGenerators.Length];
+            var rightNeighbourByChunk = new NativeArray<BlockData>[ChunksGenerators.Length];
+            var leftNeighbourByChunk = new NativeArray<BlockData>[ChunksGenerators.Length];
             var jobHandlesList = new NativeList<JobHandle>(Allocator.Temp);
             for (var i = 0; i < ChunksGenerators.Length; i++)
             {
@@ -53,7 +70,8 @@ namespace Generators
                 {
                     frontNeighbourBlocks.Dispose();
                     frontNeighbourBlocks =
-                        new NativeArray<BlockData>(1024, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+                        new NativeArray<BlockData>(ChunkData.ChunkSizeSquared, Allocator.TempJob,
+                            NativeArrayOptions.UninitializedMemory);
                     for (var x = 0; x < ChunkData.ChunkSize; x++)
                     {
                         for (var y = 0; y < ChunkData.ChunkSize; y++)
@@ -70,7 +88,8 @@ namespace Generators
                 {
                     backNeighbourBlocks.Dispose();
                     backNeighbourBlocks =
-                        new NativeArray<BlockData>(1024, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+                        new NativeArray<BlockData>(ChunkData.ChunkSizeSquared, Allocator.TempJob,
+                            NativeArrayOptions.UninitializedMemory);
                     for (var x = 0; x < ChunkData.ChunkSize; x++)
                     {
                         for (var y = 0; y < ChunkData.ChunkSize; y++)
@@ -91,7 +110,8 @@ namespace Generators
                 {
                     upperNeighbourBlocks.Dispose();
                     upperNeighbourBlocks =
-                        new NativeArray<BlockData>(1024, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+                        new NativeArray<BlockData>(ChunkData.ChunkSizeSquared, Allocator.TempJob,
+                            NativeArrayOptions.UninitializedMemory);
                     for (var x = 0; x < ChunkData.ChunkSize; x++)
                     {
                         for (var z = 0; z < ChunkData.ChunkSize; z++)
@@ -112,7 +132,8 @@ namespace Generators
                 {
                     lowerNeighbourBlocks.Dispose();
                     lowerNeighbourBlocks =
-                        new NativeArray<BlockData>(1024, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+                        new NativeArray<BlockData>(ChunkData.ChunkSizeSquared, Allocator.TempJob,
+                            NativeArrayOptions.UninitializedMemory);
                     for (var x = 0; x < ChunkData.ChunkSize; x++)
                     {
                         for (var z = 0; z < ChunkData.ChunkSize; z++)
@@ -131,7 +152,8 @@ namespace Generators
                 {
                     rightNeighbourBlocks.Dispose();
                     rightNeighbourBlocks =
-                        new NativeArray<BlockData>(1024, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+                        new NativeArray<BlockData>(ChunkData.ChunkSizeSquared, Allocator.TempJob,
+                            NativeArrayOptions.UninitializedMemory);
                     for (var y = 0; y < ChunkData.ChunkSize; y++)
                     {
                         for (var z = 0; z < ChunkData.ChunkSize; z++)
@@ -150,7 +172,8 @@ namespace Generators
                 {
                     leftNeighbourBlocks.Dispose();
                     leftNeighbourBlocks =
-                        new NativeArray<BlockData>(1024, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+                        new NativeArray<BlockData>(ChunkData.ChunkSizeSquared, Allocator.TempJob,
+                            NativeArrayOptions.UninitializedMemory);
                     for (var y = 0; y < ChunkData.ChunkSize; y++)
                     {
                         for (var z = 0; z < ChunkData.ChunkSize; z++)
@@ -165,12 +188,12 @@ namespace Generators
                     }
                 }
 
-                dataToDispose1[i] = frontNeighbourBlocks;
-                dataToDispose2[i] = backNeighbourBlocks;
-                dataToDispose3[i] = upperNeighbourBlocks;
-                dataToDispose4[i] = lowerNeighbourBlocks;
-                dataToDispose5[i] = rightNeighbourBlocks;
-                dataToDispose6[i] = leftNeighbourBlocks;
+                frontNeighbourByChunk[i] = frontNeighbourBlocks;
+                backNeighbourByChunk[i] = backNeighbourBlocks;
+                upperNeighbourByChunk[i] = upperNeighbourBlocks;
+                lowerNeighbourByChunk[i] = lowerNeighbourBlocks;
+                rightNeighbourByChunk[i] = rightNeighbourBlocks;
+                leftNeighbourByChunk[i] = leftNeighbourBlocks;
             }
 
             for (var i = 0; i < ChunksGenerators.Length; i++)
@@ -178,9 +201,9 @@ namespace Generators
                 var chunk = ChunksGenerators[i];
                 var jobHandle = new ChunkMeshGeneration()
                 {
-                    FrontNeighbour = dataToDispose1[i], BackNeighbour = dataToDispose2[i],
-                    UpperNeighbour = dataToDispose3[i], LowerNeighbour = dataToDispose4[i],
-                    RightNeighbour = dataToDispose5[i], LeftNeighbour = dataToDispose6[i],
+                    FrontNeighbour = frontNeighbourByChunk[i], BackNeighbour = backNeighbourByChunk[i],
+                    UpperNeighbour = upperNeighbourByChunk[i], LowerNeighbour = lowerNeighbourByChunk[i],
+                    RightNeighbour = rightNeighbourByChunk[i], LeftNeighbour = leftNeighbourByChunk[i],
                     Blocks = chunk.ChunkData.Blocks, Faces = chunk.ChunkData.Faces, Colors = chunk.Colors,
                     Normals = chunk.Normals,
                     Triangles = chunk.Triangles, Vertices = chunk.Vertices
@@ -191,12 +214,12 @@ namespace Generators
             JobHandle.CompleteAll(jobHandlesList);
             for (var i = 0; i < ChunksGenerators.Length; i++)
             {
-                dataToDispose1[i].Dispose();
-                dataToDispose2[i].Dispose();
-                dataToDispose3[i].Dispose();
-                dataToDispose4[i].Dispose();
-                dataToDispose5[i].Dispose();
-                dataToDispose6[i].Dispose();
+                frontNeighbourByChunk[i].Dispose();
+                backNeighbourByChunk[i].Dispose();
+                upperNeighbourByChunk[i].Dispose();
+                lowerNeighbourByChunk[i].Dispose();
+                rightNeighbourByChunk[i].Dispose();
+                leftNeighbourByChunk[i].Dispose();
                 ChunksGenerators[i].ApplyMesh();
             }
         }
@@ -245,6 +268,7 @@ namespace Generators
 
         private void CreateChunkGenerators()
         {
+            var chunkContainer = _gameFactory.CreateGameObjectContainer(ChunkContainerName);
             ChunksGenerators = new ChunkMeshGenerator[_mapProvider.MapData.Width / ChunkData.ChunkSize *
                                                       _mapProvider.MapData.Height /
                                                       ChunkData.ChunkSize *
@@ -263,7 +287,7 @@ namespace Generators
                         var chunkMeshRenderer = _meshFactory.CreateChunkMeshRender(new Vector3Int(
                             x * ChunkData.ChunkSize,
                             y * ChunkData.ChunkSize,
-                            z * ChunkData.ChunkSize), Quaternion.identity, _chunkContainer.transform);
+                            z * ChunkData.ChunkSize), Quaternion.identity, chunkContainer.transform);
                         ChunksGenerators[index] = new ChunkMeshGenerator(chunkMeshRenderer);
                         ChunksGenerators[index].ChunkData = _mapProvider.MapData.Chunks[index];
                     }
