@@ -1,9 +1,6 @@
-﻿using System.Collections.Generic;
-using Data;
+﻿using Data;
 using Infrastructure.Factory;
-using MapLogic;
 using Networking;
-using UnityEngine;
 
 namespace Infrastructure.States
 {
@@ -30,15 +27,16 @@ namespace Infrastructure.States
 
         private void CreateHost(ServerSettings serverSettings)
         {
-            _networkManager = _gameFactory.CreateSteamNetworkManager(_stateMachine, serverSettings, true).GetComponent<CustomNetworkManager>();
+            _networkManager = _gameFactory.CreateSteamNetworkManager(_stateMachine, serverSettings, true)
+                .GetComponent<CustomNetworkManager>();
             _networkManager.MapDownloaded += OnMapDownloaded;
         }
-        
-        private void OnMapDownloaded(IMapProvider mapProvider, Dictionary<Vector3Int, BlockData> mapUpdates)
+
+        private void OnMapDownloaded()
         {
-            _gameFactory.CreateWalls(mapProvider);
-            _gameFactory.CreateMapRenderer(mapProvider, mapUpdates);
-            _stateMachine.Enter<GameLoopState,CustomNetworkManager>(_networkManager);
+            _gameFactory.CreateWalls(_networkManager.Client.MapProvider);
+            _gameFactory.CreateMapRenderer(_networkManager.Client);
+            _stateMachine.Enter<GameLoopState, CustomNetworkManager>(_networkManager);
         }
 
         public void Exit()

@@ -7,6 +7,7 @@ using Infrastructure.Services.StaticData;
 using MapLogic;
 using Mirror;
 using Networking.Messages;
+using Networking.Messages.Responses;
 using Networking.ServerServices;
 using PlayerLogic.States;
 using Steamworks;
@@ -46,7 +47,7 @@ namespace Networking
         {
             ServerData.AddPlayer(connection, chosenClass, steamID, nickname);
             _playerFactory.CreatePlayer(connection);
-            NetworkServer.SendToAll(new ScoreboardMessage(ServerData.GetScoreData()));
+            NetworkServer.SendToAll(new ScoreboardResponse(ServerData.GetScoreData()));
         }
 
         public void ChangeClass(NetworkConnectionToClient connection, GameClass chosenClass)
@@ -63,13 +64,13 @@ namespace Networking
                 respawnTimer.Start();
             }
 
-            NetworkServer.SendToAll(new ScoreboardMessage(ServerData.GetScoreData()));
+            NetworkServer.SendToAll(new ScoreboardResponse(ServerData.GetScoreData()));
         }
 
         public void DeletePlayer(NetworkConnectionToClient connection)
         {
             ServerData.DeletePlayer(connection);
-            NetworkServer.SendToAll(new ScoreboardMessage(ServerData.GetScoreData()));
+            NetworkServer.SendToAll(new ScoreboardResponse(ServerData.GetScoreData()));
         }
 
         public void AddKill(NetworkConnectionToClient killer, NetworkConnectionToClient victim)
@@ -85,7 +86,7 @@ namespace Networking
             var respawnTimer = new RespawnTimer(_coroutineRunner, victim, _serverSettings.SpawnTime,
                 () => _playerFactory.RespawnPlayer(victim));
             respawnTimer.Start();
-            NetworkServer.SendToAll(new ScoreboardMessage(ServerData.GetScoreData()));
+            NetworkServer.SendToAll(new ScoreboardResponse(ServerData.GetScoreData()));
         }
 
         public void CreateSpawnPoints()

@@ -1,13 +1,9 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Infrastructure.AssetManagement
 {
     public class AssetProvider : IAssetProvider
     {
-        private static readonly string ResourcesPath = Application.dataPath + "/Resources/";
-
         public T Load<T>(string path) where T : Object
         {
             var obj = Resources.Load<T>(path);
@@ -18,6 +14,11 @@ namespace Infrastructure.AssetManagement
         {
             var objects = Resources.LoadAll<T>(path);
             return objects;
+        }
+
+        public GameObject Instantiate(GameObject prefab, Transform itemPosition)
+        {
+            return Object.Instantiate(prefab, itemPosition);
         }
 
         public GameObject Instantiate(string path)

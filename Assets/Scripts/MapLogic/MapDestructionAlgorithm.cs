@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Data;
+using Extensions;
 using Mirror;
 using Networking.Messages;
+using Networking.Messages.Responses;
 using Optimization;
 using UnityEngine;
 
@@ -11,6 +13,7 @@ namespace MapLogic
 {
     public class MapDestructionAlgorithm
     {
+        private uint componentId;
         private const int EmptyBlockCost = 1000000000;
         public IMapProvider MapProvider;
         private IMapUpdater _mapUpdater;
@@ -18,12 +21,12 @@ namespace MapLogic
         private readonly int _depth;
         private readonly int _height;
         private const int LowerSolidBlockHeight = 1;
-        
+
         private List<Vector3Int> _neighbourVector6 = new()
         {
-            new (-1, 0, 0), new (1, 0, 0), 
-            new (0, -1, 0), new (0, 1, 0),
-            new (0, 0, -1), new (0, 0, 1) 
+            new(-1, 0, 0), new(1, 0, 0),
+            new(0, -1, 0), new(0, 1, 0),
+            new(0, 0, -1), new(0, 0, 1)
         };
 
         private List<Tuple<int, int, int>> _mirrorBlocks = new()
@@ -48,7 +51,7 @@ namespace MapLogic
 
             FindColorfulBlocks();
         }
-        
+
         private void FindColorfulBlocks()
         {
             for (var x = 0; x < _width; x++)
@@ -70,7 +73,7 @@ namespace MapLogic
         {
             return vertex.y * _width * _width + vertex.z * _width + vertex.x;
         }
-        
+
         private Vector3Int GetVertexCoordinates(int index)
         {
             var y = index / (_width * _width);
@@ -81,13 +84,13 @@ namespace MapLogic
 
         private double Heuristic(Vector3Int target, Vector3Int neighbour)
         {
-            return (target.x - neighbour.x) * (target.x - neighbour.x) 
+            return (target.x - neighbour.x) * (target.x - neighbour.x)
                    + (target.y - neighbour.y) * (target.y - neighbour.y)
                    + (target.z - neighbour.z) * (target.z - neighbour.z);
         }
-        
-        private void FillQueue(Vector3Int targetVertex, List<Vector3Int> neighbours, 
-            Dictionary<Vector3Int, double> priceByVertex, 
+
+        private void FillQueue(Vector3Int targetVertex, List<Vector3Int> neighbours,
+            Dictionary<Vector3Int, double> priceByVertex,
             Vector3Int vertex, PriorityQueue<Vector3Int, double> pq)
         {
             foreach (var neighbour in neighbours)
@@ -103,13 +106,13 @@ namespace MapLogic
             }
         }
 
-        private void AStar(Vector3Int startVertex, Vector3Int tagretVertex, 
+        private void AStar(Vector3Int startVertex, Vector3Int tagretVertex,
             List<List<Vector3Int>> isolatedComponents, HashSet<Vector3Int> globalCheckedBlocks)
         {
             var blocksToDelete = new List<Vector3Int>();
             var localCheckedBlocks = new HashSet<Vector3Int>();
             var priceByVertex = new Dictionary<Vector3Int, double>();
-            
+
             priceByVertex[startVertex] = 0;
             var pq = new PriorityQueue<Vector3Int, double>();
             pq.Enqueue(startVertex, Heuristic(startVertex, tagretVertex));
@@ -120,21 +123,21 @@ namespace MapLogic
                 if (priceByVertex[vertex] >= EmptyBlockCost)
                 {
                     isolatedComponents.Add(blocksToDelete);
-                    foreach (var v in blocksToDelete) 
+                    foreach (var v in blocksToDelete)
                         MapProvider.MapData._solidBlocks.Remove(GetVertexIndex(v));
                     globalCheckedBlocks.UnionWith(localCheckedBlocks);
                     return;
                 }
-                
+
                 blocksToDelete.Add(vertex);
                 localCheckedBlocks.Add(vertex);
-                
+
                 if (globalCheckedBlocks.Contains(vertex))
                 {
                     globalCheckedBlocks.UnionWith(localCheckedBlocks);
                     return;
                 }
-                
+
                 if (vertex.y == tagretVertex.y)
                 {
                     globalCheckedBlocks.UnionWith(localCheckedBlocks);
@@ -156,15 +159,16 @@ namespace MapLogic
 
         private void AddBlockToSphere(int index, HashSet<int> sphere)
         {
-            if (MapProvider.MapData._solidBlocks.Contains(index)) 
+            if (MapProvider.MapData._solidBlocks.Contains(index))
                 sphere.Add(index);
         }
 
-        public (HashSet<int> explosionInnerBlocks, HashSet<int> explosionOuterBlocks) GetExplosionSphere(Vector3Int selectedBlock, int radius)
+        public (HashSet<int> explosionInnerBlocks, HashSet<int> explosionOuterBlocks) GetExplosionSphere(
+            Vector3Int selectedBlock, int radius)
         {
             var explosionInnerBlocks = new HashSet<int>();
             var explosionOuterBlocks = new HashSet<int>();
-            
+
             var radiusSq = radius * radius;
             var radius1Sq = (radius - 1) * (radius - 1);
             var ceilRadius = radius;
@@ -183,8 +187,8 @@ namespace MapLogic
                         {
                             foreach (var mirrorBlock in _mirrorBlocks)
                             {
-                                AddBlockToSphere((selectedBlock.y + y * mirrorBlock.Item1) * _width * _width 
-                                                 + (selectedBlock.z + z * mirrorBlock.Item2) * _width 
+                                AddBlockToSphere((selectedBlock.y + y * mirrorBlock.Item1) * _width * _width
+                                                 + (selectedBlock.z + z * mirrorBlock.Item2) * _width
                                                  + (selectedBlock.x + x * mirrorBlock.Item3), explosionInnerBlocks);
                             }
                         }
@@ -192,15 +196,15 @@ namespace MapLogic
                         {
                             foreach (var mirrorBlock in _mirrorBlocks)
                             {
-                                AddBlockToSphere((selectedBlock.y + y * mirrorBlock.Item1) * _width * _width 
-                                                 + (selectedBlock.z + z * mirrorBlock.Item2) * _width 
+                                AddBlockToSphere((selectedBlock.y + y * mirrorBlock.Item1) * _width * _width
+                                                 + (selectedBlock.z + z * mirrorBlock.Item2) * _width
                                                  + (selectedBlock.x + x * mirrorBlock.Item3), explosionOuterBlocks);
                             }
                         }
                     }
                 }
             }
-            
+
             return (explosionInnerBlocks, explosionOuterBlocks);
         }
 
@@ -208,10 +212,10 @@ namespace MapLogic
         {
             foreach (var position in blocks)
                 _mapUpdater.SetBlockByGlobalPosition(position, new BlockData());
-            NetworkServer.SendToAll(new UpdateMapMessage(blocks.ToArray(),
+            NetworkServer.SendToAll(new UpdateMapResponse(blocks.ToArray(),
                 new BlockData[blocks.Count]));
         }
-        
+
         private void ExplodeBlocks(HashSet<int> explosionInnerBlocks)
         {
             var explosionBlocksToDelete = new HashSet<Vector3Int>();
@@ -224,7 +228,7 @@ namespace MapLogic
 
             UpdateBlocks(explosionBlocksToDelete.ToList());
         }
-        
+
         private void DestroyIsolatedComponents(HashSet<int> explosionOuterBlocks, Vector3Int block)
         {
             var startVertexes = new List<Vector3Int>();
@@ -241,6 +245,15 @@ namespace MapLogic
             foreach (var startVertex in startVertexes)
                 AStar(startVertex, targetVertex, isolatedComponents, globalCheckedBlocks);
 
+            foreach (var isolatedComponent in isolatedComponents)
+            {
+                var outBlocks = GetOuterBlocks(isolatedComponent.ToHashSet());
+                NetworkServer.SendToAll(new FallBlockResponse(outBlocks.ToArray(),
+                    outBlocks.Select(position => MapProvider.GetBlockByGlobalPosition(position)).ToArray(),
+                    componentId));
+                componentId += 1;
+            }
+
             if (isolatedComponents.Count > 0)
             {
                 var blocksToDelete = isolatedComponents.SelectMany(x => x).ToList();
@@ -255,6 +268,29 @@ namespace MapLogic
 
             ExplodeBlocks(explosionInnerBlocks);
             DestroyIsolatedComponents(explosionOuterBlocks, block);
+        }
+
+        public List<Vector3Int> GetOuterBlocks(HashSet<Vector3Int> positions)
+        {
+            var outerBlocks = new List<Vector3Int>();
+            foreach (var position in positions)
+            {
+                var validNeighbours = 0;
+                foreach (var neighbour in position.GetNeighbours())
+                {
+                    if (positions.Contains(neighbour))
+                    {
+                        validNeighbours += 1;
+                    }
+                }
+
+                if (validNeighbours < 6)
+                {
+                    outerBlocks.Add(position);
+                }
+            }
+
+            return outerBlocks;
         }
     }
 }

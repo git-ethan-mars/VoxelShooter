@@ -3,6 +3,7 @@ using System.Collections;
 using Data;
 using Infrastructure;
 using Mirror;
+using Networking.Messages.Responses;
 using UnityEngine;
 
 namespace Networking.ServerServices
@@ -31,7 +32,7 @@ namespace Networking.ServerServices
             _timeLeft = new ServerTime(_timeInSeconds);
             for (var i = 0; i < _timeInSeconds; i++)
             {
-                NetworkServer.SendToAll(new ServerTimeMessage(_timeLeft));
+                NetworkServer.SendToAll(new ServerTimeResponse(_timeLeft));
                 _timeLeft = _timeLeft.Subtract(new ServerTime(1));
                 yield return new WaitForSeconds(1);
             }

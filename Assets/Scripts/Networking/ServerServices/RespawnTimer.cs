@@ -4,6 +4,7 @@ using Data;
 using Infrastructure;
 using Mirror;
 using Networking.Messages;
+using Networking.Messages.Responses;
 using UnityEngine;
 
 namespace Networking.ServerServices
@@ -35,7 +36,7 @@ namespace Networking.ServerServices
             _timeLeft = new ServerTime(_respawnTime);
             for (var i = 0; i <= _respawnTime; i++)
             {
-                _connection.Send(new RespawnTimeMessage(_timeLeft));
+                _connection.Send(new RespawnTimeResponse(_timeLeft));
                 _timeLeft = _timeLeft.Subtract(new ServerTime(1));
                 yield return new WaitForSeconds(1);
             }

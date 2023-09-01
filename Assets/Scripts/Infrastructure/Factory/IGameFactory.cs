@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using Data;
+﻿using Data;
 using Infrastructure.Services;
 using Infrastructure.States;
 using MapLogic;
+using Networking;
 using Rendering;
 using UnityEngine;
 
@@ -15,7 +15,7 @@ namespace Infrastructure.Factory
         GameObject CreateSteamNetworkManager(GameStateMachine stateMachine, ServerSettings serverSettings, bool isHost);
 
         ChunkRenderer CreateChunkRenderer(Vector3Int vector3Int, Quaternion identity, Transform transform);
-        void CreateMapRenderer(IMapProvider mapProvider, Dictionary<Vector3Int, BlockData> buffer);
+        void CreateMapRenderer(ClientData client);
 
         void CreateWalls(IMapProvider mapProvider);
         void CreateCamera();
