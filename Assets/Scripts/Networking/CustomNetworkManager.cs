@@ -125,10 +125,9 @@ namespace Networking
         {
             Client.MapDownloaded -= OnMapDownloaded;
             Client.Data.State = ClientState.Connected;
-            var sw = Stopwatch.StartNew();
             Client.MapGenerator = new MapGenerator(Client.MapProvider, Client.GameFactory, Client.MeshFactory);
-            sw.Stop();
-            Debug.Log(sw.ElapsedMilliseconds);
+            Client.MapGenerator.GenerateMap();
+            Client.MapGenerator.GenerateWalls();
             _stateMachine.Enter<GameLoopState, CustomNetworkManager>(this);
         }
 
