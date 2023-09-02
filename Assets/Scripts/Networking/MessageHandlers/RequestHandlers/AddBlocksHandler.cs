@@ -22,6 +22,7 @@ namespace Networking.MessageHandlers.RequestHandlers
             {
                 var index = _server.MapDestructionAlgorithm.GetVertexIndex(request.GlobalPositions[i]);
                 _server.MapProvider.MapData._solidBlocks.Add(index);
+                _server.MapProvider.MapData._blockColors[index] = request.Blocks[i].Color;
             }
 
             var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);

@@ -14,7 +14,7 @@ namespace Generators
         private const string ChunkContainerName = "ChunkContainer";
         private const string WallContainerName = "WallContainer";
         public ChunkMeshGenerator[] ChunksGenerators { get; private set; }
-        
+
         private readonly IMapProvider _mapProvider;
         private readonly IMeshFactory _meshFactory;
         private readonly IGameFactory _gameFactory;
@@ -24,11 +24,11 @@ namespace Generators
             _mapProvider = mapProvider;
             _gameFactory = gameFactory;
             _meshFactory = meshFactory;
+            CreateChunkGenerators();
         }
 
         public void GenerateMap()
         {
-            CreateChunkGenerators();
             SetNeighbours();
             InitializeChunkData();
         }
