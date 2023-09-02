@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Data;
 using UnityEngine;
 
 namespace MapLogic
 {
-    public class MapProvider : IMapProvider, IDisposable
+    public class MapProvider : IMapProvider
     {
         public MapData MapData { get; }
 
