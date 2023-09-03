@@ -14,18 +14,21 @@ namespace MapLogic
         {
             var rchFilePath = Application.dataPath + $"/Maps/{fileName}" + RchExtension;
             var vxlFilePath = Application.dataPath + $"/Maps/{fileName}" + VxlExtension;
+            MapProvider mapProvider;
             if (File.Exists(rchFilePath))
             {
                 using var file = File.OpenRead(rchFilePath);
-                return ReadFromStream(file);
+                mapProvider = ReadFromStream(file);
             }
-
-            if (File.Exists(vxlFilePath))
+            else
             {
-                return Vxl2RchConverter.LoadVxl(vxlFilePath);
+                mapProvider = File.Exists(vxlFilePath)
+                    ? Vxl2RchConverter.LoadVxl(vxlFilePath)
+                    : MapProvider.CreateNewMap();
             }
 
-            return MapProvider.CreateNewMap();
+            AddWater(mapProvider, new Color32(3, 58, 135, 255));
+            return mapProvider;
         }
 
 
@@ -83,8 +86,6 @@ namespace MapLogic
                 var z = binaryReader.ReadInt32();
                 spawnPoints.Add(new SpawnPointData() {X = x, Y = y, Z = z});
             }
-
-            AddWater(mapProvider, new Color32(3, 58, 135, 255));
 
             return mapProvider;
         }
