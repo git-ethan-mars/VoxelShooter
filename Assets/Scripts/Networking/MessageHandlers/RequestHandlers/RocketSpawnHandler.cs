@@ -8,21 +8,21 @@ using UnityEngine;
 
 namespace Networking.Messages.Requests
 {
-    public class RocketLauncherSpawnHandler : RequestHandler<RocketLauncherSpawnRequest>
+    public class RocketSpawnHandler : RequestHandler<RocketSpawnRequest>
     {
         private readonly IServer _server;
         private readonly IStaticDataService _staticData;
         private readonly IEntityFactory _entityFactory;
         private readonly IParticleFactory _particleFactory;
 
-        public RocketLauncherSpawnHandler(IServer server, IStaticDataService staticData, IEntityFactory entityFactory, IParticleFactory particleFactory)
+        public RocketSpawnHandler(IServer server, IStaticDataService staticData, IEntityFactory entityFactory, IParticleFactory particleFactory)
         {
             _server = server;
             _staticData = staticData;
             _entityFactory = entityFactory;
             _particleFactory = particleFactory;
         }
-        protected override void OnRequestReceived(NetworkConnectionToClient connection, RocketLauncherSpawnRequest request)
+        protected override void OnRequestReceived(NetworkConnectionToClient connection, RocketSpawnRequest request)
         {
             var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
             if (!result || !playerData.IsAlive) return;

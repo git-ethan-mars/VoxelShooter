@@ -8,6 +8,7 @@ using Infrastructure.Services.StaticData;
 using MapLogic;
 using Mirror;
 using Networking.MessageHandlers.RequestHandlers;
+using Networking.Messages.Requests;
 using Networking.Messages.Responses;
 using Networking.ServerServices;
 using PlayerLogic.States;
@@ -30,6 +31,7 @@ namespace Networking
         private readonly AddBlocksHandler _addBlocksHandler;
         private readonly ChangeClassHandler _changeClassHandler;
         private readonly GrenadeSpawnHandler _grenadeSpawnHandler;
+        private readonly RocketSpawnHandler _rocketSpawnHandler;
         private readonly TntSpawnHandler _tntSpawnHandler;
         private readonly ChangeSlotHandler _changeSlotHandler;
 
@@ -56,6 +58,7 @@ namespace Networking
             _changeSlotHandler = new ChangeSlotHandler(this);
             _grenadeSpawnHandler = new GrenadeSpawnHandler(this, coroutineRunner, entityFactory, staticData,
                 singleExplosionBehaviour);
+            _rocketSpawnHandler = new RocketSpawnHandler(this, staticData, entityFactory, particleFactory);
             _tntSpawnHandler =
                 new TntSpawnHandler(this, coroutineRunner, entityFactory, staticData, chainExplosionBehaviour);
         }
@@ -66,6 +69,7 @@ namespace Networking
             _changeClassHandler.Register();
             _changeSlotHandler.Register();
             _grenadeSpawnHandler.Register();
+            _rocketSpawnHandler.Register();
             _tntSpawnHandler.Register();
         }
 
@@ -75,6 +79,7 @@ namespace Networking
             _changeClassHandler.Unregister();
             _changeSlotHandler.Unregister();
             _grenadeSpawnHandler.Unregister();
+            _rocketSpawnHandler.Unregister();
             _tntSpawnHandler.Unregister();
         }
 

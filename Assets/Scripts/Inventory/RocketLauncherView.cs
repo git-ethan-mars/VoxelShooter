@@ -56,7 +56,7 @@ namespace Inventory
 
         public void OnLeftMouseButtonDown()
         {
-            NetworkClient.Send(new RocketLauncherSpawnRequest(_itemId,
+            NetworkClient.Send(new RocketSpawnRequest(_itemId,
                 _raycaster.CentredRay));
         }
     }
