@@ -52,12 +52,14 @@ namespace Networking
         private readonly GameTimeHandler _gameTimeHandler;
         private readonly RespawnTimeHandler _respawnTimeHandler;
         private readonly ScoreboardHandler _scoreboardHandler;
+        private readonly FallingMeshFallingMeshParticlePool _fallingMeshParticlePool;
 
-        public Client(IGameFactory gameFactory, IMeshFactory meshFactory)
+        public Client(IGameFactory gameFactory, IMeshFactory meshFactory, IParticleFactory particleFactory)
         {
             GameFactory = gameFactory;
             MeshFactory = meshFactory;
-            FallMeshGenerator = new FallMeshGenerator(meshFactory);
+            _fallingMeshParticlePool = new FallingMeshFallingMeshParticlePool(particleFactory);
+            FallMeshGenerator = new FallMeshGenerator(meshFactory, _fallingMeshParticlePool);
             Data = new ClientData();
             _downloadMapHandler = new DownloadMapHandler(this);
             _updateMapHandler = new UpdateMapHandler(this);

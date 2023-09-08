@@ -57,6 +57,11 @@ namespace Infrastructure.Factory
             _coroutineRunner.StartCoroutine(DestroyParticle(rchParticle, main.startLifetime.constant));
         }
 
+        public ParticleSystem CreateFallingMeshParticle()
+        {
+            return _assets.Instantiate(ParticlePath.FallingMeshParticlePath).GetComponent<ParticleSystem>();
+        }
+
         private static IEnumerator DestroyParticle(GameObject particle, float lifetime)
         {
             yield return new WaitForSeconds(lifetime);

@@ -61,7 +61,7 @@ namespace Networking
 
         public override void OnStartClient()
         {
-            Client = new Client(_gameFactory, _meshFactory);
+            Client = new Client(_gameFactory, _meshFactory, _particleFactory);
             Client.RegisterHandlers();
             Client.Data.State = ClientState.Connecting;
             Client.MapDownloaded += OnMapDownloaded;

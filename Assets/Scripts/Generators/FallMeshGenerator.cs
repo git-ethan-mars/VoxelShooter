@@ -8,14 +8,17 @@ namespace Generators
     public class FallMeshGenerator
     {
         private readonly IMeshFactory _meshFactory;
+        private readonly FallingMeshFallingMeshParticlePool _fallingMeshFallingMeshParticlePool;
         private readonly List<Vector3> _vertices;
         private readonly List<int> _triangles;
         private readonly List<Color32> _colors;
         private readonly List<Vector3> _normals;
 
-        public FallMeshGenerator(IMeshFactory meshFactory)
+        public FallMeshGenerator(IMeshFactory meshFactory,
+            FallingMeshFallingMeshParticlePool fallingMeshFallingMeshParticlePool)
         {
             _meshFactory = meshFactory;
+            _fallingMeshFallingMeshParticlePool = fallingMeshFallingMeshParticlePool;
             _vertices = new List<Vector3>();
             _triangles = new List<int>();
             _colors = new List<Color32>();
@@ -44,7 +47,7 @@ namespace Generators
             }
 
             var meshData = new MeshData(_vertices.ToArray(), _triangles, _colors, _normals);
-            _meshFactory.CreateFallingMesh(meshData);
+            _meshFactory.CreateFallingMesh(meshData, _fallingMeshFallingMeshParticlePool);
             ClearMeshData();
         }
 

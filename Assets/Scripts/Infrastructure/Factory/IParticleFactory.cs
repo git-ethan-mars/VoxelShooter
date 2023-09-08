@@ -10,5 +10,7 @@ namespace Infrastructure.Factory
         GameObject CreateMuzzleFlash(Transform transform);
         GameObject CreateBlood(Vector3 position, Quaternion rotation);
         void CreateRchParticle(Vector3 position, int startSpeed, int burstCount);
+
+        ParticleSystem CreateFallingMeshParticle();
     }
 }
