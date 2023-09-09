@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Infrastructure.Factory;
 using UnityEngine;
@@ -18,9 +19,10 @@ namespace Entities
             var mesh = GetComponent<MeshFilter>().mesh;
             var particleSystems = new List<ParticleSystem>();
             var counter = 0;
-            for (var i = 0; i < mesh.vertices.Length; i+=24)
+            var length = mesh.vertices.Length;
+            for (var i = 0; i < length; i+=24)
             {
-                if (counter % 10 == 0)
+                if (counter % (int)(length / Math.Sqrt(length)) == 0)
                 {
                     particleSystems.Add(CreateFallingMeshParticle(
                         transform.localRotation * (mesh.vertices[i] + new Vector3(0.5f, -0.5f, 0.5f)) +
@@ -29,7 +31,6 @@ namespace Entities
                 }
                 counter++;
             }
-
             GetComponent<MeshRenderer>().enabled = false;
             GetComponent<Collider>().enabled = false;
             GetComponent<Rigidbody>().isKinematic = true;
@@ -38,7 +39,7 @@ namespace Entities
                 StartCoroutine(_particlePool.ReleaseOnDelay(particleSystem,
                     particleSystem.main.startLifetime.constant));
             }
-
+            
             StartCoroutine(Utils.DoActionAfterDelay(7, () => Destroy(gameObject)));
         }
 

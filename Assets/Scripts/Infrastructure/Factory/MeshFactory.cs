@@ -34,7 +34,7 @@ namespace Infrastructure.Factory
             var fallingMesh = _assets.Instantiate(FallingMeshPath);
             fallingMesh.GetComponent<MeshFilter>().mesh = mesh;
             fallingMesh.GetComponent<FallingMesh>().Construct(fallingMeshFallingMeshParticlePool);
-            var torque = new Vector3(Random.Range(0, 25), 0, Random.Range(0, 25));
+            var torque = new Vector3(Random.Range(0, 40), 0, Random.Range(0, 40));
             fallingMesh.GetComponent<Rigidbody>().AddTorque(torque);
             var meshCollider = fallingMesh.GetComponent<MeshCollider>();
             meshCollider.sharedMesh = mesh;
