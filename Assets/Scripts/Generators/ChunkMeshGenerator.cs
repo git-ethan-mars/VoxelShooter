@@ -1,14 +1,12 @@
-using System;
 using System.Collections.Generic;
 using Data;
-using Unity.Collections;
+using Rendering;
 using UnityEngine;
 
 namespace Generators
 {
-    public class ChunkMeshGenerator : IDisposable
+    public class ChunkMeshGenerator
     {
-        private readonly GameObject _chunkMeshRenderer;
         public ChunkMeshGenerator UpperNeighbour { get; set; }
         public ChunkMeshGenerator LowerNeighbour { get; set; }
         public ChunkMeshGenerator LeftNeighbour { get; set; }
@@ -16,35 +14,25 @@ namespace Generators
         public ChunkMeshGenerator FrontNeighbour { get; set; }
         public ChunkMeshGenerator BackNeighbour { get; set; }
         private Mesh ChunkMesh { get; }
-        public ChunkData ChunkData { get; set; }
-        public NativeList<Vector3> Vertices { get; }
-        public NativeList<int> Triangles { get; }
-        public NativeList<Color32> Colors { get; }
-        public NativeList<Vector3> Normals { get; }
+        private readonly MeshData _meshData;
+        private readonly ChunkData _chunkData;
+        private readonly GameObject _chunkMeshRenderer;
 
-        public ChunkMeshGenerator(GameObject chunkMeshRenderer)
+        public ChunkMeshGenerator(GameObject chunkMeshRenderer, ChunkData chunkData, MeshData meshData)
         {
-            ChunkMesh = new Mesh();
-            Vertices = new NativeList<Vector3>(Allocator.Persistent);
-            Triangles = new NativeList<int>(Allocator.Persistent);
-            Colors = new NativeList<Color32>(Allocator.Persistent);
-            Normals = new NativeList<Vector3>(Allocator.Persistent);
+            _chunkData = chunkData;
+            _meshData = meshData;
             _chunkMeshRenderer = chunkMeshRenderer;
+            ChunkMesh = new Mesh();
         }
 
         public void ApplyMesh()
         {
-            ChunkMesh.SetVertices(Vertices.AsArray());
-            var triangles = new int[Triangles.Length];
-            for (var i = 0; i < Triangles.Length; i++)
-            {
-                triangles[i] = Triangles[i];
-            }
-
-            ChunkMesh.SetTriangles(triangles, 0);
-            ChunkMesh.SetColors(Colors.AsArray());
-            ChunkMesh.SetNormals(Normals.AsArray());
-            if (Vertices.Length == 0)
+            ChunkMesh.SetVertices(_meshData.Vertices);
+            ChunkMesh.SetTriangles(_meshData.Triangles, 0);
+            ChunkMesh.SetColors(_meshData.Colors);
+            ChunkMesh.SetNormals(_meshData.Normals);
+            if (_meshData.Vertices.Count == 0)
             {
                 _chunkMeshRenderer.GetComponent<MeshCollider>().sharedMesh = null;
             }
@@ -62,7 +50,7 @@ namespace Generators
             {
                 var blockPosition = data[i].Item1;
                 var blockData = data[i].Item2;
-                ChunkData.Blocks[
+                _chunkData.Blocks[
                     blockPosition.x * ChunkData.ChunkSizeSquared + blockPosition.y * ChunkData.ChunkSize +
                     blockPosition.z] = blockData;
                 SetFaces(blockPosition.x, blockPosition.y, blockPosition.z);
@@ -171,46 +159,53 @@ namespace Generators
 
         private void RegenerateMesh()
         {
-            Vertices.Clear();
-            Triangles.Clear();
-            Colors.Clear();
             ChunkMesh.Clear();
-            Normals.Clear();
+            _meshData.Vertices.Clear();
+            _meshData.Triangles.Clear();
+            _meshData.Colors.Clear();
+            ChunkMesh.Clear();
+            _meshData.Normals.Clear();
             for (var i = 0; i < ChunkData.ChunkSizeCubed; i++)
             {
                 var x = i / ChunkData.ChunkSizeSquared;
                 var y = (i - x * ChunkData.ChunkSizeSquared) / ChunkData.ChunkSize;
                 var z = i - x * ChunkData.ChunkSizeSquared - y * ChunkData.ChunkSize;
-                if (ChunkData.Faces[i] == Faces.None) continue;
-                var color = ChunkData.Blocks[i].Color;
-                if (ChunkData.Faces[i].HasFlag(Faces.Top))
+                if (_chunkData.Faces[i] == Faces.None) continue;
+                var color = _chunkData.Blocks[i].Color;
+                if (_chunkData.Faces[i].HasFlag(Faces.Top))
                 {
-                    ChunkGeneratorHelper.GenerateTopSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
+                    ChunkGeneratorHelper.GenerateTopSide(x, y, z, color, _meshData.Vertices, _meshData.Normals,
+                        _meshData.Colors, _meshData.Triangles);
                 }
 
-                if (ChunkData.Faces[i].HasFlag(Faces.Bottom))
+                if (_chunkData.Faces[i].HasFlag(Faces.Bottom))
                 {
-                    ChunkGeneratorHelper.GenerateBottomSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
+                    ChunkGeneratorHelper.GenerateBottomSide(x, y, z, color, _meshData.Vertices, _meshData.Normals,
+                        _meshData.Colors, _meshData.Triangles);
                 }
 
-                if (ChunkData.Faces[i].HasFlag(Faces.Front))
+                if (_chunkData.Faces[i].HasFlag(Faces.Front))
                 {
-                    ChunkGeneratorHelper.GenerateFrontSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
+                    ChunkGeneratorHelper.GenerateFrontSide(x, y, z, color, _meshData.Vertices, _meshData.Normals,
+                        _meshData.Colors, _meshData.Triangles);
                 }
 
-                if (ChunkData.Faces[i].HasFlag(Faces.Back))
+                if (_chunkData.Faces[i].HasFlag(Faces.Back))
                 {
-                    ChunkGeneratorHelper.GenerateBackSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
+                    ChunkGeneratorHelper.GenerateBackSide(x, y, z, color, _meshData.Vertices, _meshData.Normals,
+                        _meshData.Colors, _meshData.Triangles);
                 }
 
-                if (ChunkData.Faces[i].HasFlag(Faces.Left))
+                if (_chunkData.Faces[i].HasFlag(Faces.Left))
                 {
-                    ChunkGeneratorHelper.GenerateLeftSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
+                    ChunkGeneratorHelper.GenerateLeftSide(x, y, z, color, _meshData.Vertices, _meshData.Normals,
+                        _meshData.Colors, _meshData.Triangles);
                 }
 
-                if (ChunkData.Faces[i].HasFlag(Faces.Right))
+                if (_chunkData.Faces[i].HasFlag(Faces.Right))
                 {
-                    ChunkGeneratorHelper.GenerateRightSide(x, y, z, color, Vertices, Normals, Colors, Triangles);
+                    ChunkGeneratorHelper.GenerateRightSide(x, y, z, color, _meshData.Vertices, _meshData.Normals,
+                        _meshData.Colors, _meshData.Triangles);
                 }
             }
 
@@ -219,71 +214,63 @@ namespace Generators
 
         private void SetFaces(int x, int y, int z)
         {
-            ChunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] = Faces.None;
-            if (ChunkData.Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
+            _chunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] = Faces.None;
+            if (_chunkData.Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
                 .Equals(BlockColor.empty)) return;
             if (!ChunkData.IsValidPosition(x, y + 1, z) && (UpperNeighbour is null || UpperNeighbour is not null &&
-                    UpperNeighbour.ChunkData.Blocks[x * ChunkData.ChunkSizeSquared + z].Color
-                        .Equals(BlockColor.empty)) || ChunkData.IsValidPosition(x, y + 1, z) && ChunkData
+                    UpperNeighbour._chunkData.Blocks[x * ChunkData.ChunkSizeSquared + z].Color
+                        .Equals(BlockColor.empty)) || ChunkData.IsValidPosition(x, y + 1, z) && _chunkData
                     .Blocks[x * ChunkData.ChunkSizeSquared + (y + 1) * ChunkData.ChunkSize + z].Color
                     .Equals(BlockColor.empty))
             {
-                ChunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Top;
+                _chunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Top;
             }
 
-            if (!ChunkData.IsValidPosition(x, y - 1, z) && LowerNeighbour is not null && LowerNeighbour.ChunkData
+            if (!ChunkData.IsValidPosition(x, y - 1, z) && LowerNeighbour is not null && LowerNeighbour._chunkData
                     .Blocks[x * ChunkData.ChunkSizeSquared + (ChunkData.ChunkSize - 1) * ChunkData.ChunkSize + z].Color
-                    .Equals(BlockColor.empty) || ChunkData.IsValidPosition(x, y - 1, z) && ChunkData
+                    .Equals(BlockColor.empty) || ChunkData.IsValidPosition(x, y - 1, z) && _chunkData
                     .Blocks[x * ChunkData.ChunkSizeSquared + (y - 1) * ChunkData.ChunkSize + z].Color
                     .Equals(BlockColor.empty))
             {
-                ChunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Bottom;
+                _chunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Bottom;
             }
 
             if (!ChunkData.IsValidPosition(x, y, z + 1) && FrontNeighbour is not null &&
-                FrontNeighbour.ChunkData.Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize].Color
-                    .Equals(BlockColor.empty) || ChunkData.IsValidPosition(x, y, z + 1) && ChunkData
+                FrontNeighbour._chunkData.Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize].Color
+                    .Equals(BlockColor.empty) || ChunkData.IsValidPosition(x, y, z + 1) && _chunkData
                     .Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z + 1].Color
                     .Equals(BlockColor.empty))
             {
-                ChunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Front;
+                _chunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Front;
             }
 
             if (!ChunkData.IsValidPosition(x, y, z - 1) && BackNeighbour is not null &&
-                BackNeighbour.ChunkData
+                BackNeighbour._chunkData
                     .Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + ChunkData.ChunkSize - 1].Color
-                    .Equals(BlockColor.empty) || ChunkData.IsValidPosition(x, y, z - 1) && ChunkData
+                    .Equals(BlockColor.empty) || ChunkData.IsValidPosition(x, y, z - 1) && _chunkData
                     .Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z - 1].Color
                     .Equals(BlockColor.empty))
             {
-                ChunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Back;
+                _chunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Back;
             }
 
             if (!ChunkData.IsValidPosition(x + 1, y, z) && RightNeighbour is not null &&
-                RightNeighbour.ChunkData.Blocks[y * ChunkData.ChunkSize + z].Color.Equals(BlockColor.empty) ||
-                ChunkData.IsValidPosition(x + 1, y, z) && ChunkData
+                RightNeighbour._chunkData.Blocks[y * ChunkData.ChunkSize + z].Color.Equals(BlockColor.empty) ||
+                ChunkData.IsValidPosition(x + 1, y, z) && _chunkData
                     .Blocks[(x + 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
                     .Equals(BlockColor.empty))
             {
-                ChunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Right;
+                _chunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Right;
             }
 
-            if (!ChunkData.IsValidPosition(x - 1, y, z) && LeftNeighbour is not null && LeftNeighbour.ChunkData
+            if (!ChunkData.IsValidPosition(x - 1, y, z) && LeftNeighbour is not null && LeftNeighbour._chunkData
                     .Blocks[(ChunkData.ChunkSize - 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
-                    .Equals(BlockColor.empty) || ChunkData.IsValidPosition(x - 1, y, z) && ChunkData
+                    .Equals(BlockColor.empty) || ChunkData.IsValidPosition(x - 1, y, z) && _chunkData
                     .Blocks[(x - 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
                     .Equals(BlockColor.empty))
             {
-                ChunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Left;
+                _chunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Left;
             }
-        }
-
-        public void Dispose()
-        {
-            Vertices.Dispose();
-            Normals.Dispose();
-            Colors.Dispose();
-            Triangles.Dispose();
         }
     }
 }

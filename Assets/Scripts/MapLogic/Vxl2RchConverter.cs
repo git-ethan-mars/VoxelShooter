@@ -99,7 +99,7 @@ namespace MapLogic
                 {
                     for (var z = 0; z < Depth; z++)
                     {
-                        var chunk = chunks[mapProvider.FindChunkNumberByPosition(
+                        var chunk = chunks[mapProvider.GetChunkNumberByGlobalPosition(
                             Width - 1 - x, _height - heightOffset - 1 - y, z)];
                         chunk.Blocks[((Width - 1 - x) & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
                                      ((_height - heightOffset - 1 - y) & (ChunkData.ChunkSize - 1)) *

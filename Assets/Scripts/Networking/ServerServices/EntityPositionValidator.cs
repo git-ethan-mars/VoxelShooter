@@ -9,10 +9,10 @@ namespace Networking.ServerServices
     public class EntityPositionValidator
     {
         private readonly List<PushableObject> _pushableEntities;
-        private readonly IMapProvider _mapProvider;
+        private readonly MapProvider _mapProvider;
 
-        public EntityPositionValidator(IMapUpdater mapUpdater,
-            IMapProvider mapProvider)
+        public EntityPositionValidator(MapUpdater mapUpdater,
+            MapProvider mapProvider)
         {
             _pushableEntities = new List<PushableObject>();
             _mapProvider = mapProvider;

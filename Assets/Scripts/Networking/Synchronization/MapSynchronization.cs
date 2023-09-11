@@ -7,9 +7,9 @@ namespace Networking.Synchronization
 {
     public class MapSynchronization : NetworkBehaviour
     {
-        private IMapProvider MapProvider { get; set; }
+        private MapProvider MapProvider { get; set; }
 
-        public void Construct(IMapProvider mapProvider)
+        public void Construct(MapProvider mapProvider)
         {
             MapProvider = mapProvider;
         }

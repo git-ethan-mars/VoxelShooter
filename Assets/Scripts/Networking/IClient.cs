@@ -18,7 +18,7 @@ namespace Networking
         ClientData Data { get; }
         IGameFactory GameFactory { get; }
         IMeshFactory MeshFactory { get; }
-        IMapProvider MapProvider { get; set; }
+        MapProvider MapProvider { get; set; }
         MapGenerator MapGenerator { get; set; }
         void RegisterHandlers();
         void UnregisterHandlers();

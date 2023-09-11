@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using Data;
 using UnityEngine;
 
 namespace MapLogic
 {
-    public class MapProvider : IMapProvider
+    [Serializable]
+    public class MapProvider
     {
         public MapData MapData { get; }
 
@@ -13,34 +14,19 @@ namespace MapLogic
             MapData = mapData;
         }
 
-        public static MapProvider CreateNewMap(int width = 512, int height = 64, int depth = 512)
-        {
-            var chunks = new ChunkData[width / ChunkData.ChunkSize * height / ChunkData.ChunkSize * depth /
-                                       ChunkData.ChunkSize];
-            for (var i = 0; i < chunks.Length; i++)
-            {
-                chunks[i] = new ChunkData();
-            }
-
-            var mapData = new MapData(chunks, width, height, depth, new List<SpawnPointData>());
-            var mapProvider = new MapProvider(mapData);
-            return mapProvider;
-        }
-
-
         public BlockData GetBlockByGlobalPosition(Vector3Int position) =>
             GetBlockByGlobalPosition(position.x, position.y, position.z);
 
         public BlockData GetBlockByGlobalPosition(int x, int y, int z)
         {
-            return MapData.Chunks[FindChunkNumberByPosition(x, y, z)]
+            return MapData.Chunks[GetChunkNumberByGlobalPosition(x, y, z)]
                 .Blocks[
                     x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
                     y % ChunkData.ChunkSize * ChunkData.ChunkSize + z % ChunkData.ChunkSize];
         }
 
 
-        public int FindChunkNumberByPosition(int x, int y, int z)
+        public int GetChunkNumberByGlobalPosition(int x, int y, int z)
         {
             return z / ChunkData.ChunkSize +
                    y / ChunkData.ChunkSize * (MapData.Depth / ChunkData.ChunkSize) +
@@ -48,12 +34,18 @@ namespace MapLogic
                    (MapData.Height / ChunkData.ChunkSize * MapData.Depth / ChunkData.ChunkSize);
         }
 
-        public int FindChunkNumberByPosition(Vector3Int position)
+        public int GetChunkNumberByGlobalPosition(Vector3Int position)
         {
             return position.z / ChunkData.ChunkSize +
                    position.y / ChunkData.ChunkSize * (MapData.Depth / ChunkData.ChunkSize) +
                    position.x / ChunkData.ChunkSize *
                    (MapData.Height / ChunkData.ChunkSize * MapData.Depth / ChunkData.ChunkSize);
+        }
+
+        public Vector3Int GetLocalPositionByGlobal(Vector3Int globalPosition)
+        {
+            return new Vector3Int(globalPosition.x % ChunkData.ChunkSize, globalPosition.y % ChunkData.ChunkSize,
+                globalPosition.z % ChunkData.ChunkSize);
         }
 
         public bool IsValidPosition(Vector3Int globalPosition)
@@ -63,12 +55,10 @@ namespace MapLogic
                      globalPosition.z < 0 || globalPosition.z >= MapData.Depth);
         }
 
-        public void Dispose()
+        public int GetChunkCount()
         {
-            for (var i = 0; i < MapData.Chunks.Length; i++)
-            {
-                MapData.Chunks[i].Dispose();
-            }
+            return MapData.Width / ChunkData.ChunkSize * MapData.Height / ChunkData.ChunkSize * MapData.Depth /
+                   ChunkData.ChunkSize;
         }
     }
 }

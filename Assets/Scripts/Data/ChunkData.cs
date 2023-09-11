@@ -1,14 +1,10 @@
-using System;
-using Unity.Collections;
-
 namespace Data
 {
-    public class ChunkData : IDisposable
+    public class ChunkData
     {
-        public NativeArray<Faces> Faces = new(ChunkSizeCubed, Allocator.Persistent,
-            NativeArrayOptions.UninitializedMemory);
+        public Faces[] Faces = new Faces[ChunkSizeCubed];
 
-        public NativeArray<BlockData> Blocks = new(ChunkSizeCubed, Allocator.Persistent);
+        public readonly BlockData[] Blocks = new BlockData[ChunkSizeCubed];
         public const int ChunkSize = 32;
         public const int ChunkSizeSquared = 1024;
         public const int ChunkSizeCubed = 32768;
@@ -17,12 +13,6 @@ namespace Data
         {
             return x is >= 0 and < ChunkSize && y is >= 0 and < ChunkSize &&
                    z is >= 0 and < ChunkSize;
-        }
-
-        public void Dispose()
-        {
-            Faces.Dispose();
-            Blocks.Dispose();
         }
     }
 }

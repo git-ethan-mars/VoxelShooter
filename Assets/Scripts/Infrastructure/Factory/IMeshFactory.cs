@@ -8,7 +8,7 @@ namespace Infrastructure.Factory
     {
         void CreateFallingMesh(Rendering.MeshData meshData);
         GameObject CreateChunkMeshRender(Vector3 position, Quaternion rotation, Transform parent);
-        void CreateWalls(IMapProvider mapProvider, Transform parent);
+        void CreateWalls(MapProvider mapProvider, Transform parent);
         GameObject CreateGameModel(GameObject prefab, Transform itemPosition);
     }
 }

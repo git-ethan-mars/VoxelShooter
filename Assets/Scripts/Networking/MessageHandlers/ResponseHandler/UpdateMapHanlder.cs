@@ -25,22 +25,23 @@ namespace Networking.MessageHandlers.ResponseHandler
             {
                 for (var j = 0; j < _client.Data.BufferToUpdateMap[i].Positions.Length; j++)
                 {
-                    var chunkIndex = _client.MapProvider.FindChunkNumberByPosition(_client.Data.BufferToUpdateMap[i].Positions[j]);
+                    var chunkIndex =
+                        _client.MapProvider.GetChunkNumberByGlobalPosition(_client.Data.BufferToUpdateMap[i]
+                            .Positions[j]);
                     if (!dataByChunkIndex.ContainsKey(chunkIndex))
                     {
                         dataByChunkIndex[chunkIndex] = new List<(Vector3Int, BlockData)>();
                     }
 
-                    var localPosition = new Vector3Int(_client.Data.BufferToUpdateMap[i].Positions[j].x % ChunkData.ChunkSize,
-                        _client.Data.BufferToUpdateMap[i].Positions[j].y % ChunkData.ChunkSize,
-                        _client.Data.BufferToUpdateMap[i].Positions[j].z % ChunkData.ChunkSize);
+                    var localPosition =
+                        _client.MapProvider.GetLocalPositionByGlobal(_client.Data.BufferToUpdateMap[i].Positions[j]);
                     dataByChunkIndex[chunkIndex].Add((localPosition, _client.Data.BufferToUpdateMap[i].BlockData[j]));
                 }
             }
 
             foreach (var (chunkIndex, data) in dataByChunkIndex)
             {
-                _client.MapGenerator.ChunksGenerators[chunkIndex].SpawnBlocks(data);
+                _client.MapGenerator.ChunkGenerators[chunkIndex].SpawnBlocks(data);
             }
 
             _client.Data.BufferToUpdateMap.Clear();

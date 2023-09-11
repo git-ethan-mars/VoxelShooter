@@ -10,7 +10,7 @@ namespace Explosions
 {
     public class ChainExplosionBehaviour : ExplosionBehaviour
     {
-        public ChainExplosionBehaviour(IMapUpdater mapUpdater, IParticleFactory particleFactory, 
+        public ChainExplosionBehaviour(MapUpdater mapUpdater, IParticleFactory particleFactory, 
             IExplosionArea explosionArea, MapDestructionAlgorithm mapDestructionAlgorithm) 
             : base(mapUpdater, particleFactory, explosionArea, mapDestructionAlgorithm) { }
 

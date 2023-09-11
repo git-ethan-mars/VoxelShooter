@@ -44,7 +44,7 @@ namespace Networking
         public ClientData Data { get; set; }
         public IGameFactory GameFactory { get; set; }
         public IMeshFactory MeshFactory { get; set; }
-        public IMapProvider MapProvider { get; set; }
+        public MapProvider MapProvider { get; set; }
         public MapGenerator MapGenerator { get; set; }
 
         public readonly FallMeshGenerator FallMeshGenerator;

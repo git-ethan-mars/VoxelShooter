@@ -15,7 +15,7 @@ namespace Networking.ServerServices
         private readonly Dictionary<NetworkConnectionToClient, PlayerData> _dataByConnection;
         private readonly IStaticDataService _staticData;
 
-        public ServerData(IStaticDataService staticDataService, IMapProvider mapProvider)
+        public ServerData(IStaticDataService staticDataService, MapProvider mapProvider)
         {
             _dynamicSpawnPoints = new List<SpawnPointData>();
             mapProvider.MapData.SpawnPoints.CopyTo(_dynamicSpawnPoints);

@@ -8,7 +8,23 @@ namespace MapLogic
     public static class MapReader
     {
         private const string RchExtension = ".rch";
+
         private const string VxlExtension = ".vxl";
+
+        public static MapProvider CreateNewMap(int width = 512, int height = 64, int depth = 512)
+        {
+            var chunks = new ChunkData[width / ChunkData.ChunkSize * height / ChunkData.ChunkSize * depth /
+                                       ChunkData.ChunkSize];
+            for (var i = 0; i < chunks.Length; i++)
+            {
+                chunks[i] = new ChunkData();
+            }
+
+            var mapData = new MapData(chunks, width, height, depth, new List<SpawnPointData>());
+            var mapProvider = new MapProvider(mapData);
+            AddWater(mapProvider, new Color32(3, 58, 135, 255));
+            return mapProvider;
+        }
 
         public static MapProvider ReadFromFile(string fileName)
         {
@@ -22,15 +38,19 @@ namespace MapLogic
             }
             else
             {
-                mapProvider = File.Exists(vxlFilePath)
-                    ? Vxl2RchConverter.LoadVxl(vxlFilePath)
-                    : MapProvider.CreateNewMap();
+                if (File.Exists(vxlFilePath))
+                {
+                    mapProvider = Vxl2RchConverter.LoadVxl(vxlFilePath);
+                    AddWater(mapProvider, new Color32(3, 58, 135, 255));
+                }
+                else
+                {
+                    mapProvider = CreateNewMap();
+                }
             }
 
-            AddWater(mapProvider, new Color32(3, 58, 135, 255));
             return mapProvider;
         }
-
 
         public static MapProvider ReadFromStream(Stream stream)
         {
@@ -90,14 +110,13 @@ namespace MapLogic
             return mapProvider;
         }
 
-
-        private static void AddWater(MapProvider mapProvider, Color32 waterColor)
+        public static void AddWater(MapProvider mapProvider, Color32 waterColor)
         {
             for (var x = 0; x < mapProvider.MapData.Width; x++)
             {
                 for (var z = 0; z < mapProvider.MapData.Depth; z++)
                 {
-                    var blocks = mapProvider.MapData.Chunks[mapProvider.FindChunkNumberByPosition(x, 0, z)].Blocks;
+                    var blocks = mapProvider.MapData.Chunks[mapProvider.GetChunkNumberByGlobalPosition(x, 0, z)].Blocks;
                     var block = blocks[
                         (x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
                         (z & (ChunkData.ChunkSize - 1))];

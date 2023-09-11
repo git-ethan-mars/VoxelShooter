@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Data;
 using Optimization;
 using Unity.Collections;
 using Unity.Jobs;
@@ -10,27 +11,24 @@ namespace MapLogic
 {
     public static class MapWriter
     {
+        private const string RchExtension = ".rch";
+
         public static void SaveMap(string fileName, MapProvider mapProvider)
         {
-            if (Path.GetExtension(fileName) != ".rch")
-            {
-                throw new ArgumentException();
-            }
-
             var mapDirectory = Application.dataPath + "/Maps";
             if (!Directory.Exists(mapDirectory))
             {
                 Directory.CreateDirectory(mapDirectory);
             }
 
-            var filePath = Application.dataPath + $"/Maps/{fileName}";
+            var filePath = Application.dataPath + $"/Maps/{fileName + RchExtension}";
 
             using var file = File.OpenWrite(filePath);
             WriteMap(mapProvider, file);
         }
-        
-        
-        public static void WriteMap(IMapProvider mapProvider, Stream stream)
+
+
+        public static void WriteMap(MapProvider mapProvider, Stream stream)
         {
             var result = new List<NativeList<byte>>();
             for (var i = 0; i < mapProvider.MapData.Chunks.Length; i++)
@@ -41,7 +39,7 @@ namespace MapLogic
             var jobHandles = new NativeList<JobHandle>(Allocator.Temp);
             for (var i = 0; i < mapProvider.MapData.Chunks.Length; i++)
             {
-                var job = new ChunkSerializer(result[i], mapProvider.MapData.Chunks[i].Blocks,
+                var job = new ChunkSerializer(result[i], new NativeArray<BlockData>(mapProvider.MapData.Chunks[i].Blocks, Allocator.TempJob),
                     mapProvider.MapData.SolidColor);
                 var jobHandle = job.Schedule();
                 jobHandles.Add(jobHandle);
@@ -71,6 +69,7 @@ namespace MapLogic
                 binaryWriter.Write(mapProvider.MapData.SpawnPoints[i].Y);
                 binaryWriter.Write(mapProvider.MapData.SpawnPoints[i].Z);
             }
+
             stream.Write(memoryStream.ToArray());
         }
     }
