@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using Data;
 using Generators;
 using Infrastructure;
@@ -11,7 +10,6 @@ using MapLogic;
 using Mirror;
 using Networking.ClientServices;
 using Networking.ServerServices;
-using Debug = UnityEngine.Debug;
 using MemoryStream = System.IO.MemoryStream;
 
 namespace Networking
@@ -98,7 +96,6 @@ namespace Networking
             Client.UnregisterHandlers();
             Client.Data.State = ClientState.NotConnected;
             if (NetworkClient.activeHost) return;
-            ReleaseMapResources();
             _gameFactory.CreateCamera();
             GameFinished?.Invoke();
             StartCoroutine(Utils.DoActionAfterDelay(ShowResultsDuration,
@@ -108,17 +105,10 @@ namespace Networking
         public override void OnStopServer()
         {
             _server.UnregisterHandlers();
-            ReleaseMapResources();
             _gameFactory.CreateCamera();
             GameFinished?.Invoke();
             StartCoroutine(Utils.DoActionAfterDelay(ShowResultsDuration,
                 _stateMachine.Enter<MainMenuState>));
-        }
-
-        private void ReleaseMapResources()
-        {
-            Client.MapGenerator.Dispose();
-            Client.MapProvider.Dispose();
         }
 
         private void OnMapDownloaded()
