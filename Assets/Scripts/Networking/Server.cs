@@ -42,7 +42,7 @@ namespace Networking
             _coroutineRunner = coroutineRunner;
             _serverSettings = serverSettings;
             _entityFactory = entityFactory;
-            MapProvider = MapReader.ReadFromFile(_serverSettings.MapName);
+            MapProvider = MapReader.ReadFromFile(_serverSettings.MapName, staticData);
             MapUpdater = new MapUpdater(MapProvider);
             MapDestructionAlgorithm = new MapDestructionAlgorithm(MapProvider, MapUpdater);
             ServerData = new ServerData(staticData, MapProvider);
@@ -132,7 +132,7 @@ namespace Networking
 
         public void CreateSpawnPoints(Transform parent)
         {
-            foreach (var spawnPointData in MapProvider.MapData.SpawnPoints)
+            foreach (var spawnPointData in MapProvider.SceneData.SpawnPoints)
             {
                 var spawnPointScript = _entityFactory.CreateSpawnPoint(spawnPointData.ToVectorWithOffset(), parent)
                     .GetComponent<SpawnPoint>();

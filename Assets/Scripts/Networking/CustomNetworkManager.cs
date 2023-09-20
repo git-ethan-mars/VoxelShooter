@@ -9,6 +9,7 @@ using Infrastructure.States;
 using MapLogic;
 using Mirror;
 using Networking.ClientServices;
+using Networking.Messages.Responses;
 using Networking.ServerServices;
 using MemoryStream = System.IO.MemoryStream;
 
@@ -60,7 +61,7 @@ namespace Networking
 
         public override void OnStartClient()
         {
-            Client = new Client(_gameFactory, _meshFactory);
+            Client = new Client(_gameFactory, _meshFactory, _staticData);
             Client.RegisterHandlers();
             Client.Data.State = ClientState.Connecting;
             Client.MapDownloaded += OnMapDownloaded;
@@ -76,6 +77,7 @@ namespace Networking
             }
             else
             {
+                connection.Send(new MapNameResponse(_server.MapProvider.MapName));
                 var memoryStream = new MemoryStream();
                 MapWriter.WriteMap(_server.MapProvider, memoryStream);
                 var bytes = memoryStream.ToArray();
@@ -115,9 +117,12 @@ namespace Networking
         {
             Client.MapDownloaded -= OnMapDownloaded;
             Client.Data.State = ClientState.Connected;
-            Client.MapGenerator = new MapGenerator(Client.MapProvider, Client.GameFactory, Client.MeshFactory);
+            Client.MapGenerator = new MapGenerator(Client.MapProvider, Client.GameFactory, Client.MeshFactory,
+                Client.StaticData);
             Client.MapGenerator.GenerateMap();
             Client.MapGenerator.GenerateWalls();
+            Client.MapGenerator.GenerateLight();
+            Client.MapGenerator.ApplySkybox();
             _stateMachine.Enter<GameLoopState, CustomNetworkManager>(this);
         }
 

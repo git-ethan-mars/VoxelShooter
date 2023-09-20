@@ -16,8 +16,8 @@ namespace MapLogic
 
         public void UpdateSpawnPoint(SpawnPointData oldPosition, SpawnPointData position)
         {
-            var index = _mapProvider.MapData.SpawnPoints.FindIndex(point => point.Equals(oldPosition));
-            _mapProvider.MapData.SpawnPoints[index] = position;
+            var index = _mapProvider.SceneData.SpawnPoints.FindIndex(point => point.Equals(oldPosition));
+            _mapProvider.SceneData.SpawnPoints[index] = position;
         }
 
         public void SetBlockByGlobalPosition(Vector3Int position, BlockData blockData) =>

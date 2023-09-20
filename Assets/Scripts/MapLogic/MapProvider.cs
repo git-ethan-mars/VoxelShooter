@@ -1,17 +1,19 @@
-﻿using System;
-using Data;
+﻿using Data;
 using UnityEngine;
 
 namespace MapLogic
 {
-    [Serializable]
     public class MapProvider
     {
-        public MapData MapData { get; }
+        public readonly string MapName;
+        public readonly MapData MapData;
+        public readonly MapSceneData SceneData;
 
-        public MapProvider(MapData mapData)
+        public MapProvider(MapData mapData, MapConfigure mapConfigure)
         {
+            MapName = mapConfigure.mapName;
             MapData = mapData;
+            SceneData = new MapSceneData(mapConfigure);
         }
 
         public BlockData GetBlockByGlobalPosition(Vector3Int position) =>

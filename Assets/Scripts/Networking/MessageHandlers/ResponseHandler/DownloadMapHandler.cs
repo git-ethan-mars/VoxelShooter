@@ -23,7 +23,9 @@ namespace Networking.MessageHandlers.ResponseHandler
             _byteChunks.AddRange(message.ByteChunk);
             MapLoadProgressed?.Invoke(message.Progress);
             if (message.Progress != 1) return;
-            _client.MapProvider = MapReader.ReadFromStream(new MemoryStream(_byteChunks.ToArray()));
+            var mapConfigure = _client.StaticData.GetMapConfigure(_client.Data.MapName);
+            var mapData = MapReader.ReadFromStream(new MemoryStream(_byteChunks.ToArray()), mapConfigure);
+            _client.MapProvider = new MapProvider(mapData, mapConfigure);
             MapDownloaded?.Invoke();
         }
     }

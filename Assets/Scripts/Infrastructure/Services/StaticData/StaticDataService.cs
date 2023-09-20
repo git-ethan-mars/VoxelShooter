@@ -7,6 +7,7 @@ namespace Infrastructure.Services.StaticData
 {
     public class StaticDataService : IStaticDataService
     {
+        private const string Default = "Default";
         private Dictionary<GameClass, PlayerCharacteristic> _playerCharacteristicByClass;
         private Dictionary<GameClass, GameInventory> _inventoryByClass;
         private Dictionary<int, InventoryItem> _itemById;
@@ -52,7 +53,14 @@ namespace Infrastructure.Services.StaticData
 
         public MapConfigure GetMapConfigure(string mapName)
         {
-            return _mapConfigureByName.TryGetValue(mapName, out var mapConfigure) ? mapConfigure : null;
+            return _mapConfigureByName.TryGetValue(mapName, out var mapConfigure)
+                ? mapConfigure
+                : GetDefaultMapConfigure();
+        }
+
+        public MapConfigure GetDefaultMapConfigure()
+        {
+            return _mapConfigureByName[Default];
         }
     }
 }

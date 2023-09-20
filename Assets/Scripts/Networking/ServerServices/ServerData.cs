@@ -18,7 +18,7 @@ namespace Networking.ServerServices
         public ServerData(IStaticDataService staticDataService, MapProvider mapProvider)
         {
             _dynamicSpawnPoints = new List<SpawnPointData>();
-            mapProvider.MapData.SpawnPoints.CopyTo(_dynamicSpawnPoints);
+            mapProvider.SceneData.SpawnPoints.CopyTo(_dynamicSpawnPoints);
             _dataByConnection = new Dictionary<NetworkConnectionToClient, PlayerData>();
             KillStatistics = new List<KillData>();
             _staticData = staticDataService;

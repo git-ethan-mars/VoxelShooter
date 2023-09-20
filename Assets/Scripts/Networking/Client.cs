@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Data;
 using Generators;
 using Infrastructure.Factory;
+using Infrastructure.Services.StaticData;
 using MapLogic;
 using Networking.ClientServices;
 using Networking.MessageHandlers.ResponseHandler;
@@ -41,13 +42,15 @@ namespace Networking
             remove => _scoreboardHandler.ScoreboardChanged -= value;
         }
 
-        public ClientData Data { get; set; }
-        public IGameFactory GameFactory { get; set; }
-        public IMeshFactory MeshFactory { get; set; }
+        public ClientData Data { get; }
+        public IGameFactory GameFactory { get; }
+        public IMeshFactory MeshFactory { get; }
+        public IStaticDataService StaticData { get; }
         public MapProvider MapProvider { get; set; }
         public MapGenerator MapGenerator { get; set; }
 
         public readonly FallMeshGenerator FallMeshGenerator;
+        private readonly MapNameHandler _mapNameHandler;
         private readonly DownloadMapHandler _downloadMapHandler;
         private readonly UpdateMapHandler _updateMapHandler;
         private readonly FallBlockHandler _fallBlockHandler;
@@ -55,12 +58,14 @@ namespace Networking
         private readonly RespawnTimeHandler _respawnTimeHandler;
         private readonly ScoreboardHandler _scoreboardHandler;
 
-        public Client(IGameFactory gameFactory, IMeshFactory meshFactory)
+        public Client(IGameFactory gameFactory, IMeshFactory meshFactory, IStaticDataService staticData)
         {
             GameFactory = gameFactory;
             MeshFactory = meshFactory;
+            StaticData = staticData;
             FallMeshGenerator = new FallMeshGenerator(meshFactory);
             Data = new ClientData();
+            _mapNameHandler = new MapNameHandler(this);
             _downloadMapHandler = new DownloadMapHandler(this);
             _updateMapHandler = new UpdateMapHandler(this);
             _fallBlockHandler = new FallBlockHandler(this);
@@ -71,6 +76,7 @@ namespace Networking
 
         public void RegisterHandlers()
         {
+            _mapNameHandler.Register();
             _downloadMapHandler.Register();
             _updateMapHandler.Register();
             _fallBlockHandler.Register();
@@ -81,6 +87,7 @@ namespace Networking
 
         public void UnregisterHandlers()
         {
+            _mapNameHandler.Unregister();
             _downloadMapHandler.Unregister();
             _updateMapHandler.Unregister();
             _fallBlockHandler.Unregister();

@@ -48,6 +48,7 @@ namespace Infrastructure.States
             staticData.LoadItems();
             staticData.LoadInventories();
             staticData.LoadPlayerCharacteristics();
+            staticData.LoadMapConfigures();
             _allServices.RegisterSingle<IInputService>(new StandaloneInputService());
             _allServices.RegisterSingle<IAssetProvider>(new AssetProvider());
             if (_isLocalBuild)

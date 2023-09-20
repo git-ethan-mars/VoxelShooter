@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Data;
 using Generators;
 using Infrastructure.Factory;
+using Infrastructure.Services.StaticData;
 using MapLogic;
 using Networking.ClientServices;
 
@@ -18,6 +19,7 @@ namespace Networking
         ClientData Data { get; }
         IGameFactory GameFactory { get; }
         IMeshFactory MeshFactory { get; }
+        IStaticDataService StaticData { get; }
         MapProvider MapProvider { get; set; }
         MapGenerator MapGenerator { get; set; }
         void RegisterHandlers();

@@ -13,23 +13,20 @@ namespace Networking.Synchronization
         {
             MapProvider = mapProvider;
         }
-        
+
         [Command]
         public void SendSpawnPointOnServer(Vector3Int position)
         {
-            MapProvider.MapData.SpawnPoints.Add(new SpawnPointData()
+            MapProvider.SceneData.SpawnPoints.Add(new SpawnPointData
             {
-                X = position.x,
-                Y = position.y,
-                Z = position.z
+                position = position
             });
         }
 
         [Command]
         public void DeleteAllSpawnPoints()
         {
-            MapProvider.MapData.SpawnPoints.Clear();
+            MapProvider.SceneData.SpawnPoints.Clear();
         }
-        
     }
 }

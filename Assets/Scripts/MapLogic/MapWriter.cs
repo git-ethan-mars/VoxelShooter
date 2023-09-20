@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using Data;
 using Optimization;
@@ -39,7 +38,8 @@ namespace MapLogic
             var jobHandles = new NativeList<JobHandle>(Allocator.Temp);
             for (var i = 0; i < mapProvider.MapData.Chunks.Length; i++)
             {
-                var job = new ChunkSerializer(result[i], new NativeArray<BlockData>(mapProvider.MapData.Chunks[i].Blocks, Allocator.TempJob),
+                var job = new ChunkSerializer(result[i],
+                    new NativeArray<BlockData>(mapProvider.MapData.Chunks[i].Blocks, Allocator.TempJob),
                     mapProvider.MapData.SolidColor);
                 var jobHandle = job.Schedule();
                 jobHandles.Add(jobHandle);
@@ -62,14 +62,6 @@ namespace MapLogic
             }
 
             jobHandles.Dispose();
-            binaryWriter.Write(mapProvider.MapData.SpawnPoints.Count);
-            for (var i = 0; i < mapProvider.MapData.SpawnPoints.Count; i++)
-            {
-                binaryWriter.Write(mapProvider.MapData.SpawnPoints[i].X);
-                binaryWriter.Write(mapProvider.MapData.SpawnPoints[i].Y);
-                binaryWriter.Write(mapProvider.MapData.SpawnPoints[i].Z);
-            }
-
             stream.Write(memoryStream.ToArray());
         }
     }

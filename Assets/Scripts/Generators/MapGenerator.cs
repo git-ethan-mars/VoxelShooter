@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Data;
 using Infrastructure.Factory;
+using Infrastructure.Services.StaticData;
 using MapLogic;
 using Optimization;
 using Rendering;
@@ -22,13 +23,16 @@ namespace Generators
         private readonly MapProvider _mapProvider;
         private readonly IMeshFactory _meshFactory;
         private readonly IGameFactory _gameFactory;
+        private readonly IStaticDataService _staticData;
         private GameObject _wallContainer;
 
-        public MapGenerator(MapProvider mapProvider, IGameFactory gameFactory, IMeshFactory meshFactory)
+        public MapGenerator(MapProvider mapProvider, IGameFactory gameFactory, IMeshFactory meshFactory,
+            IStaticDataService staticData)
         {
             _mapProvider = mapProvider;
             _gameFactory = gameFactory;
             _meshFactory = meshFactory;
+            _staticData = staticData;
         }
 
         public unsafe void GenerateMap()
@@ -44,7 +48,7 @@ namespace Generators
                     UnsafeUtility.PinGCArrayAndGetDataAddress(_mapProvider.MapData.Chunks[i].Blocks, out handles[i]);
             }
 
-            var jobs = InitializeJobs(handles, addresses);
+            var jobs = InitializeJobs(addresses);
             RunJobs(jobs);
             SetChunkNeighbours();
 
@@ -65,27 +69,14 @@ namespace Generators
             _meshFactory.CreateWalls(_mapProvider, _wallContainer.transform);
         }
 
-        public void GenerateWater(Color32 waterColor)
+        public void GenerateLight()
         {
-            MapReader.AddWater(_mapProvider, waterColor);
-            var updatingBlocks = new List<(Vector3Int, BlockData)>();
-            for (var x = 0; x < ChunkData.ChunkSize; x++)
-            {
-                for (var z = 0; z < ChunkData.ChunkSize; z++)
-                {
-                    updatingBlocks.Add((new Vector3Int(x, 0, z),
-                        new BlockData(waterColor)));
-                }
-            }
+            _gameFactory.CreateDirectionalLight(_mapProvider.SceneData.LightData);
+        }
 
-            for (var x = 0; x < _mapProvider.MapData.Width; x += ChunkData.ChunkSize)
-            {
-                for (var z = 0; z < _mapProvider.MapData.Depth; z += ChunkData.ChunkSize)
-                {
-                    var chunkIndex = _mapProvider.GetChunkNumberByGlobalPosition(x, 0, z);
-                    ChunkGenerators[chunkIndex].SpawnBlocks(updatingBlocks);
-                }
-            }
+        public void ApplySkybox()
+        {
+            RenderSettings.skybox = _mapProvider.SceneData.Skybox;
         }
 
         private GameObject[] CreateChunkMeshRenders()
@@ -157,7 +148,7 @@ namespace Generators
             }
         }
 
-        private unsafe ChunkMeshGeneration[] InitializeJobs(ulong[] handles, void*[] addresses)
+        private unsafe ChunkMeshGeneration[] InitializeJobs(void*[] addresses)
         {
             var jobs = new ChunkMeshGeneration[ChunkGenerators.Length];
             for (var i = 0; i < ChunkGenerators.Length; i++)
