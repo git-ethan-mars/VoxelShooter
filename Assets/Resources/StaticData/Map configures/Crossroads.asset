@@ -20,8 +20,8 @@ MonoBehaviour:
     serializedVersion: 2
     rgba: 4281283929
   lightData:
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0, w: 1}
+    position: {x: 0, y: 110, z: 280}
+    rotation: {x: -0.08707207, y: 0.8046156, z: -0.31618926, w: 0.4950117}
     color: {r: 1, g: 1, b: 1, a: 1}
   skyboxMaterial: {fileID: 2100000, guid: 8869ec7f32ba4594aa6a20cbd6c772ec, type: 2}
   spawnPoints:
