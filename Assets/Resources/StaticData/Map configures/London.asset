@@ -12,8 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e69f3dcd48464cac84150e2016cff25a, type: 3}
   m_Name: London
   m_EditorClassIdentifier: 
-  mapName: 
-  lightPosition: {x: 0, y: 0, z: 0}
-  lightRotation: {x: 0, y: 0, z: 0, w: 0}
-  lightColor: {r: 0, g: 0, b: 0, a: 0}
+  mapName: London
+  waterColor:
+    serializedVersion: 2
+    rgba: 4287052291
+  innerColor:
+    serializedVersion: 2
+    rgba: 4281283929
+  lightData:
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0, w: 1}
+    color: {r: 1, g: 1, b: 1, a: 1}
   skyboxMaterial: {fileID: 0}
+  spawnPoints: []
