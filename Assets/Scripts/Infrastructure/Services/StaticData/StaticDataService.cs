@@ -58,7 +58,7 @@ namespace Infrastructure.Services.StaticData
                 : GetDefaultMapConfigure();
         }
 
-        public MapConfigure GetDefaultMapConfigure()
+        private MapConfigure GetDefaultMapConfigure()
         {
             return _mapConfigureByName[Default];
         }
