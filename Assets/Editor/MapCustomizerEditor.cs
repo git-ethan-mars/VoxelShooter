@@ -114,6 +114,13 @@ public class MapCustomizerEditor : UnityEditor.Editor
         }
 
         _spawnPoints.DoLayoutList();
+
+        if (GUILayout.Button("Save SO"))
+        {
+            EditorUtility.SetDirty(_mapEditorScript.mapConfigure);
+            AssetDatabase.SaveAssets();
+        }
+
         serializedObject.ApplyModifiedProperties();
     }
 }

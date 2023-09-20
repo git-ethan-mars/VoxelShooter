@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using CustomAttributes;
 using Data;
-using UnityEditor;
 using UnityEngine;
 
 [CreateAssetMenu]
@@ -28,20 +25,4 @@ public class MapConfigure : ScriptableObject
 
     [Header("Spawn points")]
     public List<SpawnPointData> spawnPoints = new();
-
-    private void Reset()
-    {
-        FetchMapName();
-    }
-
-    private void OnValidate()
-    {
-        FetchMapName();
-    }
-
-    private void FetchMapName()
-    {
-        var assetPath = AssetDatabase.GetAssetPath(GetInstanceID());
-        mapName = Path.GetFileNameWithoutExtension(assetPath);
-    }
 }

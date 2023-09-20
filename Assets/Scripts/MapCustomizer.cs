@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Data;
 using Generators;
@@ -15,7 +16,7 @@ using UnityEngine;
 [ExecuteAlways]
 public class MapCustomizer : MonoBehaviour, ICoroutineRunner
 {
-    public bool IsMapGenerated { get; private set; }
+    public bool IsMapGenerated => chunkContainer != null || spawnPointsContainer != null;
     public MapConfigure mapConfigure;
     public Color32 waterColor;
     public Color32 innerColor;
@@ -80,6 +81,12 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
 
         _previousConfigure = mapConfigure;
 
+        if (mapConfigure != null)
+        {
+            var assetPath = AssetDatabase.GetAssetPath(mapConfigure.GetInstanceID());
+            mapConfigure.mapName = Path.GetFileNameWithoutExtension(assetPath);
+        }
+
         if (IsMapGenerated)
         {
             mapConfigure.waterColor = waterColor;
@@ -110,8 +117,6 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
         {
             spawnPoints.Add(CreateSpawnPoint(mapConfigure.spawnPoints[i].position));
         }
-
-        IsMapGenerated = true;
     }
 
     public void SaveLighting()
@@ -144,6 +149,12 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
         waterColor = mapConfigure.waterColor;
         innerColor = mapConfigure.innerColor;
         skybox = mapConfigure.skyboxMaterial;
+        if (lightSource != null)
+        {
+            lightSource.transform.position = mapConfigure.lightData.position;
+            lightSource.transform.rotation = mapConfigure.lightData.rotation;
+            lightSource.color = mapConfigure.lightData.color;
+        }
     }
 
     private void DestroyChildren()
@@ -155,6 +166,5 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
 
         DestroyImmediate(chunkContainer);
         DestroyImmediate(spawnPointsContainer);
-        IsMapGenerated = false;
     }
 }
