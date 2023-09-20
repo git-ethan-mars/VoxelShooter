@@ -1,4 +1,5 @@
 ﻿using UnityEditor;
+using UnityEditorInternal;
 using UnityEngine;
 
 [CustomEditor(typeof(MapEditor))]
@@ -7,23 +8,67 @@ public class MapGeneratorEditor : UnityEditor.Editor
     private SerializedProperty _lightProperty;
     private SerializedProperty _skyboxProperty;
     private SerializedProperty _configureProperty;
+    private SerializedProperty _waterColorProperty;
+    private SerializedProperty _innerColorProperty;
+    private SerializedProperty _spawnPointsProperty;
     private MapEditor _mapEditorScript;
+    private ReorderableList _spawnPoints;
 
     private void OnEnable()
     {
         _lightProperty = serializedObject.FindProperty("lightSource");
         _skyboxProperty = serializedObject.FindProperty("skybox");
         _configureProperty = serializedObject.FindProperty("mapConfigure");
+        _waterColorProperty = serializedObject.FindProperty("waterColor");
+        _innerColorProperty = serializedObject.FindProperty("innerColor");
+        _spawnPointsProperty = serializedObject.FindProperty("spawnPoints");
         _mapEditorScript = (MapEditor) target;
+        _spawnPoints = new ReorderableList(_mapEditorScript.spawnPoints, typeof(GameObject), false, true, true, true)
+        {
+            drawHeaderCallback = DrawHeader,
+            drawElementCallback = DrawListItems,
+            onAddCallback = AddItem,
+            onRemoveCallback = RemoveItem
+        };
+    }
+
+    private void DrawHeader(Rect rect)
+    {
+        EditorGUI.LabelField(rect, _spawnPointsProperty.displayName);
+    }
+
+    private void AddItem(ReorderableList reorderableList)
+    {
+        var spawnPoint = _mapEditorScript.CreateSpawnPoint(Vector3Int.zero);
+        reorderableList.list.Add(spawnPoint);
+    }
+
+    private void RemoveItem(ReorderableList reorderableList)
+    {
+        var spawnPoint = reorderableList.list[reorderableList.index] as GameObject;
+        DestroyImmediate(spawnPoint);
+        reorderableList.list.RemoveAt(reorderableList.index);
+        serializedObject.Update();
+    }
+
+    private void DrawListItems(Rect rect, int index, bool isActive, bool isFocused)
+    {
+        serializedObject.ApplyModifiedProperties();
+        serializedObject.Update();
+        var element = _spawnPointsProperty.GetArrayElementAtIndex(index);
+        EditorGUI.ObjectField(rect, element.displayName, element.objectReferenceValue, typeof(GameObject),
+            false);
     }
 
     public override void OnInspectorGUI()
     {
-        _mapEditorScript.mapConfigure = EditorGUILayout.ObjectField(_configureProperty.displayName,
-            _configureProperty.objectReferenceValue, typeof(MapConfigure), true) as MapConfigure;
+        serializedObject.Update();
+        EditorGUILayout.PropertyField(_configureProperty);
+
         if (_mapEditorScript.mapConfigure == null)
         {
             EditorGUILayout.HelpBox("Create/choose map configure file", MessageType.Error);
+            serializedObject.ApplyModifiedProperties();
             return;
         }
 
@@ -32,10 +77,15 @@ public class MapGeneratorEditor : UnityEditor.Editor
             _mapEditorScript.GenerateMap();
         }
 
+        if (!_mapEditorScript.IsMapGenerated)
+        {
+            serializedObject.ApplyModifiedProperties();
+            return;
+        }
 
-        _mapEditorScript.lightSource = EditorGUILayout.ObjectField(_lightProperty.displayName,
-            _lightProperty.objectReferenceValue, typeof(Light),
-            true) as Light;
+        EditorGUILayout.PropertyField(_waterColorProperty);
+        EditorGUILayout.PropertyField(_innerColorProperty);
+        EditorGUILayout.PropertyField(_lightProperty);
 
         if (_mapEditorScript.lightSource != null)
         {
@@ -49,20 +99,21 @@ public class MapGeneratorEditor : UnityEditor.Editor
             EditorGUILayout.HelpBox("Choose light source in the scene", MessageType.Warning);
         }
 
-        _mapEditorScript.skybox =
-            EditorGUILayout.ObjectField(_skyboxProperty.displayName, _skyboxProperty.objectReferenceValue,
-                typeof(Material), true) as Material;
+        EditorGUILayout.PropertyField(_skyboxProperty);
 
         if (_mapEditorScript.skybox != null)
         {
-            if (GUILayout.Button("Save skybox"))
+            if (GUILayout.Button("Show skybox"))
             {
-                _mapEditorScript.SaveSkybox();
+                RenderSettings.skybox = _mapEditorScript.skybox;
             }
         }
         else
         {
             EditorGUILayout.HelpBox("Choose skybox material", MessageType.Warning);
         }
+
+        _spawnPoints.DoLayoutList();
+        serializedObject.ApplyModifiedProperties();
     }
 }

@@ -11,6 +11,7 @@ namespace Editor
         {
             GUI.enabled = false;
             EditorGUI.PropertyField(position, property, label);
+            GUI.enabled = true;
         }
     }
 }
