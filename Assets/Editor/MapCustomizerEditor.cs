@@ -2,8 +2,8 @@
 using UnityEditorInternal;
 using UnityEngine;
 
-[CustomEditor(typeof(MapEditor))]
-public class MapGeneratorEditor : UnityEditor.Editor
+[CustomEditor(typeof(MapCustomizer))]
+public class MapCustomizerEditor : UnityEditor.Editor
 {
     private SerializedProperty _lightProperty;
     private SerializedProperty _skyboxProperty;
@@ -11,7 +11,7 @@ public class MapGeneratorEditor : UnityEditor.Editor
     private SerializedProperty _waterColorProperty;
     private SerializedProperty _innerColorProperty;
     private SerializedProperty _spawnPointsProperty;
-    private MapEditor _mapEditorScript;
+    private MapCustomizer _mapEditorScript;
     private ReorderableList _spawnPoints;
 
     private void OnEnable()
@@ -22,7 +22,7 @@ public class MapGeneratorEditor : UnityEditor.Editor
         _waterColorProperty = serializedObject.FindProperty("waterColor");
         _innerColorProperty = serializedObject.FindProperty("innerColor");
         _spawnPointsProperty = serializedObject.FindProperty("spawnPoints");
-        _mapEditorScript = (MapEditor) target;
+        _mapEditorScript = (MapCustomizer) target;
         _spawnPoints = new ReorderableList(_mapEditorScript.spawnPoints, typeof(GameObject), false, true, true, true)
         {
             drawHeaderCallback = DrawHeader,

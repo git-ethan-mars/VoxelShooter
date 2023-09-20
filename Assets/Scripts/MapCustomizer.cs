@@ -13,7 +13,7 @@ using UnityEngine;
 
 [DisallowMultipleComponent]
 [ExecuteAlways]
-public class MapEditor : MonoBehaviour, ICoroutineRunner
+public class MapCustomizer : MonoBehaviour, ICoroutineRunner
 {
     public bool IsMapGenerated { get; private set; }
     public MapConfigure mapConfigure;
@@ -33,13 +33,13 @@ public class MapEditor : MonoBehaviour, ICoroutineRunner
     private MeshFactory _meshFactory;
     private GameFactory _gameFactory;
     private EntityFactory _entityFactory;
-    private static MapEditor _instance;
+    private static MapCustomizer _instance;
     private MapConfigure _previousConfigure;
 
     [UnityEditor.Callbacks.DidReloadScripts]
     private static void Init()
     {
-        _instance = FindObjectOfType<MapEditor>();
+        _instance = FindObjectOfType<MapCustomizer>();
         if (_instance != null)
         {
             _instance.InitializeFactories();
