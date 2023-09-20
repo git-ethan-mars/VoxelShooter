@@ -31,6 +31,16 @@ public class MapConfigure : ScriptableObject
 
     private void Reset()
     {
+        FetchMapName();
+    }
+
+    private void OnValidate()
+    {
+        FetchMapName();
+    }
+
+    private void FetchMapName()
+    {
         var assetPath = AssetDatabase.GetAssetPath(GetInstanceID());
         mapName = Path.GetFileNameWithoutExtension(assetPath);
     }
