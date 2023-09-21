@@ -6913,7 +6913,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -150.00008, y: -150.00005}
+  m_AnchoredPosition: {x: -150, y: -150}
   m_SizeDelta: {x: 270, y: 270}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7043186026384488421
@@ -6984,9 +6984,9 @@ RectTransform:
   m_Father: {fileID: 8646152166899526692}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 1}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -119.99991, y: -120.000046}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 250, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6983013987269023506
@@ -7017,7 +7017,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 0}
+  m_Texture: {fileID: 2800000, guid: bbaa40029dd2a524885a32dad5b7bd14, type: 3}
   m_UVRect:
     serializedVersion: 2
     x: 0
@@ -7035,6 +7035,7 @@ GameObject:
   - component: {fileID: 8646152166899526692}
   - component: {fileID: 6919272413660106237}
   - component: {fileID: 3301903364483828239}
+  - component: {fileID: 1908490057194177286}
   m_Layer: 5
   m_Name: MiniMapMask
   m_TagString: Untagged
@@ -7060,7 +7061,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -150.00008, y: -150.00005}
+  m_AnchoredPosition: {x: -150, y: -150}
   m_SizeDelta: {x: 240, y: 240}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6919272413660106237
@@ -7098,6 +7099,19 @@ MonoBehaviour:
     y: 0
     width: 1
     height: 1
+--- !u!114 &1908490057194177286
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7270028201681262620}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31a19414c41e5ae4aae2af33fee712f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ShowMaskGraphic: 1
 --- !u!1 &7406661941508816887
 GameObject:
   m_ObjectHideFlags: 0
