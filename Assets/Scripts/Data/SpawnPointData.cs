@@ -1,23 +1,21 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Data
 {
+    [Serializable]
     public struct SpawnPointData
     {
-        public int X;
-        public int Y;
-        public int Z;
+        public Vector3Int position;
 
         public SpawnPointData(Vector3Int position)
         {
-            X = position.x;
-            Y = position.y;
-            Z = position.z;
+            this.position = position;
         }
 
         public Vector3 ToVectorWithOffset()
         {
-            return new Vector3(X, Y, Z) + Constants.WorldOffset;
+            return position + Constants.WorldOffset;
         }
     }
 }

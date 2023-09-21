@@ -6,9 +6,9 @@ namespace Explosions
 {
     public class LineExplosionArea : IExplosionArea
     {
-        private readonly IMapProvider _mapProvider;
+        private readonly MapProvider _mapProvider;
 
-        public LineExplosionArea(IMapProvider mapProvider)
+        public LineExplosionArea(MapProvider mapProvider)
         {
             _mapProvider = mapProvider;
         }

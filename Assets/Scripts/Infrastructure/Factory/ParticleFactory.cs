@@ -16,30 +16,23 @@ namespace Infrastructure.Factory
             _assets = assets;
             _coroutineRunner = coroutineRunner;
         }
-        
-        public GameObject CreateBulletImpact(Vector3 position, Quaternion rotation, Color32 blockColor)
+
+        public void CreateBulletImpact(Vector3 position, Quaternion rotation, Color32 blockColor)
         {
             var bullet = _assets.Instantiate(ParticlePath.BulletHolePath, position, rotation);
             var particleColor = bullet.GetComponent<ParticleColor>();
             particleColor.color = blockColor;
-            NetworkServer.Spawn(bullet); 
-            _coroutineRunner.StartCoroutine(DestroyParticle(bullet, bullet.GetComponent<ParticleSystem>().main.startLifetime.constant));
-            return bullet;
+            NetworkServer.Spawn(bullet);
+            _coroutineRunner.StartCoroutine(DestroyParticle(bullet,
+                bullet.GetComponent<ParticleSystem>().main.startLifetime.constant));
         }
 
-        public GameObject CreateMuzzleFlash(Transform transform)
-        {
-            var muzzleFlash = _assets.Instantiate(ParticlePath.MuzzleFlashPath, transform);
-            return muzzleFlash;
-        }
-
-        public GameObject CreateBlood(Vector3 position, Quaternion rotation)
+        public void CreateBlood(Vector3 position, Quaternion rotation)
         {
             var blood = _assets.Instantiate(ParticlePath.BloodSprayPath, position, rotation);
             var particleSystem = blood.GetComponent<ParticleSystem>().main;
             NetworkServer.Spawn(blood);
             _coroutineRunner.StartCoroutine(DestroyParticle(blood, particleSystem.startLifetime.constant));
-            return blood;
         }
 
         public void CreateRchParticle(Vector3 position, int startSpeed, int burstCount)

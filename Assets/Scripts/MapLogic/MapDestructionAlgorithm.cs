@@ -13,8 +13,8 @@ namespace MapLogic
     {
         private uint componentId;
         private const int EmptyBlockCost = 1000000000;
-        public IMapProvider MapProvider;
-        private IMapUpdater _mapUpdater;
+        public MapProvider MapProvider;
+        private MapUpdater _mapUpdater;
         private readonly int _width;
         private readonly int _depth;
         private readonly int _height;
@@ -32,7 +32,7 @@ namespace MapLogic
             new Tuple<int, int, int>(-1, -1, -1)
         };
 
-        public MapDestructionAlgorithm(IMapProvider mapProvider, IMapUpdater mapUpdater)
+        public MapDestructionAlgorithm(MapProvider mapProvider, MapUpdater mapUpdater)
         {
             MapProvider = mapProvider;
             _mapUpdater = mapUpdater;

@@ -7,9 +7,9 @@ namespace Explosions
 {
     public class SphereExplosionArea : IExplosionArea
     {
-        private readonly IMapProvider _mapProvider;
+        private readonly MapProvider _mapProvider;
 
-        public SphereExplosionArea(IMapProvider mapProvider)
+        public SphereExplosionArea(MapProvider mapProvider)
         {
             _mapProvider = mapProvider;
         }

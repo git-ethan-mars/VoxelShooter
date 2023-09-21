@@ -27,7 +27,7 @@ namespace Infrastructure.Factory
             IParticleFactory particleFactory)
         {
             _server = server;
-            _spawnPoints = _server.MapProvider.MapData.SpawnPoints;
+            _spawnPoints = _server.MapProvider.SceneData.SpawnPoints;
             _assets = assets;
             _particleFactory = particleFactory;
         }

@@ -1,13 +1,14 @@
-﻿using System;
-using Data;
+﻿using Data;
 using Extensions;
 using MapLogic;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 
 namespace Optimization
 {
+    [BurstCompile]
     public struct ChunkSerializer : IJob
     {
         private NativeList<byte> _serializedChunk;
@@ -89,11 +90,10 @@ namespace Optimization
 
         private void AddInt(int value)
         {
-            var bytes = BitConverter.GetBytes(value);
-            for (var i = 0; i < bytes.Length; i++)
-            {
-                _serializedChunk.Add(bytes[i]);
-            }
+            _serializedChunk.Add((byte) (value & 255));
+            _serializedChunk.Add((byte) (value >> 8 & 255));
+            _serializedChunk.Add((byte) (value >> 16 & 255));
+            _serializedChunk.Add((byte) (value >> 24 & 255));
         }
 
         private bool IsSolidRunStarted => _solidStart != -1;

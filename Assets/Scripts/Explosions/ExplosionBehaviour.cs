@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Data;
 using Infrastructure.Factory;
 using MapLogic;
 using Mirror;
-using Networking.Messages;
 using Networking.Synchronization;
 using UnityEngine;
 
@@ -14,10 +12,10 @@ namespace Explosions
     {
         private readonly IExplosionArea _explosionArea;
         private readonly IParticleFactory _particleFactory;
-        private readonly IMapUpdater _mapUpdater;
+        private readonly MapUpdater _mapUpdater;
         private readonly MapDestructionAlgorithm _mapDestructionAlgorithm;
 
-        protected ExplosionBehaviour(IMapUpdater mapUpdater, IParticleFactory particleFactory, 
+        protected ExplosionBehaviour(MapUpdater mapUpdater, IParticleFactory particleFactory, 
             IExplosionArea explosionArea, MapDestructionAlgorithm mapDestructionAlgorithm)
         {
             _explosionArea = explosionArea;

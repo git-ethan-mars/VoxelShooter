@@ -15,6 +15,7 @@ namespace Infrastructure.Factory
         private readonly IStaticDataService _staticData;
         private const string NetworkManagerPath = "Prefabs/Network/LocalNetworkManager";
         private const string SteamNetworkManagerPath = "Prefabs/Network/SteamManager";
+        private const string DirectionalLightName = "Directional Light";
         private GameObject _networkManager;
         private readonly IEntityFactory _entityFactory;
         private readonly IAvatarLoader _avatarLoader;
@@ -52,12 +53,22 @@ namespace Infrastructure.Factory
 
         public GameObject CreateGameObjectContainer(string containerName)
         {
-            return _assets.Instantiate(new GameObject(containerName));
+            return new GameObject(containerName);
         }
 
         public void CreateCamera()
         {
             new GameObject().AddComponent<Camera>();
+        }
+
+        public void CreateDirectionalLight(LightData lightData)
+        {
+            var light = new GameObject(DirectionalLightName).AddComponent<Light>();
+            light.transform.position = lightData.position;
+            light.transform.rotation = lightData.rotation;
+            light.color = lightData.color;
+            light.type = LightType.Directional;
+            light.shadows = LightShadows.Soft;
         }
     }
 }

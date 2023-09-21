@@ -12,5 +12,6 @@ namespace Infrastructure.Factory
         GameObject CreateSteamNetworkManager(GameStateMachine stateMachine, ServerSettings serverSettings, bool isHost);
         GameObject CreateGameObjectContainer(string containerName);
         void CreateCamera();
+        void CreateDirectionalLight(LightData lightData);
     }
 }

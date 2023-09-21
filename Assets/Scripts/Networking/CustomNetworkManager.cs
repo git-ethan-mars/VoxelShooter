@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Data;
 using Generators;
 using Infrastructure;
@@ -9,6 +8,8 @@ using Infrastructure.Services.StaticData;
 using Infrastructure.States;
 using MapLogic;
 using Mirror;
+using Networking.ClientServices;
+using Networking.Messages.Responses;
 using Networking.ServerServices;
 using MemoryStream = System.IO.MemoryStream;
 
@@ -16,11 +17,11 @@ namespace Networking
 {
     public class CustomNetworkManager : NetworkManager, ICoroutineRunner
     {
-        public event Action GameFinished; // Unsubscribe please
-        public Client Client;
+        public event Action GameFinished;
+        private const string SpawnPointContainerName = "SpawnPointContainer";
+        public IClient Client;
         private IStaticDataService _staticData;
         private IEntityFactory _entityFactory;
-        private RequestHandlers _serverMessageHandlers;
         private ServerSettings _serverSettings;
         private GameStateMachine _stateMachine;
         private ServerTimer _serverTimer;
@@ -50,10 +51,9 @@ namespace Networking
         public override void OnStartServer()
         {
             _server = new Server(this, _staticData, _serverSettings, _assets, _particleFactory, _entityFactory);
-            _server.CreateSpawnPoints();
-            _serverMessageHandlers =
-                new RequestHandlers(_entityFactory, this, _server, _staticData, _particleFactory);
-            _serverMessageHandlers.RegisterHandlers();
+            _server.RegisterHandlers();
+            var spawnPointContainer = _gameFactory.CreateGameObjectContainer(SpawnPointContainerName);
+            _server.CreateSpawnPoints(spawnPointContainer.transform);
             _serverTimer = new ServerTimer(this, _serverSettings.MaxDuration, StopHost);
             _serverTimer.Start();
         }
@@ -61,7 +61,7 @@ namespace Networking
 
         public override void OnStartClient()
         {
-            Client = new Client(_gameFactory, _meshFactory, _particleFactory);
+            Client = new Client(_gameFactory, _meshFactory, _staticData, _particleFactory);
             Client.RegisterHandlers();
             Client.Data.State = ClientState.Connecting;
             Client.MapDownloaded += OnMapDownloaded;
@@ -77,6 +77,7 @@ namespace Networking
             }
             else
             {
+                connection.Send(new MapNameResponse(_server.MapProvider.MapName));
                 var memoryStream = new MemoryStream();
                 MapWriter.WriteMap(_server.MapProvider, memoryStream);
                 var bytes = memoryStream.ToArray();
@@ -105,7 +106,7 @@ namespace Networking
 
         public override void OnStopServer()
         {
-            _serverMessageHandlers.RemoveHandlers();
+            _server.UnregisterHandlers();
             _gameFactory.CreateCamera();
             GameFinished?.Invoke();
             StartCoroutine(Utils.DoActionAfterDelay(ShowResultsDuration,
@@ -116,7 +117,12 @@ namespace Networking
         {
             Client.MapDownloaded -= OnMapDownloaded;
             Client.Data.State = ClientState.Connected;
-            Client.MapGenerator = new MapGenerator(Client);
+            Client.MapGenerator = new MapGenerator(Client.MapProvider, Client.GameFactory, Client.MeshFactory,
+                Client.StaticData);
+            Client.MapGenerator.GenerateMap();
+            Client.MapGenerator.GenerateWalls();
+            Client.MapGenerator.GenerateLight();
+            Client.MapGenerator.ApplySkybox();
             _stateMachine.Enter<GameLoopState, CustomNetworkManager>(this);
         }
 

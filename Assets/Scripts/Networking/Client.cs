@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using Data;
 using Generators;
 using Infrastructure.Factory;
+using Infrastructure.Services.StaticData;
 using MapLogic;
+using Networking.ClientServices;
+using Networking.MessageHandlers.ResponseHandler;
 
 namespace Networking
 {
-    public class Client
+    public class Client : IClient
     {
         public event Action MapDownloaded
         {
@@ -39,13 +42,15 @@ namespace Networking
             remove => _scoreboardHandler.ScoreboardChanged -= value;
         }
 
-        public readonly ClientData Data;
-        public readonly IGameFactory GameFactory;
-        public readonly IMeshFactory MeshFactory;
-        public readonly FallMeshGenerator FallMeshGenerator;
-        public IMapProvider MapProvider { get; set; }
+        public ClientData Data { get; }
+        public IGameFactory GameFactory { get; }
+        public IMeshFactory MeshFactory { get; }
+        public IStaticDataService StaticData { get; }
+        public MapProvider MapProvider { get; set; }
         public MapGenerator MapGenerator { get; set; }
 
+        public readonly FallMeshGenerator FallMeshGenerator;
+        private readonly MapNameHandler _mapNameHandler;
         private readonly DownloadMapHandler _downloadMapHandler;
         private readonly UpdateMapHandler _updateMapHandler;
         private readonly FallBlockHandler _fallBlockHandler;
@@ -54,13 +59,15 @@ namespace Networking
         private readonly ScoreboardHandler _scoreboardHandler;
         private readonly FallingMeshFallingMeshParticlePool _fallingMeshParticlePool;
 
-        public Client(IGameFactory gameFactory, IMeshFactory meshFactory, IParticleFactory particleFactory)
+        public Client(IGameFactory gameFactory, IMeshFactory meshFactory, IStaticDataService staticData, IParticleFactory particleFactory)
         {
             GameFactory = gameFactory;
             MeshFactory = meshFactory;
+            StaticData = staticData;
             _fallingMeshParticlePool = new FallingMeshFallingMeshParticlePool(particleFactory);
             FallMeshGenerator = new FallMeshGenerator(meshFactory, _fallingMeshParticlePool);
             Data = new ClientData();
+            _mapNameHandler = new MapNameHandler(this);
             _downloadMapHandler = new DownloadMapHandler(this);
             _updateMapHandler = new UpdateMapHandler(this);
             _fallBlockHandler = new FallBlockHandler(this);
@@ -71,6 +78,7 @@ namespace Networking
 
         public void RegisterHandlers()
         {
+            _mapNameHandler.Register();
             _downloadMapHandler.Register();
             _updateMapHandler.Register();
             _fallBlockHandler.Register();
@@ -81,6 +89,7 @@ namespace Networking
 
         public void UnregisterHandlers()
         {
+            _mapNameHandler.Unregister();
             _downloadMapHandler.Unregister();
             _updateMapHandler.Unregister();
             _fallBlockHandler.Unregister();
