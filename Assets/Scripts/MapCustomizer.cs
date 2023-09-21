@@ -16,6 +16,7 @@ using UnityEngine;
 [ExecuteAlways]
 public class MapCustomizer : MonoBehaviour, ICoroutineRunner
 {
+#if UNITY_EDITOR
     public bool IsMapGenerated => chunkContainer != null || spawnPointsContainer != null;
     public MapConfigure mapConfigure;
     public Color32 waterColor;
@@ -167,4 +168,5 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
         DestroyImmediate(chunkContainer);
         DestroyImmediate(spawnPointsContainer);
     }
+#endif
 }
