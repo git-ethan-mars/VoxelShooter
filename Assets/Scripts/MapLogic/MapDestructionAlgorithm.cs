@@ -45,11 +45,11 @@ namespace MapLogic
 
         private void FindColorfulBlocks()
         {
-            for (var x = 0; x < _width; x++)
+            for (var x = 1; x < _width - 1; x++)
             {
-                for (var y = LowerSolidBlockHeight; y < _height; y++)
+                for (var y = LowerSolidBlockHeight + 1; y < _height - 1; y++)
                 {
-                    for (var z = 0; z < _depth; z++)
+                    for (var z = 1; z < _depth - 1; z++)
                     {
                         var currentBlock = y * _width * _width + z * _width + x;
                         var currentBlockData = MapProvider.GetBlockByGlobalPosition(x, y, z);
@@ -57,6 +57,21 @@ namespace MapLogic
                         {
                             MapProvider.MapData._solidBlocks.Add(currentBlock);
                             MapProvider.MapData._blockColors.Add(currentBlock, currentBlockData.Color);
+                        }
+                        else
+                        {
+                            bool flag = false;
+
+                            var neighbourVector = GetVectorByIndex(currentBlock - _width * _width);
+                            var neighbourBlockData = MapProvider.GetBlockByGlobalPosition(neighbourVector.x,
+                                neighbourVector.y, neighbourVector.z);
+                            if (neighbourBlockData.IsSolid())
+                            {
+                                flag = true;
+                            }
+
+                            if (flag)
+                               MapProvider.MapData._surface.Add(currentBlock);
                         }
                     }
                 }

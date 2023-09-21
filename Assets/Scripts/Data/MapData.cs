@@ -12,6 +12,7 @@ namespace Data
         public readonly ChunkData[] Chunks;
         public readonly List<SpawnPointData> SpawnPoints;
         public HashSet<int> _solidBlocks = new();
+        public HashSet<int> _surface = new();
         public Dictionary<int, Color32> _blockColors = new ();
 
         public MapData(ChunkData[] chunks, int width, int height, int depth, List<SpawnPointData> spawnPoints)

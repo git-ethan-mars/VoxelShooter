@@ -8,6 +8,7 @@ using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
 using Mirror;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Networking.Synchronization
 {
@@ -90,17 +91,20 @@ namespace Networking.Synchronization
 
             if (rayHit.collider.CompareTag("Chunk"))
             {
-                var targetBlock = Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2);
-                if (isStrongHit)
-                {
-                    var validPositions = _lineExplosionArea.GetExplodedBlocks(3, targetBlock);
-                    UpdateBlocks(validPositions, 1);
-                }
-                else
-                {
-                    var blocks = _lineExplosionArea.GetExplodedBlocks(1, targetBlock);
-                    UpdateBlocks(blocks, 1);
-                }
+                var targetBlock = Vector3Int.FloorToInt(rayHit.point + rayHit.normal / 2);
+                var prefab = Resources.Load<GameObject>("Prefabs/Test");
+                var o = Instantiate(prefab, targetBlock, Quaternion.identity);
+                o.GetComponent<TestMovement>().Construct(_server, targetBlock);
+                // if (isStrongHit)
+                // {
+                //     var validPositions = _lineExplosionArea.GetExplodedBlocks(3, targetBlock);
+                //     UpdateBlocks(validPositions, 1);
+                // }
+                // else
+                // {
+                //     var blocks = _lineExplosionArea.GetExplodedBlocks(1, targetBlock);
+                //     UpdateBlocks(blocks, 1);
+                // }
 
                 return true;
             }
