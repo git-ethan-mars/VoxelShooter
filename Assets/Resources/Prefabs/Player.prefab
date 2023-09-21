@@ -108,7 +108,7 @@ GameObject:
   - component: {fileID: 2742225876997815280}
   m_Layer: 6
   m_Name: Left leg
-  m_TagString: Untagged
+  m_TagString: Leg
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1020,7 +1020,7 @@ GameObject:
   - component: {fileID: 8888138878410626469}
   m_Layer: 6
   m_Name: Left shin
-  m_TagString: Untagged
+  m_TagString: Leg
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1897,7 +1897,7 @@ GameObject:
   - component: {fileID: 8217119693751340438}
   m_Layer: 6
   m_Name: Left arm
-  m_TagString: Untagged
+  m_TagString: Arm
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1930,7 +1930,7 @@ GameObject:
   - component: {fileID: 7085777246420524792}
   m_Layer: 6
   m_Name: Right arm
-  m_TagString: Untagged
+  m_TagString: Arm
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
