@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e69f3dcd48464cac84150e2016cff25a, type: 3}
-  m_Name: London
+  m_Name: CityOfChicago
   m_EditorClassIdentifier: 
-  mapName: London
+  mapName: CityOfChicago
   waterColor:
     serializedVersion: 2
     rgba: 4287052291
@@ -20,8 +20,8 @@ MonoBehaviour:
     serializedVersion: 2
     rgba: 4281283929
   lightData:
-    position: {x: 55.8, y: 126.32, z: 0}
-    rotation: {x: 0.14255328, y: 0.23564787, z: -0.034800526, w: 0.9606964}
-    color: {r: 0.3584906, g: 0.3584906, b: 0.3584906, a: 1}
-  skyboxMaterial: {fileID: 2100000, guid: f2b5f3f20933f434e850db1b710542fd, type: 2}
+    position: {x: 0, y: 77.2, z: 42.9}
+    rotation: {x: 0.065248124, y: 0.870988, z: -0.037345693, w: 0.4855181}
+    color: {r: 0.8584906, g: 0.6540117, b: 0.5547793, a: 1}
+  skyboxMaterial: {fileID: 2100000, guid: b4f152e0498484391a9f0d5a1facf03b, type: 2}
   spawnPoints: []
