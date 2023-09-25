@@ -117,12 +117,12 @@ namespace Networking
         {
             Client.MapDownloaded -= OnMapDownloaded;
             Client.Data.State = ClientState.Connected;
-            Client.MapGenerator = new MapGenerator(Client.MapProvider, Client.GameFactory, Client.MeshFactory,
-                Client.StaticData);
+            Client.MapGenerator = new MapGenerator(Client.MapProvider, Client.GameFactory, Client.MeshFactory);
             Client.MapGenerator.GenerateMap();
             Client.MapGenerator.GenerateWalls();
             Client.MapGenerator.GenerateLight();
-            Client.MapGenerator.ApplySkybox();
+            Client.MapGenerator.ApplyAmbientLighting();
+            Client.MapGenerator.ApplyFog();
             _stateMachine.Enter<GameLoopState, CustomNetworkManager>(this);
         }
 

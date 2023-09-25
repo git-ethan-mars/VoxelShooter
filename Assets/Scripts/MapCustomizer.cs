@@ -11,6 +11,8 @@ using MapLogic;
 using Optimization;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Serialization;
 
 [DisallowMultipleComponent]
 [ExecuteAlways]
@@ -21,7 +23,18 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
     public Color32 waterColor;
     public Color32 innerColor;
     public Light lightSource;
-    public Material skybox;
+    public Material skyboxMaterial;
+    public AmbientMode ambientMode;
+    public Color skyColor;
+    public Color equatorColor;
+    public Color groundColor;
+    public float ambientIntensity;
+    public bool isFogActivated;
+    public FogMode fogMode;
+    public Color fogColor;
+    public float fogStartDistance;
+    public float fogEndDistance;
+    public float fogDensity;
     public List<GameObject> spawnPoints;
 
     [SerializeField]
@@ -91,7 +104,7 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
         {
             mapConfigure.waterColor = waterColor;
             mapConfigure.innerColor = innerColor;
-            mapConfigure.skyboxMaterial = skybox;
+            mapConfigure.skyboxMaterial = skyboxMaterial;
             spawnPoints.RemoveAll(obj => obj == null);
             mapConfigure.spawnPoints = spawnPoints
                 .Select(obj => new SpawnPointData(Vector3Int.FloorToInt(obj.transform.localPosition))).ToList();
@@ -105,7 +118,7 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
         var mapProvider =
             SimpleBenchmark.Execute(MapReader.ReadFromFile, mapConfigure.mapName, _instance._staticData);
         var mapGenerator =
-            new MapGenerator(mapProvider, _instance._gameFactory, _instance._meshFactory, _instance._staticData);
+            new MapGenerator(mapProvider, _instance._gameFactory, _instance._meshFactory);
         SimpleBenchmark.Execute(mapGenerator.GenerateMap);
         chunkContainer = mapGenerator.ChunkContainer;
         chunkContainer.transform.SetParent(transform);
@@ -148,7 +161,18 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
     {
         waterColor = mapConfigure.waterColor;
         innerColor = mapConfigure.innerColor;
-        skybox = mapConfigure.skyboxMaterial;
+        skyboxMaterial = mapConfigure.skyboxMaterial;
+        ambientMode = mapConfigure.ambientMode;
+        skyColor = mapConfigure.skyColor;
+        equatorColor = mapConfigure.equatorColor;
+        groundColor = mapConfigure.groundColor;
+        ambientIntensity = mapConfigure.ambientIntensity;
+        isFogActivated = mapConfigure.isFogActivated;
+        fogMode = mapConfigure.fogMode;
+        fogColor = mapConfigure.fogColor;
+        fogStartDistance = mapConfigure.fogStartDistance;
+        fogEndDistance = mapConfigure.fogEndDistance;
+        fogDensity = mapConfigure.fogDensity;
         if (lightSource != null)
         {
             lightSource.transform.position = mapConfigure.lightData.position;

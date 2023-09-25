@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Data;
 using Infrastructure.Factory;
-using Infrastructure.Services.StaticData;
 using MapLogic;
 using Optimization;
 using Rendering;
@@ -23,16 +22,13 @@ namespace Generators
         private readonly MapProvider _mapProvider;
         private readonly IMeshFactory _meshFactory;
         private readonly IGameFactory _gameFactory;
-        private readonly IStaticDataService _staticData;
         private GameObject _wallContainer;
 
-        public MapGenerator(MapProvider mapProvider, IGameFactory gameFactory, IMeshFactory meshFactory,
-            IStaticDataService staticData)
+        public MapGenerator(MapProvider mapProvider, IGameFactory gameFactory, IMeshFactory meshFactory)
         {
             _mapProvider = mapProvider;
             _gameFactory = gameFactory;
             _meshFactory = meshFactory;
-            _staticData = staticData;
         }
 
         public unsafe void GenerateMap()
@@ -74,9 +70,24 @@ namespace Generators
             _gameFactory.CreateDirectionalLight(_mapProvider.SceneData.LightData);
         }
 
-        public void ApplySkybox()
+        public void ApplyAmbientLighting()
         {
-            RenderSettings.skybox = _mapProvider.SceneData.Skybox;
+            RenderSettings.skybox = _mapProvider.SceneData.SkyboxMaterial;
+            RenderSettings.ambientMode = _mapProvider.SceneData.AmbientMode;
+            RenderSettings.ambientSkyColor = _mapProvider.SceneData.SkyColor;
+            RenderSettings.ambientEquatorColor = _mapProvider.SceneData.EquatorColor;
+            RenderSettings.ambientGroundColor = _mapProvider.SceneData.GroundColor;
+            RenderSettings.ambientIntensity = _mapProvider.SceneData.AmbientIntensity;
+        }
+
+        public void ApplyFog()
+        {
+            RenderSettings.fog = _mapProvider.SceneData.IsFogActivated;
+            RenderSettings.fogMode = _mapProvider.SceneData.FogMode;
+            RenderSettings.fogColor = _mapProvider.SceneData.FogColor;
+            RenderSettings.fogStartDistance = _mapProvider.SceneData.FogStartDistance;
+            RenderSettings.fogEndDistance = _mapProvider.SceneData.FogEndDistance;
+            RenderSettings.fogDensity = _mapProvider.SceneData.FogDensity;
         }
 
         private GameObject[] CreateChunkMeshRenders()
