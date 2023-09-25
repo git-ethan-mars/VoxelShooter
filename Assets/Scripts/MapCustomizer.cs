@@ -85,7 +85,7 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
             mapConfigure.mapName = Path.GetFileNameWithoutExtension(assetPath);
         }
 
-        if (lightSource != null)
+        if (lightSource != null && mapConfigure != null)
         {
             if (mapConfigure.lightData.position != lightSource.transform.position)
             {
@@ -181,6 +181,9 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
             lightSource.transform.rotation = mapConfigure.lightData.rotation;
             lightSource.color = mapConfigure.lightData.color;
         }
+
+        Environment.ApplyAmbientLighting(mapConfigure);
+        Environment.ApplyFog(mapConfigure);
     }
 
     private void DestroyChildren()
