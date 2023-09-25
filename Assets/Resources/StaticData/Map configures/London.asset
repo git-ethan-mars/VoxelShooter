@@ -20,8 +20,19 @@ MonoBehaviour:
     serializedVersion: 2
     rgba: 4281283929
   lightData:
-    position: {x: 55.8, y: 126.32, z: 0}
-    rotation: {x: 0.14255328, y: 0.23564787, z: -0.034800526, w: 0.9606964}
-    color: {r: 0.3584906, g: 0.3584906, b: 0.3584906, a: 1}
+    position: {x: 256, y: 100, z: 100}
+    rotation: {x: -0.085614294, y: 0.123752624, z: -0.9550626, w: 0.25536418}
+    color: {r: 1, g: 1, b: 1, a: 1}
   skyboxMaterial: {fileID: 2100000, guid: f2b5f3f20933f434e850db1b710542fd, type: 2}
+  ambientMode: 0
+  skyColor: {r: 0.21176471, g: 0.22745098, b: 0.25882354, a: 1}
+  equatorColor: {r: 0.11372549, g: 0.1254902, b: 0.13333334, a: 1}
+  groundColor: {r: 0.047058824, g: 0.043137256, b: 0.03529412, a: 1}
+  ambientIntensity: 1
+  isFogActivated: 1
+  fogMode: 1
+  fogColor: {r: 0.59607846, g: 0.59607846, b: 0.59607846, a: 1}
+  fogStartDistance: 0
+  fogEndDistance: 270
+  fogDensity: 0.01
   spawnPoints: []
