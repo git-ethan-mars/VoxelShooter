@@ -11,6 +11,7 @@ using Mirror;
 using Networking.ClientServices;
 using Networking.Messages.Responses;
 using Networking.ServerServices;
+using Environment = MapLogic.Environment;
 using MemoryStream = System.IO.MemoryStream;
 
 namespace Networking
@@ -121,8 +122,8 @@ namespace Networking
             Client.MapGenerator.GenerateMap();
             Client.MapGenerator.GenerateWalls();
             Client.MapGenerator.GenerateLight();
-            Client.MapGenerator.ApplyAmbientLighting();
-            Client.MapGenerator.ApplyFog();
+            Environment.ApplyAmbientLighting(Client.MapProvider.SceneData);
+            Environment.ApplyFog(Client.MapProvider.SceneData);
             _stateMachine.Enter<GameLoopState, CustomNetworkManager>(this);
         }
 

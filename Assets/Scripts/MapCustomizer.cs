@@ -11,8 +11,6 @@ using MapLogic;
 using Optimization;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Rendering;
-using UnityEngine.Serialization;
 
 [DisallowMultipleComponent]
 [ExecuteAlways]
@@ -20,21 +18,7 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
 {
     public bool IsMapGenerated => chunkContainer != null || spawnPointsContainer != null;
     public MapConfigure mapConfigure;
-    public Color32 waterColor;
-    public Color32 innerColor;
     public Light lightSource;
-    public Material skyboxMaterial;
-    public AmbientMode ambientMode;
-    public Color skyColor;
-    public Color equatorColor;
-    public Color groundColor;
-    public float ambientIntensity;
-    public bool isFogActivated;
-    public FogMode fogMode;
-    public Color fogColor;
-    public float fogStartDistance;
-    public float fogEndDistance;
-    public float fogDensity;
     public List<GameObject> spawnPoints;
 
     [SerializeField]
@@ -102,12 +86,30 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
 
         if (IsMapGenerated)
         {
-            mapConfigure.waterColor = waterColor;
-            mapConfigure.innerColor = innerColor;
-            mapConfigure.skyboxMaterial = skyboxMaterial;
-            spawnPoints.RemoveAll(obj => obj == null);
-            mapConfigure.spawnPoints = spawnPoints
-                .Select(obj => new SpawnPointData(Vector3Int.FloorToInt(obj.transform.localPosition))).ToList();
+            if (spawnPoints.RemoveAll(obj => obj == null) > 0)
+            {
+                EditorUtility.SetDirty(mapConfigure);
+                mapConfigure.spawnPoints = spawnPoints.Select(obj =>
+                        new SpawnPointData(Vector3Int.FloorToInt(obj.transform.localPosition)))
+                    .ToList();
+            }
+            else
+            {
+                var newSpawnPoints = new List<SpawnPointData>(spawnPoints.Count);
+                for (var i = 0; i < spawnPoints.Count; i++)
+                {
+                    newSpawnPoints.Add(
+                        new SpawnPointData(Vector3Int.FloorToInt(spawnPoints[i].transform.localPosition)));
+                    if (!newSpawnPoints[i].Equals(mapConfigure.spawnPoints[i]))
+                    {
+                        EditorUtility.SetDirty(mapConfigure);
+                    }
+                }
+
+                mapConfigure.spawnPoints = newSpawnPoints;
+            }
+
+            AssetDatabase.SaveAssetIfDirty(mapConfigure);
         }
     }
 
@@ -132,12 +134,6 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
         }
     }
 
-    public void SaveLighting()
-    {
-        mapConfigure.lightData = new LightData(lightSource.transform.position, lightSource.transform.rotation,
-            lightSource.color);
-    }
-
     public GameObject CreateSpawnPoint(Vector3Int position)
     {
         var spawnPoint = _instance._entityFactory.CreateSpawnPoint(position, spawnPointsContainer.transform);
@@ -159,20 +155,6 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
 
     private void LoadConfigure()
     {
-        waterColor = mapConfigure.waterColor;
-        innerColor = mapConfigure.innerColor;
-        skyboxMaterial = mapConfigure.skyboxMaterial;
-        ambientMode = mapConfigure.ambientMode;
-        skyColor = mapConfigure.skyColor;
-        equatorColor = mapConfigure.equatorColor;
-        groundColor = mapConfigure.groundColor;
-        ambientIntensity = mapConfigure.ambientIntensity;
-        isFogActivated = mapConfigure.isFogActivated;
-        fogMode = mapConfigure.fogMode;
-        fogColor = mapConfigure.fogColor;
-        fogStartDistance = mapConfigure.fogStartDistance;
-        fogEndDistance = mapConfigure.fogEndDistance;
-        fogDensity = mapConfigure.fogDensity;
         if (lightSource != null)
         {
             lightSource.transform.position = mapConfigure.lightData.position;
@@ -190,5 +172,17 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
 
         DestroyImmediate(chunkContainer);
         DestroyImmediate(spawnPointsContainer);
+    }
+
+    public void ShowAmbientLighting()
+    {
+        var mapProvider = MapReader.ReadFromFile(mapConfigure.mapName, _instance._staticData);
+        Environment.ApplyAmbientLighting(mapProvider.SceneData);
+    }
+
+    public void ShowFog()
+    {
+        var mapProvider = MapReader.ReadFromFile(mapConfigure.mapName, _instance._staticData);
+        Environment.ApplyFog(mapProvider.SceneData);
     }
 }

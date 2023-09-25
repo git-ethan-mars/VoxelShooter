@@ -29,35 +29,35 @@ public class MapConfigure : ScriptableObject
     public AmbientMode ambientMode;
 
     [ReadOnly]
-    public Color skyColor;
+    public Color skyColor = new Color32(54, 58, 66, 255);
 
     [ReadOnly]
-    public Color equatorColor;
+    public Color equatorColor = new Color32(29, 32, 34, 255);
 
     [ReadOnly]
-    public Color groundColor;
+    public Color groundColor = new Color32(12, 11, 9, 255);
 
     [ReadOnly]
-    public float ambientIntensity;
+    public float ambientIntensity = 1;
 
     [Header("Fog")]
     [ReadOnly]
     public bool isFogActivated;
 
     [ReadOnly]
-    public FogMode fogMode;
+    public FogMode fogMode = FogMode.Linear;
 
     [ReadOnly]
-    public Color fogColor;
+    public Color fogColor = new(0.5f, 0.5f, 0.5f, 1);
 
     [ReadOnly]
     public float fogStartDistance;
 
     [ReadOnly]
-    public float fogEndDistance;
+    public float fogEndDistance = 300;
 
     [ReadOnly]
-    public float fogDensity = 1;
+    public float fogDensity = 0.01f;
 
     [Header("Spawn points")]
     public List<SpawnPointData> spawnPoints = new();

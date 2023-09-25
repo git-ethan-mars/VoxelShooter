@@ -70,26 +70,6 @@ namespace Generators
             _gameFactory.CreateDirectionalLight(_mapProvider.SceneData.LightData);
         }
 
-        public void ApplyAmbientLighting()
-        {
-            RenderSettings.skybox = _mapProvider.SceneData.SkyboxMaterial;
-            RenderSettings.ambientMode = _mapProvider.SceneData.AmbientMode;
-            RenderSettings.ambientSkyColor = _mapProvider.SceneData.SkyColor;
-            RenderSettings.ambientEquatorColor = _mapProvider.SceneData.EquatorColor;
-            RenderSettings.ambientGroundColor = _mapProvider.SceneData.GroundColor;
-            RenderSettings.ambientIntensity = _mapProvider.SceneData.AmbientIntensity;
-        }
-
-        public void ApplyFog()
-        {
-            RenderSettings.fog = _mapProvider.SceneData.IsFogActivated;
-            RenderSettings.fogMode = _mapProvider.SceneData.FogMode;
-            RenderSettings.fogColor = _mapProvider.SceneData.FogColor;
-            RenderSettings.fogStartDistance = _mapProvider.SceneData.FogStartDistance;
-            RenderSettings.fogEndDistance = _mapProvider.SceneData.FogEndDistance;
-            RenderSettings.fogDensity = _mapProvider.SceneData.FogDensity;
-        }
-
         private GameObject[] CreateChunkMeshRenders()
         {
             var chunkMeshRenderers = new GameObject[_mapProvider.GetChunkCount()];
