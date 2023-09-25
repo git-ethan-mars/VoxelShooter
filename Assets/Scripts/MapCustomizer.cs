@@ -33,6 +33,7 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
     private EntityFactory _entityFactory;
     private static MapCustomizer _instance;
     private MapConfigure _previousConfigure;
+    private MapProvider _mapProvider;
 
     [UnityEditor.Callbacks.DidReloadScripts]
     private static void Init()
@@ -84,6 +85,27 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
             mapConfigure.mapName = Path.GetFileNameWithoutExtension(assetPath);
         }
 
+        if (lightSource != null)
+        {
+            if (mapConfigure.lightData.position != lightSource.transform.position)
+            {
+                mapConfigure.lightData.position = lightSource.transform.position;
+                EditorUtility.SetDirty(mapConfigure);
+            }
+
+            if (mapConfigure.lightData.rotation != lightSource.transform.rotation)
+            {
+                mapConfigure.lightData.rotation = lightSource.transform.rotation;
+                EditorUtility.SetDirty(mapConfigure);
+            }
+
+            if (mapConfigure.lightData.color != lightSource.color)
+            {
+                mapConfigure.lightData.color = lightSource.color;
+                EditorUtility.SetDirty(mapConfigure);
+            }
+        }
+
         if (IsMapGenerated)
         {
             if (spawnPoints.RemoveAll(obj => obj == null) > 0)
@@ -108,8 +130,6 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
 
                 mapConfigure.spawnPoints = newSpawnPoints;
             }
-
-            AssetDatabase.SaveAssetIfDirty(mapConfigure);
         }
     }
 
@@ -117,10 +137,10 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
     {
         DestroyChildren();
         LoadConfigure();
-        var mapProvider =
+        _instance._mapProvider =
             SimpleBenchmark.Execute(MapReader.ReadFromFile, mapConfigure.mapName, _instance._staticData);
         var mapGenerator =
-            new MapGenerator(mapProvider, _instance._gameFactory, _instance._meshFactory);
+            new MapGenerator(_instance._mapProvider, _instance._gameFactory, _instance._meshFactory);
         SimpleBenchmark.Execute(mapGenerator.GenerateMap);
         chunkContainer = mapGenerator.ChunkContainer;
         chunkContainer.transform.SetParent(transform);
@@ -176,13 +196,11 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
 
     public void ShowAmbientLighting()
     {
-        var mapProvider = MapReader.ReadFromFile(mapConfigure.mapName, _instance._staticData);
-        Environment.ApplyAmbientLighting(mapProvider.SceneData);
+        Environment.ApplyAmbientLighting(mapConfigure);
     }
 
     public void ShowFog()
     {
-        var mapProvider = MapReader.ReadFromFile(mapConfigure.mapName, _instance._staticData);
-        Environment.ApplyFog(mapProvider.SceneData);
+        Environment.ApplyFog(mapConfigure);
     }
 }

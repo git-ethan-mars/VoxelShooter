@@ -31,12 +31,7 @@ public class MapCustomizerEditor : UnityEditor.Editor
     {
         serializedObject.Update();
         DrawGUI();
-
         serializedObject.ApplyModifiedProperties();
-        if (_mapEditorScript.mapConfigure != null)
-        {
-            AssetDatabase.SaveAssetIfDirty(_mapEditorScript.mapConfigure);
-        }
     }
 
     private void DrawGUI()
@@ -73,20 +68,7 @@ public class MapCustomizerEditor : UnityEditor.Editor
 
         EditorGUI.indentLevel -= 1;
         EditorGUILayout.PropertyField(_lightProperty);
-        if (_lightProperty.objectReferenceValue != null)
-        {
-            if (GUILayout.Button("Save light settings"))
-            {
-                var light = (Light) _lightProperty.objectReferenceValue;
-                var lightDataProperty = _configure.FindProperty("lightData");
-                lightDataProperty.FindPropertyRelative("position").vector3Value = light.transform.position;
-                lightDataProperty.FindPropertyRelative("rotation").quaternionValue = light.transform.rotation;
-                lightDataProperty.FindPropertyRelative("color").colorValue = light.color;
-                serializedObject.ApplyModifiedProperties();
-                serializedObject.Update();
-            }
-        }
-        else
+        if (_lightProperty.objectReferenceValue == null)
         {
             EditorGUILayout.HelpBox("Choose light source in the scene", MessageType.Warning);
         }
@@ -95,6 +77,10 @@ public class MapCustomizerEditor : UnityEditor.Editor
         DrawFogProperties();
         _spawnPoints.DoLayoutList();
         _configure.ApplyModifiedProperties();
+        if (EditorUtility.IsDirty(_mapEditorScript.mapConfigure) && GUILayout.Button("Save configure"))
+        {
+            AssetDatabase.SaveAssets();
+        }
     }
 
     private void DrawFogProperties()

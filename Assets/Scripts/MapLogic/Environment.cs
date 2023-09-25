@@ -24,5 +24,25 @@ namespace MapLogic
             RenderSettings.fogEndDistance = sceneData.FogEndDistance;
             RenderSettings.fogDensity = sceneData.FogDensity;
         }
+
+        public static void ApplyAmbientLighting(MapConfigure mapConfigure)
+        {
+            RenderSettings.skybox = mapConfigure.skyboxMaterial;
+            RenderSettings.ambientMode = mapConfigure.ambientMode;
+            RenderSettings.ambientSkyColor = mapConfigure.skyColor;
+            RenderSettings.ambientEquatorColor = mapConfigure.equatorColor;
+            RenderSettings.ambientGroundColor = mapConfigure.groundColor;
+            RenderSettings.ambientIntensity = mapConfigure.ambientIntensity;
+        }
+
+        public static void ApplyFog(MapConfigure mapConfigure)
+        {
+            RenderSettings.fog = mapConfigure.isFogActivated;
+            RenderSettings.fogMode = mapConfigure.fogMode;
+            RenderSettings.fogColor = mapConfigure.fogColor;
+            RenderSettings.fogStartDistance = mapConfigure.fogStartDistance;
+            RenderSettings.fogEndDistance = mapConfigure.fogEndDistance;
+            RenderSettings.fogDensity = mapConfigure.fogDensity;
+        }
     }
 }
