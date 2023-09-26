@@ -66,7 +66,7 @@ namespace Inventory
         public void OnLeftMouseButtonUp()
         {
             var holdTime = Math.Min(Time.time - _holdDownStartTime, _maxThrowDuration);
-            var throwForce = holdTime * _throwForceModifier;
+            var throwForce = Math.Max(holdTime * _throwForceModifier, 300);
             NetworkClient.Send(new GrenadeSpawnRequest(_itemId, _raycaster.CentredRay, throwForce));
         }
     }

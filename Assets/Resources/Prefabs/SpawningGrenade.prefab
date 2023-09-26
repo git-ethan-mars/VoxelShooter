@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 3755994351845431698}
   - component: {fileID: 6849381094176965432}
   - component: {fileID: -4685652171039545383}
+  - component: {fileID: 4589230353788434968}
   m_Layer: 7
   m_Name: SpawningGrenade
   m_TagString: Untagged
@@ -161,3 +162,15 @@ MonoBehaviour:
   positionSensitivity: 0.01
   rotationSensitivity: 0.01
   scaleSensitivity: 0.01
+--- !u!114 &4589230353788434968
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7084881398813862784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 840c6689ef18446d86c1c33b7870a95e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
