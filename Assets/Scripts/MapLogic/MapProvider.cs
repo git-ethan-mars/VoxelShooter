@@ -11,7 +11,7 @@ namespace MapLogic
 
         public MapProvider(MapData mapData, MapConfigure mapConfigure)
         {
-            MapName = mapConfigure.mapName;
+            MapName = mapConfigure.name;
             MapData = mapData;
             SceneData = new MapSceneData(mapConfigure);
         }

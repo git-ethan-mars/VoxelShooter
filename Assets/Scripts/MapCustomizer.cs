@@ -84,8 +84,6 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
             return;
         }
 
-        ChangeMapName();
-
         if (!IsMapGenerated)
         {
             return;
@@ -141,18 +139,12 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
         }
     }
 
-    private void ChangeMapName()
-    {
-        var assetPath = AssetDatabase.GetAssetPath(mapConfigure.GetInstanceID());
-        mapConfigure.mapName = Path.GetFileNameWithoutExtension(assetPath);
-    }
-
     public void GenerateMap()
     {
         DestroyChildren();
         LoadConfigure();
         _instance._mapProvider =
-            SimpleBenchmark.Execute(MapReader.ReadFromFile, mapConfigure.mapName, _instance._staticData);
+            SimpleBenchmark.Execute(MapReader.ReadFromFile, mapConfigure.name, _instance._staticData);
         var mapGenerator =
             new MapGenerator(_instance._mapProvider, _instance._gameFactory, _instance._meshFactory);
         SimpleBenchmark.Execute(mapGenerator.GenerateMap);

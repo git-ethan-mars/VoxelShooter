@@ -7,9 +7,6 @@ using UnityEngine.Rendering;
 [CreateAssetMenu]
 public class MapConfigure : ScriptableObject
 {
-    [ReadOnly]
-    public string mapName;
-
     [Header("Color")]
     [ReadOnly]
     public Color32 waterColor = new(3, 58, 135, 255);
