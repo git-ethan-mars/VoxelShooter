@@ -18,7 +18,6 @@ namespace Entities
 
         public void OnCollisionEnter(Collision collision)
         {
-            Debug.Log(collision.gameObject.name);
             if (_hasCollided)
                 return;
             _hasCollided = true;
