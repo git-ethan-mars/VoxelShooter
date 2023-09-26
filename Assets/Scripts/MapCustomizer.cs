@@ -79,13 +79,19 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
 
         _previousConfigure = mapConfigure;
 
-        if (mapConfigure != null)
+        if (mapConfigure == null)
         {
-            var assetPath = AssetDatabase.GetAssetPath(mapConfigure.GetInstanceID());
-            mapConfigure.mapName = Path.GetFileNameWithoutExtension(assetPath);
+            return;
         }
 
-        if (lightSource != null && mapConfigure != null)
+        ChangeMapName();
+
+        if (!IsMapGenerated)
+        {
+            return;
+        }
+
+        if (lightSource != null)
         {
             if (mapConfigure.lightData.position != lightSource.transform.position)
             {
@@ -106,31 +112,39 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
             }
         }
 
-        if (IsMapGenerated)
-        {
-            if (spawnPoints.RemoveAll(obj => obj == null) > 0)
-            {
-                EditorUtility.SetDirty(mapConfigure);
-                mapConfigure.spawnPoints = spawnPoints.Select(obj =>
-                        new SpawnPointData(Vector3Int.FloorToInt(obj.transform.localPosition)))
-                    .ToList();
-            }
-            else
-            {
-                var newSpawnPoints = new List<SpawnPointData>(spawnPoints.Count);
-                for (var i = 0; i < spawnPoints.Count; i++)
-                {
-                    newSpawnPoints.Add(
-                        new SpawnPointData(Vector3Int.FloorToInt(spawnPoints[i].transform.localPosition)));
-                    if (!newSpawnPoints[i].Equals(mapConfigure.spawnPoints[i]))
-                    {
-                        EditorUtility.SetDirty(mapConfigure);
-                    }
-                }
+        UpdateSpawnPointGameObjects();
+    }
 
-                mapConfigure.spawnPoints = newSpawnPoints;
-            }
+    private void UpdateSpawnPointGameObjects()
+    {
+        if (spawnPoints.RemoveAll(obj => obj == null) > 0)
+        {
+            EditorUtility.SetDirty(mapConfigure);
+            mapConfigure.spawnPoints = spawnPoints.Select(obj =>
+                    new SpawnPointData(Vector3Int.FloorToInt(obj.transform.localPosition)))
+                .ToList();
         }
+        else
+        {
+            var newSpawnPoints = new List<SpawnPointData>(spawnPoints.Count);
+            for (var i = 0; i < spawnPoints.Count; i++)
+            {
+                newSpawnPoints.Add(
+                    new SpawnPointData(Vector3Int.FloorToInt(spawnPoints[i].transform.localPosition)));
+                if (!newSpawnPoints[i].Equals(mapConfigure.spawnPoints[i]))
+                {
+                    EditorUtility.SetDirty(mapConfigure);
+                }
+            }
+
+            mapConfigure.spawnPoints = newSpawnPoints;
+        }
+    }
+
+    private void ChangeMapName()
+    {
+        var assetPath = AssetDatabase.GetAssetPath(mapConfigure.GetInstanceID());
+        mapConfigure.mapName = Path.GetFileNameWithoutExtension(assetPath);
     }
 
     public void GenerateMap()
