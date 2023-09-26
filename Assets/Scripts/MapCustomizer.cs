@@ -143,6 +143,7 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
     {
         DestroyChildren();
         LoadConfigure();
+        _instance._staticData.LoadMapConfigures();
         _instance._mapProvider =
             SimpleBenchmark.Execute(MapReader.ReadFromFile, mapConfigure.name, _instance._staticData);
         var mapGenerator =
@@ -172,7 +173,6 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
         var assets = new AssetProvider();
         _instance._entityFactory = new EntityFactory(assets);
         _instance._staticData = new StaticDataService();
-        _instance._staticData.LoadMapConfigures();
         var particleFactory = new ParticleFactory(assets, this);
         _instance._meshFactory = new MeshFactory(assets);
         _instance._gameFactory =
