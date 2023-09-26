@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Infrastructure.Factory;
 using UnityEngine;
@@ -8,6 +9,7 @@ namespace Entities
     public class FallingMesh : MonoBehaviour
     {
         private IFallingMeshParticlePool _particlePool;
+        private bool _hasCollided;
 
         public void Construct(IFallingMeshParticlePool particlePool)
         {
@@ -16,6 +18,16 @@ namespace Entities
 
         public void OnCollisionEnter(Collision collision)
         {
+            Debug.Log(collision.gameObject.name);
+            if (_hasCollided)
+                return;
+            _hasCollided = true;
+            StartCoroutine(ProcessCollision(2));
+        }
+        
+        public IEnumerator ProcessCollision(float lifetime)
+        {
+            yield return new WaitForSeconds(lifetime);
             var mesh = GetComponent<MeshFilter>().mesh;
             var particleSystems = new List<ParticleSystem>();
             var counter = 0;
