@@ -1,8 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
+using Data;
 using Optimization;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
 
@@ -10,38 +11,38 @@ namespace MapLogic
 {
     public static class MapWriter
     {
+        private const string RchExtension = ".rch";
+
         public static void SaveMap(string fileName, MapProvider mapProvider)
         {
-            if (Path.GetExtension(fileName) != ".rch")
-            {
-                throw new ArgumentException();
-            }
-
             var mapDirectory = Application.dataPath + "/Maps";
             if (!Directory.Exists(mapDirectory))
             {
                 Directory.CreateDirectory(mapDirectory);
             }
 
-            var filePath = Application.dataPath + $"/Maps/{fileName}";
+            var filePath = Application.dataPath + $"/Maps/{fileName + RchExtension}";
 
             using var file = File.OpenWrite(filePath);
             WriteMap(mapProvider, file);
         }
-        
-        
-        public static void WriteMap(IMapProvider mapProvider, Stream stream)
+
+
+        public static void WriteMap(MapProvider mapProvider, Stream stream)
         {
-            var result = new List<NativeList<byte>>();
+            var result = new List<NativeList<byte>>(mapProvider.MapData.Chunks.Length);
+            var blocks = new List<NativeArray<BlockData>>(mapProvider.MapData.Chunks.Length);
             for (var i = 0; i < mapProvider.MapData.Chunks.Length; i++)
             {
                 result.Add(new NativeList<byte>(Allocator.TempJob));
+                blocks.Add(new NativeArray<BlockData>(mapProvider.MapData.Chunks[i].Blocks, Allocator.TempJob));
             }
 
             var jobHandles = new NativeList<JobHandle>(Allocator.Temp);
             for (var i = 0; i < mapProvider.MapData.Chunks.Length; i++)
             {
-                var job = new ChunkSerializer(result[i], mapProvider.MapData.Chunks[i].Blocks,
+                var job = new ChunkSerializer(result[i],
+                    blocks[i],
                     mapProvider.MapData.SolidColor);
                 var jobHandle = job.Schedule();
                 jobHandles.Add(jobHandle);
@@ -53,24 +54,18 @@ namespace MapLogic
             binaryWriter.Write(mapProvider.MapData.Width);
             binaryWriter.Write(mapProvider.MapData.Height);
             binaryWriter.Write(mapProvider.MapData.Depth);
-            foreach (var serializedChunk in result)
+            for (var i = 0; i < mapProvider.MapData.Chunks.Length; i++)
             {
-                for (var i = 0; i < serializedChunk.Length; i++)
+                for (var j = 0; j < result[i].Length; j++)
                 {
-                    binaryWriter.Write(serializedChunk[i]);
+                    binaryWriter.Write(result[i][j]);
                 }
 
-                serializedChunk.Dispose();
+                result[i].Dispose();
+                blocks[i].Dispose();
             }
 
             jobHandles.Dispose();
-            binaryWriter.Write(mapProvider.MapData.SpawnPoints.Count);
-            for (var i = 0; i < mapProvider.MapData.SpawnPoints.Count; i++)
-            {
-                binaryWriter.Write(mapProvider.MapData.SpawnPoints[i].X);
-                binaryWriter.Write(mapProvider.MapData.SpawnPoints[i].Y);
-                binaryWriter.Write(mapProvider.MapData.SpawnPoints[i].Z);
-            }
             stream.Write(memoryStream.ToArray());
         }
     }

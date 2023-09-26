@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e69f3dcd48464cac84150e2016cff25a, type: 3}
+  m_Name: Crossroads
+  m_EditorClassIdentifier: 
+  mapName: Crossroads
+  waterColor:
+    serializedVersion: 2
+    rgba: 4287052291
+  innerColor:
+    serializedVersion: 2
+    rgba: 4281283929
+  lightData:
+    position: {x: 0, y: 110, z: 280}
+    rotation: {x: -0.08707207, y: 0.8046156, z: -0.31618926, w: 0.4950117}
+    color: {r: 1, g: 1, b: 1, a: 1}
+  skyboxMaterial: {fileID: 2100000, guid: 8869ec7f32ba4594aa6a20cbd6c772ec, type: 2}
+  spawnPoints:
+  - position: {x: 143, y: 23, z: 141}
+  - position: {x: 177, y: 18, z: 224}
+  - position: {x: 222, y: 14, z: 281}
+  - position: {x: 191, y: 21, z: 324}
+  - position: {x: 254, y: 18, z: 410}
+  - position: {x: 382, y: 12, z: 201}
+  - position: {x: 410, y: 47, z: 113}
+  - position: {x: 225, y: 12, z: 229}

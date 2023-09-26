@@ -11,5 +11,7 @@ namespace Infrastructure.Services.StaticData
         List<InventoryItem> GetInventory(GameClass gameClass);
         void LoadPlayerCharacteristics();
         PlayerCharacteristic GetPlayerCharacteristic(GameClass gameClass);
+        void LoadMapConfigures();
+        MapConfigure GetMapConfigure(string mapName);
     }
 }

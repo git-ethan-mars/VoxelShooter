@@ -56,10 +56,11 @@ namespace Infrastructure.Factory
             return mainMenu;
         }
 
-        public void CreateMatchMenu(GameStateMachine gameStateMachine, bool isLocalBuild)
+        public GameObject CreateMatchMenu(GameStateMachine gameStateMachine, bool isLocalBuild)
         {
             var matchMenu = _assets.Instantiate(MatchMenuPath);
             matchMenu.GetComponent<MatchMenu>().Construct(gameStateMachine, isLocalBuild);
+            return matchMenu;
         }
 
         public void CreateTimeCounter(CustomNetworkManager networkManager)

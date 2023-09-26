@@ -8,14 +8,19 @@ namespace UI
 {
     public class LoadingWindow : MonoBehaviour
     {
-        [SerializeField] private List<Image> bullets;
+        [SerializeField]
+        private List<Image> bullets;
+
         private float _previousProgress;
-    
+        private CustomNetworkManager _networkManager;
+
         public void Construct(CustomNetworkManager networkManager)
         {
-            networkManager.OnLoadProgress += UpdateBullets;
+            _networkManager = networkManager;
+            _networkManager.Client.MapLoadProgressed += UpdateLoadingBar;
         }
-        private void UpdateBullets(float progress)
+
+        private void UpdateLoadingBar(float progress)
         {
             var startBulletIndex = (int) Math.Floor(_previousProgress * bullets.Count);
             var endBulletIndex = (int) Math.Ceiling(progress * bullets.Count);
@@ -30,6 +35,11 @@ namespace UI
             {
                 Destroy(gameObject);
             }
+        }
+
+        public void OnDestroy()
+        {
+            _networkManager.Client.MapLoadProgressed -= UpdateLoadingBar;
         }
     }
 }

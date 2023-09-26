@@ -1,6 +1,7 @@
 using Data;
 using Mirror;
 using Networking.Messages;
+using Networking.Messages.Requests;
 using Rendering;
 using TMPro;
 using UI;
@@ -55,7 +56,7 @@ namespace Inventory
 
         public void OnLeftMouseButtonDown()
         {
-            NetworkClient.Send(new RocketLauncherSpawnRequest(_itemId,
+            NetworkClient.Send(new RocketSpawnRequest(_itemId,
                 _raycaster.CentredRay));
         }
     }

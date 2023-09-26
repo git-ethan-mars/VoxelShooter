@@ -4,20 +4,20 @@ using UnityEngine;
 
 namespace MapLogic
 {
-    public class MapUpdater : IMapUpdater
+    public class MapUpdater
     {
         public event Action<Vector3Int, BlockData> MapUpdated;
-        private readonly IMapProvider _mapProvider;
+        private readonly MapProvider _mapProvider;
 
-        public MapUpdater(IMapProvider mapProvider)
+        public MapUpdater(MapProvider mapProvider)
         {
             _mapProvider = mapProvider;
         }
 
         public void UpdateSpawnPoint(SpawnPointData oldPosition, SpawnPointData position)
         {
-            var index = _mapProvider.MapData.SpawnPoints.FindIndex(point => point.Equals(oldPosition));
-            _mapProvider.MapData.SpawnPoints[index] = position;
+            var index = _mapProvider.SceneData.SpawnPoints.FindIndex(point => point.Equals(oldPosition));
+            _mapProvider.SceneData.SpawnPoints[index] = position;
         }
 
         public void SetBlockByGlobalPosition(Vector3Int position, BlockData blockData) =>
@@ -25,7 +25,7 @@ namespace MapLogic
 
         private void SetBlockByGlobalPosition(int x, int y, int z, BlockData blockData)
         {
-            _mapProvider.MapData.Chunks[_mapProvider.FindChunkNumberByPosition(x, y, z)]
+            _mapProvider.MapData.Chunks[_mapProvider.GetChunkNumberByGlobalPosition(x, y, z)]
                 .Blocks[
                     x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
                     y % ChunkData.ChunkSize * ChunkData.ChunkSize + z % ChunkData.ChunkSize] = blockData;

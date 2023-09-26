@@ -8,6 +8,7 @@ using Infrastructure.Factory;
 using Inventory;
 using Mirror;
 using Networking.Messages;
+using Networking.Messages.Responses;
 using UnityEngine;
 
 namespace Networking.Synchronization
@@ -109,7 +110,7 @@ namespace Networking.Synchronization
                 rangeWeapon.BulletsInMagazine = rangeWeapon.MagazineSize;
             }
 
-            connection.Send(new ReloadResult(rangeWeapon.ID, rangeWeapon.TotalBullets, rangeWeapon.BulletsInMagazine));
+            connection.Send(new ReloadResponse(rangeWeapon.ID, rangeWeapon.TotalBullets, rangeWeapon.BulletsInMagazine));
             StartReloadCoroutine(rangeWeapon);
         }
 
@@ -128,7 +129,7 @@ namespace Networking.Synchronization
                 rangeWeapon.BulletsInMagazine = 0;
             rangeWeapon.IsReady = false;
             rangeWeapon.RecoilModifier += rangeWeapon.StepRecoil;
-            connection.Send(new ShootResult(rangeWeapon.ID, rangeWeapon.BulletsInMagazine));
+            connection.Send(new ShootResponse(rangeWeapon.ID, rangeWeapon.BulletsInMagazine));
             StartShootCoroutines(rangeWeapon);
         }
 

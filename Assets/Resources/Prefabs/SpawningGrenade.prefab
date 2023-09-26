@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 3755994351845431698}
   - component: {fileID: 6849381094176965432}
   - component: {fileID: -4685652171039545383}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: SpawningGrenade
   m_TagString: Untagged
   m_Icon: {fileID: 0}

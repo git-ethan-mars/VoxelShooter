@@ -10,17 +10,21 @@ namespace UI
     [RequireComponent(typeof(CanvasGroup))]
     public class Scoreboard : MonoBehaviour
     {
-        [SerializeField] private List<ScoreUI> scores;
+        [SerializeField]
+        private List<ScoreUI> scores;
+
         private IInputService _inputService;
         private CanvasGroup _canvasGroup;
         private IAvatarLoader _avatarLoader;
+        private CustomNetworkManager _networkManager;
 
 
         public void Construct(IInputService inputService, IAvatarLoader avatarLoader,
             CustomNetworkManager networkManager)
         {
-            networkManager.ScoreboardChanged += UpdateScoreboard;
-            networkManager.GameFinished += ShowFinalStatistics;
+            _networkManager = networkManager;
+            _networkManager.Client.ScoreboardChanged += UpdateScoreboard;
+            _networkManager.GameFinished += ShowFinalStatistics;
             _inputService = inputService;
             _avatarLoader = avatarLoader;
             _canvasGroup = GetComponent<CanvasGroup>();
@@ -34,6 +38,7 @@ namespace UI
 
         private void ShowFinalStatistics()
         {
+            _networkManager.GameFinished -= ShowFinalStatistics;
             enabled = false;
             _canvasGroup.alpha = 1;
         }
@@ -54,6 +59,11 @@ namespace UI
                 scores[i].avatar.texture = _avatarLoader.RequestAvatar(scoreBoardData[i].SteamID);
                 scores[i].gameObject.SetActive(true);
             }
+        }
+
+        private void OnDestroy()
+        {
+            _networkManager.Client.ScoreboardChanged -= UpdateScoreboard;
         }
     }
 }

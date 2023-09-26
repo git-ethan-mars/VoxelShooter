@@ -7,7 +7,6 @@ using Explosions;
 using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
 using Mirror;
-using Networking.Messages;
 using UnityEngine;
 
 namespace Networking.Synchronization
@@ -95,7 +94,7 @@ namespace Networking.Synchronization
                 if (isStrongHit)
                 {
                     var validPositions = _lineExplosionArea.GetExplodedBlocks(3, targetBlock);
-                    UpdateBlocks(validPositions, 3);
+                    UpdateBlocks(validPositions, 1);
                 }
                 else
                 {

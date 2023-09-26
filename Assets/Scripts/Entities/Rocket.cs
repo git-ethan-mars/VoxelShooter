@@ -18,7 +18,7 @@ namespace Entities
         private NetworkConnectionToClient _owner;
         private bool _isExploded;
 
-        public void Construct(IMapProvider mapProvider, IMapUpdater mapUpdater, RocketLauncherItem rocketData,
+        public void Construct(MapProvider mapProvider, MapUpdater mapUpdater, RocketLauncherItem rocketData,
             NetworkConnectionToClient owner, IParticleFactory particleFactory, MapDestructionAlgorithm mapDestructionAlgorithm)
         {
             _radius = rocketData.radius;

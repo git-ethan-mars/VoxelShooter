@@ -1,15 +1,17 @@
 ﻿using Data;
 using MapLogic;
 using Mirror;
+using Networking.ServerServices;
 using Steamworks;
+using UnityEngine;
 
 namespace Networking
 {
     public interface IServer
     {
-        IMapProvider MapProvider { get; }
+        MapProvider MapProvider { get; }
         ServerData ServerData { get; }
-        IMapUpdater MapUpdater { get; }
+        MapUpdater MapUpdater { get; }
         MapDestructionAlgorithm MapDestructionAlgorithm { get; }
         void AddKill(NetworkConnectionToClient source, NetworkConnectionToClient receiver);
 
@@ -18,6 +20,8 @@ namespace Networking
 
         void ChangeClass(NetworkConnectionToClient connection, GameClass chosenClass);
         void DeletePlayer(NetworkConnectionToClient connection);
-        void CreateSpawnPoints();
+        void CreateSpawnPoints(Transform parent);
+        void RegisterHandlers();
+        void UnregisterHandlers();
     }
 }

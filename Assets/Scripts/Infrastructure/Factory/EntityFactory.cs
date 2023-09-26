@@ -42,8 +42,8 @@ namespace Infrastructure.Factory
             return tombstone;
         }
 
-        public GameObject CreateRocket(Vector3 position, Quaternion rotation, IMapProvider mapProvider,
-            IMapUpdater mapUpdater,
+        public GameObject CreateRocket(Vector3 position, Quaternion rotation, MapProvider mapProvider,
+            MapUpdater mapUpdater,
             IParticleFactory particleFactory, RocketLauncherItem rocketData, NetworkConnectionToClient owner, MapDestructionAlgorithm mapDestructionAlgorithm)
         {
             var rocket = _assets.Instantiate(RocketPath, position, rotation);
@@ -52,9 +52,9 @@ namespace Infrastructure.Factory
             return rocket;
         }
 
-        public GameObject CreateSpawnPoint(Vector3 position)
+        public GameObject CreateSpawnPoint(Vector3 position, Transform parent)
         {
-            return _assets.Instantiate(SpawnPointPath, position, Quaternion.identity);
+            return _assets.Instantiate(SpawnPointPath, position, Quaternion.identity, parent);
         }
     }
 }
