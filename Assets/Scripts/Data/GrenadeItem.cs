@@ -13,6 +13,7 @@ namespace Data
         public int damage;
         public float maxThrowDuration;
         public float throwForceModifier;
+        public float minThrowForce;
         public int particlesSpeed;
         public int particlesCount;
 
