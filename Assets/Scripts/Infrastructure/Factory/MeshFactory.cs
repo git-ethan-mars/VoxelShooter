@@ -6,6 +6,7 @@ using Infrastructure.AssetManagement;
 using MapLogic;
 using Rendering;
 using UnityEngine;
+using UnityEngine.Rendering;
 using Random = UnityEngine.Random;
 
 namespace Infrastructure.Factory
@@ -26,11 +27,11 @@ namespace Infrastructure.Factory
             FallingMeshFallingMeshParticlePool fallingMeshFallingMeshParticlePool)
         {
             var mesh = new Mesh();
+            mesh.indexFormat = meshData.IndexFormat;
             mesh.SetVertices(meshData.Vertices.ToArray());
             mesh.SetTriangles(meshData.Triangles, 0);
             mesh.SetColors(meshData.Colors);
             mesh.SetNormals(meshData.Normals);
-            mesh.indexFormat = meshData.IndexFormat;
             var fallingMesh = _assets.Instantiate(FallingMeshPath);
             fallingMesh.GetComponent<MeshFilter>().mesh = mesh;
             fallingMesh.GetComponent<FallingMesh>().Construct(fallingMeshFallingMeshParticlePool);
