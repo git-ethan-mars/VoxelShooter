@@ -7,12 +7,16 @@ public class AnimationPlayer : MonoBehaviour
     private const float Gravity = -30f;
 
     [SerializeField]
+    private Transform headPivot;
+
+    [SerializeField]
     private float speed;
 
     [SerializeField]
     private float jumpMultiplier;
 
     private IInputService _inputService;
+    private Camera _camera;
     private CharacterController _characterController;
     private float _jumpSpeed;
 
@@ -20,9 +24,25 @@ public class AnimationPlayer : MonoBehaviour
     {
         _inputService = new StandaloneInputService();
         _characterController = GetComponent<CharacterController>();
+        _camera = Camera.main;
     }
 
     void Update()
+    {
+        HandleHeadRotation();
+        HandleMovement();
+    }
+
+    private void HandleHeadRotation()
+    {
+        var mousePos2D = Input.mousePosition;
+        var screenToCameraDistance = _camera.nearClipPlane + 1;
+        var mousePosNearClipPlane = new Vector3(mousePos2D.x, mousePos2D.y, screenToCameraDistance);
+        var worldPointPos = _camera.ScreenToWorldPoint(mousePosNearClipPlane);
+        headPivot.LookAt(worldPointPos);
+    }
+
+    private void HandleMovement()
     {
         var axis = _inputService.Axis;
         var movementDirection = (axis.x * transform.forward + axis.y * transform.right).normalized;
