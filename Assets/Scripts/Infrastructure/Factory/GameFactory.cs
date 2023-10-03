@@ -69,6 +69,7 @@ namespace Infrastructure.Factory
             light.color = lightData.color;
             light.type = LightType.Directional;
             light.shadows = LightShadows.Soft;
+            light.shadowNormalBias = 0;
         }
     }
 }
