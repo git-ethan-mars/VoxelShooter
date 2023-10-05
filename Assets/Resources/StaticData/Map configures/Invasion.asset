@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e69f3dcd48464cac84150e2016cff25a, type: 3}
   m_Name: Invasion
   m_EditorClassIdentifier: 
-  mapName: Invasion
   waterColor:
     serializedVersion: 2
     rgba: 4287052291
@@ -21,7 +20,18 @@ MonoBehaviour:
     rgba: 4281283929
   lightData:
     position: {x: 18885, y: 5618, z: 9583}
-    rotation: {x: -0.045499127, y: -0.5098868, z: 0.4095217, w: -0.75514054}
+    rotation: {x: 0.86608404, y: 0.2364802, z: 0.028527718, w: 0.4395016}
     color: {r: 1, g: 0.9826119, b: 0.7783019, a: 1}
-  skyboxMaterial: {fileID: 2100000, guid: 7416536dbe0334cfd888dd1beb75a9fb, type: 2}
+  skyboxMaterial: {fileID: 2100000, guid: cdbb40e11399e4a17882ada20a1b896a, type: 2}
+  ambientMode: 0
+  skyColor: {r: 0.21176471, g: 0.22745098, b: 0.25882354, a: 1}
+  equatorColor: {r: 0.11372549, g: 0.1254902, b: 0.13333334, a: 1}
+  groundColor: {r: 0.047058824, g: 0.043137256, b: 0.03529412, a: 1}
+  ambientIntensity: 1
+  isFogActivated: 0
+  fogMode: 1
+  fogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  fogStartDistance: 0
+  fogEndDistance: 300
+  fogDensity: 0.01
   spawnPoints: []
