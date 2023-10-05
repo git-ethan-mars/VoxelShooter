@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e69f3dcd48464cac84150e2016cff25a, type: 3}
   m_Name: BranCastle
   m_EditorClassIdentifier: 
-  mapName: 
   waterColor:
     serializedVersion: 2
     rgba: 4287052291
@@ -21,7 +20,19 @@ MonoBehaviour:
     rgba: 4281283929
   lightData:
     position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0, w: 1}
+    rotation: {x: 0.18853351, y: 0.6370727, z: 0.16475819, w: -0.72900504}
     color: {r: 1, g: 1, b: 1, a: 1}
-  skyboxMaterial: {fileID: 0}
-  spawnPoints: []
+  skyboxMaterial: {fileID: 2100000, guid: e2341a9d03e86ec4290c72b1e22bbc7c, type: 2}
+  ambientMode: 0
+  skyColor: {r: 0.21176471, g: 0.22745098, b: 0.25882354, a: 1}
+  equatorColor: {r: 0.11372549, g: 0.1254902, b: 0.13333334, a: 1}
+  groundColor: {r: 0.047058824, g: 0.043137256, b: 0.03529412, a: 1}
+  ambientIntensity: 1
+  isFogActivated: 0
+  fogMode: 1
+  fogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  fogStartDistance: 0
+  fogEndDistance: 300
+  fogDensity: 0.01
+  spawnPoints:
+  - position: {x: 413, y: 10, z: 112}
