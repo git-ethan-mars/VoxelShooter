@@ -189,7 +189,8 @@ public class MapCustomizerEditor : UnityEditor.Editor
     {
         reorderableList.serializedProperty.arraySize += 1;
         reorderableList.serializedProperty.GetArrayElementAtIndex(reorderableList.index).objectReferenceValue =
-            _mapEditorScript.CreateSpawnPoint(Vector3Int.zero);
+            _mapEditorScript.CreateSpawnPoint(
+                Vector3Int.FloorToInt(((SceneView) SceneView.sceneViews[0]).camera.transform.position));
         var spawnPointsProperty = _configure.FindProperty("spawnPoints");
         spawnPointsProperty.arraySize += 1;
     }
