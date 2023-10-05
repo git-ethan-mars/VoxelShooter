@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e69f3dcd48464cac84150e2016cff25a, type: 3}
   m_Name: CityOfChicago
   m_EditorClassIdentifier: 
-  mapName: CityOfChicago
   waterColor:
     serializedVersion: 2
     rgba: 4287052291
@@ -21,7 +20,18 @@ MonoBehaviour:
     rgba: 4281283929
   lightData:
     position: {x: 0, y: 77.2, z: 42.9}
-    rotation: {x: 0.065248124, y: 0.870988, z: -0.037345693, w: 0.4855181}
-    color: {r: 0.8584906, g: 0.6540117, b: 0.5547793, a: 1}
-  skyboxMaterial: {fileID: 2100000, guid: b4f152e0498484391a9f0d5a1facf03b, type: 2}
+    rotation: {x: -0.8870783, y: -0.048141662, z: 0.1551788, w: -0.43208107}
+    color: {r: 1, g: 0.5665028, b: 0.3160377, a: 1}
+  skyboxMaterial: {fileID: 2100000, guid: c82a334cf5a5e47978749c210cee72a7, type: 2}
+  ambientMode: 0
+  skyColor: {r: 0.21176471, g: 0.22745098, b: 0.25882354, a: 1}
+  equatorColor: {r: 0.11372549, g: 0.1254902, b: 0.13333334, a: 1}
+  groundColor: {r: 0.047058824, g: 0.043137256, b: 0.03529412, a: 1}
+  ambientIntensity: 1
+  isFogActivated: 1
+  fogMode: 1
+  fogColor: {r: 0.3584906, g: 0.3584906, b: 0.3584906, a: 1}
+  fogStartDistance: 30
+  fogEndDistance: 250
+  fogDensity: 0.01
   spawnPoints: []
