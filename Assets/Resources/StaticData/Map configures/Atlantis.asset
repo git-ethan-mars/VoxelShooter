@@ -12,16 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e69f3dcd48464cac84150e2016cff25a, type: 3}
   m_Name: Atlantis
   m_EditorClassIdentifier: 
-  mapName: 
   waterColor:
     serializedVersion: 2
-    rgba: 4287052291
+    rgba: 4281991424
   innerColor:
     serializedVersion: 2
     rgba: 4281283929
   lightData:
     position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0, w: 1}
+    rotation: {x: 0.8254846, y: -0.17087568, z: 0.3353625, w: 0.42060533}
     color: {r: 1, g: 1, b: 1, a: 1}
-  skyboxMaterial: {fileID: 0}
+  skyboxMaterial: {fileID: 2100000, guid: 119ec07f1c7ed204db46bd8465fd5a50, type: 2}
+  ambientMode: 0
+  skyColor: {r: 0.21176471, g: 0.22745098, b: 0.25882354, a: 1}
+  equatorColor: {r: 0.11372549, g: 0.1254902, b: 0.13333334, a: 1}
+  groundColor: {r: 0.047058824, g: 0.043137256, b: 0.03529412, a: 1}
+  ambientIntensity: 1
+  isFogActivated: 0
+  fogMode: 1
+  fogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  fogStartDistance: 0
+  fogEndDistance: 300
+  fogDensity: 0.01
   spawnPoints: []

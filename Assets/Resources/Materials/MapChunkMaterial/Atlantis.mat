@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Chunk NEW
+  m_Name: Atlantis
   m_Shader: {fileID: 4800000, guid: fb3eb8d1bd4c40e290ffc3273ce953e8, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
