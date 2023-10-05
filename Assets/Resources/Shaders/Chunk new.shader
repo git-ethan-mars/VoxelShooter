@@ -29,6 +29,7 @@
             // compile shader into multiple variants, with and without shadows
             // (we don't care about any lightmaps yet, so skip these variants)
             #pragma multi_compile_fwdbase nolightmap nodirlightmap nodynlightmap novertexlight
+            #pragma multi_compile_fog
 
             struct v2f
             {
@@ -49,6 +50,7 @@
                 float2 uv : TEXCOORD0;
                 float3 barycentric : TEXCOORD1;
                 SHADOW_COORDS(2)
+                UNITY_FOG_COORDS(3)
             };
 
             sampler2D _MainTex;
@@ -107,6 +109,7 @@
                 o.ambient = IN[0].ambient;
                 o.uv = IN[0].uv;
                 TRANSFER_SHADOW(o)
+                UNITY_TRANSFER_FOG(o, o.pos);
                 triStream.Append(o);
                 o.pos = UnityObjectToClipPos(IN[1].pos);
                 o.barycentric = float3(0.0, 1.0, 0.0) + modifier;
@@ -115,6 +118,7 @@
                 o.ambient = IN[1].ambient;
                 o.uv = IN[1].uv;
                 TRANSFER_SHADOW(o)
+                UNITY_TRANSFER_FOG(o, o.pos);
                 triStream.Append(o);
                 o.pos = UnityObjectToClipPos(IN[2].pos);
                 o.barycentric = float3(0.0, 0.0, 1.0) + modifier;
@@ -123,6 +127,7 @@
                 o.ambient = IN[2].ambient;
                 o.uv = IN[2].uv;
                 TRANSFER_SHADOW(o)
+                UNITY_TRANSFER_FOG(o, o.pos);
                 triStream.Append(o);
             }
 
@@ -141,6 +146,7 @@
                 const fixed shadow = SHADOW_ATTENUATION(i);
                 const fixed3 lighting = i.diff * shadow + i.ambient;
                 col.rgb *= lighting;
+                UNITY_APPLY_FOG(i.fogCoord, col);
                 if (alpha != 0)
                 {
                     return float4(col.rgb * _EdgeMultiplier, alpha);
