@@ -58,7 +58,6 @@ namespace Optimization
             if (IsSolidRunStarted) WriteSolidRun();
             if (IsColoredRunStarted) WriteColoredRun();
             _serializedChunk.Add((byte) MapRun.End);
-            _blocks.Dispose();
         }
 
 

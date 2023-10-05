@@ -32,8 +32,8 @@ namespace Infrastructure.States
         {
             var networkManager = _gameFactory.CreateLocalNetworkManager(_stateMachine, null)
                 .GetComponent<CustomNetworkManager>();
-            _uiFactory.CreateLoadingWindow(networkManager);
             networkManager.StartClient();
+            _uiFactory.CreateLoadingWindow(networkManager);
         }
 
         public void Exit()

@@ -9,5 +9,7 @@ namespace Infrastructure.Factory
         void CreateBulletImpact(Vector3 position, Quaternion rotation, Color32 blockColor);
         void CreateBlood(Vector3 position, Quaternion rotation);
         void CreateRchParticle(Vector3 position, int startSpeed, int burstCount);
+
+        ParticleSystem CreateFallingMeshParticle();
     }
 }

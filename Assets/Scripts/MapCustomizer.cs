@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Data;
 using Generators;
@@ -16,6 +15,7 @@ using UnityEngine;
 [ExecuteAlways]
 public class MapCustomizer : MonoBehaviour, ICoroutineRunner
 {
+#if UNITY_EDITOR
     public bool IsMapGenerated => chunkContainer != null || spawnPointsContainer != null;
     public MapConfigure mapConfigure;
     public Light lightSource;
@@ -212,4 +212,5 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
     {
         Environment.ApplyFog(mapConfigure);
     }
+#endif
 }

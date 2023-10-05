@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Linq;
 using Data;
+using Entities;
 using Infrastructure.AssetManagement;
 using MapLogic;
 using Rendering;
 using UnityEngine;
+using UnityEngine.Rendering;
+using Random = UnityEngine.Random;
 
 namespace Infrastructure.Factory
 {
@@ -20,16 +23,20 @@ namespace Infrastructure.Factory
             _assets = assets;
         }
 
-        public void CreateFallingMesh(MeshData meshData)
+        public void CreateFallingMesh(MeshData meshData,
+            FallingMeshFallingMeshParticlePool fallingMeshFallingMeshParticlePool)
         {
             var mesh = new Mesh();
+            mesh.indexFormat = meshData.IndexFormat;
             mesh.SetVertices(meshData.Vertices.ToArray());
             mesh.SetTriangles(meshData.Triangles, 0);
             mesh.SetColors(meshData.Colors);
             mesh.SetNormals(meshData.Normals);
-            mesh.indexFormat = meshData.IndexFormat;
             var fallingMesh = _assets.Instantiate(FallingMeshPath);
             fallingMesh.GetComponent<MeshFilter>().mesh = mesh;
+            fallingMesh.GetComponent<FallingMesh>().Construct(fallingMeshFallingMeshParticlePool);
+            var torque = new Vector3(Random.Range(0, 40), 0, Random.Range(0, 40));
+            fallingMesh.GetComponent<Rigidbody>().AddTorque(torque);
             var meshCollider = fallingMesh.GetComponent<MeshCollider>();
             meshCollider.sharedMesh = mesh;
         }

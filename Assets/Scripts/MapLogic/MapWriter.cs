@@ -3,6 +3,7 @@ using System.IO;
 using Data;
 using Optimization;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
 
@@ -29,17 +30,19 @@ namespace MapLogic
 
         public static void WriteMap(MapProvider mapProvider, Stream stream)
         {
-            var result = new List<NativeList<byte>>();
+            var result = new List<NativeList<byte>>(mapProvider.MapData.Chunks.Length);
+            var blocks = new List<NativeArray<BlockData>>(mapProvider.MapData.Chunks.Length);
             for (var i = 0; i < mapProvider.MapData.Chunks.Length; i++)
             {
                 result.Add(new NativeList<byte>(Allocator.TempJob));
+                blocks.Add(new NativeArray<BlockData>(mapProvider.MapData.Chunks[i].Blocks, Allocator.TempJob));
             }
 
             var jobHandles = new NativeList<JobHandle>(Allocator.Temp);
             for (var i = 0; i < mapProvider.MapData.Chunks.Length; i++)
             {
                 var job = new ChunkSerializer(result[i],
-                    new NativeArray<BlockData>(mapProvider.MapData.Chunks[i].Blocks, Allocator.TempJob),
+                    blocks[i],
                     mapProvider.MapData.SolidColor);
                 var jobHandle = job.Schedule();
                 jobHandles.Add(jobHandle);
@@ -51,14 +54,15 @@ namespace MapLogic
             binaryWriter.Write(mapProvider.MapData.Width);
             binaryWriter.Write(mapProvider.MapData.Height);
             binaryWriter.Write(mapProvider.MapData.Depth);
-            foreach (var serializedChunk in result)
+            for (var i = 0; i < mapProvider.MapData.Chunks.Length; i++)
             {
-                for (var i = 0; i < serializedChunk.Length; i++)
+                for (var j = 0; j < result[i].Length; j++)
                 {
-                    binaryWriter.Write(serializedChunk[i]);
+                    binaryWriter.Write(result[i][j]);
                 }
 
-                serializedChunk.Dispose();
+                result[i].Dispose();
+                blocks[i].Dispose();
             }
 
             jobHandles.Dispose();
