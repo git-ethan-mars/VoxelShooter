@@ -20,7 +20,7 @@ MonoBehaviour:
     rgba: 4281283929
   lightData:
     position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0.18853351, y: 0.6370727, z: 0.16475819, w: -0.72900504}
+    rotation: {x: -0.8024852, y: 0.037844922, z: -0.5932661, w: -0.05119118}
     color: {r: 1, g: 1, b: 1, a: 1}
   skyboxMaterial: {fileID: 2100000, guid: e2341a9d03e86ec4290c72b1e22bbc7c, type: 2}
   ambientMode: 0
