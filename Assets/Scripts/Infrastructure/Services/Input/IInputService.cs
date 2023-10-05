@@ -17,5 +17,6 @@ namespace Infrastructure.Services.Input
         float GetMouseHorizontalAxis();
         bool IsScoreboardButtonHold();
         bool IsChooseClassButtonDown();
+        bool IsMenuButtonPressed();
     }
 }

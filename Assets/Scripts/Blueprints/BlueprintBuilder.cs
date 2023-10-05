@@ -1,41 +1,37 @@
 using System.Collections.Generic;
 using Generators;
-using Infrastructure.Services.Input;
 using Rendering;
 using UnityEngine;
 
-public class BlueprintBuilder : MonoBehaviour
+public class BlueprintBuilder
 {
     private const int Size = 10;
+
+    private readonly MeshFilter _meshFilter;
+
+    private readonly MeshCollider _meshCollider;
+
     public Color32 DesiredColor { get; set; }
 
-    [SerializeField]
-    private MeshFilter meshFilter;
+    private readonly List<Vector3> _vertices;
 
-    [SerializeField]
-    private MeshCollider meshCollider;
+    private readonly List<int> _triangles;
 
-    [SerializeField]
-    private Camera camera;
+    private readonly List<Color32> _colors;
 
-    [SerializeField]
-    private Transform plane;
+    private readonly List<Vector3> _normals;
+
+    private readonly Raycaster _raycaster;
 
     private Dictionary<Vector3Int, Color32> _blockByPositions;
-    private List<Vector3> _vertices;
-    private List<int> _triangles;
-    private List<Color32> _colors;
-    private List<Vector3> _normals;
-
-    private IInputService _inputService;
-    private Raycaster _raycaster;
 
     private Bounds _bounds;
 
-    private void Awake()
+    public BlueprintBuilder(MeshFilter meshFilter, MeshCollider meshCollider, Transform plane)
     {
-        _inputService = new StandaloneInputService();
-        _raycaster = new Raycaster(camera);
+        _meshFilter = meshFilter;
+        _meshCollider = meshCollider;
+        _raycaster = new Raycaster(Camera.main);
         plane.localScale = (float) Size / 10 * Vector3.one;
         _blockByPositions = new Dictionary<Vector3Int, Color32>();
         _vertices = new List<Vector3>();
@@ -45,47 +41,57 @@ public class BlueprintBuilder : MonoBehaviour
         _bounds = new Bounds(new Vector3(0, (float) Size / 2, 0),
             new Vector3(Size, Size, Size));
         DesiredColor = new Color32(1, 1, 1, 1);
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
     }
 
-    private void Update()
+    public void CreateNewBlueprint()
     {
-        if (_inputService.IsFirstActionButtonDown())
+        _blockByPositions.Clear();
+        RedrawMesh();
+    }
+
+    public void CreateExistedBlueprint(Dictionary<Vector3Int, Color32> blueprintData)
+    {
+        _blockByPositions = blueprintData;
+        RedrawMesh();
+    }
+
+    public void CreateBlock()
+    {
+        if (Physics.Raycast(_raycaster.CentredRay, out var hit))
         {
-            if (Physics.Raycast(_raycaster.CentredRay, out var hit))
+            var blockPosition = Vector3Int.FloorToInt(hit.point + hit.normal / 2) +
+                                new Vector3(0.5f, 0.5f, 0.5f);
+            if (!_bounds.Contains(blockPosition))
             {
-                var blockPosition = Vector3Int.FloorToInt(hit.point + hit.normal / 2) +
-                                    new Vector3(0.5f, 0.5f, 0.5f);
-                if (!_bounds.Contains(blockPosition))
-                {
-                    return;
-                }
-
-                _blockByPositions.TryAdd(Vector3Int.FloorToInt(blockPosition), DesiredColor);
-                ClearMeshData();
-                WriteMeshData();
-                DrawMesh();
+                return;
             }
-        }
 
-        if (_inputService.IsSecondActionButtonDown())
+            _blockByPositions.TryAdd(Vector3Int.FloorToInt(blockPosition), DesiredColor);
+            RedrawMesh();
+        }
+    }
+
+    public void RemoveBlock()
+    {
+        if (Physics.Raycast(_raycaster.CentredRay, out var hit))
         {
-            if (Physics.Raycast(_raycaster.CentredRay, out var hit))
+            var blockPosition = Vector3Int.FloorToInt(hit.point - hit.normal / 2) +
+                                new Vector3(0.5f, 0.5f, 0.5f);
+            if (!_bounds.Contains(blockPosition))
             {
-                var blockPosition = Vector3Int.FloorToInt(hit.point - hit.normal / 2) +
-                                    new Vector3(0.5f, 0.5f, 0.5f);
-                if (!_bounds.Contains(blockPosition))
-                {
-                    return;
-                }
-
-                _blockByPositions.Remove(Vector3Int.FloorToInt(blockPosition));
-                ClearMeshData();
-                WriteMeshData();
-                DrawMesh();
+                return;
             }
+
+            _blockByPositions.Remove(Vector3Int.FloorToInt(blockPosition));
+            RedrawMesh();
         }
+    }
+
+    private void RedrawMesh()
+    {
+        ClearMeshData();
+        WriteMeshData();
+        DrawMesh();
     }
 
     private void WriteMeshData()
@@ -122,15 +128,15 @@ public class BlueprintBuilder : MonoBehaviour
         mesh.SetTriangles(_triangles.ToArray(), 0);
         mesh.SetColors(_colors);
         mesh.SetNormals(_normals);
-        meshFilter.mesh = mesh;
+        _meshFilter.mesh = mesh;
         if (_vertices.Count == 0)
         {
-            meshCollider.sharedMesh = null;
+            _meshCollider.sharedMesh = null;
         }
         else
         {
-            meshFilter.mesh = mesh;
-            meshCollider.sharedMesh = mesh;
+            _meshFilter.mesh = mesh;
+            _meshCollider.sharedMesh = mesh;
         }
     }
 }

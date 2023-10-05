@@ -19,5 +19,7 @@ namespace Infrastructure.Services.Input
         public float GetMouseVerticalAxis() => UnityEngine.Input.GetAxis("Mouse Y");
         public bool IsScoreboardButtonHold() => UnityEngine.Input.GetKey(KeyCode.Tab);
         public bool IsChooseClassButtonDown() => UnityEngine.Input.GetKeyDown(KeyCode.M);
+        public bool IsMenuButtonPressed() => UnityEngine.Input.GetKeyDown(KeyCode.Escape);
+
     }
 }

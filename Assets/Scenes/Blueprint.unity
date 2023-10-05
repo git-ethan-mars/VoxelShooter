@@ -428,9 +428,8 @@ GameObject:
   - component: {fileID: 388420473}
   - component: {fileID: 388420472}
   - component: {fileID: 388420475}
-  - component: {fileID: 388420476}
   m_Layer: 0
-  m_Name: BluePrint Builder
+  m_Name: Blueprint Builder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -524,26 +523,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 388420469}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0662185b9e4ac9448972c4a542742448, type: 3}
+  m_Script: {fileID: 11500000, guid: 079a732687094673a44b3887884fbce0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   meshFilter: {fileID: 388420474}
   meshCollider: {fileID: 388420472}
-  camera: {fileID: 43459371}
   plane: {fileID: 299963128}
---- !u!114 &388420476
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 388420469}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2656008a1f1547c293ef3aa75898126b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  builder: {fileID: 388420475}
+  freeCamera: {fileID: 43459373}
 --- !u!1 &863676421
 GameObject:
   m_ObjectHideFlags: 0
