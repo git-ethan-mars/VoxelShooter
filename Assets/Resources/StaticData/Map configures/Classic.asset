@@ -14,13 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   waterColor:
     serializedVersion: 2
-    rgba: 4287067907
+    rgba: 4287383296
   innerColor:
     serializedVersion: 2
     rgba: 4281283929
   lightData:
     position: {x: 0, y: 0, z: 0}
-    rotation: {x: -0.21085955, y: -0.6215782, z: 0.1788218, w: -0.7329403}
+    rotation: {x: -0.957043, y: -0.04243583, z: 0.18603024, w: -0.21831352}
     color: {r: 1, g: 1, b: 1, a: 1}
   skyboxMaterial: {fileID: 2100000, guid: 85cf0b004bc4a654b9e501efcce47902, type: 2}
   ambientMode: 0
