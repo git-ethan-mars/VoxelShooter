@@ -50,6 +50,7 @@ Material:
     - _DistortionStrength: 1
     - _DistortionStrengthScaled: 0
     - _DstBlend: 0
+    - _EdgeMultiplier: 1
     - _EmissionEnabled: 0
     - _FlipbookMode: 0
     - _Glossiness: 0.5
@@ -57,10 +58,12 @@ Material:
     - _Metallic: 0
     - _Mode: 0
     - _Multiplier: 0.3
+    - _NoiseVisibility: 0.5
     - _SoftParticlesEnabled: 0
     - _SoftParticlesFarFadeDistance: 1
     - _SoftParticlesNearFadeDistance: 0
     - _SrcBlend: 1
+    - _WireframeAliasing: 1.5
     - _ZWrite: 1
     m_Colors:
     - _CameraFadeParams: {r: 0, g: Infinity, b: 0, a: 0}
