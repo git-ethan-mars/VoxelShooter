@@ -1,19 +1,17 @@
-﻿using Mirror;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace PlayerLogic
 {
-    [RequireComponent(typeof(Animator))]
     
-    public class PlayerLegAnimator : NetworkBehaviour
+    public class PlayerLegAnimator
     {
         private static readonly int IsMoving = Animator.StringToHash("IsMoving");
         private static readonly int IsCrouching = Animator.StringToHash("IsCrouching");
-        private Animator _animator;
-        
-        private void Start()
+        private readonly Animator _animator;
+
+        public PlayerLegAnimator(Animator animator)
         {
-            _animator = GetComponent<Animator>();
+            _animator = animator;
         }
 
         public void PlayMove()

@@ -2,15 +2,19 @@ using Data;
 using Infrastructure.Services;
 using Infrastructure.Services.Input;
 using Mirror;
-using Networking.Synchronization;
 using UnityEngine;
 
 namespace PlayerLogic
 {
+    [RequireComponent(typeof(CharacterController), typeof(Animator))]
     public class PlayerMovement : NetworkBehaviour
     {
-        [SyncVar] private float _speed;
-        [SyncVar] private float _jumpMultiplier;
+        [SyncVar]
+        private float _speed;
+
+        [SyncVar]
+        private float _jumpMultiplier;
+
         private CharacterController _characterController;
         private IInputService _inputService;
         private Vector3 _movementDirection;
@@ -40,7 +44,7 @@ namespace PlayerLogic
         public void Start()
         {
             _characterController = GetComponent<CharacterController>();
-            _playerLegAnimator = GetComponent<PlayerLegAnimator>();
+            _playerLegAnimator = new PlayerLegAnimator(GetComponent<Animator>());
         }
 
         private void Update()
