@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e69f3dcd48464cac84150e2016cff25a, type: 3}
   m_Name: AncientEgypt
   m_EditorClassIdentifier: 
-  mapName: AncientEgypt
   waterColor:
     serializedVersion: 2
     rgba: 4287052291
@@ -35,4 +34,9 @@ MonoBehaviour:
   fogStartDistance: 0
   fogEndDistance: 300
   fogDensity: 0.01
-  spawnPoints: []
+  spawnPoints:
+  - position: {x: 226, y: 30, z: 78}
+  - position: {x: 250, y: 37, z: 223}
+  - position: {x: 281, y: 34, z: 343}
+  - position: {x: 339, y: 10, z: 164}
+  - position: {x: 467, y: 5, z: 213}
