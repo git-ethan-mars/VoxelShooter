@@ -36,3 +36,9 @@ MonoBehaviour:
   fogDensity: 0.01
   spawnPoints:
   - position: {x: 413, y: 10, z: 112}
+  - position: {x: 184, y: 12, z: 72}
+  - position: {x: 72, y: 21, z: 256}
+  - position: {x: 170, y: 58, z: 285}
+  - position: {x: 254, y: 63, z: 261}
+  - position: {x: 169, y: 69, z: 230}
+  - position: {x: 187, y: 95, z: 160}
