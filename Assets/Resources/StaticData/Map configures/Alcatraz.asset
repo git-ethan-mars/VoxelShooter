@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e69f3dcd48464cac84150e2016cff25a, type: 3}
   m_Name: Alcatraz
   m_EditorClassIdentifier: 
-  mapName: Alcatraz
   waterColor:
     serializedVersion: 2
     rgba: 4287052291
@@ -21,7 +20,7 @@ MonoBehaviour:
     rgba: 4281283929
   lightData:
     position: {x: 256, y: 100, z: 100}
-    rotation: {x: -0.085614294, y: 0.123752624, z: -0.9550626, w: 0.25536418}
+    rotation: {x: 0.94247377, y: -0.27832153, z: 0.12623903, w: 0.13544038}
     color: {r: 1, g: 1, b: 1, a: 1}
   skyboxMaterial: {fileID: 2100000, guid: d9dca9ae1786c394f9e79c637aa9a7bf, type: 2}
   ambientMode: 0
