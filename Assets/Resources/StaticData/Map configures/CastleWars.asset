@@ -34,4 +34,12 @@ MonoBehaviour:
   fogStartDistance: 0
   fogEndDistance: 270
   fogDensity: 0.01
-  spawnPoints: []
+  spawnPoints:
+  - position: {x: 63, y: 45, z: 439}
+  - position: {x: 165, y: 15, z: 413}
+  - position: {x: 65, y: 11, z: 236}
+  - position: {x: 186, y: 20, z: 255}
+  - position: {x: 326, y: 20, z: 258}
+  - position: {x: 448, y: 12, z: 238}
+  - position: {x: 367, y: 25, z: 103}
+  - position: {x: 443, y: 45, z: 54}
