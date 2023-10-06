@@ -14,15 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   waterColor:
     serializedVersion: 2
-    rgba: 4287052291
+    rgba: 4286730542
   innerColor:
     serializedVersion: 2
     rgba: 4281283929
   lightData:
     position: {x: 256, y: 100, z: 100}
-    rotation: {x: 0.94247377, y: -0.27832153, z: 0.12623903, w: 0.13544038}
+    rotation: {x: 0.43935674, y: 0.6530717, z: -0.23600271, w: 0.56988233}
     color: {r: 1, g: 1, b: 1, a: 1}
-  skyboxMaterial: {fileID: 2100000, guid: d9dca9ae1786c394f9e79c637aa9a7bf, type: 2}
+  skyboxMaterial: {fileID: 2100000, guid: 2039a0ad0a9d05549928b70362f54902, type: 2}
   ambientMode: 0
   skyColor: {r: 0.21176471, g: 0.22745098, b: 0.25882354, a: 1}
   equatorColor: {r: 0.11372549, g: 0.1254902, b: 0.13333334, a: 1}
@@ -34,4 +34,10 @@ MonoBehaviour:
   fogStartDistance: 0
   fogEndDistance: 300
   fogDensity: 0.01
-  spawnPoints: []
+  spawnPoints:
+  - position: {x: 376, y: 61, z: 248}
+  - position: {x: 80, y: 40, z: 368}
+  - position: {x: 130, y: 83, z: 245}
+  - position: {x: 252, y: 44, z: 116}
+  - position: {x: 257, y: 2, z: 427}
+  - position: {x: 387, y: 124, z: 279}
