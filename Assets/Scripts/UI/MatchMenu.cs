@@ -1,4 +1,5 @@
 using Data;
+using Infrastructure.Services.StaticData;
 using Infrastructure.States;
 using TMPro;
 using UnityEngine;
@@ -8,32 +9,48 @@ namespace UI
 {
     public class MatchMenu : Window
     {
-        [SerializeField] private Button backButton;
-        [SerializeField] private Button resetButton;
-        [SerializeField] private Button applyButton;
-        [SerializeField] private TextMeshProUGUI mapName;
+        [SerializeField]
+        private Button backButton;
 
-        [Header("Spawn Time")] [SerializeField]
+        [SerializeField]
+        private Button resetButton;
+
+        [SerializeField]
+        private Button applyButton;
+
+        [SerializeField]
+        private TextMeshProUGUI mapName;
+
+        [Header("Spawn Time")]
+        [SerializeField]
         private TextMeshProUGUI spawnTimeText;
 
-        [SerializeField] private Button incrementPlayerNumber;
-        [SerializeField] private Button decrementPlayerNumber;
+        [SerializeField]
+        private Button incrementPlayerNumber;
 
-        [Header("Game Duration")] [SerializeField]
+        [SerializeField]
+        private Button decrementPlayerNumber;
+
+        [Header("Game Duration")]
+        [SerializeField]
         private TextMeshProUGUI gameDuration;
 
-        [SerializeField] private Button incrementGameDuration;
-        [SerializeField] private Button decrementGameDuration;
+        [SerializeField]
+        private Button incrementGameDuration;
+
+        [SerializeField]
+        private Button decrementGameDuration;
+
         private Limitation _spawnTimeLimitation;
         private Limitation _timeLimitation;
         private GameStateMachine _stateMachine;
-        private const int MinGameTime = 1;
-        private const int MaxGameTime = 15;
-        private const int MinSpawnTime = 1;
-        private const int MaxSpawnTime = 10;
+        private const int MinGameTime = 5;
+        private const int MaxGameTime = 10;
+        private const int MinSpawnTime = 3;
+        private const int MaxSpawnTime = 7;
 
 
-        public void Construct(GameStateMachine stateMachine, bool isLocalBuild)
+        public void Construct(IMapRepository mapRepository, GameStateMachine stateMachine, bool isLocalBuild)
         {
             _stateMachine = stateMachine;
             InitSpawnTime();
