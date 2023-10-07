@@ -20,12 +20,13 @@
 
             CGPROGRAM
             #pragma vertex vert
+            #pragma require geometry 
             #pragma geometry geom
             #pragma fragment frag
             #include "Lighting.cginc"
             // shadow helper functions and macros
             #include "AutoLight.cginc"
-            #pragma target 3.0
+            #pragma target 3.5
             // compile shader into multiple variants, with and without shadows
             // (we don't care about any lightmaps yet, so skip these variants)
             #pragma multi_compile_fwdbase nolightmap nodirlightmap nodynlightmap novertexlight
@@ -158,4 +159,5 @@
         }
         UsePass "Legacy Shaders/VertexLit/SHADOWCASTER"
     }
+    Fallback "Diffuse"
 }
