@@ -17,7 +17,7 @@ MonoBehaviour:
     rgba: 4287052291
   innerColor:
     serializedVersion: 2
-    rgba: 4281283929
+    rgba: 4287036415
   lightData:
     position: {x: 256, y: 100, z: 100}
     rotation: {x: -0.18826072, y: 0.48867965, z: -0.42503768, w: -0.73830426}
