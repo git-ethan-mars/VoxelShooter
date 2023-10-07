@@ -7,9 +7,6 @@ namespace Blueprints
     public class BlueprintManager : MonoBehaviour
     {
         [SerializeField]
-        private GUISkin guiSkin;
-        
-        [SerializeField]
         private MeshFilter meshFilter;
 
         [SerializeField]
@@ -51,8 +48,9 @@ namespace Blueprints
 
         private void Awake()
         {
+            Debug.Log(Screen.currentResolution);
             _builder = new BlueprintBuilder(meshFilter, meshCollider, plane);
-            _ui = new BlueprintUI(guiSkin, _builder);
+            _ui = new BlueprintUI(_builder);
             _inputService = new StandaloneInputService();
             IsMenuActivated = true;
         }

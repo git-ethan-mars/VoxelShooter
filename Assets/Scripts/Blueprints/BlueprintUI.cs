@@ -13,12 +13,11 @@ namespace Blueprints
         private const int Margin = 10;
         private Vector2 _scrollPosition;
         private readonly List<Texture2D> _textures;
-        private readonly GUISkin _guiSkin;
         private readonly BlueprintBuilder _builder;
+        private int WindowSize => Screen.width / 5;
 
-        public BlueprintUI(GUISkin guiSkin, BlueprintBuilder builder)
+        public BlueprintUI(BlueprintBuilder builder)
         {
-            _guiSkin = guiSkin;
             _builder = builder;
             _textures = new List<Texture2D>();
             LoadTextures();
@@ -26,14 +25,19 @@ namespace Blueprints
 
         public void DrawCreateMenu()
         {
-            GUILayout.BeginArea(new Rect(Margin, Margin, 255, 50), _guiSkin.box);
+            var boxStyle = new GUIStyle("box");
+            boxStyle.fontSize = WindowSize / 10;
+            boxStyle.alignment = TextAnchor.MiddleCenter;
+            GUILayout.BeginArea(new Rect(Margin, Margin, WindowSize, WindowSize), boxStyle);
             {
-                if (GUILayout.Button("Load", _guiSkin.button))
+                if (GUI.Button(new Rect(WindowSize / 9, WindowSize / 9, 7 * WindowSize / 9, WindowSize / 3), "Load",
+                        boxStyle))
                 {
                     State = BlueprintGUIState.Choose;
                 }
 
-                if (GUILayout.Button("Create", _guiSkin.button))
+                if (GUI.Button(new Rect(WindowSize / 9, 5 * WindowSize / 9, 7 * WindowSize / 9, WindowSize / 3),
+                        "Create", boxStyle))
                 {
                     _builder.CreateNewBlueprint();
                     State = BlueprintGUIState.Build;
@@ -46,8 +50,12 @@ namespace Blueprints
         public void DrawChooseMenu()
         {
             var blueprintNames = BlueprintLoader.LoadBlueprintFiles().ToArray();
+            var boxStyle = new GUIStyle("box");
+            boxStyle.fontSize = WindowSize / 10;
+            boxStyle.alignment = TextAnchor.MiddleCenter;
+            GUILayout.BeginArea(new Rect(Margin, Margin, WindowSize, WindowSize), boxStyle);
             _scrollPosition = GUILayout.BeginScrollView(
-                _scrollPosition, GUILayout.Width(300), GUILayout.Height(300));
+                _scrollPosition, GUILayout.Width(WindowSize), GUILayout.Height(WindowSize));
             foreach (var blueprintName in blueprintNames)
             {
                 if (GUILayout.Button(blueprintName))
@@ -56,12 +64,13 @@ namespace Blueprints
                 }
             }
 
-            GUILayout.EndScrollView();
-
-            if (GUILayout.Button("Back"))
+            if (GUI.Button(new Rect(),"Back"))
             {
                 State = BlueprintGUIState.Create;
             }
+
+            GUILayout.EndScrollView();
+            GUILayout.EndArea();
         }
 
         public void DrawBuildMenu()
