@@ -7,7 +7,8 @@ using UnityEngine;
 
 public class MapRepository : IMapRepository
 {
-    private const string MapExtension = ".rch";
+    private const string RchExtension = ".rch";
+    private const string VxlExtension = ".vxl";
     private static readonly string FolderPath = Application.dataPath + $"/Maps";
     private readonly IStaticDataService _staticData;
     private readonly List<Tuple<string, MapConfigure>> _namedConfigures;
@@ -32,7 +33,7 @@ public class MapRepository : IMapRepository
         UpdateRepository();
         if (_namedConfigures.Count == 0)
             return null;
-        _index = (_index + 1) % _namedConfigures.Count;
+        _index = (_namedConfigures.Count + _index + 1) % _namedConfigures.Count;
         return _namedConfigures[_index];
     }
 
@@ -41,7 +42,7 @@ public class MapRepository : IMapRepository
         UpdateRepository();
         if (_namedConfigures.Count == 0)
             return null;
-        _index = (_index - 1) % _namedConfigures.Count;
+        _index = (_namedConfigures.Count + _index - 1) % _namedConfigures.Count;
         return _namedConfigures[_index];
     }
 
@@ -52,7 +53,9 @@ public class MapRepository : IMapRepository
             Directory.CreateDirectory(FolderPath);
         }
 
-        var mapNames = Directory.GetFiles(FolderPath, $@"*{MapExtension}").Select(Path.GetFileNameWithoutExtension);
+        var mapNames = Directory.GetFiles(FolderPath, $"*{RchExtension}")
+            .Union(Directory.GetFiles(FolderPath, $"*{VxlExtension}"))
+            .Select(Path.GetFileNameWithoutExtension);
         _staticData.LoadMapConfigures();
         _namedConfigures.Clear();
         foreach (var mapName in mapNames)

@@ -891,13 +891,15 @@ MonoBehaviour:
   backButton: {fileID: 395605714154993111}
   resetButton: {fileID: 3061433538795144814}
   applyButton: {fileID: 8746748109361143213}
-  mapName: {fileID: 6763337806940708623}
   spawnTimeText: {fileID: 424774279460095848}
   incrementPlayerNumber: {fileID: 7257078759865093498}
   decrementPlayerNumber: {fileID: 2072952055281921019}
   gameDuration: {fileID: 7263906329179727706}
   incrementGameDuration: {fileID: 435648626827097155}
   decrementGameDuration: {fileID: 624849803149315274}
+  mapName: {fileID: 6763337806940708623}
+  nextMapButton: {fileID: 601326420477128533}
+  previousMapButton: {fileID: 8637619598222882878}
 --- !u!1 &1891271040069907269
 GameObject:
   m_ObjectHideFlags: 0
