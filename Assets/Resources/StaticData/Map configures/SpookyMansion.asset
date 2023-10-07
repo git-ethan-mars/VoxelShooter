@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e69f3dcd48464cac84150e2016cff25a, type: 3}
   m_Name: SpookyMansion
   m_EditorClassIdentifier: 
+  image: {fileID: 2800000, guid: e2cc987aa0e63ea4a863a54537d3aaf9, type: 3}
   waterColor:
     serializedVersion: 2
     rgba: 4287052291

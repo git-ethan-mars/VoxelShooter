@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e69f3dcd48464cac84150e2016cff25a, type: 3}
   m_Name: WW1
   m_EditorClassIdentifier: 
+  image: {fileID: 2800000, guid: bc0f2e46b613f6e4bacb4ebd75db01f8, type: 3}
   waterColor:
     serializedVersion: 2
     rgba: 4287052291
