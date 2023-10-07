@@ -48,6 +48,9 @@ namespace UI
         [SerializeField]
         private Button previousMapButton;
 
+        [SerializeField]
+        private RawImage mapImage;
+
 
         private Limitation _spawnTimeLimitation;
         private Limitation _timeLimitation;
@@ -81,6 +84,7 @@ namespace UI
             if (configure != null)
             {
                 mapName.SetText(configure.Item1);
+                mapImage.texture = configure.Item2.image;
             }
         }
 
@@ -154,6 +158,7 @@ namespace UI
             if (configure != null)
             {
                 mapName.SetText(configure.Item1);
+                mapImage.texture = configure.Item2.image;
             }
         }
 
@@ -163,6 +168,7 @@ namespace UI
             if (configure != null)
             {
                 mapName.SetText(configure.Item1);
+                mapImage.texture = configure.Item2.image;
             }
         }
     }

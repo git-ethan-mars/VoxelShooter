@@ -37,6 +37,7 @@ public class MapCustomizerEditor : UnityEditor.Editor
     private void DrawGUI()
     {
         var configureProperty = serializedObject.FindProperty("mapConfigure");
+
         EditorGUILayout.PropertyField(configureProperty);
         if (configureProperty.objectReferenceValue == null)
         {
@@ -45,6 +46,14 @@ public class MapCustomizerEditor : UnityEditor.Editor
         }
 
         _configure = new SerializedObject(configureProperty.objectReferenceValue);
+        var imageProperty = _configure.FindProperty("image");
+        EditorGUI.BeginChangeCheck();
+        EditorGUILayout.ObjectField(imageProperty, new GUIContent(imageProperty.displayName));
+        if (EditorGUI.EndChangeCheck())
+        {
+            _configure.ApplyModifiedProperties();
+        }
+
         if (GUILayout.Button("Generate map"))
         {
             _mapEditorScript.GenerateMap();

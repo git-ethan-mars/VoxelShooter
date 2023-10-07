@@ -7,6 +7,10 @@ using UnityEngine.Rendering;
 [CreateAssetMenu]
 public class MapConfigure : ScriptableObject
 {
+    [Header("Image")]
+    [ReadOnly]
+    public Texture2D image;
+    
     [Header("Color")]
     [ReadOnly]
     public Color32 waterColor = new(3, 58, 135, 255);

@@ -900,6 +900,7 @@ MonoBehaviour:
   mapName: {fileID: 6763337806940708623}
   nextMapButton: {fileID: 601326420477128533}
   previousMapButton: {fileID: 8637619598222882878}
+  mapImage: {fileID: 8417798989634124943}
 --- !u!1 &1891271040069907269
 GameObject:
   m_ObjectHideFlags: 0
@@ -1045,7 +1046,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1927157716689101469}
   - component: {fileID: 5600968405938354452}
-  - component: {fileID: 8155251929030221266}
+  - component: {fileID: 8417798989634124943}
   m_Layer: 0
   m_Name: MapsLogo
   m_TagString: Untagged
@@ -1081,7 +1082,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1950939087548743195}
   m_CullTransparentMesh: 1
---- !u!114 &8155251929030221266
+--- !u!114 &8417798989634124943
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1090,7 +1091,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1950939087548743195}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
@@ -1101,16 +1102,13 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 65ba76166daa3cd478f11a3b85ab1716, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_Texture: {fileID: 0}
+  m_UVRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
 --- !u!1 &2265005690857529491
 GameObject:
   m_ObjectHideFlags: 0
