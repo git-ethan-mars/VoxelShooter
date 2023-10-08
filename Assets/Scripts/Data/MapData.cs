@@ -12,6 +12,7 @@ namespace Data
         public readonly int Height;
         public readonly ChunkData[] Chunks;
         public HashSet<int> _solidBlocks = new();
+        public HashSet<int> _blocksPlacedByPlayer = new();
         public Dictionary<int, Color32> _blockColors = new();
 
         public MapData(ChunkData[] chunks, int width, int height, int depth, Color32 solidColor, Color32 waterColor)
