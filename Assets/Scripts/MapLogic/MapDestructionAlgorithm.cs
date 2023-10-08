@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Data;
+using Infrastructure;
 using Mirror;
+using Networking;
 using Networking.Messages.Responses;
 using Optimization;
 using UnityEngine;
@@ -13,6 +15,7 @@ namespace MapLogic
     {
         private uint componentId;
         private const int EmptyBlockCost = 1000000000;
+        private readonly ICoroutineRunner _coroutineRunner;
         public MapProvider MapProvider;
         private MapUpdater _mapUpdater;
         private readonly int _width;
@@ -33,8 +36,9 @@ namespace MapLogic
             new Tuple<int, int, int>(-1, -1, -1)
         };
 
-        public MapDestructionAlgorithm(MapProvider mapProvider, MapUpdater mapUpdater)
+        public MapDestructionAlgorithm(ICoroutineRunner coroutineRunner, MapProvider mapProvider, MapUpdater mapUpdater)
         {
+            _coroutineRunner = coroutineRunner;
             MapProvider = mapProvider;
             _mapUpdater = mapUpdater;
             _width = mapProvider.MapData.Width;
@@ -134,7 +138,7 @@ namespace MapLogic
         private double Heuristic(Vector3Int target, int neighbour)
         {
             var neighbourCoordinates = GetVertexCoordinates(neighbour);
-            
+
             return (target.x - neighbourCoordinates.x) * (target.x - neighbourCoordinates.x)
                    + (target.y - neighbourCoordinates.y) * (target.y - neighbourCoordinates.y)
                    + (target.z - neighbourCoordinates.z) * (target.z - neighbourCoordinates.z);
@@ -159,8 +163,10 @@ namespace MapLogic
                     var priority = newCost + Heuristic(targetVertex, neighbour);
                     pq.Enqueue(neighbour, priority);
                 }
+
                 number++;
             }
+
             if (neighborsCounter < NeighbourCountToHideBlock)
                 outerBlocksToDelete.Add(vertex);
         }
@@ -169,7 +175,7 @@ namespace MapLogic
             List<Tuple<List<int>, List<int>>> isolatedComponents, HashSet<int> globalCheckedBlocks)
         {
             var allBlocksToDelete = new List<int>();
-            var outerBlocks = new List<int>() { startVertex };
+            var outerBlocks = new List<int>() {startVertex};
             var localCheckedBlocks = new HashSet<int>();
             var priceByVertex = new Dictionary<int, double>
             {
@@ -190,7 +196,7 @@ namespace MapLogic
                     globalCheckedBlocks.UnionWith(localCheckedBlocks);
                     return;
                 }
-                
+
                 localCheckedBlocks.Add(vertex);
 
                 if (globalCheckedBlocks.Contains(vertex))
@@ -204,7 +210,7 @@ namespace MapLogic
                     globalCheckedBlocks.UnionWith(localCheckedBlocks);
                     return;
                 }
-                
+
                 allBlocksToDelete.Add(vertex);
 
                 FillQueue(targetVertex, priceByVertex, vertex, pq, outerBlocks);
@@ -273,19 +279,19 @@ namespace MapLogic
             var explosionInnerBlocks = new HashSet<int>();
             var explosionOuterBlocks = new HashSet<int>();
             var targetBlock = GetVertexIndex(selectedBlock);
-            
+
             explosionInnerBlocks.Add(targetBlock);
             foreach (var block in GetNeighborsWithDiagonalByIndex(targetBlock))
                 if (MapProvider.MapData._solidBlocks.Contains(block))
                     explosionOuterBlocks.Add(block);
-            
+
             return (explosionInnerBlocks, explosionOuterBlocks);
         }
 
         private void UpdateBlocks(int[] blocks)
         {
             Vector3Int[] blockPositions = new Vector3Int[blocks.Length];
-            
+
             for (var i = 0; i < blocks.Length; i++)
             {
                 MapProvider.MapData._blockColors[blocks[i]] = new Color32();
@@ -293,8 +299,9 @@ namespace MapLogic
                 _mapUpdater.SetBlockByGlobalPosition(blockPositions[i], new BlockData());
             }
 
-            NetworkServer.SendToAll(new UpdateMapResponse(blockPositions,
-                new BlockData[blocks.Length]));
+            var splitter = new BlockSplitter();
+            var messages = splitter.SplitBytesIntoMessages(blockPositions, new BlockData[blocks.Length], 100000);
+            _coroutineRunner.StartCoroutine(splitter.SendMessages(messages, null, 1));
         }
 
         private void ExplodeBlocks(HashSet<int> explosionInnerBlocks)
@@ -321,17 +328,18 @@ namespace MapLogic
             var targetVertex = new Vector3Int(block.x, LowerSolidBlockHeight, block.z);
             var isolatedComponents = new List<Tuple<List<int>, List<int>>>();
             var globalCheckedBlocks = new HashSet<int>();
-            
+
             foreach (var startVertex in startVertexes)
                 AStar(startVertex, targetVertex, isolatedComponents, globalCheckedBlocks);
 
-            foreach (var isolatedComponent in isolatedComponents)
+            /*foreach (var isolatedComponent in isolatedComponents)
             {
-                NetworkServer.SendToAll(new FallBlockResponse(isolatedComponent.Item2.Select(GetVectorByIndex).ToArray(),
+                NetworkServer.SendToAll(new FallBlockResponse(
+                    isolatedComponent.Item2.Select(GetVectorByIndex).ToArray(),
                     isolatedComponent.Item2.Select(position => MapProvider.MapData._blockColors[position]).ToArray(),
                     componentId));
                 componentId += 1;
-            }
+            }*/
 
             if (isolatedComponents.Count > 0)
             {
@@ -342,8 +350,8 @@ namespace MapLogic
 
         public void StartDestruction(Vector3Int block, int radius)
         {
-            var (explosionInnerBlocks, explosionOuterBlocks) = radius > 1 
-                ? GetExplosionSphere(block, radius) 
+            var (explosionInnerBlocks, explosionOuterBlocks) = radius > 1
+                ? GetExplosionSphere(block, radius)
                 : GetExplosionSphereWithSingleRadius(block);
 
             ExplodeBlocks(explosionInnerBlocks);

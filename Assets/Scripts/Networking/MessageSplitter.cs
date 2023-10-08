@@ -3,10 +3,19 @@ using Mirror;
 
 namespace Networking
 {
-    public abstract class MessageSplitter<T> where T : NetworkMessage
+    public abstract class MessageSplitter<TMessage, T1> where TMessage : NetworkMessage
     {
-        public abstract T[] SplitBytesIntoMessages(byte[] bytes, int maxPacketSize);
+        public abstract TMessage[] SplitBytesIntoMessages(T1[] input1, int maxPacketSize);
 
-        public abstract IEnumerator SendMessages(T[] messages, NetworkConnectionToClient destination, float delayInSeconds);
+        public abstract IEnumerator SendMessages(TMessage[] messages, NetworkConnectionToClient destination,
+            float delayInSeconds);
+    }
+
+    public abstract class MessageSplitter<TMessage, T1, T2> where TMessage : NetworkMessage
+    {
+        public abstract TMessage[] SplitBytesIntoMessages(T1[] input1, T2[] input2, int maxPacketSize);
+
+        public abstract IEnumerator SendMessages(TMessage[] messages, NetworkConnectionToClient destination,
+            float delayInSeconds);
     }
 }
