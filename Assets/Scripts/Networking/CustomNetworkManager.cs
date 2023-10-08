@@ -11,6 +11,7 @@ using Mirror;
 using Networking.ClientServices;
 using Networking.Messages.Responses;
 using Networking.ServerServices;
+using Environment = MapLogic.Environment;
 using MemoryStream = System.IO.MemoryStream;
 
 namespace Networking
@@ -117,12 +118,12 @@ namespace Networking
         {
             Client.MapDownloaded -= OnMapDownloaded;
             Client.Data.State = ClientState.Connected;
-            Client.MapGenerator = new MapGenerator(Client.MapProvider, Client.GameFactory, Client.MeshFactory,
-                Client.StaticData);
+            Client.MapGenerator = new MapGenerator(Client.MapProvider, Client.GameFactory, Client.MeshFactory);
             Client.MapGenerator.GenerateMap();
             Client.MapGenerator.GenerateWalls();
             Client.MapGenerator.GenerateLight();
-            Client.MapGenerator.ApplySkybox();
+            Environment.ApplyAmbientLighting(Client.MapProvider.SceneData);
+            Environment.ApplyFog(Client.MapProvider.SceneData);
             _stateMachine.Enter<GameLoopState, CustomNetworkManager>(this);
         }
 

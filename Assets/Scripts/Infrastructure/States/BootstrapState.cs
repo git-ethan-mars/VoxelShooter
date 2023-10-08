@@ -45,6 +45,7 @@ namespace Infrastructure.States
         {
             _allServices.RegisterSingle<IStaticDataService>(new StaticDataService());
             var staticData = _allServices.Single<IStaticDataService>();
+            _allServices.RegisterSingle<IMapRepository>(new MapRepository(staticData));
             staticData.LoadItems();
             staticData.LoadInventories();
             staticData.LoadPlayerCharacteristics();

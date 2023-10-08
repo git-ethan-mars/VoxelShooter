@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Data;
 using Generators;
@@ -19,10 +18,7 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
 #if UNITY_EDITOR
     public bool IsMapGenerated => chunkContainer != null || spawnPointsContainer != null;
     public MapConfigure mapConfigure;
-    public Color32 waterColor;
-    public Color32 innerColor;
     public Light lightSource;
-    public Material skybox;
     public List<GameObject> spawnPoints;
 
     [SerializeField]
@@ -37,6 +33,7 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
     private EntityFactory _entityFactory;
     private static MapCustomizer _instance;
     private MapConfigure _previousConfigure;
+    private MapProvider _mapProvider;
 
     [UnityEditor.Callbacks.DidReloadScripts]
     private static void Init()
@@ -82,20 +79,63 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
 
         _previousConfigure = mapConfigure;
 
-        if (mapConfigure != null)
+        if (mapConfigure == null)
         {
-            var assetPath = AssetDatabase.GetAssetPath(mapConfigure.GetInstanceID());
-            mapConfigure.mapName = Path.GetFileNameWithoutExtension(assetPath);
+            return;
         }
 
-        if (IsMapGenerated)
+        if (!IsMapGenerated)
         {
-            mapConfigure.waterColor = waterColor;
-            mapConfigure.innerColor = innerColor;
-            mapConfigure.skyboxMaterial = skybox;
-            spawnPoints.RemoveAll(obj => obj == null);
-            mapConfigure.spawnPoints = spawnPoints
-                .Select(obj => new SpawnPointData(Vector3Int.FloorToInt(obj.transform.localPosition))).ToList();
+            return;
+        }
+
+        if (lightSource != null)
+        {
+            if (mapConfigure.lightData.position != lightSource.transform.position)
+            {
+                mapConfigure.lightData.position = lightSource.transform.position;
+                EditorUtility.SetDirty(mapConfigure);
+            }
+
+            if (mapConfigure.lightData.rotation != lightSource.transform.rotation)
+            {
+                mapConfigure.lightData.rotation = lightSource.transform.rotation;
+                EditorUtility.SetDirty(mapConfigure);
+            }
+
+            if (mapConfigure.lightData.color != lightSource.color)
+            {
+                mapConfigure.lightData.color = lightSource.color;
+                EditorUtility.SetDirty(mapConfigure);
+            }
+        }
+
+        UpdateSpawnPointGameObjects();
+    }
+
+    private void UpdateSpawnPointGameObjects()
+    {
+        if (spawnPoints.RemoveAll(obj => obj == null) > 0)
+        {
+            EditorUtility.SetDirty(mapConfigure);
+            mapConfigure.spawnPoints = spawnPoints.Select(obj =>
+                    new SpawnPointData(Vector3Int.FloorToInt(obj.transform.localPosition)))
+                .ToList();
+        }
+        else
+        {
+            var newSpawnPoints = new List<SpawnPointData>(spawnPoints.Count);
+            for (var i = 0; i < spawnPoints.Count; i++)
+            {
+                newSpawnPoints.Add(
+                    new SpawnPointData(Vector3Int.FloorToInt(spawnPoints[i].transform.localPosition)));
+                if (!newSpawnPoints[i].Equals(mapConfigure.spawnPoints[i]))
+                {
+                    EditorUtility.SetDirty(mapConfigure);
+                }
+            }
+
+            mapConfigure.spawnPoints = newSpawnPoints;
         }
     }
 
@@ -103,10 +143,11 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
     {
         DestroyChildren();
         LoadConfigure();
-        var mapProvider =
-            SimpleBenchmark.Execute(MapReader.ReadFromFile, mapConfigure.mapName, _instance._staticData);
+        _instance._staticData.LoadMapConfigures();
+        _instance._mapProvider =
+            SimpleBenchmark.Execute(MapReader.ReadFromFile, mapConfigure.name, _instance._staticData);
         var mapGenerator =
-            new MapGenerator(mapProvider, _instance._gameFactory, _instance._meshFactory, _instance._staticData);
+            new MapGenerator(_instance._mapProvider, _instance._gameFactory, _instance._meshFactory);
         SimpleBenchmark.Execute(mapGenerator.GenerateMap);
         chunkContainer = mapGenerator.ChunkContainer;
         chunkContainer.transform.SetParent(transform);
@@ -118,12 +159,6 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
         {
             spawnPoints.Add(CreateSpawnPoint(mapConfigure.spawnPoints[i].position));
         }
-    }
-
-    public void SaveLighting()
-    {
-        mapConfigure.lightData = new LightData(lightSource.transform.position, lightSource.transform.rotation,
-            lightSource.color);
     }
 
     public GameObject CreateSpawnPoint(Vector3Int position)
@@ -138,7 +173,6 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
         var assets = new AssetProvider();
         _instance._entityFactory = new EntityFactory(assets);
         _instance._staticData = new StaticDataService();
-        _instance._staticData.LoadMapConfigures();
         var particleFactory = new ParticleFactory(assets, this);
         _instance._meshFactory = new MeshFactory(assets);
         _instance._gameFactory =
@@ -147,15 +181,15 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
 
     private void LoadConfigure()
     {
-        waterColor = mapConfigure.waterColor;
-        innerColor = mapConfigure.innerColor;
-        skybox = mapConfigure.skyboxMaterial;
         if (lightSource != null)
         {
             lightSource.transform.position = mapConfigure.lightData.position;
             lightSource.transform.rotation = mapConfigure.lightData.rotation;
             lightSource.color = mapConfigure.lightData.color;
         }
+
+        Environment.ApplyAmbientLighting(mapConfigure);
+        Environment.ApplyFog(mapConfigure);
     }
 
     private void DestroyChildren()
@@ -167,6 +201,16 @@ public class MapCustomizer : MonoBehaviour, ICoroutineRunner
 
         DestroyImmediate(chunkContainer);
         DestroyImmediate(spawnPointsContainer);
+    }
+
+    public void ShowAmbientLighting()
+    {
+        Environment.ApplyAmbientLighting(mapConfigure);
+    }
+
+    public void ShowFog()
+    {
+        Environment.ApplyFog(mapConfigure);
     }
 #endif
 }

@@ -10,6 +10,8 @@ namespace Entities
     {
         private IFallingMeshParticlePool _particlePool;
         private bool _hasCollided;
+        private const int DestructionTime = 4;
+        private const int ParticleSystemsCountModifier = 200;
 
         public void Construct(IFallingMeshParticlePool particlePool)
         {
@@ -21,24 +23,28 @@ namespace Entities
             if (_hasCollided)
                 return;
             _hasCollided = true;
-            StartCoroutine(ProcessCollision(2));
+            StartCoroutine(ProcessCollision(DestructionTime));
         }
         
         public IEnumerator ProcessCollision(float lifetime)
         {
             yield return new WaitForSeconds(lifetime);
             var mesh = GetComponent<MeshFilter>().mesh;
+            var vertices = mesh.vertices;
+            var colors = mesh.colors;
             var particleSystems = new List<ParticleSystem>();
-            var counter = 0;
             var length = mesh.vertices.Length;
-            for (var i = 0; i < length; i+=24)
+            var blocksCount = length / 24;
+            var modifier = Math.Max(Math.Round((double)blocksCount / ParticleSystemsCountModifier), 1);
+            var counter = 0;
+            for (var i = 0; i < length; i += 24)
             {
-                if (counter % (int)(length / Math.Sqrt(length)) == 0)
+                if (counter % modifier == 0)
                 {
                     particleSystems.Add(CreateFallingMeshParticle(
-                        transform.localRotation * (mesh.vertices[i] + new Vector3(0.5f, -0.5f, 0.5f)) +
+                        transform.localRotation * (vertices[i] + new Vector3(0.5f, -0.5f, 0.5f)) +
                         transform.localPosition,
-                        1, 5, mesh.colors[i / 4]));
+                        1, 5, colors[i / 4]));
                 }
                 counter++;
             }

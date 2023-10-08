@@ -48,7 +48,7 @@ namespace Infrastructure.Services.StaticData
         public void LoadMapConfigures()
         {
             _mapConfigureByName = Resources.LoadAll<MapConfigure>("StaticData/Map configures")
-                .ToDictionary(configure => configure.mapName, configure => configure);
+                .ToDictionary(configure => configure.name, configure => configure);
         }
 
         public MapConfigure GetMapConfigure(string mapName)

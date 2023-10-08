@@ -97,6 +97,39 @@ namespace MapLogic
             };
         }
 
+        private List<int> GetNeighborsWithDiagonalByIndex(int index)
+        {
+            return new List<int>()
+            {
+                index - _width * _width - _width - 1,
+                index - _width * _width - _width,
+                index - _width * _width - _width + 1,
+                index - _width * _width - 1,
+                index - _width * _width,
+                index - _width * _width + 1,
+                index - _width * _width + _width - 1,
+                index - _width * _width + _width,
+                index - _width * _width + _width + 1,
+                index - _width - 1,
+                index - _width,
+                index - _width + 1,
+                index - 1,
+                index + 1,
+                index + _width - 1,
+                index + _width,
+                index + _width + 1,
+                index + _width * _width - _width - 1,
+                index + _width * _width - _width,
+                index + _width * _width - _width + 1,
+                index + _width * _width - 1,
+                index + _width * _width,
+                index + _width * _width + 1,
+                index + _width * _width + _width - 1,
+                index + _width * _width + _width,
+                index + _width * _width + _width + 1
+            };
+        }
+
         private double Heuristic(Vector3Int target, int neighbour)
         {
             var neighbourCoordinates = GetVertexCoordinates(neighbour);
