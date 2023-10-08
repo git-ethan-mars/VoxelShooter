@@ -21,7 +21,7 @@ namespace MapLogic
         private readonly int _height;
         private const int LowerSolidBlockHeight = 1;
         private const int NeighbourCountToHideBlock = 6;
-        private const int MaxPacketSize = 100000;
+        private const int MaxPacketSize = 200000;
 
         private List<Tuple<int, int, int>> _mirrorBlocks = new()
         {
@@ -339,7 +339,7 @@ namespace MapLogic
                     isolatedComponent.Item2.Select(position => MapProvider.MapData._blockColors[position]).ToArray(),
                     MaxPacketSize,
                     _componentId);
-                _coroutineRunner.StartCoroutine(splitter.SendMessages(messages, 1));
+                _coroutineRunner.StartCoroutine(splitter.SendMessages(messages, 0.5f));
                 _componentId += 1;
             }
 
