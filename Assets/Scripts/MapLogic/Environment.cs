@@ -13,6 +13,7 @@ namespace MapLogic
             RenderSettings.ambientEquatorColor = sceneData.EquatorColor;
             RenderSettings.ambientGroundColor = sceneData.GroundColor;
             RenderSettings.ambientIntensity = sceneData.AmbientIntensity;
+            DynamicGI.UpdateEnvironment();
         }
 
         public static void ApplyFog(MapSceneData sceneData)
@@ -33,6 +34,7 @@ namespace MapLogic
             RenderSettings.ambientEquatorColor = mapConfigure.equatorColor;
             RenderSettings.ambientGroundColor = mapConfigure.groundColor;
             RenderSettings.ambientIntensity = mapConfigure.ambientIntensity;
+            DynamicGI.UpdateEnvironment();
         }
 
         public static void ApplyFog(MapConfigure mapConfigure)
