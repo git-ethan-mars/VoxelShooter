@@ -18,7 +18,6 @@ namespace Data
         Tnt,
         Block,
         Brush,
-        SpawnPoint,
         Grenade,
         RocketLauncher
     }

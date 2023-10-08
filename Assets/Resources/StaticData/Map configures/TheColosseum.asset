@@ -23,7 +23,7 @@ MonoBehaviour:
     position: {x: 0, y: 0, z: 0}
     rotation: {x: 0.20773917, y: 0.7763014, z: -0.3223481, w: 0.5002922}
     color: {r: 1, g: 1, b: 1, a: 1}
-  skyboxMaterial: {fileID: 2100000, guid: c52c5d7968fa6c9499b0b5752f899bfb, type: 2}
+  skyboxMaterial: {fileID: 2100000, guid: cede08c9fc471e64884909cd4bbeaf59, type: 2}
   ambientMode: 0
   skyColor: {r: 0.21176471, g: 0.22745098, b: 0.25882354, a: 1}
   equatorColor: {r: 0.11372549, g: 0.1254902, b: 0.13333334, a: 1}

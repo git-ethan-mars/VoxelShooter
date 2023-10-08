@@ -134,13 +134,6 @@ namespace Inventory
                     Slots.Add(new Slot(item, handler));
                 }
 
-                if (item.itemType == ItemType.SpawnPoint)
-                {
-                    var handler =
-                        new SpawnPointView(_cubeRenderer, _mapSynchronization, (SpawnPointItem) item);
-                    Slots.Add(new Slot(item, handler));
-                }
-
                 if (item.itemType == ItemType.Tnt)
                 {
                     var handler = new TntView(_rayCaster, (TntItem) item, _hud,
