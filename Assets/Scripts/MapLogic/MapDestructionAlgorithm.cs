@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Data;
 using Infrastructure;
-using Mirror;
 using Networking;
-using Networking.Messages.Responses;
 using Optimization;
 using UnityEngine;
 
@@ -13,7 +11,7 @@ namespace MapLogic
 {
     public class MapDestructionAlgorithm
     {
-        private uint componentId;
+        private uint _componentId;
         private const int EmptyBlockCost = 1000000000;
         private readonly ICoroutineRunner _coroutineRunner;
         public MapProvider MapProvider;
@@ -23,6 +21,7 @@ namespace MapLogic
         private readonly int _height;
         private const int LowerSolidBlockHeight = 1;
         private const int NeighbourCountToHideBlock = 6;
+        private const int MaxPacketSize = 100000;
 
         private List<Tuple<int, int, int>> _mirrorBlocks = new()
         {
@@ -301,7 +300,7 @@ namespace MapLogic
 
             var splitter = new BlockSplitter();
             var messages = splitter.SplitBytesIntoMessages(blockPositions, new BlockData[blocks.Length], 100000);
-            _coroutineRunner.StartCoroutine(splitter.SendMessages(messages, null, 1));
+            _coroutineRunner.StartCoroutine(splitter.SendMessages(messages, 1));
         }
 
         private void ExplodeBlocks(HashSet<int> explosionInnerBlocks)
@@ -332,14 +331,17 @@ namespace MapLogic
             foreach (var startVertex in startVertexes)
                 AStar(startVertex, targetVertex, isolatedComponents, globalCheckedBlocks);
 
-            /*foreach (var isolatedComponent in isolatedComponents)
+            var splitter = new BlockSplitter();
+            foreach (var isolatedComponent in isolatedComponents)
             {
-                NetworkServer.SendToAll(new FallBlockResponse(
+                var messages = splitter.SplitBytesIntoMessages(
                     isolatedComponent.Item2.Select(GetVectorByIndex).ToArray(),
                     isolatedComponent.Item2.Select(position => MapProvider.MapData._blockColors[position]).ToArray(),
-                    componentId));
-                componentId += 1;
-            }*/
+                    MaxPacketSize,
+                    _componentId);
+                _coroutineRunner.StartCoroutine(splitter.SendMessages(messages, 1));
+                _componentId += 1;
+            }
 
             if (isolatedComponents.Count > 0)
             {
