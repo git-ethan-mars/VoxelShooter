@@ -102,28 +102,28 @@ namespace MapLogic
         {
             return new List<int>
             {
+                index + _width * _width,
+                index - _width * _width,
+                index + _width,
+                index - _width,
+                index + 1,
+                index - 1,
                 index - _width * _width - _width - 1,
                 index - _width * _width - _width,
                 index - _width * _width - _width + 1,
                 index - _width * _width - 1,
-                index - _width * _width,
                 index - _width * _width + 1,
                 index - _width * _width + _width - 1,
                 index - _width * _width + _width,
                 index - _width * _width + _width + 1,
                 index - _width - 1,
-                index - _width,
                 index - _width + 1,
-                index - 1,
-                index + 1,
                 index + _width - 1,
-                index + _width,
                 index + _width + 1,
                 index + _width * _width - _width - 1,
                 index + _width * _width - _width,
                 index + _width * _width - _width + 1,
                 index + _width * _width - 1,
-                index + _width * _width,
                 index + _width * _width + 1,
                 index + _width * _width + _width - 1,
                 index + _width * _width + _width,
@@ -143,26 +143,25 @@ namespace MapLogic
         private void FillQueue(Vector3Int targetVertex, Dictionary<int, double> priceByVertex,
             int vertex, PriorityQueue<int, double> pq, List<int> outerBlocksToDelete)
         {
-            var counter = 0;
-            var wasPlacedByPlayer = MapProvider.MapData._blocksPlacedByPlayer.Contains(vertex);
-            var neighbors = GetNeighborsByIndex(vertex);
-            var neighborsWithDiagonal = GetNeighborsWithDiagonalByIndex(vertex);
-            foreach (var neighbour in wasPlacedByPlayer
-                         ? neighbors
-                         : neighborsWithDiagonal)
+            var number = 0;
+            var neighborsCounter = 0;
+            foreach (var neighbour in MapProvider.MapData._blocksPlacedByPlayer.Contains(vertex)
+                         ? GetNeighborsByIndex(vertex)
+                         : GetNeighborsWithDiagonalByIndex(vertex))
             {
                 var cost = !MapProvider.MapData._solidBlocks.Contains(neighbour) ? EmptyBlockCost : 1;
                 var newCost = priceByVertex[vertex] + cost;
                 if (!priceByVertex.ContainsKey(neighbour) || newCost < priceByVertex[neighbour])
                 {
-                    if (neighbors.Contains(neighbour))
-                        counter++;
+                    if (number < NeighbourCountToHideBlock)
+                        neighborsCounter++;
                     priceByVertex[neighbour] = newCost;
                     var priority = newCost + Heuristic(targetVertex, neighbour);
                     pq.Enqueue(neighbour, priority);
                 }
+                number++;
             }
-            if (counter < NeighbourCountToHideBlock)
+            if (neighborsCounter < NeighbourCountToHideBlock)
                 outerBlocksToDelete.Add(vertex);
         }
 
