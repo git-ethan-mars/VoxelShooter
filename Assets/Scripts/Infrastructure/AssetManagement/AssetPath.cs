@@ -2,10 +2,9 @@
 {
     public static class ParticlePath
     {
-        public const string MuzzleFlashPath = "Particles/MuzzleFlashEffect";
-        public const string BulletHolePath = "Particles/BulletImpactParticle";
-        public const string BloodSprayPath = "Particles/BloodParticle";
-        public const string RchParticlePath = "Particles/RCHParticle";
-        public const string FallingMeshParticlePath = "Particles/FallingMeshParticle";
+        public const string BulletImpactPath = "Prefabs/Particles/BulletImpactParticle";
+        public const string BloodSprayPath = "Prefabs/Particles/BloodParticle";
+        public const string RchParticlePath = "Prefabs/Particles/RCHParticle";
+        public const string FallingMeshParticlePath = "Prefabs/Particles/FallingMeshParticle";
     }
 }

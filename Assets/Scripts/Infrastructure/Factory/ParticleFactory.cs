@@ -19,7 +19,7 @@ namespace Infrastructure.Factory
 
         public void CreateBulletImpact(Vector3 position, Quaternion rotation, Color32 blockColor)
         {
-            var bullet = _assets.Instantiate(ParticlePath.BulletHolePath, position, rotation);
+            var bullet = _assets.Instantiate(ParticlePath.BulletImpactPath, position, rotation);
             var particleColor = bullet.GetComponent<ParticleColor>();
             particleColor.color = blockColor;
             NetworkServer.Spawn(bullet);
