@@ -19,6 +19,7 @@ namespace MapLogic
         private readonly int _depth;
         private readonly int _height;
         private const int LowerSolidBlockHeight = 1;
+        private const int NeighbourCountToHideBlock = 6;
 
         private List<Tuple<int, int, int>> _mirrorBlocks = new()
         {
@@ -86,7 +87,7 @@ namespace MapLogic
 
         private List<int> GetNeighborsByIndex(int index)
         {
-            return new List<int>()
+            return new List<int>
             {
                 index + _width * _width,
                 index - _width * _width,
@@ -99,30 +100,30 @@ namespace MapLogic
 
         private List<int> GetNeighborsWithDiagonalByIndex(int index)
         {
-            return new List<int>()
+            return new List<int>
             {
+                index + _width * _width,
+                index - _width * _width,
+                index + _width,
+                index - _width,
+                index + 1,
+                index - 1,
                 index - _width * _width - _width - 1,
                 index - _width * _width - _width,
                 index - _width * _width - _width + 1,
                 index - _width * _width - 1,
-                index - _width * _width,
                 index - _width * _width + 1,
                 index - _width * _width + _width - 1,
                 index - _width * _width + _width,
                 index - _width * _width + _width + 1,
                 index - _width - 1,
-                index - _width,
                 index - _width + 1,
-                index - 1,
-                index + 1,
                 index + _width - 1,
-                index + _width,
                 index + _width + 1,
                 index + _width * _width - _width - 1,
                 index + _width * _width - _width,
                 index + _width * _width - _width + 1,
                 index + _width * _width - 1,
-                index + _width * _width,
                 index + _width * _width + 1,
                 index + _width * _width + _width - 1,
                 index + _width * _width + _width,
@@ -142,20 +143,25 @@ namespace MapLogic
         private void FillQueue(Vector3Int targetVertex, Dictionary<int, double> priceByVertex,
             int vertex, PriorityQueue<int, double> pq, List<int> outerBlocksToDelete)
         {
-            var counter = 0;
-            foreach (var neighbour in GetNeighborsByIndex(vertex))
+            var number = 0;
+            var neighborsCounter = 0;
+            foreach (var neighbour in MapProvider.MapData._blocksPlacedByPlayer.Contains(vertex)
+                         ? GetNeighborsByIndex(vertex)
+                         : GetNeighborsWithDiagonalByIndex(vertex))
             {
                 var cost = !MapProvider.MapData._solidBlocks.Contains(neighbour) ? EmptyBlockCost : 1;
                 var newCost = priceByVertex[vertex] + cost;
                 if (!priceByVertex.ContainsKey(neighbour) || newCost < priceByVertex[neighbour])
                 {
-                    counter++;
+                    if (number < NeighbourCountToHideBlock)
+                        neighborsCounter++;
                     priceByVertex[neighbour] = newCost;
                     var priority = newCost + Heuristic(targetVertex, neighbour);
                     pq.Enqueue(neighbour, priority);
                 }
+                number++;
             }
-            if (counter < 6)
+            if (neighborsCounter < NeighbourCountToHideBlock)
                 outerBlocksToDelete.Add(vertex);
         }
 
@@ -261,6 +267,21 @@ namespace MapLogic
             return (explosionInnerBlocks, explosionOuterBlocks);
         }
 
+        private (HashSet<int> explosionInnerBlocks, HashSet<int> explosionOuterBlocks)
+            GetExplosionSphereWithSingleRadius(Vector3Int selectedBlock)
+        {
+            var explosionInnerBlocks = new HashSet<int>();
+            var explosionOuterBlocks = new HashSet<int>();
+            var targetBlock = GetVertexIndex(selectedBlock);
+            
+            explosionInnerBlocks.Add(targetBlock);
+            foreach (var block in GetNeighborsWithDiagonalByIndex(targetBlock))
+                if (MapProvider.MapData._solidBlocks.Contains(block))
+                    explosionOuterBlocks.Add(block);
+            
+            return (explosionInnerBlocks, explosionOuterBlocks);
+        }
+
         private void UpdateBlocks(int[] blocks)
         {
             Vector3Int[] blockPositions = new Vector3Int[blocks.Length];
@@ -284,6 +305,7 @@ namespace MapLogic
             {
                 explosionBlocksToDelete.Add(innerBlock);
                 MapProvider.MapData._solidBlocks.Remove(innerBlock);
+                MapProvider.MapData._blocksPlacedByPlayer.Remove(innerBlock);
             }
 
             UpdateBlocks(explosionBlocksToDelete.ToArray());
@@ -299,7 +321,7 @@ namespace MapLogic
             var targetVertex = new Vector3Int(block.x, LowerSolidBlockHeight, block.z);
             var isolatedComponents = new List<Tuple<List<int>, List<int>>>();
             var globalCheckedBlocks = new HashSet<int>();
-
+            
             foreach (var startVertex in startVertexes)
                 AStar(startVertex, targetVertex, isolatedComponents, globalCheckedBlocks);
 
@@ -320,7 +342,9 @@ namespace MapLogic
 
         public void StartDestruction(Vector3Int block, int radius)
         {
-            var (explosionInnerBlocks, explosionOuterBlocks) = GetExplosionSphere(block, radius);
+            var (explosionInnerBlocks, explosionOuterBlocks) = radius > 1 
+                ? GetExplosionSphere(block, radius) 
+                : GetExplosionSphereWithSingleRadius(block);
 
             ExplodeBlocks(explosionInnerBlocks);
             DestroyIsolatedComponents(explosionOuterBlocks, block);
