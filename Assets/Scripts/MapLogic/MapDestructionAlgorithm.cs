@@ -352,6 +352,11 @@ namespace MapLogic
 
         public void StartDestruction(Vector3Int block, int radius)
         {
+            if (block.y == 0)
+            {
+                return;
+            }
+
             var (explosionInnerBlocks, explosionOuterBlocks) = radius > 1
                 ? GetExplosionSphere(block, radius)
                 : GetExplosionSphereWithSingleRadius(block);
