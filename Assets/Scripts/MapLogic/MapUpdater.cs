@@ -6,7 +6,7 @@ namespace MapLogic
 {
     public class MapUpdater
     {
-        public event Action<Vector3Int, BlockData> MapUpdated;
+        public event Action MapUpdated;
         private readonly MapProvider _mapProvider;
 
         public MapUpdater(MapProvider mapProvider)
@@ -29,7 +29,11 @@ namespace MapLogic
                 .Blocks[
                     x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
                     y % ChunkData.ChunkSize * ChunkData.ChunkSize + z % ChunkData.ChunkSize] = blockData;
-            MapUpdated?.Invoke(new Vector3Int(x, y, z), blockData);
+        }
+
+        public void UpdateEntityPositions()
+        {
+            MapUpdated?.Invoke();
         }
     }
 }

@@ -25,6 +25,7 @@ namespace Networking.MessageHandlers.RequestHandlers
                 _server.MapProvider.MapData._blocksPlacedByPlayer.Add(index);
                 _server.MapProvider.MapData._blockColors[index] = request.Blocks[i].Color;
             }
+            _server.MapUpdater.UpdateEntityPositions();
 
             var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
             if (!result || !playerData.IsAlive) return;

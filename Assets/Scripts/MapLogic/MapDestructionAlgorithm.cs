@@ -297,7 +297,8 @@ namespace MapLogic
                 blockPositions[i] = GetVectorByIndex(blocks[i]);
                 _mapUpdater.SetBlockByGlobalPosition(blockPositions[i], new BlockData());
             }
-
+            _mapUpdater.UpdateEntityPositions();
+            
             var splitter = new BlockSplitter();
             var messages = splitter.SplitBytesIntoMessages(blockPositions, new BlockData[blocks.Length], 100000);
             _coroutineRunner.StartCoroutine(splitter.SendMessages(messages, 1));

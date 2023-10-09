@@ -25,7 +25,7 @@ namespace Networking.ServerServices
         }
 
 
-        private void OnMapUpdate(Vector3Int globalPosition, BlockData blockData)
+        private void OnMapUpdate()
         {
             foreach (var spawnPoint in _pushableEntities)
             {
@@ -52,9 +52,9 @@ namespace Networking.ServerServices
                 {
                     for (var z = pushable.Min.z; z <= pushable.Max.z; z++)
                     {
-                        if (!_mapProvider.GetBlockByGlobalPosition(pushable.Center.x + x,
-                                    pushable.Center.y + y, pushable.Center.z + z).Color
-                                .Equals(BlockColor.empty)) return false;
+                        if (_mapProvider.MapData._solidBlocks.Contains((pushable.Center.y + y) * 512 * 512 
+                                                                       + (pushable.Center.z + z) * 512 + pushable.Center.x + x)) 
+                            return false;
                     }
                 }
             }
