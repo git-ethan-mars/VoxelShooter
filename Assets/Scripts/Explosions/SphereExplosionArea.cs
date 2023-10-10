@@ -24,7 +24,8 @@ namespace Explosions
                     for (var z = -radius; z <= radius; z++)
                     {
                         var blockPosition = targetBlock + new Vector3Int(x, y, z);
-                        if (_mapProvider.IsDestructiblePosition(blockPosition))
+                        if (_mapProvider.IsDestructiblePosition(blockPosition) &&
+                            _mapProvider.GetBlockByGlobalPosition(blockPosition).IsSolid())
                         {
                             var blockData = _mapProvider.GetBlockByGlobalPosition(blockPosition);
                             if (Vector3Int.Distance(blockPosition, targetBlock) <= radius

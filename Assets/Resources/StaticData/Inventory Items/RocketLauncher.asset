@@ -17,7 +17,7 @@ MonoBehaviour:
   inventoryIcon: {fileID: 631782971, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
   prefab: {fileID: 1374883755550458842, guid: ec400446b38d6744981b2c36ae5fc2f1, type: 3}
   countIcon: {fileID: 886209943, guid: e7634cc0bf7762649a525e59875cd9d1, type: 3}
-  count: 3
+  count: 1000
   radius: 8
   damage: 150
   speed: 100
