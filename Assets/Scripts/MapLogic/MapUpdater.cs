@@ -1,5 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Data;
+using Mirror;
+using Networking.Messages.Responses;
+using Networking.ServerServices;
 using UnityEngine;
 
 namespace MapLogic
@@ -8,10 +13,12 @@ namespace MapLogic
     {
         public event Action MapUpdated;
         private readonly MapProvider _mapProvider;
+        private readonly ColumnDestructionAlgorithm _destructionAlgorithm;
 
-        public MapUpdater(MapProvider mapProvider)
+        public MapUpdater(MapProvider mapProvider, ColumnDestructionAlgorithm destructionAlgorithm)
         {
             _mapProvider = mapProvider;
+            _destructionAlgorithm = destructionAlgorithm;
         }
 
         public void UpdateSpawnPoint(SpawnPointData oldPosition, SpawnPointData position)
@@ -20,20 +27,63 @@ namespace MapLogic
             _mapProvider.SceneData.SpawnPoints[index] = position;
         }
 
-        public void SetBlockByGlobalPosition(Vector3Int position, BlockData blockData) =>
-            SetBlockByGlobalPosition(position.x, position.y, position.z, blockData);
-
-        private void SetBlockByGlobalPosition(int x, int y, int z, BlockData blockData)
+        public void SetBlockByGlobalPosition(Vector3Int position, BlockData blockData)
         {
-            _mapProvider.MapData.Chunks[_mapProvider.GetChunkNumberByGlobalPosition(x, y, z)]
-                .Blocks[
-                    x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
-                    y % ChunkData.ChunkSize * ChunkData.ChunkSize + z % ChunkData.ChunkSize] = blockData;
+            _mapProvider.MapData.Chunks[_mapProvider.GetChunkNumberByGlobalPosition(position.x, position.y, position.z)]
+                    .Blocks[
+                        position.x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
+                        position.y % ChunkData.ChunkSize * ChunkData.ChunkSize + position.z % ChunkData.ChunkSize] =
+                blockData;
+
+            MapUpdated?.Invoke();
+            _destructionAlgorithm.Add(new List<Vector3Int> {position});
+            NetworkServer.SendToAll(new UpdateMapResponse(new[] {position}, new[] {blockData}));
         }
 
-        public void UpdateEntityPositions()
+        public void SetBlocksByGlobalPositions(List<Vector3Int> positions, List<BlockData> blockData)
         {
+            for (var i = 0; i < positions.Count; i++)
+            {
+                _mapProvider.MapData
+                        .Chunks[
+                            _mapProvider.GetChunkNumberByGlobalPosition(positions[i].x, positions[i].y, positions[i].z)]
+                        .Blocks[
+                            positions[i].x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
+                            positions[i].y % ChunkData.ChunkSize * ChunkData.ChunkSize +
+                            positions[i].z % ChunkData.ChunkSize] =
+                    blockData[i];
+            }
+
             MapUpdated?.Invoke();
+            NetworkServer.SendToAll(new UpdateMapResponse(positions.ToArray(), blockData.ToArray()));
+            _destructionAlgorithm.Add(positions);
+        }
+
+        public void DestroyBlocks(List<Vector3Int> positions)
+        {
+            for (var i = 0; i < positions.Count; i++)
+            {
+                _mapProvider.MapData
+                        .Chunks[
+                            _mapProvider.GetChunkNumberByGlobalPosition(positions[i].x, positions[i].y, positions[i].z)]
+                        .Blocks[
+                            positions[i].x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
+                            positions[i].y % ChunkData.ChunkSize * ChunkData.ChunkSize +
+                            positions[i].z % ChunkData.ChunkSize] =
+                    new BlockData();
+            }
+
+            MapUpdated?.Invoke();
+            var fallingPositions = _destructionAlgorithm.Remove(positions);
+            var destroyedBlocks = positions.Union(fallingPositions).ToArray();
+            NetworkServer.SendToAll(new UpdateMapResponse(destroyedBlocks, new BlockData[destroyedBlocks.Length]));
+            var colors = new Color32[fallingPositions.Length];
+            for (var i = 0; i < colors.Length; i++)
+            {
+                colors[i] = _mapProvider.GetBlockByGlobalPosition(fallingPositions[i]).Color;
+            }
+
+            NetworkServer.SendToAll(new FallBlockResponse(fallingPositions, colors));
         }
     }
 }

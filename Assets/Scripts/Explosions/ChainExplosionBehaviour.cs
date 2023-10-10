@@ -3,7 +3,6 @@ using System.Linq;
 using Infrastructure.Factory;
 using MapLogic;
 using Mirror;
-using Networking;
 using UnityEngine;
 
 namespace Explosions
@@ -11,8 +10,8 @@ namespace Explosions
     public class ChainExplosionBehaviour : ExplosionBehaviour
     {
         public ChainExplosionBehaviour(MapUpdater mapUpdater, IParticleFactory particleFactory, 
-            IExplosionArea explosionArea, MapDestructionAlgorithm mapDestructionAlgorithm) 
-            : base(mapUpdater, particleFactory, explosionArea, mapDestructionAlgorithm) { }
+            IExplosionArea explosionArea) 
+            : base(mapUpdater, particleFactory, explosionArea) { }
 
         public override void Explode(Vector3Int explosionCenter, GameObject explosive, int radius, 
             NetworkConnectionToClient connection, int damage, int particlesSpeed, 

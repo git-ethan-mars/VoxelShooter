@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Data;
 using Explosions;
 using Infrastructure;
-using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
 using Infrastructure.Services.StaticData;
 using Mirror;

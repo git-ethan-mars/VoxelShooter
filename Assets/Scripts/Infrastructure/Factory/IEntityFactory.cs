@@ -16,7 +16,7 @@ namespace Infrastructure.Factory
 
         GameObject CreateRocket(Vector3 position, Quaternion rotation, MapProvider mapProvider,
             MapUpdater mapUpdater,
-            IParticleFactory particleFactory, RocketLauncherItem rocketData, NetworkConnectionToClient owner, MapDestructionAlgorithm mapDestructionAlgorithm);
+            IParticleFactory particleFactory, RocketLauncherItem rocketData, NetworkConnectionToClient owner);
 
         GameObject CreateSpawnPoint(Vector3 position, Transform parent);
     }

@@ -93,25 +93,19 @@ namespace Networking.Synchronization
                 var targetBlock = Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2);
                 if (isStrongHit)
                 {
-                    var validPositions = _lineExplosionArea.GetExplodedBlocks(3, targetBlock);
-                    UpdateBlocks(validPositions, 1);
+                    var blocks = _lineExplosionArea.GetExplodedBlocks(3, targetBlock);
+                    _server.MapUpdater.DestroyBlocks(blocks);
                 }
                 else
                 {
                     var blocks = _lineExplosionArea.GetExplodedBlocks(1, targetBlock);
-                    UpdateBlocks(blocks, 1);
+                    _server.MapUpdater.DestroyBlocks(blocks);
                 }
 
                 return true;
             }
 
             return false;
-        }
-
-        private void UpdateBlocks(List<Vector3Int> blocks, int radius)
-        {
-            foreach (var block in blocks)
-                _server.MapDestructionAlgorithm.StartDestruction(block, radius);
         }
 
         [Server]

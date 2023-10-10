@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
-using Data;
 using Entities;
 using MapLogic;
-using UnityEngine;
 
 namespace Networking.ServerServices
 {
@@ -52,9 +50,11 @@ namespace Networking.ServerServices
                 {
                     for (var z = pushable.Min.z; z <= pushable.Max.z; z++)
                     {
-                        if (_mapProvider.MapData._solidBlocks.Contains((pushable.Center.y + y) * 512 * 512 
-                                                                       + (pushable.Center.z + z) * 512 + pushable.Center.x + x)) 
+                        if (_mapProvider.GetBlockByGlobalPosition(pushable.Center.x + x,
+                                pushable.Center.y + y, pushable.Center.z + z).IsSolid())
+                        {
                             return false;
+                        }
                     }
                 }
             }

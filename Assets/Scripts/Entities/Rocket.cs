@@ -19,14 +19,14 @@ namespace Entities
         private bool _isExploded;
 
         public void Construct(MapProvider mapProvider, MapUpdater mapUpdater, RocketLauncherItem rocketData,
-            NetworkConnectionToClient owner, IParticleFactory particleFactory, MapDestructionAlgorithm mapDestructionAlgorithm)
+            NetworkConnectionToClient owner, IParticleFactory particleFactory)
         {
             _radius = rocketData.radius;
             _damage = rocketData.damage;
             _particlesSpeed = rocketData.particlesSpeed;
             _particlesCount = rocketData.particlesCount;
             _owner = owner;
-            _explosionBehaviour = new SingleExplosionBehaviour(mapUpdater, particleFactory, new SphereExplosionArea(mapProvider), mapDestructionAlgorithm);
+            _explosionBehaviour = new SingleExplosionBehaviour(mapUpdater, particleFactory, new SphereExplosionArea(mapProvider));
         }
         
         private void OnCollisionEnter(Collision collision)

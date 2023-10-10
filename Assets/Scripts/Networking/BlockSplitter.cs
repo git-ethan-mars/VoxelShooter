@@ -46,14 +46,14 @@ namespace Networking
                 blockBuffer.Add(blocks[i]);
                 if ((positionBuffer.Count + 1) * size >= maxPacketSize)
                 {
-                    messages.Add(new FallBlockResponse(positionBuffer.ToArray(), blockBuffer.ToArray(), componentId));
+                    messages.Add(new FallBlockResponse(positionBuffer.ToArray(), blockBuffer.ToArray()));
                     positionBuffer.Clear();
                     blockBuffer.Clear();
                 }
             }
 
             if (positionBuffer.Count > 0)
-                messages.Add(new FallBlockResponse(positionBuffer.ToArray(), blockBuffer.ToArray(), componentId));
+                messages.Add(new FallBlockResponse(positionBuffer.ToArray(), blockBuffer.ToArray()));
 
             return messages.ToArray();
         }
