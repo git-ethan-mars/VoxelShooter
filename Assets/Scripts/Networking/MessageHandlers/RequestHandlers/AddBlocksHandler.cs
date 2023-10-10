@@ -50,7 +50,7 @@ namespace Networking.MessageHandlers.RequestHandlers
                         return;
                 }
 
-                if (!_server.MapProvider.IsValidPosition(request.GlobalPositions[i])) return;
+                if (!_server.MapProvider.IsDestructiblePosition(request.GlobalPositions[i])) return;
                 var currentBlock = _server.MapProvider.GetBlockByGlobalPosition(request.GlobalPositions[i]);
                 if (currentBlock.Equals(request.Blocks[i])) return;
                 _server.MapUpdater.SetBlockByGlobalPosition(request.GlobalPositions[i], request.Blocks[i]);
