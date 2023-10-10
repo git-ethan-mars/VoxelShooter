@@ -75,14 +75,27 @@ namespace MapLogic
 
             MapUpdated?.Invoke();
             var fallingPositions = _destructionAlgorithm.Remove(positions);
-            var destroyedBlocks = positions.Union(fallingPositions).ToArray();
-            NetworkServer.SendToAll(new UpdateMapResponse(destroyedBlocks, new BlockData[destroyedBlocks.Length]));
             var colors = new Color32[fallingPositions.Length];
             for (var i = 0; i < colors.Length; i++)
             {
                 colors[i] = _mapProvider.GetBlockByGlobalPosition(fallingPositions[i]).Color;
             }
 
+            for (var i = 0; i < fallingPositions.Length; i++)
+            {
+                _mapProvider.MapData
+                        .Chunks[
+                            _mapProvider.GetChunkNumberByGlobalPosition(fallingPositions[i].x, fallingPositions[i].y,
+                                fallingPositions[i].z)]
+                        .Blocks[
+                            fallingPositions[i].x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
+                            fallingPositions[i].y % ChunkData.ChunkSize * ChunkData.ChunkSize +
+                            fallingPositions[i].z % ChunkData.ChunkSize] =
+                    new BlockData();
+            }
+
+            var destroyedBlocks = positions.Union(fallingPositions).ToArray();
+            NetworkServer.SendToAll(new UpdateMapResponse(destroyedBlocks, new BlockData[destroyedBlocks.Length]));
             NetworkServer.SendToAll(new FallBlockResponse(fallingPositions, colors));
         }
     }
