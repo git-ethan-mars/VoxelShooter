@@ -73,7 +73,6 @@ namespace MapLogic
                     new BlockData();
             }
 
-            MapUpdated?.Invoke();
             var fallingPositions = _destructionAlgorithm.Remove(positions);
             var colors = new Color32[fallingPositions.Length];
             for (var i = 0; i < colors.Length; i++)
@@ -94,6 +93,7 @@ namespace MapLogic
                     new BlockData();
             }
 
+            MapUpdated?.Invoke();
             var destroyedBlocks = positions.Union(fallingPositions).ToArray();
             NetworkServer.SendToAll(new UpdateMapResponse(destroyedBlocks, new BlockData[destroyedBlocks.Length]));
             NetworkServer.SendToAll(new FallBlockResponse(fallingPositions, colors));
