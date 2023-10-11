@@ -3,11 +3,11 @@ using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-[CustomEditor(typeof(MapCustomizer))]
+[CustomEditor(typeof(MapCustomizer.MapCustomizer))]
 public class MapCustomizerEditor : UnityEditor.Editor
 {
     private SerializedProperty _lightProperty;
-    private MapCustomizer _mapEditorScript;
+    private MapCustomizer.MapCustomizer _mapEditorScript;
     private ReorderableList _spawnPoints;
     private readonly string[] _ambientModes = {"Skybox", "Gradient", "Color"};
     private readonly string[] _fogModes = {"Linear", "Exponential", "Exponential squared"};
@@ -15,7 +15,7 @@ public class MapCustomizerEditor : UnityEditor.Editor
 
     private void OnEnable()
     {
-        _mapEditorScript = (MapCustomizer) target;
+        _mapEditorScript = (MapCustomizer.MapCustomizer) target;
         _spawnPoints = new ReorderableList(serializedObject, serializedObject.FindProperty("spawnPoints"), false, true,
             true, true)
         {
