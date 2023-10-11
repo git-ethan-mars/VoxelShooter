@@ -7,9 +7,11 @@ namespace Infrastructure.Services.StaticData
 {
     public class StaticDataService : IStaticDataService
     {
+        private const string Default = "Default";
         private Dictionary<GameClass, PlayerCharacteristic> _playerCharacteristicByClass;
         private Dictionary<GameClass, GameInventory> _inventoryByClass;
         private Dictionary<int, InventoryItem> _itemById;
+        private Dictionary<string, MapConfigure> _mapConfigureByName;
 
         public void LoadItems()
         {
@@ -23,7 +25,8 @@ namespace Infrastructure.Services.StaticData
 
         public void LoadInventories()
         {
-            _inventoryByClass = Resources.LoadAll<GameInventory>("StaticData/Inventories").ToDictionary(x=>x.gameClass, x => x);
+            _inventoryByClass = Resources.LoadAll<GameInventory>("StaticData/Inventories")
+                .ToDictionary(x => x.gameClass, x => x);
         }
 
         public List<InventoryItem> GetInventory(GameClass gameClass)
@@ -40,6 +43,24 @@ namespace Infrastructure.Services.StaticData
         public PlayerCharacteristic GetPlayerCharacteristic(GameClass gameClass)
         {
             return _playerCharacteristicByClass.TryGetValue(gameClass, out var characteristic) ? characteristic : null;
+        }
+
+        public void LoadMapConfigures()
+        {
+            _mapConfigureByName = Resources.LoadAll<MapConfigure>("StaticData/Map configures")
+                .ToDictionary(configure => configure.name, configure => configure);
+        }
+
+        public MapConfigure GetMapConfigure(string mapName)
+        {
+            return _mapConfigureByName.TryGetValue(mapName, out var mapConfigure)
+                ? mapConfigure
+                : GetDefaultMapConfigure();
+        }
+
+        private MapConfigure GetDefaultMapConfigure()
+        {
+            return _mapConfigureByName[Default];
         }
     }
 }

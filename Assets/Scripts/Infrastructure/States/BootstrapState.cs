@@ -45,27 +45,31 @@ namespace Infrastructure.States
         {
             _allServices.RegisterSingle<IStaticDataService>(new StaticDataService());
             var staticData = _allServices.Single<IStaticDataService>();
+            _allServices.RegisterSingle<IMapRepository>(new MapRepository(staticData));
             staticData.LoadItems();
             staticData.LoadInventories();
             staticData.LoadPlayerCharacteristics();
+            staticData.LoadMapConfigures();
             _allServices.RegisterSingle<IInputService>(new StandaloneInputService());
             _allServices.RegisterSingle<IAssetProvider>(new AssetProvider());
             if (_isLocalBuild)
             {
-                _allServices.RegisterSingle<IAvatarLoader>(new LocalAvatarLoader(_allServices.Single<IAssetProvider>()));
+                _allServices.RegisterSingle<IAvatarLoader>(
+                    new LocalAvatarLoader(_allServices.Single<IAssetProvider>()));
             }
             else
             {
-                _allServices.RegisterSingle<IAvatarLoader>(new SteamAvatarLoader(_allServices.Single<IAssetProvider>()));
+                _allServices.RegisterSingle<IAvatarLoader>(
+                    new SteamAvatarLoader(_allServices.Single<IAssetProvider>()));
             }
 
             _allServices.RegisterSingle<IParticleFactory>(new ParticleFactory(_allServices.Single<IAssetProvider>(),
                 _coroutineRunner));
-            _allServices.RegisterSingle<IInventoryModelFactory>(new InventoryModelFactory());
+            _allServices.RegisterSingle<IMeshFactory>(new MeshFactory(_allServices.Single<IAssetProvider>()));
             _allServices.RegisterSingle<IEntityFactory>(new EntityFactory(_allServices.Single<IAssetProvider>()));
             _allServices.RegisterSingle<IGameFactory>(
                 new GameFactory(_allServices.Single<IAssetProvider>(), _allServices.Single<IEntityFactory>(),
-                    staticData, _allServices.Single<IParticleFactory>()));
+                    staticData, _allServices.Single<IParticleFactory>(), _allServices.Single<IMeshFactory>()));
             _allServices.RegisterSingle<IUIFactory>(new UIFactory(_allServices.Single<IAssetProvider>(),
                 _allServices.Single<IInputService>(), _allServices.Single<IStaticDataService>(),
                 _allServices.Single<IAvatarLoader>()));

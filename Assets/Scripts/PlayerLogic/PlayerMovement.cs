@@ -20,11 +20,11 @@ namespace PlayerLogic
         private const float NormalSpeed = 1f;
         private const float SneakingSpeed = 0.7f;
         private const float SquattingSpeed = 0.4f;
-        private const float NormalHeight = 2.07f;
-        private const float SquattingHeight = 1.57f;
-        private readonly Vector3 _normalColliderCenter = new(0, 0.3f, 0);
-        private readonly Vector3 _squattingColliderCenter = new(0, 0, 0);
-        private PlayerLegAnimator _playerLegAnimator;
+        private const float SquattingSize = 0.5f;
+        private float _stayingHeight;
+        private float _squattingHeight;
+        private Vector3 _stayingColliderCenter;
+        private Vector3 _squattingColliderCenter;
 
         public void Construct(PlayerCharacteristic characteristic)
         {
@@ -40,7 +40,11 @@ namespace PlayerLogic
         public void Start()
         {
             _characterController = GetComponent<CharacterController>();
-            _playerLegAnimator = GetComponent<PlayerLegAnimator>();
+            _stayingHeight = _characterController.height;
+            _squattingHeight = _stayingHeight - SquattingSize;
+            _stayingColliderCenter = _characterController.center;
+            _squattingColliderCenter = new Vector3(_stayingColliderCenter.x,
+                _stayingColliderCenter.y - SquattingSize / 2, _stayingColliderCenter.z);
         }
 
         private void Update()
@@ -48,9 +52,8 @@ namespace PlayerLogic
             if (!isLocalPlayer) return;
             HandleSneaking();
             HandleSquatting();
+            
             var axis = _inputService.Axis;
-            if (_characterController.velocity == Vector3.zero) _playerLegAnimator.PlayIdle();
-            else _playerLegAnimator.PlayMove();
             var playerTransform = transform;
             _movementDirection = (axis.x * playerTransform.forward + axis.y * playerTransform.right).normalized;
             if (_characterController.isGrounded)
@@ -87,17 +90,15 @@ namespace PlayerLogic
             if (Input.GetKeyDown(KeyCode.LeftControl))
             {
                 _speedModifier = SquattingSpeed;
-                _characterController.height = SquattingHeight;
+                _characterController.height = _squattingHeight;
                 _characterController.center = _squattingColliderCenter;
-                _playerLegAnimator.PlayCrouch();
             }
 
             if (Input.GetKeyUp(KeyCode.LeftControl))
             {
                 _speedModifier = NormalSpeed;
-                _characterController.height = NormalHeight;
-                _characterController.center = _normalColliderCenter;
-                _playerLegAnimator.StopCrouch();
+                _characterController.height = _stayingHeight;
+                _characterController.center = _stayingColliderCenter;
             }
         }
     }

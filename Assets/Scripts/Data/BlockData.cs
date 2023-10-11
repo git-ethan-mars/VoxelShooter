@@ -26,5 +26,13 @@ namespace Data
         {
             return Color.GetHashCode();
         }
+        
+        public bool IsSolid()
+        {
+            return !(Color.a == BlockColor.empty.a &&
+                     Color.r == BlockColor.empty.r &&
+                     Color.g == BlockColor.empty.g &&
+                     Color.b == BlockColor.empty.b);
+        }
     }
 }

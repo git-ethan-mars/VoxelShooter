@@ -16,13 +16,13 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Chunk
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
+  - Player
+  - Entity
+  - Falling Mesh
+  - Wall
   - 
   - 
   - 

@@ -27,10 +27,10 @@ MonoBehaviour:
   magazineSize: 6
   bulletsPerTap: 1
   totalBullets: 24
-  zoomMultiplier: 2
-  damage: 20
-  headMultiplier: 2.5
-  chestMultiplier: 1.2
+  zoomMultiplier: 1.5
+  damage: 40
+  headMultiplier: 2
+  chestMultiplier: 1
   legMultiplier: 0.8
   armMultiplier: 0.6
   shootingAudioClip: {fileID: 8300000, guid: 5bc3e13105a469d42b92872d84c47e5a, type: 3}

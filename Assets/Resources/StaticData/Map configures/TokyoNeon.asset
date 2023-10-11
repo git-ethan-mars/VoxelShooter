@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e69f3dcd48464cac84150e2016cff25a, type: 3}
+  m_Name: TokyoNeon
+  m_EditorClassIdentifier: 
+  image: {fileID: 2800000, guid: a05538ac4513d984fac8a46fcfc5aa23, type: 3}
+  waterColor:
+    serializedVersion: 2
+    rgba: 4294901913
+  innerColor:
+    serializedVersion: 2
+    rgba: 4284039467
+  lightData:
+    position: {x: 500, y: 180, z: 500}
+    rotation: {x: 0.12254247, y: -0.9161095, z: 0.22516075, w: 0.3082684}
+    color: {r: 0.6124487, g: 0.36470592, b: 1, a: 1}
+  skyboxMaterial: {fileID: 2100000, guid: 51b74d7bad397457d883c5940f7664d8, type: 2}
+  ambientMode: 0
+  skyColor: {r: 0.21176471, g: 0.22745098, b: 0.25882354, a: 1}
+  equatorColor: {r: 0.11372549, g: 0.1254902, b: 0.13333334, a: 1}
+  groundColor: {r: 0.047058824, g: 0.043137256, b: 0.03529412, a: 1}
+  ambientIntensity: 1
+  isFogActivated: 1
+  fogMode: 1
+  fogColor: {r: 0.23211686, g: 0.16740832, b: 0.6226415, a: 1}
+  fogStartDistance: 100
+  fogEndDistance: 300
+  fogDensity: 0.01
+  spawnPoints:
+  - position: {x: 351, y: 41, z: 143}
+  - position: {x: 267, y: 41, z: 167}
+  - position: {x: 157, y: 25, z: 229}
+  - position: {x: 85, y: 32, z: 248}
+  - position: {x: 117, y: 24, z: 310}
+  - position: {x: 240, y: 41, z: 371}
+  - position: {x: 427, y: 32, z: 250}
+  - position: {x: 416, y: 66, z: 256}
+  - position: {x: 245, y: 79, z: 262}
+  - position: {x: 68, y: 73, z: 257}

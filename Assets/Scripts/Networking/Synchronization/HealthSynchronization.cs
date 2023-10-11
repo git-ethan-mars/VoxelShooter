@@ -1,35 +1,28 @@
-﻿using Infrastructure.Factory;
-using Mirror;
+﻿using Mirror;
 using PlayerLogic;
-using UnityEngine;
 
 namespace Networking.Synchronization
 {
     public class HealthSynchronization : NetworkBehaviour
     {
-        private ServerData _serverData;
-        private IEntityFactory _entityFactory;
+        private IServer _server;
 
-        public void Construct(ServerData serverData, IEntityFactory entityFactory)
+        public void Construct(IServer server)
         {
-            _serverData = serverData;
-            _entityFactory = entityFactory;
+            _server = server;
         }
 
 
         [Server]
         public void Damage(NetworkConnectionToClient source, NetworkConnectionToClient receiver, int totalDamage)
         {
-            var result = _serverData.TryGetPlayerData(receiver, out var playerData);
+            var result = _server.ServerData.TryGetPlayerData(receiver, out var playerData);
             if (!result || !playerData.IsAlive) return;
-            var receiverPosition = receiver.identity.transform.position;
-            var tombstonePosition = new Vector3(receiverPosition.x, receiverPosition.y, receiverPosition.z);
             playerData.Health -= totalDamage;
             if (playerData.Health <= 0)
             {
                 playerData.Health = 0;
-                _serverData.AddKill(source, receiver);
-                var tombstone = _entityFactory.CreateTombstone(tombstonePosition);
+                _server.AddKill(source, receiver);
             }
             else
             {

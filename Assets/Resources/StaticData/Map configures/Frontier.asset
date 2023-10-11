@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e69f3dcd48464cac84150e2016cff25a, type: 3}
+  m_Name: Frontier
+  m_EditorClassIdentifier: 
+  image: {fileID: 2800000, guid: d002e1bc97f2eec40a7065386a54b037, type: 3}
+  waterColor:
+    serializedVersion: 2
+    rgba: 4287052291
+  innerColor:
+    serializedVersion: 2
+    rgba: 4284263370
+  lightData:
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: 0.009856946, y: 0.97418374, z: -0.043385528, w: 0.22132902}
+    color: {r: 0.9056604, g: 0.57155395, b: 0.5254539, a: 1}
+  skyboxMaterial: {fileID: 2100000, guid: 03389866351d19a47adc95c57d054097, type: 2}
+  ambientMode: 0
+  skyColor: {r: 0.21176471, g: 0.22745098, b: 0.25882354, a: 1}
+  equatorColor: {r: 0.11372549, g: 0.1254902, b: 0.13333334, a: 1}
+  groundColor: {r: 0.047058824, g: 0.043137256, b: 0.03529412, a: 1}
+  ambientIntensity: 1
+  isFogActivated: 0
+  fogMode: 1
+  fogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  fogStartDistance: 0
+  fogEndDistance: 300
+  fogDensity: 0.01
+  spawnPoints:
+  - position: {x: 132, y: 32, z: 138}
+  - position: {x: 191, y: 41, z: 248}
+  - position: {x: 219, y: 32, z: 343}
+  - position: {x: 334, y: 55, z: 354}
+  - position: {x: 417, y: 32, z: 201}
+  - position: {x: 110, y: 35, z: 349}
+  - position: {x: 248, y: 42, z: 159}

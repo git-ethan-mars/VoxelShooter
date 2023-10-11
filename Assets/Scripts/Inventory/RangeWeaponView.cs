@@ -1,6 +1,7 @@
 using Data;
 using Infrastructure.Services.Input;
 using Networking.Synchronization;
+using PlayerLogic;
 using TMPro;
 using UI;
 using UnityEngine;
@@ -25,7 +26,7 @@ namespace Inventory
         private readonly float _zoomMultiplier;
 
 
-        public RangeWeaponView(IInputService inputService, Camera camera, GameObject player, GameObject hud, RangeWeaponData configuration)
+        public RangeWeaponView(IInputService inputService, Camera camera, Player player, Hud hud, RangeWeaponData configuration)
         {
             _inputService = inputService;
             Icon = configuration.InventoryIcon;
@@ -35,9 +36,9 @@ namespace Inventory
             TotalBullets = configuration.TotalBullets;
             _zoomMultiplier = configuration.ZoomMultiplier;
             _fpsCam = camera;
-            _ammoInfo = hud.GetComponent<Hud>().ammoInfo;
-            _ammoCount = hud.GetComponent<Hud>().ammoCount.GetComponent<TextMeshProUGUI>();
-            _ammoType = hud.GetComponent<Hud>().ammoType;
+            _ammoInfo = hud.ammoInfo;
+            _ammoCount = hud.ammoCount.GetComponent<TextMeshProUGUI>();
+            _ammoType = hud.ammoType;
             _bulletSynchronization = player.GetComponent<RangeWeaponSynchronization>();
         }
 

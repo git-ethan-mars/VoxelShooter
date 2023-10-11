@@ -4,77 +4,85 @@ using System.Linq;
 using Data;
 using Infrastructure;
 using Infrastructure.AssetManagement;
-using Infrastructure.Factory;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
 using Mirror;
-using Networking.Messages;
+using Networking.MessageHandlers.ResponseHandler;
+using Networking.Messages.Requests;
 using Networking.Synchronization;
 using PlayerLogic;
 using Rendering;
 using UI;
 using UnityEngine;
+using ChangeSlotHandler = Networking.MessageHandlers.ResponseHandler.ChangeSlotHandler;
 
 namespace Inventory
 {
     public class InventoryController : MonoBehaviour, ICoroutineRunner
     {
-        [SerializeField] private InventoryView inventoryView;
-        private Transform _itemPosition;
+        [SerializeField]
+        private InventoryView inventoryView;
+
+        public List<Slot> Slots { get; set; }
+        public int ItemIndex { get; set; }
+        public GameObject[] Boarders { get; set; }
+
         private IInputService _inputService;
-        private int _itemIndex;
         private int _maxIndex;
-        private GameObject[] _boarders;
         private CubeRenderer _cubeRenderer;
         private Camera _mainCamera;
         private MapSynchronization _mapSynchronization;
         private GameObject _palette;
-        private InventoryModelFactory _modelFactory;
-        private GameObject _player;
-        private GameObject _hud;
+        private Player _player;
+        private Hud _hud;
         private PlayerCharacteristic _characteristic;
-        private Raycaster _raycaster;
         private TransparentMeshPool _transparentMeshPool;
-        private List<Slot> _slots;
         private IStaticDataService _staticData;
+        private Raycaster _rayCaster;
+        private ItemUseHandler _itemUseHandler;
+        private ReloadHandler _reloadHandler;
+        private ShootHandler _shootHandler;
+        private ChangeSlotHandler _changeSlotHandler;
 
-        public void Construct(IInputService inputService, IAssetProvider assets, IStaticDataService staticData, GameObject hud,
+        public void Construct(IInputService inputService, IAssetProvider assets, IStaticDataService staticData,
+            GameObject hud,
             GameObject player)
         {
             AddEventHandlers(player.GetComponent<InventoryInput>());
             _staticData = staticData;
-            _player = player;
-            _hud = hud;
-            _mainCamera = Camera.main;
+            _player = player.GetComponent<Player>();
+            _rayCaster = new Raycaster(Camera.main);
             _transparentMeshPool = new TransparentMeshPool(assets);
-            _raycaster = new Raycaster(_mainCamera, player.GetComponent<Player>().placeDistance);
-            _itemPosition = player.GetComponent<Player>().itemPosition;
             _mapSynchronization = player.GetComponent<MapSynchronization>();
-            _palette = hud.GetComponent<Hud>().palette;
-            _modelFactory = new InventoryModelFactory();
+            _hud = hud.GetComponent<Hud>();
+            _palette = _hud.palette;
             _inputService = inputService;
             InitializeInventoryViews(player.GetComponent<PlayerLogic.Inventory>().ItemIds);
-            _maxIndex = Math.Min(_slots.Count, inventoryView.SlotsCount);
-            _boarders = inventoryView.Boarders;
+            _maxIndex = Math.Min(Slots.Count, inventoryView.SlotsCount);
+            Boarders = inventoryView.Boarders;
             for (var i = 0; i < _maxIndex; i++)
             {
-                inventoryView.SetIconForItem(i, _slots[i].ItemHandler.Icon);
+                inventoryView.SetIconForItem(i, Slots[i].ItemHandler.Icon);
             }
 
-            SendChangeSlotRequest(_itemIndex);
-            NetworkClient.RegisterHandler<ItemUseResult>(OnItemUse);
-            NetworkClient.RegisterHandler<ReloadResult>(OnReloadResult);
-            NetworkClient.RegisterHandler<ShootResult>(OnShootResult);
-            NetworkClient.RegisterHandler<ChangeSlotResult>(OnChangeSlotResult);
+            SendChangeSlotRequest(ItemIndex);
+            _itemUseHandler = new ItemUseHandler(Slots);
+            _itemUseHandler.Register();
+            _reloadHandler = new ReloadHandler(Slots);
+            _reloadHandler.Register();
+            _shootHandler = new ShootHandler(Slots);
+            _shootHandler.Register();
+            _changeSlotHandler = new ChangeSlotHandler(this);
+            _changeSlotHandler.Register();
         }
 
-        public void OnDestroy()
+        private void OnDestroy()
         {
             _transparentMeshPool.CleanPool();
-            NetworkClient.UnregisterHandler<ItemUseResult>();
-            NetworkClient.UnregisterHandler<ReloadResult>();
-            NetworkClient.UnregisterHandler<ShootResult>();
-            NetworkClient.UnregisterHandler<ChangeSlotResult>();
+            _itemUseHandler.Unregister();
+            _reloadHandler.Unregister();
+            _shootHandler.Unregister();
+            _changeSlotHandler.Unregister();
         }
 
         private void AddEventHandlers(InventoryInput inventoryInput)
@@ -82,40 +90,40 @@ namespace Inventory
             inventoryInput.OnFirstActionButtonDown += FirstActionButtonDown;
             inventoryInput.OnFirstActionButtonUp += FirstActionButtonUp;
             inventoryInput.OnFirstActionButtonHold += FirstActionButtonHold;
-            
+
             inventoryInput.OnSecondActionButtonUp += SecondActionButtonUp;
             inventoryInput.OnSecondActionButtonDown += SecondActionButtonDown;
-            
+
             inventoryInput.OnScroll +=
-                () => SendChangeSlotRequest(_itemIndex + Math.Sign(_inputService.GetScrollSpeed()));
+                () => SendChangeSlotRequest(ItemIndex + Math.Sign(_inputService.GetScrollSpeed()));
             inventoryInput.OnChangeSlot += SendChangeSlotRequest;
         }
 
         private void InitializeInventoryViews(IEnumerable<int> ids)
         {
-            _slots = new List<Slot>();
+            Slots = new List<Slot>();
             var items = ids.Select((id) => _staticData.GetItem(id));
             foreach (var item in items)
             {
                 if (item.itemType == ItemType.RangeWeapon)
                 {
-                    var handler = new RangeWeaponView(_inputService, _mainCamera, _player,
+                    var handler = new RangeWeaponView(_inputService, Camera.main, _player,
                         _hud, new RangeWeaponData((RangeWeaponItem) item));
-                    _slots.Add(new Slot(item, handler));
+                    Slots.Add(new Slot(item, handler));
                 }
 
                 if (item.itemType == ItemType.MeleeWeapon)
                 {
-                    var handler = new MeleeWeaponView(_mainCamera,
-                        _player, new MeleeWeaponData((MeleeWeaponItem) item), _player.GetComponent<LineRenderer>());
-                    _slots.Add(new Slot(item, handler));
+                    var handler = new MeleeWeaponView(_rayCaster,
+                        _player, new MeleeWeaponData((MeleeWeaponItem) item));
+                    Slots.Add(new Slot(item, handler));
                 }
 
                 if (item.itemType == ItemType.Block)
                 {
-                    var handler = new BlockView(_hud,
-                        (BlockItem) item, _transparentMeshPool, _raycaster, _player);
-                    _slots.Add(new Slot(item, handler));
+                    var handler = new BlockView(_rayCaster, _hud,
+                        (BlockItem) item, _transparentMeshPool, _player);
+                    Slots.Add(new Slot(item, handler));
                 }
 
                 if (item.itemType == ItemType.Brush)
@@ -123,121 +131,83 @@ namespace Inventory
                     var handler = new BrushView(_cubeRenderer,
                         _palette,
                         (BrushItem) item);
-                    _slots.Add(new Slot(item, handler));
-                }
-
-                if (item.itemType == ItemType.SpawnPoint)
-                {
-                    var handler =
-                        new SpawnPointView(_cubeRenderer, _mapSynchronization, (SpawnPointItem) item);
-                    _slots.Add(new Slot(item, handler));
+                    Slots.Add(new Slot(item, handler));
                 }
 
                 if (item.itemType == ItemType.Tnt)
                 {
-                    var handler = new TntView(_raycaster, (TntItem) item, _hud.GetComponent<Hud>(),
-                        _transparentMeshPool);
-                    _slots.Add(new Slot(item, handler));
+                    var handler = new TntView(_rayCaster, (TntItem) item, _hud,
+                        _transparentMeshPool, _player);
+                    Slots.Add(new Slot(item, handler));
                 }
 
                 if (item.itemType == ItemType.Grenade)
                 {
-                    var handler = new GrenadeView(_raycaster, (GrenadeItem) item, _hud.GetComponent<Hud>());
-                    _slots.Add(new Slot(item, handler));
+                    var handler = new GrenadeView(_rayCaster, (GrenadeItem) item, _hud.GetComponent<Hud>());
+                    Slots.Add(new Slot(item, handler));
                 }
-                
+
                 if (item.itemType == ItemType.RocketLauncher)
                 {
-                    var handler = new RocketLauncherView(_raycaster, (RocketLauncherItem) item, _hud.GetComponent<Hud>());
-                    _slots.Add(new Slot(item, handler));
+                    var handler = new RocketLauncherView(_rayCaster, (RocketLauncherItem) item,
+                        _hud.GetComponent<Hud>());
+                    Slots.Add(new Slot(item, handler));
                 }
             }
         }
 
         private void FirstActionButtonDown()
         {
-            if (_slots[_itemIndex].ItemHandler is ILeftMouseButtonDownHandler)
+            if (Slots[ItemIndex].ItemHandler is ILeftMouseButtonDownHandler)
             {
-                ((ILeftMouseButtonDownHandler) _slots[_itemIndex].ItemHandler).OnLeftMouseButtonDown();
+                ((ILeftMouseButtonDownHandler) Slots[ItemIndex].ItemHandler).OnLeftMouseButtonDown();
             }
         }
 
         private void SecondActionButtonDown()
         {
-            if (_slots[_itemIndex].ItemHandler is IRightMouseButtonDownHandler)
+            if (Slots[ItemIndex].ItemHandler is IRightMouseButtonDownHandler)
             {
-                ((IRightMouseButtonDownHandler) _slots[_itemIndex].ItemHandler).OnRightMouseButtonDown();
+                ((IRightMouseButtonDownHandler) Slots[ItemIndex].ItemHandler).OnRightMouseButtonDown();
             }
         }
-        
+
         private void SecondActionButtonUp()
         {
-            if (_slots[_itemIndex].ItemHandler is IRightMouseButtonUpHandler)
+            if (Slots[ItemIndex].ItemHandler is IRightMouseButtonUpHandler)
             {
-                ((IRightMouseButtonUpHandler) _slots[_itemIndex].ItemHandler).OnRightMouseButtonUp();
+                ((IRightMouseButtonUpHandler) Slots[ItemIndex].ItemHandler).OnRightMouseButtonUp();
             }
         }
-        
+
         private void FirstActionButtonUp()
         {
-            if (_slots[_itemIndex].ItemHandler is ILeftMouseButtonUpHandler)
+            if (Slots[ItemIndex].ItemHandler is ILeftMouseButtonUpHandler)
             {
-                ((ILeftMouseButtonUpHandler) _slots[_itemIndex].ItemHandler).OnLeftMouseButtonUp();
+                ((ILeftMouseButtonUpHandler) Slots[ItemIndex].ItemHandler).OnLeftMouseButtonUp();
             }
         }
 
         private void FirstActionButtonHold()
         {
-            if (_slots[_itemIndex].ItemHandler is ILeftMouseButtonHoldHandler)
+            if (Slots[ItemIndex].ItemHandler is ILeftMouseButtonHoldHandler)
             {
-                ((ILeftMouseButtonHoldHandler) _slots[_itemIndex].ItemHandler).OnLeftMouseButtonHold();
+                ((ILeftMouseButtonHoldHandler) Slots[ItemIndex].ItemHandler).OnLeftMouseButtonHold();
             }
         }
 
 
         private void Update()
         {
-            if (_slots[_itemIndex].ItemHandler is IUpdated)
+            if (Slots[ItemIndex].ItemHandler is IUpdated)
             {
-                ((IUpdated) _slots[_itemIndex].ItemHandler).InnerUpdate();
+                ((IUpdated) Slots[ItemIndex].ItemHandler).InnerUpdate();
             }
         }
 
         private void SendChangeSlotRequest(int index)
         {
             NetworkClient.Send(new ChangeSlotRequest((index + _maxIndex) % _maxIndex));
-        }
-
-
-        private void OnChangeSlotResult(ChangeSlotResult message)
-        {
-            _boarders[_itemIndex].SetActive(false);
-            _slots[_itemIndex].ItemHandler.Unselect();
-            _itemIndex = message.Index;
-            _slots[_itemIndex].ItemHandler.Select();
-            _boarders[_itemIndex].SetActive(true);
-        }
-
-        private void OnItemUse(ItemUseResult message)
-        {
-            ((IConsumable) _slots.Find(slot => slot.InventoryItem.id == message.ItemId).ItemHandler).Count =
-                message.Count;
-            ((IConsumable) _slots.Find(slot => slot.InventoryItem.id == message.ItemId).ItemHandler).OnCountChanged();
-        }
-
-        private void OnReloadResult(ReloadResult message)
-        {
-            var reloading = (IReloading) _slots.Find(slot => slot.InventoryItem.id == message.WeaponId).ItemHandler;
-            reloading.TotalBullets = message.TotalBullets;
-            reloading.BulletsInMagazine = message.BulletsInMagazine;
-            reloading.OnReloadResult();
-        }
-
-        private void OnShootResult(ShootResult message)
-        {
-            var shooting = (IShooting) _slots.Find(slot => slot.InventoryItem.id == message.WeaponId).ItemHandler;
-            shooting.BulletsInMagazine = message.BulletsInMagazine;
-            shooting.OnShootResult();
         }
     }
 }

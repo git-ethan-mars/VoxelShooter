@@ -2,6 +2,8 @@
 using Data;
 using Mirror;
 using Networking.Messages;
+using Networking.Messages.Requests;
+using PlayerLogic;
 using Rendering;
 using TMPro;
 using UI;
@@ -16,34 +18,31 @@ namespace Inventory
         public int Count { get; set; }
         private readonly Raycaster _raycaster;
         private readonly GameObject _transparentTnt;
-        private readonly float _delayInSeconds;
-        private readonly int _radius;
-        private readonly int _damage;
         private readonly int _itemId;
         private readonly GameObject _tntInfo;
         private readonly TextMeshProUGUI _tntCountText;
         private readonly Sprite _tntCountIcon;
         private readonly Sprite _itemTypeIcon;
         private readonly Image _itemType;
+        private readonly float _placeDistance;
 
-        public TntView(Raycaster raycaster, TntItem configuration, Hud hud, TransparentMeshPool transparentMeshPool)
+        public TntView(Raycaster raycaster, TntItem configuration, Hud hud, TransparentMeshPool transparentMeshPool,
+            Player player)
         {
             Icon = configuration.inventoryIcon;
-            _delayInSeconds = configuration.delayInSeconds;
-            _radius = configuration.radius;
-            _damage = configuration.damage;
+            _raycaster = raycaster;
+            _placeDistance = player.placeDistance;
             _itemId = configuration.id;
             _tntInfo = hud.itemInfo;
             _tntCountText = hud.itemCount;
             _tntCountIcon = configuration.countIcon;
             _itemType = hud.itemIcon;
             Count = configuration.count;
-            _raycaster = raycaster;
             _transparentTnt =
                 transparentMeshPool.CreateTransparentGameObject(configuration.prefab, new Color32(255, 0, 0, 100));
             _transparentTnt.SetActive(false);
         }
-        
+
 
         public void OnCountChanged()
         {
@@ -67,7 +66,7 @@ namespace Inventory
 
         public void OnLeftMouseButtonDown()
         {
-            var raycastResult = _raycaster.GetRayCastHit(out var raycastHit);
+            var raycastResult = _raycaster.GetRayCastHit(out var raycastHit, _placeDistance, Constants.BuildMask);
             if (!raycastResult) return;
             NetworkClient.Send(new TntSpawnRequest(_itemId,
                 Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2) +
@@ -79,7 +78,7 @@ namespace Inventory
 
         public void InnerUpdate()
         {
-            var raycastResult = _raycaster.GetRayCastHit(out var raycastHit);
+            var raycastResult = _raycaster.GetRayCastHit(out var raycastHit, _placeDistance, Constants.BuildMask);
             if (raycastResult)
             {
                 _transparentTnt.SetActive(true);

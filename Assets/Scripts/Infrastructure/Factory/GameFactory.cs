@@ -1,12 +1,10 @@
-﻿using System.Collections.Generic;
-using Data;
+﻿using Data;
 using Infrastructure.AssetManagement;
 using Infrastructure.Services.PlayerDataLoader;
 using Infrastructure.Services.StaticData;
 using Infrastructure.States;
-using MapLogic;
 using Networking;
-using Rendering;
+using Networking.ServerServices;
 using UnityEngine;
 
 namespace Infrastructure.Factory
@@ -14,26 +12,24 @@ namespace Infrastructure.Factory
     public class GameFactory : IGameFactory
     {
         private readonly IAssetProvider _assets;
-        private MapRenderer _mapGenerator;
         private readonly IStaticDataService _staticData;
         private const string NetworkManagerPath = "Prefabs/Network/LocalNetworkManager";
         private const string SteamNetworkManagerPath = "Prefabs/Network/SteamManager";
-        private const string MapRendererPath = "Prefabs/MapCreation/MapRenderer";
-        private const string ChunkRendererPath = "Prefabs/MapCreation/Chunk";
-        private const string Wall = "Prefabs/MapCreation/Wall";
+        private const string DirectionalLightName = "Directional Light";
         private GameObject _networkManager;
         private readonly IEntityFactory _entityFactory;
         private readonly IAvatarLoader _avatarLoader;
         private readonly IPlayerFactory _playerFactory;
         private readonly IParticleFactory _particleFactory;
-
+        private readonly IMeshFactory _meshFactory;
 
         public GameFactory(IAssetProvider assets, IEntityFactory entityFactory,
-            IStaticDataService staticData, IParticleFactory particleFactory)
+            IStaticDataService staticData, IParticleFactory particleFactory, IMeshFactory meshFactory)
         {
             _assets = assets;
             _entityFactory = entityFactory;
             _particleFactory = particleFactory;
+            _meshFactory = meshFactory;
             _staticData = staticData;
         }
 
@@ -41,7 +37,7 @@ namespace Infrastructure.Factory
         {
             _networkManager = _assets.Instantiate(NetworkManagerPath);
             _networkManager.GetComponent<CustomNetworkManager>().Construct(stateMachine, _staticData, _entityFactory,
-                _particleFactory, _assets, this, serverSettings);
+                _particleFactory, _assets, this, _meshFactory, serverSettings);
             return _networkManager;
         }
 
@@ -50,40 +46,30 @@ namespace Infrastructure.Factory
         {
             _networkManager = _assets.Instantiate(SteamNetworkManagerPath);
             _networkManager.GetComponent<CustomNetworkManager>().Construct(stateMachine, _staticData, _entityFactory,
-                _particleFactory, _assets, this, serverSettings);
+                _particleFactory, _assets, this, _meshFactory, serverSettings);
             _networkManager.GetComponent<SteamLobby>().Construct(isHost);
             return _networkManager;
         }
 
-        public void CreateWalls(Map map)
+        public GameObject CreateGameObjectContainer(string containerName)
         {
-            _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(map, Faces.Top);
-            _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(map, Faces.Bottom);
-            _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(map, Faces.Right);
-            _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(map, Faces.Left);
-            _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(map, Faces.Front);
-            _assets.Instantiate(Wall).GetComponent<WallRenderer>().Construct(map, Faces.Back);
-        }
-
-        public GameObject CreateMapRenderer(Map map, Dictionary<Vector3Int, BlockData> buffer)
-        {
-            var mapGenerator = _assets.Instantiate(MapRendererPath);
-            _mapGenerator = mapGenerator.GetComponent<MapRenderer>();
-            _mapGenerator.Construct(map, this, buffer);
-            return mapGenerator;
-        }
-
-        public ChunkRenderer CreateChunkRenderer(Vector3Int position, Quaternion rotation, Transform transform)
-        {
-            var chunkRenderer = _assets.Instantiate(ChunkRendererPath, position, rotation, transform)
-                .GetComponent<ChunkRenderer>();
-            chunkRenderer.Construct();
-            return chunkRenderer;
+            return new GameObject(containerName);
         }
 
         public void CreateCamera()
         {
             new GameObject().AddComponent<Camera>();
+        }
+
+        public void CreateDirectionalLight(LightData lightData)
+        {
+            var light = new GameObject(DirectionalLightName).AddComponent<Light>();
+            light.transform.position = lightData.position;
+            light.transform.rotation = lightData.rotation;
+            light.color = lightData.color;
+            light.type = LightType.Directional;
+            light.shadows = LightShadows.Soft;
+            light.shadowNormalBias = 0;
         }
     }
 }

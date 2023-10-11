@@ -7,30 +7,29 @@ using Explosions;
 using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
 using Mirror;
-using Networking.Messages;
 using UnityEngine;
 
 namespace Networking.Synchronization
 {
     public class MeleeWeaponSynchronization : NetworkBehaviour
     {
-        private ServerData _serverData;
+        private IServer _server;
         private IParticleFactory _particleFactory;
         private List<AudioClip> _audioClips;
         private LineExplosionArea _lineExplosionArea;
 
-        public void Construct(IParticleFactory particleFactory, IAssetProvider assets, ServerData serverData)
+        public void Construct(IParticleFactory particleFactory, IAssetProvider assets, IServer server)
         {
-            _serverData = serverData;
+            _server = server;
             _particleFactory = particleFactory;
             _audioClips = assets.LoadAll<AudioClip>("Audio/Sounds").ToList();
-            _lineExplosionArea = new LineExplosionArea(serverData);
+            _lineExplosionArea = new LineExplosionArea(_server.MapProvider);
         }
 
         [Command]
         public void CmdHit(Ray ray, int weaponId, bool isStrongHit, NetworkConnectionToClient source = null)
         {
-            var result = _serverData.TryGetPlayerData(source, out var playerData);
+            var result = _server.ServerData.TryGetPlayerData(source, out var playerData);
             if (!result || !playerData.IsAlive) return;
             var weapon = playerData.MeleeWeaponsById[weaponId];
             if (!CanHit(weapon)) return;
@@ -67,7 +66,7 @@ namespace Networking.Synchronization
         private bool ApplyRaycast(NetworkConnectionToClient source, Ray ray, MeleeWeaponData meleeWeapon,
             bool isStrongHit)
         {
-            var raycastResult = Physics.Raycast(ray, out var rayHit, meleeWeapon.Range);
+            var raycastResult = Physics.Raycast(ray, out var rayHit, meleeWeapon.Range, Constants.AttackMask);
             if (!raycastResult) return false;
             if (rayHit.collider.CompareTag("Head"))
             {
@@ -95,25 +94,24 @@ namespace Networking.Synchronization
                 if (isStrongHit)
                 {
                     var validPositions = _lineExplosionArea.GetExplodedBlocks(3, targetBlock);
-                    foreach (var position in validPositions)
-                        _serverData.Map.SetBlockByGlobalPosition(position, new BlockData());
-                    NetworkServer.SendToAll(new UpdateMapMessage(
-                        validPositions.ToArray(), new BlockData[validPositions.Count]));
+                    UpdateBlocks(validPositions, 1);
                 }
                 else
                 {
                     var blocks = _lineExplosionArea.GetExplodedBlocks(1, targetBlock);
-                    if (blocks.Count > 0)
-                    {
-                        _serverData.Map.SetBlockByGlobalPosition(blocks[0], new BlockData());
-                        NetworkServer.SendToAll(new UpdateMapMessage(new[] {targetBlock}, new BlockData[1]));
-                    }
+                    UpdateBlocks(blocks, 1);
                 }
 
                 return true;
             }
 
             return false;
+        }
+
+        private void UpdateBlocks(List<Vector3Int> blocks, int radius)
+        {
+            foreach (var block in blocks)
+                _server.MapDestructionAlgorithm.StartDestruction(block, radius);
         }
 
         [Server]

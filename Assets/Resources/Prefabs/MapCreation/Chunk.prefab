@@ -12,8 +12,7 @@ GameObject:
   - component: {fileID: 4659098196728068262}
   - component: {fileID: 6126872290204476689}
   - component: {fileID: 23298336223436630}
-  - component: {fileID: 4659098196728068260}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Chunk
   m_TagString: Chunk
   m_Icon: {fileID: 0}
@@ -63,7 +62,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 0b97c12a78afb0e41855037d621e09b3, type: 2}
+  - {fileID: 2100000, guid: 940859ed725ba884795f6dcacc5764a4, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -99,15 +98,3 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 4
   m_Mesh: {fileID: 0}
---- !u!114 &4659098196728068260
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4659098196728068443}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 740795a85b20fe3468634acf7d351b3c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

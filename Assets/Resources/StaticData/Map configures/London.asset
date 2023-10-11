@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e69f3dcd48464cac84150e2016cff25a, type: 3}
+  m_Name: London
+  m_EditorClassIdentifier: 
+  image: {fileID: 2800000, guid: 42d3f1b8308a798478282a64294ddbac, type: 3}
+  waterColor:
+    serializedVersion: 2
+    rgba: 4287052291
+  innerColor:
+    serializedVersion: 2
+    rgba: 4281283929
+  lightData:
+    position: {x: 256, y: 100, z: 100}
+    rotation: {x: -0.2828916, y: -0.5241832, z: 0.7333457, w: -0.3277322}
+    color: {r: 1, g: 1, b: 1, a: 1}
+  skyboxMaterial: {fileID: 2100000, guid: 54fe2f000ad8f424fb63cc3ea0ae2bb2, type: 2}
+  ambientMode: 0
+  skyColor: {r: 0.21176471, g: 0.22745098, b: 0.25882354, a: 1}
+  equatorColor: {r: 0.11372549, g: 0.1254902, b: 0.13333334, a: 1}
+  groundColor: {r: 0.047058824, g: 0.043137256, b: 0.03529412, a: 1}
+  ambientIntensity: 1
+  isFogActivated: 1
+  fogMode: 1
+  fogColor: {r: 0.59607846, g: 0.59607846, b: 0.59607846, a: 1}
+  fogStartDistance: 0
+  fogEndDistance: 270
+  fogDensity: 0.01
+  spawnPoints:
+  - position: {x: 403, y: 9, z: 142}
+  - position: {x: 376, y: 14, z: 248}
+  - position: {x: 299, y: 15, z: 271}
+  - position: {x: 294, y: 16, z: 332}
+  - position: {x: 191, y: 14, z: 296}
+  - position: {x: 57, y: 15, z: 236}
+  - position: {x: 161, y: 131, z: 239}
+  - position: {x: 211, y: 18, z: 135}

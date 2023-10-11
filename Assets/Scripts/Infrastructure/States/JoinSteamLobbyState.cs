@@ -1,9 +1,5 @@
-﻿using System.Collections.Generic;
-using Data;
-using Infrastructure.Factory;
-using MapLogic;
+﻿using Infrastructure.Factory;
 using Networking;
-using UnityEngine;
 
 namespace Infrastructure.States
 {
@@ -12,8 +8,7 @@ namespace Infrastructure.States
         private readonly GameStateMachine _stateMachine;
         private readonly SceneLoader _sceneLoader;
         private readonly IGameFactory _gameFactory;
-        private CustomNetworkManager _networkManager;
-        private IUIFactory _uiFactory;
+        private readonly IUIFactory _uiFactory;
         private const string Main = "Main";
 
         public JoinSteamLobbyState(GameStateMachine stateMachine, SceneLoader sceneLoader, IGameFactory gameFactory,
@@ -32,17 +27,9 @@ namespace Infrastructure.States
 
         private void OnLoaded()
         {
-            _networkManager = _gameFactory.CreateSteamNetworkManager(_stateMachine, null, false)
+            var networkManager = _gameFactory.CreateSteamNetworkManager(_stateMachine, null, false)
                 .GetComponent<CustomNetworkManager>();
-            _networkManager.MapDownloaded += OnMapDownloaded;
-            _uiFactory.CreateLoadingWindow(_networkManager);
-        }
-
-        private void OnMapDownloaded(Map map, Dictionary<Vector3Int, BlockData> mapUpdates)
-        {
-            _gameFactory.CreateWalls(map);
-            _gameFactory.CreateMapRenderer(map, mapUpdates);
-            _stateMachine.Enter<GameLoopState, CustomNetworkManager>(_networkManager);
+            _uiFactory.CreateLoadingWindow(networkManager);
         }
 
         public void Exit()

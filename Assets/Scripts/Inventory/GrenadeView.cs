@@ -2,6 +2,7 @@ using System;
 using Data;
 using Mirror;
 using Networking.Messages;
+using Networking.Messages.Requests;
 using Rendering;
 using TMPro;
 using UI;
@@ -17,6 +18,7 @@ namespace Inventory
         private readonly Raycaster _raycaster;
         private readonly float _maxThrowDuration;
         private readonly float _throwForceModifier;
+        private readonly float _minThrowForce;
         private readonly int _itemId;
         private readonly GameObject _grenadeInfo;
         private readonly TextMeshProUGUI _grenadeCountText;
@@ -37,8 +39,9 @@ namespace Inventory
             _itemType = hud.itemIcon;
             Count = configuration.count;
             _raycaster = raycaster;
+            _minThrowForce = configuration.minThrowForce;
         }
-        
+
 
         public void OnCountChanged()
         {
@@ -51,7 +54,7 @@ namespace Inventory
             _itemType.sprite = _grenadeCountIcon;
             _grenadeCountText.SetText(Count.ToString());
         }
-        
+
         public void OnLeftMouseButtonDown()
         {
             _holdDownStartTime = Time.time;
@@ -65,9 +68,8 @@ namespace Inventory
         public void OnLeftMouseButtonUp()
         {
             var holdTime = Math.Min(Time.time - _holdDownStartTime, _maxThrowDuration);
-            var throwForce = holdTime * _throwForceModifier;
-            var ray = _raycaster.GetCentredRay();
-            NetworkClient.Send(new GrenadeSpawnRequest(_itemId, ray, throwForce));
+            var throwForce = Math.Max(holdTime * _throwForceModifier, _minThrowForce);
+            NetworkClient.Send(new GrenadeSpawnRequest(_itemId, _raycaster.CentredRay, throwForce));
         }
     }
 }

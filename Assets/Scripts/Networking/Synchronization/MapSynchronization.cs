@@ -7,29 +7,26 @@ namespace Networking.Synchronization
 {
     public class MapSynchronization : NetworkBehaviour
     {
-        private Map Map { get; set; }
+        private MapProvider MapProvider { get; set; }
 
-        public void Construct(Map map)
+        public void Construct(MapProvider mapProvider)
         {
-            Map = map;
+            MapProvider = mapProvider;
         }
-        
+
         [Command]
         public void SendSpawnPointOnServer(Vector3Int position)
         {
-            Map.MapData.SpawnPoints.Add(new SpawnPoint()
+            MapProvider.SceneData.SpawnPoints.Add(new SpawnPointData
             {
-                X = position.x,
-                Y = position.y,
-                Z = position.z
+                position = position
             });
         }
 
         [Command]
         public void DeleteAllSpawnPoints()
         {
-            Map.MapData.SpawnPoints.Clear();
+            MapProvider.SceneData.SpawnPoints.Clear();
         }
-        
     }
 }

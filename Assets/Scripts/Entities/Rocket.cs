@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using Data;
 using Explosions;
 using Infrastructure.Factory;
+using MapLogic;
 using Mirror;
-using Networking;
 using UnityEngine;
 
 namespace Entities
@@ -18,15 +18,15 @@ namespace Entities
         private NetworkConnectionToClient _owner;
         private bool _isExploded;
 
-        public void Construct(ServerData serverData, RocketLauncherItem rocketData,
-            NetworkConnectionToClient owner, IParticleFactory particleFactory)
+        public void Construct(MapProvider mapProvider, MapUpdater mapUpdater, RocketLauncherItem rocketData,
+            NetworkConnectionToClient owner, IParticleFactory particleFactory, MapDestructionAlgorithm mapDestructionAlgorithm)
         {
             _radius = rocketData.radius;
             _damage = rocketData.damage;
             _particlesSpeed = rocketData.particlesSpeed;
             _particlesCount = rocketData.particlesCount;
             _owner = owner;
-            _explosionBehaviour = new SingleExplosionBehaviour(serverData, particleFactory, new SphereExplosionArea(serverData));
+            _explosionBehaviour = new SingleExplosionBehaviour(mapUpdater, particleFactory, new SphereExplosionArea(mapProvider), mapDestructionAlgorithm);
         }
         
         private void OnCollisionEnter(Collision collision)

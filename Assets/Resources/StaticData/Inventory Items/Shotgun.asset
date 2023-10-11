@@ -28,9 +28,9 @@ MonoBehaviour:
   bulletsPerTap: 10
   totalBullets: 24
   zoomMultiplier: 1.25
-  damage: 15
-  headMultiplier: 1.5
-  chestMultiplier: 1.2
+  damage: 25
+  headMultiplier: 1.2
+  chestMultiplier: 1
   legMultiplier: 0.8
   armMultiplier: 0.6
   shootingAudioClip: {fileID: 8300000, guid: 6fccd7e7c2e3f15418aa226445563722, type: 3}

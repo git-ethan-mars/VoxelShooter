@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Data;
 using Infrastructure.Factory;
+using MapLogic;
 using Mirror;
-using Networking;
-using Networking.Messages;
 using Networking.Synchronization;
 using UnityEngine;
 
@@ -13,15 +11,17 @@ namespace Explosions
     public abstract class ExplosionBehaviour
     {
         private readonly IExplosionArea _explosionArea;
-        private readonly ServerData _serverData;
         private readonly IParticleFactory _particleFactory;
+        private readonly MapUpdater _mapUpdater;
+        private readonly MapDestructionAlgorithm _mapDestructionAlgorithm;
 
-        protected ExplosionBehaviour(ServerData serverData, IParticleFactory particleFactory, 
-            IExplosionArea explosionArea)
+        protected ExplosionBehaviour(MapUpdater mapUpdater, IParticleFactory particleFactory, 
+            IExplosionArea explosionArea, MapDestructionAlgorithm mapDestructionAlgorithm)
         {
             _explosionArea = explosionArea;
-            _serverData = serverData;
+            _mapUpdater = mapUpdater;
             _particleFactory = particleFactory;
+            _mapDestructionAlgorithm = mapDestructionAlgorithm;
         }
         
         protected void DamagePlayer(Collider hitCollider, Vector3 explosionCenter, int radius, int damage, 
@@ -48,12 +48,8 @@ namespace Explosions
         protected void DestroyExplosiveWithBlocks(Vector3Int explosionCenter, GameObject explosive, int radius, 
             int particlesSpeed, int particlesCount)
         {
-            var blockPositions = _explosionArea.GetExplodedBlocks(radius, explosionCenter);
-            foreach (var position in blockPositions)
-                _serverData.Map.SetBlockByGlobalPosition(position, new BlockData());
+            _mapDestructionAlgorithm.StartDestruction(explosionCenter, radius);
             _particleFactory.CreateRchParticle(explosionCenter, particlesSpeed, particlesCount);
-            NetworkServer.SendToAll(new UpdateMapMessage(blockPositions.ToArray(),
-                new BlockData[blockPositions.Count]));
             NetworkServer.Destroy(explosive);
         }
         

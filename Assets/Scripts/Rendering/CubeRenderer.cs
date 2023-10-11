@@ -1,4 +1,4 @@
-﻿using Inventory;
+﻿using PlayerLogic;
 using UnityEngine;
 
 namespace Rendering
@@ -7,13 +7,15 @@ namespace Rendering
     {
         private readonly LineRenderer _lineRenderer;
         private readonly Raycaster _raycaster;
+        private readonly float _placeDistance;
 
-        public CubeRenderer(LineRenderer lineRenderer, Raycaster raycaster)
+        public CubeRenderer(LineRenderer lineRenderer, Raycaster raycaster, Player player)
         {
             _lineRenderer = lineRenderer;
             _raycaster = raycaster;
+            _placeDistance = player.placeDistance;
         }
-        
+
 
         public void EnableCube()
         {
@@ -29,7 +31,7 @@ namespace Rendering
 
         public void UpdateCube(bool isBuilding)
         {
-            var raycastResult = _raycaster.GetRayCastHit(out var raycastHit);
+            var raycastResult = _raycaster.GetRayCastHit(out var raycastHit, _placeDistance, Constants.BuildMask);
             if (!raycastResult)
             {
                 _lineRenderer.positionCount = 0;
@@ -42,7 +44,8 @@ namespace Rendering
         }
 
 
-        public bool GetRayCastHit(out RaycastHit raycastHit) => _raycaster.GetRayCastHit(out raycastHit);
+        public bool GetRayCastHit(out RaycastHit raycastHit) =>
+            _raycaster.GetRayCastHit(out raycastHit, _placeDistance, Constants.BuildMask);
 
         private void DrawCube(Vector3Int startPosition)
         {

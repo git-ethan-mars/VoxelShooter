@@ -1,4 +1,5 @@
 using Data;
+using Infrastructure.Services.StaticData;
 using Infrastructure.States;
 using TMPro;
 using UnityEngine;
@@ -8,42 +9,83 @@ namespace UI
 {
     public class MatchMenu : Window
     {
-        [SerializeField] private Button backButton;
-        [SerializeField] private Button resetButton;
-        [SerializeField] private Button applyButton;
-        [SerializeField] private TextMeshProUGUI mapName;
-        [Header("Spawn Time")] [SerializeField]
+        [SerializeField]
+        private Button backButton;
+
+        [SerializeField]
+        private Button resetButton;
+
+        [SerializeField]
+        private Button applyButton;
+
+        [Header("Spawn Time")]
+        [SerializeField]
         private TextMeshProUGUI spawnTimeText;
-        [SerializeField] private Button incrementPlayerNumber;
-        [SerializeField] private Button decrementPlayerNumber;
-        [Header("Game Duration")] [SerializeField]
+
+        [SerializeField]
+        private Button incrementPlayerNumber;
+
+        [SerializeField]
+        private Button decrementPlayerNumber;
+
+        [Header("Game Duration")]
+        [SerializeField]
         private TextMeshProUGUI gameDuration;
-        [SerializeField] private Button incrementGameDuration;
-        [SerializeField] private Button decrementGameDuration;
+
+        [SerializeField]
+        private Button incrementGameDuration;
+
+        [SerializeField]
+        private Button decrementGameDuration;
+
+        [Header("Map choice")]
+        [SerializeField]
+        private TextMeshProUGUI mapName;
+
+        [SerializeField]
+        private Button nextMapButton;
+
+        [SerializeField]
+        private Button previousMapButton;
+
+        [SerializeField]
+        private RawImage mapImage;
+
+
         private Limitation _spawnTimeLimitation;
         private Limitation _timeLimitation;
+        private IMapRepository _mapRepository;
         private GameStateMachine _stateMachine;
-        private const int MinGameTime = 1;
-        private const int MaxGameTime = 15;
-        private const int MinSpawnTime = 1;
-        private const int MaxSpawnTime = 10;
+        private bool _isLocalBuild;
+        private const int MinGameTime = 5;
+        private const int MaxGameTime = 10;
+        private const int MinSpawnTime = 3;
+        private const int MaxSpawnTime = 7;
 
 
-        public void Construct(GameStateMachine stateMachine, bool isLocalBuild)
+        public void Construct(IMapRepository mapRepository, GameStateMachine stateMachine, bool isLocalBuild)
         {
+            _mapRepository = mapRepository;
             _stateMachine = stateMachine;
+            _isLocalBuild = isLocalBuild;
             InitSpawnTime();
             InitGameDuration();
-            resetButton.onClick.AddListener(ResetLimitations);
-            backButton.onClick.AddListener(stateMachine.Enter<MainMenuState>);
-            if (isLocalBuild)
-                applyButton.onClick.AddListener(() => _stateMachine.Enter<StartMatchState, ServerSettings>(new ServerSettings(_timeLimitation.CurrentValue, _spawnTimeLimitation.CurrentValue, mapName.text)));
-            else
+            InitMapChoice();
+            resetButton.onClick.AddListener(OnResetButton);
+            backButton.onClick.AddListener(OnBackButton);
+            applyButton.onClick.AddListener(OnApplyButton);
+            nextMapButton.onClick.AddListener(OnNextMapButton);
+            previousMapButton.onClick.AddListener(OnPreviousButton);
+        }
+
+        private void InitMapChoice()
+        {
+            var configure = _mapRepository.GetCurrentMap();
+            if (configure != null)
             {
-                applyButton.onClick.AddListener(()=>_stateMachine.Enter<StartSteamLobbyState, ServerSettings>(
-                    new ServerSettings(_timeLimitation.CurrentValue, _spawnTimeLimitation.CurrentValue, mapName.text)));
+                mapName.SetText(configure.Item1);
+                mapImage.texture = configure.Item2.image;
             }
-            
         }
 
         private void OnEnable()
@@ -54,6 +96,15 @@ namespace UI
         private void OnDisable()
         {
             HideCursor();
+        }
+
+        private void OnDestroy()
+        {
+            resetButton.onClick.RemoveListener(OnResetButton);
+            backButton.onClick.RemoveListener(OnBackButton);
+            applyButton.onClick.RemoveListener(OnApplyButton);
+            nextMapButton.onClick.RemoveListener(OnNextMapButton);
+            previousMapButton.onClick.RemoveListener(OnPreviousButton);
         }
 
         private void InitGameDuration()
@@ -75,10 +126,50 @@ namespace UI
             spawnTimeText.SetText(_spawnTimeLimitation.CurrentValue.ToString());
         }
 
-        private void ResetLimitations()
+        private void OnResetButton()
         {
             _spawnTimeLimitation.Reset();
             _timeLimitation.Reset();
+        }
+
+        private void OnBackButton()
+        {
+            _stateMachine.Enter<MainMenuState>();
+        }
+
+        private void OnApplyButton()
+        {
+            if (_isLocalBuild)
+            {
+                _stateMachine.Enter<StartMatchState, ServerSettings>(
+                    new ServerSettings(_timeLimitation.CurrentValue, _spawnTimeLimitation.CurrentValue,
+                        mapName.text));
+            }
+            else
+            {
+                _stateMachine.Enter<StartSteamLobbyState, ServerSettings>(
+                    new ServerSettings(_timeLimitation.CurrentValue, _spawnTimeLimitation.CurrentValue, mapName.text));
+            }
+        }
+
+        private void OnNextMapButton()
+        {
+            var configure = _mapRepository.GetNextMap();
+            if (configure != null)
+            {
+                mapName.SetText(configure.Item1);
+                mapImage.texture = configure.Item2.image;
+            }
+        }
+
+        private void OnPreviousButton()
+        {
+            var configure = _mapRepository.GetPreviousMap();
+            if (configure != null)
+            {
+                mapName.SetText(configure.Item1);
+                mapImage.texture = configure.Item2.image;
+            }
         }
     }
 }

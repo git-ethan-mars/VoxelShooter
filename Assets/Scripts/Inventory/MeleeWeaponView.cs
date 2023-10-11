@@ -1,6 +1,7 @@
 using Data;
 using Infrastructure.Factory;
 using Networking.Synchronization;
+using PlayerLogic;
 using Rendering;
 using UnityEngine;
 
@@ -11,18 +12,18 @@ namespace Inventory
     {
         public Sprite Icon { get; }
         private readonly MeleeWeaponData _meleeWeapon;
-        private readonly Camera _fpsCam;
         private readonly IGameFactory _gameFactory;
         private readonly MeleeWeaponSynchronization _meleeWeaponSynchronization;
         private readonly CubeRenderer _cubeRenderer;
+        private readonly Raycaster _raycaster;
 
 
-        public MeleeWeaponView(Camera camera, GameObject player, MeleeWeaponData configuration, LineRenderer lineRenderer)
+        public MeleeWeaponView(Raycaster raycaster, Player player, MeleeWeaponData configuration)
         {
             _meleeWeapon = configuration;
-            _cubeRenderer = new CubeRenderer(lineRenderer, new Raycaster(camera, _meleeWeapon.Range));
+            _raycaster = raycaster;
+            _cubeRenderer = new CubeRenderer(player.GetComponent<LineRenderer>(), raycaster, player);
             Icon = _meleeWeapon.Icon;
-            _fpsCam = camera;
             _meleeWeaponSynchronization = player.GetComponent<MeleeWeaponSynchronization>();
         }
 
@@ -39,16 +40,14 @@ namespace Inventory
 
         public void OnLeftMouseButtonDown()
         {
-            var ray = _fpsCam.ViewportPointToRay(new Vector2(0.5f, 0.5f));
-            _meleeWeaponSynchronization.CmdHit(ray, _meleeWeapon.ID, false);
+            _meleeWeaponSynchronization.CmdHit(_raycaster.CentredRay, _meleeWeapon.ID, false);
         }
 
         public void OnRightMouseButtonDown()
         {
             if (_meleeWeapon.HasStrongHit)
             {
-                var ray = _fpsCam.ViewportPointToRay(new Vector2(0.5f, 0.5f));
-                _meleeWeaponSynchronization.CmdHit(ray, _meleeWeapon.ID, true);
+                _meleeWeaponSynchronization.CmdHit(_raycaster.CentredRay, _meleeWeapon.ID, true);
             }
         }
 

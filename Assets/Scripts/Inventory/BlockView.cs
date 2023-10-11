@@ -1,6 +1,8 @@
 ﻿using Data;
 using Mirror;
 using Networking.Messages;
+using Networking.Messages.Requests;
+using PlayerLogic;
 using Rendering;
 using TMPro;
 using UI;
@@ -22,28 +24,27 @@ namespace Inventory
         private readonly GameObject _palette;
         private readonly GameObject _transparentBlock;
         private readonly Raycaster _rayCaster;
-        private readonly GameObject _player;
+        private readonly float _placeDistance;
 
 
-        public BlockView(GameObject hud, BlockItem configuration, TransparentMeshPool transparentMeshPool,
-            Raycaster raycaster, GameObject player)
+        public BlockView(Raycaster raycaster, Hud hud, BlockItem configuration, TransparentMeshPool transparentMeshPool, Player player)
         {
-            _palette = hud.GetComponent<Hud>().palette;
-            _blockInfo = hud.GetComponent<Hud>().itemInfo;
-            _blockImage = hud.GetComponent<Hud>().itemIcon;
-            _blockCountText = hud.GetComponent<Hud>().itemCount;
-            _player = player;
+            _rayCaster = raycaster;
+            _placeDistance = player.placeDistance;
+            _palette = hud.palette;
+            _blockInfo = hud.itemInfo;
+            _blockImage = hud.itemIcon;
+            _blockCountText = hud.itemCount;
             Icon = configuration.inventoryIcon;
             _blockSprite = configuration.itemSprite;
             _palette.GetComponent<PaletteCreator>().OnColorUpdate += UpdateColor;
             Count = configuration.count;
             _id = configuration.id;
-            _rayCaster = raycaster;
             _transparentBlock =
                 transparentMeshPool.CreateTransparentGameObject(configuration.prefab, _currentColor);
             _transparentBlock.SetActive(false);
         }
-        
+
 
         public void OnCountChanged()
         {
@@ -73,7 +74,7 @@ namespace Inventory
 
         public void InnerUpdate()
         {
-            var raycastResult = _rayCaster.GetRayCastHit(out var raycastHit);
+            var raycastResult = _rayCaster.GetRayCastHit(out var raycastHit, _placeDistance, Constants.BuildMask);
             if (!raycastResult)
                 _transparentBlock.SetActive(false);
             else
@@ -86,7 +87,7 @@ namespace Inventory
 
         private void PlaceBlock(Color32 color)
         {
-            var raycastResult = _rayCaster.GetRayCastHit(out var raycastHit);
+            var raycastResult = _rayCaster.GetRayCastHit(out var raycastHit, _placeDistance, Constants.BuildMask);
             if (!raycastResult) return;
             NetworkClient.Send(new AddBlocksRequest(
                 new[] {Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2)},
