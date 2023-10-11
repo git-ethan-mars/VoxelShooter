@@ -11,11 +11,19 @@ namespace Networking.ServerServices
         private readonly MapProvider _mapProvider;
         private readonly List<Run>[] _columns;
         private readonly Dictionary<Run, HashSet<Run>> _neighboursByRun;
+        private readonly List<Run> _runsToDelete;
+        private readonly Stack<Run> _pathStack;
+        private readonly HashSet<Vector3Int> _connectedNeighbours;
+        private readonly List<Vector3Int> _neighbours;
 
         public ColumnDestructionAlgorithm(MapProvider mapProvider)
         {
             _mapProvider = mapProvider;
             _columns = new List<Run>[mapProvider.MapData.Width * mapProvider.MapData.Depth];
+            _runsToDelete = new List<Run>();
+            _pathStack = new Stack<Run>();
+            _connectedNeighbours = new HashSet<Vector3Int>();
+            _neighbours = new List<Vector3Int>();
             for (var i = 0; i < _columns.Length; i++)
             {
                 _columns[i] = new List<Run>();
@@ -42,7 +50,9 @@ namespace Networking.ServerServices
 
         public Vector3Int[] Remove(List<Vector3Int> removingPositions)
         {
-            var runsToDelete = new List<Run>();
+            _runsToDelete.Clear();
+            _pathStack.Clear();
+            _connectedNeighbours.Clear();
             for (var i = 0; i < removingPositions.Count; i++)
             {
                 var run = FindRunInColumn(removingPositions[i].x, removingPositions[i].z, removingPositions[i].y);
@@ -65,64 +75,73 @@ namespace Networking.ServerServices
                     AddRun(firstRun);
                     AddRun(secondRun);
                 }
+            }
 
-                var stack = new Stack<Run>();
-                var neighbourRuns =
-                    GetConnectedNeighbours(removingPositions[i].x, removingPositions[i].y, removingPositions[i].z)
-                        .Select(position => FindRunInColumn(position.x, position.z, position.y)).ToHashSet();
-                while (neighbourRuns.Count > 0)
+            for (var i = 0; i < removingPositions.Count; i++)
+            {
+                GetConnectedNeighbours(removingPositions[i].x, removingPositions[i].y, removingPositions[i].z);
+                for (var j = 0; j < _neighbours.Count; j++)
                 {
-                    var visited = new HashSet<Run>();
-                    var neighbourRun = neighbourRuns.First();
-                    stack.Push(neighbourRun);
-                    var isSeparatedComponent = true;
-                    while (stack.Count > 0)
-                    {
-                        if (!isSeparatedComponent)
-                        {
-                            stack.Clear();
-                            continue;
-                        }
-
-                        var element = stack.Pop();
-                        visited.Add(element);
-                        if (neighbourRuns.Contains(element))
-                        {
-                            neighbourRuns.Remove(element);
-                        }
-
-                        foreach (var nextRun in _neighboursByRun[element])
-                        {
-                            if (visited.Contains(nextRun))
-                            {
-                                continue;
-                            }
-
-                            if (nextRun.Begin == 0)
-                            {
-                                isSeparatedComponent = false;
-                                break;
-                            }
-
-                            stack.Push(nextRun);
-                        }
-                    }
-
-                    if (isSeparatedComponent)
-                    {
-                        runsToDelete.AddRange(visited);
-                    }
+                    _connectedNeighbours.Add(_neighbours[j]);
                 }
             }
 
-            var fallingPositions = new List<Vector3Int>();
-            for (var i = 0; i < runsToDelete.Count; i++)
+            var neighbourRuns =
+                _connectedNeighbours.Select(position => FindRunInColumn(position.x, position.z, position.y))
+                    .ToHashSet();
+            while (neighbourRuns.Count > 0)
             {
-                for (var height = runsToDelete[i].Begin;
-                     height < runsToDelete[i].Begin + runsToDelete[i].Length;
+                var visited = new HashSet<Run>();
+                var neighbourRun = neighbourRuns.First();
+                _pathStack.Push(neighbourRun);
+                var isSeparatedComponent = true;
+                while (_pathStack.Count > 0)
+                {
+                    if (!isSeparatedComponent)
+                    {
+                        _pathStack.Clear();
+                        continue;
+                    }
+
+                    var element = _pathStack.Pop();
+                    visited.Add(element);
+                    if (neighbourRuns.Contains(element))
+                    {
+                        neighbourRuns.Remove(element);
+                    }
+
+                    foreach (var nextRun in _neighboursByRun[element])
+                    {
+                        if (visited.Contains(nextRun))
+                        {
+                            continue;
+                        }
+
+                        if (nextRun.Begin == 0)
+                        {
+                            isSeparatedComponent = false;
+                            break;
+                        }
+
+                        _pathStack.Push(nextRun);
+                    }
+                }
+
+                if (isSeparatedComponent)
+                {
+                    _runsToDelete.AddRange(visited);
+                }
+            }
+
+
+            var fallingPositions = new List<Vector3Int>();
+            for (var i = 0; i < _runsToDelete.Count; i++)
+            {
+                for (var height = _runsToDelete[i].Begin;
+                     height < _runsToDelete[i].Begin + _runsToDelete[i].Length;
                      height++)
                 {
-                    fallingPositions.Add(new Vector3Int(runsToDelete[i].X, height, runsToDelete[i].Z));
+                    fallingPositions.Add(new Vector3Int(_runsToDelete[i].X, height, _runsToDelete[i].Z));
                 }
             }
 
@@ -135,15 +154,20 @@ namespace Networking.ServerServices
             _neighboursByRun[run] = new HashSet<Run>();
             for (var y = run.Begin; y < run.Begin + run.Length; y++)
             {
-                var neighbours = run.IsCreatedByPlayer
-                    ? GetConnectedNeighboursWithoutDiagonals(run.X, y, run.Z)
-                    : GetConnectedNeighbours(run.X, y, run.Z);
+                if (run.IsCreatedByPlayer)
+                {
+                    GetConnectedNeighboursWithoutDiagonals(run.X, y, run.Z);
+                }
+                else
+                {
+                    GetConnectedNeighbours(run.X, y, run.Z);
+                }
 
-                for (var i = 0; i < neighbours.Count; i++)
+                for (var i = 0; i < _neighbours.Count; i++)
                 {
                     var neighbourRun =
-                        FindRunInColumn(neighbours[i].x, neighbours[i].z,
-                            neighbours[i].y);
+                        FindRunInColumn(_neighbours[i].x, _neighbours[i].z,
+                            _neighbours[i].y);
                     if (neighbourRun != null && run != neighbourRun)
                     {
                         _neighboursByRun[run].Add(neighbourRun);
@@ -224,12 +248,12 @@ namespace Networking.ServerServices
                         }
 
                         var currentRun = FindRunInColumn(x, z, y);
-                        var neighbours = GetConnectedNeighbours(x, y, z);
-                        for (var i = 0; i < neighbours.Count; i++)
+                        GetConnectedNeighbours(x, y, z);
+                        for (var i = 0; i < _neighbours.Count; i++)
                         {
                             var neighbourRun = FindRunInColumn(
-                                neighbours[i].x, neighbours[i].z,
-                                neighbours[i].y);
+                                _neighbours[i].x, _neighbours[i].z,
+                                _neighbours[i].y);
                             if (currentRun != neighbourRun)
                             {
                                 _neighboursByRun[currentRun].Add(neighbourRun);
@@ -288,9 +312,9 @@ namespace Networking.ServerServices
             return null;
         }
 
-        private List<Vector3Int> GetConnectedNeighbours(int x, int y, int z)
+        private void GetConnectedNeighbours(int x, int y, int z)
         {
-            var neighbours = new List<Vector3Int>();
+            _neighbours.Clear();
             for (var xOffset = -1; xOffset <= 1; xOffset++)
             {
                 for (var yOffset = -1; yOffset <= 1; yOffset++)
@@ -305,18 +329,16 @@ namespace Networking.ServerServices
                         if (_mapProvider.IsInsideMap(x + xOffset, y + yOffset, z + zOffset) && _mapProvider
                                 .GetBlockByGlobalPosition(x + xOffset, y + yOffset, z + zOffset).IsSolid())
                         {
-                            neighbours.Add(new Vector3Int(x + xOffset, y + yOffset, z + zOffset));
+                            _neighbours.Add(new Vector3Int(x + xOffset, y + yOffset, z + zOffset));
                         }
                     }
                 }
             }
-
-            return neighbours;
         }
 
-        private List<Vector3Int> GetConnectedNeighboursWithoutDiagonals(int x, int y, int z)
+        private void GetConnectedNeighboursWithoutDiagonals(int x, int y, int z)
         {
-            var neighbours = new List<Vector3Int>();
+            _neighbours.Clear();
             for (var xOffset = -1; xOffset <= 1; xOffset++)
             {
                 for (var yOffset = -1; yOffset <= 1; yOffset++)
@@ -331,13 +353,11 @@ namespace Networking.ServerServices
                         if (_mapProvider.IsInsideMap(x + xOffset, y + yOffset, z + zOffset) && _mapProvider
                                 .GetBlockByGlobalPosition(x + xOffset, y + yOffset, z + zOffset).IsSolid())
                         {
-                            neighbours.Add(new Vector3Int(x + xOffset, y + yOffset, z + zOffset));
+                            _neighbours.Add(new Vector3Int(x + xOffset, y + yOffset, z + zOffset));
                         }
                     }
                 }
             }
-
-            return neighbours;
         }
 
         private class Run
