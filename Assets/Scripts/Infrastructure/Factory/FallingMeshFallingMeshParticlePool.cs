@@ -6,7 +6,7 @@ namespace Infrastructure.Factory
 {
     public class FallingMeshFallingMeshParticlePool : IFallingMeshParticlePool
     {
-        private const int PoolSize = 1000;
+        private const int PoolSize = 3000;
         private const string ContainerName = "FallingMeshParticleContainer";
         private readonly Stack<ParticleSystem> _stack = new(PoolSize);
 
