@@ -1,8 +1,9 @@
 ﻿using System;
 using Data;
+using MapLogic;
 using UnityEngine;
 
-namespace MapLogic
+namespace Networking.ServerServices
 {
     public class MapUpdater
     {
