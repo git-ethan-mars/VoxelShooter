@@ -3,13 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Infrastructure.Services.StaticData;
-using UnityEngine;
 
 public class MapRepository : IMapRepository
 {
-    private const string RchExtension = ".rch";
-    private const string VxlExtension = ".vxl";
-    private static readonly string FolderPath = Application.dataPath + $"/Maps";
     private readonly IStaticDataService _staticData;
     private readonly List<Tuple<string, MapConfigure>> _namedConfigures;
     private int _index;
@@ -48,13 +44,13 @@ public class MapRepository : IMapRepository
 
     private void UpdateRepository()
     {
-        if (!Directory.Exists(FolderPath))
+        if (!Directory.Exists(Constants.mapFolderPath))
         {
-            Directory.CreateDirectory(FolderPath);
+            Directory.CreateDirectory(Constants.mapFolderPath);
         }
 
-        var mapNames = Directory.GetFiles(FolderPath, $"*{RchExtension}")
-            .Union(Directory.GetFiles(FolderPath, $"*{VxlExtension}"))
+        var mapNames = Directory.GetFiles(Constants.mapFolderPath, $"*{Constants.RchExtension}")
+            .Union(Directory.GetFiles(Constants.mapFolderPath, $"*{Constants.VxlExtension}"))
             .Select(Path.GetFileNameWithoutExtension);
         _staticData.LoadMapConfigures();
         _namedConfigures.Clear();

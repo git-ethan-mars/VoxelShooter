@@ -3,26 +3,16 @@ using System.IO;
 using Data;
 using Optimization;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
-using UnityEngine;
 
 namespace MapLogic
 {
     public static class MapWriter
     {
-        private const string RchExtension = ".rch";
-
         public static void SaveMap(string fileName, MapProvider mapProvider)
         {
-            var mapDirectory = Application.dataPath + "/Maps";
-            if (!Directory.Exists(mapDirectory))
-            {
-                Directory.CreateDirectory(mapDirectory);
-            }
-
-            var filePath = Application.dataPath + $"/Maps/{fileName + RchExtension}";
-
+            Directory.CreateDirectory(Constants.mapFolderPath);
+            var filePath = Path.Combine(Constants.mapFolderPath, fileName);
             using var file = File.OpenWrite(filePath);
             WriteMap(mapProvider, file);
         }
