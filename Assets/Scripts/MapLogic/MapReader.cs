@@ -9,8 +9,8 @@ namespace MapLogic
     {
         public static MapProvider ReadFromFile(string mapName, IStaticDataService staticData)
         {
-            var rchFilePath = Path.Combine(Constants.mapFolderPath, mapName, Constants.RchExtension);
-            var vxlFilePath = Path.Combine(Constants.mapFolderPath, mapName, Constants.VxlExtension);
+            var rchFilePath = Path.Combine(Constants.mapFolderPath, $"{mapName}{Constants.RchExtension}");
+            var vxlFilePath = Path.Combine(Constants.mapFolderPath, $"{mapName}{Constants.VxlExtension}");
             MapProvider mapProvider;
             var mapConfigure = staticData.GetMapConfigure(mapName);
 
