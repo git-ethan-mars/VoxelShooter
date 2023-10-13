@@ -2,20 +2,15 @@
 using Data;
 using Extensions;
 using Infrastructure.Services.StaticData;
-using UnityEngine;
 
 namespace MapLogic
 {
     public static class MapReader
     {
-        private const string RchExtension = ".rch";
-
-        private const string VxlExtension = ".vxl";
-
         public static MapProvider ReadFromFile(string mapName, IStaticDataService staticData)
         {
-            var rchFilePath = Application.dataPath + $"/Maps/{mapName}" + RchExtension;
-            var vxlFilePath = Application.dataPath + $"/Maps/{mapName}" + VxlExtension;
+            var rchFilePath = Path.Combine(Constants.mapFolderPath, mapName, Constants.RchExtension);
+            var vxlFilePath = Path.Combine(Constants.mapFolderPath, mapName, Constants.VxlExtension);
             MapProvider mapProvider;
             var mapConfigure = staticData.GetMapConfigure(mapName);
 
