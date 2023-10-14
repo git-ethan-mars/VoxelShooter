@@ -337,68 +337,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
---- !u!1001 &542295164
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 566820160}
-    m_Modifications:
-    - target: {fileID: 1266766636482955538, guid: 9cd3f16ba6580e041bfac5996bd412b0, type: 3}
-      propertyPath: m_Name
-      value: Shotgun
-      objectReference: {fileID: 0}
-    - target: {fileID: 8008063096557673001, guid: 9cd3f16ba6580e041bfac5996bd412b0, type: 3}
-      propertyPath: m_RootOrder
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8008063096557673001, guid: 9cd3f16ba6580e041bfac5996bd412b0, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8008063096557673001, guid: 9cd3f16ba6580e041bfac5996bd412b0, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8008063096557673001, guid: 9cd3f16ba6580e041bfac5996bd412b0, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8008063096557673001, guid: 9cd3f16ba6580e041bfac5996bd412b0, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8008063096557673001, guid: 9cd3f16ba6580e041bfac5996bd412b0, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8008063096557673001, guid: 9cd3f16ba6580e041bfac5996bd412b0, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8008063096557673001, guid: 9cd3f16ba6580e041bfac5996bd412b0, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8008063096557673001, guid: 9cd3f16ba6580e041bfac5996bd412b0, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8008063096557673001, guid: 9cd3f16ba6580e041bfac5996bd412b0, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8008063096557673001, guid: 9cd3f16ba6580e041bfac5996bd412b0, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 9cd3f16ba6580e041bfac5996bd412b0, type: 3}
---- !u!4 &542295165 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 8008063096557673001, guid: 9cd3f16ba6580e041bfac5996bd412b0, type: 3}
-  m_PrefabInstance: {fileID: 542295164}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &566820159
 GameObject:
   m_ObjectHideFlags: 0
@@ -427,7 +365,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 542295165}
+  - {fileID: 1249516858}
   m_Father: {fileID: 2935951484389514906}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: -5.575, y: -91.165, z: 89.741}
@@ -464,6 +402,68 @@ Transform:
   m_Father: {fileID: 951460949906310946}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1249516857
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 566820160}
+    m_Modifications:
+    - target: {fileID: 5883255735991980120, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5883255735991980120, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5883255735991980120, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5883255735991980120, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5883255735991980120, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5883255735991980120, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5883255735991980120, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5883255735991980120, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5883255735991980120, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5883255735991980120, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5883255735991980120, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6832412113328611646, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
+      propertyPath: m_Name
+      value: Assault Rifle
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
+--- !u!4 &1249516858 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5883255735991980120, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
+  m_PrefabInstance: {fileID: 1249516857}
+  m_PrefabAsset: {fileID: 0}
 --- !u!95 &1442865001
 Animator:
   serializedVersion: 5
