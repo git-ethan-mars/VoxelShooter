@@ -12,6 +12,7 @@ namespace Entities
         private bool _hasCollided;
         private const int DestructionTime = 4;
         private const int ParticleSystemsCountModifier = 200;
+        private const int MaxVerticesForMeshCollider = 24000;
 
         public void Construct(IFallingMeshParticlePool particlePool)
         {
@@ -20,20 +21,22 @@ namespace Entities
 
         public void OnCollisionEnter(Collision collision)
         {
+            var mesh = GetComponent<MeshFilter>().mesh;
+            var length = mesh.vertexCount;
+            if (length > MaxVerticesForMeshCollider)
+                GetComponent<Rigidbody>().isKinematic = true;
             if (_hasCollided)
                 return;
             _hasCollided = true;
-            StartCoroutine(ProcessCollision(DestructionTime));
+            StartCoroutine(ProcessCollision(mesh, length, DestructionTime));
         }
         
-        public IEnumerator ProcessCollision(float lifetime)
+        public IEnumerator ProcessCollision(Mesh mesh, int length, float lifetime)
         {
             yield return new WaitForSeconds(lifetime);
-            var mesh = GetComponent<MeshFilter>().mesh;
             var vertices = mesh.vertices;
             var colors = mesh.colors;
             var particleSystems = new List<ParticleSystem>();
-            var length = mesh.vertices.Length;
             var blocksCount = length / 24;
             var modifier = Math.Max(Math.Round((double)blocksCount / ParticleSystemsCountModifier), 1);
             var counter = 0;

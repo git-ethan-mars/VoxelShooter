@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Infrastructure.Factory;
-using MapLogic;
 using Mirror;
 using Networking.ServerServices;
 using Networking.Synchronization;
@@ -12,20 +11,24 @@ namespace Explosions
     public abstract class ExplosionBehaviour
     {
         private readonly IExplosionArea _explosionArea;
-        private readonly IParticleFactory _particleFactory;
-        private readonly MapUpdater _mapUpdater;
-        private readonly MapDestructionAlgorithm _mapDestructionAlgorithm;
 
-        protected ExplosionBehaviour(MapUpdater mapUpdater, IParticleFactory particleFactory, 
-            IExplosionArea explosionArea, MapDestructionAlgorithm mapDestructionAlgorithm)
+        private readonly IParticleFactory _particleFactory;
+
+        private readonly MapUpdater _mapUpdater;
+
+        public abstract void Explode(Vector3Int explosionCenter, GameObject explosive, int radius,
+            NetworkConnectionToClient connection, int damage, int particlesSpeed,
+            int particlesCount, List<GameObject> exploded, string explosiveTag);
+
+        protected ExplosionBehaviour(MapUpdater mapUpdater, IParticleFactory particleFactory,
+            IExplosionArea explosionArea)
         {
             _explosionArea = explosionArea;
             _mapUpdater = mapUpdater;
             _particleFactory = particleFactory;
-            _mapDestructionAlgorithm = mapDestructionAlgorithm;
         }
-        
-        protected void DamagePlayer(Collider hitCollider, Vector3 explosionCenter, int radius, int damage, 
+
+        protected void DamagePlayer(Collider hitCollider, Vector3 explosionCenter, int radius, int damage,
             int particlesSpeed, NetworkConnectionToClient connection)
         {
             if (hitCollider.CompareTag("Player"))
@@ -46,17 +49,12 @@ namespace Explosions
             }
         }
 
-        protected void DestroyExplosiveWithBlocks(Vector3Int explosionCenter, GameObject explosive, int radius, 
+        protected void DestroyExplosiveWithBlocks(Vector3Int explosionCenter, GameObject explosive, int radius,
             int particlesSpeed, int particlesCount)
         {
-            _mapDestructionAlgorithm.StartDestruction(explosionCenter, radius);
             _particleFactory.CreateRchParticle(explosionCenter, particlesSpeed, particlesCount);
             NetworkServer.Destroy(explosive);
+            _mapUpdater.DestroyBlocks(_explosionArea.GetExplodedBlocks(radius, explosionCenter));
         }
-        
-        public abstract void Explode(Vector3Int explosionCenter, GameObject explosive, int radius, 
-            NetworkConnectionToClient connection, int damage, int particlesSpeed, 
-            int particlesCount, List<GameObject> exploded, string explosiveTag);
-        
     }
 }

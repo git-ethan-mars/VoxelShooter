@@ -16,7 +16,9 @@ namespace Infrastructure.Factory
         private const string FallingMeshPath = "Prefabs/MapCreation/FallingMesh";
         private const string ChunkMeshRendererPath = "Prefabs/MapCreation/Chunk";
         private const string WallPath = "Prefabs/MapCreation/Wall";
+        private const string PhysicMaterial = "Physics Materials/HighFrictionMaterial";
         private readonly IAssetProvider _assets;
+        private const int MaxVerticesForMeshCollider = 24000;
 
         public MeshFactory(IAssetProvider assets)
         {
@@ -37,8 +39,23 @@ namespace Infrastructure.Factory
             fallingMesh.GetComponent<FallingMesh>().Construct(fallingMeshFallingMeshParticlePool);
             var torque = new Vector3(Random.Range(0, 40), 0, Random.Range(0, 40));
             fallingMesh.GetComponent<Rigidbody>().AddTorque(torque);
-            var meshCollider = fallingMesh.GetComponent<MeshCollider>();
-            meshCollider.sharedMesh = mesh;
+            if (meshData.Vertices.Count > MaxVerticesForMeshCollider)
+            {
+                fallingMesh.AddComponent<SphereCollider>();
+                var sphereCollider = fallingMesh.GetComponent<SphereCollider>();
+                var meshRenderer = fallingMesh.GetComponent<MeshRenderer>().bounds;
+                sphereCollider.center = meshRenderer.center;
+                sphereCollider.radius = 1;
+                sphereCollider.material = _assets.Load<PhysicMaterial>(PhysicMaterial);
+            }
+            else
+            {
+                fallingMesh.AddComponent<MeshCollider>();
+                var meshCollider = fallingMesh.GetComponent<MeshCollider>();
+                meshCollider.convex = true;
+                meshCollider.sharedMesh = mesh;
+                meshCollider.material = _assets.Load<PhysicMaterial>(PhysicMaterial);
+            }
         }
 
         public GameObject CreateChunkMeshRender(Vector3 position, Quaternion rotation, Transform parent)

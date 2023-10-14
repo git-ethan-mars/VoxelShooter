@@ -22,7 +22,6 @@ namespace Networking
         public MapProvider MapProvider { get; }
         public ServerData ServerData { get; }
         public MapUpdater MapUpdater { get; }
-        public MapDestructionAlgorithm MapDestructionAlgorithm { get; }
         private readonly ServerSettings _serverSettings;
         private readonly EntityPositionValidator _entityPositionValidator;
         private readonly IEntityFactory _entityFactory;
@@ -43,16 +42,16 @@ namespace Networking
             _serverSettings = serverSettings;
             _entityFactory = entityFactory;
             MapProvider = MapReader.ReadFromFile(_serverSettings.MapName, staticData);
-            MapUpdater = new MapUpdater(MapProvider);
-            MapDestructionAlgorithm = new MapDestructionAlgorithm(coroutineRunner, MapProvider, MapUpdater);
+            var destructionAlgorithm = new ColumnDestructionAlgorithm(MapProvider);
+            MapUpdater = new MapUpdater(_coroutineRunner, MapProvider, destructionAlgorithm);
             ServerData = new ServerData(staticData, MapProvider);
             _entityPositionValidator = new EntityPositionValidator(MapUpdater, MapProvider);
             _playerFactory = new PlayerFactory(assets, this, particleFactory);
             var sphereExplosionArea = new SphereExplosionArea(MapProvider);
             var singleExplosionBehaviour = new SingleExplosionBehaviour(MapUpdater, particleFactory,
-                sphereExplosionArea, MapDestructionAlgorithm);
+                sphereExplosionArea);
             var chainExplosionBehaviour = new ChainExplosionBehaviour(MapUpdater, particleFactory,
-                sphereExplosionArea, MapDestructionAlgorithm);
+                sphereExplosionArea);
             _addBlocksHandler = new AddBlocksHandler(this);
             _changeClassHandler = new ChangeClassHandler(this);
             _changeSlotHandler = new ChangeSlotHandler(this);

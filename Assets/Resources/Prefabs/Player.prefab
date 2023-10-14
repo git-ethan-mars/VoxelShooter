@@ -106,7 +106,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2742225876997815280}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Left leg
   m_TagString: Leg
   m_Icon: {fileID: 0}
@@ -141,7 +141,7 @@ GameObject:
   - component: {fileID: 3157100881742231132}
   - component: {fileID: 8607930526394087490}
   - component: {fileID: 6176815723976854097}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -277,7 +277,7 @@ GameObject:
   - component: {fileID: 5300560821960517367}
   - component: {fileID: 6131346967020701535}
   - component: {fileID: 3916779899806900265}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -657,7 +657,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 162809396587092744}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: Head Pivot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -883,7 +883,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 37491314163932749}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Right leg
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1354,7 +1354,7 @@ GameObject:
   - component: {fileID: 1864132953276379790}
   - component: {fileID: 1304852672885579959}
   - component: {fileID: 1347592026688706292}
-  m_Layer: 2
+  m_Layer: 10
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -1895,7 +1895,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8217119693751340438}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Left arm
   m_TagString: Arm
   m_Icon: {fileID: 0}
@@ -1928,7 +1928,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7085777246420524792}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Right arm
   m_TagString: Arm
   m_Icon: {fileID: 0}

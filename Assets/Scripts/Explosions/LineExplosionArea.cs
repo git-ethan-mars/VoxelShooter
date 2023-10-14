@@ -15,10 +15,11 @@ namespace Explosions
 
         public List<Vector3Int> GetExplodedBlocks(int radius, Vector3Int targetBlock)
         {
-            var blocks = new List<Vector3Int> { targetBlock };
+            var blocks = new List<Vector3Int>();
             for (var i = -radius / 2; i <= radius / 2; i++)
             {
-                if (i != 0 && _mapProvider.IsValidPosition(targetBlock + new Vector3Int(0, i, 0)))
+                if (_mapProvider.IsDestructiblePosition(targetBlock + new Vector3Int(0, i, 0)) && _mapProvider
+                        .GetBlockByGlobalPosition(targetBlock + new Vector3Int(0, i, 0)).IsSolid())
                 {
                     blocks.Add(targetBlock + new Vector3Int(0, i, 0));
                 }

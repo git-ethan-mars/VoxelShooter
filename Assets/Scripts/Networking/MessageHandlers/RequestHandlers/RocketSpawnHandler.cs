@@ -34,7 +34,7 @@ namespace Networking.Messages.Requests
             var rocketData = (RocketLauncherItem) _staticData.GetItem(request.ItemId);
             var direction = request.Ray.direction;
             var rocket = _entityFactory.CreateRocket(request.Ray.origin + direction * 2,
-                Quaternion.LookRotation(direction), _server.MapProvider, _server.MapUpdater, _particleFactory, rocketData, connection, _server.MapDestructionAlgorithm);
+                Quaternion.LookRotation(direction), _server.MapProvider, _server.MapUpdater, _particleFactory, rocketData, connection);
             rocket.GetComponent<Rigidbody>().velocity = direction * rocketData.speed;
         }
     }

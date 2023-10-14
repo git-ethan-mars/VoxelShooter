@@ -16,17 +16,9 @@ namespace Networking.MessageHandlers.RequestHandlers
         {
             _server = server;
         }
+
         protected override void OnRequestReceived(NetworkConnectionToClient connection, AddBlocksRequest request)
         {
-            for (var i = 0; i < request.GlobalPositions.Length; i++)
-            {
-                var index = _server.MapDestructionAlgorithm.GetVertexIndex(request.GlobalPositions[i]);
-                _server.MapProvider.MapData._solidBlocks.Add(index);
-                _server.MapProvider.MapData._blocksPlacedByPlayer.Add(index);
-                _server.MapProvider.MapData._blockColors[index] = request.Blocks[i].Color;
-            }
-            _server.MapUpdater.UpdateEntityPositions();
-
             var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
             if (!result || !playerData.IsAlive) return;
             var blockAmount = playerData.ItemCountById[request.ItemId];
@@ -50,16 +42,24 @@ namespace Networking.MessageHandlers.RequestHandlers
                         return;
                 }
 
-                if (!_server.MapProvider.IsValidPosition(request.GlobalPositions[i])) return;
+                if (!_server.MapProvider.IsDestructiblePosition(request.GlobalPositions[i]))
+                {
+                    return;
+                }
+
                 var currentBlock = _server.MapProvider.GetBlockByGlobalPosition(request.GlobalPositions[i]);
-                if (currentBlock.Equals(request.Blocks[i])) return;
+                if (currentBlock.Equals(request.Blocks[i]))
+                {
+                    return;
+                }
+
                 _server.MapUpdater.SetBlockByGlobalPosition(request.GlobalPositions[i], request.Blocks[i]);
                 validPositions.Add(request.GlobalPositions[i]);
                 validBlockData.Add(request.Blocks[i]);
             }
 
             playerData.ItemCountById[request.ItemId] = blockAmount - blocksUsed;
-            NetworkServer.SendToAll(new UpdateMapResponse(validPositions.ToArray(), validBlockData.ToArray()));
+            _server.MapUpdater.SetBlocksByGlobalPositions(validPositions, validBlockData);
             connection.Send(new ItemUseResponse(request.ItemId, blockAmount - blocksUsed));
         }
     }

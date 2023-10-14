@@ -50,9 +50,10 @@ namespace Infrastructure.Factory
             _coroutineRunner.StartCoroutine(DestroyParticle(rchParticle, main.startLifetime.constant));
         }
 
-        public ParticleSystem CreateFallingMeshParticle()
+        public ParticleSystem CreateFallingMeshParticle(Transform particleContainer)
         {
-            return _assets.Instantiate(ParticlePath.FallingMeshParticlePath).GetComponent<ParticleSystem>();
+            return _assets.Instantiate(ParticlePath.FallingMeshParticlePath, particleContainer)
+                .GetComponent<ParticleSystem>();
         }
 
         private static IEnumerator DestroyParticle(GameObject particle, float lifetime)

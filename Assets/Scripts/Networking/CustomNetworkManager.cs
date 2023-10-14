@@ -83,8 +83,8 @@ namespace Networking
                 MapWriter.WriteMap(_server.MapProvider, memoryStream);
                 var bytes = memoryStream.ToArray();
                 var mapSplitter = new MapSplitter();
-                var mapMessages = mapSplitter.SplitBytesIntoMessages(bytes, 100000);
-                StartCoroutine(mapSplitter.SendMessages(mapMessages, connection, 1f));
+                var mapMessages = mapSplitter.SplitBytesIntoMessages(bytes, Constants.MessageSize);
+                StartCoroutine(mapSplitter.SendMessages(mapMessages, connection, Constants.MessageDelay));
             }
         }
 
