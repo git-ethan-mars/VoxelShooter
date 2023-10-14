@@ -1967,8 +1967,7 @@ Transform:
   m_LocalPosition: {x: -2.12, y: 10.64, z: 4.41}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1000729922737100397}
+  m_Children: []
   m_Father: {fileID: 2935951484019069552}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: -5.575, y: -91.165, z: 89.741}
@@ -2038,65 +2037,3 @@ Transform:
   m_Father: {fileID: 2774989034482963106}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
---- !u!1001 &6649225632260392501
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 7893378094424813921}
-    m_Modifications:
-    - target: {fileID: 5883255735991980120, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
-      propertyPath: m_RootOrder
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5883255735991980120, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5883255735991980120, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5883255735991980120, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5883255735991980120, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5883255735991980120, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5883255735991980120, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5883255735991980120, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5883255735991980120, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5883255735991980120, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5883255735991980120, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6832412113328611646, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
-      propertyPath: m_Name
-      value: Assault Rifle
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
---- !u!4 &1000729922737100397 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 5883255735991980120, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
-  m_PrefabInstance: {fileID: 6649225632260392501}
-  m_PrefabAsset: {fileID: 0}
