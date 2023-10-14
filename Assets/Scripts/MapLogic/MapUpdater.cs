@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Data;
+using Infrastructure;
 using Mirror;
+using Networking;
 using Networking.Messages.Responses;
 using Networking.ServerServices;
 using UnityEngine;
@@ -12,13 +14,18 @@ namespace MapLogic
     public class MapUpdater
     {
         public event Action MapUpdated;
+        private readonly ICoroutineRunner _coroutineRunner;
         private readonly MapProvider _mapProvider;
         private readonly ColumnDestructionAlgorithm _destructionAlgorithm;
+        private readonly BlockSplitter _blockSplitter;
 
-        public MapUpdater(MapProvider mapProvider, ColumnDestructionAlgorithm destructionAlgorithm)
+        public MapUpdater(ICoroutineRunner coroutineRunner, MapProvider mapProvider,
+            ColumnDestructionAlgorithm destructionAlgorithm)
         {
+            _coroutineRunner = coroutineRunner;
             _mapProvider = mapProvider;
             _destructionAlgorithm = destructionAlgorithm;
+            _blockSplitter = new BlockSplitter();
         }
 
         public void UpdateSpawnPoint(SpawnPointData oldPosition, SpawnPointData position)
@@ -29,6 +36,12 @@ namespace MapLogic
 
         public void SetBlockByGlobalPosition(Vector3Int position, BlockData blockData)
         {
+            if (!blockData.IsSolid())
+            {
+                Debug.LogWarning("This method doesn't support empty blocks");
+                return;
+            }
+
             _mapProvider.MapData.Chunks[_mapProvider.GetChunkNumberByGlobalPosition(position.x, position.y, position.z)]
                     .Blocks[
                         position.x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
@@ -44,9 +57,16 @@ namespace MapLogic
         {
             for (var i = 0; i < positions.Count; i++)
             {
+                if (!blockData[i].IsSolid())
+                {
+                    Debug.LogWarning("This method doesn't support empty blocks");
+                    return;
+                }
+
                 _mapProvider.MapData
                         .Chunks[
-                            _mapProvider.GetChunkNumberByGlobalPosition(positions[i].x, positions[i].y, positions[i].z)]
+                            _mapProvider.GetChunkNumberByGlobalPosition(positions[i].x, positions[i].y,
+                                positions[i].z)]
                         .Blocks[
                             positions[i].x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
                             positions[i].y % ChunkData.ChunkSize * ChunkData.ChunkSize +
@@ -55,6 +75,9 @@ namespace MapLogic
             }
 
             MapUpdated?.Invoke();
+            var updateMessages =
+                _blockSplitter.SplitArraysIntoMessages(positions.ToArray(), blockData.ToArray(), Constants.MessageSize);
+            _coroutineRunner.StartCoroutine(_blockSplitter.SendMessages(updateMessages, Constants.MessageDelay));
             NetworkServer.SendToAll(new UpdateMapResponse(positions.ToArray(), blockData.ToArray()));
             _destructionAlgorithm.Add(positions);
         }
@@ -95,8 +118,13 @@ namespace MapLogic
 
             MapUpdated?.Invoke();
             var destroyedBlocks = positions.Union(fallingPositions).ToArray();
-            NetworkServer.SendToAll(new UpdateMapResponse(destroyedBlocks, new BlockData[destroyedBlocks.Length]));
-            NetworkServer.SendToAll(new FallBlockResponse(fallingPositions, colors));
+            var updateMessages = _blockSplitter.SplitArraysIntoMessages(destroyedBlocks,
+                new BlockData[destroyedBlocks.Length],
+                Constants.MessageSize);
+            _coroutineRunner.StartCoroutine(_blockSplitter.SendMessages(updateMessages, Constants.MessageDelay));
+            var fallingBlockMessages =
+                _blockSplitter.SplitArraysIntoMessages(fallingPositions, colors, Constants.MessageSize);
+            _coroutineRunner.StartCoroutine(_blockSplitter.SendMessages(fallingBlockMessages, Constants.MessageDelay));
         }
     }
 }

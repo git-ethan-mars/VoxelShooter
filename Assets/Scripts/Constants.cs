@@ -7,4 +7,6 @@ public static class Constants
     public static LayerMask BuildMask = LayerMask.GetMask("Chunk");
     public const float Epsilon = 0.001f;
     public const int DefaultFov = 60;
+    public const int MessageSize = 100000;
+    public const float MessageDelay = 1f;
 }

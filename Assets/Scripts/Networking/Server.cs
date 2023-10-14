@@ -44,7 +44,7 @@ namespace Networking
             _entityFactory = entityFactory;
             MapProvider = MapReader.ReadFromFile(_serverSettings.MapName, staticData);
             ColumnDestructionAlgorithm = new ColumnDestructionAlgorithm(MapProvider);
-            MapUpdater = new MapUpdater(MapProvider, ColumnDestructionAlgorithm);
+            MapUpdater = new MapUpdater(_coroutineRunner, MapProvider, ColumnDestructionAlgorithm);
             ServerData = new ServerData(staticData, MapProvider);
             _entityPositionValidator = new EntityPositionValidator(MapUpdater, MapProvider);
             _playerFactory = new PlayerFactory(assets, this, particleFactory);
