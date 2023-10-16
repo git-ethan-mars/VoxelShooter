@@ -32,7 +32,8 @@ namespace PlayerLogic
             _hud = AllServices.Container.Single<IUIFactory>().CreateHud(gameObject);
             var weatherParticleSystem = AllServices.Container.Single<IStaticDataService>()
                 .GetMapConfigure(((CustomNetworkManager)NetworkManager.singleton).Client.Data.MapName).weather;
-            Instantiate(weatherParticleSystem, transform);
+            if (weatherParticleSystem)
+                Instantiate(weatherParticleSystem, transform);
             TurnOffNickName();
             TurnOffBodyRender();
         }
