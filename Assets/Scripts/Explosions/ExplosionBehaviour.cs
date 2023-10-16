@@ -52,9 +52,11 @@ namespace Explosions
         protected void DestroyExplosiveWithBlocks(Vector3Int explosionCenter, GameObject explosive, int radius,
             int particlesSpeed, int particlesCount, string explosiveTag)
         {
-            _particleFactory.CreateRchParticle(explosionCenter, particlesSpeed, particlesCount);
             if (explosiveTag != "Drill")
+            {
+                _particleFactory.CreateRchParticle(explosionCenter, particlesSpeed, particlesCount);
                 NetworkServer.Destroy(explosive);
+            }
             _mapUpdater.DestroyBlocks(_explosionArea.GetExplodedBlocks(radius, explosionCenter));
         }
     }

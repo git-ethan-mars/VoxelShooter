@@ -30,10 +30,6 @@ namespace Entities
             _owner = owner;
             _explosionBehaviour = new SingleExplosionBehaviour(mapUpdater, particleFactory, new SphereExplosionArea(mapProvider));
             _coroutineRunner = coroutineRunner;
-        }
-
-        public void Start()
-        {
             _coroutineRunner.StartCoroutine(DestroyDrill(_lifetime));
         }
 
