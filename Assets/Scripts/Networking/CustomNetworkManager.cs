@@ -74,6 +74,7 @@ namespace Networking
             if (IsHost(connection))
             {
                 Client.MapProvider = _server.MapProvider;
+                Client.Data.MapName = _server.MapProvider.MapName;
                 OnMapDownloaded();
             }
             else

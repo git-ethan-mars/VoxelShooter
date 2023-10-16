@@ -2,7 +2,9 @@ using System;
 using Data;
 using Infrastructure.Factory;
 using Infrastructure.Services;
+using Infrastructure.Services.StaticData;
 using Mirror;
+using Networking;
 using UnityEngine;
 
 namespace PlayerLogic
@@ -28,6 +30,9 @@ namespace PlayerLogic
         public override void OnStartLocalPlayer()
         {
             _hud = AllServices.Container.Single<IUIFactory>().CreateHud(gameObject);
+            var weatherParticleSystem = AllServices.Container.Single<IStaticDataService>()
+                .GetMapConfigure(((CustomNetworkManager)NetworkManager.singleton).Client.Data.MapName).weather;
+            Instantiate(weatherParticleSystem, transform);
             TurnOffNickName();
             TurnOffBodyRender();
         }
