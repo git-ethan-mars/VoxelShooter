@@ -59,7 +59,7 @@ namespace Networking
             _grenadeSpawnHandler = new GrenadeSpawnHandler(this, coroutineRunner, entityFactory, staticData,
                 singleExplosionBehaviour);
             _rocketSpawnHandler = new RocketSpawnHandler(this, staticData, entityFactory, particleFactory);
-            _drillSpawnHandler = new DrillSpawnHandler(this, staticData, entityFactory, particleFactory);
+            _drillSpawnHandler = new DrillSpawnHandler(this, staticData, entityFactory, particleFactory, coroutineRunner);
             _tntSpawnHandler =
                 new TntSpawnHandler(this, coroutineRunner, entityFactory, staticData, chainExplosionBehaviour);
         }

@@ -12,6 +12,7 @@ TagManager:
   - Hand
   - TNT
   - Rocket
+  - Drill
   layers:
   - Default
   - TransparentFX

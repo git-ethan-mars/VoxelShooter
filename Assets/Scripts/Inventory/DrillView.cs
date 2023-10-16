@@ -54,7 +54,6 @@ namespace Inventory
 
         public void OnLeftMouseButtonDown()
         {
-            Debug.Log(_itemId);
             NetworkClient.Send(new DrillSpawnRequest(_itemId,
                 _raycaster.CentredRay));
         }

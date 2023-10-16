@@ -16,10 +16,13 @@ namespace Explosions
             NetworkConnectionToClient connection, int damage, int particlesSpeed, 
             int particlesCount, List<GameObject> exploded, string explosiveTag)
         {
-            DestroyExplosiveWithBlocks(explosionCenter, explosive, radius, particlesSpeed, particlesCount);
+            DestroyExplosiveWithBlocks(explosionCenter, explosive, radius, particlesSpeed, particlesCount, explosiveTag);
             Collider[] hitColliders = Physics.OverlapSphere(explosionCenter, radius);
             foreach (var hitCollider in hitColliders)
-                DamagePlayer(hitCollider, explosionCenter, radius, damage, particlesSpeed, connection);
+            {
+                if (connection != null)
+                    DamagePlayer(hitCollider, explosionCenter, radius, damage, particlesSpeed, connection);
+            }
         }
     }
 }

@@ -20,15 +20,19 @@ namespace Explosions
             int particlesCount, List<GameObject> exploded, string explosiveTag)
         {
             exploded.Add(explosive);
-            DestroyExplosiveWithBlocks(explosionCenter, explosive, radius, particlesSpeed, particlesCount);
+            DestroyExplosiveWithBlocks(explosionCenter, explosive, radius, particlesSpeed, particlesCount, explosiveTag);
             Collider[] hitColliders = Physics.OverlapSphere(explosionCenter, radius);
             foreach (var hitCollider in hitColliders)
             {
-                if (hitCollider.CompareTag(explosiveTag) && exploded.All(x => x.gameObject != hitCollider.gameObject))
-                    Explode(Vector3Int.FloorToInt(hitCollider.gameObject.transform.position),
-                        hitCollider.gameObject, radius, connection, damage, particlesSpeed,
-                        particlesCount, exploded, explosiveTag);
-                DamagePlayer(hitCollider, explosionCenter, radius, damage, particlesSpeed, connection);
+                if (connection != null)
+                {
+                    if (hitCollider.CompareTag(explosiveTag) &&
+                        exploded.All(x => x.gameObject != hitCollider.gameObject))
+                        Explode(Vector3Int.FloorToInt(hitCollider.gameObject.transform.position),
+                            hitCollider.gameObject, radius, connection, damage, particlesSpeed,
+                            particlesCount, exploded, explosiveTag);
+                    DamagePlayer(hitCollider, explosionCenter, radius, damage, particlesSpeed, connection);
+                }
             }
         }
     }

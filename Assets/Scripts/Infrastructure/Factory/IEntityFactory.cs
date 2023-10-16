@@ -21,7 +21,8 @@ namespace Infrastructure.Factory
         
         GameObject CreateDrill(Vector3 position, Quaternion rotation, MapProvider mapProvider,
             MapUpdater mapUpdater,
-            IParticleFactory particleFactory, DrillItem drillData, NetworkConnectionToClient owner);
+            IParticleFactory particleFactory, DrillItem drillData, NetworkConnectionToClient owner,
+            ICoroutineRunner coroutineRunner);
 
         GameObject CreateSpawnPoint(Vector3 position, Transform parent);
     }

@@ -1,7 +1,8 @@
-using System;
+using System.Collections;
 using System.Collections.Generic;
 using Data;
 using Explosions;
+using Infrastructure;
 using Infrastructure.Factory;
 using MapLogic;
 using Mirror;
@@ -15,48 +16,49 @@ namespace Entities
         private ExplosionBehaviour _explosionBehaviour;
         private int _radius;
         private int _damage;
+        private int _lifetime;
         private NetworkConnectionToClient _owner;
         private bool _isExploded;
+        private ICoroutineRunner _coroutineRunner;
 
-        public void Construct(MapProvider mapProvider, MapUpdater mapUpdater, DrillItem rocketData,
-            NetworkConnectionToClient owner, IParticleFactory particleFactory)
+        public void Construct(MapProvider mapProvider, MapUpdater mapUpdater, DrillItem drillData,
+            NetworkConnectionToClient owner, IParticleFactory particleFactory, ICoroutineRunner coroutineRunner)
         {
-            _radius = rocketData.radius;
-            _damage = rocketData.damage;
+            _radius = drillData.radius;
+            _damage = drillData.damage;
+            _lifetime = drillData.lifetime;
             _owner = owner;
             _explosionBehaviour = new SingleExplosionBehaviour(mapUpdater, particleFactory, new SphereExplosionArea(mapProvider));
+            _coroutineRunner = coroutineRunner;
         }
 
-        // void Update()
-        // {
-        //
-        //     // The step size is equal to speed times frame time.
-        //     float singleStep = 10 * Time.deltaTime;
-        //
-        //     // Rotate the forward vector towards the target direction by one step
-        //     Vector3 newDirection = Vector3.RotateTowards(transform.forward, transform.forward * 10, singleStep, 0.0f);
-        //     
-        //     // Calculate a rotation a step closer to the target and applies rotation to this object
-        //     transform.rotation = Quaternion.LookRotation(newDirection);
-        // }
+        public void Start()
+        {
+            _coroutineRunner.StartCoroutine(DestroyDrill(_lifetime));
+        }
+
+        void FixedUpdate()
+        {
+            transform.Rotate(new Vector3(0, 0, transform.forward.normalized.z), 50 * Time.deltaTime);
+        }
         
-        void Update()
+        private void OnTriggerEnter(Collider other)
         {
-            Debug.Log(transform.forward.normalized);
-            transform.Rotate(transform.forward.normalized, 30 * Time.deltaTime);
-        }
+            if (!isServer) return;
 
-        private void OnCollisionEnter(Collision collision)
-        {
-            if (!isServer || _isExploded) return;
-            _isExploded = true;
             var position = transform.position;
-            var rocketPosition = new Vector3Int((int) position.x,
+            var drillPosition = new Vector3Int((int) position.x,
                 (int) position.y, (int) position.z);
 
-            // var explodedRockets = new List<GameObject>();
-            // _explosionBehaviour.Explode(rocketPosition, gameObject, _radius,_owner, _damage, 
-            //     _particlesSpeed, _particlesCount, explodedRockets, gameObject.tag);
+            var explodedRockets = new List<GameObject>();
+            _explosionBehaviour.Explode(drillPosition, gameObject, _radius, _owner, _damage, 
+                0, 0, explodedRockets, gameObject.tag);
+        }
+
+        private IEnumerator DestroyDrill(float delayInSeconds)
+        {
+            yield return new WaitForSeconds(delayInSeconds);
+            NetworkServer.Destroy(gameObject);
         }
     }
 }

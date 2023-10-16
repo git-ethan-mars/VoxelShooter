@@ -1,4 +1,5 @@
 using Data;
+using Infrastructure;
 using Infrastructure.Factory;
 using Infrastructure.Services.StaticData;
 using Mirror;
@@ -14,14 +15,16 @@ namespace Networking.Messages.Requests
         private readonly IStaticDataService _staticData;
         private readonly IEntityFactory _entityFactory;
         private readonly IParticleFactory _particleFactory;
+        private readonly ICoroutineRunner _coroutineRunner;
 
-        public DrillSpawnHandler(IServer server, IStaticDataService staticData, 
-            IEntityFactory entityFactory, IParticleFactory particleFactory)
+        public DrillSpawnHandler(IServer server, IStaticDataService staticData,
+            IEntityFactory entityFactory, IParticleFactory particleFactory, ICoroutineRunner coroutineRunner)
         {
             _server = server;
             _staticData = staticData;
             _entityFactory = entityFactory;
             _particleFactory = particleFactory;
+            _coroutineRunner = coroutineRunner;
         }
         
         protected override void OnRequestReceived(NetworkConnectionToClient connection, DrillSpawnRequest request)
@@ -36,7 +39,7 @@ namespace Networking.Messages.Requests
             var drillData = (DrillItem) _staticData.GetItem(request.ItemId);
             var direction = request.Ray.direction;
             var drill = _entityFactory.CreateDrill(request.Ray.origin + direction * 2,
-                Quaternion.LookRotation(direction), _server.MapProvider, _server.MapUpdater, _particleFactory, drillData, connection);
+                Quaternion.LookRotation(direction), _server.MapProvider, _server.MapUpdater, _particleFactory, drillData, connection, _coroutineRunner);
             drill.GetComponent<Rigidbody>().velocity = direction * drillData.speed;
         }
     }

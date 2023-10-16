@@ -56,10 +56,11 @@ namespace Infrastructure.Factory
         
         public GameObject CreateDrill(Vector3 position, Quaternion rotation, MapProvider mapProvider,
             MapUpdater mapUpdater,
-            IParticleFactory particleFactory, DrillItem drillData, NetworkConnectionToClient owner)
+            IParticleFactory particleFactory, DrillItem drillData, NetworkConnectionToClient owner,
+            ICoroutineRunner coroutineRunner)
         {
             var drill = _assets.Instantiate(DrillPath, position, rotation);
-            drill.GetComponent<Drill>().Construct(mapProvider, mapUpdater, drillData, owner, particleFactory);
+            drill.GetComponent<Drill>().Construct(mapProvider, mapUpdater, drillData, owner, particleFactory, coroutineRunner);
             NetworkServer.Spawn(drill);
             return drill;
         }
