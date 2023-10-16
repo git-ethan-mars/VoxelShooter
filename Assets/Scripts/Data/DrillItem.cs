@@ -11,6 +11,7 @@ namespace Data
         public int damage;
         public int speed;
         public int lifetime;
+        public int range;
 
         public void Awake()
         {

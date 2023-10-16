@@ -22,7 +22,7 @@ namespace Inventory
         {
             _meleeWeapon = configuration;
             _raycaster = raycaster;
-            _cubeRenderer = new CubeRenderer(player.GetComponent<LineRenderer>(), raycaster, player);
+            _cubeRenderer = new CubeRenderer(player.GetComponent<LineRenderer>(), raycaster, player.placeDistance);
             Icon = _meleeWeapon.Icon;
             _meleeWeaponSynchronization = player.GetComponent<MeleeWeaponSynchronization>();
         }

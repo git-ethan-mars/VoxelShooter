@@ -9,11 +9,11 @@ namespace Rendering
         private readonly Raycaster _raycaster;
         private readonly float _placeDistance;
 
-        public CubeRenderer(LineRenderer lineRenderer, Raycaster raycaster, Player player)
+        public CubeRenderer(LineRenderer lineRenderer, Raycaster raycaster, float placeDistance)
         {
             _lineRenderer = lineRenderer;
             _raycaster = raycaster;
-            _placeDistance = player.placeDistance;
+            _placeDistance = placeDistance;
         }
 
 
