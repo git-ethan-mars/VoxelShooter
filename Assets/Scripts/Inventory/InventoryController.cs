@@ -153,6 +153,13 @@ namespace Inventory
                         _hud.GetComponent<Hud>());
                     Slots.Add(new Slot(item, handler));
                 }
+                
+                if (item.itemType == ItemType.Drill)
+                {
+                    var handler = new DrillView(_rayCaster, (DrillItem) item,
+                        _hud.GetComponent<Hud>());
+                    Slots.Add(new Slot(item, handler));
+                }
             }
         }
 

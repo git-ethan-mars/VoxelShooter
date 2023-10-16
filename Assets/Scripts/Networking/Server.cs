@@ -31,6 +31,7 @@ namespace Networking
         private readonly ChangeClassHandler _changeClassHandler;
         private readonly GrenadeSpawnHandler _grenadeSpawnHandler;
         private readonly RocketSpawnHandler _rocketSpawnHandler;
+        private readonly DrillSpawnHandler _drillSpawnHandler;
         private readonly TntSpawnHandler _tntSpawnHandler;
         private readonly ChangeSlotHandler _changeSlotHandler;
 
@@ -58,6 +59,7 @@ namespace Networking
             _grenadeSpawnHandler = new GrenadeSpawnHandler(this, coroutineRunner, entityFactory, staticData,
                 singleExplosionBehaviour);
             _rocketSpawnHandler = new RocketSpawnHandler(this, staticData, entityFactory, particleFactory);
+            _drillSpawnHandler = new DrillSpawnHandler(this, staticData, entityFactory, particleFactory);
             _tntSpawnHandler =
                 new TntSpawnHandler(this, coroutineRunner, entityFactory, staticData, chainExplosionBehaviour);
         }
@@ -69,6 +71,7 @@ namespace Networking
             _changeSlotHandler.Register();
             _grenadeSpawnHandler.Register();
             _rocketSpawnHandler.Register();
+            _drillSpawnHandler.Register();
             _tntSpawnHandler.Register();
         }
 
@@ -79,6 +82,7 @@ namespace Networking
             _changeSlotHandler.Unregister();
             _grenadeSpawnHandler.Unregister();
             _rocketSpawnHandler.Unregister();
+            _drillSpawnHandler.Unregister();
             _tntSpawnHandler.Unregister();
         }
 

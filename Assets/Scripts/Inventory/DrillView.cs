@@ -9,26 +9,26 @@ using UnityEngine.UI;
 
 namespace Inventory
 {
-    public class RocketLauncherView : IInventoryItemView, IConsumable, ILeftMouseButtonDownHandler
+    public class DrillView : IInventoryItemView, IConsumable, ILeftMouseButtonDownHandler
     {
         public Sprite Icon { get; }
         public int Count { get; set; }
         private readonly Raycaster _raycaster;
         private readonly float _delayInSeconds;
         private readonly int _itemId;
-        private readonly GameObject _rocketLauncherInfo;
-        private readonly TextMeshProUGUI _rocketLauncherCountText;
-        private readonly Sprite _rocketLauncherCountIcon;
+        private readonly GameObject _drillInfo;
+        private readonly TextMeshProUGUI _drillCountText;
+        private readonly Sprite _drillCountIcon;
         private readonly Sprite _itemTypeIcon;
         private readonly Image _itemType;
 
-        public RocketLauncherView(Raycaster raycaster, RocketLauncherItem configuration, Hud hud)
+        public DrillView(Raycaster raycaster, DrillItem configuration, Hud hud)
         {
             Icon = configuration.inventoryIcon;
             _itemId = configuration.id;
-            _rocketLauncherInfo = hud.itemInfo;
-            _rocketLauncherCountText = hud.itemCount;
-            _rocketLauncherCountIcon = configuration.countIcon;
+            _drillInfo = hud.itemInfo;
+            _drillCountText = hud.itemCount;
+            _drillCountIcon = configuration.countIcon;
             _itemType = hud.itemIcon;
             Count = configuration.count;
             _raycaster = raycaster;
@@ -37,26 +37,25 @@ namespace Inventory
 
         public void OnCountChanged()
         {
-            _rocketLauncherCountText.SetText(Count.ToString());
+            _drillCountText.SetText(Count.ToString());
         }
 
         public void Select()
         {
-            _rocketLauncherInfo.SetActive(true);
-            _itemType.sprite = _rocketLauncherCountIcon;
-            _rocketLauncherCountText.SetText(Count.ToString());
+            _drillInfo.SetActive(true);
+            _itemType.sprite = _drillCountIcon;
+            _drillCountText.SetText(Count.ToString());
         }
-
-
+        
         public void Unselect()
         {
-            _rocketLauncherInfo.SetActive(false);
+            _drillInfo.SetActive(false);
         }
 
         public void OnLeftMouseButtonDown()
         {
             Debug.Log(_itemId);
-            NetworkClient.Send(new RocketSpawnRequest(_itemId,
+            NetworkClient.Send(new DrillSpawnRequest(_itemId,
                 _raycaster.CentredRay));
         }
     }

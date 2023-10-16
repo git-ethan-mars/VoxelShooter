@@ -19,6 +19,7 @@ namespace Data
         Block,
         Brush,
         Grenade,
-        RocketLauncher
+        RocketLauncher,
+        Drill
     }
 }

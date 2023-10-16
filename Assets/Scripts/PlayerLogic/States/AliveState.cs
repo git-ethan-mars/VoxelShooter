@@ -61,6 +61,12 @@ namespace PlayerLogic.States
                     _playerData.ItemCountById[itemId] = ((RocketLauncherItem) item).count;
                     continue;
                 }
+                
+                if (item.itemType == ItemType.Drill)
+                {
+                    _playerData.ItemCountById[itemId] = ((DrillItem) item).count;
+                    continue;
+                }
 
                 _playerData.ItemCountById[itemId] = 1;
             }

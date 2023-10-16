@@ -18,6 +18,10 @@ namespace Infrastructure.Factory
         GameObject CreateRocket(Vector3 position, Quaternion rotation, MapProvider mapProvider,
             MapUpdater mapUpdater,
             IParticleFactory particleFactory, RocketLauncherItem rocketData, NetworkConnectionToClient owner);
+        
+        GameObject CreateDrill(Vector3 position, Quaternion rotation, MapProvider mapProvider,
+            MapUpdater mapUpdater,
+            IParticleFactory particleFactory, DrillItem drillData, NetworkConnectionToClient owner);
 
         GameObject CreateSpawnPoint(Vector3 position, Transform parent);
     }
