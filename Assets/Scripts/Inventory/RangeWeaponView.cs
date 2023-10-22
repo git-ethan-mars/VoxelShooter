@@ -71,7 +71,7 @@ namespace Inventory
         public void OnLeftMouseButtonHold()
         {
             var ray = _fpsCam.ViewportPointToRay(new Vector2(0.5f, 0.5f));
-            NetworkClient.Send(new ShootRequest(ray, false));
+            NetworkClient.Send(new ShootRequest(ray, true));
         }
 
         public void OnRightMouseButtonDown()
