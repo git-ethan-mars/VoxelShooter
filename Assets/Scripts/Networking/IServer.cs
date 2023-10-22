@@ -11,7 +11,6 @@ namespace Networking
         MapProvider MapProvider { get; }
         ServerData ServerData { get; }
         MapUpdater MapUpdater { get; }
-        void AddKill(NetworkConnectionToClient source, NetworkConnectionToClient receiver);
 
         void AddPlayer(NetworkConnectionToClient connection, GameClass chosenClass, CSteamID steamID,
             string nickname);

@@ -112,22 +112,6 @@ namespace Networking
             NetworkServer.DestroyPlayerForConnection(connection);
         }
 
-        public void AddKill(NetworkConnectionToClient killer, NetworkConnectionToClient victim)
-        {
-            var tombstonePosition = Vector3Int.FloorToInt(victim.identity.transform.position) +
-                                    Constants.WorldOffset;
-            var tombstone = _entityFactory.CreateTombstone(tombstonePosition);
-            _entityPositionValidator.AddEntity(tombstone.GetComponent<PushableObject>());
-            ServerData.AddKill(killer, victim);
-            var playerData = ServerData.GetPlayerData(victim);
-            playerData.PlayerStateMachine.Enter<DeathState>();
-            _playerFactory.CreateSpectatorPlayer(victim);
-            var respawnTimer = new RespawnTimer(_coroutineRunner, victim, _serverSettings.SpawnTime,
-                () => _playerFactory.RespawnPlayer(victim));
-            respawnTimer.Start();
-            NetworkServer.SendToAll(new ScoreboardResponse(ServerData.GetScoreData()));
-        }
-
         public void Damage(NetworkConnectionToClient source, NetworkConnectionToClient receiver, int totalDamage)
         {
             var result = ServerData.TryGetPlayerData(receiver, out var playerData);
@@ -198,6 +182,22 @@ namespace Networking
                 _entityPositionValidator.AddEntity(spawnPointScript);
                 spawnPointScript.PositionUpdated += MapUpdater.UpdateSpawnPoint; // TODO : Need to unsubscribe
             }
+        }
+
+        private void AddKill(NetworkConnectionToClient killer, NetworkConnectionToClient victim)
+        {
+            var tombstonePosition = Vector3Int.FloorToInt(victim.identity.transform.position) +
+                                    Constants.WorldOffset;
+            var tombstone = _entityFactory.CreateTombstone(tombstonePosition);
+            _entityPositionValidator.AddEntity(tombstone.GetComponent<PushableObject>());
+            ServerData.AddKill(killer, victim);
+            var playerData = ServerData.GetPlayerData(victim);
+            playerData.PlayerStateMachine.Enter<DeathState>();
+            _playerFactory.CreateSpectatorPlayer(victim);
+            var respawnTimer = new RespawnTimer(_coroutineRunner, victim, _serverSettings.SpawnTime,
+                () => _playerFactory.RespawnPlayer(victim));
+            respawnTimer.Start();
+            NetworkServer.SendToAll(new ScoreboardResponse(ServerData.GetScoreData()));
         }
     }
 }
