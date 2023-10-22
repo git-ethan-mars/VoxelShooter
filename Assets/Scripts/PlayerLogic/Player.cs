@@ -1,40 +1,46 @@
-using System;
-using Data;
+using System.Collections.Generic;
 using Infrastructure.Factory;
 using Infrastructure.Services;
 using Mirror;
+using Networking;
 using UnityEngine;
 
 namespace PlayerLogic
 {
     public class Player : NetworkBehaviour
     {
-        public event Action<int> OnHealthChanged;
-        [HideInInspector] [SyncVar] public float placeDistance;
-        [HideInInspector] [SyncVar] public string nickName;
-        [SyncVar(hook = nameof(UpdateHealth))] [HideInInspector] public int health;
-        public Transform itemPosition;
-        [SerializeField] private GameObject[] bodyParts;
-        [SerializeField] private GameObject nickNameCanvas;
-        private GameObject _hud;
+        public List<int> ItemsIds { get; private set; }
+        public float PlaceDistance { get; private set; }
 
-        public void Construct(PlayerData playerData)
+        public string nickName;
+
+        [SerializeField]
+        private Transform itemPosition;
+
+        public Transform ItemPosition => itemPosition;
+
+        [SerializeField]
+        private GameObject[] bodyParts;
+
+        [SerializeField]
+        private GameObject nickNameCanvas;
+
+        private GameObject _hud;
+        private IClient _client;
+
+        public void Construct(IClient client, float placeDistance, List<int> itemIds)
         {
-            placeDistance = playerData.Characteristic.placeDistance;
-            nickName = playerData.NickName;
-            health = playerData.Characteristic.maxHealth;
+            _client = client;
+            PlaceDistance = placeDistance;
+            nickName = "Need to fix";
+            ItemsIds = itemIds;
         }
 
         public override void OnStartLocalPlayer()
         {
-            _hud = AllServices.Container.Single<IUIFactory>().CreateHud(gameObject);
+            _hud = AllServices.Container.Single<IUIFactory>().CreateHud(_client, gameObject);
             TurnOffNickName();
             TurnOffBodyRender();
-        }
-
-        private void UpdateHealth(int oldHealth, int newHealth)
-        {
-            OnHealthChanged?.Invoke(newHealth);
         }
 
         private void TurnOffBodyRender()

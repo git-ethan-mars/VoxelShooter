@@ -1,16 +1,14 @@
-using Data;
 using Infrastructure.Services;
 using Infrastructure.Services.Input;
 using Mirror;
-using Networking.Synchronization;
 using UnityEngine;
 
 namespace PlayerLogic
 {
     public class PlayerMovement : NetworkBehaviour
     {
-        [SyncVar] private float _speed;
-        [SyncVar] private float _jumpMultiplier;
+        private float _speed;
+        private float _jumpMultiplier;
         private CharacterController _characterController;
         private IInputService _inputService;
         private Vector3 _movementDirection;
@@ -26,10 +24,10 @@ namespace PlayerLogic
         private Vector3 _stayingColliderCenter;
         private Vector3 _squattingColliderCenter;
 
-        public void Construct(PlayerCharacteristic characteristic)
+        public void Construct(float speed, float jumpMultiplier)
         {
-            _speed = characteristic.speed;
-            _jumpMultiplier = characteristic.jumpMultiplier;
+            _speed = speed;
+            _jumpMultiplier = jumpMultiplier;
         }
 
         private void Awake()

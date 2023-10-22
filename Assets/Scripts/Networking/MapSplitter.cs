@@ -30,6 +30,8 @@ namespace Networking
                 destination.Send(messages[i]);
                 yield return new WaitForSeconds(delayInSeconds);
             }
+
+            NetworkServer.SetClientReady(destination);
         }
     }
 }

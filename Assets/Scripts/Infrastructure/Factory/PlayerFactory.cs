@@ -4,8 +4,7 @@ using Data;
 using Infrastructure.AssetManagement;
 using Mirror;
 using Networking;
-using Networking.Synchronization;
-using PlayerLogic;
+using Networking.Messages.Responses;
 using PlayerLogic.States;
 using UnityEngine;
 
@@ -15,21 +14,18 @@ namespace Infrastructure.Factory
     {
         private readonly List<SpawnPointData> _spawnPoints;
         private readonly IAssetProvider _assets;
-        private readonly IParticleFactory _particleFactory;
         private readonly IServer _server;
         private int _spawnPointIndex;
         private const string PlayerPath = "Prefabs/Player";
         private const string SpectatorPlayerPath = "Prefabs/Spectator player";
 
 
-        public PlayerFactory(IAssetProvider assets,
-            IServer server,
-            IParticleFactory particleFactory)
+        public PlayerFactory(IServer server,
+            IAssetProvider assets)
         {
             _server = server;
             _spawnPoints = _server.MapProvider.SceneData.SpawnPoints;
             _assets = assets;
-            _particleFactory = particleFactory;
         }
 
 
@@ -49,8 +45,8 @@ namespace Infrastructure.Factory
 
             var playerData = _server.ServerData.GetPlayerData(connection);
             playerData.PlayerStateMachine.Enter<LifeState>();
-            ConfigurePlayer(player, playerData);
-            ConfigureSynchronization(player);
+            connection.Send(new PlayerConfigureResponse(playerData.Characteristic.placeDistance,
+                playerData.Characteristic.speed, playerData.Characteristic.jumpMultiplier, playerData.ItemIds));
             NetworkServer.AddPlayerForConnection(connection, player);
         }
 
@@ -71,8 +67,8 @@ namespace Infrastructure.Factory
             }
 
             playerData.PlayerStateMachine.Enter<LifeState>();
-            ConfigurePlayer(player, playerData);
-            ConfigureSynchronization(player);
+            connection.Send(new PlayerConfigureResponse(playerData.Characteristic.placeDistance,
+                playerData.Characteristic.speed, playerData.Characteristic.jumpMultiplier, playerData.ItemIds));
             ReplacePlayer(connection, player);
         }
 
@@ -88,22 +84,6 @@ namespace Infrastructure.Factory
             _assets.Instantiate(PlayerPath, position, rotation);
 
         private GameObject CreatePlayerWithoutSpawnPoint() => _assets.Instantiate(PlayerPath);
-
-        private void ConfigurePlayer(GameObject player, PlayerData playerData)
-        {
-            player.GetComponent<Player>().Construct(playerData);
-            player.GetComponent<PlayerMovement>().Construct(playerData.Characteristic);
-            player.GetComponent<PlayerLogic.Inventory>().ItemIds
-                .AddRange(playerData.ItemsId);
-        }
-
-        private void ConfigureSynchronization(GameObject player)
-        {
-            player.GetComponent<MapSynchronization>().Construct(_server.MapProvider);
-            player.GetComponent<HealthSynchronization>().Construct(_server);
-            player.GetComponent<RangeWeaponSynchronization>().Construct(_particleFactory, _assets, _server);
-            player.GetComponent<MeleeWeaponSynchronization>().Construct(_particleFactory, _assets, _server);
-        }
 
         private void ReplacePlayer(NetworkConnectionToClient connection, GameObject newPlayer)
         {

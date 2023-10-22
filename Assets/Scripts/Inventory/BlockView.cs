@@ -1,6 +1,5 @@
 ﻿using Data;
 using Mirror;
-using Networking.Messages;
 using Networking.Messages.Requests;
 using PlayerLogic;
 using Rendering;
@@ -30,7 +29,7 @@ namespace Inventory
         public BlockView(Raycaster raycaster, Hud hud, BlockItem configuration, TransparentMeshPool transparentMeshPool, Player player)
         {
             _rayCaster = raycaster;
-            _placeDistance = player.placeDistance;
+            _placeDistance = player.PlaceDistance;
             _palette = hud.palette;
             _blockInfo = hud.itemInfo;
             _blockImage = hud.itemIcon;

@@ -18,12 +18,11 @@ namespace Networking.ServerServices
         private readonly ColumnDestructionAlgorithm _destructionAlgorithm;
         private readonly BlockSplitter _blockSplitter;
 
-        public MapUpdater(ICoroutineRunner coroutineRunner, MapProvider mapProvider,
-            ColumnDestructionAlgorithm destructionAlgorithm)
+        public MapUpdater(ICoroutineRunner coroutineRunner, MapProvider mapProvider)
         {
             _coroutineRunner = coroutineRunner;
             _mapProvider = mapProvider;
-            _destructionAlgorithm = destructionAlgorithm;
+            _destructionAlgorithm = new ColumnDestructionAlgorithm(mapProvider);
             _blockSplitter = new BlockSplitter();
         }
 

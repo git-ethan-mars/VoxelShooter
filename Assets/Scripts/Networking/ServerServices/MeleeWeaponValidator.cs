@@ -1,68 +1,57 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using Data;
 using Explosions;
-using Infrastructure.AssetManagement;
+using Infrastructure;
 using Infrastructure.Factory;
 using Mirror;
 using UnityEngine;
 
-namespace Networking.Synchronization
+namespace Networking.ServerServices
 {
-    public class MeleeWeaponSynchronization : NetworkBehaviour
+    public class MeleeWeaponValidator
     {
-        private IServer _server;
-        private IParticleFactory _particleFactory;
-        private List<AudioClip> _audioClips;
-        private LineExplosionArea _lineExplosionArea;
+        private readonly IServer _server;
+        private readonly ICoroutineRunner _coroutineRunner;
+        private readonly IParticleFactory _particleFactory;
+        private readonly IExplosionArea _lineExplosionArea;
 
-        public void Construct(IParticleFactory particleFactory, IAssetProvider assets, IServer server)
+        public MeleeWeaponValidator(IServer server, ICoroutineRunner coroutineRunner, IParticleFactory particleFactory)
         {
             _server = server;
             _particleFactory = particleFactory;
-            _audioClips = assets.LoadAll<AudioClip>("Audio/Sounds").ToList();
+            _coroutineRunner = coroutineRunner;
             _lineExplosionArea = new LineExplosionArea(_server.MapProvider);
         }
 
-        [Command]
-        public void CmdHit(Ray ray, int weaponId, bool isStrongHit, NetworkConnectionToClient source = null)
+        public void Hit(NetworkConnectionToClient connection, Ray ray, bool isStrongHit)
         {
-            var result = _server.ServerData.TryGetPlayerData(source, out var playerData);
-            if (!result || !playerData.IsAlive) return;
-            var weapon = playerData.MeleeWeaponsById[weaponId];
-            if (!CanHit(weapon)) return;
-            var isSurface = ApplyRaycast(source, ray, weapon, isStrongHit);
-            weapon.IsReady = false;
-            if (isSurface)
+            var playerData = _server.ServerData.GetPlayerData(connection);
+            if (!playerData.MeleeWeaponsById.TryGetValue(playerData.ItemIds[playerData.InventorySlotId],
+                    out var weapon))
             {
-                GetComponent<SoundSynchronization>().PlayAudioClip(source!.identity,
-                    _audioClips.FindIndex(audioClip => audioClip == weapon.DiggingAudioClip), weapon.DiggingVolume);
-            }
-            else
-            {
-                GetComponent<SoundSynchronization>().PlayAudioClip(source!.identity,
-                    _audioClips.FindIndex(audioClip => audioClip == weapon.HitAudioClip), weapon.HitVolume);
+                return;
             }
 
+            if (!CanHit(weapon))
+            {
+                return;
+            }
+
+            var isSurface = ApplyRaycast(connection, ray, weapon, isStrongHit);
+            weapon.IsReady = false;
             StartHitCoroutines(weapon);
         }
 
-        [Server]
         private void StartHitCoroutines(MeleeWeaponData meleeWeapon)
         {
-            StartCoroutine(WaitForSeconds(() => ResetHit(meleeWeapon), meleeWeapon.TimeBetweenHit));
+            _coroutineRunner.StartCoroutine(Utils.DoActionAfterDelay(() => ResetHit(meleeWeapon), meleeWeapon.TimeBetweenHit));
         }
 
-        [Server]
         private void ResetHit(MeleeWeaponData meleeWeapon)
         {
             if (meleeWeapon is not null)
                 meleeWeapon.IsReady = true;
         }
 
-        [Server]
         private bool ApplyRaycast(NetworkConnectionToClient source, Ray ray, MeleeWeaponData meleeWeapon,
             bool isStrongHit)
         {
@@ -93,13 +82,13 @@ namespace Networking.Synchronization
                 var targetBlock = Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2);
                 if (isStrongHit)
                 {
-                    var blocks = _lineExplosionArea.GetExplodedBlocks(3, targetBlock);
-                    _server.MapUpdater.DestroyBlocks(blocks);
+                    var validPositions = _lineExplosionArea.GetExplodedBlocks(3, targetBlock);
+                    _server.MapUpdater.DestroyBlocks(validPositions);
                 }
                 else
                 {
-                    var blocks = _lineExplosionArea.GetExplodedBlocks(1, targetBlock);
-                    _server.MapUpdater.DestroyBlocks(blocks);
+                    var validPositions = _lineExplosionArea.GetExplodedBlocks(1, targetBlock);
+                    _server.MapUpdater.DestroyBlocks(validPositions);
                 }
 
                 return true;
@@ -108,24 +97,19 @@ namespace Networking.Synchronization
             return false;
         }
 
-        [Server]
         private void HitImpact(NetworkConnectionToClient source, RaycastHit rayHit, int damage)
         {
             var receiver = rayHit.collider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
             if (source != receiver)
             {
-                GetComponent<HealthSynchronization>().Damage(source, receiver, damage);
+                _server.Damage(source, receiver, damage);
                 _particleFactory.CreateBlood(rayHit.point, Quaternion.LookRotation(rayHit.normal));
             }
         }
 
-        [Server]
-        private bool CanHit(MeleeWeaponData meleeWeapon) => meleeWeapon.IsReady;
-
-        private static IEnumerator WaitForSeconds(Action action, float timeInSeconds)
+        private bool CanHit(MeleeWeaponData meleeWeapon)
         {
-            yield return new WaitForSeconds(timeInSeconds);
-            action();
+            return meleeWeapon.IsReady;
         }
     }
 }

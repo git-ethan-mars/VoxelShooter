@@ -13,7 +13,7 @@ namespace Rendering
         {
             _lineRenderer = lineRenderer;
             _raycaster = raycaster;
-            _placeDistance = player.placeDistance;
+            _placeDistance = player.PlaceDistance;
         }
 
 

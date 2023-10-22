@@ -2,29 +2,26 @@ using System;
 using System.Collections.Generic;
 using Infrastructure.Factory;
 using Mirror;
-using Networking.ServerServices;
-using Networking.Synchronization;
+using Networking;
 using UnityEngine;
 
 namespace Explosions
 {
     public abstract class ExplosionBehaviour
     {
+        private readonly IServer _server;
         private readonly IExplosionArea _explosionArea;
-
         private readonly IParticleFactory _particleFactory;
-
-        private readonly MapUpdater _mapUpdater;
 
         public abstract void Explode(Vector3Int explosionCenter, GameObject explosive, int radius,
             NetworkConnectionToClient connection, int damage, int particlesSpeed,
             int particlesCount, List<GameObject> exploded, string explosiveTag);
 
-        protected ExplosionBehaviour(MapUpdater mapUpdater, IParticleFactory particleFactory,
+        protected ExplosionBehaviour(IServer server, IParticleFactory particleFactory,
             IExplosionArea explosionArea)
         {
+            _server = server;
             _explosionArea = explosionArea;
-            _mapUpdater = mapUpdater;
             _particleFactory = particleFactory;
         }
 
@@ -44,8 +41,7 @@ namespace Explosions
                 var direction = playerPosition - explosionCenter;
                 hitCollider.GetComponent<CharacterController>().Move(direction * particlesSpeed / 3);
                 var receiver = hitCollider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
-                if (receiver.identity.TryGetComponent<HealthSynchronization>(out var health))
-                    health.Damage(connection, receiver, currentDamage);
+                _server.Damage(connection, receiver, currentDamage);
             }
         }
 
@@ -54,7 +50,7 @@ namespace Explosions
         {
             _particleFactory.CreateRchParticle(explosionCenter, particlesSpeed, particlesCount);
             NetworkServer.Destroy(explosive);
-            _mapUpdater.DestroyBlocks(_explosionArea.GetExplodedBlocks(radius, explosionCenter));
+            _server.MapUpdater.DestroyBlocks(_explosionArea.GetExplodedBlocks(radius, explosionCenter));
         }
     }
 }

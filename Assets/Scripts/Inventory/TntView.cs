@@ -1,7 +1,6 @@
 ﻿using System;
 using Data;
 using Mirror;
-using Networking.Messages;
 using Networking.Messages.Requests;
 using PlayerLogic;
 using Rendering;
@@ -31,7 +30,7 @@ namespace Inventory
         {
             Icon = configuration.inventoryIcon;
             _raycaster = raycaster;
-            _placeDistance = player.placeDistance;
+            _placeDistance = player.PlaceDistance;
             _itemId = configuration.id;
             _tntInfo = hud.itemInfo;
             _tntCountText = hud.itemCount;

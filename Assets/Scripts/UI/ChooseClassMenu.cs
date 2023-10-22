@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using Data;
 using Infrastructure.Services.Input;
 using Mirror;
@@ -29,14 +30,14 @@ namespace UI
         private IInputService _inputService;
         private CanvasGroup _canvasGroup;
         private bool _isLocalBuild;
-        private CustomNetworkManager _networkManager;
+        private IClient _client;
 
-        public void Construct(CustomNetworkManager networkManager, IInputService inputService, bool isLocalBuild)
+        public void Construct(IClient client, IInputService inputService, bool isLocalBuild)
         {
             _isLocalBuild = isLocalBuild;
             _inputService = inputService;
-            _networkManager = networkManager;
-            _networkManager.GameFinished += HideWindow;
+            _client = client;
+            _client.GameFinished += HideWindow;
             _canvasGroup = GetComponent<CanvasGroup>();
             builderButton.onClick.AddListener(() => ChangeClass(GameClass.Builder));
             sniperButton.onClick.AddListener(() => ChangeClass(GameClass.Sniper));
@@ -46,7 +47,7 @@ namespace UI
 
         private void HideWindow()
         {
-            _networkManager.GameFinished -= HideWindow;
+            _client.GameFinished -= HideWindow;
             gameObject.SetActive(false);
         }
 
@@ -80,7 +81,8 @@ namespace UI
         private void ChangeClass(GameClass gameClass)
         {
             NetworkClient.Send(new ChangeClassRequest(_isLocalBuild ? CSteamID.Nil : SteamUser.GetSteamID(),
-                gameClass, _isLocalBuild ? Random.value.ToString() : SteamFriends.GetPersonaName()));
+                gameClass,
+                _isLocalBuild ? Random.value.ToString(CultureInfo.InvariantCulture) : SteamFriends.GetPersonaName()));
             _canvasGroup.alpha = 0;
             HideCursor();
         }

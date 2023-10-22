@@ -16,9 +16,13 @@ namespace Networking.MessageHandlers.RequestHandlers
         {
             var result = _server.ServerData.TryGetPlayerData(connection, out _);
             if (!result)
+            {
                 _server.AddPlayer(connection, request.GameClass, request.SteamID, request.Nickname);
+            }
             else
+            {
                 _server.ChangeClass(connection, request.GameClass);
+            }
         }
     }
 }
