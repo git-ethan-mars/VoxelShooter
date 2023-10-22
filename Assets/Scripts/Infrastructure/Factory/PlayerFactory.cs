@@ -45,9 +45,9 @@ namespace Infrastructure.Factory
 
             var playerData = _server.ServerData.GetPlayerData(connection);
             playerData.PlayerStateMachine.Enter<LifeState>();
+            NetworkServer.AddPlayerForConnection(connection, player);
             connection.Send(new PlayerConfigureResponse(playerData.Characteristic.placeDistance,
                 playerData.Characteristic.speed, playerData.Characteristic.jumpMultiplier, playerData.ItemIds));
-            NetworkServer.AddPlayerForConnection(connection, player);
         }
 
         public void RespawnPlayer(NetworkConnectionToClient connection)
@@ -67,9 +67,9 @@ namespace Infrastructure.Factory
             }
 
             playerData.PlayerStateMachine.Enter<LifeState>();
+            ReplacePlayer(connection, player);
             connection.Send(new PlayerConfigureResponse(playerData.Characteristic.placeDistance,
                 playerData.Characteristic.speed, playerData.Characteristic.jumpMultiplier, playerData.ItemIds));
-            ReplacePlayer(connection, player);
         }
 
         public void CreateSpectatorPlayer(NetworkConnectionToClient connection)
@@ -87,7 +87,11 @@ namespace Infrastructure.Factory
 
         private void ReplacePlayer(NetworkConnectionToClient connection, GameObject newPlayer)
         {
-            if (connection.identity == null) return;
+            if (connection.identity == null)
+            {
+                return;
+            }
+
             var oldPlayer = connection.identity.gameObject;
             NetworkServer.ReplacePlayerForConnection(connection, newPlayer, true);
             Object.Destroy(oldPlayer, 0.1f);

@@ -2,6 +2,7 @@ using Data;
 using Infrastructure;
 using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
+using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
 using Infrastructure.States;
 using Mirror;
@@ -24,10 +25,9 @@ namespace Networking
         private IGameFactory _gameFactory;
         private IServer _server;
 
-
-        public void Construct(GameStateMachine stateMachine, IStaticDataService staticData,
+        public void Construct(GameStateMachine stateMachine, IInputService inputService, IStaticDataService staticData,
             IEntityFactory entityFactory, IParticleFactory particleFactory, IAssetProvider assets,
-            IGameFactory gameFactory, IMeshFactory meshFactory,
+            IGameFactory gameFactory, IMeshFactory meshFactory, IUIFactory uiFactory,
             ServerSettings serverSettings)
         {
             _stateMachine = stateMachine;
@@ -38,7 +38,8 @@ namespace Networking
             _gameFactory = gameFactory;
             _meshFactory = meshFactory;
             _serverSettings = serverSettings;
-            Client = new Client(_stateMachine, this, _gameFactory, _meshFactory, _staticData, _particleFactory);
+            Client = new Client(_stateMachine, this, inputService, _gameFactory, _meshFactory, _staticData, _particleFactory,
+                uiFactory);
         }
 
         public override void OnStartHost()
@@ -57,7 +58,7 @@ namespace Networking
 
         public override void OnServerReady(NetworkConnectionToClient connection)
         {
-            if (NetworkServer.activeHost)
+            if (NetworkServer.localConnection == connection)
             {
                 Client.MapProvider = _server.MapProvider;
                 NetworkServer.SetClientReady(connection);
@@ -65,6 +66,7 @@ namespace Networking
             else
             {
                 _server.SendMap(connection);
+                Debug.Log("Send");
             }
         }
 

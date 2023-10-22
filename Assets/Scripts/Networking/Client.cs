@@ -4,6 +4,7 @@ using Data;
 using Generators;
 using Infrastructure;
 using Infrastructure.Factory;
+using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
 using Infrastructure.States;
 using MapLogic;
@@ -86,10 +87,10 @@ namespace Networking
         private readonly ChangeItemModelHandler _changeItemModelHandler;
         private readonly PlayerConfigureHandler _playerConfigureHandler;
 
-        public Client(GameStateMachine stateMachine, ICoroutineRunner coroutineRunner, IGameFactory gameFactory,
+        public Client(GameStateMachine stateMachine, ICoroutineRunner coroutineRunner, IInputService inputService, IGameFactory gameFactory,
             IMeshFactory meshFactory,
             IStaticDataService staticData,
-            IParticleFactory particleFactory)
+            IParticleFactory particleFactory, IUIFactory uiFactory)
         {
             _stateMachine = stateMachine;
             _coroutineRunner = coroutineRunner;
@@ -108,7 +109,7 @@ namespace Networking
             _scoreboardHandler = new ScoreboardHandler();
             _healthHandler = new HealthHandler();
             _changeItemModelHandler = new ChangeItemModelHandler(meshFactory, staticData);
-            _playerConfigureHandler = new PlayerConfigureHandler(this);
+            _playerConfigureHandler = new PlayerConfigureHandler(this, uiFactory, inputService);
         }
 
         public void Start()

@@ -1,4 +1,6 @@
 ﻿using Infrastructure.Services;
+using Infrastructure.Services.Input;
+using Infrastructure.Services.PlayerDataLoader;
 using Infrastructure.Services.StaticData;
 using Infrastructure.States;
 using Networking;
@@ -8,12 +10,12 @@ namespace Infrastructure.Factory
 {
     public interface IUIFactory : IService
     {
-        GameObject CreateHud(IClient client, GameObject player);
-        void CreateChooseClassMenu(IClient client, bool isLocalBuild);
+        GameObject CreateHud(IClient client, IInputService inputService, GameObject player);
+        void CreateChooseClassMenu(IClient client, IInputService inputService, bool isLocalBuild);
         GameObject CreateMainMenu(GameStateMachine gameStateMachine, bool isLocalBuild);
         GameObject CreateMatchMenu(IMapRepository mapRepository, GameStateMachine gameStateMachine, bool isLocalBuild);
-        void CreateTimeCounter(IClient client);
-        void CreateScoreboard(IClient client);
+        void CreateTimeCounter(IClient client, IInputService inputService);
+        void CreateScoreboard(IClient client, IInputService inputService, IAvatarLoader avatarLoader);
         void CreateLoadingWindow(IClient client);
-    }   
+    }
 }

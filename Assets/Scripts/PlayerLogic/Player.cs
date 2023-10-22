@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Infrastructure.Factory;
-using Infrastructure.Services;
+using Infrastructure.Services.Input;
 using Mirror;
 using Networking;
 using UnityEngine;
@@ -28,17 +28,13 @@ namespace PlayerLogic
         private GameObject _hud;
         private IClient _client;
 
-        public void Construct(IClient client, float placeDistance, List<int> itemIds)
+        public void Construct(IClient client, IUIFactory uiFactory, IInputService inputService, float placeDistance, List<int> itemIds)
         {
             _client = client;
             PlaceDistance = placeDistance;
             nickName = "Need to fix";
             ItemsIds = itemIds;
-        }
-
-        public override void OnStartLocalPlayer()
-        {
-            _hud = AllServices.Container.Single<IUIFactory>().CreateHud(_client, gameObject);
+            _hud = uiFactory.CreateHud(_client, inputService, gameObject);
             TurnOffNickName();
             TurnOffBodyRender();
         }

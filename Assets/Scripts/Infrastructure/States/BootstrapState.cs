@@ -67,12 +67,13 @@ namespace Infrastructure.States
                 _coroutineRunner));
             _allServices.RegisterSingle<IMeshFactory>(new MeshFactory(_allServices.Single<IAssetProvider>()));
             _allServices.RegisterSingle<IEntityFactory>(new EntityFactory(_allServices.Single<IAssetProvider>()));
-            _allServices.RegisterSingle<IGameFactory>(
-                new GameFactory(_allServices.Single<IAssetProvider>(), _allServices.Single<IEntityFactory>(),
-                    staticData, _allServices.Single<IParticleFactory>(), _allServices.Single<IMeshFactory>()));
             _allServices.RegisterSingle<IUIFactory>(new UIFactory(_allServices.Single<IAssetProvider>(),
-                _allServices.Single<IInputService>(), _allServices.Single<IStaticDataService>(),
-                _allServices.Single<IAvatarLoader>()));
+                _allServices.Single<IStaticDataService>()));
+            _allServices.RegisterSingle<IGameFactory>(
+                new GameFactory(_allServices.Single<IAssetProvider>(), _allServices.Single<IInputService>(),
+                    _allServices.Single<IEntityFactory>(),
+                    staticData, _allServices.Single<IParticleFactory>(), _allServices.Single<IMeshFactory>(),
+                    _allServices.Single<IUIFactory>()));
         }
     }
 }

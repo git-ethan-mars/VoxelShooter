@@ -20,34 +20,29 @@ namespace Infrastructure.Factory
         private const string ScoreboardPath = "Prefabs/UI/Scoreboard";
         private const string LoadingWindowPath = "Prefabs/UI/LoadingWindow";
         private readonly IAssetProvider _assets;
-        private readonly IInputService _inputService;
         private readonly IStaticDataService _staticData;
-        private readonly IAvatarLoader _avatarLoader;
 
 
-        public UIFactory(IAssetProvider assets, IInputService inputService, IStaticDataService staticData,
-            IAvatarLoader avatarLoader)
+        public UIFactory(IAssetProvider assets, IStaticDataService staticData)
         {
             _assets = assets;
-            _inputService = inputService;
             _staticData = staticData;
-            _avatarLoader = avatarLoader;
         }
 
-        public GameObject CreateHud(IClient client, GameObject player)
+        public GameObject CreateHud(IClient client, IInputService inputService, GameObject player)
         {
             var hud = _assets.Instantiate(HudPath);
-            hud.GetComponent<Hud>().Construct(_inputService);
+            hud.GetComponent<Hud>().Construct(inputService);
             var inventoryController = hud.GetComponent<Hud>().inventory.GetComponent<InventoryController>();
-            inventoryController.Construct(_inputService, _assets, _staticData, hud, player);
+            inventoryController.Construct(inputService, _assets, _staticData, hud, player);
             hud.GetComponent<Hud>().healthCounter.Construct(client);
             return hud;
         }
 
-        public void CreateChooseClassMenu(IClient client, bool isLocalBuild)
+        public void CreateChooseClassMenu(IClient client, IInputService inputService, bool isLocalBuild)
         {
             _assets.Instantiate(ChooseClassMenuPath).GetComponent<ChooseClassMenu>()
-                .Construct(client, _inputService, isLocalBuild);
+                .Construct(client, inputService, isLocalBuild);
         }
 
         public GameObject CreateMainMenu(GameStateMachine gameStateMachine, bool isLocalBuild)
@@ -65,15 +60,15 @@ namespace Infrastructure.Factory
             return matchMenu;
         }
 
-        public void CreateTimeCounter(IClient client)
+        public void CreateTimeCounter(IClient client, IInputService inputService)
         {
-            _assets.Instantiate(TimeCounterPath).GetComponent<TimeCounter>().Construct(client, _inputService);
+            _assets.Instantiate(TimeCounterPath).GetComponent<TimeCounter>().Construct(client, inputService);
         }
 
-        public void CreateScoreboard(IClient client)
+        public void CreateScoreboard(IClient client, IInputService inputService, IAvatarLoader avatarLoader)
         {
             _assets.Instantiate(ScoreboardPath).GetComponent<Scoreboard>()
-                .Construct(client, _inputService, _avatarLoader);
+                .Construct(client, inputService, avatarLoader);
         }
 
         public void CreateLoadingWindow(IClient client)
