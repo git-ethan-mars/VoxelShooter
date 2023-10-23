@@ -23,7 +23,7 @@ namespace Networking
     {
         private const string SpawnPointContainerName = "SpawnPointContainer";
         public MapProvider MapProvider { get; }
-        public ServerData ServerData { get; }
+        public ServerData Data { get; }
         public MapUpdater MapUpdater { get; }
         private readonly IGameFactory _gameFactory;
         private readonly ServerSettings _serverSettings;
@@ -51,7 +51,7 @@ namespace Networking
             _entityFactory = entityFactory;
             MapProvider = MapReader.ReadFromFile(_serverSettings.MapName, staticData);
             MapUpdater = new MapUpdater(_coroutineRunner, MapProvider);
-            ServerData = new ServerData(staticData);
+            Data = new ServerData(staticData);
             _entityPositionValidator = new EntityPositionValidator(MapUpdater, MapProvider);
             _playerFactory = new PlayerFactory(this, assets);
             var sphereExplosionArea = new SphereExplosionArea(MapProvider);
@@ -83,14 +83,14 @@ namespace Networking
         public void AddPlayer(NetworkConnectionToClient connection, GameClass chosenClass, CSteamID steamID,
             string nickname)
         {
-            ServerData.AddPlayer(connection, chosenClass, steamID, nickname);
+            Data.AddPlayer(connection, chosenClass, steamID, nickname);
             _playerFactory.CreatePlayer(connection);
-            NetworkServer.SendToAll(new ScoreboardResponse(ServerData.GetScoreData()));
+            NetworkServer.SendToAll(new ScoreboardResponse(Data.GetScoreData()));
         }
 
         public void ChangeClass(NetworkConnectionToClient connection, GameClass chosenClass)
         {
-            var playerData = ServerData.GetPlayerData(connection);
+            var playerData = Data.GetPlayerData(connection);
             if (playerData.GameClass == chosenClass) return;
             playerData.GameClass = chosenClass;
             if (playerData.IsAlive)
@@ -102,19 +102,19 @@ namespace Networking
                 respawnTimer.Start();
             }
 
-            NetworkServer.SendToAll(new ScoreboardResponse(ServerData.GetScoreData()));
+            NetworkServer.SendToAll(new ScoreboardResponse(Data.GetScoreData()));
         }
 
         public void DeletePlayer(NetworkConnectionToClient connection)
         {
-            ServerData.DeletePlayer(connection);
-            NetworkServer.SendToAll(new ScoreboardResponse(ServerData.GetScoreData()));
+            Data.DeletePlayer(connection);
+            NetworkServer.SendToAll(new ScoreboardResponse(Data.GetScoreData()));
             NetworkServer.DestroyPlayerForConnection(connection);
         }
 
         public void Damage(NetworkConnectionToClient source, NetworkConnectionToClient receiver, int totalDamage)
         {
-            var result = ServerData.TryGetPlayerData(receiver, out var playerData);
+            var result = Data.TryGetPlayerData(receiver, out var playerData);
             if (!result || !playerData.IsAlive) return;
             playerData.Health -= totalDamage;
             if (playerData.Health <= 0)
@@ -128,16 +128,27 @@ namespace Networking
             }
         }
 
-        public void SendMap(NetworkConnectionToClient connection)
+        public void SendCurrentServerState(NetworkConnectionToClient connection)
         {
-            connection.Send(new MapNameResponse(MapProvider.MapName));
-            using var memoryStream = new MemoryStream();
-            MapWriter.WriteMap(MapProvider, memoryStream);
-            var bytes = memoryStream.ToArray();
-            var mapSplitter = new MapSplitter();
-            var mapMessages = mapSplitter.SplitBytesIntoMessages(bytes, Constants.MessageSize);
-            _coroutineRunner.StartCoroutine(mapSplitter.SendMessages(mapMessages, connection,
-                Constants.MessageDelay));
+            SendMap(connection);
+            SendItemModels(connection);
+        }
+
+        private void SendItemModels(NetworkConnectionToClient connection)
+        {
+            foreach (var anotherClient in Data.ClientConnections)
+            {
+                if (anotherClient.identity == null)
+                {
+                    continue;
+                }
+
+                if (Data.TryGetPlayerData(anotherClient, out var playerData) && playerData.IsAlive)
+                {
+                    connection.Send(new ChangeItemModelResponse(anotherClient.identity,
+                        playerData.ItemIds[playerData.InventorySlotId]));
+                }
+            }
         }
 
         public void Stop()
@@ -190,14 +201,25 @@ namespace Networking
                                     Constants.WorldOffset;
             var tombstone = _entityFactory.CreateTombstone(tombstonePosition);
             _entityPositionValidator.AddEntity(tombstone.GetComponent<PushableObject>());
-            ServerData.AddKill(killer, victim);
-            var playerData = ServerData.GetPlayerData(victim);
+            Data.AddKill(killer, victim);
+            var playerData = Data.GetPlayerData(victim);
             playerData.PlayerStateMachine.Enter<DeathState>();
             _playerFactory.CreateSpectatorPlayer(victim);
             var respawnTimer = new RespawnTimer(_coroutineRunner, victim, _serverSettings.SpawnTime,
                 () => _playerFactory.RespawnPlayer(victim));
             respawnTimer.Start();
-            NetworkServer.SendToAll(new ScoreboardResponse(ServerData.GetScoreData()));
+            NetworkServer.SendToAll(new ScoreboardResponse(Data.GetScoreData()));
+        }
+
+        private void SendMap(NetworkConnectionToClient connection)
+        {
+            connection.Send(new MapNameResponse(MapProvider.MapName));
+            using var memoryStream = new MemoryStream();
+            MapWriter.WriteMap(MapProvider, memoryStream);
+            var bytes = memoryStream.ToArray();
+            var mapSplitter = new MapSplitter();
+            var mapMessages = mapSplitter.SplitBytesIntoMessages(bytes, Constants.MessageSize);
+            mapSplitter.SendMessages(mapMessages, connection);
         }
     }
 }

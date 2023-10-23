@@ -43,7 +43,7 @@ namespace Infrastructure.Factory
                 _spawnPointIndex = (_spawnPointIndex + 1) % _spawnPoints.Count;
             }
 
-            var playerData = _server.ServerData.GetPlayerData(connection);
+            var playerData = _server.Data.GetPlayerData(connection);
             playerData.PlayerStateMachine.Enter<LifeState>();
             NetworkServer.AddPlayerForConnection(connection, player);
             connection.Send(new PlayerConfigureResponse(playerData.Characteristic.placeDistance,
@@ -52,7 +52,7 @@ namespace Infrastructure.Factory
 
         public void RespawnPlayer(NetworkConnectionToClient connection)
         {
-            var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
+            var result = _server.Data.TryGetPlayerData(connection, out var playerData);
             if (!result) return;
             GameObject player;
             if (_spawnPoints.Count == 0)

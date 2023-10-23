@@ -16,7 +16,7 @@ public class ReloadHandler : RequestHandler<ReloadRequest>
     }
     protected override void OnRequestReceived(NetworkConnectionToClient connection, ReloadRequest request)
     {
-        var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
+        var result = _server.Data.TryGetPlayerData(connection, out var playerData);
         if (!result || !playerData.IsAlive)
         {
             return;

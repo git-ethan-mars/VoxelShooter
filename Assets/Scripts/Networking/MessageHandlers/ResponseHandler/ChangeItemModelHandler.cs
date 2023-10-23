@@ -19,25 +19,23 @@ namespace Networking.MessageHandlers.ResponseHandler
 
         protected override void OnResponseReceived(ChangeItemModelResponse response)
         {
-            var identity = response.Identity;
-            if (identity == null)
+            if (response.Identity == null)
             {
                 return;
             }
 
-            if (!identity.TryGetComponent<Player>(out var player))
+            if (!response.Identity.TryGetComponent<Player>(out var player))
             {
                 return;
             }
 
-            if (player.ItemPosition.childCount > 0)
+            foreach (Transform item in player.ItemPosition)
             {
-                var item = player.ItemPosition.GetChild(0).gameObject;
-                Object.Destroy(item);
+                Object.Destroy(item.gameObject);
             }
 
             _meshFactory.CreateGameModel(_staticData.GetItem(response.ItemId).prefab,
-                identity.GetComponent<Player>().ItemPosition);
+                player.ItemPosition);
         }
     }
 }

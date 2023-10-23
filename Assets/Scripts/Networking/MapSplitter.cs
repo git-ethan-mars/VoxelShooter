@@ -1,8 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Mirror;
 using Networking.Messages.Responses;
-using UnityEngine;
 
 namespace Networking
 {
@@ -22,13 +20,11 @@ namespace Networking
             return messages.ToArray();
         }
 
-        public IEnumerator SendMessages(DownloadMapResponse[] messages, NetworkConnectionToClient destination,
-            float delayInSeconds)
+        public void SendMessages(DownloadMapResponse[] messages, NetworkConnectionToClient destination)
         {
             for (var i = 0; i < messages.Length; i++)
             {
                 destination.Send(messages[i]);
-                yield return new WaitForSeconds(delayInSeconds);
             }
 
             NetworkServer.SetClientReady(destination);

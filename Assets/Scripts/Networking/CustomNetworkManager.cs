@@ -6,6 +6,8 @@ using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
 using Infrastructure.States;
 using Mirror;
+using Networking.MessageHandlers.ResponseHandler;
+using Networking.Messages.Responses;
 using Networking.ServerServices;
 using UnityEngine;
 
@@ -38,7 +40,8 @@ namespace Networking
             _gameFactory = gameFactory;
             _meshFactory = meshFactory;
             _serverSettings = serverSettings;
-            Client = new Client(_stateMachine, this, inputService, _gameFactory, _meshFactory, _staticData, _particleFactory,
+            Client = new Client(_stateMachine, this, inputService, _gameFactory, _meshFactory, _staticData,
+                _particleFactory,
                 uiFactory);
         }
 
@@ -61,13 +64,13 @@ namespace Networking
             if (NetworkServer.localConnection == connection)
             {
                 Client.MapProvider = _server.MapProvider;
-                NetworkServer.SetClientReady(connection);
             }
             else
             {
-                _server.SendMap(connection);
-                Debug.Log("Send");
+                _server.SendCurrentServerState(connection);
             }
+
+            NetworkServer.SetClientReady(connection);
         }
 
         public override void OnServerDisconnect(NetworkConnectionToClient connection)

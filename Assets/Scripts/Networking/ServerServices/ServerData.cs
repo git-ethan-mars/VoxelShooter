@@ -20,6 +20,8 @@ namespace Networking.ServerServices
             _staticData = staticDataService;
         }
 
+        public IEnumerable<NetworkConnectionToClient> ClientConnections => _dataByConnection.Keys.ToArray();
+
         public void AddPlayer(NetworkConnectionToClient connection, GameClass chosenClass, CSteamID steamID,
             string nickname)
         {
@@ -63,11 +65,6 @@ namespace Networking.ServerServices
             NetworkConnectionToClient except)
         {
             return _dataByConnection.Where(kvp => kvp.Value.IsAlive && except != kvp.Key).ToList();
-        }
-
-        public IEnumerable<NetworkConnectionToClient> GetConnections()
-        {
-            return _dataByConnection.Keys.ToArray();
         }
 
         public List<ScoreData> GetScoreData()

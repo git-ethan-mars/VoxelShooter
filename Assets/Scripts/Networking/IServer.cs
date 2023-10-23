@@ -9,7 +9,7 @@ namespace Networking
     public interface IServer
     {
         MapProvider MapProvider { get; }
-        ServerData ServerData { get; }
+        ServerData Data { get; }
         MapUpdater MapUpdater { get; }
 
         void AddPlayer(NetworkConnectionToClient connection, GameClass chosenClass, CSteamID steamID,
@@ -18,7 +18,7 @@ namespace Networking
         void ChangeClass(NetworkConnectionToClient connection, GameClass chosenClass);
         void DeletePlayer(NetworkConnectionToClient connection);
         void Damage(NetworkConnectionToClient source, NetworkConnectionToClient receiver, int totalDamage);
-        void SendMap(NetworkConnectionToClient connection);
+        void SendCurrentServerState(NetworkConnectionToClient connection);
         void Start();
         void Stop();
     }

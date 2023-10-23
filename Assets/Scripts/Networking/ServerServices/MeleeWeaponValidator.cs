@@ -24,7 +24,7 @@ namespace Networking.ServerServices
 
         public void Hit(NetworkConnectionToClient connection, Ray ray, bool isStrongHit)
         {
-            var playerData = _server.ServerData.GetPlayerData(connection);
+            var playerData = _server.Data.GetPlayerData(connection);
             if (!playerData.MeleeWeaponsById.TryGetValue(playerData.ItemIds[playerData.InventorySlotId],
                     out var weapon))
             {

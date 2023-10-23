@@ -23,7 +23,7 @@ namespace Networking.ServerServices
 
         public void Shoot(NetworkConnectionToClient connection, Ray ray, bool requestIsButtonHolding)
         {
-            var playerData = _server.ServerData.GetPlayerData(connection);
+            var playerData = _server.Data.GetPlayerData(connection);
             if (!playerData.RangeWeaponsById.TryGetValue(playerData.ItemIds[playerData.InventorySlotId],
                     out var weapon))
             {
@@ -50,7 +50,7 @@ namespace Networking.ServerServices
 
         public void Reload(NetworkConnectionToClient connection)
         {
-            var playerData = _server.ServerData.GetPlayerData(connection);
+            var playerData = _server.Data.GetPlayerData(connection);
             if (!playerData.RangeWeaponsById.TryGetValue(playerData.ItemIds[playerData.InventorySlotId],
                     out var weapon))
             {
