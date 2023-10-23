@@ -26,6 +26,7 @@ namespace Networking
         private ServerSettings _serverSettings;
         private GameStateMachine _stateMachine;
         private ServerTimer _serverTimer;
+        private BoxDropService _boxDropService;
         private IParticleFactory _particleFactory;
         private IMeshFactory _meshFactory;
         private IAssetProvider _assets;
@@ -58,6 +59,8 @@ namespace Networking
             _server.CreateSpawnPoints(spawnPointContainer.transform);
             _serverTimer = new ServerTimer(this, _serverSettings.MaxDuration, StopHost);
             _serverTimer.Start();
+            _boxDropService = new BoxDropService(this, _serverSettings.MaxDuration, StopHost, _entityFactory);
+            _boxDropService.Start();
         }
 
 

@@ -16,6 +16,7 @@ namespace Infrastructure.Factory
         private const string RocketPath = "Prefabs/Rocket";
         private const string TombstonePath = "Prefabs/Tombstone";
         private const string SpawnPointPath = "Prefabs/Spawnpoint";
+        private const string AmmoBoxPath = "Prefabs/Drops/AmmoBox";
 
         public EntityFactory(IAssetProvider assets)
         {
@@ -51,6 +52,14 @@ namespace Infrastructure.Factory
             rocket.GetComponent<Rocket>().Construct(mapProvider, mapUpdater, rocketData, owner, particleFactory);
             NetworkServer.Spawn(rocket);
             return rocket;
+        }
+        
+        public GameObject CreateLootBox(Vector3 position)
+        {
+            var lootBox = _assets.Instantiate(AmmoBoxPath, position, Quaternion.identity);
+            lootBox.GetComponent<LootBox>().Construct();
+            NetworkServer.Spawn(lootBox);
+            return lootBox;
         }
 
         public GameObject CreateSpawnPoint(Vector3 position, Transform parent)
