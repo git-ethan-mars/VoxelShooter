@@ -46,8 +46,6 @@ namespace Infrastructure.Factory
             var playerData = _server.Data.GetPlayerData(connection);
             playerData.PlayerStateMachine.Enter<LifeState>();
             NetworkServer.AddPlayerForConnection(connection, player);
-            connection.Send(new PlayerConfigureResponse(playerData.Characteristic.placeDistance,
-                playerData.Characteristic.speed, playerData.Characteristic.jumpMultiplier, playerData.ItemIds));
         }
 
         public void RespawnPlayer(NetworkConnectionToClient connection)

@@ -1423,9 +1423,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7988b75de6ad4df498929a82e8d38dce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0.1
   nickName: 
   itemPosition: {fileID: 7893378094424813921}
   bodyParts:
@@ -1455,6 +1452,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0.1
+  characterController: {fileID: 4442746436690766187}
 --- !u!114 &2734791800071418437
 MonoBehaviour:
   m_ObjectHideFlags: 0

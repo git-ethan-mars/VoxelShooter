@@ -1,13 +1,12 @@
 using System.Collections.Generic;
 using Infrastructure.Factory;
 using Infrastructure.Services.Input;
-using Mirror;
 using Networking;
 using UnityEngine;
 
 namespace PlayerLogic
 {
-    public class Player : NetworkBehaviour
+    public class Player : MonoBehaviour
     {
         public List<int> ItemsIds { get; private set; }
         public float PlaceDistance { get; private set; }
@@ -28,11 +27,12 @@ namespace PlayerLogic
         private GameObject _hud;
         private IClient _client;
 
-        public void Construct(IClient client, IUIFactory uiFactory, IInputService inputService, float placeDistance, List<int> itemIds)
+        public void Construct(IClient client, IUIFactory uiFactory, IInputService inputService, float placeDistance,
+            List<int> itemIds)
         {
             _client = client;
-            PlaceDistance = placeDistance;
             nickName = "Need to fix";
+            PlaceDistance = placeDistance;
             ItemsIds = itemIds;
             _hud = uiFactory.CreateHud(_client, inputService, gameObject);
             TurnOffNickName();
