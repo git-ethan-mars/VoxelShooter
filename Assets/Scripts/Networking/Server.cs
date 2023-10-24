@@ -85,6 +85,10 @@ namespace Networking
         {
             Data.AddPlayer(connection, chosenClass, steamID, nickname);
             _playerFactory.CreatePlayer(connection);
+            SendDataFromOtherPlayers(connection);
+            var playerData = Data.GetPlayerData(connection);
+            connection.Send(new PlayerConfigureResponse(playerData.Characteristic.placeDistance,
+                playerData.Characteristic.speed, playerData.Characteristic.jumpMultiplier, playerData.ItemIds));
             NetworkServer.SendToAll(new ScoreboardResponse(Data.GetScoreData()));
         }
 
@@ -101,7 +105,7 @@ namespace Networking
                     () => _playerFactory.RespawnPlayer(connection));
                 respawnTimer.Start();
             }
-
+            
             NetworkServer.SendToAll(new ScoreboardResponse(Data.GetScoreData()));
         }
 
@@ -130,25 +134,8 @@ namespace Networking
 
         public void SendCurrentServerState(NetworkConnectionToClient connection)
         {
+            connection.Send(new MapNameResponse(MapProvider.MapName));
             SendMap(connection);
-            SendItemModels(connection);
-        }
-
-        private void SendItemModels(NetworkConnectionToClient connection)
-        {
-            foreach (var anotherClient in Data.ClientConnections)
-            {
-                if (anotherClient.identity == null)
-                {
-                    continue;
-                }
-
-                if (Data.TryGetPlayerData(anotherClient, out var playerData) && playerData.IsAlive)
-                {
-                    connection.Send(new ChangeItemModelResponse(anotherClient.identity,
-                        playerData.ItemIds[playerData.InventorySlotId]));
-                }
-            }
         }
 
         public void Stop()
@@ -213,13 +200,30 @@ namespace Networking
 
         private void SendMap(NetworkConnectionToClient connection)
         {
-            connection.Send(new MapNameResponse(MapProvider.MapName));
             using var memoryStream = new MemoryStream();
             MapWriter.WriteMap(MapProvider, memoryStream);
             var bytes = memoryStream.ToArray();
             var mapSplitter = new MapSplitter();
             var mapMessages = mapSplitter.SplitBytesIntoMessages(bytes, Constants.MessageSize);
             mapSplitter.SendMessages(mapMessages, connection);
+        }
+
+        private void SendDataFromOtherPlayers(NetworkConnectionToClient connection)
+        {
+            var playerData = Data.GetPlayerData(connection);
+            foreach (var anotherClient in Data.ClientConnections)
+            {
+                if (anotherClient.identity == null)
+                {
+                    continue;
+                }
+
+                if (Data.TryGetPlayerData(anotherClient, out var anotherPlayer) && playerData.IsAlive)
+                {
+                    connection.Send(new ChangeItemModelResponse(anotherClient.identity,
+                        anotherPlayer.ItemIds[anotherPlayer.InventorySlotId]));
+                }
+            }
         }
     }
 }

@@ -24,7 +24,7 @@ namespace Networking.MessageHandlers.ResponseHandler
             var playerGameObject = NetworkClient.connection.identity;
             var player = playerGameObject.GetComponent<Player>();
             player.Construct(_client, _uiFactory, _inputService, response.PlaceDistance, response.ItemIds);
-            playerGameObject.GetComponent<PlayerMovement>().Construct(response.Speed, response.JumpMultiplier);
+            playerGameObject.GetComponent<PlayerMovement>().Construct(_inputService, response.Speed, response.JumpMultiplier);
         }
     }
 }
