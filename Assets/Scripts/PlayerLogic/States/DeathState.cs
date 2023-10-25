@@ -18,7 +18,7 @@ namespace PlayerLogic.States
              _playerData.Characteristic = null;
             _playerData.Health = 0;
             _playerData.ItemCountById = null;
-            _playerData.ItemsId = null;
+            _playerData.ItemIds = null;
             _playerData.RangeWeaponsById  = null;
             _playerData.MeleeWeaponsById  = null;
             _playerData.ItemCountById = null;

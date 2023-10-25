@@ -1,22 +1,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using Infrastructure.Factory;
-using MapLogic;
 using Mirror;
 using Networking;
-using Networking.ServerServices;
 using UnityEngine;
 
 namespace Explosions
 {
     public class ChainExplosionBehaviour : ExplosionBehaviour
     {
-        public ChainExplosionBehaviour(MapUpdater mapUpdater, IParticleFactory particleFactory, 
-            IExplosionArea explosionArea) 
-            : base(mapUpdater, particleFactory, explosionArea) { }
+        public ChainExplosionBehaviour(IServer server, IParticleFactory particleFactory,
+            IExplosionArea explosionArea)
+            : base(server, particleFactory, explosionArea)
+        {
+        }
 
-        public override void Explode(Vector3Int explosionCenter, GameObject explosive, int radius, 
-            NetworkConnectionToClient connection, int damage, int particlesSpeed, 
+        public override void Explode(Vector3Int explosionCenter, GameObject explosive, int radius,
+            NetworkConnectionToClient connection, int damage, int particlesSpeed,
             int particlesCount, List<GameObject> exploded, string explosiveTag)
         {
             exploded.Add(explosive);

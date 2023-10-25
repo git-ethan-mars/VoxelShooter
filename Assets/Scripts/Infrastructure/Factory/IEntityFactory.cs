@@ -2,6 +2,7 @@
 using Infrastructure.Services;
 using MapLogic;
 using Mirror;
+using Networking;
 using Networking.ServerServices;
 using UnityEngine;
 
@@ -15,8 +16,7 @@ namespace Infrastructure.Factory
 
         GameObject CreateTombstone(Vector3 position);
 
-        GameObject CreateRocket(Vector3 position, Quaternion rotation, MapProvider mapProvider,
-            MapUpdater mapUpdater,
+        GameObject CreateRocket(Vector3 position, Quaternion rotation, IServer server,
             IParticleFactory particleFactory, RocketLauncherItem rocketData, NetworkConnectionToClient owner);
 
         GameObject CreateSpawnPoint(Vector3 position, Transform parent);

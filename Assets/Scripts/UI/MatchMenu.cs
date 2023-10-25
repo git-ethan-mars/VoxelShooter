@@ -51,23 +51,20 @@ namespace UI
         [SerializeField]
         private RawImage mapImage;
 
-
         private Limitation _spawnTimeLimitation;
         private Limitation _timeLimitation;
         private IMapRepository _mapRepository;
         private GameStateMachine _stateMachine;
-        private bool _isLocalBuild;
         private const int MinGameTime = 5;
         private const int MaxGameTime = 10;
         private const int MinSpawnTime = 3;
         private const int MaxSpawnTime = 7;
 
 
-        public void Construct(IMapRepository mapRepository, GameStateMachine stateMachine, bool isLocalBuild)
+        public void Construct(IMapRepository mapRepository, GameStateMachine stateMachine)
         {
             _mapRepository = mapRepository;
             _stateMachine = stateMachine;
-            _isLocalBuild = isLocalBuild;
             InitSpawnTime();
             InitGameDuration();
             InitMapChoice();
@@ -139,7 +136,7 @@ namespace UI
 
         private void OnApplyButton()
         {
-            if (_isLocalBuild)
+            if (Constants.isLocalBuild)
             {
                 _stateMachine.Enter<StartMatchState, ServerSettings>(
                     new ServerSettings(_timeLimitation.CurrentValue, _spawnTimeLimitation.CurrentValue,

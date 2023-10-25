@@ -1,40 +1,55 @@
-using System;
-using Data;
+using System.Collections.Generic;
 using Infrastructure.Factory;
-using Infrastructure.Services;
-using Mirror;
+using Infrastructure.Services.Input;
+using Networking;
+using TMPro;
 using UnityEngine;
 
 namespace PlayerLogic
 {
-    public class Player : NetworkBehaviour
+    public class Player : MonoBehaviour
     {
-        public event Action<int> OnHealthChanged;
-        [HideInInspector] [SyncVar] public float placeDistance;
-        [HideInInspector] [SyncVar] public string nickName;
-        [SyncVar(hook = nameof(UpdateHealth))] [HideInInspector] public int health;
-        public Transform itemPosition;
-        [SerializeField] private GameObject[] bodyParts;
-        [SerializeField] private GameObject nickNameCanvas;
-        private GameObject _hud;
+        public List<int> ItemsIds { get; private set; }
+        public float PlaceDistance { get; private set; }
 
-        public void Construct(PlayerData playerData)
+        public string NickName
         {
-            placeDistance = playerData.Characteristic.placeDistance;
-            nickName = playerData.NickName;
-            health = playerData.Characteristic.maxHealth;
+            get => _nickName;
+            set
+            {
+                nickNameText.SetText(value);
+                _nickName = value;
+            }
         }
 
-        public override void OnStartLocalPlayer()
+        private string _nickName;
+        
+        [SerializeField]
+        private TextMeshProUGUI nickNameText;
+
+        [SerializeField]
+        private Transform itemPosition;
+
+        public Transform ItemPosition => itemPosition;
+
+        [SerializeField]
+        private GameObject[] bodyParts;
+
+        [SerializeField]
+        private GameObject nickNameCanvas;
+
+        private GameObject _hud;
+        private IClient _client;
+
+        public void Construct(IClient client, IUIFactory uiFactory, IInputService inputService, float placeDistance,
+            List<int> itemIds)
         {
-            _hud = AllServices.Container.Single<IUIFactory>().CreateHud(gameObject);
+            _client = client;
+            PlaceDistance = placeDistance;
+            ItemsIds = itemIds;
+            _hud = uiFactory.CreateHud(_client, inputService, gameObject);
             TurnOffNickName();
             TurnOffBodyRender();
-        }
-
-        private void UpdateHealth(int oldHealth, int newHealth)
-        {
-            OnHealthChanged?.Invoke(newHealth);
         }
 
         private void TurnOffBodyRender()

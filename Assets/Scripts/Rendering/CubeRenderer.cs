@@ -13,7 +13,7 @@ namespace Rendering
         {
             _lineRenderer = lineRenderer;
             _raycaster = raycaster;
-            _placeDistance = player.placeDistance;
+            _placeDistance = player.PlaceDistance;
         }
 
 
@@ -31,7 +31,7 @@ namespace Rendering
 
         public void UpdateCube(bool isBuilding)
         {
-            var raycastResult = _raycaster.GetRayCastHit(out var raycastHit, _placeDistance, Constants.BuildMask);
+            var raycastResult = _raycaster.GetRayCastHit(out var raycastHit, _placeDistance, Constants.buildMask);
             if (!raycastResult)
             {
                 _lineRenderer.positionCount = 0;
@@ -45,7 +45,7 @@ namespace Rendering
 
 
         public bool GetRayCastHit(out RaycastHit raycastHit) =>
-            _raycaster.GetRayCastHit(out raycastHit, _placeDistance, Constants.BuildMask);
+            _raycaster.GetRayCastHit(out raycastHit, _placeDistance, Constants.buildMask);
 
         private void DrawCube(Vector3Int startPosition)
         {

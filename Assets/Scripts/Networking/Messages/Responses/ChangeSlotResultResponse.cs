@@ -2,11 +2,11 @@
 
 namespace Networking.Messages.Responses
 {
-    public struct ChangeSlotResponse : NetworkMessage
+    public struct ChangeSlotResultResponse : NetworkMessage
     {
         public readonly int Index;
 
-        public ChangeSlotResponse(int index)
+        public ChangeSlotResultResponse(int index)
         {
             Index = index;
         }

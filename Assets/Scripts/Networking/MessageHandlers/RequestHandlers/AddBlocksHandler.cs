@@ -19,7 +19,7 @@ namespace Networking.MessageHandlers.RequestHandlers
 
         protected override void OnRequestReceived(NetworkConnectionToClient connection, AddBlocksRequest request)
         {
-            var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
+            var result = _server.Data.TryGetPlayerData(connection, out var playerData);
             if (!result || !playerData.IsAlive) return;
             var blockAmount = playerData.ItemCountById[request.ItemId];
             var validPositions = new List<Vector3Int>();
@@ -27,9 +27,9 @@ namespace Networking.MessageHandlers.RequestHandlers
             var blocksUsed = Math.Min(blockAmount, request.GlobalPositions.Length);
             for (var i = 0; i < blocksUsed; i++)
             {
-                foreach (var otherConnection in _server.ServerData.GetConnections())
+                foreach (var otherConnection in _server.Data.ClientConnections)
                 {
-                    result = _server.ServerData.TryGetPlayerData(otherConnection, out var otherPlayer);
+                    result = _server.Data.TryGetPlayerData(otherConnection, out var otherPlayer);
                     if (!result || !otherPlayer.IsAlive) continue;
                     var playerPosition = otherConnection.identity.gameObject.transform.position;
                     var blockPosition = request.GlobalPositions[i];

@@ -16,15 +16,15 @@ namespace UI
         private IInputService _inputService;
         private CanvasGroup _canvasGroup;
         private IAvatarLoader _avatarLoader;
-        private CustomNetworkManager _networkManager;
+        private IClient _client;
 
 
-        public void Construct(IInputService inputService, IAvatarLoader avatarLoader,
-            CustomNetworkManager networkManager)
+        public void Construct(IClient client, IInputService inputService,
+            IAvatarLoader avatarLoader)
         {
-            _networkManager = networkManager;
-            _networkManager.Client.ScoreboardChanged += UpdateScoreboard;
-            _networkManager.GameFinished += ShowFinalStatistics;
+            _client = client;
+            _client.ScoreboardChanged += UpdateScoreboard;
+            _client.GameFinished += ShowFinalStatistics;
             _inputService = inputService;
             _avatarLoader = avatarLoader;
             _canvasGroup = GetComponent<CanvasGroup>();
@@ -38,7 +38,7 @@ namespace UI
 
         private void ShowFinalStatistics()
         {
-            _networkManager.GameFinished -= ShowFinalStatistics;
+            _client.GameFinished -= ShowFinalStatistics;
             enabled = false;
             _canvasGroup.alpha = 1;
         }
@@ -63,7 +63,7 @@ namespace UI
 
         private void OnDestroy()
         {
-            _networkManager.Client.ScoreboardChanged -= UpdateScoreboard;
+            _client.ScoreboardChanged -= UpdateScoreboard;
         }
     }
 }

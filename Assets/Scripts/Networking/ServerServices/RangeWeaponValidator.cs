@@ -1,102 +1,100 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using Data;
-using Infrastructure.AssetManagement;
+using Infrastructure;
 using Infrastructure.Factory;
-using Inventory;
 using Mirror;
-using Networking.Messages;
 using Networking.Messages.Responses;
 using UnityEngine;
 
-namespace Networking.Synchronization
+namespace Networking.ServerServices
 {
-    public class RangeWeaponSynchronization : NetworkBehaviour
+    public class RangeWeaponValidator
     {
-        private IServer _server;
-        private IParticleFactory _particleFactory;
-        private IAssetProvider _assets;
-        private List<AudioClip> _audioClips;
+        private readonly IServer _server;
+        private readonly ICoroutineRunner _coroutineRunner;
+        private readonly IParticleFactory _particleFactory;
 
-        public void Construct(IParticleFactory particleFactory, IAssetProvider assets, IServer server)
+        public RangeWeaponValidator(IServer server, ICoroutineRunner coroutineRunner, IParticleFactory particleFactory)
         {
             _server = server;
+            _coroutineRunner = coroutineRunner;
             _particleFactory = particleFactory;
-            _audioClips = assets.LoadAll<AudioClip>("Audio/Sounds").ToList();
         }
 
-        [Command]
-        public void CmdShootSingle(Ray ray, int weaponId, NetworkConnectionToClient connection = null)
+        public void Shoot(NetworkConnectionToClient connection, Ray ray, bool requestIsButtonHolding)
         {
-            var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
-            if (!result || !playerData.IsAlive) return;
-            var weapon = playerData.RangeWeaponsById[weaponId];
-            if (!CanShoot(weapon) || weapon.IsAutomatic) return;
-            Shoot(weapon, connection);
+            var playerData = _server.Data.GetPlayerData(connection);
+            if (!playerData.RangeWeaponsById.TryGetValue(playerData.ItemIds[playerData.InventorySlotId],
+                    out var weapon))
+            {
+                return;
+            }
+
+            if (!CanShoot(weapon) || requestIsButtonHolding != weapon.IsAutomatic)
+            {
+                return;
+            }
+
             for (var i = 0; i < weapon.BulletsPerShot; i++)
+            {
                 ApplyRaycast(connection, ray, weapon);
-            GetComponent<SoundSynchronization>().PlayAudioClip(connection!.identity,
-                _audioClips.FindIndex(audioClip => audioClip == weapon.ShootAudioClip), weapon.ShootingVolume);
+            }
+
+            UpdateWeaponState(weapon);
+            connection.Send(new ShootResultResponse(weapon.ID, weapon.BulletsInMagazine));
+            StartShootCoroutines(weapon);
+
+            //GetComponent<SoundSynchronization>().PlayAudioClip(connection!.identity,
+            //    _audioClips.FindIndex(audioClip => audioClip == weapon.ShootAudioClip), weapon.ShootingVolume);
         }
 
-        [Command]
-        public void CmdShootAutomatic(Ray ray, int weaponId, NetworkConnectionToClient connection = null)
+        public void Reload(NetworkConnectionToClient connection)
         {
-            var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
-            if (!result || !playerData.IsAlive) return;
-            var weapon = playerData.RangeWeaponsById[weaponId];
-            if (!CanShoot(weapon) || !weapon.IsAutomatic) return;
-            Shoot(weapon, connection);
-            for (var i = 0; i < weapon.BulletsPerShot; i++)
-                ApplyRaycast(connection, ray, weapon);
-            GetComponent<SoundSynchronization>().PlayAudioClip(connection!.identity,
-                _audioClips.FindIndex(audioClip => audioClip == weapon.ShootAudioClip), weapon.ShootingVolume);
+            var playerData = _server.Data.GetPlayerData(connection);
+            if (!playerData.RangeWeaponsById.TryGetValue(playerData.ItemIds[playerData.InventorySlotId],
+                    out var weapon))
+            {
+                return;
+            }
+
+            if (!CanReload(weapon))
+            {
+                return;
+            }
+
+            ReloadInternal(weapon);
+            connection.Send(new ReloadResultResponse(weapon.ID, weapon.TotalBullets,
+                weapon.BulletsInMagazine));
+            StartReloadCoroutine(weapon);
+            //GetComponent<SoundSynchronization>().PlayAudioClip(connection!.identity,
+            //    _audioClips.FindIndex(audioClip => audioClip == weapon.ReloadingAudioClip), weapon.ReloadingVolume);
         }
 
-        [Command]
-        public void CmdReload(int weaponId, NetworkConnectionToClient connection = null)
-        {
-            var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
-            if (!result || !playerData.IsAlive) return;
-            var weapon = playerData.RangeWeaponsById[weaponId];
-            if (!CanReload(weapon)) return;
-            Reload(weapon, connection);
-            GetComponent<SoundSynchronization>().PlayAudioClip(connection!.identity,
-                _audioClips.FindIndex(audioClip => audioClip == weapon.ReloadingAudioClip), weapon.ReloadingVolume);
-        }
-
-        [Server]
         private void StartShootCoroutines(RangeWeaponData rangeWeapon)
         {
-            StartCoroutine(WaitForSeconds(() => ResetShoot(rangeWeapon), rangeWeapon.TimeBetweenShooting));
-            StartCoroutine(WaitForSeconds(() => ResetRecoil(rangeWeapon), rangeWeapon.ResetTimeRecoil));
+            _coroutineRunner.StartCoroutine(Utils.DoActionAfterDelay(() => ResetShoot(rangeWeapon), rangeWeapon.TimeBetweenShooting));
+            _coroutineRunner.StartCoroutine(Utils.DoActionAfterDelay(() => ResetRecoil(rangeWeapon), rangeWeapon.ResetTimeRecoil));
         }
 
 
-        [Server]
         private void StartReloadCoroutine(RangeWeaponData rangeWeapon)
         {
-            StartCoroutine(WaitForSeconds(() => ReloadFinished(rangeWeapon), rangeWeapon.ReloadTime));
+            _coroutineRunner.StartCoroutine(Utils.DoActionAfterDelay(() => ReloadFinished(rangeWeapon), rangeWeapon.ReloadTime));
         }
 
-        [Server]
         private void ResetRecoil(RangeWeaponData rangeWeapon)
         {
             if (rangeWeapon is not null)
                 rangeWeapon.RecoilModifier -= rangeWeapon.StepRecoil;
         }
 
-        [Server]
         private void ResetShoot(RangeWeaponData rangeWeapon)
         {
             if (rangeWeapon is not null)
                 rangeWeapon.IsReady = true;
         }
 
-        [Server]
-        private void Reload(RangeWeaponData rangeWeapon, NetworkConnectionToClient connection)
+        private void ReloadInternal(RangeWeaponData rangeWeapon)
         {
             rangeWeapon.IsReloading = true;
             if (rangeWeapon.TotalBullets + rangeWeapon.BulletsInMagazine - rangeWeapon.MagazineSize <= 0)
@@ -109,31 +107,23 @@ namespace Networking.Synchronization
                 rangeWeapon.TotalBullets -= rangeWeapon.MagazineSize - rangeWeapon.BulletsInMagazine;
                 rangeWeapon.BulletsInMagazine = rangeWeapon.MagazineSize;
             }
-
-            connection.Send(new ReloadResponse(rangeWeapon.ID, rangeWeapon.TotalBullets, rangeWeapon.BulletsInMagazine));
-            StartReloadCoroutine(rangeWeapon);
         }
 
-        [Server]
         private void ReloadFinished(RangeWeaponData rangeWeapon)
         {
             if (rangeWeapon is not null)
                 rangeWeapon.IsReloading = false;
         }
 
-        [Server]
-        private void Shoot(RangeWeaponData rangeWeapon, NetworkConnectionToClient connection)
+        private void UpdateWeaponState(RangeWeaponData rangeWeapon)
         {
             rangeWeapon.BulletsInMagazine -= 1;
             if (rangeWeapon.BulletsInMagazine <= 0)
                 rangeWeapon.BulletsInMagazine = 0;
             rangeWeapon.IsReady = false;
             rangeWeapon.RecoilModifier += rangeWeapon.StepRecoil;
-            connection.Send(new ShootResponse(rangeWeapon.ID, rangeWeapon.BulletsInMagazine));
-            StartShootCoroutines(rangeWeapon);
         }
 
-        [Server]
         private void ApplyRaycast(NetworkConnectionToClient source, Ray ray,
             RangeWeaponData rangeWeapon)
         {
@@ -150,8 +140,12 @@ namespace Networking.Synchronization
                 : UnityEngine.Random.Range(-rangeWeapon.BaseRecoil, rangeWeapon.BaseRecoil) *
                   (rangeWeapon.RecoilModifier + 1);
             ray = new Ray(ray.origin, ray.direction + new Vector3(x, y, z));
-            var raycastResult = Physics.Raycast(ray, out var rayHit, rangeWeapon.Range, Constants.AttackMask);
-            if (!raycastResult) return;
+            var raycastResult = Physics.Raycast(ray, out var rayHit, rangeWeapon.Range, Constants.attackMask);
+            if (!raycastResult)
+            {
+                return;
+            }
+
             if (rayHit.collider.CompareTag("Head"))
             {
                 ShootImpact(source, rayHit, (int) (rangeWeapon.HeadMultiplier * rangeWeapon.Damage));
@@ -186,25 +180,20 @@ namespace Networking.Synchronization
             var receiver = rayHit.collider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
             if (source != receiver)
             {
-                GetComponent<HealthSynchronization>().Damage(source, receiver, damage);
+                _server.Damage(source, receiver, damage);
                 _particleFactory.CreateBlood(rayHit.point, Quaternion.LookRotation(rayHit.normal));
             }
         }
 
-
-        [Server]
-        private bool CanShoot(RangeWeaponData rangeWeapon) =>
-            rangeWeapon.IsReady && !rangeWeapon.IsReloading && rangeWeapon.BulletsInMagazine > 0;
-
-        [Server]
-        private bool CanReload(RangeWeaponData rangeWeapon) =>
-            rangeWeapon.BulletsInMagazine < rangeWeapon.MagazineSize &&
-            !rangeWeapon.IsReloading && rangeWeapon.TotalBullets > 0;
-
-        private static IEnumerator WaitForSeconds(Action action, float timeInSeconds)
+        private bool CanShoot(RangeWeaponData rangeWeapon)
         {
-            yield return new WaitForSeconds(timeInSeconds);
-            action();
+            return rangeWeapon.IsReady && !rangeWeapon.IsReloading && rangeWeapon.BulletsInMagazine > 0;
+        }
+
+        private bool CanReload(RangeWeaponData rangeWeapon)
+        {
+            return rangeWeapon.BulletsInMagazine < rangeWeapon.MagazineSize &&
+                   !rangeWeapon.IsReloading && rangeWeapon.TotalBullets > 0;
         }
     }
 }

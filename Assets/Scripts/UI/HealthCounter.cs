@@ -1,4 +1,4 @@
-using PlayerLogic;
+using Networking;
 using TMPro;
 using UnityEngine;
 
@@ -6,17 +6,25 @@ namespace UI
 {
     public class HealthCounter : MonoBehaviour
     {
-        [SerializeField] private TextMeshProUGUI healthText;
-        
-        public void Construct(GameObject player)
+        [SerializeField]
+        private TextMeshProUGUI healthText;
+
+        private IClient _client;
+
+        public void Construct(IClient client)
         {
-            player.GetComponent<Player>().OnHealthChanged += OnHealthChanged; 
-            OnHealthChanged(player.GetComponent<Player>().health);
+            _client = client;
+            _client.HealthChanged += OnHealthChanged;
         }
 
         private void OnHealthChanged(int currentHealth)
         {
             healthText.SetText(currentHealth.ToString());
+        }
+
+        private void OnDestroy()
+        {
+            _client.HealthChanged -= OnHealthChanged;
         }
     }
 }

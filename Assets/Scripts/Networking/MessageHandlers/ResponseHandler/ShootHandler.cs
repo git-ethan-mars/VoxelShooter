@@ -4,16 +4,16 @@ using Networking.Messages.Responses;
 
 namespace Networking.MessageHandlers.ResponseHandler
 {
-    public class ShootHandler : ResponseHandler<ShootResponse>
+    public class ShootResultHandler : ResponseHandler<ShootResultResponse>
     {
         private readonly List<Slot> _slots;
 
-        public ShootHandler(List<Slot> slots)
+        public ShootResultHandler(List<Slot> slots)
         {
             _slots = slots;
         }
 
-        protected override void OnResponseReceived(ShootResponse response)
+        protected override void OnResponseReceived(ShootResultResponse response)
         {
             var shooting = (IShooting) _slots.Find(slot => slot.InventoryItem.id == response.WeaponId).ItemHandler;
             shooting.BulletsInMagazine = response.BulletsInMagazine;
