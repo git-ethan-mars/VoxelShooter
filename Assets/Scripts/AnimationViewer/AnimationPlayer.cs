@@ -64,10 +64,6 @@ public class AnimationPlayer : MonoBehaviour
 
     private void HandleMovement()
     {
-        if (Input.GetKeyDown(KeyCode.LeftControl))
-        {
-            Debug.Log("Фиит Сосать");
-        }
         var axis = _inputService.Axis;
         if (Mathf.Abs(_characterController.velocity.magnitude) < Constants.Epsilon)
         {
