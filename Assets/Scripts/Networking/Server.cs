@@ -118,13 +118,13 @@ namespace Networking
                 respawnTimer.Start();
             }
 
-            NetworkServer.SendToAll(new ScoreboardResponse(Data.GetScoreData()));
+            NetworkServer.SendToReady(new ScoreboardResponse(Data.GetScoreData()));
         }
 
         public void DeletePlayer(NetworkConnectionToClient connection)
         {
             Data.DeletePlayer(connection);
-            NetworkServer.SendToAll(new ScoreboardResponse(Data.GetScoreData()));
+            NetworkServer.SendToReady(new ScoreboardResponse(Data.GetScoreData()));
             NetworkServer.DestroyPlayerForConnection(connection);
         }
 
@@ -210,7 +210,7 @@ namespace Networking
             var respawnTimer = new RespawnTimer(_coroutineRunner, victim, _serverSettings.SpawnTime,
                 () => RespawnPlayer(victim));
             respawnTimer.Start();
-            NetworkServer.SendToAll(new ScoreboardResponse(Data.GetScoreData()));
+            NetworkServer.SendToReady(new ScoreboardResponse(Data.GetScoreData()));
         }
 
         private void SendMap(NetworkConnectionToClient connection)
