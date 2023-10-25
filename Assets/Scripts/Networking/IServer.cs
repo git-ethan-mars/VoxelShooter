@@ -12,7 +12,7 @@ namespace Networking
         ServerData Data { get; }
         MapUpdater MapUpdater { get; }
 
-        void AddPlayer(NetworkConnectionToClient connection, GameClass chosenClass, CSteamID steamID,
+        void AddPlayer(NetworkConnectionToClient connection, CSteamID steamID,
             string nickname);
 
         void ChangeClass(NetworkConnectionToClient connection, GameClass chosenClass);

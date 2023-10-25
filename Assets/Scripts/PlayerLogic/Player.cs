@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Infrastructure.Factory;
 using Infrastructure.Services.Input;
 using Networking;
+using TMPro;
 using UnityEngine;
 
 namespace PlayerLogic
@@ -11,7 +12,20 @@ namespace PlayerLogic
         public List<int> ItemsIds { get; private set; }
         public float PlaceDistance { get; private set; }
 
-        public string nickName;
+        public string NickName
+        {
+            get => _nickName;
+            set
+            {
+                nickNameText.SetText(value);
+                _nickName = value;
+            }
+        }
+
+        private string _nickName;
+        
+        [SerializeField]
+        private TextMeshProUGUI nickNameText;
 
         [SerializeField]
         private Transform itemPosition;
@@ -31,7 +45,6 @@ namespace PlayerLogic
             List<int> itemIds)
         {
             _client = client;
-            nickName = "Need to fix";
             PlaceDistance = placeDistance;
             ItemsIds = itemIds;
             _hud = uiFactory.CreateHud(_client, inputService, gameObject);

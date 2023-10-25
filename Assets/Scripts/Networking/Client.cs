@@ -86,6 +86,7 @@ namespace Networking
         private readonly HealthHandler _healthHandler;
         private readonly ChangeItemModelHandler _changeItemModelHandler;
         private readonly PlayerConfigureHandler _playerConfigureHandler;
+        private readonly NickNameHandler _nickNameHandler;
 
         public Client(GameStateMachine stateMachine, ICoroutineRunner coroutineRunner, IInputService inputService, IGameFactory gameFactory,
             IMeshFactory meshFactory,
@@ -110,6 +111,7 @@ namespace Networking
             _healthHandler = new HealthHandler();
             _changeItemModelHandler = new ChangeItemModelHandler(meshFactory, staticData);
             _playerConfigureHandler = new PlayerConfigureHandler(this, uiFactory, inputService);
+            _nickNameHandler = new NickNameHandler();
         }
 
         public void Start()
@@ -140,6 +142,7 @@ namespace Networking
             _healthHandler.Register();
             _changeItemModelHandler.Register();
             _playerConfigureHandler.Register();
+            _nickNameHandler.Register();
         }
 
         private void UnregisterHandlers()
@@ -154,6 +157,7 @@ namespace Networking
             _healthHandler.Unregister();
             _changeItemModelHandler.Unregister();
             _playerConfigureHandler.Unregister();
+            _nickNameHandler.Unregister();
         }
 
         private void OnMapDownloaded()

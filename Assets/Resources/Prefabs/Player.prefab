@@ -355,8 +355,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 908e098c0a7bf2e4184f51e6ebc78b3c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nickNameText: {fileID: 6176815723976854097}
-  player: {fileID: 8907822022040828168}
 --- !u!1 &1556552308598454547
 GameObject:
   m_ObjectHideFlags: 0
@@ -1423,7 +1421,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7988b75de6ad4df498929a82e8d38dce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nickName: 
+  nickNameText: {fileID: 6176815723976854097}
   itemPosition: {fileID: 7893378094424813921}
   bodyParts:
   - {fileID: 6038241266318642879}

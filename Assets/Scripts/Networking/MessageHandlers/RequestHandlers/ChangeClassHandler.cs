@@ -14,12 +14,8 @@ namespace Networking.MessageHandlers.RequestHandlers
 
         protected override void OnRequestReceived(NetworkConnectionToClient connection, ChangeClassRequest request)
         {
-            var result = _server.Data.TryGetPlayerData(connection, out _);
-            if (!result)
-            {
-                _server.AddPlayer(connection, request.GameClass, request.SteamID, request.Nickname);
-            }
-            else
+            var playerData = _server.Data.GetPlayerData(connection);
+            if (playerData.GameClass != request.GameClass)
             {
                 _server.ChangeClass(connection, request.GameClass);
             }

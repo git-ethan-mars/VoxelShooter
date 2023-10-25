@@ -40,6 +40,7 @@ namespace Networking
         private readonly ShootHandler _shootHandler;
         private readonly ReloadHandler _reloadHandler;
         private readonly HitHandler _hitHandler;
+        private readonly AuthenticationHandler _authenticationHandler;
 
         public Server(ICoroutineRunner coroutineRunner, IStaticDataService staticData,
             ServerSettings serverSettings, IAssetProvider assets, IGameFactory gameFactory,
@@ -72,6 +73,7 @@ namespace Networking
             _shootHandler = new ShootHandler(this, rangeWeaponValidator);
             _reloadHandler = new ReloadHandler(this, rangeWeaponValidator);
             _hitHandler = new HitHandler(this, meleeWeaponValidator);
+            _authenticationHandler = new AuthenticationHandler(this);
         }
 
         public void Start()
@@ -80,32 +82,42 @@ namespace Networking
             CreateSpawnPoints();
         }
 
-        public void AddPlayer(NetworkConnectionToClient connection, GameClass chosenClass, CSteamID steamID,
+        public void AddPlayer(NetworkConnectionToClient connection, CSteamID steamID,
             string nickname)
         {
-            Data.AddPlayer(connection, chosenClass, steamID, nickname);
-            _playerFactory.CreatePlayer(connection);
-            SendDataFromOtherPlayers(connection);
-            var playerData = Data.GetPlayerData(connection);
-            connection.Send(new PlayerConfigureResponse(playerData.Characteristic.placeDistance,
-                playerData.Characteristic.speed, playerData.Characteristic.jumpMultiplier, playerData.ItemIds));
-            NetworkServer.SendToAll(new ScoreboardResponse(Data.GetScoreData()));
+            Data.AddPlayer(connection, steamID, nickname);
         }
 
         public void ChangeClass(NetworkConnectionToClient connection, GameClass chosenClass)
         {
             var playerData = Data.GetPlayerData(connection);
-            if (playerData.GameClass == chosenClass) return;
-            playerData.GameClass = chosenClass;
-            if (playerData.IsAlive)
+            if (playerData.GameClass == GameClass.None)
             {
+                playerData.GameClass = chosenClass;
+                playerData.PlayerStateMachine.Enter<LifeState>();
+                var player = _playerFactory.CreatePlayer();
+                NetworkServer.AddPlayerForConnection(connection, player);
+                connection.Send(new PlayerConfigureResponse(playerData.Characteristic.placeDistance,
+                    playerData.Characteristic.speed, playerData.Characteristic.jumpMultiplier, playerData.ItemIds));
+                SendDataFromOtherPlayers(connection);
+                NetworkServer.SendToReady(new NickNameResponse(connection.identity, playerData.NickName));
+            }
+            else
+            {
+                playerData.GameClass = chosenClass;
+                if (!playerData.IsAlive)
+                {
+                    return;
+                }
+
                 playerData.PlayerStateMachine.Enter<DeathState>();
-                _playerFactory.CreateSpectatorPlayer(connection);
+                var spectator = _playerFactory.CreateSpectatorPlayer();
+                ReplacePlayer(connection, spectator);
                 var respawnTimer = new RespawnTimer(_coroutineRunner, connection, _serverSettings.SpawnTime,
-                    () => _playerFactory.RespawnPlayer(connection));
+                    () => RespawnPlayer(connection));
                 respawnTimer.Start();
             }
-            
+
             NetworkServer.SendToAll(new ScoreboardResponse(Data.GetScoreData()));
         }
 
@@ -154,6 +166,7 @@ namespace Networking
             _shootHandler.Register();
             _reloadHandler.Register();
             _hitHandler.Register();
+            _authenticationHandler.Register();
         }
 
         private void UnregisterHandlers()
@@ -167,6 +180,7 @@ namespace Networking
             _shootHandler.Unregister();
             _reloadHandler.Unregister();
             _hitHandler.Unregister();
+            _authenticationHandler.Unregister();
         }
 
         private void CreateSpawnPoints()
@@ -185,15 +199,16 @@ namespace Networking
         private void AddKill(NetworkConnectionToClient killer, NetworkConnectionToClient victim)
         {
             var tombstonePosition = Vector3Int.FloorToInt(victim.identity.transform.position) +
-                                    Constants.WorldOffset;
+                                    Constants.worldOffset;
             var tombstone = _entityFactory.CreateTombstone(tombstonePosition);
             _entityPositionValidator.AddEntity(tombstone.GetComponent<PushableObject>());
             Data.AddKill(killer, victim);
             var playerData = Data.GetPlayerData(victim);
             playerData.PlayerStateMachine.Enter<DeathState>();
-            _playerFactory.CreateSpectatorPlayer(victim);
+            var spectatorPlayer = _playerFactory.CreateSpectatorPlayer();
+            ReplacePlayer(victim, spectatorPlayer);
             var respawnTimer = new RespawnTimer(_coroutineRunner, victim, _serverSettings.SpawnTime,
-                () => _playerFactory.RespawnPlayer(victim));
+                () => RespawnPlayer(victim));
             respawnTimer.Start();
             NetworkServer.SendToAll(new ScoreboardResponse(Data.GetScoreData()));
         }
@@ -222,8 +237,32 @@ namespace Networking
                 {
                     connection.Send(new ChangeItemModelResponse(anotherClient.identity,
                         anotherPlayer.ItemIds[anotherPlayer.InventorySlotId]));
+                    connection.Send(new NickNameResponse(anotherClient.identity, anotherPlayer.NickName));
                 }
             }
+        }
+
+        private void RespawnPlayer(NetworkConnectionToClient connection)
+        {
+            var playerData = Data.GetPlayerData(connection);
+            playerData.PlayerStateMachine.Enter<LifeState>();
+            var player = _playerFactory.CreatePlayer();
+            ReplacePlayer(connection, player);
+            connection.Send(new PlayerConfigureResponse(playerData.Characteristic.placeDistance,
+                playerData.Characteristic.speed, playerData.Characteristic.jumpMultiplier, playerData.ItemIds));
+            NetworkServer.SendToReady(new NickNameResponse(connection.identity, playerData.NickName));
+        }
+
+        private void ReplacePlayer(NetworkConnectionToClient connection, GameObject newPlayer)
+        {
+            if (connection.identity == null)
+            {
+                return;
+            }
+
+            var oldPlayer = connection.identity.gameObject;
+            NetworkServer.ReplacePlayerForConnection(connection, newPlayer, true);
+            Object.Destroy(oldPlayer, 0.1f);
         }
     }
 }

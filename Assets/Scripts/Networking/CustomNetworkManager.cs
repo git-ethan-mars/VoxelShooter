@@ -1,3 +1,4 @@
+using System.Globalization;
 using Data;
 using Infrastructure;
 using Infrastructure.AssetManagement;
@@ -6,9 +7,8 @@ using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
 using Infrastructure.States;
 using Mirror;
-using Networking.MessageHandlers.ResponseHandler;
-using Networking.Messages.Responses;
 using Networking.ServerServices;
+using Steamworks;
 using UnityEngine;
 
 namespace Networking
@@ -71,6 +71,15 @@ namespace Networking
             }
 
             NetworkServer.SetClientReady(connection);
+        }
+
+        public override void OnClientConnect()
+        {
+            NetworkClient.Ready();
+            NetworkClient.Send(new AuthenticationRequest(Constants.isLocalBuild ? CSteamID.Nil : SteamUser.GetSteamID(),
+                Constants.isLocalBuild
+                    ? Random.value.ToString(CultureInfo.InvariantCulture)
+                    : SteamFriends.GetPersonaName()));
         }
 
         public override void OnServerDisconnect(NetworkConnectionToClient connection)

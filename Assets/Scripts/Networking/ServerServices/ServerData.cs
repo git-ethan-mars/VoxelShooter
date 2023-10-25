@@ -22,11 +22,10 @@ namespace Networking.ServerServices
 
         public IEnumerable<NetworkConnectionToClient> ClientConnections => _dataByConnection.Keys.ToArray();
 
-        public void AddPlayer(NetworkConnectionToClient connection, GameClass chosenClass, CSteamID steamID,
+        public void AddPlayer(NetworkConnectionToClient connection, CSteamID steamID,
             string nickname)
         {
             var playerData = new PlayerData(steamID, nickname, _staticData);
-            playerData.GameClass = chosenClass;
             _dataByConnection[connection] = playerData;
         }
 

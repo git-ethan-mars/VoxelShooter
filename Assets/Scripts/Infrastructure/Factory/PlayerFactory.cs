@@ -2,10 +2,7 @@
 using CameraLogic;
 using Data;
 using Infrastructure.AssetManagement;
-using Mirror;
 using Networking;
-using Networking.Messages.Responses;
-using PlayerLogic.States;
 using UnityEngine;
 
 namespace Infrastructure.Factory
@@ -19,7 +16,6 @@ namespace Infrastructure.Factory
         private const string PlayerPath = "Prefabs/Player";
         private const string SpectatorPlayerPath = "Prefabs/Spectator player";
 
-
         public PlayerFactory(IServer server,
             IAssetProvider assets)
         {
@@ -28,8 +24,7 @@ namespace Infrastructure.Factory
             _assets = assets;
         }
 
-
-        public void CreatePlayer(NetworkConnectionToClient connection)
+        public GameObject CreatePlayer()
         {
             GameObject player;
             if (_spawnPoints.Count == 0)
@@ -43,38 +38,14 @@ namespace Infrastructure.Factory
                 _spawnPointIndex = (_spawnPointIndex + 1) % _spawnPoints.Count;
             }
 
-            var playerData = _server.Data.GetPlayerData(connection);
-            playerData.PlayerStateMachine.Enter<LifeState>();
-            NetworkServer.AddPlayerForConnection(connection, player);
+            return player;
         }
 
-        public void RespawnPlayer(NetworkConnectionToClient connection)
-        {
-            var result = _server.Data.TryGetPlayerData(connection, out var playerData);
-            if (!result) return;
-            GameObject player;
-            if (_spawnPoints.Count == 0)
-            {
-                player = CreatePlayerWithoutSpawnPoint();
-            }
-            else
-            {
-                player = CreatePlayerWithSpawnPoint(_spawnPoints[_spawnPointIndex].ToVectorWithOffset(),
-                    Quaternion.identity);
-                _spawnPointIndex = (_spawnPointIndex + 1) % _spawnPoints.Count;
-            }
-
-            playerData.PlayerStateMachine.Enter<LifeState>();
-            ReplacePlayer(connection, player);
-            connection.Send(new PlayerConfigureResponse(playerData.Characteristic.placeDistance,
-                playerData.Characteristic.speed, playerData.Characteristic.jumpMultiplier, playerData.ItemIds));
-        }
-
-        public void CreateSpectatorPlayer(NetworkConnectionToClient connection)
+        public GameObject CreateSpectatorPlayer()
         {
             var spectator = _assets.Instantiate(SpectatorPlayerPath);
             spectator.GetComponent<Spectator>().Construct(_server);
-            ReplacePlayer(connection, spectator);
+            return spectator;
         }
 
         private GameObject CreatePlayerWithSpawnPoint(Vector3 position,
@@ -82,17 +53,5 @@ namespace Infrastructure.Factory
             _assets.Instantiate(PlayerPath, position, rotation);
 
         private GameObject CreatePlayerWithoutSpawnPoint() => _assets.Instantiate(PlayerPath);
-
-        private void ReplacePlayer(NetworkConnectionToClient connection, GameObject newPlayer)
-        {
-            if (connection.identity == null)
-            {
-                return;
-            }
-
-            var oldPlayer = connection.identity.gameObject;
-            NetworkServer.ReplacePlayerForConnection(connection, newPlayer, true);
-            Object.Destroy(oldPlayer, 0.1f);
-        }
     }
 }
