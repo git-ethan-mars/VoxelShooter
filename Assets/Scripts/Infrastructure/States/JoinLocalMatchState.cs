@@ -6,7 +6,6 @@ namespace Infrastructure.States
     public class JoinLocalMatchState : IState
     {
         private readonly IGameFactory _gameFactory;
-        private readonly bool _isLocalBuild;
         private readonly GameStateMachine _stateMachine;
         private readonly SceneLoader _sceneLoader;
         private readonly IUIFactory _uiFactory;

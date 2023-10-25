@@ -13,17 +13,16 @@ namespace Infrastructure.States
         private readonly Dictionary<Type, IExitableState> _states;
         private IExitableState _activeState;
 
-        public GameStateMachine(SceneLoader sceneLoader, ICoroutineRunner coroutineRunner, AllServices allServices,
-            bool isLocalBuild)
+        public GameStateMachine(SceneLoader sceneLoader, ICoroutineRunner coroutineRunner, AllServices allServices)
         {
             _states = new Dictionary<Type, IExitableState>
             {
                 [typeof(BootstrapState)] =
-                    new BootstrapState(this, sceneLoader, allServices, coroutineRunner, isLocalBuild),
+                    new BootstrapState(this, sceneLoader, allServices, coroutineRunner),
                 [typeof(MainMenuState)] =
-                    new MainMenuState(this, sceneLoader, allServices.Single<IUIFactory>(), isLocalBuild),
+                    new MainMenuState(this, sceneLoader, allServices.Single<IUIFactory>()),
                 [typeof(CreateMatchState)] = new CreateMatchState(this, allServices.Single<IMapRepository>(),
-                    allServices.Single<IUIFactory>(), isLocalBuild),
+                    allServices.Single<IUIFactory>()),
                 [typeof(StartSteamLobbyState)] =
                     new StartSteamLobbyState(this, sceneLoader, allServices.Single<IGameFactory>()),
                 [typeof(JoinSteamLobbyState)] = new JoinSteamLobbyState(this, sceneLoader,
@@ -33,7 +32,7 @@ namespace Infrastructure.States
                     allServices.Single<IGameFactory>(), allServices.Single<IUIFactory>()),
                 [typeof(GameLoopState)] =
                     new GameLoopState(allServices.Single<IUIFactory>(), allServices.Single<IInputService>(),
-                        allServices.Single<IAvatarLoader>(), isLocalBuild)
+                        allServices.Single<IAvatarLoader>())
             };
         }
 

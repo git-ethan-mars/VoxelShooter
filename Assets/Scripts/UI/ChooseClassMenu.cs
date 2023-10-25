@@ -1,14 +1,11 @@
 using System;
-using System.Globalization;
 using Data;
 using Infrastructure.Services.Input;
 using Mirror;
 using Networking;
 using Networking.Messages.Requests;
-using Steamworks;
 using UnityEngine;
 using UnityEngine.UI;
-using Random = UnityEngine.Random;
 
 namespace UI
 {
@@ -29,17 +26,15 @@ namespace UI
 
         private IInputService _inputService;
         private CanvasGroup _canvasGroup;
-        private bool _isLocalBuild;
         private IClient _client;
 
-        public void Construct(IClient client, IInputService inputService, bool isLocalBuild)
+        public void Construct(IClient client, IInputService inputService)
         {
-            _isLocalBuild = isLocalBuild;
             _inputService = inputService;
             _client = client;
             _client.GameFinished += HideWindow;
             _canvasGroup = GetComponent<CanvasGroup>();
-            builderButton.onClick.AddListener(() => ChangeClass(GameClass.Builder));
+            builderButton.onClick.AddListener(() => ChangeClass(GameClass.Builder)); // TODO : Unsubscribe from these events.
             sniperButton.onClick.AddListener(() => ChangeClass(GameClass.Sniper));
             combatantButton.onClick.AddListener(() => ChangeClass(GameClass.Combatant));
             grenadierButton.onClick.AddListener(() => ChangeClass(GameClass.Grenadier));
@@ -80,9 +75,7 @@ namespace UI
 
         private void ChangeClass(GameClass gameClass)
         {
-            NetworkClient.Send(new ChangeClassRequest(_isLocalBuild ? CSteamID.Nil : SteamUser.GetSteamID(),
-                gameClass,
-                _isLocalBuild ? Random.value.ToString(CultureInfo.InvariantCulture) : SteamFriends.GetPersonaName()));
+            NetworkClient.Send(new ChangeClassRequest(gameClass));
             _canvasGroup.alpha = 0;
             HideCursor();
         }

@@ -11,9 +11,9 @@ namespace Infrastructure.Factory
     public interface IUIFactory : IService
     {
         GameObject CreateHud(IClient client, IInputService inputService, GameObject player);
-        void CreateChooseClassMenu(IClient client, IInputService inputService, bool isLocalBuild);
-        GameObject CreateMainMenu(GameStateMachine gameStateMachine, bool isLocalBuild);
-        GameObject CreateMatchMenu(IMapRepository mapRepository, GameStateMachine gameStateMachine, bool isLocalBuild);
+        void CreateChooseClassMenu(IClient client, IInputService inputService);
+        GameObject CreateMainMenu(GameStateMachine gameStateMachine);
+        GameObject CreateMatchMenu(IMapRepository mapRepository, GameStateMachine gameStateMachine);
         void CreateTimeCounter(IClient client, IInputService inputService);
         void CreateScoreboard(IClient client, IInputService inputService, IAvatarLoader avatarLoader);
         void CreateLoadingWindow(IClient client);

@@ -39,24 +39,23 @@ namespace Infrastructure.Factory
             return hud;
         }
 
-        public void CreateChooseClassMenu(IClient client, IInputService inputService, bool isLocalBuild)
+        public void CreateChooseClassMenu(IClient client, IInputService inputService)
         {
             _assets.Instantiate(ChooseClassMenuPath).GetComponent<ChooseClassMenu>()
-                .Construct(client, inputService, isLocalBuild);
+                .Construct(client, inputService);
         }
 
-        public GameObject CreateMainMenu(GameStateMachine gameStateMachine, bool isLocalBuild)
+        public GameObject CreateMainMenu(GameStateMachine gameStateMachine)
         {
             var mainMenu = _assets.Instantiate(MainMenuPath);
-            mainMenu.GetComponent<MainMenu>().Construct(gameStateMachine, isLocalBuild);
+            mainMenu.GetComponent<MainMenu>().Construct(gameStateMachine);
             return mainMenu;
         }
 
-        public GameObject CreateMatchMenu(IMapRepository mapRepository, GameStateMachine gameStateMachine,
-            bool isLocalBuild)
+        public GameObject CreateMatchMenu(IMapRepository mapRepository, GameStateMachine gameStateMachine)
         {
             var matchMenu = _assets.Instantiate(MatchMenuPath);
-            matchMenu.GetComponent<MatchMenu>().Construct(mapRepository, gameStateMachine, isLocalBuild);
+            matchMenu.GetComponent<MatchMenu>().Construct(mapRepository, gameStateMachine);
             return matchMenu;
         }
 

@@ -14,16 +14,14 @@ namespace Infrastructure.States
         private readonly SceneLoader _sceneLoader;
         private readonly AllServices _allServices;
         private readonly ICoroutineRunner _coroutineRunner;
-        private readonly bool _isLocalBuild;
 
         public BootstrapState(GameStateMachine stateMachine, SceneLoader sceneLoader, AllServices allServices,
-            ICoroutineRunner coroutineRunner, bool isLocalBuild)
+            ICoroutineRunner coroutineRunner)
         {
             _stateMachine = stateMachine;
             _sceneLoader = sceneLoader;
             _allServices = allServices;
             _coroutineRunner = coroutineRunner;
-            _isLocalBuild = isLocalBuild;
             RegisterServices();
         }
 
@@ -52,7 +50,7 @@ namespace Infrastructure.States
             staticData.LoadMapConfigures();
             _allServices.RegisterSingle<IInputService>(new StandaloneInputService());
             _allServices.RegisterSingle<IAssetProvider>(new AssetProvider());
-            if (_isLocalBuild)
+            if (Constants.isLocalBuild)
             {
                 _allServices.RegisterSingle<IAvatarLoader>(
                     new LocalAvatarLoader(_allServices.Single<IAssetProvider>()));

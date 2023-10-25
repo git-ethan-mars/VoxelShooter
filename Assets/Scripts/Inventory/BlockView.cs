@@ -73,7 +73,7 @@ namespace Inventory
 
         public void InnerUpdate()
         {
-            var raycastResult = _rayCaster.GetRayCastHit(out var raycastHit, _placeDistance, Constants.BuildMask);
+            var raycastResult = _rayCaster.GetRayCastHit(out var raycastHit, _placeDistance, Constants.buildMask);
             if (!raycastResult)
                 _transparentBlock.SetActive(false);
             else
@@ -86,7 +86,7 @@ namespace Inventory
 
         private void PlaceBlock(Color32 color)
         {
-            var raycastResult = _rayCaster.GetRayCastHit(out var raycastHit, _placeDistance, Constants.BuildMask);
+            var raycastResult = _rayCaster.GetRayCastHit(out var raycastHit, _placeDistance, Constants.buildMask);
             if (!raycastResult) return;
             NetworkClient.Send(new AddBlocksRequest(
                 new[] {Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2)},

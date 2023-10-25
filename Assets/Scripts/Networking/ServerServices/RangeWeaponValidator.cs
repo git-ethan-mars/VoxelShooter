@@ -140,7 +140,7 @@ namespace Networking.ServerServices
                 : UnityEngine.Random.Range(-rangeWeapon.BaseRecoil, rangeWeapon.BaseRecoil) *
                   (rangeWeapon.RecoilModifier + 1);
             ray = new Ray(ray.origin, ray.direction + new Vector3(x, y, z));
-            var raycastResult = Physics.Raycast(ray, out var rayHit, rangeWeapon.Range, Constants.AttackMask);
+            var raycastResult = Physics.Raycast(ray, out var rayHit, rangeWeapon.Range, Constants.attackMask);
             if (!raycastResult)
             {
                 return;

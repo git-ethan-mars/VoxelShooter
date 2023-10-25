@@ -55,7 +55,7 @@ namespace Networking.ServerServices
         private bool ApplyRaycast(NetworkConnectionToClient source, Ray ray, MeleeWeaponData meleeWeapon,
             bool isStrongHit)
         {
-            var raycastResult = Physics.Raycast(ray, out var rayHit, meleeWeapon.Range, Constants.AttackMask);
+            var raycastResult = Physics.Raycast(ray, out var rayHit, meleeWeapon.Range, Constants.attackMask);
             if (!raycastResult) return false;
             if (rayHit.collider.CompareTag("Head"))
             {

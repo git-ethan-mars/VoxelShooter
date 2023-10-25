@@ -7,9 +7,9 @@ namespace Infrastructure
     {
         public readonly GameStateMachine StateMachine;
 
-        public Game(ICoroutineRunner coroutineRunner, AllServices allServices, bool isLocalBuild)
+        public Game(ICoroutineRunner coroutineRunner, AllServices allServices)
         {
-            StateMachine = new GameStateMachine(new SceneLoader(coroutineRunner), coroutineRunner, allServices, isLocalBuild);
+            StateMachine = new GameStateMachine(new SceneLoader(coroutineRunner), coroutineRunner, allServices);
         }
     }
 }

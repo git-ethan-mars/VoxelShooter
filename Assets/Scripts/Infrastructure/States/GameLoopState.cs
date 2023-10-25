@@ -10,20 +10,17 @@ namespace Infrastructure.States
         private readonly IUIFactory _uiFactory;
         private readonly IInputService _inputService;
         private readonly IAvatarLoader _avatarLoader;
-        private readonly bool _isLocalBuild;
 
-        public GameLoopState(IUIFactory uiFactory, IInputService inputService, IAvatarLoader avatarLoader,
-            bool isLocalBuild)
+        public GameLoopState(IUIFactory uiFactory, IInputService inputService, IAvatarLoader avatarLoader)
         {
             _uiFactory = uiFactory;
             _inputService = inputService;
             _avatarLoader = avatarLoader;
-            _isLocalBuild = isLocalBuild;
         }
 
         public void Enter(IClient client)
         {
-            _uiFactory.CreateChooseClassMenu(client, _inputService, _isLocalBuild);
+            _uiFactory.CreateChooseClassMenu(client, _inputService);
             _uiFactory.CreateTimeCounter(client, _inputService);
             _uiFactory.CreateScoreboard(client, _inputService, _avatarLoader);
         }
