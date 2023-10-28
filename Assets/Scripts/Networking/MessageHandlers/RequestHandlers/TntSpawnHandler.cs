@@ -32,7 +32,7 @@ namespace Networking.MessageHandlers.RequestHandlers
 
         protected override void OnRequestReceived(NetworkConnectionToClient connection, TntSpawnRequest request)
         {
-            var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
+            var result = _server.Data.TryGetPlayerData(connection, out var playerData);
             if (!result || !playerData.IsAlive) return;
             var tntCount = playerData.ItemCountById[request.ItemId];
             if (tntCount <= 0)

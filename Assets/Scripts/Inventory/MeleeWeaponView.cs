@@ -1,6 +1,7 @@
 using Data;
 using Infrastructure.Factory;
-using Networking.Synchronization;
+using Mirror;
+using Networking.Messages.Requests;
 using PlayerLogic;
 using Rendering;
 using UnityEngine;
@@ -11,27 +12,21 @@ namespace Inventory
         IUpdated
     {
         public Sprite Icon { get; }
-        private readonly MeleeWeaponData _meleeWeapon;
         private readonly IGameFactory _gameFactory;
-        private readonly MeleeWeaponSynchronization _meleeWeaponSynchronization;
         private readonly CubeRenderer _cubeRenderer;
         private readonly Raycaster _raycaster;
 
-
         public MeleeWeaponView(Raycaster raycaster, Player player, MeleeWeaponData configuration)
         {
-            _meleeWeapon = configuration;
             _raycaster = raycaster;
             _cubeRenderer = new CubeRenderer(player.GetComponent<LineRenderer>(), raycaster, player);
-            Icon = _meleeWeapon.Icon;
-            _meleeWeaponSynchronization = player.GetComponent<MeleeWeaponSynchronization>();
+            Icon = configuration.Icon;
         }
 
         public void Select()
         {
             _cubeRenderer.EnableCube();
         }
-
 
         public void Unselect()
         {
@@ -40,15 +35,12 @@ namespace Inventory
 
         public void OnLeftMouseButtonDown()
         {
-            _meleeWeaponSynchronization.CmdHit(_raycaster.CentredRay, _meleeWeapon.ID, false);
+            NetworkClient.Send(new HitRequest(_raycaster.CentredRay, false));
         }
 
         public void OnRightMouseButtonDown()
         {
-            if (_meleeWeapon.HasStrongHit)
-            {
-                _meleeWeaponSynchronization.CmdHit(_raycaster.CentredRay, _meleeWeapon.ID, true);
-            }
+            NetworkClient.Send(new HitRequest(_raycaster.CentredRay, true));
         }
 
         public void InnerUpdate()

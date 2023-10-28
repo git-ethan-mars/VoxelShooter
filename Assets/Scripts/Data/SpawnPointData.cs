@@ -15,7 +15,7 @@ namespace Data
 
         public Vector3 ToVectorWithOffset()
         {
-            return position + Constants.WorldOffset;
+            return position + Constants.worldOffset;
         }
     }
 }

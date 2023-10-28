@@ -1,7 +1,7 @@
 using Data;
 using Infrastructure.Services.Input;
-using Networking.Synchronization;
-using PlayerLogic;
+using Mirror;
+using Networking.Messages.Requests;
 using TMPro;
 using UI;
 using UnityEngine;
@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 namespace Inventory
 {
-    public class RangeWeaponView : IInventoryItemView, IReloading, IShooting, ILeftMouseButtonDownHandler, 
+    public class RangeWeaponView : IInventoryItemView, IReloading, IShooting, ILeftMouseButtonDownHandler,
         ILeftMouseButtonHoldHandler, IRightMouseButtonDownHandler, IRightMouseButtonUpHandler, IUpdated
     {
         public Sprite Icon { get; }
@@ -19,19 +19,17 @@ namespace Inventory
         private readonly GameObject _ammoInfo;
         private readonly TextMeshProUGUI _ammoCount;
         private readonly Camera _fpsCam;
-        private readonly RangeWeaponSynchronization _bulletSynchronization;
         private readonly Image _ammoType;
         private readonly Sprite _ammoTypeIcon;
-        private readonly int _id;
         private readonly float _zoomMultiplier;
 
 
-        public RangeWeaponView(IInputService inputService, Camera camera, Player player, Hud hud, RangeWeaponData configuration)
+        public RangeWeaponView(IInputService inputService, Camera camera, Hud hud,
+            RangeWeaponData configuration)
         {
             _inputService = inputService;
             Icon = configuration.InventoryIcon;
             _ammoTypeIcon = configuration.AmmoTypeIcon;
-            _id = configuration.ID;
             BulletsInMagazine = configuration.BulletsInMagazine;
             TotalBullets = configuration.TotalBullets;
             _zoomMultiplier = configuration.ZoomMultiplier;
@@ -39,7 +37,6 @@ namespace Inventory
             _ammoInfo = hud.ammoInfo;
             _ammoCount = hud.ammoCount.GetComponent<TextMeshProUGUI>();
             _ammoType = hud.ammoType;
-            _bulletSynchronization = player.GetComponent<RangeWeaponSynchronization>();
         }
 
 
@@ -60,26 +57,28 @@ namespace Inventory
         public void InnerUpdate()
         {
             if (_inputService.IsReloadingButtonDown())
-                _bulletSynchronization.CmdReload(_id);
+            {
+                NetworkClient.Send(new ReloadRequest());
+            }
         }
 
         public void OnLeftMouseButtonDown()
         {
             var ray = _fpsCam.ViewportPointToRay(new Vector2(0.5f, 0.5f));
-            _bulletSynchronization.CmdShootSingle(ray, _id);
+            NetworkClient.Send(new ShootRequest(ray, false));
         }
 
         public void OnLeftMouseButtonHold()
         {
             var ray = _fpsCam.ViewportPointToRay(new Vector2(0.5f, 0.5f));
-            _bulletSynchronization.CmdShootAutomatic(ray, _id);
+            NetworkClient.Send(new ShootRequest(ray, true));
         }
 
         public void OnRightMouseButtonDown()
         {
             _fpsCam.fieldOfView = Constants.DefaultFov / _zoomMultiplier;
         }
-        
+
         public void OnRightMouseButtonUp()
         {
             _fpsCam.fieldOfView = Constants.DefaultFov;

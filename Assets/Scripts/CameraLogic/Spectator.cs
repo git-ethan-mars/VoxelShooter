@@ -70,15 +70,15 @@ namespace CameraLogic
         [Command]
         private void RequestNextIdentity(NetworkConnectionToClient connection = null)
         {
-            var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
+            var result = _server.Data.TryGetPlayerData(connection, out var playerData);
             if (!result) return;
             if (playerData.SpectatedPlayer == null)
             {
-                for (var i = _server.ServerData.KillStatistics.Count - 1; i >= 0; i--)
+                for (var i = _server.Data.KillStatistics.Count - 1; i >= 0; i--)
                 {
-                    var killData = _server.ServerData.KillStatistics[i];
+                    var killData = _server.Data.KillStatistics[i];
                     if (killData.Victim != connection) continue;
-                    result = _server.ServerData.TryGetPlayerData(killData.Killer, out var killerData);
+                    result = _server.Data.TryGetPlayerData(killData.Killer, out var killerData);
                     if (!result) continue;
                     if (!killerData.IsAlive)
                         break;
@@ -88,7 +88,7 @@ namespace CameraLogic
                 }
             }
 
-            var alivePlayers = _server.ServerData.GetAlivePlayers(connection);
+            var alivePlayers = _server.Data.GetAlivePlayers(connection);
             if (alivePlayers.Count == 0)
             {
                 var mapWidth = _server.MapProvider.MapData.Width;

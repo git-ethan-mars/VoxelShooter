@@ -32,7 +32,7 @@ namespace Networking.MessageHandlers.RequestHandlers
 
         protected override void OnRequestReceived(NetworkConnectionToClient connection, GrenadeSpawnRequest request)
         {
-            var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
+            var result = _server.Data.TryGetPlayerData(connection, out var playerData);
             if (!result || !playerData.IsAlive) return;
             var grenadeCount = playerData.ItemCountById[request.ItemId];
             if (grenadeCount <= 0)

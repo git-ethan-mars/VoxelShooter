@@ -60,7 +60,7 @@ namespace Entities
                     particleSystem.main.startLifetime.constant));
             }
             
-            StartCoroutine(Utils.DoActionAfterDelay(7, () => Destroy(gameObject)));
+            StartCoroutine(Utils.DoActionAfterDelay(() => Destroy(gameObject), 7));
         }
 
         private ParticleSystem CreateFallingMeshParticle(Vector3 position, int startSpeed, int burstCount, Color meshColor)

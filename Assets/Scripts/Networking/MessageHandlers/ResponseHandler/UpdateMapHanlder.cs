@@ -8,9 +8,9 @@ namespace Networking.MessageHandlers.ResponseHandler
 {
     public class UpdateMapHandler : ResponseHandler<UpdateMapResponse>
     {
-        private readonly Client _client;
+        private readonly IClient _client;
 
-        public UpdateMapHandler(Client client)
+        public UpdateMapHandler(IClient client)
         {
             _client = client;
         }

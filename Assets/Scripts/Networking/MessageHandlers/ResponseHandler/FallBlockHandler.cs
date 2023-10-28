@@ -4,9 +4,9 @@ namespace Networking.MessageHandlers.ResponseHandler
 {
     public class FallBlockHandler : ResponseHandler<FallBlockResponse>
     {
-        private readonly Client _client;
+        private readonly IClient _client;
 
-        public FallBlockHandler(Client client)
+        public FallBlockHandler(IClient client)
         {
             _client = client;
         }
