@@ -20,6 +20,8 @@ MonoBehaviour:
   count: 1000
   radius: 3
   damage: 200
-  speed: 5
+  speed: 10
   lifetime: 10
-  range: 10
+  particlesSpeed: 5
+  particlesCount: 10
+  rotationSpeed: 10

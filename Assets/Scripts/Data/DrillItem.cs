@@ -11,7 +11,9 @@ namespace Data
         public int damage;
         public int speed;
         public int lifetime;
-        public int range;
+        public int particlesSpeed;
+        public int particlesCount;
+        public int rotationSpeed;
 
         public void Awake()
         {

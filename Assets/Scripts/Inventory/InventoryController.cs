@@ -156,8 +156,7 @@ namespace Inventory
                 
                 if (item.itemType == ItemType.Drill)
                 {
-                    var handler = new DrillView(_rayCaster, (DrillItem) item,
-                        _hud.GetComponent<Hud>(), _player);
+                    var handler = new DrillView(_rayCaster, (DrillItem) item, _hud.GetComponent<Hud>());
                     Slots.Add(new Slot(item, handler));
                 }
             }

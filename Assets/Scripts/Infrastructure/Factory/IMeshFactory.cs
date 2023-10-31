@@ -7,7 +7,7 @@ namespace Infrastructure.Factory
 {
     public interface IMeshFactory : IService
     {
-        void CreateFallingMesh(MeshData meshData, FallingMeshFallingMeshParticlePool fallingMeshFallingMeshParticlePool);
+        void CreateFallingMesh(MeshData meshData, FallingMeshParticlePool fallingMeshParticlePool);
         GameObject CreateChunkMeshRender(Vector3 position, Quaternion rotation, Transform parent);
         void CreateWalls(MapProvider mapProvider, Transform parent);
         GameObject CreateGameModel(GameObject prefab, Transform itemPosition);

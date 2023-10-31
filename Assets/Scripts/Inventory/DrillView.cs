@@ -1,7 +1,6 @@
 using Data;
 using Mirror;
 using Networking.Messages.Requests;
-using PlayerLogic;
 using Rendering;
 using TMPro;
 using UI;
@@ -10,7 +9,7 @@ using UnityEngine.UI;
 
 namespace Inventory
 {
-    public class DrillView : IInventoryItemView, IConsumable, ILeftMouseButtonDownHandler, IUpdated
+    public class DrillView : IInventoryItemView, IConsumable, ILeftMouseButtonDownHandler
     {
         public Sprite Icon { get; }
         public int Count { get; set; }
@@ -22,10 +21,8 @@ namespace Inventory
         private readonly Sprite _drillCountIcon;
         private readonly Sprite _itemTypeIcon;
         private readonly Image _itemType;
-        private CubeRenderer _cubeRenderer;
-        private readonly int _range;
 
-        public DrillView(Raycaster raycaster, DrillItem configuration, Hud hud, Player player)
+        public DrillView(Raycaster raycaster, DrillItem configuration, Hud hud)
         {
             Icon = configuration.inventoryIcon;
             _itemId = configuration.id;
@@ -35,8 +32,6 @@ namespace Inventory
             _itemType = hud.itemIcon;
             Count = configuration.count;
             _raycaster = raycaster;
-            _range = configuration.range;
-            _cubeRenderer = new CubeRenderer(player.GetComponent<LineRenderer>(), raycaster, _range);
         }
 
         public void OnCountChanged()
@@ -49,26 +44,16 @@ namespace Inventory
             _drillInfo.SetActive(true);
             _itemType.sprite = _drillCountIcon;
             _drillCountText.SetText(Count.ToString());
-            _cubeRenderer.EnableCube();
         }
         
         public void Unselect()
         {
             _drillInfo.SetActive(false);
-            _cubeRenderer.DisableCube();
         }
         
-        public void InnerUpdate()
-        {
-            _cubeRenderer.UpdateCube(false);
-        }
-
         public void OnLeftMouseButtonDown()
         {
-            var raycastResult = _raycaster.GetRayCastHit(out var raycastHit, _range, Constants.BuildMask);
-            if (!raycastResult) return;
-            NetworkClient.Send(new DrillSpawnRequest(_itemId,
-                _raycaster.CentredRay));
+            NetworkClient.Send(new DrillSpawnRequest(_itemId, _raycaster.CentredRay));
         }
     }
 }

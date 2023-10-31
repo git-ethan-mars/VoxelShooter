@@ -38,5 +38,30 @@ namespace Explosions
 
             return blockPositions;
         }
+
+        public List<Color32> GetExplodedBlockColors(int radius, Vector3Int targetBlock)
+        {
+            var blockColors = new List<Color32>();
+            for (var x = -radius; x <= radius; x++)
+            {
+                for (var y = -radius; y <= radius; y++)
+                {
+                    for (var z = -radius; z <= radius; z++)
+                    {
+                        var blockPosition = targetBlock + new Vector3Int(x, y, z);
+                        if (_mapProvider.IsDestructiblePosition(blockPosition) &&
+                            _mapProvider.GetBlockByGlobalPosition(blockPosition).IsSolid())
+                        {
+                            var blockData = _mapProvider.GetBlockByGlobalPosition(blockPosition);
+                            if (Vector3Int.Distance(blockPosition, targetBlock) <= radius
+                                && !blockData.Color.Equals(BlockColor.empty))
+                                blockColors.Add(blockData.Color);
+                        }
+                    }
+                }
+            }
+
+            return blockColors;
+        }
     }
 }

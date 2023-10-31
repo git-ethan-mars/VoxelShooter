@@ -1,8 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 using Data;
 using Explosions;
-using Infrastructure;
 using Infrastructure.Factory;
 using MapLogic;
 using Mirror;
@@ -16,31 +14,40 @@ namespace Entities
         private ExplosionBehaviour _explosionBehaviour;
         private int _radius;
         private int _damage;
-        private int _lifetime;
         private NetworkConnectionToClient _owner;
         private bool _isExploded;
-        private ICoroutineRunner _coroutineRunner;
+        private Rigidbody _rigidbody;
+        private int _rotationSpeed;
+        private int _particlesCount;
+        private int _particlesSpeed;
+        public int collisionCount;
 
         public void Construct(MapProvider mapProvider, MapUpdater mapUpdater, DrillItem drillData,
-            NetworkConnectionToClient owner, IParticleFactory particleFactory, ICoroutineRunner coroutineRunner)
+            NetworkConnectionToClient owner, IParticleFactory particleFactory)
         {
             _radius = drillData.radius;
             _damage = drillData.damage;
-            _lifetime = drillData.lifetime;
             _owner = owner;
+            _rotationSpeed = drillData.rotationSpeed;
+            _particlesCount = drillData.particlesCount;
+            _particlesSpeed = drillData.particlesSpeed;
             _explosionBehaviour = new SingleExplosionBehaviour(mapUpdater, particleFactory, new SphereExplosionArea(mapProvider));
-            _coroutineRunner = coroutineRunner;
-            _coroutineRunner.StartCoroutine(DestroyDrill(_lifetime));
+            _rigidbody = gameObject.GetComponent<Rigidbody>();
         }
 
-        void FixedUpdate()
+        private void FixedUpdate()
         {
-            transform.Rotate(new Vector3(0, 0, transform.forward.normalized.z), 50 * Time.deltaTime);
+            _rigidbody.AddForce(Vector3.down);
+            var previousZAngle = _rigidbody.rotation.eulerAngles.z;
+            _rigidbody.rotation = Quaternion.LookRotation(_rigidbody.velocity) 
+                                  * Quaternion.Euler(new Vector3(0, 0, _rotationSpeed + previousZAngle));
         }
-        
+
         private void OnTriggerEnter(Collider other)
         {
             if (!isServer) return;
+
+            collisionCount++;
 
             var position = transform.position;
             var drillPosition = new Vector3Int((int) position.x,
@@ -48,13 +55,7 @@ namespace Entities
 
             var explodedRockets = new List<GameObject>();
             _explosionBehaviour.Explode(drillPosition, gameObject, _radius, _owner, _damage, 
-                0, 0, explodedRockets, gameObject.tag);
-        }
-
-        private IEnumerator DestroyDrill(float delayInSeconds)
-        {
-            yield return new WaitForSeconds(delayInSeconds);
-            NetworkServer.Destroy(gameObject);
+                _particlesSpeed, _particlesCount, explodedRockets, gameObject.tag);
         }
     }
 }

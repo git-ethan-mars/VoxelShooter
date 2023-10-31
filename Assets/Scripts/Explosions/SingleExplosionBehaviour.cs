@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Infrastructure.Factory;
-using MapLogic;
 using Mirror;
 using Networking.ServerServices;
 using UnityEngine;
@@ -16,7 +15,7 @@ namespace Explosions
             NetworkConnectionToClient connection, int damage, int particlesSpeed, 
             int particlesCount, List<GameObject> exploded, string explosiveTag)
         {
-            DestroyExplosiveWithBlocks(explosionCenter, explosive, radius, particlesSpeed, particlesCount, explosiveTag);
+            DestroyExplosiveWithBlocks(explosionCenter, explosive, radius, particlesSpeed, particlesCount);
             Collider[] hitColliders = Physics.OverlapSphere(explosionCenter, radius);
             foreach (var hitCollider in hitColliders)
             {

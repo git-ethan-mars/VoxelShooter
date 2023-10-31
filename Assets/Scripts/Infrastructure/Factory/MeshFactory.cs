@@ -6,7 +6,6 @@ using Infrastructure.AssetManagement;
 using MapLogic;
 using Rendering;
 using UnityEngine;
-using UnityEngine.Rendering;
 using Random = UnityEngine.Random;
 
 namespace Infrastructure.Factory
@@ -26,7 +25,7 @@ namespace Infrastructure.Factory
         }
 
         public void CreateFallingMesh(MeshData meshData,
-            FallingMeshFallingMeshParticlePool fallingMeshFallingMeshParticlePool)
+            FallingMeshParticlePool fallingMeshParticlePool)
         {
             var mesh = new Mesh();
             mesh.indexFormat = meshData.IndexFormat;
@@ -36,7 +35,7 @@ namespace Infrastructure.Factory
             mesh.SetNormals(meshData.Normals);
             var fallingMesh = _assets.Instantiate(FallingMeshPath);
             fallingMesh.GetComponent<MeshFilter>().mesh = mesh;
-            fallingMesh.GetComponent<FallingMesh>().Construct(fallingMeshFallingMeshParticlePool);
+            fallingMesh.GetComponent<FallingMesh>().Construct(fallingMeshParticlePool);
             var torque = new Vector3(Random.Range(0, 40), 0, Random.Range(0, 40));
             fallingMesh.GetComponent<Rigidbody>().AddTorque(torque);
             if (meshData.Vertices.Count > MaxVerticesForMeshCollider)

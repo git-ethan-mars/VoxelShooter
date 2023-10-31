@@ -49,6 +49,23 @@ namespace Infrastructure.Factory
             NetworkServer.Spawn(rchParticle);
             _coroutineRunner.StartCoroutine(DestroyParticle(rchParticle, main.startLifetime.constant));
         }
+        
+        public void CreateDrillParticle(Vector3 position, int startSpeed, int burstCount, Color color,
+            Quaternion rotation)
+        {
+            var rchParticle = _assets.Instantiate(ParticlePath.DrillParticlePath, position, rotation);
+            var particleSystem = rchParticle.GetComponent<ParticleSystem>();
+            var main = particleSystem.main;
+            main.startSpeed = startSpeed;
+            main.startColor = color;
+            var burst = new ParticleSystem.Burst(0f, burstCount, 5, 0.05f)
+            {
+                probability = 1
+            };
+            particleSystem.emission.SetBurst(0, burst);
+            NetworkServer.Spawn(rchParticle);
+            _coroutineRunner.StartCoroutine(DestroyParticle(rchParticle, main.startLifetime.constant));
+        }
 
         public ParticleSystem CreateFallingMeshParticle(Transform particleContainer)
         {

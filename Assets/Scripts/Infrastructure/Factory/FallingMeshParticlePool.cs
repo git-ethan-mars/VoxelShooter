@@ -4,13 +4,13 @@ using UnityEngine;
 
 namespace Infrastructure.Factory
 {
-    public class FallingMeshFallingMeshParticlePool : IFallingMeshParticlePool
+    public class FallingMeshParticlePool : IFallingMeshParticlePool
     {
         private const int PoolSize = 3000;
         private const string ContainerName = "FallingMeshParticleContainer";
         private readonly Stack<ParticleSystem> _stack = new(PoolSize);
 
-        public FallingMeshFallingMeshParticlePool(IGameFactory gameFactory, IParticleFactory particleFactory)
+        public FallingMeshParticlePool(IGameFactory gameFactory, IParticleFactory particleFactory)
         {
             var particleContainer = gameFactory.CreateGameObjectContainer(ContainerName).transform;
             for (var i = 0; i < PoolSize; i++)

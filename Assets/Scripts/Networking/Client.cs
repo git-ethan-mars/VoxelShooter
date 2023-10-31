@@ -64,7 +64,7 @@ namespace Networking
             GameFactory = gameFactory;
             MeshFactory = meshFactory;
             StaticData = staticData;
-            var fallingMeshParticlePool = new FallingMeshFallingMeshParticlePool(gameFactory, particleFactory);
+            var fallingMeshParticlePool = new FallingMeshParticlePool(gameFactory, particleFactory);
             FallMeshGenerator = new FallMeshGenerator(meshFactory, fallingMeshParticlePool);
             Data = new ClientData();
             _mapNameHandler = new MapNameHandler(this);

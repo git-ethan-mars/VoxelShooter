@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using Entities;
 using Infrastructure.Factory;
 using Mirror;
 using Networking.ServerServices;
 using Networking.Synchronization;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Explosions
 {
@@ -50,12 +52,26 @@ namespace Explosions
         }
 
         protected void DestroyExplosiveWithBlocks(Vector3Int explosionCenter, GameObject explosive, int radius,
-            int particlesSpeed, int particlesCount, string explosiveTag)
+            int particlesSpeed, int particlesCount)
         {
-            if (explosiveTag != "Drill")
+            if (!explosive.TryGetComponent(out Drill drill))
             {
                 _particleFactory.CreateRchParticle(explosionCenter, particlesSpeed, particlesCount);
                 NetworkServer.Destroy(explosive);
+            }
+            else
+            {
+                var colors = _explosionArea.GetExplodedBlockColors(radius, explosionCenter);
+                if (colors.Count > 0)
+                {
+                    var collisionCount = explosive.GetComponent<Drill>().collisionCount;
+                    if (collisionCount % 2 == 0)
+                    {
+                        _particleFactory.CreateDrillParticle(explosionCenter, particlesSpeed, particlesCount,
+                            colors[Random.Range(0, colors.Count - 1)],
+                            Quaternion.LookRotation(-explosive.GetComponent<Rigidbody>().transform.forward));
+                    }
+                }
             }
             _mapUpdater.DestroyBlocks(_explosionArea.GetExplodedBlocks(radius, explosionCenter));
         }

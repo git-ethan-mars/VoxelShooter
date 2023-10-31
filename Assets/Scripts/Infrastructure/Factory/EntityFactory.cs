@@ -1,4 +1,5 @@
-﻿using Data;
+﻿using System.Collections;
+using Data;
 using Entities;
 using Infrastructure.AssetManagement;
 using MapLogic;
@@ -60,9 +61,17 @@ namespace Infrastructure.Factory
             ICoroutineRunner coroutineRunner)
         {
             var drill = _assets.Instantiate(DrillPath, position, rotation);
-            drill.GetComponent<Drill>().Construct(mapProvider, mapUpdater, drillData, owner, particleFactory, coroutineRunner);
+            drill.GetComponent<Drill>().Construct(mapProvider, mapUpdater, drillData, owner, particleFactory);
+            coroutineRunner.StartCoroutine(DestroyDrill(drill, drillData.lifetime));
             NetworkServer.Spawn(drill);
             return drill;
+        }
+        
+        private IEnumerator DestroyDrill(GameObject drill, float delayInSeconds)
+        {
+            yield return new WaitForSeconds(delayInSeconds);
+            if (drill != null)
+                NetworkServer.Destroy(drill);
         }
 
         public GameObject CreateSpawnPoint(Vector3 position, Transform parent)
