@@ -5,6 +5,7 @@ using Generators;
 using Infrastructure;
 using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
+using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
 using MapLogic;
 using Optimization;
@@ -177,8 +178,11 @@ namespace MapCustomizer
             _instance._staticData = new StaticDataService();
             var particleFactory = new ParticleFactory(assets, this);
             _instance._meshFactory = new MeshFactory(assets);
+            var uiFactory = new UIFactory(assets, _staticData);
+            var inputService = new StandaloneInputService();
             _instance._gameFactory =
-                new GameFactory(assets, _entityFactory, _staticData, particleFactory, _meshFactory);
+                new GameFactory(assets, inputService, _entityFactory, _staticData, particleFactory, _meshFactory,
+                    uiFactory);
         }
 
         private void LoadConfigure()

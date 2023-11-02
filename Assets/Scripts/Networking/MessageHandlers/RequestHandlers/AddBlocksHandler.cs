@@ -19,17 +19,17 @@ namespace Networking.MessageHandlers.RequestHandlers
 
         protected override void OnRequestReceived(NetworkConnectionToClient connection, AddBlocksRequest request)
         {
-            var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
+            var result = _server.Data.TryGetPlayerData(connection, out var playerData);
             if (!result || !playerData.IsAlive) return;
-            var blockAmount = playerData.ItemCountById[request.ItemId];
+            var blockAmount = playerData.ItemCountById[playerData.ItemIds[playerData.InventorySlotId]];
             var validPositions = new List<Vector3Int>();
             var validBlockData = new List<BlockData>();
             var blocksUsed = Math.Min(blockAmount, request.GlobalPositions.Length);
             for (var i = 0; i < blocksUsed; i++)
             {
-                foreach (var otherConnection in _server.ServerData.GetConnections())
+                foreach (var otherConnection in _server.Data.ClientConnections)
                 {
-                    result = _server.ServerData.TryGetPlayerData(otherConnection, out var otherPlayer);
+                    result = _server.Data.TryGetPlayerData(otherConnection, out var otherPlayer);
                     if (!result || !otherPlayer.IsAlive) continue;
                     var playerPosition = otherConnection.identity.gameObject.transform.position;
                     var blockPosition = request.GlobalPositions[i];
@@ -58,9 +58,9 @@ namespace Networking.MessageHandlers.RequestHandlers
                 validBlockData.Add(request.Blocks[i]);
             }
 
-            playerData.ItemCountById[request.ItemId] = blockAmount - blocksUsed;
+            playerData.ItemCountById[playerData.ItemIds[playerData.InventorySlotId]] = blockAmount - blocksUsed;
             _server.MapUpdater.SetBlocksByGlobalPositions(validPositions, validBlockData);
-            connection.Send(new ItemUseResponse(request.ItemId, blockAmount - blocksUsed));
+            connection.Send(new ItemUseResponse(playerData.ItemIds[playerData.InventorySlotId], blockAmount - blocksUsed));
         }
     }
 }

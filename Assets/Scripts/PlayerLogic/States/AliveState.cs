@@ -21,11 +21,11 @@ namespace PlayerLogic.States
             _playerData.Characteristic = _staticData.GetPlayerCharacteristic(_playerData.GameClass);
             _playerData.Health = _playerData.Characteristic.maxHealth;
             _playerData.ItemCountById = new Dictionary<int, int>();
-            _playerData.ItemsId = _staticData.GetInventory(_playerData.GameClass).Select(item => item.id).ToList();
+            _playerData.ItemIds = _staticData.GetInventory(_playerData.GameClass).Select(item => item.id).ToList();
             _playerData.RangeWeaponsById = new Dictionary<int, RangeWeaponData>();
             _playerData.MeleeWeaponsById = new Dictionary<int, MeleeWeaponData>();
             _playerData.ItemCountById = new Dictionary<int, int>();
-            foreach (var itemId in _playerData.ItemsId)
+            foreach (var itemId in _playerData.ItemIds)
             {
                 var item = _staticData.GetItem(itemId);
                 if (item.itemType == ItemType.RangeWeapon)

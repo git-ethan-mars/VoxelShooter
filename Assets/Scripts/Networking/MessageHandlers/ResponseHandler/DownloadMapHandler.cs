@@ -9,11 +9,10 @@ namespace Networking.MessageHandlers.ResponseHandler
     public class DownloadMapHandler : ResponseHandler<DownloadMapResponse>
     {
         public event Action<float> MapLoadProgressed;
-        public event Action MapDownloaded;
         private readonly List<byte> _byteChunks = new();
-        private readonly Client _client;
+        private readonly IClient _client;
 
-        public DownloadMapHandler(Client client)
+        public DownloadMapHandler(IClient client)
         {
             _client = client;
         }
@@ -26,7 +25,6 @@ namespace Networking.MessageHandlers.ResponseHandler
             var mapConfigure = _client.StaticData.GetMapConfigure(_client.Data.MapName);
             var mapData = MapReader.ReadFromStream(new MemoryStream(_byteChunks.ToArray()), mapConfigure);
             _client.MapProvider = new MapProvider(mapData, mapConfigure);
-            MapDownloaded?.Invoke();
         }
     }
 }

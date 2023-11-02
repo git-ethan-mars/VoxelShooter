@@ -9,16 +9,13 @@ namespace Infrastructure.States
         private readonly IUIFactory _uiFactory;
         private readonly GameStateMachine _stateMachine;
         private GameObject _mainMenu;
-        private readonly bool _isLocalBuild;
         private const string MainMenu = "MainMenu";
 
-        public MainMenuState(GameStateMachine stateMachine, SceneLoader sceneLoader, IUIFactory uiFactory,
-            bool isLocalBuild)
+        public MainMenuState(GameStateMachine stateMachine, SceneLoader sceneLoader, IUIFactory uiFactory)
         {
             _sceneLoader = sceneLoader;
             _uiFactory = uiFactory;
             _stateMachine = stateMachine;
-            _isLocalBuild = isLocalBuild;
         }
 
         public void Enter()
@@ -28,7 +25,7 @@ namespace Infrastructure.States
 
         private void EnterLoadLevel()
         {
-            _mainMenu = _uiFactory.CreateMainMenu(_stateMachine, _isLocalBuild);
+            _mainMenu = _uiFactory.CreateMainMenu(_stateMachine);
         }
 
         public void Exit()

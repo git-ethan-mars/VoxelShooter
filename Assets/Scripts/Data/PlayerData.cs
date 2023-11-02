@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Infrastructure.Services.StaticData;
 using Mirror;
 using PlayerLogic.States;
@@ -19,7 +20,8 @@ namespace Data
         public int Deaths { get; set; }
         public Dictionary<int, RangeWeaponData> RangeWeaponsById { get; set; }
         public Dictionary<int, MeleeWeaponData> MeleeWeaponsById { get; set; }
-        public List<int> ItemsId { get; set; }
+        public int InventorySlotId { get; set; }
+        public List<int> ItemIds { get; set; }
         public Dictionary<int, int> ItemCountById { get; set; }
         public NetworkConnectionToClient SpectatedPlayer { get; set; }
 

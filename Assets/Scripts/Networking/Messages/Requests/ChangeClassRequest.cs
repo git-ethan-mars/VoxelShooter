@@ -1,20 +1,14 @@
 ﻿using Data;
 using Mirror;
-using Steamworks;
 
 namespace Networking.Messages.Requests
 {
     public struct ChangeClassRequest : NetworkMessage
     {
         public readonly GameClass GameClass;
-        public readonly CSteamID SteamID;
-        public readonly string Nickname;
-
-        public ChangeClassRequest(CSteamID steamID, GameClass gameClass, string nickname)
+        public ChangeClassRequest(GameClass gameClass)
         {
-            SteamID = steamID;
             GameClass = gameClass;
-            Nickname = nickname;
         }
     }
 }

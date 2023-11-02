@@ -3,6 +3,7 @@ using Entities;
 using Infrastructure.AssetManagement;
 using MapLogic;
 using Mirror;
+using Networking;
 using Networking.ServerServices;
 using UnityEngine;
 
@@ -44,22 +45,20 @@ namespace Infrastructure.Factory
             return tombstone;
         }
 
-        public GameObject CreateRocket(Vector3 position, Quaternion rotation, MapProvider mapProvider,
-            MapUpdater mapUpdater,
+        public GameObject CreateRocket(Vector3 position, Quaternion rotation, IServer server,
             IParticleFactory particleFactory, RocketLauncherItem rocketData, NetworkConnectionToClient owner)
         {
             var rocket = _assets.Instantiate(RocketPath, position, rotation);
-            rocket.GetComponent<Rocket>().Construct(mapProvider, mapUpdater, rocketData, owner, particleFactory);
+            rocket.GetComponent<Rocket>().Construct(server, rocketData, owner, particleFactory);
             NetworkServer.Spawn(rocket);
             return rocket;
         }
         
-        public GameObject CreateLootBox(Vector3 position)
+        public LootBox CreateLootBox(Vector3 position)
         {
             var lootBox = _assets.Instantiate(AmmoBoxPath, position, Quaternion.identity);
-            lootBox.GetComponent<LootBox>().Construct();
             NetworkServer.Spawn(lootBox);
-            return lootBox;
+            return lootBox.GetComponent<LootBox>();
         }
 
         public GameObject CreateSpawnPoint(Vector3 position, Transform parent)

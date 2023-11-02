@@ -32,10 +32,11 @@ namespace Networking.ServerServices
             _timeLeft = new ServerTime(_timeInSeconds);
             for (var i = 0; i < _timeInSeconds; i++)
             {
-                NetworkServer.SendToAll(new GameTimeResponse(_timeLeft));
+                NetworkServer.SendToReady(new GameTimeResponse(_timeLeft));
                 _timeLeft = _timeLeft.Subtract(new ServerTime(1));
                 yield return new WaitForSeconds(1);
             }
+
             _onStop?.Invoke();
         }
     }

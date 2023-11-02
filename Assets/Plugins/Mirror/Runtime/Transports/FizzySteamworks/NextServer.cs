@@ -60,7 +60,13 @@ namespace Mirror.FizzySteam
 
         private void Host()
         {
-            SteamNetworkingConfigValue_t[] options = new SteamNetworkingConfigValue_t[] { };
+            var queueSize = new SteamNetworkingConfigValue_t()
+            {
+                m_eValue = ESteamNetworkingConfigValue.k_ESteamNetworkingConfig_SendBufferSize,
+                m_eDataType = ESteamNetworkingConfigDataType.k_ESteamNetworkingConfig_Int32,
+            };
+            queueSize.m_val.m_int32 = 1024 * 1024 * 100;
+            SteamNetworkingConfigValue_t[] options = { queueSize };
 #if UNITY_SERVER
             listenSocket = SteamGameServerNetworkingSockets.CreateListenSocketP2P(0, options.Length, options);
 #else

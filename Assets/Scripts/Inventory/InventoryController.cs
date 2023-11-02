@@ -9,12 +9,10 @@ using Infrastructure.Services.StaticData;
 using Mirror;
 using Networking.MessageHandlers.ResponseHandler;
 using Networking.Messages.Requests;
-using Networking.Synchronization;
 using PlayerLogic;
 using Rendering;
 using UI;
 using UnityEngine;
-using ChangeSlotHandler = Networking.MessageHandlers.ResponseHandler.ChangeSlotHandler;
 
 namespace Inventory
 {
@@ -23,15 +21,14 @@ namespace Inventory
         [SerializeField]
         private InventoryView inventoryView;
 
-        public List<Slot> Slots { get; set; }
+        public List<Slot> Slots { get; private set; }
         public int ItemIndex { get; set; }
-        public GameObject[] Boarders { get; set; }
+        public GameObject[] Boarders { get; private set; }
 
         private IInputService _inputService;
         private int _maxIndex;
         private CubeRenderer _cubeRenderer;
         private Camera _mainCamera;
-        private MapSynchronization _mapSynchronization;
         private GameObject _palette;
         private Player _player;
         private Hud _hud;
@@ -40,9 +37,9 @@ namespace Inventory
         private IStaticDataService _staticData;
         private Raycaster _rayCaster;
         private ItemUseHandler _itemUseHandler;
-        private ReloadHandler _reloadHandler;
-        private ShootHandler _shootHandler;
-        private ChangeSlotHandler _changeSlotHandler;
+        private ReloadResultHandler _reloadHandler;
+        private ShootResultHandler _shootHandler;
+        private ChangeSlotResultHandler _changeSlotHandler;
 
         public void Construct(IInputService inputService, IAssetProvider assets, IStaticDataService staticData,
             GameObject hud,
@@ -53,11 +50,10 @@ namespace Inventory
             _player = player.GetComponent<Player>();
             _rayCaster = new Raycaster(Camera.main);
             _transparentMeshPool = new TransparentMeshPool(assets);
-            _mapSynchronization = player.GetComponent<MapSynchronization>();
             _hud = hud.GetComponent<Hud>();
             _palette = _hud.palette;
             _inputService = inputService;
-            InitializeInventoryViews(player.GetComponent<PlayerLogic.Inventory>().ItemIds);
+            InitializeInventoryViews(player.GetComponent<Player>().ItemsIds);
             _maxIndex = Math.Min(Slots.Count, inventoryView.SlotsCount);
             Boarders = inventoryView.Boarders;
             for (var i = 0; i < _maxIndex; i++)
@@ -68,11 +64,11 @@ namespace Inventory
             SendChangeSlotRequest(ItemIndex);
             _itemUseHandler = new ItemUseHandler(Slots);
             _itemUseHandler.Register();
-            _reloadHandler = new ReloadHandler(Slots);
+            _reloadHandler = new ReloadResultHandler(Slots);
             _reloadHandler.Register();
-            _shootHandler = new ShootHandler(Slots);
+            _shootHandler = new ShootResultHandler(Slots);
             _shootHandler.Register();
-            _changeSlotHandler = new ChangeSlotHandler(this);
+            _changeSlotHandler = new ChangeSlotResultHandler(this);
             _changeSlotHandler.Register();
         }
 
@@ -102,12 +98,12 @@ namespace Inventory
         private void InitializeInventoryViews(IEnumerable<int> ids)
         {
             Slots = new List<Slot>();
-            var items = ids.Select((id) => _staticData.GetItem(id));
+            var items = ids.Select(id => _staticData.GetItem(id));
             foreach (var item in items)
             {
                 if (item.itemType == ItemType.RangeWeapon)
                 {
-                    var handler = new RangeWeaponView(_inputService, Camera.main, _player,
+                    var handler = new RangeWeaponView(_inputService, Camera.main,
                         _hud, new RangeWeaponData((RangeWeaponItem) item));
                     Slots.Add(new Slot(item, handler));
                 }

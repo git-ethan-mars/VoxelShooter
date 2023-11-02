@@ -29,7 +29,7 @@ namespace Infrastructure.States
         {
             var networkManager = _gameFactory.CreateSteamNetworkManager(_stateMachine, null, false)
                 .GetComponent<CustomNetworkManager>();
-            _uiFactory.CreateLoadingWindow(networkManager);
+            _uiFactory.CreateLoadingWindow(networkManager.Client);
         }
 
         public void Exit()

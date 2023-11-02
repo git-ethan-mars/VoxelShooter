@@ -1,7 +1,6 @@
 ﻿using System;
 using Data;
 using Mirror;
-using Networking.Messages;
 using Networking.Messages.Requests;
 using PlayerLogic;
 using Rendering;
@@ -31,7 +30,7 @@ namespace Inventory
         {
             Icon = configuration.inventoryIcon;
             _raycaster = raycaster;
-            _placeDistance = player.placeDistance;
+            _placeDistance = player.PlaceDistance;
             _itemId = configuration.id;
             _tntInfo = hud.itemInfo;
             _tntCountText = hud.itemCount;
@@ -66,7 +65,7 @@ namespace Inventory
 
         public void OnLeftMouseButtonDown()
         {
-            var raycastResult = _raycaster.GetRayCastHit(out var raycastHit, _placeDistance, Constants.BuildMask);
+            var raycastResult = _raycaster.GetRayCastHit(out var raycastHit, _placeDistance, Constants.buildMask);
             if (!raycastResult) return;
             NetworkClient.Send(new TntSpawnRequest(_itemId,
                 Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2) +
@@ -78,7 +77,7 @@ namespace Inventory
 
         public void InnerUpdate()
         {
-            var raycastResult = _raycaster.GetRayCastHit(out var raycastHit, _placeDistance, Constants.BuildMask);
+            var raycastResult = _raycaster.GetRayCastHit(out var raycastHit, _placeDistance, Constants.buildMask);
             if (raycastResult)
             {
                 _transparentTnt.SetActive(true);

@@ -7,7 +7,7 @@ namespace MapCustomizer
     {
         private void Update()
         {
-            transform.position = Vector3Int.FloorToInt(transform.position) + Constants.WorldOffset;
+            transform.position = Vector3Int.FloorToInt(transform.position) + Constants.worldOffset;
         }
     }
 }
