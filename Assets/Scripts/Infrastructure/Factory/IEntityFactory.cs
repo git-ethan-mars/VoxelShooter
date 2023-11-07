@@ -20,7 +20,11 @@ namespace Infrastructure.Factory
         GameObject CreateRocket(Vector3 position, Quaternion rotation, IServer server,
             IParticleFactory particleFactory, RocketLauncherItem rocketData, NetworkConnectionToClient owner);
         
-        LootBox CreateLootBox(Vector3 position);
+        LootBox CreateAmmoBox(Vector3 position, Transform parent);
+        
+        LootBox CreateHealthBox(Vector3 position, Transform parent);
+
+        LootBox CreateBlockBox(Vector3 position, Transform parent);
 
         GameObject CreateSpawnPoint(Vector3 position, Transform parent);
     }

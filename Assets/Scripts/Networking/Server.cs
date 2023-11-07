@@ -73,7 +73,8 @@ namespace Networking
             var meleeWeaponValidator = new MeleeWeaponValidator(this, coroutineRunner, particleFactory);
             _shootHandler = new ShootHandler(this, rangeWeaponValidator);
             _reloadHandler = new ReloadHandler(this, rangeWeaponValidator);
-            _boxDropService = new BoxDropService(this, _coroutineRunner, _serverSettings.MaxDuration, _entityFactory);
+            _boxDropService = new BoxDropService(this, _coroutineRunner, _serverSettings.MaxDuration, _entityFactory, 
+                _entityPositionValidator, _gameFactory);
             _boxDropService.Start();
             _hitHandler = new HitHandler(this, meleeWeaponValidator);
             _authenticationHandler = new AuthenticationHandler(this);
@@ -216,7 +217,7 @@ namespace Networking
             var tombstonePosition = Vector3Int.FloorToInt(victim.identity.transform.position) +
                                     Constants.worldOffset;
             var tombstone = _entityFactory.CreateTombstone(tombstonePosition);
-            _entityPositionValidator.AddEntity(tombstone.GetComponent<PushableObject>());
+            _entityPositionValidator.AddEntity(tombstone.GetComponent<IPushable>());
             Data.AddKill(killer, victim);
             var playerData = Data.GetPlayerData(victim);
             playerData.PlayerStateMachine.Enter<DeathState>();

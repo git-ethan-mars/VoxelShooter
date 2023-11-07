@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Net;
 using Data;
 using Entities;
 using Infrastructure;
@@ -19,32 +18,58 @@ namespace Networking.ServerServices
         private readonly int _timeInSeconds;
         private IEntityFactory _entityFactory;
         private readonly IServer _server;
-        private const int SpawnRate = 5;
-        private Dictionary<LootBox, LootBoxType> _lootBoxes = new Dictionary<LootBox, LootBoxType>();
+        private const int SpawnRate = 1;
+        private Dictionary<LootBox, LootBoxType> _lootBoxes = new();
+        private readonly EntityPositionValidator _entityPostionValidator;
+        private readonly IGameFactory _gameFactory;
+        private readonly Transform _parent;
+        private const string LootBoxContainer = "LootBoxContainer";
 
         public BoxDropService(IServer server, ICoroutineRunner coroutineRunner, int timeInMinutes,
-            IEntityFactory entityFactory)
+            IEntityFactory entityFactory, EntityPositionValidator entityPositionValidator, IGameFactory gameFactory)
         {
             _coroutineRunner = coroutineRunner;
             _timeInSeconds = timeInMinutes * 60;
             _entityFactory = entityFactory;
             _server = server;
+            _entityPostionValidator = entityPositionValidator;
+            _gameFactory = gameFactory;
+            _parent = _gameFactory.CreateGameObjectContainer(LootBoxContainer).transform;
         }
 
         public void Start()
         {
             _coroutineRunner.StartCoroutine(SpawnLootBox());
         }
-
+        
         private IEnumerator SpawnLootBox()
         {
             for (var i = 0; i < _timeInSeconds; i++)
             {
                 if (i % SpawnRate == 0)
                 {
-                    var lootBox = _entityFactory.CreateLootBox(new Vector3(100, 100, 100));
-                    var lootBoxType = Random.Range(0, 2);
-                    _lootBoxes.Add(lootBox, (LootBoxType)lootBoxType);
+                    var lowerSolidLayer = _server.MapProvider.MapData.LowerSolidLayer;
+                    var spawnPosition = lowerSolidLayer[Random.Range(0, lowerSolidLayer.Count - 1)] + Constants.worldOffset;
+                    var mapHeight = _server.MapProvider.MapData.Height + 1;
+                    LootBox lootBox;
+                    var lootBoxType = (LootBoxType)Random.Range(0, Enum.GetNames(typeof(LootBoxType)).Length);
+                    switch (lootBoxType)
+                    {
+                        case LootBoxType.Ammo:
+                            lootBox = _entityFactory.CreateAmmoBox(new Vector3(spawnPosition.x, mapHeight,
+                                spawnPosition.z), _parent);
+                            break;
+                        case LootBoxType.Health:
+                            lootBox = _entityFactory.CreateHealthBox(new Vector3(spawnPosition.x, mapHeight,
+                                spawnPosition.z), _parent);
+                            break;
+                        default:
+                            lootBox = _entityFactory.CreateBlockBox(new Vector3(spawnPosition.x, mapHeight,
+                                spawnPosition.z), _parent);
+                            break;
+                    }
+                    _entityPostionValidator.AddEntity(lootBox);
+                    _lootBoxes.Add(lootBox, lootBoxType);
                     lootBox.OnPickUp += OnPickUp;
                 }
                 yield return new WaitForSeconds(1);
@@ -53,6 +78,7 @@ namespace Networking.ServerServices
 
         private void OnPickUp(LootBox lootBox, NetworkConnectionToClient connection)
         {
+            _entityPostionValidator.RemoveEntity(lootBox);
             if (_lootBoxes[lootBox] == LootBoxType.Ammo)
             {
                 PickUpAmmo(connection);
