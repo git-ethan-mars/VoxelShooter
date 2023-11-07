@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 2152020212705423522}
   - component: {fileID: 3096187247010312276}
   - component: {fileID: 175388871813019814}
+  - component: {fileID: 435828093334939669}
   m_Layer: 7
   m_Name: BlockBox
   m_TagString: Untagged
@@ -164,6 +165,34 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.91, y: 0.87000006, z: 0.83}
   m_Center: {x: -0.004999995, y: 0.42500004, z: 0.004999995}
+--- !u!114 &435828093334939669
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6585829382983018329}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  target: {fileID: 845613909609890760}
+  clientAuthority: 0
+  syncPosition: 1
+  syncRotation: 0
+  syncScale: 0
+  showGizmos: 0
+  showOverlay: 0
+  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+  onlySyncOnChange: 1
+  bufferResetMultiplier: 5
+  positionSensitivity: 0.01
+  rotationSensitivity: 0.01
+  scaleSensitivity: 0.01
 --- !u!1001 &4272885257826730564
 PrefabInstance:
   m_ObjectHideFlags: 0

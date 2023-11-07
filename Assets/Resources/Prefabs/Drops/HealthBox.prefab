@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 7023995344156866121}
   - component: {fileID: 7562665930802004943}
   - component: {fileID: 887962197428128713}
+  - component: {fileID: 4733877821327493701}
   m_Layer: 7
   m_Name: HealthBox
   m_TagString: Untagged
@@ -164,6 +165,34 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.91, y: 0.87000006, z: 0.82}
   m_Center: {x: -0.004999995, y: 0.42500004, z: 0}
+--- !u!114 &4733877821327493701
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2864901346383602098}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  target: {fileID: 8582599924361626915}
+  clientAuthority: 0
+  syncPosition: 1
+  syncRotation: 0
+  syncScale: 0
+  showGizmos: 0
+  showOverlay: 0
+  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+  onlySyncOnChange: 1
+  bufferResetMultiplier: 5
+  positionSensitivity: 0.01
+  rotationSensitivity: 0.01
+  scaleSensitivity: 0.01
 --- !u!1001 &5045202384111378343
 PrefabInstance:
   m_ObjectHideFlags: 0
