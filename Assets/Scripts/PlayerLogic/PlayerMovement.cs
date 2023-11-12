@@ -1,3 +1,4 @@
+using System;
 using Infrastructure.Services.Input;
 using Mirror;
 using UnityEngine;
@@ -6,97 +7,101 @@ namespace PlayerLogic
 {
     public class PlayerMovement : NetworkBehaviour
     {
-        private const float Gravity = -30f;
-        private const float NormalSpeed = 1f;
-        private const float SneakingSpeed = 0.7f;
-        private const float SquattingSpeed = 0.4f;
-        private const float SquattingSize = 0.5f;
+        private const float JumpHeightOffset = 0.5f;
+        private const float AccelerationTime = 1f;
+        private const float GravityScale = 3;
+
+        private static readonly Vector3 HorizontalMask = new(1, 0, 1);
 
         [SerializeField]
-        private CharacterController characterController;
+        private new Rigidbody rigidbody;
+
+        [SerializeField]
+        private Transform bodyOrientation;
+
+        [SerializeField]
+        private CapsuleCollider hitBox;
 
         private IInputService _inputService;
 
         private float _speed;
-        private float _jumpMultiplier;
+        private float _jumpHeight;
 
-        private Vector3 _movementDirection;
-        private float _jumpSpeed;
-        private float _speedModifier = 1f;
-        private float _stayingHeight;
-        private float _squattingHeight;
-        private Vector3 _stayingColliderCenter;
-        private Vector3 _squattingColliderCenter;
+        private Vector3 _desiredDirection;
+        private bool _jumpRequested;
+        private bool _shouldResetHorizontalVelocity;
 
-        public void Construct(IInputService inputService, float speed, float jumpMultiplier)
+        public void Construct(IInputService inputService, float speed, float jumpHeight)
         {
             _inputService = inputService;
             _speed = speed;
-            _jumpMultiplier = jumpMultiplier;
-            _stayingHeight = characterController.height;
-            _squattingHeight = _stayingHeight - SquattingSize;
-            _stayingColliderCenter = characterController.center;
-            _squattingColliderCenter = new Vector3(_stayingColliderCenter.x,
-                _stayingColliderCenter.y - SquattingSize / 2, _stayingColliderCenter.z);
+            _jumpHeight = jumpHeight + JumpHeightOffset;
         }
 
         private void Update()
         {
-            if (!isLocalPlayer)
+            var axis = _inputService.Axis;
+            var horizontalDirection = (axis.x * bodyOrientation.forward + axis.y * bodyOrientation.right).normalized;
+            if (Vector3.Dot(_desiredDirection, horizontalDirection) <= 0)
             {
-                return;
+                _shouldResetHorizontalVelocity = true;
             }
 
-            HandleSneaking();
-            HandleSquatting();
+            _desiredDirection = horizontalDirection;
 
-            var axis = _inputService.Axis;
-            var playerTransform = transform;
-            _movementDirection = (axis.x * playerTransform.forward + axis.y * playerTransform.right).normalized;
-            if (characterController.isGrounded)
+            if (_inputService.IsJumpButtonDown())
             {
-                _jumpSpeed = 0;
-                if (_inputService.IsJumpButtonDown())
+                _jumpRequested = true;
+            }
+        }
+
+        private void FixedUpdate()
+        {
+            if (IsGrounded())
+            {
+                if (_jumpRequested)
                 {
-                    _jumpSpeed = _jumpMultiplier;
+                    rigidbody.AddForce(Mathf.Sqrt(-2 * GravityScale * Physics.gravity.y * _jumpHeight) * Vector3.up,
+                        ForceMode.Impulse);
                 }
             }
+            else
+            {
+                rigidbody.AddForce(GravityScale * Physics.gravity);
+            }
 
-            _jumpSpeed += Gravity * Time.deltaTime;
-            Vector3 direction = new Vector3(_movementDirection.x * _speed * _speedModifier * Time.deltaTime,
-                _jumpSpeed * Time.deltaTime,
-                _movementDirection.z * Time.deltaTime * _speed * _speedModifier);
-            characterController.Move(direction);
+            rigidbody.AddForce(-GetHorizontalVelocity() / Time.deltaTime);
+
+            if (!_shouldResetHorizontalVelocity)
+            {
+                rigidbody.AddForce(_desiredDirection * GetHorizontalVelocity().magnitude / Time.deltaTime);
+                rigidbody.AddForce(
+                    Math.Min((_speed - GetHorizontalVelocity().magnitude) / Time.deltaTime,
+                        _speed / AccelerationTime) * _desiredDirection);
+            }
+
+            _jumpRequested = false;
+            _shouldResetHorizontalVelocity = false;
         }
 
-        private void HandleSneaking()
+        private bool IsGrounded()
         {
-            if (Input.GetKeyDown(KeyCode.LeftShift))
-            {
-                _speedModifier = SneakingSpeed;
-            }
-
-            if (Input.GetKeyUp(KeyCode.LeftShift))
-            {
-                _speedModifier = NormalSpeed;
-            }
+            var isGrounded = Physics.CheckBox(rigidbody.position + hitBox.height / 2 * Vector3.down,
+                new Vector3(hitBox.radius / 2, Constants.Epsilon, hitBox.radius / 2),
+                Quaternion.identity, Constants.buildMask);
+            return isGrounded;
         }
 
-        private void HandleSquatting()
+        private Vector3 GetHorizontalVelocity()
         {
-            if (Input.GetKeyDown(KeyCode.LeftControl))
-            {
-                _speedModifier = SquattingSpeed;
-                characterController.height = _squattingHeight;
-                characterController.center = _squattingColliderCenter;
-            }
+            return Vector3.Scale(HorizontalMask, rigidbody.velocity);
+        }
 
-            if (Input.GetKeyUp(KeyCode.LeftControl))
-            {
-                _speedModifier = NormalSpeed;
-                characterController.height = _stayingHeight;
-                characterController.center = _stayingColliderCenter;
-            }
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireCube(rigidbody.position + hitBox.height / 2 * Vector3.down,
+                new Vector3(hitBox.radius, 2 * Constants.Epsilon, hitBox.radius));
         }
     }
 }
