@@ -918,7 +918,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5284312042905907581}
-  - component: {fileID: 4544477825004322168}
+  - component: {fileID: 8903361373109355883}
   m_Layer: 10
   m_Name: Hit box
   m_TagString: Untagged
@@ -942,8 +942,8 @@ Transform:
   m_Father: {fileID: 951460950341307336}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &4544477825004322168
-BoxCollider:
+--- !u!136 &8903361373109355883
+CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -952,8 +952,9 @@ BoxCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 2, z: 1}
+  m_Radius: 0.3
+  m_Height: 2
+  m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &5558901517420845540
 GameObject:
@@ -1545,7 +1546,7 @@ MonoBehaviour:
   syncInterval: 0.1
   rigidbody: {fileID: 418850259563909874}
   bodyOrientation: {fileID: 3490630571108121316}
-  hitBox: {fileID: 4544477825004322168}
+  hitBox: {fileID: 8903361373109355883}
 --- !u!54 &418850259563909874
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1557,7 +1558,7 @@ Rigidbody:
   m_Mass: 1
   m_Drag: 0
   m_AngularDrag: 0.05
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 1
   m_Constraints: 112
