@@ -25,24 +25,19 @@ namespace Explosions
             _particleFactory = particleFactory;
         }
 
-        protected void DamagePlayer(Collider hitCollider, Vector3 explosionCenter, int radius, int damage,
-            int particlesSpeed, NetworkConnectionToClient connection)
+        protected void DamagePlayer(GameObject damagedPlayer, Vector3 explosionCenter, int radius, int damage,
+            NetworkConnectionToClient source)
         {
-            if (hitCollider.CompareTag("Player"))
-            {
-                var playerPosition = hitCollider.transform.position;
-                var distance = Math.Sqrt(
-                    (explosionCenter.x - playerPosition.x) * (explosionCenter.x - playerPosition.x) +
-                    (explosionCenter.y - playerPosition.y) * (explosionCenter.y - playerPosition.y) +
-                    (explosionCenter.z - playerPosition.z) * (explosionCenter.z - playerPosition.z));
-                if (distance >= radius)
-                    distance = radius;
-                var currentDamage = (int) (damage - damage * (distance / radius));
-                var direction = playerPosition - explosionCenter;
-                hitCollider.GetComponent<CharacterController>().Move(direction * particlesSpeed / 3);
-                var receiver = hitCollider.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
-                _server.Damage(connection, receiver, currentDamage);
-            }
+            var playerPosition = damagedPlayer.transform.position;
+            var distance = Math.Sqrt(
+                (explosionCenter.x - playerPosition.x) * (explosionCenter.x - playerPosition.x) +
+                (explosionCenter.y - playerPosition.y) * (explosionCenter.y - playerPosition.y) +
+                (explosionCenter.z - playerPosition.z) * (explosionCenter.z - playerPosition.z));
+            if (distance >= radius)
+                distance = radius;
+            var currentDamage = (int) (damage - damage * (distance / radius));
+            var receiver = damagedPlayer.GetComponentInParent<NetworkIdentity>().connectionToClient;
+            _server.Damage(source, receiver, currentDamage);
         }
 
         protected void DestroyExplosiveWithBlocks(Vector3Int explosionCenter, GameObject explosive, int radius,
