@@ -90,7 +90,7 @@ namespace Inventory
             if (!raycastResult) return;
             NetworkClient.Send(new AddBlocksRequest(
                 new[] {Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2)},
-                new[] {new BlockData(color)}, _id));
+                new[] {new BlockData(color)}));
         }
 
 

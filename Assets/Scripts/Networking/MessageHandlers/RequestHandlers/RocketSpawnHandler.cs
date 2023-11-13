@@ -23,7 +23,6 @@ namespace Networking.MessageHandlers.RequestHandlers
             _entityFactory = entityFactory;
             _particleFactory = particleFactory;
         }
-
         protected override void OnRequestReceived(NetworkConnectionToClient connection, RocketSpawnRequest request)
         {
             var result = _server.Data.TryGetPlayerData(connection, out var playerData);

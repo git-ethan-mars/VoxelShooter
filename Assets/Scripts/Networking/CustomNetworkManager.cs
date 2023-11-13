@@ -21,6 +21,7 @@ namespace Networking
         private ServerSettings _serverSettings;
         private GameStateMachine _stateMachine;
         private ServerTimer _serverTimer;
+        private BoxDropService _boxDropService;
         private IParticleFactory _particleFactory;
         private IMeshFactory _meshFactory;
         private IAssetProvider _assets;

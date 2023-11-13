@@ -1,10 +1,8 @@
 ﻿using Data;
 using Entities;
 using Infrastructure.AssetManagement;
-using MapLogic;
 using Mirror;
 using Networking;
-using Networking.ServerServices;
 using UnityEngine;
 
 namespace Infrastructure.Factory
@@ -17,6 +15,9 @@ namespace Infrastructure.Factory
         private const string RocketPath = "Prefabs/Rocket";
         private const string TombstonePath = "Prefabs/Tombstone";
         private const string SpawnPointPath = "Prefabs/Spawnpoint";
+        private const string AmmoBoxPath = "Prefabs/Drops/AmmoBox";
+        private const string HealthBoxPath = "Prefabs/Drops/HealthBox";
+        private const string BlockBoxPath = "Prefabs/Drops/BlockBox";
 
         public EntityFactory(IAssetProvider assets)
         {
@@ -52,7 +53,28 @@ namespace Infrastructure.Factory
             NetworkServer.Spawn(rocket);
             return rocket;
         }
-
+        
+        public LootBox CreateAmmoBox(Vector3 position, Transform parent)
+        {
+            var lootBox = _assets.Instantiate(AmmoBoxPath, position, Quaternion.identity, parent);
+            NetworkServer.Spawn(lootBox);
+            return lootBox.GetComponent<LootBox>();
+        }
+        
+        public LootBox CreateHealthBox(Vector3 position, Transform parent)
+        {
+            var lootBox = _assets.Instantiate(HealthBoxPath, position, Quaternion.identity, parent);
+            NetworkServer.Spawn(lootBox);
+            return lootBox.GetComponent<LootBox>();
+        }
+        
+        public LootBox CreateBlockBox(Vector3 position, Transform parent)
+        {
+            var lootBox = _assets.Instantiate(BlockBoxPath, position, Quaternion.identity, parent);
+            NetworkServer.Spawn(lootBox);
+            return lootBox.GetComponent<LootBox>();
+        }
+        
         public GameObject CreateSpawnPoint(Vector3 position, Transform parent)
         {
             return _assets.Instantiate(SpawnPointPath, position, Quaternion.identity, parent);

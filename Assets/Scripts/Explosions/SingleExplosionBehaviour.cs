@@ -22,7 +22,12 @@ namespace Explosions
             DestroyExplosiveWithBlocks(explosionCenter, explosive, radius, particlesSpeed, particlesCount);
             Collider[] hitColliders = Physics.OverlapSphere(explosionCenter, radius);
             foreach (var hitCollider in hitColliders)
-                DamagePlayer(hitCollider, explosionCenter, radius, damage, particlesSpeed, connection);
+            {
+                if (hitCollider.CompareTag("Player"))
+                {
+                    DamagePlayer(hitCollider.gameObject, explosionCenter, radius, damage, connection);
+                }
+            }
         }
     }
 }

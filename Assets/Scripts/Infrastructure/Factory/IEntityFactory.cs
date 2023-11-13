@@ -1,4 +1,5 @@
 ﻿using Data;
+using Entities;
 using Infrastructure.Services;
 using MapLogic;
 using Mirror;
@@ -18,6 +19,12 @@ namespace Infrastructure.Factory
 
         GameObject CreateRocket(Vector3 position, Quaternion rotation, IServer server,
             IParticleFactory particleFactory, RocketLauncherItem rocketData, NetworkConnectionToClient owner);
+        
+        LootBox CreateAmmoBox(Vector3 position, Transform parent);
+        
+        LootBox CreateHealthBox(Vector3 position, Transform parent);
+
+        LootBox CreateBlockBox(Vector3 position, Transform parent);
 
         GameObject CreateSpawnPoint(Vector3 position, Transform parent);
     }

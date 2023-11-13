@@ -8,7 +8,7 @@ namespace PlayerLogic
     public class PlayerMovement : NetworkBehaviour
     {
         private const float JumpHeightOffset = 0.5f;
-        private const float AccelerationTime = 1f;
+        private const float AccelerationTime = 0.3f;
         private const float GravityScale = 3;
 
         private static readonly Vector3 HorizontalMask = new(1, 0, 1);
@@ -40,6 +40,11 @@ namespace PlayerLogic
 
         private void Update()
         {
+            if (!isLocalPlayer)
+            {
+                return;
+            }
+
             var axis = _inputService.Axis;
             var horizontalDirection = (axis.x * bodyOrientation.forward + axis.y * bodyOrientation.right).normalized;
             if (Vector3.Dot(_desiredDirection, horizontalDirection) <= 0)
@@ -57,6 +62,11 @@ namespace PlayerLogic
 
         private void FixedUpdate()
         {
+            if (!isLocalPlayer)
+            {
+                return;
+            }
+
             if (IsGrounded())
             {
                 if (_jumpRequested)

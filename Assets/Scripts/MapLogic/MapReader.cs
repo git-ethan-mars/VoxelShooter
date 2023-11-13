@@ -2,6 +2,7 @@
 using Data;
 using Extensions;
 using Infrastructure.Services.StaticData;
+using UnityEngine;
 
 namespace MapLogic
 {
@@ -95,6 +96,10 @@ namespace MapLogic
                     {
                         blocks[(x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
                                (z & (ChunkData.ChunkSize - 1))] = new BlockData(mapProvider.MapData.WaterColor);
+                    }
+                    else
+                    {
+                        mapProvider.MapData.LowerSolidLayer.Add(new Vector3Int(x, 0, z));
                     }
                 }
             }
