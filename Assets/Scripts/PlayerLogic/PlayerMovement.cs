@@ -40,6 +40,11 @@ namespace PlayerLogic
 
         private void Update()
         {
+            if (!isLocalPlayer)
+            {
+                return;
+            }
+
             var axis = _inputService.Axis;
             var horizontalDirection = (axis.x * bodyOrientation.forward + axis.y * bodyOrientation.right).normalized;
             if (Vector3.Dot(_desiredDirection, horizontalDirection) <= 0)
@@ -57,6 +62,11 @@ namespace PlayerLogic
 
         private void FixedUpdate()
         {
+            if (!isLocalPlayer)
+            {
+                return;
+            }
+
             if (IsGrounded())
             {
                 if (_jumpRequested)
