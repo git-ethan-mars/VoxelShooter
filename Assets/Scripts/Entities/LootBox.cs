@@ -15,7 +15,13 @@ namespace Entities
         [SerializeField]
         private GameObject parachute;
 
-        private void OnTriggerEnter(Collider other)
+        private void Awake()
+        {
+            var bounds = GetComponent<Collider>().bounds;
+            _size = Vector3Int.RoundToInt(bounds.size);
+        }
+
+        private void OnCollisionEnter(Collision other)
         {
             if (isServer)
             {
@@ -24,21 +30,12 @@ namespace Entities
                     var player = other.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
                     OnPickUp?.Invoke(this, player);
                 }
-            }
-        }
 
-        private void OnCollisionEnter(Collision collision)
-        {
-            if (collision.gameObject.CompareTag("Chunk"))
-            {
-                parachute.SetActive(false);
+                if (other.gameObject.CompareTag("Chunk"))
+                {
+                    parachute.SetActive(false);
+                }
             }
-        }
-
-        private void Awake()
-        {
-            var bounds = GetComponent<Collider>().bounds;
-            _size = Vector3Int.RoundToInt(bounds.size);
         }
 
         public void Push()
