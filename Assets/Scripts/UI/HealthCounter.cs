@@ -1,4 +1,5 @@
 using Networking;
+using PlayerLogic;
 using TMPro;
 using UnityEngine;
 
@@ -11,9 +12,10 @@ namespace UI
 
         private IClient _client;
 
-        public void Construct(IClient client)
+        public void Construct(IClient client, Player player)
         {
             _client = client;
+            healthText.SetText(player.Health.ToString());
             _client.HealthChanged += OnHealthChanged;
         }
 

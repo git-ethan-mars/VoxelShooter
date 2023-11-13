@@ -13,8 +13,10 @@ namespace PlayerLogic
     public class Player : NetworkBehaviour
     {
         public InventoryInput InventoryInput { get; private set; }
+        public int Health { get; private set; }
         public List<int> ItemsIds { get; private set; }
         public float PlaceDistance { get; private set; }
+
 
         [SerializeField]
         private TextMeshProUGUI nickNameText;
@@ -23,6 +25,7 @@ namespace PlayerLogic
         private Transform itemPosition;
 
         public Transform ItemPosition => itemPosition;
+
 
         [SerializeField]
         private MeshRenderer[] bodyParts;
@@ -52,11 +55,13 @@ namespace PlayerLogic
         private PlayerMovement _movement;
         private PlayerRotation _rotation;
 
+
         public void Construct(IClient client, IUIFactory uiFactory, IInputService inputService, float placeDistance,
-            List<int> itemIds, float speed, float jumpHeight)
+            List<int> itemIds, float speed, float jumpHeight, int health)
         {
             PlaceDistance = placeDistance;
             ItemsIds = itemIds;
+            Health = health;
             _inputService = inputService;
             InventoryInput = new InventoryInput(_inputService);
             _movement = new PlayerMovement(hitBox, rigidbody, bodyOrientation, speed, jumpHeight);
@@ -87,6 +92,11 @@ namespace PlayerLogic
 
         private void FixedUpdate()
         {
+            if (!isLocalPlayer)
+            {
+                return;
+            }
+
             _movement.FixedUpdate();
         }
 
@@ -119,7 +129,10 @@ namespace PlayerLogic
 
         private void OnDestroy()
         {
-            Destroy(_hud.gameObject);
+            if (_hud != null)
+            {
+                Destroy(_hud.gameObject);
+            }
         }
     }
 }

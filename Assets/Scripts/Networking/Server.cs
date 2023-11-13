@@ -41,7 +41,6 @@ namespace Networking
         private readonly ReloadHandler _reloadHandler;
         private readonly HitHandler _hitHandler;
         private readonly AuthenticationHandler _authenticationHandler;
-        private readonly BoxDropService _boxDropService;
 
         public Server(ICoroutineRunner coroutineRunner, IStaticDataService staticData,
             ServerSettings serverSettings, IAssetProvider assets, IGameFactory gameFactory,
@@ -73,9 +72,9 @@ namespace Networking
             var meleeWeaponValidator = new MeleeWeaponValidator(this, coroutineRunner, particleFactory);
             _shootHandler = new ShootHandler(this, rangeWeaponValidator);
             _reloadHandler = new ReloadHandler(this, rangeWeaponValidator);
-            _boxDropService = new BoxDropService(this, _coroutineRunner, _serverSettings.MaxDuration, _entityFactory, 
+            var boxDropService = new BoxDropService(this, _coroutineRunner, _serverSettings.MaxDuration, _entityFactory,
                 _entityPositionValidator, _gameFactory);
-            _boxDropService.Start();
+            boxDropService.Start();
             _hitHandler = new HitHandler(this, meleeWeaponValidator);
             _authenticationHandler = new AuthenticationHandler(this);
         }
@@ -102,7 +101,8 @@ namespace Networking
                 var player = _playerFactory.CreatePlayer();
                 NetworkServer.AddPlayerForConnection(connection, player);
                 connection.Send(new PlayerConfigureResponse(playerData.Characteristic.placeDistance,
-                    playerData.Characteristic.speed, playerData.Characteristic.jumpMultiplier, playerData.ItemIds));
+                    playerData.Characteristic.speed, playerData.Characteristic.jumpHeight, playerData.ItemIds,
+                    playerData.Health));
                 SendDataFromOtherPlayers(connection);
                 NetworkServer.SendToReady(new NickNameResponse(connection.identity, playerData.NickName));
             }
@@ -147,7 +147,7 @@ namespace Networking
                 receiver.Send(new HealthResponse(playerData.Health));
             }
         }
-        
+
         public void Heal(NetworkConnectionToClient receiver, int totalHeal)
         {
             var result = Data.TryGetPlayerData(receiver, out var playerData);
@@ -157,6 +157,7 @@ namespace Networking
             {
                 playerData.Health = playerData.Characteristic.maxHealth;
             }
+
             receiver.Send(new HealthResponse(playerData.Health));
         }
 
@@ -265,7 +266,7 @@ namespace Networking
             var player = _playerFactory.CreatePlayer();
             ReplacePlayer(connection, player);
             connection.Send(new PlayerConfigureResponse(playerData.Characteristic.placeDistance,
-                playerData.Characteristic.speed, playerData.Characteristic.jumpMultiplier, playerData.ItemIds));
+                playerData.Characteristic.speed, playerData.Characteristic.jumpHeight, playerData.ItemIds, playerData.Health));
             NetworkServer.SendToReady(new NickNameResponse(connection.identity, playerData.NickName));
         }
 
