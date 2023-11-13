@@ -142,7 +142,7 @@ GameObject:
   - component: {fileID: 8607930526394087490}
   - component: {fileID: 6176815723976854097}
   m_Layer: 0
-  m_Name: Text (TMP)
+  m_Name: Nick name
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1292,7 +1292,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8664586988098286231}
   m_Layer: 0
-  m_Name: CameraMountPoint
+  m_Name: Camera mount point
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1419,11 +1419,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 951460950341307336}
-  - component: {fileID: 3881894797543075076}
-  - component: {fileID: 5496113448558553160}
   - component: {fileID: 8907822022040828168}
-  - component: {fileID: 2734791800071418437}
-  - component: {fileID: 2284097651350949927}
   - component: {fileID: 418850259563909874}
   - component: {fileID: -525354919619175065}
   - component: {fileID: 6515215865813608757}
@@ -1455,41 +1451,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3881894797543075076
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7129409968729204767}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b29395d9893c2a14bae5adacf96fc283, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0.1
-  cameraMountPoint: {fileID: 8664586988098286231}
---- !u!114 &5496113448558553160
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7129409968729204767}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a4cdc2635cc8a9a4783582c488ddd908, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0.1
-  sensitivityX: 200
-  sensitivityY: 200
-  headPivot: {fileID: 162809396587092744}
-  bodyOrientation: {fileID: 3490630571108121316}
 --- !u!114 &8907822022040828168
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1502,53 +1463,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7988b75de6ad4df498929a82e8d38dce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0.1
   nickNameText: {fileID: 6176815723976854097}
   itemPosition: {fileID: 7893378094424813921}
   bodyParts:
-  - {fileID: 6038241266318642879}
-  - {fileID: 4645897469814539043}
-  - {fileID: 4171014233673176982}
-  - {fileID: 2485293878770796464}
-  - {fileID: 6759529035599134267}
-  - {fileID: 7019146953197375861}
-  - {fileID: 1556552308598454547}
-  - {fileID: 6592051406695012981}
-  - {fileID: 107809365821787452}
-  - {fileID: 3603125022827540089}
+  - {fileID: 3785449706706436186}
+  - {fileID: 2827470159255539142}
+  - {fileID: 1566841989182963716}
+  - {fileID: 5035554387082779450}
+  - {fileID: 592380425137283838}
+  - {fileID: 8998519746882111269}
+  - {fileID: 8152447546173184227}
+  - {fileID: 7225909984380790769}
+  - {fileID: 1091164908782461205}
+  - {fileID: 4646009578787415590}
   nickNameCanvas: {fileID: 1450820302951618227}
---- !u!114 &2734791800071418437
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7129409968729204767}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80b0d97ce8104defb14e1e69fdd2da56, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0.1
---- !u!114 &2284097651350949927
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7129409968729204767}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 342e70a3da6f4a6386588389d893d5a4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0.1
-  rigidbody: {fileID: 418850259563909874}
   bodyOrientation: {fileID: 3490630571108121316}
+  headPivot: {fileID: 162809396587092744}
+  cameraMountPoint: {fileID: 8664586988098286231}
   hitBox: {fileID: 8903361373109355883}
+  rigidbody: {fileID: 418850259563909874}
 --- !u!54 &418850259563909874
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1869,7 +1805,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7893378094424813921}
   m_Layer: 0
-  m_Name: ItemPosition
+  m_Name: Item position
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -42,19 +42,18 @@ namespace Inventory
         private ChangeSlotResultHandler _changeSlotHandler;
 
         public void Construct(IInputService inputService, IAssetProvider assets, IStaticDataService staticData,
-            GameObject hud,
-            GameObject player)
+            Hud hud,
+            Player player)
         {
-            AddEventHandlers(player.GetComponent<InventoryInput>());
+            _inputService = inputService;
             _staticData = staticData;
-            _player = player.GetComponent<Player>();
+            _hud = hud;
+            _player = player;
             _rayCaster = new Raycaster(Camera.main);
             _transparentMeshPool = new TransparentMeshPool(assets);
-            _hud = hud.GetComponent<Hud>();
             _palette = _hud.palette;
-            _inputService = inputService;
-            InitializeInventoryViews(player.GetComponent<Player>().ItemsIds);
-            _maxIndex = Math.Min(Slots.Count, inventoryView.SlotsCount);
+            AddEventHandlers(player.InventoryInput);
+            InitializeInventoryViews(_player.ItemsIds);
             Boarders = inventoryView.Boarders;
             for (var i = 0; i < _maxIndex; i++)
             {
@@ -150,6 +149,8 @@ namespace Inventory
                     Slots.Add(new Slot(item, handler));
                 }
             }
+            
+            _maxIndex = Math.Min(Slots.Count, inventoryView.SlotsCount);
         }
 
         private void FirstActionButtonDown()

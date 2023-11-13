@@ -1,42 +1,34 @@
 using System;
-using Mirror;
 using UnityEngine;
 
 namespace PlayerLogic
 {
-    public class PlayerRotation : NetworkBehaviour
+    public class PlayerRotation
     {
-        [SerializeField]
-        private float sensitivityX;
+        private const float SensitivityX = 200;
+        private const float SensitivityY = 200;
 
-        [SerializeField]
-        private float sensitivityY;
+        private readonly Transform _headPivot;
+        private readonly Transform _bodyOrientation;
 
-        [SerializeField]
-        private Transform headPivot;
+        private float _xRotation;
+        private float _yRotation;
 
-        [SerializeField]
-        private Transform bodyOrientation;
-
-        private float XRotation { get; set; }
-        private float YRotation { get; set; }
-
-        private void Update()
+        public PlayerRotation(Transform bodyOrientation, Transform headPivot)
         {
-            if (!isLocalPlayer)
-            {
-                return;
-            }
+            _bodyOrientation = bodyOrientation;
+            _headPivot = headPivot;
+        }
 
-            var mouseXInput = Input.GetAxis("Mouse X");
-            var mouseYInput = Input.GetAxis("Mouse Y");
-            var mouseX = mouseXInput * sensitivityX * Time.deltaTime;
-            var mouseY = mouseYInput * sensitivityY * Time.deltaTime;
-            YRotation += mouseX;
-            XRotation -= mouseY;
-            XRotation = Math.Clamp(XRotation, -90, 90);
-            bodyOrientation.rotation = Quaternion.Euler(0, YRotation, 0);
-            headPivot.rotation = Quaternion.Euler(XRotation, YRotation, 0);
+        public void Rotate(Vector2 direction)
+        {
+            var mouseX = direction.x * SensitivityX * Time.deltaTime;
+            var mouseY = direction.y * SensitivityY * Time.deltaTime;
+            _yRotation += mouseX;
+            _xRotation -= mouseY;
+            _xRotation = Math.Clamp(_xRotation, -90, 90);
+            _bodyOrientation.rotation = Quaternion.Euler(0, _yRotation, 0);
+            _headPivot.rotation = Quaternion.Euler(_xRotation, _yRotation, 0);
         }
     }
 }

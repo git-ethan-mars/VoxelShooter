@@ -1,16 +1,21 @@
-﻿using UnityEngine;
-using UnityEngine.Serialization;
+﻿using CustomAttributes;
+using UnityEngine;
 
 namespace Data
 {
     public abstract class InventoryItem : ScriptableObject
     {
         public int id;
+
+        [ReadOnly]
         public ItemType itemType;
-        [FormerlySerializedAs("icon")] [Header("Visual/UI")]
+
+        [Header("Visual/UI")]
         public Sprite inventoryIcon;
+
         public GameObject prefab;
     }
+
     public enum ItemType
     {
         RangeWeapon,

@@ -1,11 +1,9 @@
 using System;
-using Infrastructure.Services.Input;
-using Mirror;
 using UnityEngine;
 
 namespace PlayerLogic
 {
-    public class PlayerMovement : NetworkBehaviour
+    public class PlayerMovement
     {
         private const float JumpHeightOffset = 0.5f;
         private const float AccelerationTime = 0.3f;
@@ -13,79 +11,63 @@ namespace PlayerLogic
 
         private static readonly Vector3 HorizontalMask = new(1, 0, 1);
 
-        [SerializeField]
-        private new Rigidbody rigidbody;
-
-        [SerializeField]
-        private Transform bodyOrientation;
-
-        [SerializeField]
-        private CapsuleCollider hitBox;
-
-        private IInputService _inputService;
-
-        private float _speed;
-        private float _jumpHeight;
+        private readonly float _speed;
+        private readonly float _jumpHeight;
+        
+        private readonly Rigidbody _rigidbody;
+        private readonly Transform _bodyOrientation;
+        private readonly CapsuleCollider _hitBox;
 
         private Vector3 _desiredDirection;
         private bool _jumpRequested;
         private bool _shouldResetHorizontalVelocity;
 
-        public void Construct(IInputService inputService, float speed, float jumpHeight)
+        public PlayerMovement(CapsuleCollider hitBox, Rigidbody rigidbody, Transform bodyOrientation, float speed, float jumpHeight)
         {
-            _inputService = inputService;
             _speed = speed;
             _jumpHeight = jumpHeight + JumpHeightOffset;
+            _hitBox = hitBox;
+            _rigidbody = rigidbody;
+            _bodyOrientation = bodyOrientation;
         }
 
-        private void Update()
+        public void Move(Vector2 direction)
         {
-            if (!isLocalPlayer)
-            {
-                return;
-            }
-
-            var axis = _inputService.Axis;
-            var horizontalDirection = (axis.x * bodyOrientation.forward + axis.y * bodyOrientation.right).normalized;
+            var horizontalDirection = (direction.x * _bodyOrientation.forward + direction.y * _bodyOrientation.right).normalized;
             if (Vector3.Dot(_desiredDirection, horizontalDirection) <= 0)
             {
                 _shouldResetHorizontalVelocity = true;
             }
 
             _desiredDirection = horizontalDirection;
-
-            if (_inputService.IsJumpButtonDown())
-            {
-                _jumpRequested = true;
-            }
         }
 
-        private void FixedUpdate()
+        public void Jump()
         {
-            if (!isLocalPlayer)
-            {
-                return;
-            }
+            _jumpRequested = true;
+        }
 
+        public void FixedUpdate()
+        {
             if (IsGrounded())
             {
                 if (_jumpRequested)
                 {
-                    rigidbody.AddForce(Mathf.Sqrt(-2 * GravityScale * Physics.gravity.y * _jumpHeight) * Vector3.up,
+                    _rigidbody.AddForce(Mathf.Sqrt(-2 * GravityScale * Physics.gravity.y * _jumpHeight) * Vector3.up,
                         ForceMode.Impulse);
                 }
             }
             else
             {
-                rigidbody.AddForce(GravityScale * Physics.gravity);
+                _rigidbody.AddForce(GravityScale * Physics.gravity);
             }
 
-            rigidbody.AddForce(-GetHorizontalVelocity() / Time.deltaTime);
+            _rigidbody.AddForce(-GetHorizontalVelocity() / Time.deltaTime);
 
             if (!_shouldResetHorizontalVelocity)
             {
-                rigidbody.AddForce(_desiredDirection * GetHorizontalVelocity().magnitude / Time.deltaTime);
-                rigidbody.AddForce(
+                _rigidbody.AddForce(_desiredDirection * GetHorizontalVelocity().magnitude / Time.deltaTime);
+                _rigidbody.AddForce(
                     Math.Min((_speed - GetHorizontalVelocity().magnitude) / Time.deltaTime,
                         _speed / AccelerationTime) * _desiredDirection);
             }
@@ -96,22 +78,15 @@ namespace PlayerLogic
 
         private bool IsGrounded()
         {
-            var isGrounded = Physics.CheckBox(rigidbody.position + hitBox.height / 2 * Vector3.down,
-                new Vector3(hitBox.radius / 2, Constants.Epsilon, hitBox.radius / 2),
+            var isGrounded = Physics.CheckBox(_rigidbody.position + _hitBox.height / 2 * Vector3.down,
+                new Vector3(_hitBox.radius / 2, Constants.Epsilon, _hitBox.radius / 2),
                 Quaternion.identity, Constants.buildMask);
             return isGrounded;
         }
 
         private Vector3 GetHorizontalVelocity()
         {
-            return Vector3.Scale(HorizontalMask, rigidbody.velocity);
-        }
-
-        private void OnDrawGizmos()
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireCube(rigidbody.position + hitBox.height / 2 * Vector3.down,
-                new Vector3(hitBox.radius, 2 * Constants.Epsilon, hitBox.radius));
+            return Vector3.Scale(HorizontalMask, _rigidbody.velocity);
         }
     }
 }

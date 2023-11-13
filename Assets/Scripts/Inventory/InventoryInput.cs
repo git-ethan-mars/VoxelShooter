@@ -1,25 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using Infrastructure.Services;
 using Infrastructure.Services.Input;
-using Mirror;
 using UnityEngine;
 
 namespace Inventory
 {
-    public class InventoryInput : NetworkBehaviour
+    public class InventoryInput
     {
         public event Action OnScroll;
         public event Action OnFirstActionButtonDown;
         public event Action OnFirstActionButtonUp;
         public event Action OnFirstActionButtonHold;
-        
         public event Action OnSecondActionButtonDown;
         public event Action OnSecondActionButtonUp;
-        
         public event Action<int> OnChangeSlot;
 
-        private IInputService _inputService;
+        private readonly IInputService _inputService;
 
 
         private readonly Dictionary<KeyCode, int> _slotIndexByKey = new()
@@ -31,15 +27,13 @@ namespace Inventory
             [KeyCode.Alpha5] = 4,
         };
 
-
-        private void Awake()
+        public InventoryInput(IInputService inputService)
         {
-            _inputService = AllServices.Container.Single<IInputService>();
+            _inputService = inputService;
         }
 
-        private void Update()
+        public void Update()
         {
-            if (!isLocalPlayer) return;
             if (_inputService.GetScrollSpeed() != 0.0f)
             {
                 OnScroll?.Invoke();
@@ -62,17 +56,17 @@ namespace Inventory
             {
                 OnFirstActionButtonHold?.Invoke();
             }
-            
+
             if (_inputService.IsFirstActionButtonUp())
             {
                 OnFirstActionButtonUp?.Invoke();
             }
-            
+
             if (_inputService.IsSecondActionButtonDown())
             {
                 OnSecondActionButtonDown?.Invoke();
             }
-            
+
             if (_inputService.IsSecondActionButtonUp())
             {
                 OnSecondActionButtonUp?.Invoke();
