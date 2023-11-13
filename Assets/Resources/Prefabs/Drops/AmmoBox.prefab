@@ -11,11 +11,10 @@ GameObject:
   - component: {fileID: 6236285571945295307}
   - component: {fileID: 97125586086238811}
   - component: {fileID: 1890165684022045429}
-  - component: {fileID: 4832597122493399090}
-  - component: {fileID: 729600513692801623}
-  - component: {fileID: 4677558903131102881}
-  - component: {fileID: 7842669828995072410}
   - component: {fileID: 131467749748963534}
+  - component: {fileID: 729600513692801623}
+  - component: {fileID: 4832597122493399090}
+  - component: {fileID: 4677558903131102881}
   - component: {fileID: -968833979389795543}
   m_Layer: 7
   m_Name: AmmoBox
@@ -90,22 +89,19 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &4832597122493399090
-MonoBehaviour:
+--- !u!65 &131467749748963534
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 455449736796981594}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
   m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 172c5963e91c4ec4932ff81deb11a47f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0.1
-  parachute: {fileID: 7302551272095989573}
+  serializedVersion: 2
+  m_Size: {x: 0.91, y: 0.87000006, z: 0.82}
+  m_Center: {x: -0.004999995, y: 0.42500004, z: 0}
 --- !u!54 &729600513692801623
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -122,6 +118,22 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 122
   m_CollisionDetection: 1
+--- !u!114 &4832597122493399090
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 455449736796981594}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172c5963e91c4ec4932ff81deb11a47f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0.1
+  parachute: {fileID: 7302551272095989573}
 --- !u!114 &4677558903131102881
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -139,32 +151,6 @@ MonoBehaviour:
   serverOnly: 0
   visible: 0
   hasSpawned: 0
---- !u!65 &7842669828995072410
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 455449736796981594}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: -0.004999995, y: 0.42500004, z: 0}
---- !u!65 &131467749748963534
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 455449736796981594}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.91, y: 0.87000006, z: 0.82}
-  m_Center: {x: -0.004999995, y: 0.42500004, z: 0}
 --- !u!114 &-968833979389795543
 MonoBehaviour:
   m_ObjectHideFlags: 0
