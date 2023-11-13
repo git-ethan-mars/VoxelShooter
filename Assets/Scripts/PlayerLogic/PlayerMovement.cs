@@ -8,7 +8,7 @@ namespace PlayerLogic
     public class PlayerMovement : NetworkBehaviour
     {
         private const float JumpHeightOffset = 0.5f;
-        private const float AccelerationTime = 1f;
+        private const float AccelerationTime = 0.3f;
         private const float GravityScale = 3;
 
         private static readonly Vector3 HorizontalMask = new(1, 0, 1);
