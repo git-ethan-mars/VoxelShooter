@@ -23,17 +23,17 @@ namespace Entities
 
         private void OnCollisionEnter(Collision other)
         {
+            if (other.gameObject.CompareTag("Chunk"))
+            {
+                parachute.SetActive(false);
+            }
+            
             if (isServer)
             {
                 if (other.gameObject.CompareTag("Player"))
                 {
                     var player = other.gameObject.GetComponentInParent<NetworkIdentity>().connectionToClient;
                     OnPickUp?.Invoke(this, player);
-                }
-
-                if (other.gameObject.CompareTag("Chunk"))
-                {
-                    parachute.SetActive(false);
                 }
             }
         }
