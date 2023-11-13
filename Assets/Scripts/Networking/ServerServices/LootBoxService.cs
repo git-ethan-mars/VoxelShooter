@@ -18,7 +18,7 @@ namespace Networking.ServerServices
         private readonly int _timeInSeconds;
         private IEntityFactory _entityFactory;
         private readonly IServer _server;
-        private const int SpawnRate = 1;
+        private const int SpawnRate = 10;
         private Dictionary<LootBox, LootBoxType> _lootBoxes = new();
         private readonly EntityPositionValidator _entityPostionValidator;
         private readonly IGameFactory _gameFactory;
