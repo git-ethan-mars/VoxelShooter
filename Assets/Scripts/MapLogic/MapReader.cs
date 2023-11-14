@@ -82,25 +82,27 @@ namespace MapLogic
             return mapData;
         }
 
-        public static void AddWater(MapProvider mapProvider)
+        private static void AddWater(MapProvider mapProvider)
         {
             for (var x = 0; x < mapProvider.MapData.Width; x++)
             {
                 for (var z = 0; z < mapProvider.MapData.Depth; z++)
                 {
                     var blocks = mapProvider.MapData.Chunks[mapProvider.GetChunkNumberByGlobalPosition(x, 0, z)].Blocks;
-                    var block = blocks[
+                    var zeroHeightBlock = blocks[
                         (x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
                         (z & (ChunkData.ChunkSize - 1))];
-                    if (!block.Color.IsSolid())
+                    var oneHeightBlock = blocks[
+                        (x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
+                        (1 & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSize +
+                        (z & (ChunkData.ChunkSize - 1))];
+                    if (!zeroHeightBlock.Color.IsSolid())
                     {
                         blocks[(x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
                                (z & (ChunkData.ChunkSize - 1))] = new BlockData(mapProvider.MapData.WaterColor);
                     }
-                    else
-                    {
-                        mapProvider.MapData.LowerSolidLayer.Add(new Vector3Int(x, 0, z));
-                    }
+                    if (oneHeightBlock.Color.IsSolid())
+                        mapProvider.MapData.BoxSpawnLayer.Add(new Vector3Int(x, mapProvider.MapData.Height - 1, z));
                 }
             }
         }

@@ -18,7 +18,7 @@ namespace Networking.ServerServices
         private readonly int _timeInSeconds;
         private IEntityFactory _entityFactory;
         private readonly IServer _server;
-        private const int SpawnRate = 10;
+        private const int SpawnRate = 1;
         private Dictionary<LootBox, LootBoxType> _lootBoxes = new();
         private readonly EntityPositionValidator _entityPostionValidator;
         private readonly IGameFactory _gameFactory;
@@ -42,30 +42,32 @@ namespace Networking.ServerServices
             _coroutineRunner.StartCoroutine(SpawnLootBox());
         }
         
+        // If build up top layer, game will go into infinite loop
         private IEnumerator SpawnLootBox()
         {
             for (var i = 0; i < _timeInSeconds; i++)
             {
                 if (i % SpawnRate == 0)
                 {
-                    var lowerSolidLayer = _server.MapProvider.MapData.LowerSolidLayer;
-                    var spawnPosition = lowerSolidLayer[Random.Range(0, lowerSolidLayer.Count - 1)] + Constants.worldOffset;
-                    var mapHeight = _server.MapProvider.MapData.Height + 1;
+                    var boxSpawnLayer = _server.MapProvider.MapData.BoxSpawnLayer;
+                    var spawnPosition = boxSpawnLayer[Random.Range(0, boxSpawnLayer.Count - 1)];
+                    var spawnBlock = _server.MapProvider.GetBlockByGlobalPosition(spawnPosition.x, 
+                        spawnPosition.y, spawnPosition.z);
+                    if (spawnBlock.IsSolid())
+                        continue;
+                    var spawnCoordinates = spawnPosition + Constants.worldOffset;
                     LootBox lootBox;
                     var lootBoxType = (LootBoxType)Random.Range(0, Enum.GetNames(typeof(LootBoxType)).Length);
                     switch (lootBoxType)
                     {
                         case LootBoxType.Ammo:
-                            lootBox = _entityFactory.CreateAmmoBox(new Vector3(spawnPosition.x, mapHeight,
-                                spawnPosition.z), _parent);
+                            lootBox = _entityFactory.CreateAmmoBox(spawnCoordinates, _parent);
                             break;
                         case LootBoxType.Health:
-                            lootBox = _entityFactory.CreateHealthBox(new Vector3(spawnPosition.x, mapHeight,
-                                spawnPosition.z), _parent);
+                            lootBox = _entityFactory.CreateHealthBox(spawnCoordinates, _parent);
                             break;
                         default:
-                            lootBox = _entityFactory.CreateBlockBox(new Vector3(spawnPosition.x, mapHeight,
-                                spawnPosition.z), _parent);
+                            lootBox = _entityFactory.CreateBlockBox(spawnCoordinates, _parent);
                             break;
                     }
                     _entityPostionValidator.AddEntity(lootBox);
