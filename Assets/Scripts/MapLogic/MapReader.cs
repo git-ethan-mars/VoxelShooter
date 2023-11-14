@@ -35,7 +35,7 @@ namespace MapLogic
         public static MapData ReadFromStream(Stream stream, MapConfigure mapConfigure)
         {
             stream.Seek(0, SeekOrigin.Begin);
-            var binaryReader = new BinaryReader(stream);
+            using var binaryReader = new BinaryReader(stream);
             var width = binaryReader.ReadInt32();
             var height = binaryReader.ReadInt32();
             var depth = binaryReader.ReadInt32();
