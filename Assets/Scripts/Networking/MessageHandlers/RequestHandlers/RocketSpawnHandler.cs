@@ -34,7 +34,7 @@ namespace Networking.MessageHandlers.RequestHandlers
             connection.Send(new ItemUseResponse(request.ItemId, rocketCount - 1));
             var rocketData = (RocketLauncherItem) _staticData.GetItem(request.ItemId);
             var direction = request.Ray.direction;
-            var rocket = _entityFactory.CreateRocket(request.Ray.origin + direction * 2,
+            var rocket = _entityFactory.CreateRocket(request.Ray.origin + direction * 3,
                 Quaternion.LookRotation(direction), _server, _particleFactory, rocketData, connection);
             rocket.GetComponent<Rigidbody>().velocity = direction * rocketData.speed;
         }
