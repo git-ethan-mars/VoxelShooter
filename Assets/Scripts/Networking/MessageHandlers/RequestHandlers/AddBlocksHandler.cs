@@ -53,14 +53,14 @@ namespace Networking.MessageHandlers.RequestHandlers
                     return;
                 }
 
-                _server.MapUpdater.SetBlockByGlobalPosition(request.GlobalPositions[i], request.Blocks[i]);
                 validPositions.Add(request.GlobalPositions[i]);
                 validBlockData.Add(request.Blocks[i]);
             }
 
             playerData.ItemCountById[playerData.ItemIds[playerData.InventorySlotId]] = blockAmount - blocksUsed;
             _server.MapUpdater.SetBlocksByGlobalPositions(validPositions, validBlockData);
-            connection.Send(new ItemUseResponse(playerData.ItemIds[playerData.InventorySlotId], blockAmount - blocksUsed));
+            connection.Send(new ItemUseResponse(playerData.ItemIds[playerData.InventorySlotId],
+                blockAmount - blocksUsed));
         }
     }
 }
