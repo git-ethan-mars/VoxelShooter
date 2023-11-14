@@ -7,15 +7,17 @@ namespace Networking.Messages.Responses
     {
         public readonly float PlaceDistance;
         public readonly float Speed;
-        public readonly float JumpMultiplier;
+        public readonly float JumpHeight;
         public readonly List<int> ItemIds;
+        public readonly int Health;
 
-        public PlayerConfigureResponse(float placeDistance, float speed, float jumpMultiplier, List<int> itemIds)
+        public PlayerConfigureResponse(float placeDistance, float speed, float jumpHeight, List<int> itemIds, int health)
         {
             PlaceDistance = placeDistance;
             Speed = speed;
-            JumpMultiplier = jumpMultiplier;
+            JumpHeight = jumpHeight;
             ItemIds = itemIds;
+            Health = health;
         }
     }
 }

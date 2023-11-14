@@ -14,7 +14,6 @@ namespace Networking
         event Action<ServerTime> GameTimeChanged;
         event Action<ServerTime> RespawnTimeChanged;
         event Action<List<ScoreData>> ScoreboardChanged;
-        event Action<int> HealthChanged;
         event Action GameFinished;
         FallMeshGenerator FallMeshGenerator { get; }
         IStaticDataService StaticData { get; }

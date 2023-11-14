@@ -4,13 +4,15 @@ using Infrastructure.Services.PlayerDataLoader;
 using Infrastructure.Services.StaticData;
 using Infrastructure.States;
 using Networking;
+using PlayerLogic;
+using UI;
 using UnityEngine;
 
 namespace Infrastructure.Factory
 {
     public interface IUIFactory : IService
     {
-        GameObject CreateHud(IClient client, IInputService inputService, GameObject player);
+        Hud CreateHud(Player player, IInputService inputService);
         void CreateChooseClassMenu(IClient client, IInputService inputService);
         GameObject CreateMainMenu(GameStateMachine gameStateMachine);
         GameObject CreateMatchMenu(IMapRepository mapRepository, GameStateMachine gameStateMachine);

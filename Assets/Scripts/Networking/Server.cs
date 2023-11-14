@@ -72,6 +72,9 @@ namespace Networking
             var meleeWeaponValidator = new MeleeWeaponValidator(this, coroutineRunner, particleFactory);
             _shootHandler = new ShootHandler(this, rangeWeaponValidator);
             _reloadHandler = new ReloadHandler(this, rangeWeaponValidator);
+            var boxDropService = new BoxDropService(this, _coroutineRunner, _serverSettings.MaxDuration, _entityFactory,
+                _entityPositionValidator, _gameFactory);
+            boxDropService.Start();
             _hitHandler = new HitHandler(this, meleeWeaponValidator);
             _authenticationHandler = new AuthenticationHandler(this);
         }
@@ -98,7 +101,8 @@ namespace Networking
                 var player = _playerFactory.CreatePlayer();
                 NetworkServer.AddPlayerForConnection(connection, player);
                 connection.Send(new PlayerConfigureResponse(playerData.Characteristic.placeDistance,
-                    playerData.Characteristic.speed, playerData.Characteristic.jumpMultiplier, playerData.ItemIds));
+                    playerData.Characteristic.speed, playerData.Characteristic.jumpHeight, playerData.ItemIds,
+                    playerData.Health));
                 SendDataFromOtherPlayers(connection);
                 NetworkServer.SendToReady(new NickNameResponse(connection.identity, playerData.NickName));
             }
@@ -142,6 +146,19 @@ namespace Networking
             {
                 receiver.Send(new HealthResponse(playerData.Health));
             }
+        }
+
+        public void Heal(NetworkConnectionToClient receiver, int totalHeal)
+        {
+            var result = Data.TryGetPlayerData(receiver, out var playerData);
+            if (!result || !playerData.IsAlive) return;
+            playerData.Health += totalHeal;
+            if (playerData.Health >= playerData.Characteristic.maxHealth)
+            {
+                playerData.Health = playerData.Characteristic.maxHealth;
+            }
+
+            receiver.Send(new HealthResponse(playerData.Health));
         }
 
         public void SendCurrentServerState(NetworkConnectionToClient connection)
@@ -201,7 +218,7 @@ namespace Networking
             var tombstonePosition = Vector3Int.FloorToInt(victim.identity.transform.position) +
                                     Constants.worldOffset;
             var tombstone = _entityFactory.CreateTombstone(tombstonePosition);
-            _entityPositionValidator.AddEntity(tombstone.GetComponent<PushableObject>());
+            _entityPositionValidator.AddEntity(tombstone.GetComponent<IPushable>());
             Data.AddKill(killer, victim);
             var playerData = Data.GetPlayerData(victim);
             playerData.PlayerStateMachine.Enter<DeathState>();
@@ -249,7 +266,7 @@ namespace Networking
             var player = _playerFactory.CreatePlayer();
             ReplacePlayer(connection, player);
             connection.Send(new PlayerConfigureResponse(playerData.Characteristic.placeDistance,
-                playerData.Characteristic.speed, playerData.Characteristic.jumpMultiplier, playerData.ItemIds));
+                playerData.Characteristic.speed, playerData.Characteristic.jumpHeight, playerData.ItemIds, playerData.Health));
             NetworkServer.SendToReady(new NickNameResponse(connection.identity, playerData.NickName));
         }
 

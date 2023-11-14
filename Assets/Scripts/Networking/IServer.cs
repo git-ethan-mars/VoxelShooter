@@ -18,6 +18,7 @@ namespace Networking
         void ChangeClass(NetworkConnectionToClient connection, GameClass chosenClass);
         void DeletePlayer(NetworkConnectionToClient connection);
         void Damage(NetworkConnectionToClient source, NetworkConnectionToClient receiver, int totalDamage);
+        void Heal(NetworkConnectionToClient receiver, int totalHeal);
         void SendCurrentServerState(NetworkConnectionToClient connection);
         void Start();
         void Stop();

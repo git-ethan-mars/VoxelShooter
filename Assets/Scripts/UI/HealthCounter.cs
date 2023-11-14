@@ -1,4 +1,4 @@
-using Networking;
+using PlayerLogic;
 using TMPro;
 using UnityEngine;
 
@@ -9,12 +9,13 @@ namespace UI
         [SerializeField]
         private TextMeshProUGUI healthText;
 
-        private IClient _client;
+        private Player _player;
 
-        public void Construct(IClient client)
+        public void Construct(Player player)
         {
-            _client = client;
-            _client.HealthChanged += OnHealthChanged;
+            _player = player;
+            healthText.SetText(_player.Health.ToString());
+            _player.HealthChanged += OnHealthChanged;
         }
 
         private void OnHealthChanged(int currentHealth)
@@ -24,7 +25,7 @@ namespace UI
 
         private void OnDestroy()
         {
-            _client.HealthChanged -= OnHealthChanged;
+            _player.HealthChanged -= OnHealthChanged;
         }
     }
 }

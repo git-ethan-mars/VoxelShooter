@@ -14,7 +14,7 @@ namespace Networking.MessageHandlers.ResponseHandler
 
             if (response.Identity.TryGetComponent<Player>(out var player))
             {
-                player.NickName = response.NickName;
+                player.SetNickName(response.NickName);
             }
         }
     }

@@ -21,7 +21,7 @@ namespace Networking.MessageHandlers.RequestHandlers
         {
             var result = _server.Data.TryGetPlayerData(connection, out var playerData);
             if (!result || !playerData.IsAlive) return;
-            var blockAmount = playerData.ItemCountById[request.ItemId];
+            var blockAmount = playerData.ItemCountById[playerData.ItemIds[playerData.InventorySlotId]];
             var validPositions = new List<Vector3Int>();
             var validBlockData = new List<BlockData>();
             var blocksUsed = Math.Min(blockAmount, request.GlobalPositions.Length);
@@ -58,9 +58,9 @@ namespace Networking.MessageHandlers.RequestHandlers
                 validBlockData.Add(request.Blocks[i]);
             }
 
-            playerData.ItemCountById[request.ItemId] = blockAmount - blocksUsed;
+            playerData.ItemCountById[playerData.ItemIds[playerData.InventorySlotId]] = blockAmount - blocksUsed;
             _server.MapUpdater.SetBlocksByGlobalPositions(validPositions, validBlockData);
-            connection.Send(new ItemUseResponse(request.ItemId, blockAmount - blocksUsed));
+            connection.Send(new ItemUseResponse(playerData.ItemIds[playerData.InventorySlotId], blockAmount - blocksUsed));
         }
     }
 }

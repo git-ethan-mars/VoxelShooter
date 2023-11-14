@@ -8,9 +8,15 @@ namespace CameraLogic
 {
     public class Spectator : NetworkBehaviour
     {
-        [SerializeField] private float sensitivityX;
-        [SerializeField] private float sensitivityY;
-        [SerializeField] private float distance;
+        [SerializeField]
+        private float sensitivityX;
+
+        [SerializeField]
+        private float sensitivityY;
+
+        [SerializeField]
+        private float distance;
+
         private IInputService _inputService;
         private Transform _cameraTransform;
         private NetworkIdentity _target;
@@ -42,10 +48,8 @@ namespace CameraLogic
         {
             if (!isLocalPlayer && !IsValidCameraPosition) return;
             if (_inputService.IsFirstActionButtonDown()) RequestNextIdentity();
-            var mouseXInput = _inputService.GetMouseHorizontalAxis();
-            var mouseYInput = _inputService.GetMouseVerticalAxis();
-            var mouseX = mouseXInput * sensitivityX * Time.deltaTime;
-            var mouseY = mouseYInput * sensitivityY * Time.deltaTime;
+            var mouseX = _inputService.MouseAxis.x * sensitivityX * Time.deltaTime;
+            var mouseY = _inputService.MouseAxis.y * sensitivityY * Time.deltaTime;
             YRotation += mouseX;
             XRotation -= mouseY;
             transform.rotation = Quaternion.Euler(XRotation, YRotation, 0);

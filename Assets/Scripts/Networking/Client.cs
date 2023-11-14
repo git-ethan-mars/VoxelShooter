@@ -44,18 +44,6 @@ namespace Networking
             remove => _scoreboardHandler.ScoreboardChanged -= value;
         }
 
-        public event Action<int> HealthChanged
-        {
-            add => _healthHandler.HealthChanged += value;
-            remove => _healthHandler.HealthChanged -= value;
-        }
-
-        public void SetMap(MapProvider mapProvider)
-        {
-            _mapProvider = mapProvider;
-            MapDownloaded?.Invoke();
-        }
-
         public FallMeshGenerator FallMeshGenerator { get; }
         public IStaticDataService StaticData { get; }
         public ClientData Data { get; }
@@ -88,7 +76,8 @@ namespace Networking
         private readonly PlayerConfigureHandler _playerConfigureHandler;
         private readonly NickNameHandler _nickNameHandler;
 
-        public Client(GameStateMachine stateMachine, ICoroutineRunner coroutineRunner, IInputService inputService, IGameFactory gameFactory,
+        public Client(GameStateMachine stateMachine, ICoroutineRunner coroutineRunner, IInputService inputService,
+            IGameFactory gameFactory,
             IMeshFactory meshFactory,
             IStaticDataService staticData,
             IParticleFactory particleFactory, IUIFactory uiFactory)
@@ -110,7 +99,7 @@ namespace Networking
             _scoreboardHandler = new ScoreboardHandler();
             _healthHandler = new HealthHandler();
             _changeItemModelHandler = new ChangeItemModelHandler(meshFactory, staticData);
-            _playerConfigureHandler = new PlayerConfigureHandler(this, uiFactory, inputService);
+            _playerConfigureHandler = new PlayerConfigureHandler(uiFactory, inputService);
             _nickNameHandler = new NickNameHandler();
         }
 
@@ -127,7 +116,8 @@ namespace Networking
             Data.State = ClientState.NotConnected;
             _gameFactory.CreateCamera();
             GameFinished?.Invoke();
-            _coroutineRunner.StartCoroutine(Utils.DoActionAfterDelay(_stateMachine.Enter<MainMenuState>, ShowResultsDuration));
+            _coroutineRunner.StartCoroutine(Utils.DoActionAfterDelay(_stateMachine.Enter<MainMenuState>,
+                ShowResultsDuration));
         }
 
         private void RegisterHandlers()

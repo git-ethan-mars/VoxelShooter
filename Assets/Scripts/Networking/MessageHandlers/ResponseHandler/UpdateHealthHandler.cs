@@ -1,14 +1,17 @@
-using System;
+using Mirror;
+using PlayerLogic;
 
 namespace Networking.MessageHandlers.ResponseHandler
 {
     public class HealthHandler : ResponseHandler<HealthResponse>
     {
-        public event Action<int> HealthChanged;
-
         protected override void OnResponseReceived(HealthResponse response)
         {
-            HealthChanged?.Invoke(response.Health);
+            if (NetworkClient.connection.identity != null &&
+                NetworkClient.connection.identity.TryGetComponent<Player>(out var player))
+            {
+                player.Health = response.Health;
+            }
         }
     }
 }

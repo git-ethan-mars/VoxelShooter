@@ -8,13 +8,11 @@ namespace Networking.MessageHandlers.ResponseHandler
 {
     public class PlayerConfigureHandler : ResponseHandler<PlayerConfigureResponse>
     {
-        private readonly IClient _client;
         private readonly IUIFactory _uiFactory;
         private readonly IInputService _inputService;
 
-        public PlayerConfigureHandler(IClient client, IUIFactory uiFactory, IInputService inputService)
+        public PlayerConfigureHandler(IUIFactory uiFactory, IInputService inputService)
         {
-            _client = client;
             _uiFactory = uiFactory;
             _inputService = inputService;
         }
@@ -23,8 +21,8 @@ namespace Networking.MessageHandlers.ResponseHandler
         {
             var playerGameObject = NetworkClient.connection.identity;
             var player = playerGameObject.GetComponent<Player>();
-            player.Construct(_client, _uiFactory, _inputService, response.PlaceDistance, response.ItemIds);
-            playerGameObject.GetComponent<PlayerMovement>().Construct(_inputService, response.Speed, response.JumpMultiplier);
+            player.Construct(_uiFactory, _inputService, response.PlaceDistance, response.ItemIds,
+                response.Speed, response.JumpHeight, response.Health);
         }
     }
 }

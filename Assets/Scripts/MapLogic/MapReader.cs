@@ -2,6 +2,7 @@
 using Data;
 using Extensions;
 using Infrastructure.Services.StaticData;
+using UnityEngine;
 
 namespace MapLogic
 {
@@ -34,7 +35,7 @@ namespace MapLogic
         public static MapData ReadFromStream(Stream stream, MapConfigure mapConfigure)
         {
             stream.Seek(0, SeekOrigin.Begin);
-            var binaryReader = new BinaryReader(stream);
+            using var binaryReader = new BinaryReader(stream);
             var width = binaryReader.ReadInt32();
             var height = binaryReader.ReadInt32();
             var depth = binaryReader.ReadInt32();
@@ -95,6 +96,10 @@ namespace MapLogic
                     {
                         blocks[(x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
                                (z & (ChunkData.ChunkSize - 1))] = new BlockData(mapProvider.MapData.WaterColor);
+                    }
+                    else
+                    {
+                        mapProvider.MapData.LowerSolidLayer.Add(new Vector3Int(x, 0, z));
                     }
                 }
             }

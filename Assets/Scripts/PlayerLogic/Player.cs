@@ -1,29 +1,36 @@
+using System;
 using System.Collections.Generic;
 using Infrastructure.Factory;
 using Infrastructure.Services.Input;
-using Networking;
+using Inventory;
+using Mirror;
 using TMPro;
+using UI;
 using UnityEngine;
 
 namespace PlayerLogic
 {
-    public class Player : MonoBehaviour
+    public class Player : NetworkBehaviour
     {
-        public List<int> ItemsIds { get; private set; }
-        public float PlaceDistance { get; private set; }
+        public event Action<int> HealthChanged;
 
-        public string NickName
+        public int Health
         {
-            get => _nickName;
+            get => _health;
             set
             {
-                nickNameText.SetText(value);
-                _nickName = value;
+                _health = value;
+                HealthChanged?.Invoke(_health);
             }
         }
 
-        private string _nickName;
-        
+        private int _health;
+
+        public InventoryInput InventoryInput { get; private set; }
+        public List<int> ItemsIds { get; private set; }
+        public float PlaceDistance { get; private set; }
+
+
         [SerializeField]
         private TextMeshProUGUI nickNameText;
 
@@ -32,24 +39,83 @@ namespace PlayerLogic
 
         public Transform ItemPosition => itemPosition;
 
+
         [SerializeField]
-        private GameObject[] bodyParts;
+        private MeshRenderer[] bodyParts;
 
         [SerializeField]
         private GameObject nickNameCanvas;
 
-        private GameObject _hud;
-        private IClient _client;
+        [SerializeField]
+        private Transform bodyOrientation;
 
-        public void Construct(IClient client, IUIFactory uiFactory, IInputService inputService, float placeDistance,
-            List<int> itemIds)
+        [SerializeField]
+        private Transform headPivot;
+
+        [SerializeField]
+        private Transform cameraMountPoint;
+
+        [SerializeField]
+        private CapsuleCollider hitBox;
+
+        [SerializeField]
+        private new Rigidbody rigidbody;
+
+        private Hud _hud;
+
+        private IInputService _inputService;
+
+        private PlayerMovement _movement;
+        private PlayerRotation _rotation;
+
+
+        public void Construct(IUIFactory uiFactory, IInputService inputService, float placeDistance,
+            List<int> itemIds, float speed, float jumpHeight, int health)
         {
-            _client = client;
             PlaceDistance = placeDistance;
             ItemsIds = itemIds;
-            _hud = uiFactory.CreateHud(_client, inputService, gameObject);
+            Health = health;
+            _inputService = inputService;
+            InventoryInput = new InventoryInput(_inputService);
+            _movement = new PlayerMovement(hitBox, rigidbody, bodyOrientation, speed, jumpHeight);
+            _rotation = new PlayerRotation(bodyOrientation, headPivot);
+            _hud = uiFactory.CreateHud(this, inputService);
             TurnOffNickName();
             TurnOffBodyRender();
+            MountCamera();
+        }
+
+        private void Update()
+        {
+            if (!isLocalPlayer)
+            {
+                return;
+            }
+
+            _movement.Move(_inputService.Axis);
+
+            if (_inputService.IsJumpButtonDown())
+            {
+                _movement.Jump();
+            }
+
+            _rotation.Rotate(_inputService.MouseAxis);
+            InventoryInput.Update();
+        }
+
+        private void FixedUpdate()
+        {
+            if (!isLocalPlayer)
+            {
+                return;
+            }
+
+            _movement.FixedUpdate();
+        }
+
+        public void SetNickName(string nickName)
+        {
+            nickNameText.SetText(nickName);
         }
 
         private void TurnOffBodyRender()
@@ -65,9 +131,21 @@ namespace PlayerLogic
             nickNameCanvas.SetActive(false);
         }
 
+        private void MountCamera()
+        {
+            var cameraTransform = Camera.main.gameObject.transform;
+            cameraTransform.parent = cameraMountPoint.transform;
+            cameraTransform.position = cameraMountPoint.position;
+            cameraTransform.rotation = cameraMountPoint.rotation;
+            Camera.main.fieldOfView = Constants.DefaultFov;
+        }
+
         private void OnDestroy()
         {
-            Destroy(_hud);
+            if (_hud != null)
+            {
+                Destroy(_hud.gameObject);
+            }
         }
     }
 }

@@ -22,6 +22,7 @@ namespace Inventory
         private readonly Image _ammoType;
         private readonly Sprite _ammoTypeIcon;
         private readonly float _zoomMultiplier;
+        private bool _isSelected;
 
 
         public RangeWeaponView(IInputService inputService, Camera camera, Hud hud,
@@ -43,6 +44,7 @@ namespace Inventory
         public void Select()
         {
             _ammoInfo.SetActive(true);
+            _isSelected = true;
             _ammoType.sprite = _ammoTypeIcon;
             _ammoCount.SetText($"{BulletsInMagazine} / {TotalBullets}");
         }
@@ -51,6 +53,7 @@ namespace Inventory
         public void Unselect()
         {
             _ammoInfo.SetActive(false);
+            _isSelected = false;
             _fpsCam.fieldOfView = Constants.DefaultFov;
         }
 
@@ -86,12 +89,14 @@ namespace Inventory
 
         public void OnReloadResult()
         {
-            _ammoCount.SetText($"{BulletsInMagazine} / {TotalBullets}");
+            if (_isSelected) 
+                _ammoCount.SetText($"{BulletsInMagazine} / {TotalBullets}");
         }
 
         public void OnShootResult()
         {
-            _ammoCount.SetText($"{BulletsInMagazine} / {TotalBullets}");
+            if (_isSelected)
+                _ammoCount.SetText($"{BulletsInMagazine} / {TotalBullets}");
         }
     }
 }

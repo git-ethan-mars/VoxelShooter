@@ -5,6 +5,7 @@ using Infrastructure.Services.StaticData;
 using Infrastructure.States;
 using Inventory;
 using Networking;
+using PlayerLogic;
 using UI;
 using UnityEngine;
 
@@ -29,13 +30,13 @@ namespace Infrastructure.Factory
             _staticData = staticData;
         }
 
-        public GameObject CreateHud(IClient client, IInputService inputService, GameObject player)
+        public Hud CreateHud(Player player, IInputService inputService)
         {
-            var hud = _assets.Instantiate(HudPath);
-            hud.GetComponent<Hud>().Construct(inputService);
-            var inventoryController = hud.GetComponent<Hud>().inventory.GetComponent<InventoryController>();
+            var hud = _assets.Instantiate(HudPath).GetComponent<Hud>();
+            hud.Construct(inputService);
+            var inventoryController = hud.inventory.GetComponent<InventoryController>();
             inventoryController.Construct(inputService, _assets, _staticData, hud, player);
-            hud.GetComponent<Hud>().healthCounter.Construct(client);
+            hud.healthCounter.Construct(player);
             return hud;
         }
 
