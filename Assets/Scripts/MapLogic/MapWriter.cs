@@ -39,8 +39,8 @@ namespace MapLogic
             }
 
             JobHandle.CompleteAll(jobHandles);
-            var memoryStream = new MemoryStream();
-            var binaryWriter = new BinaryWriter(memoryStream);
+            using var memoryStream = new MemoryStream();
+            using var binaryWriter = new BinaryWriter(memoryStream);
             binaryWriter.Write(mapProvider.MapData.Width);
             binaryWriter.Write(mapProvider.MapData.Height);
             binaryWriter.Write(mapProvider.MapData.Depth);
