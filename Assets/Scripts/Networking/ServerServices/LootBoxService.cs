@@ -14,50 +14,55 @@ namespace Networking.ServerServices
 {
     public class BoxDropService
     {
-        private readonly ICoroutineRunner _coroutineRunner;
-        private readonly int _timeInSeconds;
-        private IEntityFactory _entityFactory;
-        private readonly IServer _server;
-        private const int SpawnRate = 1;
-        private Dictionary<LootBox, LootBoxType> _lootBoxes = new();
-        private readonly EntityPositionValidator _entityPostionValidator;
-        private readonly IGameFactory _gameFactory;
-        private readonly Transform _parent;
         private const string LootBoxContainer = "LootBoxContainer";
 
-        public BoxDropService(IServer server, ICoroutineRunner coroutineRunner, int timeInMinutes,
+        private readonly ICoroutineRunner _coroutineRunner;
+        private readonly int _timeInSeconds;
+        private readonly IEntityFactory _entityFactory;
+        private readonly IServer _server;
+        private readonly int _spawnRate;
+        private readonly Dictionary<LootBox, LootBoxType> _lootBoxes = new();
+        private readonly EntityPositionValidator _entityPositionValidator;
+        private readonly Transform _parent;
+
+        public BoxDropService(IServer server, ICoroutineRunner coroutineRunner, ServerSettings serverSettings,
             IEntityFactory entityFactory, EntityPositionValidator entityPositionValidator, IGameFactory gameFactory)
         {
             _coroutineRunner = coroutineRunner;
-            _timeInSeconds = timeInMinutes * 60;
+            _timeInSeconds = serverSettings.MaxDuration * 60;
+            _spawnRate = serverSettings.BoxSpawnTime;
             _entityFactory = entityFactory;
             _server = server;
-            _entityPostionValidator = entityPositionValidator;
-            _gameFactory = gameFactory;
-            _parent = _gameFactory.CreateGameObjectContainer(LootBoxContainer).transform;
+            _entityPositionValidator = entityPositionValidator;
+            _parent = gameFactory.CreateGameObjectContainer(LootBoxContainer).transform;
         }
 
         public void Start()
         {
             _coroutineRunner.StartCoroutine(SpawnLootBox());
         }
-        
+
+        public void Stop()
+        {
+            _coroutineRunner.StopCoroutine(SpawnLootBox());
+        }
+
         // If build up top layer, game will go into infinite loop
         private IEnumerator SpawnLootBox()
         {
             for (var i = 0; i < _timeInSeconds; i++)
             {
-                if (i % SpawnRate == 0)
+                if (i % _spawnRate == 0)
                 {
                     var boxSpawnLayer = _server.MapProvider.MapData.BoxSpawnLayer;
                     var spawnPosition = boxSpawnLayer[Random.Range(0, boxSpawnLayer.Count - 1)];
-                    var spawnBlock = _server.MapProvider.GetBlockByGlobalPosition(spawnPosition.x, 
+                    var spawnBlock = _server.MapProvider.GetBlockByGlobalPosition(spawnPosition.x,
                         spawnPosition.y, spawnPosition.z);
                     if (spawnBlock.IsSolid())
                         continue;
                     var spawnCoordinates = spawnPosition + Constants.worldOffset;
                     LootBox lootBox;
-                    var lootBoxType = (LootBoxType)Random.Range(0, Enum.GetNames(typeof(LootBoxType)).Length);
+                    var lootBoxType = (LootBoxType) Random.Range(0, Enum.GetNames(typeof(LootBoxType)).Length);
                     switch (lootBoxType)
                     {
                         case LootBoxType.Ammo:
@@ -70,27 +75,29 @@ namespace Networking.ServerServices
                             lootBox = _entityFactory.CreateBlockBox(spawnCoordinates, _parent);
                             break;
                     }
-                    _entityPostionValidator.AddEntity(lootBox);
+
+                    _entityPositionValidator.AddEntity(lootBox);
                     _lootBoxes.Add(lootBox, lootBoxType);
                     lootBox.OnPickUp += OnPickUp;
                 }
+
                 yield return new WaitForSeconds(1);
             }
         }
 
         private void OnPickUp(LootBox lootBox, NetworkConnectionToClient connection)
         {
-            _entityPostionValidator.RemoveEntity(lootBox);
+            _entityPositionValidator.RemoveEntity(lootBox);
             if (_lootBoxes[lootBox] == LootBoxType.Ammo)
             {
                 PickUpAmmo(connection);
             }
-            
+
             if (_lootBoxes[lootBox] == LootBoxType.Health)
             {
                 PickUpHealthBox(connection);
             }
-            
+
             if (_lootBoxes[lootBox] == LootBoxType.Block)
             {
                 PickUpBox(connection);
@@ -109,7 +116,7 @@ namespace Networking.ServerServices
         {
             var result = _server.Data.TryGetPlayerData(receiver, out var playerData);
             if (!result || !playerData.IsAlive) return;
-            
+
             foreach (var itemId in playerData.ItemIds)
             {
                 var item = _server.Data.StaticData.GetItem(itemId);
@@ -121,12 +128,12 @@ namespace Networking.ServerServices
                 }
             }
         }
-        
+
         private void PickUpAmmo(NetworkConnectionToClient receiver)
         {
             var result = _server.Data.TryGetPlayerData(receiver, out var playerData);
             if (!result || !playerData.IsAlive) return;
-            
+
             foreach (var itemId in playerData.ItemIds)
             {
                 var item = _server.Data.StaticData.GetItem(itemId);
@@ -144,7 +151,7 @@ namespace Networking.ServerServices
                     receiver.Send(new ItemUseResponse(itemId, playerData.ItemCountById[itemId]));
                     continue;
                 }
-                
+
                 if (item.itemType == ItemType.Grenade)
                 {
                     playerData.ItemCountById[itemId] += 1;

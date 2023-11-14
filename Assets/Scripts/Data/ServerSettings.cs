@@ -4,12 +4,14 @@
     {
         public readonly int MaxDuration;
         public readonly int SpawnTime;
+        public readonly int BoxSpawnTime;
         public readonly string MapName;
 
-        public ServerSettings(int maxDuration, int spawnTime, string mapName)
+        public ServerSettings(string mapName, int maxDuration, int spawnTime, int boxSpawnTime)
         {
             MaxDuration = maxDuration;
             SpawnTime = spawnTime;
+            BoxSpawnTime = boxSpawnTime;
             MapName = mapName;
         }
     }
