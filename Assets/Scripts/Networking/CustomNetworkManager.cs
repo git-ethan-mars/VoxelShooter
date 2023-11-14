@@ -20,7 +20,6 @@ namespace Networking
         private IEntityFactory _entityFactory;
         private ServerSettings _serverSettings;
         private GameStateMachine _stateMachine;
-        private ServerTimer _serverTimer;
         private BoxDropService _boxDropService;
         private IParticleFactory _particleFactory;
         private IMeshFactory _meshFactory;
@@ -51,8 +50,6 @@ namespace Networking
             _server = new Server(this, _staticData, _serverSettings, _assets, _gameFactory, _particleFactory,
                 _entityFactory);
             _server.Start();
-            _serverTimer = new ServerTimer(this, _serverSettings.MaxDuration, StopHost);
-            _serverTimer.Start();
         }
 
         public override void OnStartClient()

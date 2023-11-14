@@ -26,31 +26,6 @@ namespace Networking.ServerServices
             _blockSplitter = new BlockSplitter();
         }
 
-        public void UpdateSpawnPoint(SpawnPointData oldPosition, SpawnPointData position)
-        {
-            var index = _mapProvider.SceneData.SpawnPoints.FindIndex(point => point.Equals(oldPosition));
-            _mapProvider.SceneData.SpawnPoints[index] = position;
-        }
-
-        public void SetBlockByGlobalPosition(Vector3Int position, BlockData blockData)
-        {
-            if (!blockData.IsSolid())
-            {
-                Debug.LogWarning("This method doesn't support empty blocks");
-                return;
-            }
-
-            _mapProvider.MapData.Chunks[_mapProvider.GetChunkNumberByGlobalPosition(position.x, position.y, position.z)]
-                    .Blocks[
-                        position.x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
-                        position.y % ChunkData.ChunkSize * ChunkData.ChunkSize + position.z % ChunkData.ChunkSize] =
-                blockData;
-
-            MapUpdated?.Invoke();
-            _destructionAlgorithm.Add(new List<Vector3Int> {position});
-            NetworkServer.SendToAll(new UpdateMapResponse(new[] {position}, new[] {blockData}));
-        }
-
         public void SetBlocksByGlobalPositions(List<Vector3Int> positions, List<BlockData> blockData)
         {
             for (var i = 0; i < positions.Count; i++)

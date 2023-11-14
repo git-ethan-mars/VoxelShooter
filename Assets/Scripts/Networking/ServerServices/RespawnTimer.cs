@@ -31,6 +31,11 @@ namespace Networking.ServerServices
             _coroutineRunner.StartCoroutine(SendTime());
         }
 
+        public void Stop()
+        {
+            _coroutineRunner.StopCoroutine(SendTime());
+        }
+
         private IEnumerator SendTime()
         {
             _timeLeft = new ServerTime(_respawnTime);

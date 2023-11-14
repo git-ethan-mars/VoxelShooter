@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Data
 {
     [Serializable]
-    public struct SpawnPointData
+    public class SpawnPointData
     {
         public Vector3Int position;
 

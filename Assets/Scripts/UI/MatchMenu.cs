@@ -51,15 +51,27 @@ namespace UI
         [SerializeField]
         private RawImage mapImage;
 
+        [Header("Box spawn time")]
+        [SerializeField]
+        private TextMeshProUGUI boxSpawnTime;
+
+        [SerializeField]
+        private Button incrementBoxSpawnTime;
+
+        [SerializeField]
+        private Button decrementBoxSpawnTime;
+
         private Limitation _spawnTimeLimitation;
         private Limitation _timeLimitation;
+        private Limitation _boxSpawnTimeLimitation;
         private IMapRepository _mapRepository;
         private GameStateMachine _stateMachine;
         private const int MinGameTime = 5;
         private const int MaxGameTime = 10;
         private const int MinSpawnTime = 3;
         private const int MaxSpawnTime = 7;
-
+        private const int MinBoxSpawnTime = 10;
+        private const int MaxBoxSpawnTime = 20;
 
         public void Construct(IMapRepository mapRepository, GameStateMachine stateMachine)
         {
@@ -68,6 +80,7 @@ namespace UI
             InitSpawnTime();
             InitGameDuration();
             InitMapChoice();
+            InitBoxSpawnTime();
             resetButton.onClick.AddListener(OnResetButton);
             backButton.onClick.AddListener(OnBackButton);
             applyButton.onClick.AddListener(OnApplyButton);
@@ -123,6 +136,16 @@ namespace UI
             spawnTimeText.SetText(_spawnTimeLimitation.CurrentValue.ToString());
         }
 
+        private void InitBoxSpawnTime()
+        {
+            _boxSpawnTimeLimitation = new Limitation(MinBoxSpawnTime, MaxBoxSpawnTime);
+            _boxSpawnTimeLimitation.OnCurrentValueUpdate +=
+                () => boxSpawnTime.SetText(_boxSpawnTimeLimitation.CurrentValue.ToString());
+            incrementBoxSpawnTime.onClick.AddListener(_boxSpawnTimeLimitation.Increment);
+            decrementBoxSpawnTime.onClick.AddListener(_boxSpawnTimeLimitation.Decrement);
+            boxSpawnTime.SetText(_boxSpawnTimeLimitation.CurrentValue.ToString());
+        }
+
         private void OnResetButton()
         {
             _spawnTimeLimitation.Reset();
@@ -136,16 +159,17 @@ namespace UI
 
         private void OnApplyButton()
         {
+            var serverSettings = new ServerSettings(mapName.text, _timeLimitation.CurrentValue,
+                _spawnTimeLimitation.CurrentValue, _boxSpawnTimeLimitation.CurrentValue);
             if (Constants.isLocalBuild)
             {
                 _stateMachine.Enter<StartMatchState, ServerSettings>(
-                    new ServerSettings(_timeLimitation.CurrentValue, _spawnTimeLimitation.CurrentValue,
-                        mapName.text));
+                    serverSettings);
             }
             else
             {
                 _stateMachine.Enter<StartSteamLobbyState, ServerSettings>(
-                    new ServerSettings(_timeLimitation.CurrentValue, _spawnTimeLimitation.CurrentValue, mapName.text));
+                    serverSettings);
             }
         }
 
