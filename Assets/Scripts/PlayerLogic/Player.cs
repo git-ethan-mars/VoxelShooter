@@ -86,7 +86,7 @@ namespace PlayerLogic
             var weatherParticleSystem = AllServices.Container.Single<IStaticDataService>()
                 .GetMapConfigure(((CustomNetworkManager)NetworkManager.singleton).Client.Data.MapName).weather;
             if (weatherParticleSystem)
-                Instantiate(weatherParticleSystem, transform);
+                Instantiate(weatherParticleSystem, bodyOrientation);
             TurnOffNickName();
             TurnOffBodyRender();
             MountCamera();
