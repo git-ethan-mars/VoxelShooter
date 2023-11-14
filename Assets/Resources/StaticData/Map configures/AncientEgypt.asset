@@ -29,6 +29,7 @@ MonoBehaviour:
   equatorColor: {r: 0.11372549, g: 0.1254902, b: 0.13333334, a: 1}
   groundColor: {r: 0.047058824, g: 0.043137256, b: 0.03529412, a: 1}
   ambientIntensity: 1
+  weather: {fileID: 7346217845250167101, guid: 532fdf926f93d8444899b177407fddaf, type: 3}
   isFogActivated: 0
   fogMode: 1
   fogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}

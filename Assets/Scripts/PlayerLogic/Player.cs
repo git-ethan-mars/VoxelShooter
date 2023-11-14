@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using Infrastructure.Factory;
+using Infrastructure.Services;
 using Infrastructure.Services.Input;
+using Infrastructure.Services.StaticData;
 using Inventory;
 using Mirror;
+using Networking;
 using TMPro;
 using UI;
 using UnityEngine;
@@ -80,6 +83,10 @@ namespace PlayerLogic
             _movement = new PlayerMovement(hitBox, rigidbody, bodyOrientation, speed, jumpHeight);
             _rotation = new PlayerRotation(bodyOrientation, headPivot);
             _hud = uiFactory.CreateHud(this, inputService);
+            var weatherParticleSystem = AllServices.Container.Single<IStaticDataService>()
+                .GetMapConfigure(((CustomNetworkManager)NetworkManager.singleton).Client.Data.MapName).weather;
+            if (weatherParticleSystem)
+                Instantiate(weatherParticleSystem, transform);
             TurnOffNickName();
             TurnOffBodyRender();
             MountCamera();

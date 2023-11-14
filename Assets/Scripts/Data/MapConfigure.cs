@@ -40,6 +40,10 @@ public class MapConfigure : ScriptableObject
 
     [ReadOnly]
     public float ambientIntensity = 1;
+    
+    [Header("Weather")]
+    [ReadOnly]
+    public ParticleSystem weather;
 
     [Header("Fog")]
     [ReadOnly]
