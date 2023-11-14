@@ -33,6 +33,9 @@ namespace Entities
         private void OnCollisionEnter(Collision collision)
         {
             if (!isServer || _isExploded) return;
+            if (collision.gameObject.GetComponentInParent<NetworkIdentity>()?.connectionToClient == _owner)
+                return;
+            
             _isExploded = true;
             var position = transform.position;
             var rocketPosition = new Vector3Int((int) position.x,
