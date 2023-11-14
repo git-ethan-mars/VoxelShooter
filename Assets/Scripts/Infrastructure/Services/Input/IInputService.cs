@@ -16,5 +16,10 @@ namespace Infrastructure.Services.Input
         float GetScrollSpeed();
         bool IsScoreboardButtonHold();
         bool IsChooseClassButtonDown();
+        bool IsInGameMenuButtonDown();
+        bool IsLeftArrowButtonDown();
+        bool IsRightArrowButtonDown();
+        bool IsUpArrowButtonDown();
+        bool IsDownArrowButtonDown();
     }
 }

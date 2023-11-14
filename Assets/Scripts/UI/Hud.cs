@@ -9,7 +9,7 @@ namespace UI
     public class Hud : MonoBehaviour
     {
         public GameObject inventory;
-        public GameObject palette;
+        public Palette palette;
         public GameObject ammoInfo;
         public Image ammoType;
         public TextMeshProUGUI ammoCount;

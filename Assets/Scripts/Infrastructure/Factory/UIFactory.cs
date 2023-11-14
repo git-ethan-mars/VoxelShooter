@@ -37,6 +37,7 @@ namespace Infrastructure.Factory
             var inventoryController = hud.inventory.GetComponent<InventoryController>();
             inventoryController.Construct(inputService, _assets, _staticData, hud, player);
             hud.healthCounter.Construct(client, player);
+            hud.palette.Construct(inputService);
             return hud;
         }
 

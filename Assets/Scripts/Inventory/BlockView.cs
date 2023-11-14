@@ -17,16 +17,16 @@ namespace Inventory
         private Color32 _currentColor;
         private readonly GameObject _blockInfo;
         private readonly TextMeshProUGUI _blockCountText;
-        private readonly int _id;
         private readonly Image _blockImage;
         private readonly Sprite _blockSprite;
-        private readonly GameObject _palette;
+        private readonly Palette _palette;
         private readonly GameObject _transparentBlock;
         private readonly Raycaster _rayCaster;
         private readonly float _placeDistance;
 
 
-        public BlockView(Raycaster raycaster, Hud hud, BlockItem configuration, TransparentMeshPool transparentMeshPool, Player player)
+        public BlockView(Raycaster raycaster, Hud hud, BlockItem configuration, TransparentMeshPool transparentMeshPool,
+            Player player)
         {
             _rayCaster = raycaster;
             _placeDistance = player.PlaceDistance;
@@ -36,14 +36,12 @@ namespace Inventory
             _blockCountText = hud.itemCount;
             Icon = configuration.inventoryIcon;
             _blockSprite = configuration.itemSprite;
-            _palette.GetComponent<PaletteCreator>().OnColorUpdate += UpdateColor;
+            _palette.ColorChanged += UpdatedColor;
             Count = configuration.count;
-            _id = configuration.id;
             _transparentBlock =
                 transparentMeshPool.CreateTransparentGameObject(configuration.prefab, _currentColor);
             _transparentBlock.SetActive(false);
         }
-
 
         public void OnCountChanged()
         {
@@ -53,7 +51,7 @@ namespace Inventory
         public void Select()
         {
             _transparentBlock.SetActive(true);
-            _palette.SetActive(true);
+            _palette.gameObject.SetActive(true);
             _blockInfo.SetActive(true);
             _blockImage.sprite = _blockSprite;
             _blockCountText.SetText(Count.ToString());
@@ -61,7 +59,7 @@ namespace Inventory
 
         public void Unselect()
         {
-            _palette.SetActive(false);
+            _palette.gameObject.SetActive(false);
             _blockInfo.SetActive(false);
             _transparentBlock.SetActive(false);
         }
@@ -93,8 +91,7 @@ namespace Inventory
                 new[] {new BlockData(color)}));
         }
 
-
-        private void UpdateColor(Color32 newColor)
+        private void UpdatedColor(Color32 newColor)
         {
             _currentColor = newColor;
             _transparentBlock.GetComponent<MeshRenderer>().material.color = new Color(newColor.r / 255f,

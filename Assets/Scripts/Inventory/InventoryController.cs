@@ -29,7 +29,6 @@ namespace Inventory
         private int _maxIndex;
         private CubeRenderer _cubeRenderer;
         private Camera _mainCamera;
-        private GameObject _palette;
         private Player _player;
         private Hud _hud;
         private PlayerCharacteristic _characteristic;
@@ -51,7 +50,6 @@ namespace Inventory
             _player = player;
             _rayCaster = new Raycaster(Camera.main);
             _transparentMeshPool = new TransparentMeshPool(assets);
-            _palette = _hud.palette;
             AddEventHandlers(player.InventoryInput);
             InitializeInventoryViews(_player.ItemsIds);
             Boarders = inventoryView.Boarders;
@@ -121,14 +119,6 @@ namespace Inventory
                     Slots.Add(new Slot(item, handler));
                 }
 
-                if (item.itemType == ItemType.Brush)
-                {
-                    var handler = new BrushView(_cubeRenderer,
-                        _palette,
-                        (BrushItem) item);
-                    Slots.Add(new Slot(item, handler));
-                }
-
                 if (item.itemType == ItemType.Tnt)
                 {
                     var handler = new TntView(_rayCaster, (TntItem) item, _hud,
@@ -138,18 +128,18 @@ namespace Inventory
 
                 if (item.itemType == ItemType.Grenade)
                 {
-                    var handler = new GrenadeView(_rayCaster, (GrenadeItem) item, _hud.GetComponent<Hud>());
+                    var handler = new GrenadeView(_rayCaster, (GrenadeItem) item, _hud);
                     Slots.Add(new Slot(item, handler));
                 }
 
                 if (item.itemType == ItemType.RocketLauncher)
                 {
                     var handler = new RocketLauncherView(_rayCaster, (RocketLauncherItem) item,
-                        _hud.GetComponent<Hud>());
+                        _hud);
                     Slots.Add(new Slot(item, handler));
                 }
             }
-            
+
             _maxIndex = Math.Min(Slots.Count, inventoryView.SlotsCount);
         }
 
