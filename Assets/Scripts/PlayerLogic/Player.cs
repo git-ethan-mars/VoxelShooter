@@ -1,9 +1,9 @@
+using System;
 using System.Collections.Generic;
 using Infrastructure.Factory;
 using Infrastructure.Services.Input;
 using Inventory;
 using Mirror;
-using Networking;
 using TMPro;
 using UI;
 using UnityEngine;
@@ -12,8 +12,21 @@ namespace PlayerLogic
 {
     public class Player : NetworkBehaviour
     {
+        public event Action<int> HealthChanged;
+
+        public int Health
+        {
+            get => _health;
+            set
+            {
+                _health = value;
+                HealthChanged?.Invoke(_health);
+            }
+        }
+
+        private int _health;
+
         public InventoryInput InventoryInput { get; private set; }
-        public int Health { get; private set; }
         public List<int> ItemsIds { get; private set; }
         public float PlaceDistance { get; private set; }
 
@@ -56,7 +69,7 @@ namespace PlayerLogic
         private PlayerRotation _rotation;
 
 
-        public void Construct(IClient client, IUIFactory uiFactory, IInputService inputService, float placeDistance,
+        public void Construct(IUIFactory uiFactory, IInputService inputService, float placeDistance,
             List<int> itemIds, float speed, float jumpHeight, int health)
         {
             PlaceDistance = placeDistance;
@@ -66,7 +79,7 @@ namespace PlayerLogic
             InventoryInput = new InventoryInput(_inputService);
             _movement = new PlayerMovement(hitBox, rigidbody, bodyOrientation, speed, jumpHeight);
             _rotation = new PlayerRotation(bodyOrientation, headPivot);
-            _hud = uiFactory.CreateHud(this, client, inputService);
+            _hud = uiFactory.CreateHud(this, inputService);
             TurnOffNickName();
             TurnOffBodyRender();
             MountCamera();

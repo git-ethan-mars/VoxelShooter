@@ -30,13 +30,13 @@ namespace Infrastructure.Factory
             _staticData = staticData;
         }
 
-        public Hud CreateHud(Player player, IClient client, IInputService inputService)
+        public Hud CreateHud(Player player, IInputService inputService)
         {
             var hud = _assets.Instantiate(HudPath).GetComponent<Hud>();
             hud.Construct(inputService);
             var inventoryController = hud.inventory.GetComponent<InventoryController>();
             inventoryController.Construct(inputService, _assets, _staticData, hud, player);
-            hud.healthCounter.Construct(client, player);
+            hud.healthCounter.Construct(player);
             return hud;
         }
 

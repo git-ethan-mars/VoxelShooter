@@ -12,7 +12,7 @@ namespace Infrastructure.Factory
 {
     public interface IUIFactory : IService
     {
-        Hud CreateHud(Player player, IClient client, IInputService inputService);
+        Hud CreateHud(Player player, IInputService inputService);
         void CreateChooseClassMenu(IClient client, IInputService inputService);
         GameObject CreateMainMenu(GameStateMachine gameStateMachine);
         GameObject CreateMatchMenu(IMapRepository mapRepository, GameStateMachine gameStateMachine);
