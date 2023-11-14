@@ -1276,6 +1276,7 @@ MonoBehaviour:
   sniperButton: {fileID: 452592361852125138}
   combatantButton: {fileID: 2714429266595045976}
   grenadierButton: {fileID: 7231122801333671136}
+  exitButton: {fileID: 7575343517220128717}
 --- !u!225 &172937459948263850
 CanvasGroup:
   m_ObjectHideFlags: 0

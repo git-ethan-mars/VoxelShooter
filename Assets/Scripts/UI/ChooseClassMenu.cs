@@ -23,6 +23,9 @@ namespace UI
 
         [SerializeField]
         private Button grenadierButton;
+        
+        [SerializeField]
+        private Button exitButton;
 
         private IInputService _inputService;
         private CanvasGroup _canvasGroup;
@@ -38,6 +41,7 @@ namespace UI
             sniperButton.onClick.AddListener(() => ChangeClass(GameClass.Sniper));
             combatantButton.onClick.AddListener(() => ChangeClass(GameClass.Combatant));
             grenadierButton.onClick.AddListener(() => ChangeClass(GameClass.Grenadier));
+            exitButton.onClick.AddListener(() => _canvasGroup.alpha = 0);
         }
 
         private void HideWindow()
