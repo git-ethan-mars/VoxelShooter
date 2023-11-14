@@ -21,14 +21,15 @@ MonoBehaviour:
     rgba: 4286085240
   lightData:
     position: {x: 256, y: 100, z: 100}
-    rotation: {x: 0.43935674, y: 0.6530717, z: -0.23600271, w: 0.56988233}
-    color: {r: 1, g: 1, b: 1, a: 1}
+    rotation: {x: -0.059231196, y: 0.75064325, z: -0.65583384, w: -0.053930566}
+    color: {r: 0.8254717, g: 0.943847, b: 1, a: 1}
   skyboxMaterial: {fileID: 2100000, guid: 2039a0ad0a9d05549928b70362f54902, type: 2}
   ambientMode: 0
   skyColor: {r: 0.21176471, g: 0.22745098, b: 0.25882354, a: 1}
   equatorColor: {r: 0.11372549, g: 0.1254902, b: 0.13333334, a: 1}
   groundColor: {r: 0.047058824, g: 0.043137256, b: 0.03529412, a: 1}
   ambientIntensity: 1
+  weather: {fileID: 0}
   isFogActivated: 0
   fogMode: 1
   fogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
