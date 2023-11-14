@@ -13,5 +13,7 @@ namespace Infrastructure.Services.StaticData
         PlayerCharacteristic GetPlayerCharacteristic(GameClass gameClass);
         void LoadMapConfigures();
         MapConfigure GetMapConfigure(string mapName);
+        void LoadLobbyBalance();
+        LobbyBalance GetLobbyBalance();
     }
 }

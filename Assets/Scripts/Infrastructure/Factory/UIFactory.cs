@@ -56,7 +56,7 @@ namespace Infrastructure.Factory
         public GameObject CreateMatchMenu(IMapRepository mapRepository, GameStateMachine gameStateMachine)
         {
             var matchMenu = _assets.Instantiate(MatchMenuPath);
-            matchMenu.GetComponent<MatchMenu>().Construct(mapRepository, gameStateMachine);
+            matchMenu.GetComponent<MatchMenu>().Construct(mapRepository, _staticData, gameStateMachine);
             return matchMenu;
         }
 

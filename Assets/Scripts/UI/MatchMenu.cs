@@ -66,17 +66,25 @@ namespace UI
         private Limitation _boxSpawnTimeLimitation;
         private IMapRepository _mapRepository;
         private GameStateMachine _stateMachine;
-        private const int MinGameTime = 5;
-        private const int MaxGameTime = 10;
-        private const int MinSpawnTime = 3;
-        private const int MaxSpawnTime = 7;
-        private const int MinBoxSpawnTime = 10;
-        private const int MaxBoxSpawnTime = 20;
+        private int _minGameTime;
+        private int _maxGameTime;
+        private int _minSpawnTime;
+        private int _maxSpawnTime;
+        private int _minBoxSpawnTime;
+        private int _maxBoxSpawnTime;
 
-        public void Construct(IMapRepository mapRepository, GameStateMachine stateMachine)
+        public void Construct(IMapRepository mapRepository, IStaticDataService staticData,
+            GameStateMachine stateMachine)
         {
             _mapRepository = mapRepository;
             _stateMachine = stateMachine;
+            var lobbyBalance = staticData.GetLobbyBalance();
+            _minGameTime = lobbyBalance.minMatchDuration;
+            _maxGameTime = lobbyBalance.maxMatchDuration;
+            _minSpawnTime = lobbyBalance.minSpawnTime;
+            _maxSpawnTime = lobbyBalance.maxSpawnTime;
+            _minBoxSpawnTime = lobbyBalance.minBoxSpawnTime;
+            _maxBoxSpawnTime = lobbyBalance.maxBoxSpawnTime;
             InitSpawnTime();
             InitGameDuration();
             InitMapChoice();
@@ -119,7 +127,7 @@ namespace UI
 
         private void InitGameDuration()
         {
-            _timeLimitation = new Limitation(MinGameTime, MaxGameTime);
+            _timeLimitation = new Limitation(_minGameTime, _maxGameTime);
             _timeLimitation.OnCurrentValueUpdate += () => gameDuration.SetText(_timeLimitation.CurrentValue.ToString());
             incrementGameDuration.onClick.AddListener(_timeLimitation.Increment);
             decrementGameDuration.onClick.AddListener(_timeLimitation.Decrement);
@@ -128,7 +136,7 @@ namespace UI
 
         private void InitSpawnTime()
         {
-            _spawnTimeLimitation = new Limitation(MinSpawnTime, MaxSpawnTime);
+            _spawnTimeLimitation = new Limitation(_minSpawnTime, _maxSpawnTime);
             _spawnTimeLimitation.OnCurrentValueUpdate +=
                 () => spawnTimeText.SetText(_spawnTimeLimitation.CurrentValue.ToString());
             incrementPlayerNumber.onClick.AddListener(_spawnTimeLimitation.Increment);
@@ -138,7 +146,7 @@ namespace UI
 
         private void InitBoxSpawnTime()
         {
-            _boxSpawnTimeLimitation = new Limitation(MinBoxSpawnTime, MaxBoxSpawnTime);
+            _boxSpawnTimeLimitation = new Limitation(_minBoxSpawnTime, _maxBoxSpawnTime);
             _boxSpawnTimeLimitation.OnCurrentValueUpdate +=
                 () => boxSpawnTime.SetText(_boxSpawnTimeLimitation.CurrentValue.ToString());
             incrementBoxSpawnTime.onClick.AddListener(_boxSpawnTimeLimitation.Increment);
