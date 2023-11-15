@@ -19,5 +19,6 @@ namespace Infrastructure.Factory
         void CreateTimeCounter(IClient client, IInputService inputService);
         void CreateScoreboard(IClient client, IInputService inputService, IAvatarLoader avatarLoader);
         void CreateLoadingWindow(IClient client);
+        GameObject CreateSettingsMenu(GameStateMachine gameStateMachine);
     }
 }

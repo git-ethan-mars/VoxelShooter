@@ -7,6 +7,7 @@ using Inventory;
 using Networking;
 using PlayerLogic;
 using UI;
+using UI.SettingsMenu;
 using UnityEngine;
 
 namespace Infrastructure.Factory
@@ -20,6 +21,7 @@ namespace Infrastructure.Factory
         private const string TimeCounterPath = "Prefabs/UI/TimeInfo";
         private const string ScoreboardPath = "Prefabs/UI/Scoreboard";
         private const string LoadingWindowPath = "Prefabs/UI/LoadingWindow";
+        private const string SettingsMenuPath = "Prefabs/UI/SettingsMenu";
         private readonly IAssetProvider _assets;
         private readonly IStaticDataService _staticData;
 
@@ -74,6 +76,13 @@ namespace Infrastructure.Factory
         public void CreateLoadingWindow(IClient client)
         {
             _assets.Instantiate(LoadingWindowPath).GetComponent<LoadingWindow>().Construct(client);
+        }
+
+        public GameObject CreateSettingsMenu(GameStateMachine gameStateMachine)
+        {
+            var settingsMenu = _assets.Instantiate(SettingsMenuPath);
+            settingsMenu.GetComponent<SettingsMenu>().Construct(gameStateMachine);
+            return settingsMenu;
         }
     }
 }
