@@ -1,17 +1,23 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace UI.SettingsMenu.States
 {
     public class SettingsMenuStateMachine
     {
         public ISettingsMenuState CurrentState { private set; get; }
-        private readonly Dictionary<Type, ISettingsMenuState> _states = new()
+        private readonly Dictionary<Type, ISettingsMenuState> _states;
+
+        public SettingsMenuStateMachine(GameObject mouseSettings, GameObject volumeSettings, GameObject videoSettings)
         {
-            [typeof(MouseSettings)] = new MouseSettings(),
-            [typeof(VolumeSettings)] = new VolumeSettings(),
-            [typeof(VideoSettings)] = new VideoSettings(),
-        };
+            _states = new()
+            {
+                [typeof(MouseSettings)] = new MouseSettings(mouseSettings),
+                [typeof(VolumeSettings)] = new VolumeSettings(volumeSettings),
+                [typeof(VideoSettings)] = new VideoSettings(videoSettings),
+            };
+        }
 
         public void SwitchState<TState>() where TState : ISettingsMenuState
         {

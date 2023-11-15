@@ -11,13 +11,23 @@ namespace UI.SettingsMenu
         private Button mouseSection;
 
         [SerializeField]
+        private GameObject mouseSettings;
+
+        [SerializeField]
         private Button volumeSection;
+
+        [SerializeField]
+        private GameObject volumeSettings;
 
         [SerializeField]
         private Button videoSection;
 
         [SerializeField]
+        private GameObject videoSettings;
+
+        [SerializeField]
         private Button backButton;
+
 
         private GameStateMachine _gameStateMachine;
         private SettingsMenuStateMachine _menuStateMachine;
@@ -25,7 +35,7 @@ namespace UI.SettingsMenu
         public void Construct(GameStateMachine gameStateMachine)
         {
             _gameStateMachine = gameStateMachine;
-            _menuStateMachine = new SettingsMenuStateMachine();
+            _menuStateMachine = new SettingsMenuStateMachine(mouseSettings, volumeSettings, videoSettings);
             mouseSection.onClick.AddListener(_menuStateMachine.SwitchState<MouseSettings>);
             volumeSection.onClick.AddListener(_menuStateMachine.SwitchState<VolumeSettings>);
             videoSection.onClick.AddListener(_menuStateMachine.SwitchState<VideoSettings>);

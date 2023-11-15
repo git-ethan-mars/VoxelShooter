@@ -906,7 +906,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5676227885488614966}
   m_Layer: 0
-  m_Name: Volume
+  m_Name: Volume section
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1155,7 +1155,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7783349725543776645}
   m_Layer: 0
-  m_Name: Mouse settings
+  m_Name: Mouse section
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2548,7 +2548,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4778705098934177041}
   m_Layer: 0
-  m_Name: Settings
+  m_Name: Video settings
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4385,7 +4385,7 @@ GameObject:
   m_Component:
   - component: {fileID: 395392057345706266}
   m_Layer: 0
-  m_Name: Settings
+  m_Name: Volume settings
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4546,7 +4546,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5215156889556282141}
   m_Layer: 0
-  m_Name: Settings
+  m_Name: Mouse settings
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4891,8 +4891,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mouseSection: {fileID: 5214423261406727420}
+  mouseSettings: {fileID: 7701705406606961424}
   volumeSection: {fileID: 8553803100579441339}
+  volumeSettings: {fileID: 7116498491560206839}
   videoSection: {fileID: 4740908906166553419}
+  videoSettings: {fileID: 4653402983461053370}
   backButton: {fileID: 2843711758504616371}
 --- !u!1 &8096513971188715188
 GameObject:
@@ -5486,7 +5489,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4272559760460515298}
   m_Layer: 0
-  m_Name: Video
+  m_Name: Video section
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
