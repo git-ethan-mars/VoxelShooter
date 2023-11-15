@@ -13,9 +13,9 @@ namespace UI.SettingsMenu.States
         {
             _states = new()
             {
-                [typeof(MouseSettings)] = new MouseSettings(mouseSettings),
-                [typeof(VolumeSettings)] = new VolumeSettings(volumeSettings),
-                [typeof(VideoSettings)] = new VideoSettings(videoSettings),
+                [typeof(MouseSettingsState)] = new MouseSettingsState(mouseSettings),
+                [typeof(VolumeSettingsState)] = new VolumeSettingsState(volumeSettings),
+                [typeof(VideoSettingsState)] = new VideoSettingsState(videoSettings),
             };
         }
 

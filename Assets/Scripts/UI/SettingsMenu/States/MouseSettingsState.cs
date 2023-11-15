@@ -2,15 +2,15 @@ using UnityEngine;
 
 namespace UI.SettingsMenu.States
 {
-    public class VolumeSettings : ISettingsMenuState
+    public class MouseSettingsState : ISettingsMenuState
     {
         private readonly GameObject _settings;
 
-        public VolumeSettings(GameObject settings)
+        public MouseSettingsState(GameObject settings)
         {
             _settings = settings;
         }
-
+        
         public void Enter()
         {
             _settings.SetActive(true);

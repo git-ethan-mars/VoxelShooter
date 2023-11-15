@@ -2,11 +2,11 @@ using UnityEngine;
 
 namespace UI.SettingsMenu.States
 {
-    public class VideoSettings : ISettingsMenuState
+    public class VideoSettingsState : ISettingsMenuState
     {
         private readonly GameObject _settings;
 
-        public VideoSettings(GameObject settings)
+        public VideoSettingsState(GameObject settings)
         {
             _settings = settings;
         }

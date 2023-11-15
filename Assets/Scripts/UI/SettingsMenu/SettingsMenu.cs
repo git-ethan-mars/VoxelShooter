@@ -36,11 +36,11 @@ namespace UI.SettingsMenu
         {
             _gameStateMachine = gameStateMachine;
             _menuStateMachine = new SettingsMenuStateMachine(mouseSettings, volumeSettings, videoSettings);
-            mouseSection.onClick.AddListener(_menuStateMachine.SwitchState<MouseSettings>);
-            volumeSection.onClick.AddListener(_menuStateMachine.SwitchState<VolumeSettings>);
-            videoSection.onClick.AddListener(_menuStateMachine.SwitchState<VideoSettings>);
+            mouseSection.onClick.AddListener(_menuStateMachine.SwitchState<MouseSettingsState>);
+            volumeSection.onClick.AddListener(_menuStateMachine.SwitchState<VolumeSettingsState>);
+            videoSection.onClick.AddListener(_menuStateMachine.SwitchState<VideoSettingsState>);
             backButton.onClick.AddListener(_gameStateMachine.Enter<MainMenuState>);
-            _menuStateMachine.SwitchState<MouseSettings>();
+            _menuStateMachine.SwitchState<MouseSettingsState>();
         }
 
         private void Update()
@@ -50,9 +50,9 @@ namespace UI.SettingsMenu
 
         private void OnDestroy()
         {
-            mouseSection.onClick.RemoveListener(_menuStateMachine.SwitchState<MouseSettings>);
-            volumeSection.onClick.RemoveListener(_menuStateMachine.SwitchState<VolumeSettings>);
-            videoSection.onClick.RemoveListener(_menuStateMachine.SwitchState<VideoSettings>);
+            mouseSection.onClick.RemoveListener(_menuStateMachine.SwitchState<MouseSettingsState>);
+            volumeSection.onClick.RemoveListener(_menuStateMachine.SwitchState<VolumeSettingsState>);
+            videoSection.onClick.RemoveListener(_menuStateMachine.SwitchState<VideoSettingsState>);
             backButton.onClick.RemoveListener(_gameStateMachine.Enter<MainMenuState>);
         }
     }
