@@ -15,5 +15,5 @@ MonoBehaviour:
   gameClass: 2
   maxHealth: 125
   speed: 9.5
-  jumpHeight: 1.5
+  jumpHeight: 1.25
   placeDistance: 6
