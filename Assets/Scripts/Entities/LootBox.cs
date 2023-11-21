@@ -6,6 +6,8 @@ namespace Entities
 {
     public class LootBox : NetworkBehaviour, IPushable
     {
+        [SerializeField]
+        private new Collider collider;
         public event Action<LootBox, NetworkConnectionToClient> OnPickUp;
         private Vector3Int _size;
         public Vector3Int Center => Vector3Int.FloorToInt(transform.position);
@@ -17,7 +19,7 @@ namespace Entities
 
         private void Awake()
         {
-            var bounds = GetComponent<Collider>().bounds;
+            var bounds = collider.bounds;
             _size = Vector3Int.RoundToInt(bounds.size);
         }
 

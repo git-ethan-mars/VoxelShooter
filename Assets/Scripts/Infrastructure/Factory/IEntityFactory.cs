@@ -26,6 +26,6 @@ namespace Infrastructure.Factory
 
         LootBox CreateBlockBox(Vector3 position, Transform parent);
 
-        GameObject CreateSpawnPoint(Vector3 position, Transform parent);
+        SpawnPoint CreateSpawnPoint(Vector3 position, Transform parent);
     }
 }

@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using Data;
 using Infrastructure.Factory;
 using Infrastructure.Services;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
+using Infrastructure.Services.Storage;
 using Inventory;
 using Mirror;
 using Networking;
@@ -72,7 +74,8 @@ namespace PlayerLogic
         private PlayerRotation _rotation;
 
 
-        public void Construct(IUIFactory uiFactory, IInputService inputService, float placeDistance,
+        public void Construct(IUIFactory uiFactory, IInputService inputService, IStorageService storageService,
+            float placeDistance,
             List<int> itemIds, float speed, float jumpHeight, int health)
         {
             PlaceDistance = placeDistance;
@@ -81,10 +84,11 @@ namespace PlayerLogic
             _inputService = inputService;
             InventoryInput = new InventoryInput(_inputService);
             _movement = new PlayerMovement(hitBox, rigidbody, bodyOrientation, speed, jumpHeight);
-            _rotation = new PlayerRotation(bodyOrientation, headPivot);
+            var sensitivity = storageService.Load<MouseSettingsData>(Constants.MouseSettingKey).GeneralSensitivity;
+            _rotation = new PlayerRotation(bodyOrientation, headPivot, sensitivity);
             _hud = uiFactory.CreateHud(this, inputService);
             var weatherParticleSystem = AllServices.Container.Single<IStaticDataService>()
-                .GetMapConfigure(((CustomNetworkManager)NetworkManager.singleton).Client.Data.MapName).weather;
+                .GetMapConfigure(((CustomNetworkManager) NetworkManager.singleton).Client.Data.MapName).weather;
             if (weatherParticleSystem)
                 Instantiate(weatherParticleSystem, bodyOrientation);
             TurnOffNickName();

@@ -8,6 +8,15 @@ namespace Entities
 {
     public class FallingMesh : MonoBehaviour
     {
+        [SerializeField]
+        private MeshFilter meshFilter;
+
+        [SerializeField]
+        private new Rigidbody rigidbody;
+
+        [SerializeField]
+        private MeshRenderer meshRenderer;
+
         private IFallingMeshParticlePool _particlePool;
         private bool _hasCollided;
         private const int DestructionTime = 4;
@@ -21,16 +30,15 @@ namespace Entities
 
         public void OnCollisionEnter(Collision collision)
         {
-            var mesh = GetComponent<MeshFilter>().mesh;
-            var length = mesh.vertexCount;
+            var length = meshFilter.mesh.vertexCount;
             if (length > MaxVerticesForMeshCollider)
-                GetComponent<Rigidbody>().isKinematic = true;
+                rigidbody.isKinematic = true;
             if (_hasCollided)
                 return;
             _hasCollided = true;
-            StartCoroutine(ProcessCollision(mesh, length, DestructionTime));
+            StartCoroutine(ProcessCollision(meshFilter.mesh, length, DestructionTime));
         }
-        
+
         public IEnumerator ProcessCollision(Mesh mesh, int length, float lifetime)
         {
             yield return new WaitForSeconds(lifetime);
@@ -38,7 +46,7 @@ namespace Entities
             var colors = mesh.colors;
             var particleSystems = new List<ParticleSystem>();
             var blocksCount = length / 24;
-            var modifier = Math.Max(Math.Round((double)blocksCount / ParticleSystemsCountModifier), 1);
+            var modifier = Math.Max(Math.Round((double) blocksCount / ParticleSystemsCountModifier), 1);
             var counter = 0;
             for (var i = 0; i < length; i += 24)
             {
@@ -49,21 +57,24 @@ namespace Entities
                         transform.localPosition,
                         1, 5, colors[i / 4]));
                 }
+
                 counter++;
             }
-            GetComponent<MeshRenderer>().enabled = false;
+
+            meshRenderer.enabled = false;
             GetComponent<Collider>().enabled = false;
-            GetComponent<Rigidbody>().isKinematic = true;
+            rigidbody.isKinematic = true;
             foreach (var particleSystem in particleSystems)
             {
                 StartCoroutine(_particlePool.ReleaseOnDelay(particleSystem,
                     particleSystem.main.startLifetime.constant));
             }
-            
+
             StartCoroutine(Utils.DoActionAfterDelay(() => Destroy(gameObject), 7));
         }
 
-        private ParticleSystem CreateFallingMeshParticle(Vector3 position, int startSpeed, int burstCount, Color meshColor)
+        private ParticleSystem CreateFallingMeshParticle(Vector3 position, int startSpeed, int burstCount,
+            Color meshColor)
         {
             var particleSystem = _particlePool.Get();
             particleSystem.gameObject.transform.position = position;

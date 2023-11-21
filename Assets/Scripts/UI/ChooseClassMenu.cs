@@ -13,6 +13,9 @@ namespace UI
     public class ChooseClassMenu : Window
     {
         [SerializeField]
+        private CanvasGroup canvasGroup;
+        
+        [SerializeField]
         private Button builderButton;
 
         [SerializeField]
@@ -28,7 +31,6 @@ namespace UI
         private Button exitButton;
 
         private IInputService _inputService;
-        private CanvasGroup _canvasGroup;
         private IClient _client;
 
         public void Construct(IClient client, IInputService inputService)
@@ -36,12 +38,11 @@ namespace UI
             _inputService = inputService;
             _client = client;
             _client.GameFinished += HideWindow;
-            _canvasGroup = GetComponent<CanvasGroup>();
             builderButton.onClick.AddListener(() => ChangeClass(GameClass.Builder)); // TODO : Unsubscribe from these events.
             sniperButton.onClick.AddListener(() => ChangeClass(GameClass.Sniper));
             combatantButton.onClick.AddListener(() => ChangeClass(GameClass.Combatant));
             grenadierButton.onClick.AddListener(() => ChangeClass(GameClass.Grenadier));
-            exitButton.onClick.AddListener(() => _canvasGroup.alpha = 0);
+            exitButton.onClick.AddListener(() => canvasGroup.alpha = 0);
         }
 
         private void HideWindow()
@@ -59,14 +60,14 @@ namespace UI
         {
             if (_inputService.IsChooseClassButtonDown())
             {
-                if (Math.Abs(_canvasGroup.alpha - 1) < Constants.Epsilon)
+                if (Math.Abs(canvasGroup.alpha - 1) < Constants.Epsilon)
                 {
-                    _canvasGroup.alpha = 0;
+                    canvasGroup.alpha = 0;
                     HideCursor();
                 }
                 else
                 {
-                    _canvasGroup.alpha = 1;
+                    canvasGroup.alpha = 1;
                     ShowCursor();
                 }
             }
@@ -80,7 +81,7 @@ namespace UI
         private void ChangeClass(GameClass gameClass)
         {
             NetworkClient.Send(new ChangeClassRequest(gameClass));
-            _canvasGroup.alpha = 0;
+            canvasGroup.alpha = 0;
             HideCursor();
         }
     }

@@ -75,9 +75,9 @@ namespace Infrastructure.Factory
             return lootBox.GetComponent<LootBox>();
         }
         
-        public GameObject CreateSpawnPoint(Vector3 position, Transform parent)
+        public SpawnPoint CreateSpawnPoint(Vector3 position, Transform parent)
         {
-            return _assets.Instantiate(SpawnPointPath, position, Quaternion.identity, parent);
+            return _assets.Instantiate(SpawnPointPath, position, Quaternion.identity, parent).GetComponent<SpawnPoint>();
         }
     }
 }

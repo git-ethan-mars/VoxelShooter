@@ -5,6 +5,7 @@ using Infrastructure.Services;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.PlayerDataLoader;
 using Infrastructure.Services.StaticData;
+using Infrastructure.Services.Storage;
 
 namespace Infrastructure.States
 {
@@ -21,7 +22,8 @@ namespace Infrastructure.States
                     new BootstrapState(this, sceneLoader, allServices, coroutineRunner),
                 [typeof(MainMenuState)] =
                     new MainMenuState(this, sceneLoader, allServices.Single<IUIFactory>()),
-                [typeof(SettingsMenuState)] = new SettingsMenuState(this, allServices.Single<IUIFactory>()),
+                [typeof(SettingsMenuState)] = new SettingsMenuState(this, allServices.Single<IUIFactory>(),
+                    allServices.Single<IStorageService>()),
                 [typeof(CreateMatchState)] = new CreateMatchState(this, allServices.Single<IMapRepository>(),
                     allServices.Single<IUIFactory>()),
                 [typeof(StartSteamLobbyState)] =

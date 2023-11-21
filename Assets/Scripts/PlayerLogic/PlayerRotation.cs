@@ -1,29 +1,30 @@
 using System;
+using Data;
+using Infrastructure.Services.Storage;
 using UnityEngine;
 
 namespace PlayerLogic
 {
     public class PlayerRotation
     {
-        private const float SensitivityX = 200;
-        private const float SensitivityY = 200;
-
         private readonly Transform _headPivot;
         private readonly Transform _bodyOrientation;
 
+        private float _sensitivity;
         private float _xRotation;
         private float _yRotation;
 
-        public PlayerRotation(Transform bodyOrientation, Transform headPivot)
+        public PlayerRotation(Transform bodyOrientation, Transform headPivot, float sensitivity)
         {
             _bodyOrientation = bodyOrientation;
             _headPivot = headPivot;
+            _sensitivity = sensitivity;
         }
 
         public void Rotate(Vector2 direction)
         {
-            var mouseX = direction.x * SensitivityX * Time.deltaTime;
-            var mouseY = direction.y * SensitivityY * Time.deltaTime;
+            var mouseX = direction.x * _sensitivity * Time.deltaTime;
+            var mouseY = direction.y * _sensitivity * Time.deltaTime;
             _yRotation += mouseX;
             _xRotation -= mouseY;
             _xRotation = Math.Clamp(_xRotation, -90, 90);

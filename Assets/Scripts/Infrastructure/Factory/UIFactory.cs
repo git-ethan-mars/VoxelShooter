@@ -2,6 +2,7 @@
 using Infrastructure.Services.Input;
 using Infrastructure.Services.PlayerDataLoader;
 using Infrastructure.Services.StaticData;
+using Infrastructure.Services.Storage;
 using Infrastructure.States;
 using Inventory;
 using Networking;
@@ -55,7 +56,7 @@ namespace Infrastructure.Factory
             return mainMenu;
         }
 
-        public GameObject CreateMatchMenu(IMapRepository mapRepository, GameStateMachine gameStateMachine)
+        public GameObject CreateMatchMenu(GameStateMachine gameStateMachine, IMapRepository mapRepository)
         {
             var matchMenu = _assets.Instantiate(MatchMenuPath);
             matchMenu.GetComponent<MatchMenu>().Construct(mapRepository, _staticData, gameStateMachine);
@@ -78,10 +79,10 @@ namespace Infrastructure.Factory
             _assets.Instantiate(LoadingWindowPath).GetComponent<LoadingWindow>().Construct(client);
         }
 
-        public GameObject CreateSettingsMenu(GameStateMachine gameStateMachine)
+        public GameObject CreateSettingsMenu(GameStateMachine gameStateMachine, IStorageService storageService)
         {
             var settingsMenu = _assets.Instantiate(SettingsMenuPath);
-            settingsMenu.GetComponent<SettingsMenu>().Construct(gameStateMachine);
+            settingsMenu.GetComponent<SettingsMenu>().Construct(gameStateMachine, storageService);
             return settingsMenu;
         }
     }

@@ -11,10 +11,12 @@ namespace UI
     public class Scoreboard : MonoBehaviour
     {
         [SerializeField]
+        private CanvasGroup canvasGroup;
+
+        [SerializeField]
         private List<ScoreUI> scores;
 
         private IInputService _inputService;
-        private CanvasGroup _canvasGroup;
         private IAvatarLoader _avatarLoader;
         private IClient _client;
 
@@ -27,20 +29,19 @@ namespace UI
             _client.GameFinished += ShowFinalStatistics;
             _inputService = inputService;
             _avatarLoader = avatarLoader;
-            _canvasGroup = GetComponent<CanvasGroup>();
-            _canvasGroup.alpha = 0;
+            canvasGroup.alpha = 0;
         }
 
         private void Update()
         {
-            _canvasGroup.alpha = _inputService.IsScoreboardButtonHold() ? 1 : 0;
+            canvasGroup.alpha = _inputService.IsScoreboardButtonHold() ? 1 : 0;
         }
 
         private void ShowFinalStatistics()
         {
             _client.GameFinished -= ShowFinalStatistics;
             enabled = false;
-            _canvasGroup.alpha = 1;
+            canvasGroup.alpha = 1;
         }
 
         private void UpdateScoreboard(List<ScoreData> scoreBoardData)

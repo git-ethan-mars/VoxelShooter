@@ -8,6 +8,9 @@ namespace UI
     [RequireComponent(typeof(CanvasGroup))]
     public class Hud : MonoBehaviour
     {
+        [SerializeField]
+        private CanvasGroup canvasGroup;
+        
         public GameObject inventory;
         public GameObject palette;
         public GameObject ammoInfo;
@@ -23,12 +26,11 @@ namespace UI
         public void Construct(IInputService inputService)
         {
             _inputService = inputService;
-            _canvasGroup = GetComponent<CanvasGroup>();
         }
 
         public void Update()
         {
-            _canvasGroup.alpha = _inputService.IsScoreboardButtonHold() ? 0 : 1;
+            canvasGroup.alpha = _inputService.IsScoreboardButtonHold() ? 0 : 1;
         }
     }
 }

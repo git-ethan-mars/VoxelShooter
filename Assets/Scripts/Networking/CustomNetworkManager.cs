@@ -5,6 +5,7 @@ using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
+using Infrastructure.Services.Storage;
 using Infrastructure.States;
 using Mirror;
 using Networking.ServerServices;
@@ -27,7 +28,8 @@ namespace Networking
         private IGameFactory _gameFactory;
         private IServer _server;
 
-        public void Construct(GameStateMachine stateMachine, IInputService inputService, IStaticDataService staticData,
+        public void Construct(GameStateMachine stateMachine, IInputService inputService, IStorageService storageService,
+            IStaticDataService staticData,
             IEntityFactory entityFactory, IParticleFactory particleFactory, IAssetProvider assets,
             IGameFactory gameFactory, IMeshFactory meshFactory, IUIFactory uiFactory,
             ServerSettings serverSettings)
@@ -40,7 +42,8 @@ namespace Networking
             _gameFactory = gameFactory;
             _meshFactory = meshFactory;
             _serverSettings = serverSettings;
-            Client = new Client(_stateMachine, this, inputService, _gameFactory, _meshFactory, _staticData,
+            Client = new Client(_stateMachine, this, inputService, storageService, _gameFactory, _meshFactory,
+                _staticData,
                 _particleFactory,
                 uiFactory);
         }

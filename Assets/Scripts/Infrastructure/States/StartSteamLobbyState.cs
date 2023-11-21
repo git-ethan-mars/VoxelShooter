@@ -26,8 +26,7 @@ namespace Infrastructure.States
 
         private void CreateHost(ServerSettings serverSettings)
         {
-            _gameFactory.CreateSteamNetworkManager(_stateMachine, serverSettings, true)
-                .GetComponent<CustomNetworkManager>();
+            _gameFactory.CreateSteamNetworkManager(_stateMachine, serverSettings, true);
         }
 
         public void Exit()

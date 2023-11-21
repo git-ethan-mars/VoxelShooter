@@ -1,29 +1,56 @@
+using Infrastructure.Services.Storage;
 using Infrastructure.States;
+using UI.Carousel;
 using UI.SettingsMenu.States;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace UI.SettingsMenu
 {
     public class SettingsMenu : MonoBehaviour
     {
+        [Header("Mouse")]
         [SerializeField]
-        private Button mouseSection;
+        private Button mouseSectionButton;
 
         [SerializeField]
-        private GameObject mouseSettings;
+        private GameObject mouseSection;
 
         [SerializeField]
-        private Button volumeSection;
+        private CarouselControl generalSensitivity;
 
         [SerializeField]
-        private GameObject volumeSettings;
+        private CarouselControl aimSensitivity;
+
+        [Header("Volume")]
+        [SerializeField]
+        private Button volumeSectionButton;
 
         [SerializeField]
-        private Button videoSection;
+        private GameObject volumeSection;
 
         [SerializeField]
-        private GameObject videoSettings;
+        private CarouselControl masterVolume;
+
+        [SerializeField]
+        private CarouselControl musicVolume;
+
+        [SerializeField]
+        private CarouselControl soundVolume;
+
+        [Header("Video")]
+        [SerializeField]
+        private Button videoSectionButton;
+
+        [SerializeField]
+        private GameObject videoSection;
+
+        [SerializeField]
+        private CarouselControl resolution;
+
+        [FormerlySerializedAs("renderMode")] [SerializeField]
+        private CarouselControl screenMode;
 
         [SerializeField]
         private Button backButton;
@@ -32,28 +59,28 @@ namespace UI.SettingsMenu
         private GameStateMachine _gameStateMachine;
         private SettingsMenuStateMachine _menuStateMachine;
 
-        public void Construct(GameStateMachine gameStateMachine)
+        public void Construct(GameStateMachine gameStateMachine, IStorageService storageService)
         {
             _gameStateMachine = gameStateMachine;
-            _menuStateMachine = new SettingsMenuStateMachine(mouseSettings, volumeSettings, videoSettings);
-            mouseSection.onClick.AddListener(_menuStateMachine.SwitchState<MouseSettingsState>);
-            volumeSection.onClick.AddListener(_menuStateMachine.SwitchState<VolumeSettingsState>);
-            videoSection.onClick.AddListener(_menuStateMachine.SwitchState<VideoSettingsState>);
+            _menuStateMachine =
+                new SettingsMenuStateMachine(new MouseSettingsState(mouseSection,
+                    generalSensitivity, aimSensitivity, storageService), new VolumeSettingsState(volumeSection,
+                    masterVolume, musicVolume, soundVolume), new VideoSettingsState(videoSection,
+                    resolution, screenMode, storageService));
+            mouseSectionButton.onClick.AddListener(_menuStateMachine.SwitchState<MouseSettingsState>);
+            volumeSectionButton.onClick.AddListener(_menuStateMachine.SwitchState<VolumeSettingsState>);
+            videoSectionButton.onClick.AddListener(_menuStateMachine.SwitchState<VideoSettingsState>);
             backButton.onClick.AddListener(_gameStateMachine.Enter<MainMenuState>);
             _menuStateMachine.SwitchState<MouseSettingsState>();
         }
 
-        private void Update()
-        {
-            _menuStateMachine.CurrentState.Update();
-        }
-
         private void OnDestroy()
         {
-            mouseSection.onClick.RemoveListener(_menuStateMachine.SwitchState<MouseSettingsState>);
-            volumeSection.onClick.RemoveListener(_menuStateMachine.SwitchState<VolumeSettingsState>);
-            videoSection.onClick.RemoveListener(_menuStateMachine.SwitchState<VideoSettingsState>);
+            mouseSectionButton.onClick.RemoveListener(_menuStateMachine.SwitchState<MouseSettingsState>);
+            volumeSectionButton.onClick.RemoveListener(_menuStateMachine.SwitchState<VolumeSettingsState>);
+            videoSectionButton.onClick.RemoveListener(_menuStateMachine.SwitchState<VideoSettingsState>);
             backButton.onClick.RemoveListener(_gameStateMachine.Enter<MainMenuState>);
+            _menuStateMachine.Clear();
         }
     }
 }

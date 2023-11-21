@@ -15,13 +15,14 @@ namespace UI
         [SerializeField]
         private TextMeshProUGUI respawnTimeText;
 
+        [SerializeField]
+        private CanvasGroup canvasGroup;
+
         private IInputService _inputService;
-        private CanvasGroup _canvasGroup;
         private IClient _client;
 
         public void Construct(IClient client, IInputService inputService)
         {
-            _canvasGroup = GetComponent<CanvasGroup>();
             _inputService = inputService;
             _client = client;
             _client.GameFinished += HideTimer;
@@ -31,7 +32,7 @@ namespace UI
 
         public void Update()
         {
-            _canvasGroup.alpha = _inputService.IsScoreboardButtonHold() ? 0 : 1;
+            canvasGroup.alpha = _inputService.IsScoreboardButtonHold() ? 0 : 1;
         }
 
         private void ChangeGameTime(ServerTime timeLeft)

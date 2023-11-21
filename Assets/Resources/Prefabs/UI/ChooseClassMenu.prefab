@@ -1272,6 +1272,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4e49966de4b69641914c50a8192fee7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canvasGroup: {fileID: 172937459948263850}
   builderButton: {fileID: 3768349693843250709}
   sniperButton: {fileID: 452592361852125138}
   combatantButton: {fileID: 2714429266595045976}

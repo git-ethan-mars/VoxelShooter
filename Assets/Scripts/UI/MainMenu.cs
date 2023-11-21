@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace UI
 {
-    public class MainMenu : MonoBehaviour
+    public class MainMenu : Window
     {
         [SerializeField]
         private Button joinMatchButton;
@@ -35,6 +35,7 @@ namespace UI
             }
 
             exitButton.onClick.AddListener(Application.Quit);
+            ShowCursor();
         }
 
         private void OnDestroy()

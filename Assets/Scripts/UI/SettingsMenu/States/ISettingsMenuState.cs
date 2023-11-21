@@ -4,6 +4,5 @@ namespace UI.SettingsMenu.States
     {
         void Enter();
         void Exit();
-        void Update();
     }
 }
