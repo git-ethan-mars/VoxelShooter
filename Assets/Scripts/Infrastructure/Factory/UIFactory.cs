@@ -4,7 +4,6 @@ using Infrastructure.Services.PlayerDataLoader;
 using Infrastructure.Services.StaticData;
 using Infrastructure.Services.Storage;
 using Infrastructure.States;
-using Inventory;
 using Networking;
 using PlayerLogic;
 using UI;
@@ -37,8 +36,6 @@ namespace Infrastructure.Factory
         {
             var hud = _assets.Instantiate(HudPath).GetComponent<Hud>();
             hud.Construct(inputService);
-            var inventoryController = hud.inventory.GetComponent<InventoryController>();
-            inventoryController.Construct(inputService, _assets, _staticData, hud, player);
             hud.healthCounter.Construct(player);
             return hud;
         }

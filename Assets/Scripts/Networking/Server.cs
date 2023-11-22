@@ -14,8 +14,6 @@ using Networking.ServerServices;
 using PlayerLogic.States;
 using Steamworks;
 using UnityEngine;
-using ChangeSlotHandler = Networking.MessageHandlers.RequestHandlers.ChangeSlotHandler;
-using ShootHandler = Networking.MessageHandlers.RequestHandlers.ShootHandler;
 
 namespace Networking
 {
@@ -38,6 +36,8 @@ namespace Networking
         private readonly RocketSpawnHandler _rocketSpawnHandler;
         private readonly TntSpawnHandler _tntSpawnHandler;
         private readonly ChangeSlotHandler _changeSlotHandler;
+        private readonly IncrementSlotIndexHandler _incrementSlotIndexHandler;
+        private readonly DecrementSlotIndexHandler _decrementSlotIndexHandler;
         private readonly ShootHandler _shootHandler;
         private readonly ReloadHandler _reloadHandler;
         private readonly HitHandler _hitHandler;
@@ -53,7 +53,8 @@ namespace Networking
             MapProvider = MapReader.ReadFromFile(serverSettings.MapName, staticData);
             MapUpdater = new MapUpdater(networkManager, MapProvider);
             _entityPositionValidator = new EntityPositionValidator(MapUpdater, MapProvider);
-            _spawnPointService = new SpawnPointService(MapProvider, gameFactory, entityFactory, _entityPositionValidator);
+            _spawnPointService =
+                new SpawnPointService(MapProvider, gameFactory, entityFactory, _entityPositionValidator);
             _playerFactory = new PlayerFactory(this, assets, _spawnPointService);
             Data = new ServerData(staticData);
             _serverTimer = new ServerTimer(networkManager, serverSettings.MaxDuration);
@@ -69,6 +70,8 @@ namespace Networking
             _addBlocksHandler = new AddBlocksHandler(this);
             _changeClassHandler = new ChangeClassHandler(this);
             _changeSlotHandler = new ChangeSlotHandler(this);
+            _incrementSlotIndexHandler = new IncrementSlotIndexHandler(this);
+            _decrementSlotIndexHandler = new DecrementSlotIndexHandler(this);
             _grenadeSpawnHandler = new GrenadeSpawnHandler(this, networkManager, entityFactory, staticData,
                 singleExplosionBehaviour);
             _rocketSpawnHandler = new RocketSpawnHandler(this, staticData, entityFactory, particleFactory);
@@ -182,6 +185,8 @@ namespace Networking
             _addBlocksHandler.Register();
             _changeClassHandler.Register();
             _changeSlotHandler.Register();
+            _incrementSlotIndexHandler.Register();
+            _decrementSlotIndexHandler.Register();
             _grenadeSpawnHandler.Register();
             _rocketSpawnHandler.Register();
             _tntSpawnHandler.Register();
@@ -196,6 +201,8 @@ namespace Networking
             _addBlocksHandler.Unregister();
             _changeClassHandler.Unregister();
             _changeSlotHandler.Unregister();
+            _incrementSlotIndexHandler.Unregister();
+            _decrementSlotIndexHandler.Unregister();
             _grenadeSpawnHandler.Unregister();
             _rocketSpawnHandler.Unregister();
             _tntSpawnHandler.Unregister();
@@ -245,7 +252,7 @@ namespace Networking
                 if (Data.TryGetPlayerData(anotherClient, out var anotherPlayer) && playerData.IsAlive)
                 {
                     connection.Send(new ChangeItemModelResponse(anotherClient.identity,
-                        anotherPlayer.ItemIds[anotherPlayer.InventorySlotId]));
+                        anotherPlayer.ItemIds[anotherPlayer.SelectedSlotIndex]));
                     connection.Send(new NickNameResponse(anotherClient.identity, anotherPlayer.NickName));
                 }
             }

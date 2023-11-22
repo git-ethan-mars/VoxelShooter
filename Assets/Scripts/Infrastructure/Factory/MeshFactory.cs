@@ -6,7 +6,6 @@ using Infrastructure.AssetManagement;
 using MapLogic;
 using Rendering;
 using UnityEngine;
-using UnityEngine.Rendering;
 using Random = UnityEngine.Random;
 
 namespace Infrastructure.Factory
@@ -16,6 +15,7 @@ namespace Infrastructure.Factory
         private const string FallingMeshPath = "Prefabs/MapCreation/FallingMesh";
         private const string ChunkMeshRendererPath = "Prefabs/MapCreation/Chunk";
         private const string WallPath = "Prefabs/MapCreation/Wall";
+        private const string TransparentSamplePath = "Prefabs/TransparentSample";
         private const string PhysicMaterial = "Physics Materials/HighFrictionMaterial";
         private readonly IAssetProvider _assets;
         private const int MaxVerticesForMeshCollider = 24000;
@@ -75,6 +75,18 @@ namespace Infrastructure.Factory
         public GameObject CreateGameModel(GameObject prefab, Transform itemPosition)
         {
             return _assets.Instantiate(prefab, itemPosition);
+        }
+
+        public GameObject CreateTransparentGameObject(GameObject prefab, Color32 color)
+        {
+            var transparentObject = _assets.Instantiate(TransparentSamplePath);
+            transparentObject.name = $"{prefab.name} - transparent";
+            transparentObject.GetComponent<MeshFilter>().mesh = prefab.GetComponent<MeshFilter>().sharedMesh;
+            var material = transparentObject.GetComponent<MeshRenderer>().material;
+            material.color = color;
+            transparentObject.GetComponent<MeshRenderer>().material = new Material(material);
+            transparentObject.transform.localScale = prefab.transform.localScale;
+            return transparentObject;
         }
     }
 }

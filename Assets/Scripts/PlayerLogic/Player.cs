@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Data;
 using Infrastructure.Factory;
-using Infrastructure.Services;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
 using Infrastructure.Services.Storage;
@@ -31,10 +30,7 @@ namespace PlayerLogic
 
         private int _health;
 
-        public InventoryInput InventoryInput { get; private set; }
-        public List<int> ItemsIds { get; private set; }
         public float PlaceDistance { get; private set; }
-
 
         [SerializeField]
         private TextMeshProUGUI nickNameText;
@@ -42,8 +38,8 @@ namespace PlayerLogic
         [SerializeField]
         private Transform itemPosition;
 
-        public Transform ItemPosition => itemPosition;
 
+        public Transform ItemPosition => itemPosition;
 
         [SerializeField]
         private MeshRenderer[] bodyParts;
@@ -69,25 +65,27 @@ namespace PlayerLogic
         private Hud _hud;
 
         private IInputService _inputService;
+        private InventorySystem _inventory;
 
         private PlayerMovement _movement;
         private PlayerRotation _rotation;
 
 
-        public void Construct(IUIFactory uiFactory, IInputService inputService, IStorageService storageService,
+        public void Construct(IUIFactory uiFactory, IMeshFactory meshFactory, IInputService inputService,
+            IStorageService storageService,
+            IStaticDataService staticData,
             float placeDistance,
             List<int> itemIds, float speed, float jumpHeight, int health)
         {
             PlaceDistance = placeDistance;
-            ItemsIds = itemIds;
             Health = health;
             _inputService = inputService;
-            InventoryInput = new InventoryInput(_inputService);
             _movement = new PlayerMovement(hitBox, rigidbody, bodyOrientation, speed, jumpHeight);
             var sensitivity = storageService.Load<MouseSettingsData>(Constants.MouseSettingKey).GeneralSensitivity;
             _rotation = new PlayerRotation(bodyOrientation, headPivot, sensitivity);
             _hud = uiFactory.CreateHud(this, inputService);
-            var weatherParticleSystem = AllServices.Container.Single<IStaticDataService>()
+            _inventory = new InventorySystem(_inputService, staticData, meshFactory, itemIds, _hud, this);
+            var weatherParticleSystem = staticData
                 .GetMapConfigure(((CustomNetworkManager) NetworkManager.singleton).Client.Data.MapName).weather;
             if (weatherParticleSystem)
                 Instantiate(weatherParticleSystem, bodyOrientation);
@@ -111,7 +109,7 @@ namespace PlayerLogic
             }
 
             _rotation.Rotate(_inputService.MouseAxis);
-            InventoryInput.Update();
+            _inventory.Update();
         }
 
         private void FixedUpdate()
@@ -155,6 +153,7 @@ namespace PlayerLogic
         {
             if (_hud != null)
             {
+                _inventory.Clear();
                 Destroy(_hud.gameObject);
             }
         }

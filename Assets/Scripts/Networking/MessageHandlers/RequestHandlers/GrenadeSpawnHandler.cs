@@ -34,14 +34,14 @@ namespace Networking.MessageHandlers.RequestHandlers
         {
             var result = _server.Data.TryGetPlayerData(connection, out var playerData);
             if (!result || !playerData.IsAlive) return;
-            var grenadeCount = playerData.ItemCountById[request.ItemId];
+            var grenadeCount = playerData.ItemCountById[playerData.ItemIds[playerData.SelectedSlotIndex]];
             if (grenadeCount <= 0)
                 return;
-            playerData.ItemCountById[request.ItemId] = grenadeCount - 1;
-            connection.Send(new ItemUseResponse(request.ItemId, grenadeCount - 1));
+            playerData.ItemCountById[playerData.ItemIds[playerData.SelectedSlotIndex]] = grenadeCount - 1;
+            connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex, grenadeCount - 1));
             var grenade = _entityFactory.CreateGrenade(request.Ray.origin, Quaternion.identity);
             grenade.GetComponent<Rigidbody>().AddForce(request.Ray.direction * request.ThrowForce);
-            var grenadeData = (GrenadeItem) _staticData.GetItem(request.ItemId);
+            var grenadeData = (GrenadeItem) _staticData.GetItem(playerData.ItemIds[playerData.SelectedSlotIndex]);
             _coroutineRunner.StartCoroutine(ExplodeGrenade(grenade, grenadeData.delayInSeconds, grenadeData.radius,
                 grenadeData.damage, grenadeData.particlesSpeed, grenadeData.particlesCount, connection));
         }

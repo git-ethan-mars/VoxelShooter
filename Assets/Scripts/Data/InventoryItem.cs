@@ -22,7 +22,6 @@ namespace Data
         MeleeWeapon,
         Tnt,
         Block,
-        Brush,
         Grenade,
         RocketLauncher
     }

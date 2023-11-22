@@ -1,10 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Data;
 using Infrastructure;
 using Infrastructure.Factory;
-using Inventory;
 using Mirror;
 using Networking.Messages.Responses;
 using UnityEngine;
@@ -27,7 +24,7 @@ namespace Networking.ServerServices
         public void Shoot(NetworkConnectionToClient connection, Ray ray, bool requestIsButtonHolding)
         {
             var playerData = _server.Data.GetPlayerData(connection);
-            if (!playerData.RangeWeaponsById.TryGetValue(playerData.ItemIds[playerData.InventorySlotId],
+            if (!playerData.RangeWeaponsById.TryGetValue(playerData.ItemIds[playerData.SelectedSlotIndex],
                     out var weapon))
             {
                 return;
@@ -44,7 +41,7 @@ namespace Networking.ServerServices
             }
 
             UpdateWeaponState(weapon);
-            connection.Send(new ShootResultResponse(weapon.ID, weapon.BulletsInMagazine));
+            connection.Send(new ShootResultResponse(weapon.BulletsInMagazine));
             StartShootCoroutines(weapon);
 
             //GetComponent<SoundSynchronization>().PlayAudioClip(connection!.identity,
@@ -54,7 +51,7 @@ namespace Networking.ServerServices
         public void Reload(NetworkConnectionToClient connection)
         {
             var playerData = _server.Data.GetPlayerData(connection);
-            if (!playerData.RangeWeaponsById.TryGetValue(playerData.ItemIds[playerData.InventorySlotId],
+            if (!playerData.RangeWeaponsById.TryGetValue(playerData.ItemIds[playerData.SelectedSlotIndex],
                     out var weapon))
             {
                 return;

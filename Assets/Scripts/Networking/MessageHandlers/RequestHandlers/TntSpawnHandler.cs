@@ -34,16 +34,16 @@ namespace Networking.MessageHandlers.RequestHandlers
         {
             var result = _server.Data.TryGetPlayerData(connection, out var playerData);
             if (!result || !playerData.IsAlive) return;
-            var tntCount = playerData.ItemCountById[request.ItemId];
+            var tntCount = playerData.ItemCountById[playerData.ItemIds[playerData.SelectedSlotIndex]];
             if (tntCount <= 0)
                 return;
+            playerData.ItemCountById[playerData.ItemIds[playerData.SelectedSlotIndex]] = tntCount - 1;
+            connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex, tntCount - 1));
             var tnt = _entityFactory.CreateTnt(request.Position, request.Rotation);
-            var tntData = (TntItem) _staticData.GetItem(request.ItemId);
-            playerData.ItemCountById[request.ItemId] = tntCount - 1;
+            var tntData = (TntItem) _staticData.GetItem(playerData.ItemIds[playerData.SelectedSlotIndex]);
             _coroutineRunner.StartCoroutine(ExplodeTnt(Vector3Int.FloorToInt(request.ExplosionCenter), tnt,
                 tntData.delayInSeconds,
                 tntData.radius, connection, tntData.damage, tntData.particlesSpeed, tntData.particlesCount));
-            connection.Send(new ItemUseResponse(request.ItemId, tntCount - 1));
         }
 
         private IEnumerator ExplodeTnt(Vector3Int explosionCenter, GameObject tnt, float delayInSeconds,

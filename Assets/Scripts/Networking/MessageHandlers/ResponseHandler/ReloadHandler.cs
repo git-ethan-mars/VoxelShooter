@@ -1,24 +1,22 @@
-﻿using System.Collections.Generic;
-using Inventory;
+﻿using Inventory;
 using Networking.Messages.Responses;
 
 namespace Networking.MessageHandlers.ResponseHandler
 {
     public class ReloadResultHandler : ResponseHandler<ReloadResultResponse>
     {
-        private readonly List<Slot> _slots;
+        private readonly InventorySystem _inventory;
 
-        public ReloadResultHandler(List<Slot> slots)
+        public ReloadResultHandler(InventorySystem inventory)
         {
-            _slots = slots;
+            _inventory = inventory;
         }
 
         protected override void OnResponseReceived(ReloadResultResponse response)
         {
-            var reloading = (IReloading) _slots.Find(slot => slot.InventoryItem.id == response.WeaponId).ItemHandler;
-            reloading.TotalBullets = response.TotalBullets;
-            reloading.BulletsInMagazine = response.BulletsInMagazine;
-            reloading.OnReloadResult();
+            var reloading = (IReloading) _inventory.GetModel(response.WeaponId);
+            reloading.TotalBullets.Value = response.TotalBullets;
+            reloading.BulletsInMagazine.Value = response.BulletsInMagazine;
         }
     }
 }

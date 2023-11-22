@@ -11,8 +11,6 @@ GameObject:
   - component: {fileID: 8385389258059739}
   - component: {fileID: 8385389258059742}
   - component: {fileID: 8385389258059737}
-  - component: {fileID: 1007571750086494738}
-  - component: {fileID: 343061144902160714}
   m_Layer: 5
   m_Name: Inventory
   m_TagString: Untagged
@@ -83,37 +81,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &1007571750086494738
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8385389258059738}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7211c0b1ce384278bb147a36208410e5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  slots:
-  - {fileID: 8385389932756997}
-  - {fileID: 8385389283162744}
-  - {fileID: 8385390078397115}
-  - {fileID: 8385389372847293}
-  - {fileID: 8385390193770773}
---- !u!114 &343061144902160714
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8385389258059738}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 38f7f248a7354052a8f101e84db66359, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  inventoryView: {fileID: 1007571750086494738}
 --- !u!1 &8385389283162744
 GameObject:
   m_ObjectHideFlags: 0
@@ -2638,8 +2605,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24ef6aee32a571743bd646e04e9a9247, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  slots:
+  - {fileID: 8385389932757051}
+  - {fileID: 8385389283162750}
+  - {fileID: 8385390078397113}
+  - {fileID: 8385389372847283}
+  - {fileID: 8385390193770763}
+  boarders:
+  - {fileID: 8385389379581213}
+  - {fileID: 8385390151578391}
+  - {fileID: 8385390471367467}
+  - {fileID: 8385390066982849}
+  - {fileID: 8385390339013529}
   canvasGroup: {fileID: 1057873040651562711}
-  inventory: {fileID: 8385389258059738}
   palette: {fileID: 684630227827703790}
   ammoInfo: {fileID: 3965871264559929169}
   ammoType: {fileID: 3965871265337293365}

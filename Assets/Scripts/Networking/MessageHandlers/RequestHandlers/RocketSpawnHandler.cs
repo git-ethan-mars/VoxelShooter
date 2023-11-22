@@ -23,16 +23,17 @@ namespace Networking.MessageHandlers.RequestHandlers
             _entityFactory = entityFactory;
             _particleFactory = particleFactory;
         }
+
         protected override void OnRequestReceived(NetworkConnectionToClient connection, RocketSpawnRequest request)
         {
             var result = _server.Data.TryGetPlayerData(connection, out var playerData);
             if (!result || !playerData.IsAlive) return;
-            var rocketCount = playerData.ItemCountById[request.ItemId];
+            var rocketCount = playerData.ItemCountById[playerData.ItemIds[playerData.SelectedSlotIndex]];
             if (rocketCount <= 0)
                 return;
-            playerData.ItemCountById[request.ItemId] = rocketCount - 1;
-            connection.Send(new ItemUseResponse(request.ItemId, rocketCount - 1));
-            var rocketData = (RocketLauncherItem) _staticData.GetItem(request.ItemId);
+            playerData.ItemCountById[playerData.ItemIds[playerData.SelectedSlotIndex]] = rocketCount - 1;
+            connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex, rocketCount - 1));
+            var rocketData = (RocketLauncherItem) _staticData.GetItem(playerData.ItemIds[playerData.SelectedSlotIndex]);
             var direction = request.Ray.direction;
             var rocket = _entityFactory.CreateRocket(request.Ray.origin + direction * 3,
                 Quaternion.LookRotation(direction), _server, _particleFactory, rocketData, connection);

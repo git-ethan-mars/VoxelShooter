@@ -11,5 +11,6 @@ namespace Infrastructure.Factory
         GameObject CreateChunkMeshRender(Vector3 position, Quaternion rotation, Transform parent);
         void CreateWalls(MapProvider mapProvider, Transform parent);
         GameObject CreateGameModel(GameObject prefab, Transform itemPosition);
+        GameObject CreateTransparentGameObject(GameObject prefab, Color32 color);
     }
 }

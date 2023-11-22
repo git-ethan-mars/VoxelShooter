@@ -1,17 +1,27 @@
+using System.Collections.Generic;
 using Infrastructure.Services.Input;
+using Inventory;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace UI
 {
-    [RequireComponent(typeof(CanvasGroup))]
     public class Hud : MonoBehaviour
     {
+        public List<Image> Slots => slots;
+
+        [SerializeField]
+        private List<Image> slots;
+
+        public List<GameObject> Boarders => boarders;
+
+        [SerializeField]
+        private List<GameObject> boarders;
+
         [SerializeField]
         private CanvasGroup canvasGroup;
-        
-        public GameObject inventory;
+
         public GameObject palette;
         public GameObject ammoInfo;
         public Image ammoType;
@@ -21,8 +31,7 @@ namespace UI
         public TextMeshProUGUI itemCount;
         public HealthCounter healthCounter;
         private IInputService _inputService;
-        private CanvasGroup _canvasGroup;
-        
+
         public void Construct(IInputService inputService)
         {
             _inputService = inputService;

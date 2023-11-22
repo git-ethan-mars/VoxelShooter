@@ -77,7 +77,8 @@ namespace Networking
         private readonly PlayerConfigureHandler _playerConfigureHandler;
         private readonly NickNameHandler _nickNameHandler;
 
-        public Client(GameStateMachine stateMachine, ICoroutineRunner coroutineRunner, IInputService inputService, IStorageService storageService,
+        public Client(GameStateMachine stateMachine, ICoroutineRunner coroutineRunner, IInputService inputService,
+            IStorageService storageService,
             IGameFactory gameFactory,
             IMeshFactory meshFactory,
             IStaticDataService staticData,
@@ -100,7 +101,8 @@ namespace Networking
             _scoreboardHandler = new ScoreboardHandler();
             _healthHandler = new HealthHandler();
             _changeItemModelHandler = new ChangeItemModelHandler(meshFactory, staticData);
-            _playerConfigureHandler = new PlayerConfigureHandler(uiFactory, inputService, storageService);
+            _playerConfigureHandler =
+                new PlayerConfigureHandler(uiFactory, meshFactory, inputService, storageService, staticData);
             _nickNameHandler = new NickNameHandler();
         }
 
