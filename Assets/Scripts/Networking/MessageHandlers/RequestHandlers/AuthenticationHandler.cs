@@ -1,4 +1,5 @@
 using Mirror;
+using Networking.Messages.Requests;
 
 namespace Networking.MessageHandlers.RequestHandlers
 {

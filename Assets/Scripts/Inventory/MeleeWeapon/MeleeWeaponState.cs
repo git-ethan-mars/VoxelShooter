@@ -1,7 +1,8 @@
+using CameraLogic;
 using Data;
 using PlayerLogic;
 
-namespace Inventory
+namespace Inventory.MeleeWeapon
 {
     public class MeleeWeaponState : IInventoryItemState
     {

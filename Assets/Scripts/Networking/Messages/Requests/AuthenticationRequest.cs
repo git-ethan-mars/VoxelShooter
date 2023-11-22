@@ -1,7 +1,7 @@
 using Mirror;
 using Steamworks;
 
-namespace Networking
+namespace Networking.Messages.Requests
 {
     public struct AuthenticationRequest : NetworkMessage
     {

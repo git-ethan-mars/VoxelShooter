@@ -1,6 +1,6 @@
 using Mirror;
 
-namespace Networking
+namespace Networking.Messages.Responses
 {
     public struct HealthResponse : NetworkMessage
     {

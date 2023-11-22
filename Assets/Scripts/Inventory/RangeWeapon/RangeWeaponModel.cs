@@ -1,9 +1,10 @@
+using CameraLogic;
 using Data;
 using Infrastructure;
 using Mirror;
 using Networking.Messages.Requests;
 
-namespace Inventory
+namespace Inventory.RangeWeapon
 {
     public class RangeWeaponModel : IInventoryItemModel, IShooting, IReloading
     {

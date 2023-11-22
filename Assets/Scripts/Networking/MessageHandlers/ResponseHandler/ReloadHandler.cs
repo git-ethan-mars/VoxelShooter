@@ -1,4 +1,5 @@
 ﻿using Inventory;
+using Inventory.RangeWeapon;
 using Networking.Messages.Responses;
 
 namespace Networking.MessageHandlers.ResponseHandler

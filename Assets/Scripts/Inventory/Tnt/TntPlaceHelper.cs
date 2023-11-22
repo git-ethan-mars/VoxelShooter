@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Inventory
+namespace Inventory.Tnt
 {
     public static class TntPlaceHelper
     {

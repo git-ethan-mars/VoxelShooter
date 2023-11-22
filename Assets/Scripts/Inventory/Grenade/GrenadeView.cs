@@ -4,7 +4,7 @@ using UI;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Inventory
+namespace Inventory.Grenade
 {
     public class GrenadeView : IInventoryItemView
     {

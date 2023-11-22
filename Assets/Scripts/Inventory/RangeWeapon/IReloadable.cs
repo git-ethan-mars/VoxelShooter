@@ -1,6 +1,6 @@
 ﻿using Infrastructure;
 
-namespace Inventory
+namespace Inventory.RangeWeapon
 {
     public interface IReloading
     {

@@ -1,3 +1,4 @@
+using CameraLogic;
 using Data;
 using Infrastructure;
 using Mirror;
@@ -5,7 +6,7 @@ using Networking.Messages.Requests;
 using PlayerLogic;
 using UnityEngine;
 
-namespace Inventory
+namespace Inventory.Block
 {
     public class BlockModel : IInventoryItemModel, IConsumable
     {

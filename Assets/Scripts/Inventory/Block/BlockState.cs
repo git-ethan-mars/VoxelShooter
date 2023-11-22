@@ -1,9 +1,10 @@
+using CameraLogic;
 using Data;
 using Infrastructure.Factory;
 using PlayerLogic;
 using UI;
 
-namespace Inventory
+namespace Inventory.Block
 {
     public class BlockState : IInventoryItemState
     {

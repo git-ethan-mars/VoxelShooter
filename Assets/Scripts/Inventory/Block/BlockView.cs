@@ -1,4 +1,5 @@
-﻿using Data;
+﻿using CameraLogic;
+using Data;
 using Infrastructure.Factory;
 using PlayerLogic;
 using TMPro;
@@ -6,7 +7,7 @@ using UI;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Inventory
+namespace Inventory.Block
 {
     public class BlockView : IInventoryItemView
     {

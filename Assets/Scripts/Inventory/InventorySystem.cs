@@ -1,9 +1,15 @@
 using System.Collections.Generic;
 using System.Linq;
+using CameraLogic;
 using Data;
 using Infrastructure.Factory;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
+using Inventory.Block;
+using Inventory.Grenade;
+using Inventory.MeleeWeapon;
+using Inventory.RangeWeapon;
+using Inventory.Tnt;
 using Mirror;
 using Networking.MessageHandlers.ResponseHandler;
 using Networking.Messages.Requests;

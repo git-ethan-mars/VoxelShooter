@@ -1,7 +1,8 @@
+using CameraLogic;
 using Mirror;
 using Networking.Messages.Requests;
 
-namespace Inventory
+namespace Inventory.MeleeWeapon
 {
     public class MeleeWeaponModel : IInventoryItemModel
     {

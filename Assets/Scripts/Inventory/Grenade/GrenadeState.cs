@@ -1,7 +1,8 @@
+using CameraLogic;
 using Data;
 using UI;
 
-namespace Inventory
+namespace Inventory.Grenade
 {
     public class GrenadeState : IInventoryItemState
     {

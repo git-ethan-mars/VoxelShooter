@@ -1,10 +1,11 @@
+using CameraLogic;
 using Data;
 using Infrastructure.Factory;
 using PlayerLogic;
 using Rendering;
 using UnityEngine;
 
-namespace Inventory
+namespace Inventory.MeleeWeapon
 {
     public class MeleeWeaponView : IInventoryItemView
     {

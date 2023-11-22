@@ -1,8 +1,9 @@
+using CameraLogic;
 using Data;
 using UI;
 using UnityEngine;
 
-namespace Inventory
+namespace Inventory.RangeWeapon
 {
     public class RangeWeaponState : IInventoryItemState
     {

@@ -1,11 +1,12 @@
 using System;
+using CameraLogic;
 using Data;
 using Infrastructure;
 using Mirror;
 using Networking.Messages.Requests;
 using UnityEngine;
 
-namespace Inventory
+namespace Inventory.Grenade
 {
     public class GrenadeModel : IInventoryItemModel, IConsumable
     {
