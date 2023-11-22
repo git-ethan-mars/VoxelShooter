@@ -23,7 +23,7 @@ namespace Inventory
     {
         public IInventoryItemModel ActiveItemModel => _states[_index].ItemModel;
         private int _index;
-        private readonly List<IInventoryItemState> _states;
+        private readonly List<IInventoryItemState> _states = new();
         private readonly ChangeSlotResultHandler _changeSlotHandler;
         private readonly ItemUseHandler _itemUseHandler;
         private readonly ReloadResultHandler _reloadHandler;
@@ -36,10 +36,11 @@ namespace Inventory
         {
             var rayCaster = new RayCaster(Camera.main);
             _inventoryInput = new InventoryInput(inputService);
+            _inventoryInput.SlotButtonPressed += ChangeSlotRequest;
+            _inventoryInput.MouseScrolledUp += SendIncrementSlotIndexRequest;
+            _inventoryInput.MouseScrolledDown += SendDecrementSlotIndexRequest;
             _hud = hud;
-            _states = new List<IInventoryItemState>();
-            var items = itemIds.Select(staticData.GetItem).ToList();
-            foreach (var item in items)
+            foreach (var item in itemIds.Select(staticData.GetItem))
             {
                 if (item.itemType == ItemType.RangeWeapon)
                 {
@@ -77,6 +78,8 @@ namespace Inventory
                 }
             }
 
+            _states[_index].Enter();
+
             for (var i = 0; i < _states.Count; i++)
             {
                 var previousColor = _hud.Slots[i].color;
@@ -84,9 +87,6 @@ namespace Inventory
                 _hud.Slots[i].sprite = _states[i].ItemView.Icon;
             }
 
-            _inventoryInput.SlotButtonPressed += ChangeSlotRequest;
-            _inventoryInput.MouseScrolledUp += SendIncrementSlotIndexRequest;
-            _inventoryInput.MouseScrolledDown += SendDecrementSlotIndexRequest;
             _changeSlotHandler = new ChangeSlotResultHandler(this);
             _changeSlotHandler.Register();
             _itemUseHandler = new ItemUseHandler(this);
