@@ -2,7 +2,7 @@ using CameraLogic;
 using Data;
 using UI;
 
-namespace Inventory
+namespace Inventory.RocketLauncher
 {
     public class RocketLauncherState : IInventoryItemState
     {

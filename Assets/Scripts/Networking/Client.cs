@@ -102,7 +102,8 @@ namespace Networking
             _healthHandler = new HealthHandler();
             _changeItemModelHandler = new ChangeItemModelHandler(meshFactory, staticData);
             _playerConfigureHandler =
-                new PlayerConfigureHandler(uiFactory, meshFactory, inputService, storageService, staticData);
+                new PlayerConfigureHandler(this, particleFactory, uiFactory, meshFactory, inputService, storageService,
+                    staticData);
             _nickNameHandler = new NickNameHandler();
         }
 

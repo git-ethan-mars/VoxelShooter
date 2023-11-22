@@ -9,6 +9,7 @@ using Inventory.Block;
 using Inventory.Grenade;
 using Inventory.MeleeWeapon;
 using Inventory.RangeWeapon;
+using Inventory.RocketLauncher;
 using Inventory.Tnt;
 using Mirror;
 using Networking.MessageHandlers.ResponseHandler;

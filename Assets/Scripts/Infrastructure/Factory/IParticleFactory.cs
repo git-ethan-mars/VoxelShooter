@@ -10,5 +10,6 @@ namespace Infrastructure.Factory
         void CreateRchParticle(Vector3 position, int startSpeed, int burstCount);
 
         ParticleSystem CreateFallingMeshParticle(Transform particleContainer);
+        void CreateWeatherParticle(string mapName, Transform parent);
     }
 }

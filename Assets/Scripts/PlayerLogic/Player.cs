@@ -1,13 +1,12 @@
-using System;
 using System.Collections.Generic;
 using Data;
+using Infrastructure;
 using Infrastructure.Factory;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
 using Infrastructure.Services.Storage;
 using Inventory;
 using Mirror;
-using Networking;
 using TMPro;
 using UI;
 using UnityEngine;
@@ -16,20 +15,7 @@ namespace PlayerLogic
 {
     public class Player : NetworkBehaviour
     {
-        public event Action<int> HealthChanged;
-
-        public int Health
-        {
-            get => _health;
-            set
-            {
-                _health = value;
-                HealthChanged?.Invoke(_health);
-            }
-        }
-
-        private int _health;
-
+        public ObservableVariable<int> Health;
         public float PlaceDistance { get; private set; }
 
         [SerializeField]
@@ -38,7 +24,6 @@ namespace PlayerLogic
         [SerializeField]
         private Transform itemPosition;
 
-
         public Transform ItemPosition => itemPosition;
 
         [SerializeField]
@@ -46,6 +31,8 @@ namespace PlayerLogic
 
         [SerializeField]
         private GameObject nickNameCanvas;
+
+        public Transform BodyOrientation => bodyOrientation;
 
         [SerializeField]
         private Transform bodyOrientation;
@@ -78,17 +65,13 @@ namespace PlayerLogic
             List<int> itemIds, float speed, float jumpHeight, int health)
         {
             PlaceDistance = placeDistance;
-            Health = health;
+            Health = new ObservableVariable<int>(health);
             _inputService = inputService;
             _movement = new PlayerMovement(hitBox, rigidbody, bodyOrientation, speed, jumpHeight);
             var sensitivity = storageService.Load<MouseSettingsData>(Constants.MouseSettingKey).GeneralSensitivity;
             _rotation = new PlayerRotation(bodyOrientation, headPivot, sensitivity);
             _hud = uiFactory.CreateHud(this, inputService);
             _inventory = new InventorySystem(_inputService, staticData, meshFactory, itemIds, _hud, this);
-            var weatherParticleSystem = staticData
-                .GetMapConfigure(((CustomNetworkManager) NetworkManager.singleton).Client.Data.MapName).weather;
-            if (weatherParticleSystem)
-                Instantiate(weatherParticleSystem, bodyOrientation);
             TurnOffNickName();
             TurnOffBodyRender();
             MountCamera();

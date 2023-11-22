@@ -15,6 +15,7 @@ namespace Inventory.Grenade
         private readonly Sprite _itemTypeIcon;
         private readonly Image _itemType;
         private int _count;
+        private bool _isSelected;
 
         public GrenadeView(GrenadeItem configure, Hud hud)
         {
@@ -28,6 +29,7 @@ namespace Inventory.Grenade
 
         public void Enable()
         {
+            _isSelected = true;
             _grenadeInfo.SetActive(true);
             _itemType.sprite = _grenadeCountIcon;
             _grenadeCountText.SetText(_count.ToString());
@@ -36,11 +38,15 @@ namespace Inventory.Grenade
         public void OnCountChanged(int count)
         {
             _count = count;
-            _grenadeCountText.SetText(_count.ToString());
+            if (_isSelected)
+            {
+                _grenadeCountText.SetText(_count.ToString());
+            }
         }
 
         public void Disable()
         {
+            _isSelected = false;
             _grenadeInfo.SetActive(false);
         }
     }

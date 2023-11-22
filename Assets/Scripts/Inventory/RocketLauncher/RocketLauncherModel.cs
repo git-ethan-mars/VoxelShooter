@@ -4,7 +4,7 @@ using Infrastructure;
 using Mirror;
 using Networking.Messages.Requests;
 
-namespace Inventory
+namespace Inventory.RocketLauncher
 {
     public class RocketLauncherModel : IInventoryItemModel, IConsumable
     {

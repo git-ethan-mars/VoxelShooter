@@ -21,6 +21,7 @@ namespace Inventory.Block
         private readonly RayCaster _rayCaster;
         private readonly float _placeDistance;
         private int _count;
+        private bool _isSelected;
 
         public BlockView(IMeshFactory meshFactory, BlockItem configure, RayCaster rayCaster, Player player,
             Hud hud)
@@ -41,6 +42,7 @@ namespace Inventory.Block
 
         public void Enable()
         {
+            _isSelected = true;
             _transparentBlock.SetActive(true);
             _palette.SetActive(true);
             _blockInfo.SetActive(true);
@@ -50,6 +52,7 @@ namespace Inventory.Block
 
         public void Disable()
         {
+            _isSelected = false;
             _palette.SetActive(false);
             _blockInfo.SetActive(false);
             _transparentBlock.SetActive(false);

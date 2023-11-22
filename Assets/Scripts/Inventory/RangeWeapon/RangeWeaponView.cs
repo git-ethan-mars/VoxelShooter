@@ -33,16 +33,16 @@ namespace Inventory.RangeWeapon
 
         public void Enable()
         {
-            _ammoInfo.SetActive(true);
             _isSelected = true;
+            _ammoInfo.SetActive(true);
             _ammoType.sprite = _ammoTypeIcon;
             _ammoCount.SetText($"{_bulletsInMagazine} / {_totalBullets}");
         }
 
         public void Disable()
         {
-            _ammoInfo.SetActive(false);
             _isSelected = false;
+            _ammoInfo.SetActive(false);
             _fpsCam.fieldOfView = Constants.DefaultFov;
         }
 
@@ -50,7 +50,9 @@ namespace Inventory.RangeWeapon
         {
             _totalBullets = totalBullets;
             if (_isSelected)
+            {
                 _ammoCount.SetText($"{_bulletsInMagazine} / {_totalBullets}");
+            }
         }
 
         public void OnBulletsInMagazineChanged(int bulletsInMagazine)

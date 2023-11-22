@@ -11,7 +11,7 @@ namespace Networking.MessageHandlers.ResponseHandler
             if (NetworkClient.connection.identity != null &&
                 NetworkClient.connection.identity.TryGetComponent<Player>(out var player))
             {
-                player.Health = response.Health;
+                player.Health.Value = response.Health;
             }
         }
     }

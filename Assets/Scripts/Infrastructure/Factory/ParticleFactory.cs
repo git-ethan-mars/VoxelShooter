@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using Infrastructure.AssetManagement;
+using Infrastructure.Services.StaticData;
 using Mirror;
 using Particles;
 using UnityEngine;
@@ -9,11 +10,13 @@ namespace Infrastructure.Factory
     public class ParticleFactory : IParticleFactory
     {
         private readonly IAssetProvider _assets;
+        private readonly IStaticDataService _staticData;
         private readonly ICoroutineRunner _coroutineRunner;
 
-        public ParticleFactory(IAssetProvider assets, ICoroutineRunner coroutineRunner)
+        public ParticleFactory(IAssetProvider assets, IStaticDataService staticData, ICoroutineRunner coroutineRunner)
         {
             _assets = assets;
+            _staticData = staticData;
             _coroutineRunner = coroutineRunner;
         }
 
@@ -54,6 +57,15 @@ namespace Infrastructure.Factory
         {
             return _assets.Instantiate(ParticlePath.FallingMeshParticlePath, particleContainer)
                 .GetComponent<ParticleSystem>();
+        }
+
+        public void CreateWeatherParticle(string mapName, Transform parent)
+        {
+            var particles = _staticData.GetMapConfigure(mapName).weather;
+            if (particles != null)
+            {
+                _assets.Instantiate(particles.gameObject, parent);
+            }
         }
 
         private static IEnumerator DestroyParticle(GameObject particle, float lifetime)

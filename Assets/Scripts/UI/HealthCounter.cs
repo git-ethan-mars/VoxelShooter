@@ -15,7 +15,7 @@ namespace UI
         {
             _player = player;
             healthText.SetText(_player.Health.ToString());
-            _player.HealthChanged += OnHealthChanged;
+            _player.Health.ValueChanged += OnHealthChanged;
         }
 
         private void OnHealthChanged(int currentHealth)
@@ -25,7 +25,7 @@ namespace UI
 
         private void OnDestroy()
         {
-            _player.HealthChanged -= OnHealthChanged;
+            _player.Health.ValueChanged -= OnHealthChanged;
         }
     }
 }
