@@ -12,20 +12,18 @@ namespace Inventory.RangeWeapon
         private int _totalBullets;
         private readonly GameObject _ammoInfo;
         private readonly TextMeshProUGUI _ammoCount;
-        private readonly Camera _fpsCam;
         private readonly Image _ammoType;
         private readonly Sprite _ammoTypeIcon;
         private int _bulletsInMagazine;
         private bool _isSelected;
 
-        public RangeWeaponView(Camera camera, RangeWeaponData configure,
+        public RangeWeaponView(RangeWeaponData configure,
             Hud hud)
         {
             Icon = configure.InventoryIcon;
             _ammoTypeIcon = configure.AmmoTypeIcon;
             _bulletsInMagazine = configure.BulletsInMagazine;
             _totalBullets = configure.TotalBullets;
-            _fpsCam = camera;
             _ammoInfo = hud.ammoInfo;
             _ammoCount = hud.ammoCount;
             _ammoType = hud.ammoType;
@@ -43,7 +41,6 @@ namespace Inventory.RangeWeapon
         {
             _isSelected = false;
             _ammoInfo.SetActive(false);
-            _fpsCam.fieldOfView = Constants.DefaultFov;
         }
 
         public void OnTotalBulletsChanged(int totalBullets)

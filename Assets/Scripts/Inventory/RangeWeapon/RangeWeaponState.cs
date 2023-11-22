@@ -16,12 +16,13 @@ namespace Inventory.RangeWeapon
         private readonly RangeWeaponView _rangeWeaponView;
 
 
-        public RangeWeaponState(IInventoryInput inventoryInput, IStorageService storageService, RayCaster rayCaster, RangeWeaponData configure,
+        public RangeWeaponState(IInventoryInput inventoryInput, IStorageService storageService, RayCaster rayCaster,
+            RangeWeaponData configure,
             Camera camera, Player player, Hud hud)
         {
             _inventoryInput = inventoryInput;
             _rangeWeaponModel = new RangeWeaponModel(storageService, rayCaster, camera, configure, player);
-            _rangeWeaponView = new RangeWeaponView(camera, configure, hud);
+            _rangeWeaponView = new RangeWeaponView(configure, hud);
         }
 
         public void Enter()
@@ -49,6 +50,7 @@ namespace Inventory.RangeWeapon
             _inventoryInput.SecondActionButtonUp -= _rangeWeaponModel.ZoomOut;
             _rangeWeaponModel.BulletsInMagazine.ValueChanged -= _rangeWeaponView.OnBulletsInMagazineChanged;
             _rangeWeaponModel.TotalBullets.ValueChanged -= _rangeWeaponView.OnTotalBulletsChanged;
+            _rangeWeaponModel.ZoomOut();
             _rangeWeaponView.Disable();
         }
     }
