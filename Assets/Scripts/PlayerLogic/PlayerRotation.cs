@@ -9,9 +9,11 @@ namespace PlayerLogic
     {
         private const float SensitivityMultiplier = 2.0f;
 
+        public float Sensitivity { get; set; }
+
         private readonly Transform _headPivot;
         private readonly Transform _bodyOrientation;
-        private readonly float _sensitivity;
+
 
         private float _xRotation;
         private float _yRotation;
@@ -20,13 +22,13 @@ namespace PlayerLogic
         {
             _bodyOrientation = bodyOrientation;
             _headPivot = headPivot;
-            _sensitivity = sensitivity;
+            Sensitivity = sensitivity;
         }
 
         public void Rotate(Vector2 direction)
         {
-            var mouseX = direction.x * SensitivityMultiplier * _sensitivity * Time.deltaTime;
-            var mouseY = direction.y * SensitivityMultiplier * _sensitivity * Time.deltaTime;
+            var mouseX = direction.x * SensitivityMultiplier * Sensitivity * Time.deltaTime;
+            var mouseY = direction.y * SensitivityMultiplier * Sensitivity * Time.deltaTime;
             _yRotation += mouseX;
             _xRotation -= mouseY;
             _xRotation = Math.Clamp(_xRotation, -90, 90);

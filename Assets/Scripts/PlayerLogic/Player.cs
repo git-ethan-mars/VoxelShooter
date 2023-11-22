@@ -18,6 +18,8 @@ namespace PlayerLogic
         public ObservableVariable<int> Health;
         public float PlaceDistance { get; private set; }
 
+        public PlayerRotation Rotation => _rotation;
+
         [SerializeField]
         private TextMeshProUGUI nickNameText;
 
@@ -26,6 +28,7 @@ namespace PlayerLogic
 
         public Transform ItemPosition => itemPosition;
 
+
         [SerializeField]
         private MeshRenderer[] bodyParts;
 
@@ -33,6 +36,7 @@ namespace PlayerLogic
         private GameObject nickNameCanvas;
 
         public Transform BodyOrientation => bodyOrientation;
+
 
         [SerializeField]
         private Transform bodyOrientation;
@@ -71,7 +75,7 @@ namespace PlayerLogic
             var sensitivity = storageService.Load<MouseSettingsData>(Constants.MouseSettingKey).GeneralSensitivity;
             _rotation = new PlayerRotation(bodyOrientation, headPivot, sensitivity);
             _hud = uiFactory.CreateHud(this, inputService);
-            _inventory = new InventorySystem(_inputService, staticData, meshFactory, itemIds, _hud, this);
+            _inventory = new InventorySystem(_inputService, staticData, meshFactory, storageService, itemIds, _hud, this);
             TurnOffNickName();
             TurnOffBodyRender();
             MountCamera();

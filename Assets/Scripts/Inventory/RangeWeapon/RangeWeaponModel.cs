@@ -1,24 +1,35 @@
 using CameraLogic;
 using Data;
 using Infrastructure;
+using Infrastructure.Services.Storage;
 using Mirror;
 using Networking.Messages.Requests;
+using PlayerLogic;
+using UnityEngine;
 
 namespace Inventory.RangeWeapon
 {
     public class RangeWeaponModel : IInventoryItemModel, IShooting, IReloading
     {
-        public ObservableVariable<int> BulletsInMagazine { get; set; }
-        public ObservableVariable<int> TotalBullets { get; set; }
+        public ObservableVariable<int> BulletsInMagazine { get; }
+        public ObservableVariable<int> TotalBullets { get; }
 
-        private int _bulletsInMagazine;
         private readonly RayCaster _rayCaster;
-        private readonly float _zoomMultiplier;
+        private readonly ZoomService _zoomService;
+        private readonly float _aimSensitivity;
+        private readonly int _sensitivity;
+        private readonly Player _player;
+        private int _bulletsInMagazine;
 
-        public RangeWeaponModel(RayCaster rayCaster, RangeWeaponData configure)
+        public RangeWeaponModel(IStorageService storageService, RayCaster rayCaster, Camera camera,
+            RangeWeaponData configure, Player player)
         {
+            var mouseSettings = storageService.Load<MouseSettingsData>(Constants.MouseSettingKey);
+            _aimSensitivity = mouseSettings.AimSensitivity;
+            _sensitivity = mouseSettings.GeneralSensitivity;
             _rayCaster = rayCaster;
-            _zoomMultiplier = configure.ZoomMultiplier;
+            _zoomService = new ZoomService(camera, configure.ZoomMultiplier);
+            _player = player;
             BulletsInMagazine = new ObservableVariable<int>(configure.BulletsInMagazine);
             TotalBullets = new ObservableVariable<int>(configure.TotalBullets);
         }
@@ -40,12 +51,14 @@ namespace Inventory.RangeWeapon
 
         public void ZoomIn()
         {
-            //_fpsCam.fieldOfView = Constants.DefaultFov / _zoomMultiplier;
+            _zoomService.ZoomIn();
+            _player.Rotation.Sensitivity = _aimSensitivity;
         }
 
         public void ZoomOut()
         {
-            //_fpsCam.fieldOfView = Constants.DefaultFov;
+            _zoomService.ZoomOut();
+            _player.Rotation.Sensitivity = _sensitivity;
         }
     }
 }

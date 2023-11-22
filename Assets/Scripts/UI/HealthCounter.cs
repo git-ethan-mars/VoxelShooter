@@ -14,7 +14,7 @@ namespace UI
         public void Construct(Player player)
         {
             _player = player;
-            healthText.SetText(_player.Health.ToString());
+            healthText.SetText(_player.Health.Value.ToString());
             _player.Health.ValueChanged += OnHealthChanged;
         }
 

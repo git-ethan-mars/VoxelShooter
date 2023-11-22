@@ -73,9 +73,11 @@ namespace Inventory.Block
         public void OnCountChanged(int count)
         {
             _count = count;
-            _blockCountText.SetText(_count.ToString());
+            if (_isSelected)
+            {
+                _blockCountText.SetText(_count.ToString());
+            }
         }
-
 
         public void ChangeTransparentBlockColor(Color32 color)
         {
