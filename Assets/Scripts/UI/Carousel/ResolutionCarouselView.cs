@@ -1,4 +1,3 @@
-using UI.SettingsMenu.States;
 using UnityEngine;
 
 namespace UI.Carousel

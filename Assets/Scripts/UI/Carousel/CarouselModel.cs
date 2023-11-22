@@ -19,8 +19,11 @@ namespace UI.Carousel
             get => _currentItem;
             set
             {
-                _currentItem = value;
-                ValueChanged?.Invoke(_currentItem);
+                if (!_currentItem.Equals(value))
+                {
+                    _currentItem = value;
+                    ValueChanged?.Invoke(_currentItem);
+                }
             }
         }
 
