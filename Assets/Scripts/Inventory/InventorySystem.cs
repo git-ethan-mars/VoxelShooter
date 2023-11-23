@@ -81,6 +81,7 @@ namespace Inventory
             }
 
             _states[_index].Enter();
+            _hud.Boarders[_index].SetActive(true);
 
             for (var i = 0; i < _states.Count; i++)
             {
