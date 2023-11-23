@@ -5,7 +5,7 @@ using Infrastructure.Services.Input;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace UI
+namespace UI.Palette
 {
     public class Palette : MonoBehaviour
     {

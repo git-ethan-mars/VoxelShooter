@@ -22,7 +22,7 @@ namespace UI
         [SerializeField]
         private CanvasGroup canvasGroup;
 
-        public Palette palette;
+        public Palette.Palette palette;
         public GameObject ammoInfo;
         public Image ammoType;
         public TextMeshProUGUI ammoCount;
