@@ -35,7 +35,7 @@ namespace Inventory.Tnt
             _itemType = hud.itemIcon;
             _count = configuration.count;
             _transparentTnt =
-                meshFactory.CreateTransparentGameObject(configuration.prefab, new Color32(255, 0, 0, 100));
+                meshFactory.CreateTransparentGameObject(configuration.prefab, Color.red);
             _transparentTnt.SetActive(false);
         }
 

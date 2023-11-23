@@ -17,7 +17,7 @@ namespace Inventory.Block
         private readonly Image _blockImage;
         private readonly Sprite _blockSprite;
         private readonly GameObject _palette;
-        private readonly GameObject _transparentBlock;
+        private readonly MeshRenderer _transparentBlock;
         private readonly RayCaster _rayCaster;
         private readonly float _placeDistance;
         private int _count;
@@ -35,14 +35,15 @@ namespace Inventory.Block
             Icon = configure.inventoryIcon;
             _blockSprite = configure.itemSprite;
             _count = configure.count;
-            _transparentBlock = meshFactory.CreateTransparentGameObject(configure.prefab, initialColor);
-            _transparentBlock.SetActive(false);
+            _transparentBlock = meshFactory.CreateTransparentGameObject(configure.prefab, initialColor)
+                .GetComponent<MeshRenderer>();
+            _transparentBlock.gameObject.SetActive(false);
         }
 
         public void Enable()
         {
             _isSelected = true;
-            _transparentBlock.SetActive(true);
+            _transparentBlock.gameObject.SetActive(true);
             _palette.SetActive(true);
             _blockInfo.SetActive(true);
             _blockImage.sprite = _blockSprite;
@@ -54,7 +55,7 @@ namespace Inventory.Block
             _isSelected = false;
             _palette.SetActive(false);
             _blockInfo.SetActive(false);
-            _transparentBlock.SetActive(false);
+            _transparentBlock.gameObject.SetActive(false);
         }
 
         public void DisplayTransparentBlock()
@@ -66,7 +67,7 @@ namespace Inventory.Block
                                                        new Vector3(0.5f, 0.5f, 0.5f);
             }
 
-            _transparentBlock.SetActive(raycastResult);
+            _transparentBlock.gameObject.SetActive(raycastResult);
         }
 
         public void OnCountChanged(int count)
@@ -80,8 +81,10 @@ namespace Inventory.Block
 
         public void ChangeTransparentBlockColor(Color32 color)
         {
-            _transparentBlock.GetComponent<MeshRenderer>().material.color = new Color(color.r / 255f,
-                color.g / 255f, color.b / 255f, 100 / 255f);
+            var floatColor = (Color) color;
+            var material = _transparentBlock.material;
+            floatColor = new Color(floatColor.r, floatColor.g, floatColor.b, material.color.a);
+            material.color = floatColor;
         }
     }
 }
