@@ -40,6 +40,8 @@ namespace UI.Palette
             {
                 blockImages[i].color = colors[i];
             }
+
+            Color = new ObservableVariable<Color32>(_colorCreator.ColorById[0]);
         }
 
         private void OnEnable()

@@ -36,6 +36,7 @@ namespace Inventory.Grenade
         {
             _inventoryInput.FirstActionButtonDown -= _grenadeModel.PullPin;
             _inventoryInput.FirstActionButtonUp -= _grenadeModel.Throw;
+            _grenadeModel.Count.ValueChanged -= _grenadeView.OnCountChanged;
             _grenadeView.Disable();
         }
     }
