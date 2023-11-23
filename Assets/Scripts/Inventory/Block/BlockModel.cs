@@ -17,12 +17,12 @@ namespace Inventory.Block
         private readonly RayCaster _rayCaster;
         private readonly float _placeDistance;
 
-        public BlockModel(BlockItem configure, RayCaster rayCaster, Player player)
+        public BlockModel(BlockItem configure, RayCaster rayCaster, Player player, Color32 initialColor)
         {
             _rayCaster = rayCaster;
             _placeDistance = player.PlaceDistance;
             Count = new ObservableVariable<int>(configure.count);
-            BlockColor = new ObservableVariable<Color32>(Color.black);
+            BlockColor = new ObservableVariable<Color32>(initialColor);
         }
 
         public void PlaceBlock()

@@ -42,7 +42,7 @@ namespace Optimization
                     continue;
                 }
 
-                if (!_blocks[i].Color.IsEquals(BlockColor.empty))
+                if (!_blocks[i].IsSolid())
                 {
                     if (IsSolidRunStarted) WriteSolidRun();
                     if (!IsColoredRunStarted) _coloredStart = i;

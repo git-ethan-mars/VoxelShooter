@@ -24,19 +24,18 @@ namespace Inventory.Block
         private bool _isSelected;
 
         public BlockView(IMeshFactory meshFactory, BlockItem configure, RayCaster rayCaster, Player player,
-            Hud hud)
+            Hud hud, Color32 initialColor)
         {
             _rayCaster = rayCaster;
             _placeDistance = player.PlaceDistance;
-            _palette = hud.palette;
+            _palette = hud.palette.gameObject;
             _blockInfo = hud.itemInfo;
             _blockImage = hud.itemIcon;
             _blockCountText = hud.itemCount;
             Icon = configure.inventoryIcon;
             _blockSprite = configure.itemSprite;
-            _palette.GetComponent<PaletteCreator>().OnColorUpdate += ChangeTransparentBlockColor;
             _count = configure.count;
-            _transparentBlock = meshFactory.CreateTransparentGameObject(configure.prefab, Color.black);
+            _transparentBlock = meshFactory.CreateTransparentGameObject(configure.prefab, initialColor);
             _transparentBlock.SetActive(false);
         }
 

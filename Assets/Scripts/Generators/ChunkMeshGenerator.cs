@@ -215,59 +215,56 @@ namespace Generators
         private void SetFaces(int x, int y, int z)
         {
             _chunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] = Faces.None;
-            if (_chunkData.Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
-                .Equals(BlockColor.empty)) return;
+            if (!_chunkData.Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].IsSolid())
+            {
+                return;
+            }
+
             if (!ChunkData.IsValidPosition(x, y + 1, z) && (UpperNeighbour is null || UpperNeighbour is not null &&
-                    UpperNeighbour._chunkData.Blocks[x * ChunkData.ChunkSizeSquared + z].Color
-                        .Equals(BlockColor.empty)) || ChunkData.IsValidPosition(x, y + 1, z) && _chunkData
-                    .Blocks[x * ChunkData.ChunkSizeSquared + (y + 1) * ChunkData.ChunkSize + z].Color
-                    .Equals(BlockColor.empty))
+                    !UpperNeighbour._chunkData.Blocks[x * ChunkData.ChunkSizeSquared + z].IsSolid()) ||
+                ChunkData.IsValidPosition(x, y + 1, z) && !_chunkData
+                    .Blocks[x * ChunkData.ChunkSizeSquared + (y + 1) * ChunkData.ChunkSize + z].IsSolid())
             {
                 _chunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Top;
             }
 
-            if (!ChunkData.IsValidPosition(x, y - 1, z) && LowerNeighbour is not null && LowerNeighbour._chunkData
-                    .Blocks[x * ChunkData.ChunkSizeSquared + (ChunkData.ChunkSize - 1) * ChunkData.ChunkSize + z].Color
-                    .Equals(BlockColor.empty) || ChunkData.IsValidPosition(x, y - 1, z) && _chunkData
-                    .Blocks[x * ChunkData.ChunkSizeSquared + (y - 1) * ChunkData.ChunkSize + z].Color
-                    .Equals(BlockColor.empty))
+            if (!ChunkData.IsValidPosition(x, y - 1, z) && LowerNeighbour is not null && !LowerNeighbour._chunkData
+                    .Blocks[x * ChunkData.ChunkSizeSquared + (ChunkData.ChunkSize - 1) * ChunkData.ChunkSize + z]
+                    .IsSolid() || ChunkData.IsValidPosition(x, y - 1, z) && !_chunkData
+                    .Blocks[x * ChunkData.ChunkSizeSquared + (y - 1) * ChunkData.ChunkSize + z].IsSolid())
             {
                 _chunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Bottom;
             }
 
             if (!ChunkData.IsValidPosition(x, y, z + 1) && FrontNeighbour is not null &&
-                FrontNeighbour._chunkData.Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize].Color
-                    .Equals(BlockColor.empty) || ChunkData.IsValidPosition(x, y, z + 1) && _chunkData
-                    .Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z + 1].Color
-                    .Equals(BlockColor.empty))
+                !FrontNeighbour._chunkData.Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize].IsSolid() ||
+                !ChunkData.IsValidPosition(x, y, z + 1) && _chunkData
+                    .Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z + 1].IsSolid())
             {
                 _chunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Front;
             }
 
             if (!ChunkData.IsValidPosition(x, y, z - 1) && BackNeighbour is not null &&
-                BackNeighbour._chunkData
-                    .Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + ChunkData.ChunkSize - 1].Color
-                    .Equals(BlockColor.empty) || ChunkData.IsValidPosition(x, y, z - 1) && _chunkData
-                    .Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z - 1].Color
-                    .Equals(BlockColor.empty))
+                !BackNeighbour._chunkData
+                    .Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + ChunkData.ChunkSize - 1]
+                    .IsSolid() || ChunkData.IsValidPosition(x, y, z - 1) && !_chunkData
+                    .Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z - 1].IsSolid())
             {
                 _chunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Back;
             }
 
             if (!ChunkData.IsValidPosition(x + 1, y, z) && RightNeighbour is not null &&
-                RightNeighbour._chunkData.Blocks[y * ChunkData.ChunkSize + z].Color.Equals(BlockColor.empty) ||
-                ChunkData.IsValidPosition(x + 1, y, z) && _chunkData
-                    .Blocks[(x + 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
-                    .Equals(BlockColor.empty))
+                !RightNeighbour._chunkData.Blocks[y * ChunkData.ChunkSize + z].IsSolid() ||
+                ChunkData.IsValidPosition(x + 1, y, z) && !_chunkData
+                    .Blocks[(x + 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].IsSolid())
             {
                 _chunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Right;
             }
 
-            if (!ChunkData.IsValidPosition(x - 1, y, z) && LeftNeighbour is not null && LeftNeighbour._chunkData
-                    .Blocks[(ChunkData.ChunkSize - 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
-                    .Equals(BlockColor.empty) || ChunkData.IsValidPosition(x - 1, y, z) && _chunkData
-                    .Blocks[(x - 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color
-                    .Equals(BlockColor.empty))
+            if (!ChunkData.IsValidPosition(x - 1, y, z) && LeftNeighbour is not null && !LeftNeighbour._chunkData
+                    .Blocks[(ChunkData.ChunkSize - 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z]
+                    .IsSolid() || ChunkData.IsValidPosition(x - 1, y, z) && !_chunkData
+                    .Blocks[(x - 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].IsSolid())
             {
                 _chunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Left;
             }
