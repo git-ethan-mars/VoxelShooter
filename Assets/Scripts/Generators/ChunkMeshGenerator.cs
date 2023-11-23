@@ -238,7 +238,7 @@ namespace Generators
 
             if (!ChunkData.IsValidPosition(x, y, z + 1) && FrontNeighbour is not null &&
                 !FrontNeighbour._chunkData.Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize].IsSolid() ||
-                !ChunkData.IsValidPosition(x, y, z + 1) && _chunkData
+                ChunkData.IsValidPosition(x, y, z + 1) && !_chunkData
                     .Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z + 1].IsSolid())
             {
                 _chunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Front;

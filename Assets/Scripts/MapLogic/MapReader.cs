@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using Data;
-using Extensions;
 using Infrastructure.Services.StaticData;
 using UnityEngine;
 
@@ -96,12 +95,12 @@ namespace MapLogic
                         (x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
                         (1 & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSize +
                         (z & (ChunkData.ChunkSize - 1))];
-                    if (!zeroHeightBlock.Color.IsSolid())
+                    if (!zeroHeightBlock.IsSolid())
                     {
                         blocks[(x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
                                (z & (ChunkData.ChunkSize - 1))] = new BlockData(mapProvider.MapData.WaterColor);
                     }
-                    if (oneHeightBlock.Color.IsSolid())
+                    if (oneHeightBlock.IsSolid())
                         mapProvider.MapData.BoxSpawnLayer.Add(new Vector3Int(x, mapProvider.MapData.Height - 1, z));
                 }
             }
