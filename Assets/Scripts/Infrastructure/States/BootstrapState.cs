@@ -42,7 +42,9 @@ namespace Infrastructure.States
 
         private void RegisterServices()
         {
-            _allServices.RegisterSingle<IStaticDataService>(new StaticDataService());
+            _allServices.RegisterSingle<IAssetProvider>(new AssetProvider());
+            _allServices.RegisterSingle<IStaticDataService>(
+                new StaticDataService(_allServices.Single<IAssetProvider>()));
             _allServices.RegisterSingle<IStorageService>(new JsonToFileStorageService());
             var staticData = _allServices.Single<IStaticDataService>();
             _allServices.RegisterSingle<IMapRepository>(new MapRepository(staticData));
@@ -52,7 +54,6 @@ namespace Infrastructure.States
             staticData.LoadMapConfigures();
             staticData.LoadLobbyBalance();
             _allServices.RegisterSingle<IInputService>(new StandaloneInputService());
-            _allServices.RegisterSingle<IAssetProvider>(new AssetProvider());
             if (Constants.isLocalBuild)
             {
                 _allServices.RegisterSingle<IAvatarLoader>(

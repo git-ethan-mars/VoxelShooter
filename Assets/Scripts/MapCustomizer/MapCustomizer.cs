@@ -178,7 +178,7 @@ namespace MapCustomizer
             var assets = new AssetProvider();
             var storageService = new JsonToFileStorageService();
             _instance._entityFactory = new EntityFactory(assets);
-            _instance._staticData = new StaticDataService();
+            _instance._staticData = new StaticDataService(assets);
             var particleFactory = new ParticleFactory(assets, _instance._staticData, this);
             _instance._meshFactory = new MeshFactory(assets);
             var uiFactory = new UIFactory(assets, _staticData);

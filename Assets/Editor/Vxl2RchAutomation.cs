@@ -1,4 +1,5 @@
 using System.IO;
+using Infrastructure.AssetManagement;
 using Infrastructure.Services.StaticData;
 using MapLogic;
 using UnityEditor;
@@ -10,7 +11,7 @@ namespace Editor
         [MenuItem("Vxl2RchConverter/Convert all")]
         public static void ConvertAll()
         {
-            var staticData = new StaticDataService();
+            var staticData = new StaticDataService(new AssetProvider());
             staticData.LoadMapConfigures();
             var mapFolder = Path.Combine(Constants.mapFolderPath);
             var vxlFilePaths = Directory.GetFiles(mapFolder, $"*{Constants.VxlExtension}");
