@@ -28,7 +28,6 @@ namespace PlayerLogic
 
         public Transform ItemPosition => itemPosition;
 
-
         [SerializeField]
         private MeshRenderer[] bodyParts;
 
@@ -36,7 +35,6 @@ namespace PlayerLogic
         private GameObject nickNameCanvas;
 
         public Transform BodyOrientation => bodyOrientation;
-
 
         [SerializeField]
         private Transform bodyOrientation;
@@ -53,6 +51,17 @@ namespace PlayerLogic
         [SerializeField]
         private new Rigidbody rigidbody;
 
+        [SerializeField]
+        private AudioSource continuousAudio;
+
+        public AudioSource ContinuousAudio => continuousAudio;
+
+        [SerializeField]
+        private AudioSource stepAudio;
+
+        [SerializeField]
+        private AudioData stepAudioData;
+
         private Hud _hud;
 
         private IInputService _inputService;
@@ -60,6 +69,7 @@ namespace PlayerLogic
 
         private PlayerMovement _movement;
         private PlayerRotation _rotation;
+        private PlayerAudio _audio;
 
 
         public void Construct(IUIFactory uiFactory, IMeshFactory meshFactory, IInputService inputService,
@@ -71,11 +81,13 @@ namespace PlayerLogic
             PlaceDistance = placeDistance;
             Health = new ObservableVariable<int>(health);
             _inputService = inputService;
+            _audio = new PlayerAudio(stepAudio, stepAudioData);
             _movement = new PlayerMovement(hitBox, rigidbody, bodyOrientation, speed, jumpHeight);
             var sensitivity = storageService.Load<MouseSettingsData>(Constants.MouseSettingKey).GeneralSensitivity;
             _rotation = new PlayerRotation(bodyOrientation, headPivot, sensitivity);
             _hud = uiFactory.CreateHud(this, inputService);
-            _inventory = new InventorySystem(_inputService, staticData, meshFactory, storageService, itemIds, _hud, this);
+            _inventory = new InventorySystem(_inputService, staticData, meshFactory, storageService, itemIds, _hud,
+                this);
             TurnOffNickName();
             TurnOffBodyRender();
             MountCamera();
@@ -83,6 +95,15 @@ namespace PlayerLogic
 
         private void Update()
         {
+            /*if (_movement.MovementState == PlayerMovementState.Move)
+            {
+                _audio.EnableStepSound();
+            }
+            else
+            {
+                _audio.DisableStepSound();
+            }*/
+
             if (!isLocalPlayer)
             {
                 return;

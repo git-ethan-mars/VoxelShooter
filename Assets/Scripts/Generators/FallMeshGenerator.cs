@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Infrastructure.Factory;
+using Networking.ClientServices;
 using Rendering;
 using UnityEngine;
 
@@ -8,14 +9,14 @@ namespace Generators
     public class FallMeshGenerator
     {
         private readonly IMeshFactory _meshFactory;
-        private readonly FallingMeshFallingMeshParticlePool _fallingMeshFallingMeshParticlePool;
+        private readonly FallingMeshParticlePool _fallingMeshFallingMeshParticlePool;
         private readonly List<Vector3> _vertices;
         private readonly List<int> _triangles;
         private readonly List<Color32> _colors;
         private readonly List<Vector3> _normals;
 
         public FallMeshGenerator(IMeshFactory meshFactory,
-            FallingMeshFallingMeshParticlePool fallingMeshFallingMeshParticlePool)
+            FallingMeshParticlePool fallingMeshFallingMeshParticlePool)
         {
             _meshFactory = meshFactory;
             _fallingMeshFallingMeshParticlePool = fallingMeshFallingMeshParticlePool;

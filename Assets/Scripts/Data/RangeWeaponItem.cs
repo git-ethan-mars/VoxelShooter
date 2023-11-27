@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Data
 {
@@ -6,8 +7,10 @@ namespace Data
     public class RangeWeaponItem : InventoryItem
     {
         public Sprite ammoIcon;
-        [Header("Configuration")] 
+
+        [Header("Configuration")]
         public bool isAutomatic;
+
         public float timeBetweenShooting;
         public float baseRecoil;
         public float stepRecoil;
@@ -18,22 +21,26 @@ namespace Data
         public int bulletsPerTap;
         public int totalBullets;
         public float zoomMultiplier;
+
         [Header("Damage")]
         public int damage;
-        [Range(0,5)]
+
+        [Range(0, 5)]
         public float headMultiplier;
-        [Range(0,5)]
+
+        [Range(0, 5)]
         public float chestMultiplier;
-        [Range(0,5)]
+
+        [Range(0, 5)]
         public float legMultiplier;
-        [Range(0,5)]
+
+        [Range(0, 5)]
         public float armMultiplier;
-        
+
         [Header("Audio")]
-        public AudioClip shootingAudioClip;
-        [Range(0, 1)] public float shootingVolume;
-        public AudioClip reloadingAudioClip;
-        [Range(0, 1)] public float reloadingVolume;
+        public AudioData shootingSound;
+
+        public AudioData reloadingSound;
 
         private void Awake()
         {

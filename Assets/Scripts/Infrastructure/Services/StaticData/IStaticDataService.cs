@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Data;
+using UnityEngine;
 
 namespace Infrastructure.Services.StaticData
 {
@@ -15,5 +16,8 @@ namespace Infrastructure.Services.StaticData
         MapConfigure GetMapConfigure(string mapName);
         void LoadLobbyBalance();
         LobbyBalance GetLobbyBalance();
+        void LoadSounds();
+        AudioData GetAudio(int soundId);
+        int GetAudioIndex(AudioData clip);
     }
 }

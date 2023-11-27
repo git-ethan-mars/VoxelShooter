@@ -44,6 +44,11 @@ namespace Inventory.RangeWeapon
             NetworkClient.Send(new ShootRequest(_rayCaster.CentredRay, true));
         }
 
+        public void CancelShoot()
+        {
+            NetworkClient.Send(new CancelShootRequest());
+        }
+
         public void Reload()
         {
             NetworkClient.Send(new ReloadRequest());

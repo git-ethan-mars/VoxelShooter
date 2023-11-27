@@ -9,11 +9,13 @@ namespace PlayerLogic
         private const float AccelerationTime = 0.3f;
         private const float GravityScale = 3;
 
+        public PlayerMovementState MovementState { get; private set; }
+
         private static readonly Vector3 HorizontalMask = new(1, 0, 1);
 
         private readonly float _speed;
         private readonly float _jumpHeight;
-        
+
         private readonly Rigidbody _rigidbody;
         private readonly Transform _bodyOrientation;
         private readonly CapsuleCollider _hitBox;
@@ -22,18 +24,21 @@ namespace PlayerLogic
         private bool _jumpRequested;
         private bool _shouldResetHorizontalVelocity;
 
-        public PlayerMovement(CapsuleCollider hitBox, Rigidbody rigidbody, Transform bodyOrientation, float speed, float jumpHeight)
+        public PlayerMovement(CapsuleCollider hitBox, Rigidbody rigidbody, Transform bodyOrientation,
+            float speed, float jumpHeight)
         {
             _speed = speed;
             _jumpHeight = jumpHeight + JumpHeightOffset;
             _hitBox = hitBox;
             _rigidbody = rigidbody;
             _bodyOrientation = bodyOrientation;
+            MovementState = PlayerMovementState.Stay;
         }
 
         public void Move(Vector2 direction)
         {
-            var horizontalDirection = (direction.x * _bodyOrientation.forward + direction.y * _bodyOrientation.right).normalized;
+            var horizontalDirection = (direction.x * _bodyOrientation.forward + direction.y * _bodyOrientation.right)
+                .normalized;
             if (Vector3.Dot(_desiredDirection, horizontalDirection) <= 0)
             {
                 _shouldResetHorizontalVelocity = true;
@@ -74,6 +79,19 @@ namespace PlayerLogic
 
             _jumpRequested = false;
             _shouldResetHorizontalVelocity = false;
+            UpdateMovementState();
+        }
+
+        private void UpdateMovementState()
+        {
+            if (!IsGrounded())
+            {
+                MovementState = PlayerMovementState.Jump;
+            }
+            else
+            {
+                MovementState = _desiredDirection.magnitude > 0 ? PlayerMovementState.Move : PlayerMovementState.Stay;
+            }
         }
 
         private bool IsGrounded()
@@ -88,5 +106,12 @@ namespace PlayerLogic
         {
             return Vector3.Scale(HorizontalMask, _rigidbody.velocity);
         }
+    }
+
+    public enum PlayerMovementState
+    {
+        Stay,
+        Move,
+        Jump
     }
 }

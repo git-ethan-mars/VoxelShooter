@@ -4,12 +4,10 @@ namespace Networking.Messages.Responses
 {
     public struct StopContinuousSoundResponse : NetworkMessage
     {
-        public readonly int SoundId;
         public readonly NetworkIdentity Source;
 
-        public StopContinuousSoundResponse(int soundId, NetworkIdentity source)
+        public StopContinuousSoundResponse(NetworkIdentity source)
         {
-            SoundId = soundId;
             Source = source;
         }
     }

@@ -2,7 +2,6 @@
 using System.Linq;
 using Data;
 using Infrastructure.AssetManagement;
-using UnityEngine;
 
 namespace Infrastructure.Services.StaticData
 {
@@ -14,13 +13,13 @@ namespace Infrastructure.Services.StaticData
         private const string PlayerCharacteristicsPath = "StaticData/Player Characteristics";
         private const string MapConfiguresPath = "StaticData/Map configures";
         private const string LobbyBalancePath = "StaticData/Lobby Balance";
-        private const string SoundPath = "Audio/Sounds";
+        private const string SoundPath = "StaticData/Audio Data";
         private readonly IAssetProvider _assets;
         private Dictionary<GameClass, PlayerCharacteristic> _playerCharacteristicByClass;
         private Dictionary<GameClass, GameInventory> _inventoryByClass;
         private Dictionary<int, InventoryItem> _itemById;
         private Dictionary<string, MapConfigure> _mapConfigureByName;
-        private Dictionary<int, AudioClip> _soundById;
+        private List<AudioData> _audios;
         private LobbyBalance _lobbyBalance;
 
         public StaticDataService(IAssetProvider assets)
@@ -88,18 +87,28 @@ namespace Infrastructure.Services.StaticData
             return _mapConfigureByName[Default];
         }
 
-
         public void LoadSounds()
         {
-            _soundById = _assets.LoadAll<AudioClip>(SoundPath).Select((sound, index) => new
-            {
-                index, sound
-            }).ToDictionary(it => it.index, it => it.sound);
+            _audios = _assets.LoadAll<AudioData>(SoundPath).ToList();
         }
 
-        public AudioClip GetSound(int soundId)
+        public AudioData GetAudio(int soundId)
         {
-            return _soundById.TryGetValue(soundId, out var sound) ? sound : null;
+            return _audios[soundId];
+        }
+
+        public int GetAudioIndex(AudioData audio)
+        {
+            var index = 0;
+            for (var i = 0; i < _audios.Count; i++)
+            {
+                if (_audios[i] == audio)
+                {
+                    index = i;
+                }
+            }
+
+            return index;
         }
     }
 }

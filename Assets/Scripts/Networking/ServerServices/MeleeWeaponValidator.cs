@@ -12,12 +12,15 @@ namespace Networking.ServerServices
         private readonly IServer _server;
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly IParticleFactory _particleFactory;
+        private readonly AudioService _audioService;
         private readonly IExplosionArea _lineExplosionArea;
 
-        public MeleeWeaponValidator(IServer server, ICoroutineRunner coroutineRunner, IParticleFactory particleFactory)
+        public MeleeWeaponValidator(IServer server, ICoroutineRunner coroutineRunner, IParticleFactory particleFactory,
+            AudioService audioService)
         {
             _server = server;
             _particleFactory = particleFactory;
+            _audioService = audioService;
             _coroutineRunner = coroutineRunner;
             _lineExplosionArea = new LineExplosionArea(_server.MapProvider);
         }
@@ -39,11 +42,13 @@ namespace Networking.ServerServices
             var isSurface = ApplyRaycast(connection, ray, weapon, isStrongHit);
             weapon.IsReady = false;
             StartHitCoroutines(weapon);
+            _audioService.SendAudio(isSurface ? weapon.DiggingAudio : weapon.HittingAudio, connection.identity);
         }
 
         private void StartHitCoroutines(MeleeWeaponData meleeWeapon)
         {
-            _coroutineRunner.StartCoroutine(Utils.DoActionAfterDelay(() => ResetHit(meleeWeapon), meleeWeapon.TimeBetweenHit));
+            _coroutineRunner.StartCoroutine(Utils.DoActionAfterDelay(() => ResetHit(meleeWeapon),
+                meleeWeapon.TimeBetweenHit));
         }
 
         private void ResetHit(MeleeWeaponData meleeWeapon)

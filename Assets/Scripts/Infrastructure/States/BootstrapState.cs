@@ -53,6 +53,7 @@ namespace Infrastructure.States
             staticData.LoadPlayerCharacteristics();
             staticData.LoadMapConfigures();
             staticData.LoadLobbyBalance();
+            staticData.LoadSounds();
             _allServices.RegisterSingle<IInputService>(new StandaloneInputService());
             if (Constants.isLocalBuild)
             {

@@ -6,7 +6,7 @@ namespace Data
     {
         public readonly float Range;
         public readonly float TimeBetweenHit;
-        
+
         public readonly int DamageToPlayer;
         public readonly int DamageToBlock;
 
@@ -18,33 +18,29 @@ namespace Data
         public readonly float ChestMultiplier;
         public readonly float LegMultiplier;
         public readonly float ArmMultiplier;
-        
-        public AudioClip DiggingAudioClip;
-        public float DiggingVolume;
-        public AudioClip HitAudioClip;
-        public float HitVolume;
-        
+
+        public AudioData DiggingAudio;
+        public AudioData HittingAudio;
+
         public bool IsReady;
         public bool HasStrongHit;
 
-        public MeleeWeaponData(MeleeWeaponItem primaryMeleeWeapon)
+        public MeleeWeaponData(MeleeWeaponItem meleeWeapon)
         {
-            Range = primaryMeleeWeapon.range;
-            DamageToPlayer = primaryMeleeWeapon.damageToPlayer;
-            DamageToBlock = primaryMeleeWeapon.damageToBlock;
-            ID = primaryMeleeWeapon.id;
-            HeadMultiplier = primaryMeleeWeapon.headMultiplier;
-            ChestMultiplier = primaryMeleeWeapon.chestMultiplier;
-            LegMultiplier = primaryMeleeWeapon.legMultiplier;
-            ArmMultiplier = primaryMeleeWeapon.armMultiplier;
-            DiggingAudioClip = primaryMeleeWeapon.diggingAudioClip;
-            DiggingVolume = primaryMeleeWeapon.diggingVolume;
-            HitAudioClip = primaryMeleeWeapon.hitAudioClip;
-            HitVolume = primaryMeleeWeapon.hitVolume;
-            TimeBetweenHit = primaryMeleeWeapon.timeBetweenHit;
-            Prefab = primaryMeleeWeapon.prefab;
-            Icon = primaryMeleeWeapon.inventoryIcon;
-            HasStrongHit = primaryMeleeWeapon.hasStrongHit;
+            Range = meleeWeapon.range;
+            DamageToPlayer = meleeWeapon.damageToPlayer;
+            DamageToBlock = meleeWeapon.damageToBlock;
+            ID = meleeWeapon.id;
+            HeadMultiplier = meleeWeapon.headMultiplier;
+            ChestMultiplier = meleeWeapon.chestMultiplier;
+            LegMultiplier = meleeWeapon.legMultiplier;
+            ArmMultiplier = meleeWeapon.armMultiplier;
+            DiggingAudio = meleeWeapon.diggingAudio;
+            HittingAudio = meleeWeapon.diggingAudio;
+            TimeBetweenHit = meleeWeapon.timeBetweenHit;
+            Prefab = meleeWeapon.prefab;
+            Icon = meleeWeapon.inventoryIcon;
+            HasStrongHit = meleeWeapon.hasStrongHit;
             IsReady = true;
         }
     }

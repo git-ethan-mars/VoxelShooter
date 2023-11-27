@@ -13,12 +13,15 @@ namespace Networking.ServerServices
         private readonly IServer _server;
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly IParticleFactory _particleFactory;
+        private readonly AudioService _audioService;
 
-        public RangeWeaponValidator(IServer server, ICoroutineRunner coroutineRunner, IParticleFactory particleFactory)
+        public RangeWeaponValidator(IServer server, ICoroutineRunner coroutineRunner, IParticleFactory particleFactory,
+            AudioService audioService)
         {
             _server = server;
             _coroutineRunner = coroutineRunner;
             _particleFactory = particleFactory;
+            _audioService = audioService;
         }
 
         public void Shoot(NetworkConnectionToClient connection, Ray ray, bool requestIsButtonHolding)
@@ -32,6 +35,7 @@ namespace Networking.ServerServices
 
             if (!CanShoot(weapon) || requestIsButtonHolding != weapon.IsAutomatic)
             {
+                _audioService.StopContinuousSound(connection.identity);
                 return;
             }
 
@@ -44,8 +48,19 @@ namespace Networking.ServerServices
             connection.Send(new ShootResultResponse(weapon.BulletsInMagazine));
             StartShootCoroutines(weapon);
 
-            //GetComponent<SoundSynchronization>().PlayAudioClip(connection!.identity,
-            //    _audioClips.FindIndex(audioClip => audioClip == weapon.ShootAudioClip), weapon.ShootingVolume);
+            if (weapon.IsAutomatic)
+            {
+                _audioService.StartContinuousAudio(weapon.ShootingSound, connection.identity);
+            }
+            else
+            {
+                _audioService.SendAudio(weapon.ShootingSound, connection.identity);
+            }
+        }
+
+        public void CancelShoot(NetworkConnectionToClient connection)
+        {
+            _audioService.StopContinuousSound(connection.identity);
         }
 
         public void Reload(NetworkConnectionToClient connection)
@@ -66,8 +81,7 @@ namespace Networking.ServerServices
             connection.Send(new ReloadResultResponse(playerData.SelectedSlotIndex, weapon.TotalBullets,
                 weapon.BulletsInMagazine));
             StartReloadCoroutine(weapon);
-            //GetComponent<SoundSynchronization>().PlayAudioClip(connection!.identity,
-            //    _audioClips.FindIndex(audioClip => audioClip == weapon.ReloadingAudioClip), weapon.ReloadingVolume);
+            _audioService.SendAudio(weapon.ReloadingSound, connection.identity);
         }
 
         private void StartShootCoroutines(RangeWeaponData rangeWeapon)
