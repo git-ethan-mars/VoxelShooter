@@ -6,6 +6,7 @@ using Infrastructure;
 using Infrastructure.Factory;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
+using Infrastructure.Services.Storage;
 using Infrastructure.States;
 using MapLogic;
 using Networking.ClientServices;
@@ -77,6 +78,7 @@ namespace Networking
         private readonly NickNameHandler _nickNameHandler;
 
         public Client(GameStateMachine stateMachine, ICoroutineRunner coroutineRunner, IInputService inputService,
+            IStorageService storageService,
             IGameFactory gameFactory,
             IMeshFactory meshFactory,
             IStaticDataService staticData,
@@ -99,7 +101,9 @@ namespace Networking
             _scoreboardHandler = new ScoreboardHandler();
             _healthHandler = new HealthHandler();
             _changeItemModelHandler = new ChangeItemModelHandler(meshFactory, staticData);
-            _playerConfigureHandler = new PlayerConfigureHandler(uiFactory, inputService);
+            _playerConfigureHandler =
+                new PlayerConfigureHandler(this, particleFactory, uiFactory, meshFactory, inputService, storageService,
+                    staticData);
             _nickNameHandler = new NickNameHandler();
         }
 

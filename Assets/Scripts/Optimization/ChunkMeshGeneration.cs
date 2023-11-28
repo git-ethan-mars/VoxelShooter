@@ -1,6 +1,5 @@
 ﻿using System;
 using Data;
-using Extensions;
 using Generators;
 using Unity.Burst;
 using Unity.Collections;
@@ -143,7 +142,7 @@ namespace Optimization
             for (var i = 0; i < ChunkData.ChunkSizeCubed; i++)
             {
                 Faces[i] = Data.Faces.None;
-                if (!Blocks[i].Color.IsSolid()) continue;
+                if (!Blocks[i].IsSolid()) continue;
                 var x = i / ChunkData.ChunkSizeSquared;
                 var y = (i - x * ChunkData.ChunkSizeSquared) / ChunkData.ChunkSize;
                 var z = i - x * ChunkData.ChunkSizeSquared - y * ChunkData.ChunkSize;
@@ -204,25 +203,25 @@ namespace Optimization
             return !ChunkData.IsValidPosition(x, y + 1, z) &&
                    (upperNeighbourAddress == IntPtr.Zero ||
                     upperNeighbourAddress != IntPtr.Zero &&
-                    !upperNeighbourBlocks[x * ChunkData.ChunkSize + z].Color.IsSolid()) ||
+                    !upperNeighbourBlocks[x * ChunkData.ChunkSize + z].IsSolid()) ||
                    ChunkData.IsValidPosition(x, y + 1, z) &&
-                   !Blocks[x * ChunkData.ChunkSizeSquared + (y + 1) * ChunkData.ChunkSize + z].Color.IsSolid();
+                   !Blocks[x * ChunkData.ChunkSizeSquared + (y + 1) * ChunkData.ChunkSize + z].IsSolid();
         }
 
         private bool CheckBottomFace(int x, int y, int z, NativeArray<BlockData> lowerNeighboursBlocks,
             IntPtr lowerNeighbourAddress)
         {
             return !ChunkData.IsValidPosition(x, y - 1, z) && lowerNeighbourAddress != IntPtr.Zero &&
-                   !lowerNeighboursBlocks[x * ChunkData.ChunkSize + z].Color.IsSolid() ||
+                   !lowerNeighboursBlocks[x * ChunkData.ChunkSize + z].IsSolid() ||
                    ChunkData.IsValidPosition(x, y - 1, z) &&
-                   !Blocks[x * ChunkData.ChunkSizeSquared + (y - 1) * ChunkData.ChunkSize + z].Color.IsSolid();
+                   !Blocks[x * ChunkData.ChunkSizeSquared + (y - 1) * ChunkData.ChunkSize + z].IsSolid();
         }
 
         private bool CheckFrontFace(int x, int y, int z, NativeArray<BlockData> frontNeighbourBlocks,
             IntPtr frontNeighbourAddress)
         {
             return !ChunkData.IsValidPosition(x, y, z + 1) && frontNeighbourAddress != IntPtr.Zero &&
-                   !frontNeighbourBlocks[x * ChunkData.ChunkSize + y].Color.IsSolid() ||
+                   !frontNeighbourBlocks[x * ChunkData.ChunkSize + y].IsSolid() ||
                    ChunkData.IsValidPosition(x, y, z + 1) &&
                    !Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z + 1].IsSolid();
         }
@@ -231,9 +230,9 @@ namespace Optimization
             IntPtr backNeighbourAddress)
         {
             return !ChunkData.IsValidPosition(x, y, z - 1) && backNeighbourAddress != IntPtr.Zero &&
-                   !backNeighbourBlocks[x * ChunkData.ChunkSize + y].Color.IsSolid() ||
+                   !backNeighbourBlocks[x * ChunkData.ChunkSize + y].IsSolid() ||
                    ChunkData.IsValidPosition(x, y, z - 1) &&
-                   !Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z - 1].Color.IsSolid();
+                   !Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z - 1].IsSolid();
         }
 
 
@@ -241,18 +240,18 @@ namespace Optimization
             IntPtr rightNeighbourAddress)
         {
             return !ChunkData.IsValidPosition(x + 1, y, z) && rightNeighbourAddress != IntPtr.Zero &&
-                   !rightNeighbourBlocks[y * ChunkData.ChunkSize + z].Color.IsSolid() ||
+                   !rightNeighbourBlocks[y * ChunkData.ChunkSize + z].IsSolid() ||
                    ChunkData.IsValidPosition(x + 1, y, z) &&
-                   !Blocks[(x + 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color.IsSolid();
+                   !Blocks[(x + 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].IsSolid();
         }
 
         private bool CheckLeftFace(int x, int y, int z, NativeArray<BlockData> leftNeighbourBlocks,
             IntPtr leftNeighbourAddress)
         {
             return !ChunkData.IsValidPosition(x - 1, y, z) && leftNeighbourAddress != IntPtr.Zero &&
-                   !leftNeighbourBlocks[y * ChunkData.ChunkSize + z].Color.IsSolid() ||
+                   !leftNeighbourBlocks[y * ChunkData.ChunkSize + z].IsSolid() ||
                    ChunkData.IsValidPosition(x - 1, y, z) &&
-                   !Blocks[(x - 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].Color.IsSolid();
+                   !Blocks[(x - 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].IsSolid();
         }
     }
 }

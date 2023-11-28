@@ -1,12 +1,12 @@
-using System;
 using System.Collections.Generic;
+using Data;
+using Infrastructure;
 using Infrastructure.Factory;
-using Infrastructure.Services;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
+using Infrastructure.Services.Storage;
 using Inventory;
 using Mirror;
-using Networking;
 using TMPro;
 using UI;
 using UnityEngine;
@@ -15,24 +15,10 @@ namespace PlayerLogic
 {
     public class Player : NetworkBehaviour
     {
-        public event Action<int> HealthChanged;
-
-        public int Health
-        {
-            get => _health;
-            set
-            {
-                _health = value;
-                HealthChanged?.Invoke(_health);
-            }
-        }
-
-        private int _health;
-
-        public InventoryInput InventoryInput { get; private set; }
-        public List<int> ItemsIds { get; private set; }
+        public ObservableVariable<int> Health;
         public float PlaceDistance { get; private set; }
 
+        public PlayerRotation Rotation => _rotation;
 
         [SerializeField]
         private TextMeshProUGUI nickNameText;
@@ -48,6 +34,9 @@ namespace PlayerLogic
 
         [SerializeField]
         private GameObject nickNameCanvas;
+
+        public Transform BodyOrientation => bodyOrientation;
+
 
         [SerializeField]
         private Transform bodyOrientation;
@@ -67,26 +56,26 @@ namespace PlayerLogic
         private Hud _hud;
 
         private IInputService _inputService;
+        private InventorySystem _inventory;
 
         private PlayerMovement _movement;
         private PlayerRotation _rotation;
 
 
-        public void Construct(IUIFactory uiFactory, IInputService inputService, float placeDistance,
+        public void Construct(IUIFactory uiFactory, IMeshFactory meshFactory, IInputService inputService,
+            IStorageService storageService,
+            IStaticDataService staticData,
+            float placeDistance,
             List<int> itemIds, float speed, float jumpHeight, int health)
         {
             PlaceDistance = placeDistance;
-            ItemsIds = itemIds;
-            Health = health;
+            Health = new ObservableVariable<int>(health);
             _inputService = inputService;
-            InventoryInput = new InventoryInput(_inputService);
             _movement = new PlayerMovement(hitBox, rigidbody, bodyOrientation, speed, jumpHeight);
-            _rotation = new PlayerRotation(bodyOrientation, headPivot);
+            var sensitivity = storageService.Load<MouseSettingsData>(Constants.MouseSettingKey).GeneralSensitivity;
+            _rotation = new PlayerRotation(bodyOrientation, headPivot, sensitivity);
             _hud = uiFactory.CreateHud(this, inputService);
-            var weatherParticleSystem = AllServices.Container.Single<IStaticDataService>()
-                .GetMapConfigure(((CustomNetworkManager)NetworkManager.singleton).Client.Data.MapName).weather;
-            if (weatherParticleSystem)
-                Instantiate(weatherParticleSystem, bodyOrientation);
+            _inventory = new InventorySystem(_inputService, staticData, meshFactory, storageService, itemIds, _hud, this);
             TurnOffNickName();
             TurnOffBodyRender();
             MountCamera();
@@ -107,7 +96,7 @@ namespace PlayerLogic
             }
 
             _rotation.Rotate(_inputService.MouseAxis);
-            InventoryInput.Update();
+            _inventory.Update();
         }
 
         private void FixedUpdate()
@@ -151,6 +140,7 @@ namespace PlayerLogic
         {
             if (_hud != null)
             {
+                _inventory.Clear();
                 Destroy(_hud.gameObject);
             }
         }

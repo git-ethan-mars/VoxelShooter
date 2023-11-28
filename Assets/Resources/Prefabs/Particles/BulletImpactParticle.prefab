@@ -4904,4 +4904,5 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0.1
+  particleSystem: {fileID: 7346217845250167101}
   color: {r: 0, g: 0, b: 0, a: 0}

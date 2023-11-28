@@ -4,12 +4,12 @@ namespace Networking.Messages.Responses
 {
     public struct ItemUseResponse : NetworkMessage
     {
-        public readonly int ItemId;
+        public readonly int SlotIndex;
         public readonly int Count;
 
-        public ItemUseResponse(int itemId, int count)
+        public ItemUseResponse(int slotIndex, int count)
         {
-            ItemId = itemId;
+            SlotIndex = slotIndex;
             Count = count;
         }
     }

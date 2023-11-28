@@ -90,7 +90,7 @@ namespace Networking.ServerServices
             _entityPositionValidator.RemoveEntity(lootBox);
             if (_lootBoxes[lootBox] == LootBoxType.Ammo)
             {
-                PickUpAmmo(connection);
+                PickUpAmmoBox(connection);
             }
 
             if (_lootBoxes[lootBox] == LootBoxType.Health)
@@ -100,7 +100,7 @@ namespace Networking.ServerServices
 
             if (_lootBoxes[lootBox] == LootBoxType.Block)
             {
-                PickUpBox(connection);
+                PickUpBlockBox(connection);
             }
 
             lootBox.OnPickUp -= OnPickUp;
@@ -112,57 +112,59 @@ namespace Networking.ServerServices
             _server.Heal(connection, 50);
         }
 
-        private void PickUpBox(NetworkConnectionToClient receiver)
+        private void PickUpBlockBox(NetworkConnectionToClient receiver)
         {
             var result = _server.Data.TryGetPlayerData(receiver, out var playerData);
-            if (!result || !playerData.IsAlive) return;
-
-            foreach (var itemId in playerData.ItemIds)
+            if (!result || !playerData.IsAlive)
             {
-                var item = _server.Data.StaticData.GetItem(itemId);
+                return;
+            }
 
+            for (var i = 0; i < playerData.ItemIds.Count; i++)
+            {
+                var item = _server.Data.StaticData.GetItem(playerData.ItemIds[i]);
                 if (item.itemType == ItemType.Block)
                 {
-                    playerData.ItemCountById[itemId] += 50;
-                    receiver.Send(new ItemUseResponse(itemId, playerData.ItemCountById[itemId]));
+                    playerData.ItemCountById[playerData.ItemIds[i]] += 50;
+                    receiver.Send(new ItemUseResponse(i, playerData.ItemCountById[playerData.ItemIds[i]]));
                 }
             }
         }
 
-        private void PickUpAmmo(NetworkConnectionToClient receiver)
+        private void PickUpAmmoBox(NetworkConnectionToClient receiver)
         {
             var result = _server.Data.TryGetPlayerData(receiver, out var playerData);
             if (!result || !playerData.IsAlive) return;
 
-            foreach (var itemId in playerData.ItemIds)
+            for (var i = 0; i < playerData.ItemIds.Count; i++)
             {
-                var item = _server.Data.StaticData.GetItem(itemId);
+                var item = _server.Data.StaticData.GetItem(playerData.ItemIds[i]);
                 if (item.itemType == ItemType.RangeWeapon)
                 {
-                    var weapon = playerData.RangeWeaponsById[itemId];
+                    var weapon = playerData.RangeWeaponsById[playerData.ItemIds[i]];
                     weapon.TotalBullets += weapon.MagazineSize * 2;
-                    receiver.Send(new ReloadResultResponse(itemId, weapon.TotalBullets, weapon.BulletsInMagazine));
+                    receiver.Send(new ReloadResultResponse(i, weapon.TotalBullets, weapon.BulletsInMagazine));
                     continue;
                 }
 
                 if (item.itemType == ItemType.Tnt)
                 {
-                    playerData.ItemCountById[itemId] += 1;
-                    receiver.Send(new ItemUseResponse(itemId, playerData.ItemCountById[itemId]));
+                    playerData.ItemCountById[playerData.ItemIds[i]] += 1;
+                    receiver.Send(new ItemUseResponse(i, playerData.ItemCountById[playerData.ItemIds[i]]));
                     continue;
                 }
 
                 if (item.itemType == ItemType.Grenade)
                 {
-                    playerData.ItemCountById[itemId] += 1;
-                    receiver.Send(new ItemUseResponse(itemId, playerData.ItemCountById[itemId]));
+                    playerData.ItemCountById[playerData.ItemIds[i]] += 1;
+                    receiver.Send(new ItemUseResponse(i, playerData.ItemCountById[playerData.ItemIds[i]]));
                     continue;
                 }
 
                 if (item.itemType == ItemType.RocketLauncher)
                 {
-                    playerData.ItemCountById[itemId] += 1;
-                    receiver.Send(new ItemUseResponse(itemId, playerData.ItemCountById[itemId]));
+                    playerData.ItemCountById[playerData.ItemIds[i]] += 1;
+                    receiver.Send(new ItemUseResponse(i, playerData.ItemCountById[playerData.ItemIds[i]]));
                 }
             }
         }

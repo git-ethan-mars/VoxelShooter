@@ -4,6 +4,7 @@ using Infrastructure.Services;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.PlayerDataLoader;
 using Infrastructure.Services.StaticData;
+using Infrastructure.Services.Storage;
 
 namespace Infrastructure.States
 {
@@ -42,6 +43,7 @@ namespace Infrastructure.States
         private void RegisterServices()
         {
             _allServices.RegisterSingle<IStaticDataService>(new StaticDataService());
+            _allServices.RegisterSingle<IStorageService>(new JsonToFileStorageService());
             var staticData = _allServices.Single<IStaticDataService>();
             _allServices.RegisterSingle<IMapRepository>(new MapRepository(staticData));
             staticData.LoadItems();
@@ -63,6 +65,7 @@ namespace Infrastructure.States
             }
 
             _allServices.RegisterSingle<IParticleFactory>(new ParticleFactory(_allServices.Single<IAssetProvider>(),
+                _allServices.Single<IStaticDataService>(),
                 _coroutineRunner));
             _allServices.RegisterSingle<IMeshFactory>(new MeshFactory(_allServices.Single<IAssetProvider>()));
             _allServices.RegisterSingle<IEntityFactory>(new EntityFactory(_allServices.Single<IAssetProvider>()));
@@ -70,6 +73,7 @@ namespace Infrastructure.States
                 _allServices.Single<IStaticDataService>()));
             _allServices.RegisterSingle<IGameFactory>(
                 new GameFactory(_allServices.Single<IAssetProvider>(), _allServices.Single<IInputService>(),
+                    _allServices.Single<IStorageService>(),
                     _allServices.Single<IEntityFactory>(),
                     staticData, _allServices.Single<IParticleFactory>(), _allServices.Single<IMeshFactory>(),
                     _allServices.Single<IUIFactory>()));

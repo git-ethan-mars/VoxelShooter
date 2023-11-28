@@ -1,23 +1,21 @@
-﻿using System.Collections.Generic;
-using Inventory;
+﻿using Inventory;
+using Inventory.RangeWeapon;
 using Networking.Messages.Responses;
 
 namespace Networking.MessageHandlers.ResponseHandler
 {
     public class ShootResultHandler : ResponseHandler<ShootResultResponse>
     {
-        private readonly List<Slot> _slots;
+        private readonly InventorySystem _inventory;
 
-        public ShootResultHandler(List<Slot> slots)
+        public ShootResultHandler(InventorySystem inventory)
         {
-            _slots = slots;
+            _inventory = inventory;
         }
 
         protected override void OnResponseReceived(ShootResultResponse response)
         {
-            var shooting = (IShooting) _slots.Find(slot => slot.InventoryItem.id == response.WeaponId).ItemHandler;
-            shooting.BulletsInMagazine = response.BulletsInMagazine;
-            shooting.OnShootResult();
+            ((IShooting) _inventory.ActiveItemModel).BulletsInMagazine.Value = response.BulletsInMagazine;
         }
     }
 }

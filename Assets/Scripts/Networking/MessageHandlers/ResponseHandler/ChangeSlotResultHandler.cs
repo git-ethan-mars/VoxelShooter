@@ -3,22 +3,18 @@ using Networking.Messages.Responses;
 
 namespace Networking.MessageHandlers.ResponseHandler
 {
-    public class ChangeSlotResultHandler : ResponseHandler<ChangeSlotResultResponse>
+    public class ChangeSlotResultHandler : ResponseHandler<ChangeSlotResponse>
     {
-        private readonly InventoryController _inventoryController;
+        private readonly InventorySystem _inventory;
 
-        public ChangeSlotResultHandler(InventoryController inventoryController)
+        public ChangeSlotResultHandler(InventorySystem inventory)
         {
-            _inventoryController = inventoryController;
+            _inventory = inventory;
         }
 
-        protected override void OnResponseReceived(ChangeSlotResultResponse response)
+        protected override void OnResponseReceived(ChangeSlotResponse response)
         {
-            _inventoryController.Boarders[_inventoryController.ItemIndex].SetActive(false);
-            _inventoryController.Slots[_inventoryController.ItemIndex].ItemHandler.Unselect();
-            _inventoryController.ItemIndex = response.Index;
-            _inventoryController.Slots[_inventoryController.ItemIndex].ItemHandler.Select();
-            _inventoryController.Boarders[_inventoryController.ItemIndex].SetActive(true);
+            _inventory.SwitchActiveSlot(response.Index);
         }
     }
 }

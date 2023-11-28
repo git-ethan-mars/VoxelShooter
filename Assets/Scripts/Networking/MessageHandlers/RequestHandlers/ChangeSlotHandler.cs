@@ -26,10 +26,10 @@ namespace Networking.MessageHandlers.RequestHandlers
                 return;
             }
 
-            playerData.InventorySlotId = request.Index;
-            connection.Send(new ChangeSlotResultResponse(playerData.InventorySlotId));
+            playerData.SelectedSlotIndex = request.Index;
+            connection.Send(new ChangeSlotResponse(playerData.SelectedSlotIndex));
             NetworkServer.SendToReady(new ChangeItemModelResponse(connection.identity,
-                playerData.ItemIds[playerData.InventorySlotId]));
+                playerData.ItemIds[playerData.SelectedSlotIndex]));
         }
     }
 }

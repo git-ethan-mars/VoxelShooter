@@ -133,6 +133,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0.1
+  collider: {fileID: 887962197428128713}
   parachute: {fileID: 4814552783422771007}
 --- !u!114 &7023995344156866121
 MonoBehaviour:

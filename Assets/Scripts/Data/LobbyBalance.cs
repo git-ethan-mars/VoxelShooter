@@ -6,24 +6,18 @@ namespace Data
     public class LobbyBalance : ScriptableObject
     {
         [Header("Box spawn time")]
-        [Min(0)]
-        public int minBoxSpawnTime;
-
-        [Min(0)]
-        public int maxBoxSpawnTime;
+        [Min(1)]
+        public int boxSpawnTime;
 
         [Header("Spawn time")]
-        [Min(0)]
-        public int minSpawnTime;
-
-        [Min(0)]
-        public int maxSpawnTime;
+        [Min(1)]
+        public int spawnTime;
 
         [Header("Match duration")]
-        [Min(0)]
+        [Min(1)]
         public int minMatchDuration;
 
-        [Min(0)]
+        [Min(1)]
         public int maxMatchDuration;
     }
 }

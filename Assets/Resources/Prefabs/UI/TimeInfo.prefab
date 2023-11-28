@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7605663829676703079}
   - component: {fileID: 8759100264161774177}
   - component: {fileID: 6454754648433064695}
+  - component: {fileID: 6646651850018034957}
   m_Layer: 5
   m_Name: TimeInfo
   m_TagString: Untagged
@@ -59,7 +60,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_AdditionalShaderChannelsFlag: 25
+  m_AdditionalShaderChannelsFlag: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -117,6 +118,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   serverTimeText: {fileID: 3492710512274258355}
   respawnTimeText: {fileID: 7419560952268244195}
+  canvasGroup: {fileID: 6646651850018034957}
+--- !u!225 &6646651850018034957
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1735657623338339369}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &5173919268988017597
 GameObject:
   m_ObjectHideFlags: 0
@@ -321,7 +335,7 @@ MonoBehaviour:
   m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 826f3a6926e5ed14583e9ab0a32696ab, type: 2}
-  m_sharedMaterial: {fileID: -5574846122589945228, guid: 826f3a6926e5ed14583e9ab0a32696ab, type: 2}
+  m_sharedMaterial: {fileID: -4699972163460073869, guid: 826f3a6926e5ed14583e9ab0a32696ab, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

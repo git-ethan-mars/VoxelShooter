@@ -20,7 +20,7 @@ namespace Infrastructure.States
 
         public void Enter()
         {
-            _matchMenu = _uiFactory.CreateMatchMenu(_mapRepository, _stateMachine);
+            _matchMenu = _uiFactory.CreateMatchMenu(_stateMachine, _mapRepository);
         }
 
         public void Exit()

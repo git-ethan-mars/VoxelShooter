@@ -63,7 +63,7 @@ namespace CameraLogic
 
         private void SetupCamera()
         {
-            _cameraTransform = Camera.main.transform;
+            _cameraTransform = Camera.main.transform; // TODO : Bug here null ref
             _cameraTransform.parent = transform;
             _cameraTransform.position = Vector3.zero;
             _cameraTransform.rotation = Quaternion.identity;

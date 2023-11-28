@@ -2,11 +2,12 @@
 using Infrastructure.Services.Input;
 using Infrastructure.Services.PlayerDataLoader;
 using Infrastructure.Services.StaticData;
+using Infrastructure.Services.Storage;
 using Infrastructure.States;
-using Inventory;
 using Networking;
 using PlayerLogic;
 using UI;
+using UI.SettingsMenu;
 using UnityEngine;
 
 namespace Infrastructure.Factory
@@ -20,6 +21,7 @@ namespace Infrastructure.Factory
         private const string TimeCounterPath = "Prefabs/UI/TimeInfo";
         private const string ScoreboardPath = "Prefabs/UI/Scoreboard";
         private const string LoadingWindowPath = "Prefabs/UI/LoadingWindow";
+        private const string SettingsMenuPath = "Prefabs/UI/SettingsMenu";
         private readonly IAssetProvider _assets;
         private readonly IStaticDataService _staticData;
 
@@ -34,9 +36,8 @@ namespace Infrastructure.Factory
         {
             var hud = _assets.Instantiate(HudPath).GetComponent<Hud>();
             hud.Construct(inputService);
-            var inventoryController = hud.inventory.GetComponent<InventoryController>();
-            inventoryController.Construct(inputService, _assets, _staticData, hud, player);
             hud.healthCounter.Construct(player);
+            hud.palette.Construct(inputService);
             return hud;
         }
 
@@ -53,7 +54,7 @@ namespace Infrastructure.Factory
             return mainMenu;
         }
 
-        public GameObject CreateMatchMenu(IMapRepository mapRepository, GameStateMachine gameStateMachine)
+        public GameObject CreateMatchMenu(GameStateMachine gameStateMachine, IMapRepository mapRepository)
         {
             var matchMenu = _assets.Instantiate(MatchMenuPath);
             matchMenu.GetComponent<MatchMenu>().Construct(mapRepository, _staticData, gameStateMachine);
@@ -74,6 +75,13 @@ namespace Infrastructure.Factory
         public void CreateLoadingWindow(IClient client)
         {
             _assets.Instantiate(LoadingWindowPath).GetComponent<LoadingWindow>().Construct(client);
+        }
+
+        public GameObject CreateSettingsMenu(GameStateMachine gameStateMachine, IStorageService storageService)
+        {
+            var settingsMenu = _assets.Instantiate(SettingsMenuPath);
+            settingsMenu.GetComponent<SettingsMenu>().Construct(gameStateMachine, storageService);
+            return settingsMenu;
         }
     }
 }

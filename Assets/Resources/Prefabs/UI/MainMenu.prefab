@@ -239,6 +239,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   joinMatchButton: {fileID: 6574665460549933866}
   createMatchButton: {fileID: 6574665460197726164}
+  settingButton: {fileID: 6574665458850848070}
   exitButton: {fileID: 6574665460306759942}
 --- !u!1 &6574665459184950057
 GameObject:
