@@ -81,7 +81,6 @@ namespace PlayerLogic
             PlaceDistance = placeDistance;
             Health = new ObservableVariable<int>(health);
             _inputService = inputService;
-            _audio = new PlayerAudio(stepAudio, stepAudioData);
             _movement = new PlayerMovement(hitBox, rigidbody, bodyOrientation, speed, jumpHeight);
             var sensitivity = storageService.Load<MouseSettingsData>(Constants.MouseSettingKey).GeneralSensitivity;
             _rotation = new PlayerRotation(bodyOrientation, headPivot, sensitivity);
@@ -93,16 +92,21 @@ namespace PlayerLogic
             MountCamera();
         }
 
+        private void Start()
+        {
+            _audio = new PlayerAudio(stepAudio, stepAudioData);
+        }
+
         private void Update()
         {
-            /*if (_movement.MovementState == PlayerMovementState.Move)
+            if (Vector3.Scale(rigidbody.velocity, new Vector3(1, 0, 1)).magnitude > Constants.Epsilon)
             {
                 _audio.EnableStepSound();
             }
             else
             {
                 _audio.DisableStepSound();
-            }*/
+            }
 
             if (!isLocalPlayer)
             {
