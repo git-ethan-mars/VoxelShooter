@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: RifleShoot
   m_EditorClassIdentifier: 
   clip: {fileID: 8300000, guid: 2e459cd27f71f224ebbcde1e5950f9d9, type: 3}
-  volume: 0
+  volume: 1
   minDistance: 0
-  maxDistance: 0
+  maxDistance: 50

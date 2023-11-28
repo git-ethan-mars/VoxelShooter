@@ -33,5 +33,5 @@ MonoBehaviour:
   chestMultiplier: 1
   legMultiplier: 0.8
   armMultiplier: 0.6
-  shootingSound: {fileID: 0}
-  reloadingSound: {fileID: 0}
+  shootingSound: {fileID: 11400000, guid: 99fef55f8818002438ca06dd3cbef51f, type: 2}
+  reloadingSound: {fileID: 11400000, guid: 1afb59dd54d474c46b08dbf548e0ae83, type: 2}

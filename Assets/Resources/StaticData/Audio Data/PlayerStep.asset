@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: PlayerStep
   m_EditorClassIdentifier: 
   clip: {fileID: 8300000, guid: ac5f4287421a7624abe900b236c704cd, type: 3}
-  volume: 0
+  volume: 1
   minDistance: 0
-  maxDistance: 0
+  maxDistance: 50

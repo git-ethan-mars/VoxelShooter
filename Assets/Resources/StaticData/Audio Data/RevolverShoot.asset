@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: RevolverShoot
   m_EditorClassIdentifier: 
   clip: {fileID: 8300000, guid: 5bc3e13105a469d42b92872d84c47e5a, type: 3}
-  volume: 0
+  volume: 1
   minDistance: 0
-  maxDistance: 0
+  maxDistance: 50

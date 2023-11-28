@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: RifleReload
   m_EditorClassIdentifier: 
   clip: {fileID: 8300000, guid: 27795beba10a55e4da2b4c1210e0080a, type: 3}
-  volume: 0
+  volume: 1
   minDistance: 0
-  maxDistance: 0
+  maxDistance: 50

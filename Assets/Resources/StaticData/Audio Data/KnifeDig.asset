@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: KnifeDig
   m_EditorClassIdentifier: 
   clip: {fileID: 8300000, guid: 613f72723faec4849a39244e8dbf5d0a, type: 3}
-  volume: 0
+  volume: 1
   minDistance: 0
-  maxDistance: 0
+  maxDistance: 50

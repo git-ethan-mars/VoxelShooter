@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: ShotgunShoot
   m_EditorClassIdentifier: 
   clip: {fileID: 8300000, guid: 6fccd7e7c2e3f15418aa226445563722, type: 3}
-  volume: 0
+  volume: 1
   minDistance: 0
-  maxDistance: 0
+  maxDistance: 50

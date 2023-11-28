@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: PlayerHurt
   m_EditorClassIdentifier: 
   clip: {fileID: 8300000, guid: ac388e2b8febc484eb01da69c2e25927, type: 3}
-  volume: 0
+  volume: 1
   minDistance: 0
-  maxDistance: 0
+  maxDistance: 50
