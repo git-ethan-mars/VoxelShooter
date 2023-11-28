@@ -18,6 +18,6 @@ namespace Infrastructure.Services.StaticData
         LobbyBalance GetLobbyBalance();
         void LoadSounds();
         AudioData GetAudio(int soundId);
-        int GetAudioIndex(AudioData clip);
+        int GetAudioIndex(AudioData audio);
     }
 }

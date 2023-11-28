@@ -41,6 +41,8 @@ namespace Networking.MessageHandlers.RequestHandlers
             var rocket = _entityFactory.CreateRocket(request.Ray.origin + direction * 3,
                 Quaternion.LookRotation(direction), _server, _particleFactory, rocketData, connection, _audioService);
             rocket.GetComponent<Rigidbody>().velocity = direction * rocketData.speed;
+            NetworkServer.SendToReady(new PlayerSoundResponse(_staticData.GetAudioIndex(rocketData.reloadSound),
+                connection.identity));
         }
     }
 }

@@ -23,4 +23,5 @@ MonoBehaviour:
   speed: 80
   particlesSpeed: 7
   particlesCount: 100
-  explosionSound: {fileID: 11400000, guid: 9eebc9c80e42edd4f94203f43574c8b4, type: 2}
+  explosionSound: {fileID: 11400000, guid: 39f9e93379fb0de4686abc82d8ababc3, type: 2}
+  reloadSound: {fileID: 11400000, guid: 9b6f8cee3c44692429cf7b9fdf581a26, type: 2}
