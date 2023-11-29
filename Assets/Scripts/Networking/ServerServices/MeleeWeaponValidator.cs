@@ -1,3 +1,4 @@
+using System.Collections;
 using Data;
 using Explosions;
 using Infrastructure;
@@ -34,15 +35,29 @@ namespace Networking.ServerServices
             }
 
             var isSurface = ApplyRaycast(connection, ray, meleeWeapon, isStrongHit);
-            meleeWeaponData.IsReady = false;
-            _coroutineRunner.StartCoroutine(Utils.DoActionAfterDelay(() =>
-                ResetHit(meleeWeaponData), meleeWeapon.timeBetweenHit));
+            _coroutineRunner.StartCoroutine(ResetHit(connection, meleeWeapon, meleeWeaponData));
         }
 
-        private void ResetHit(MeleeWeaponData meleeWeapon)
+        private IEnumerator ResetHit(NetworkConnectionToClient connection, MeleeWeaponItem configure,
+            MeleeWeaponData data)
         {
-            if (meleeWeapon is not null)
-                meleeWeapon.IsReady = true;
+            data.IsReady = false;
+            var waitForHitReset = new WaitWithoutSlotChange(_server, connection, configure.timeBetweenHit);
+            while (true)
+            {
+                yield return waitForHitReset;
+                if (waitForHitReset.CompletedSuccessfully || waitForHitReset.IsAborted)
+                {
+                    break;
+                }
+
+                waitForHitReset = new WaitWithoutSlotChange(_server, connection, configure.timeBetweenHit);
+            }
+
+            if (waitForHitReset.CompletedSuccessfully)
+            {
+                data.IsReady = true;
+            }
         }
 
         private bool ApplyRaycast(NetworkConnectionToClient source, Ray ray, MeleeWeaponItem meleeWeapon,
