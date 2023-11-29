@@ -46,14 +46,15 @@ namespace Inventory
             {
                 if (item.itemType == ItemType.RangeWeapon)
                 {
+                    var rangeWeapon = (RangeWeaponItem) item;
                     _states.Add(new RangeWeaponState(_inventoryInput, storageService, rayCaster,
-                        new RangeWeaponData((RangeWeaponItem) item), Camera.main, player, hud));
+                        rangeWeapon, new RangeWeaponData(rangeWeapon), Camera.main, player, hud));
                 }
 
                 if (item.itemType == ItemType.MeleeWeapon)
                 {
                     _states.Add(new MeleeWeaponState(_inventoryInput, rayCaster, player,
-                        new MeleeWeaponData((MeleeWeaponItem) item)));
+                        (MeleeWeaponItem) item));
                 }
 
                 if (item.itemType == ItemType.Block)

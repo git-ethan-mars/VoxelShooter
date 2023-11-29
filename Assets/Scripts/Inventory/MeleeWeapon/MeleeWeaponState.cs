@@ -16,7 +16,7 @@ namespace Inventory.MeleeWeapon
         private readonly MeleeWeaponView _meleeWeaponView;
 
         public MeleeWeaponState(IInventoryInput inventoryInput, RayCaster rayCaster, Player player,
-            MeleeWeaponData configuration)
+            MeleeWeaponItem configuration)
         {
             _inventoryInput = inventoryInput;
             _meleeWeaponModel = new MeleeWeaponModel(rayCaster);

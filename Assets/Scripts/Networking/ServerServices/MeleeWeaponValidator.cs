@@ -25,25 +25,18 @@ namespace Networking.ServerServices
         public void Hit(NetworkConnectionToClient connection, Ray ray, bool isStrongHit)
         {
             var playerData = _server.Data.GetPlayerData(connection);
-            if (!playerData.MeleeWeaponsById.TryGetValue(playerData.ItemIds[playerData.SelectedSlotIndex],
-                    out var weapon))
+            var meleeWeapon = (MeleeWeaponItem) playerData.Items[playerData.SelectedSlotIndex];
+            var meleeWeaponData = (MeleeWeaponData) playerData.ItemData[playerData.SelectedSlotIndex];
+
+            if (!CanHit(meleeWeaponData))
             {
                 return;
             }
 
-            if (!CanHit(weapon))
-            {
-                return;
-            }
-
-            var isSurface = ApplyRaycast(connection, ray, weapon, isStrongHit);
-            weapon.IsReady = false;
-            StartHitCoroutines(weapon);
-        }
-
-        private void StartHitCoroutines(MeleeWeaponData meleeWeapon)
-        {
-            _coroutineRunner.StartCoroutine(Utils.DoActionAfterDelay(() => ResetHit(meleeWeapon), meleeWeapon.TimeBetweenHit));
+            var isSurface = ApplyRaycast(connection, ray, meleeWeapon, isStrongHit);
+            meleeWeaponData.IsReady = false;
+            _coroutineRunner.StartCoroutine(Utils.DoActionAfterDelay(() =>
+                ResetHit(meleeWeaponData), meleeWeapon.timeBetweenHit));
         }
 
         private void ResetHit(MeleeWeaponData meleeWeapon)
@@ -52,29 +45,29 @@ namespace Networking.ServerServices
                 meleeWeapon.IsReady = true;
         }
 
-        private bool ApplyRaycast(NetworkConnectionToClient source, Ray ray, MeleeWeaponData meleeWeapon,
+        private bool ApplyRaycast(NetworkConnectionToClient source, Ray ray, MeleeWeaponItem meleeWeapon,
             bool isStrongHit)
         {
-            var raycastResult = Physics.Raycast(ray, out var rayHit, meleeWeapon.Range, Constants.attackMask);
+            var raycastResult = Physics.Raycast(ray, out var rayHit, meleeWeapon.range, Constants.attackMask);
             if (!raycastResult) return false;
             if (rayHit.collider.CompareTag("Head"))
             {
-                HitImpact(source, rayHit, (int) (meleeWeapon.HeadMultiplier * meleeWeapon.DamageToPlayer));
+                HitImpact(source, rayHit, (int) (meleeWeapon.headMultiplier * meleeWeapon.damageToPlayer));
             }
 
             if (rayHit.collider.CompareTag("Leg"))
             {
-                HitImpact(source, rayHit, (int) (meleeWeapon.LegMultiplier * meleeWeapon.DamageToPlayer));
+                HitImpact(source, rayHit, (int) (meleeWeapon.legMultiplier * meleeWeapon.damageToPlayer));
             }
 
             if (rayHit.collider.CompareTag("Chest"))
             {
-                HitImpact(source, rayHit, (int) (meleeWeapon.ChestMultiplier * meleeWeapon.DamageToPlayer));
+                HitImpact(source, rayHit, (int) (meleeWeapon.chestMultiplier * meleeWeapon.damageToPlayer));
             }
 
             if (rayHit.collider.CompareTag("Arm"))
             {
-                HitImpact(source, rayHit, (int) (meleeWeapon.ArmMultiplier * meleeWeapon.DamageToPlayer));
+                HitImpact(source, rayHit, (int) (meleeWeapon.armMultiplier * meleeWeapon.damageToPlayer));
             }
 
             if (rayHit.collider.CompareTag("Chunk"))

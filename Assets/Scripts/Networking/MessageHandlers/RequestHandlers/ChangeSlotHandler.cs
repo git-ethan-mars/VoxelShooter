@@ -21,7 +21,7 @@ namespace Networking.MessageHandlers.RequestHandlers
                 return;
             }
 
-            if (request.Index < 0 || request.Index >= playerData.ItemIds.Count)
+            if (request.Index < 0 || request.Index >= playerData.Items.Count)
             {
                 return;
             }
@@ -29,7 +29,7 @@ namespace Networking.MessageHandlers.RequestHandlers
             playerData.SelectedSlotIndex = request.Index;
             connection.Send(new ChangeSlotResponse(playerData.SelectedSlotIndex));
             NetworkServer.SendToReady(new ChangeItemModelResponse(connection.identity,
-                playerData.ItemIds[playerData.SelectedSlotIndex]));
+                playerData.Items[playerData.SelectedSlotIndex].id));
         }
     }
 }

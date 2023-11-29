@@ -22,16 +22,16 @@ namespace Inventory.RangeWeapon
         private int _bulletsInMagazine;
 
         public RangeWeaponModel(IStorageService storageService, RayCaster rayCaster, Camera camera,
-            RangeWeaponData configure, Player player)
+            RangeWeaponItem configure, RangeWeaponData data, Player player)
         {
             var mouseSettings = storageService.Load<MouseSettingsData>(Constants.MouseSettingKey);
             _aimSensitivity = mouseSettings.AimSensitivity;
             _sensitivity = mouseSettings.GeneralSensitivity;
             _rayCaster = rayCaster;
-            _zoomService = new ZoomService(camera, configure.ZoomMultiplier);
+            _zoomService = new ZoomService(camera, configure.zoomMultiplier);
             _player = player;
-            BulletsInMagazine = new ObservableVariable<int>(configure.BulletsInMagazine);
-            TotalBullets = new ObservableVariable<int>(configure.TotalBullets);
+            BulletsInMagazine = new ObservableVariable<int>(data.BulletsInMagazine);
+            TotalBullets = new ObservableVariable<int>(data.TotalBullets);
         }
 
         public void ShootSingle()

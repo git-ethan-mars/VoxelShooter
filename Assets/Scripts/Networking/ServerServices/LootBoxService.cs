@@ -120,13 +120,12 @@ namespace Networking.ServerServices
                 return;
             }
 
-            for (var i = 0; i < playerData.ItemIds.Count; i++)
+            for (var i = 0; i < playerData.Items.Count; i++)
             {
-                var item = _server.Data.StaticData.GetItem(playerData.ItemIds[i]);
-                if (item.itemType == ItemType.Block)
+                if (playerData.Items[i].itemType == ItemType.Block)
                 {
-                    playerData.ItemCountById[playerData.ItemIds[i]] += 50;
-                    receiver.Send(new ItemUseResponse(i, playerData.ItemCountById[playerData.ItemIds[i]]));
+                    playerData.CountByItem[playerData.Items[i]] += 50;
+                    receiver.Send(new ItemUseResponse(i, playerData.CountByItem[playerData.Items[i]]));
                 }
             }
         }
@@ -136,35 +135,37 @@ namespace Networking.ServerServices
             var result = _server.Data.TryGetPlayerData(receiver, out var playerData);
             if (!result || !playerData.IsAlive) return;
 
-            for (var i = 0; i < playerData.ItemIds.Count; i++)
+            for (var i = 0; i < playerData.Items.Count; i++)
             {
-                var item = _server.Data.StaticData.GetItem(playerData.ItemIds[i]);
+                var item = playerData.Items[i];
+                var itemData = playerData.ItemData[i];
                 if (item.itemType == ItemType.RangeWeapon)
                 {
-                    var weapon = playerData.RangeWeaponsById[playerData.ItemIds[i]];
-                    weapon.TotalBullets += weapon.MagazineSize * 2;
-                    receiver.Send(new ReloadResultResponse(i, weapon.TotalBullets, weapon.BulletsInMagazine));
+                    var rangeWeapon = (RangeWeaponItem) item;
+                    var rangeWeaponData = (RangeWeaponData) itemData;
+                    rangeWeaponData.TotalBullets += rangeWeapon.magazineSize * 2;
+                    receiver.Send(new ReloadResultResponse(i, rangeWeaponData.TotalBullets, rangeWeaponData.BulletsInMagazine));
                     continue;
                 }
 
                 if (item.itemType == ItemType.Tnt)
                 {
-                    playerData.ItemCountById[playerData.ItemIds[i]] += 1;
-                    receiver.Send(new ItemUseResponse(i, playerData.ItemCountById[playerData.ItemIds[i]]));
+                    playerData.CountByItem[item] += 1;
+                    receiver.Send(new ItemUseResponse(i, playerData.CountByItem[item]));
                     continue;
                 }
 
                 if (item.itemType == ItemType.Grenade)
                 {
-                    playerData.ItemCountById[playerData.ItemIds[i]] += 1;
-                    receiver.Send(new ItemUseResponse(i, playerData.ItemCountById[playerData.ItemIds[i]]));
+                    playerData.CountByItem[item] += 1;
+                    receiver.Send(new ItemUseResponse(i, playerData.CountByItem[item]));
                     continue;
                 }
 
                 if (item.itemType == ItemType.RocketLauncher)
                 {
-                    playerData.ItemCountById[playerData.ItemIds[i]] += 1;
-                    receiver.Send(new ItemUseResponse(i, playerData.ItemCountById[playerData.ItemIds[i]]));
+                    playerData.CountByItem[item] += 1;
+                    receiver.Send(new ItemUseResponse(i, playerData.CountByItem[item]));
                 }
             }
         }
