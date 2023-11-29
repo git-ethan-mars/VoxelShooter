@@ -10,11 +10,11 @@ namespace Rendering
         private readonly RayCaster _rayCaster;
         private readonly float _placeDistance;
 
-        public CubeRenderer(LineRenderer lineRenderer, RayCaster rayCaster, Player player)
+        public CubeRenderer(LineRenderer lineRenderer, RayCaster rayCaster, float drawDistance)
         {
             _lineRenderer = lineRenderer;
             _rayCaster = rayCaster;
-            _placeDistance = player.PlaceDistance;
+            _placeDistance = drawDistance;
         }
 
         public void EnableCube()

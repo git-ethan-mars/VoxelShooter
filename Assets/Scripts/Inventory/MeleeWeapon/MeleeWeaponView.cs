@@ -15,7 +15,7 @@ namespace Inventory.MeleeWeapon
 
         public MeleeWeaponView(RayCaster rayCaster, Player player, MeleeWeaponItem configure)
         {
-            _cubeRenderer = new CubeRenderer(player.GetComponent<LineRenderer>(), rayCaster, player);
+            _cubeRenderer = new CubeRenderer(player.GetComponent<LineRenderer>(), rayCaster, configure.range);
             Icon = configure.inventoryIcon;
         }
 
