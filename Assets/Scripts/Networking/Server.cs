@@ -55,7 +55,7 @@ namespace Networking
             _entityPositionValidator = new EntityPositionValidator(MapUpdater, MapProvider);
             _spawnPointService =
                 new SpawnPointService(MapProvider, gameFactory, entityFactory, _entityPositionValidator);
-            _playerFactory = new PlayerFactory(this, assets, _spawnPointService);
+            _playerFactory = new PlayerFactory(assets, _spawnPointService);
             Data = new ServerData(staticData);
             _serverTimer = new ServerTimer(networkManager, serverSettings.MaxDuration);
             _boxDropService = new BoxDropService(this, networkManager, serverSettings, entityFactory,
@@ -121,7 +121,7 @@ namespace Networking
                 }
 
                 playerData.PlayerStateMachine.Enter<DeathState>();
-                var spectator = _playerFactory.CreateSpectatorPlayer();
+                var spectator = _playerFactory.CreateSpectatorPlayer(connection.identity.transform.position);
                 ReplacePlayer(connection, spectator);
                 var respawnTimer = new RespawnTimer(_networkManager, connection, _serverSettings.SpawnTime,
                     () => RespawnPlayer(connection));
@@ -221,8 +221,9 @@ namespace Networking
             Data.AddKill(killer, victim);
             var playerData = Data.GetPlayerData(victim);
             playerData.PlayerStateMachine.Enter<DeathState>();
-            var spectatorPlayer = _playerFactory.CreateSpectatorPlayer();
+            var spectatorPlayer = _playerFactory.CreateSpectatorPlayer(tombstonePosition);
             ReplacePlayer(victim, spectatorPlayer);
+            victim.Send(new SpectatorConfigureResponse());
             var respawnTimer = new RespawnTimer(_networkManager, victim, _serverSettings.SpawnTime,
                 () => RespawnPlayer(victim));
             respawnTimer.Start();
