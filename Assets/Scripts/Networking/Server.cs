@@ -125,6 +125,7 @@ namespace Networking
                 playerData.PlayerStateMachine.Enter<DeathState>();
                 var spectator = _playerFactory.CreateSpectatorPlayer(connection.identity.transform.position);
                 ReplacePlayer(connection, spectator);
+                connection.Send(new SpectatorConfigureResponse());
                 var respawnTimer = new RespawnTimer(_customNetworkManager, connection, _serverSettings.SpawnTime,
                     () => RespawnPlayer(connection));
                 respawnTimer.Start();
@@ -225,6 +226,7 @@ namespace Networking
             playerData.PlayerStateMachine.Enter<DeathState>();
             var spectatorPlayer = _playerFactory.CreateSpectatorPlayer(tombstonePosition);
             ReplacePlayer(victim, spectatorPlayer);
+            victim.Send(new SpectatorConfigureResponse());
             var respawnTimer = new RespawnTimer(_customNetworkManager, victim, _serverSettings.SpawnTime,
                 () => RespawnPlayer(victim));
             respawnTimer.Start();
