@@ -30,7 +30,7 @@ namespace Networking
         private readonly ServerTimer _serverTimer;
         private readonly IEntityFactory _entityFactory;
         private readonly IPlayerFactory _playerFactory;
-        private readonly ICoroutineRunner _coroutineRunner;
+        private readonly ICoroutineRunner _customNetworkManager;
         private readonly AddBlocksHandler _addBlocksHandler;
         private readonly ChangeClassHandler _changeClassHandler;
         private readonly GrenadeSpawnHandler _grenadeSpawnHandler;
@@ -44,40 +44,40 @@ namespace Networking
         private readonly HitHandler _hitHandler;
         private readonly AuthenticationHandler _authenticationHandler;
 
-        public Server(CustomNetworkManager coroutineRunner, IStaticDataService staticData,
+        public Server(CustomNetworkManager customNetworkManager, IStaticDataService staticData,
             ServerSettings serverSettings, IAssetProvider assets, IGameFactory gameFactory,
             IParticleFactory particleFactory, IEntityFactory entityFactory)
         {
-            _coroutineRunner = coroutineRunner;
+            _customNetworkManager = customNetworkManager;
             _serverSettings = serverSettings;
             _entityFactory = entityFactory;
             MapProvider = MapReader.ReadFromFile(serverSettings.MapName, staticData);
-            MapUpdater = new MapUpdater(coroutineRunner, MapProvider);
+            MapUpdater = new MapUpdater(customNetworkManager, MapProvider);
             _entityPositionValidator = new EntityPositionValidator(MapUpdater, MapProvider);
             _spawnPointService =
                 new SpawnPointService(MapProvider, gameFactory, entityFactory, _entityPositionValidator);
-            _playerFactory = new PlayerFactory(this, assets, _spawnPointService);
+            _playerFactory = new PlayerFactory(assets, _spawnPointService);
             Data = new ServerData(staticData);
-            _serverTimer = new ServerTimer(coroutineRunner, serverSettings.MaxDuration);
-            _boxDropService = new BoxDropService(this, coroutineRunner, serverSettings, entityFactory,
+            _serverTimer = new ServerTimer(customNetworkManager, serverSettings.MaxDuration);
+            _boxDropService = new BoxDropService(this, customNetworkManager, serverSettings, entityFactory,
                 _entityPositionValidator, gameFactory);
             var sphereExplosionArea = new SphereExplosionArea(MapProvider);
             var singleExplosionBehaviour = new SingleExplosionBehaviour(this, particleFactory,
                 sphereExplosionArea);
             var chainExplosionBehaviour = new ChainExplosionBehaviour(this, particleFactory,
                 sphereExplosionArea);
-            var rangeWeaponValidator = new RangeWeaponValidator(this, coroutineRunner, particleFactory);
-            var meleeWeaponValidator = new MeleeWeaponValidator(this, coroutineRunner, particleFactory);
+            var rangeWeaponValidator = new RangeWeaponValidator(this, customNetworkManager, particleFactory);
+            var meleeWeaponValidator = new MeleeWeaponValidator(this, customNetworkManager, particleFactory);
             _addBlocksHandler = new AddBlocksHandler(this);
             _changeClassHandler = new ChangeClassHandler(this);
             _changeSlotHandler = new ChangeSlotHandler(this);
             _incrementSlotIndexHandler = new IncrementSlotIndexHandler(this);
             _decrementSlotIndexHandler = new DecrementSlotIndexHandler(this);
-            _grenadeSpawnHandler = new GrenadeSpawnHandler(this, coroutineRunner, entityFactory,
+            _grenadeSpawnHandler = new GrenadeSpawnHandler(this, customNetworkManager, entityFactory,
                 singleExplosionBehaviour);
-            _rocketSpawnHandler = new RocketSpawnHandler(this, coroutineRunner, entityFactory, particleFactory);
+            _rocketSpawnHandler = new RocketSpawnHandler(this, customNetworkManager, entityFactory, particleFactory);
             _tntSpawnHandler =
-                new TntSpawnHandler(this, coroutineRunner, entityFactory, chainExplosionBehaviour);
+                new TntSpawnHandler(this, customNetworkManager, entityFactory, chainExplosionBehaviour);
             _shootHandler = new ShootHandler(this, rangeWeaponValidator);
             _reloadHandler = new ReloadHandler(this, rangeWeaponValidator);
             _hitHandler = new HitHandler(this, meleeWeaponValidator);
@@ -123,9 +123,9 @@ namespace Networking
                 }
 
                 playerData.PlayerStateMachine.Enter<DeathState>();
-                var spectator = _playerFactory.CreateSpectatorPlayer();
+                var spectator = _playerFactory.CreateSpectatorPlayer(connection.identity.transform.position);
                 ReplacePlayer(connection, spectator);
-                var respawnTimer = new RespawnTimer(_coroutineRunner, connection, _serverSettings.SpawnTime,
+                var respawnTimer = new RespawnTimer(_customNetworkManager, connection, _serverSettings.SpawnTime,
                     () => RespawnPlayer(connection));
                 respawnTimer.Start();
             }
@@ -223,9 +223,9 @@ namespace Networking
             Data.AddKill(killer, victim);
             var playerData = Data.GetPlayerData(victim);
             playerData.PlayerStateMachine.Enter<DeathState>();
-            var spectatorPlayer = _playerFactory.CreateSpectatorPlayer();
+            var spectatorPlayer = _playerFactory.CreateSpectatorPlayer(tombstonePosition);
             ReplacePlayer(victim, spectatorPlayer);
-            var respawnTimer = new RespawnTimer(_coroutineRunner, victim, _serverSettings.SpawnTime,
+            var respawnTimer = new RespawnTimer(_customNetworkManager, victim, _serverSettings.SpawnTime,
                 () => RespawnPlayer(victim));
             respawnTimer.Start();
             NetworkServer.SendToReady(new ScoreboardResponse(Data.GetScoreData()));

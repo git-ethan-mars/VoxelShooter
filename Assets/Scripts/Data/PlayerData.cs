@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Infrastructure.Services.StaticData;
-using Mirror;
 using PlayerLogic.States;
 using Steamworks;
 
@@ -21,7 +20,6 @@ namespace Data
         public List<InventoryItem> Items { get; set; }
         public List<IMutableItemData> ItemData { get; set; }
         public Dictionary<InventoryItem, int> CountByItem { get; set; }
-        public NetworkConnectionToClient SpectatedPlayer { get; set; }
 
         public PlayerData(CSteamID steamID, string nickName, IStaticDataService staticDataService)
         {

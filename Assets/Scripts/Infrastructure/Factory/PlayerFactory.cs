@@ -1,5 +1,4 @@
-﻿using CameraLogic;
-using Infrastructure.AssetManagement;
+﻿using Infrastructure.AssetManagement;
 using Networking;
 using UnityEngine;
 
@@ -11,12 +10,10 @@ namespace Infrastructure.Factory
         private const string SpectatorPlayerPath = "Prefabs/Spectator player";
 
         private readonly IAssetProvider _assets;
-        private readonly IServer _server;
         private readonly SpawnPointService _spawnPointService;
 
-        public PlayerFactory(IServer server, IAssetProvider assets, SpawnPointService spawnPointService)
+        public PlayerFactory(IAssetProvider assets, SpawnPointService spawnPointService)
         {
-            _server = server;
             _spawnPointService = spawnPointService;
             _assets = assets;
         }
@@ -27,10 +24,9 @@ namespace Infrastructure.Factory
             return player;
         }
 
-        public GameObject CreateSpectatorPlayer()
+        public GameObject CreateSpectatorPlayer(Vector3 deathPosition)
         {
-            var spectator = _assets.Instantiate(SpectatorPlayerPath);
-            spectator.GetComponent<Spectator>().Construct(_server);
+            var spectator = _assets.Instantiate(SpectatorPlayerPath, deathPosition, Quaternion.identity);
             return spectator;
         }
     }

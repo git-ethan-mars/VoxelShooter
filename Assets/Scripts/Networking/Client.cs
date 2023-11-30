@@ -75,6 +75,7 @@ namespace Networking
         private readonly HealthHandler _healthHandler;
         private readonly ChangeItemModelHandler _changeItemModelHandler;
         private readonly PlayerConfigureHandler _playerConfigureHandler;
+        private readonly SpectatorConfigureHandler _spectatorConfigureHandler;
         private readonly NickNameHandler _nickNameHandler;
 
         public Client(GameStateMachine stateMachine, ICoroutineRunner coroutineRunner, IInputService inputService,
@@ -104,6 +105,7 @@ namespace Networking
             _playerConfigureHandler =
                 new PlayerConfigureHandler(this, particleFactory, uiFactory, meshFactory, inputService, storageService,
                     staticData);
+            _spectatorConfigureHandler = new SpectatorConfigureHandler(inputService, storageService);
             _nickNameHandler = new NickNameHandler();
         }
 
@@ -118,7 +120,6 @@ namespace Networking
         {
             UnregisterHandlers();
             Data.State = ClientState.NotConnected;
-            _gameFactory.CreateCamera();
             GameFinished?.Invoke();
             _coroutineRunner.StartCoroutine(Utils.DoActionAfterDelay(_stateMachine.Enter<MainMenuState>,
                 ShowResultsDuration));
@@ -136,6 +137,7 @@ namespace Networking
             _healthHandler.Register();
             _changeItemModelHandler.Register();
             _playerConfigureHandler.Register();
+            _spectatorConfigureHandler.Register();
             _nickNameHandler.Register();
         }
 
@@ -151,6 +153,7 @@ namespace Networking
             _healthHandler.Unregister();
             _changeItemModelHandler.Unregister();
             _playerConfigureHandler.Unregister();
+            _spectatorConfigureHandler.Unregister();
             _nickNameHandler.Unregister();
         }
 
