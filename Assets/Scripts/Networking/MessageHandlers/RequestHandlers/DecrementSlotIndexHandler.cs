@@ -22,11 +22,11 @@ namespace Networking.MessageHandlers.RequestHandlers
                 return;
             }
 
-            playerData.SelectedSlotIndex = (playerData.SelectedSlotIndex - 1 + playerData.ItemIds.Count) %
-                                           playerData.ItemIds.Count;
+            playerData.SelectedSlotIndex = (playerData.SelectedSlotIndex - 1 + playerData.Items.Count) %
+                                           playerData.Items.Count;
             connection.Send(new ChangeSlotResponse(playerData.SelectedSlotIndex));
             NetworkServer.SendToReady(new ChangeItemModelResponse(connection.identity,
-                playerData.ItemIds[playerData.SelectedSlotIndex]));
+                playerData.Items[playerData.SelectedSlotIndex].id));
         }
     }
 }

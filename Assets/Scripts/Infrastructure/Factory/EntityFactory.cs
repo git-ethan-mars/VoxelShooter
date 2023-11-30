@@ -50,6 +50,7 @@ namespace Infrastructure.Factory
         {
             var rocket = _assets.Instantiate(RocketPath, position, rotation);
             rocket.GetComponent<Rocket>().Construct(server, rocketData, owner, particleFactory);
+            
             NetworkServer.Spawn(rocket);
             return rocket;
         }
