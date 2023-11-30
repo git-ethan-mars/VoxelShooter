@@ -22,7 +22,6 @@ namespace Data
         public int SelectedSlotIndex { get; set; }
         public List<int> ItemIds { get; set; }
         public Dictionary<int, int> ItemCountById { get; set; }
-        public NetworkConnectionToClient SpectatedPlayer { get; set; }
 
         public PlayerData(CSteamID steamID, string nickName, IStaticDataService staticDataService)
         {
