@@ -4,11 +4,11 @@ namespace Data
 {
     public class MouseSettingsData
     {
-        public readonly int GeneralSensitivity;
-        public readonly int AimSensitivity;
+        public readonly float GeneralSensitivity;
+        public readonly float AimSensitivity;
 
         [JsonConstructor]
-        public MouseSettingsData(int generalSensitivity, int aimSensitivity)
+        public MouseSettingsData(float generalSensitivity, float aimSensitivity)
         {
             GeneralSensitivity = generalSensitivity;
             AimSensitivity = aimSensitivity;
@@ -16,8 +16,8 @@ namespace Data
 
         public MouseSettingsData()
         {
-            GeneralSensitivity = 50;
-            AimSensitivity = 50;
+            GeneralSensitivity = 0.5f;
+            AimSensitivity = 0.5f;
         }
     }
 }

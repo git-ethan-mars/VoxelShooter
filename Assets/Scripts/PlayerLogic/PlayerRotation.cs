@@ -1,13 +1,11 @@
 using System;
-using Data;
-using Infrastructure.Services.Storage;
 using UnityEngine;
 
 namespace PlayerLogic
 {
     public class PlayerRotation
     {
-        private const float SensitivityMultiplier = 2.0f;
+        private const float SensitivityMultiplier = 100.0f;
 
         public float Sensitivity { get; set; }
 
