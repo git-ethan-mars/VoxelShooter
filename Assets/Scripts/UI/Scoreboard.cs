@@ -53,11 +53,11 @@ namespace UI
 
             for (var i = 0; i < scoreBoardData.Count; i++)
             {
-                scores[i].nickName.SetText(scoreBoardData[i].NickName);
-                scores[i].kills.SetText(scoreBoardData[i].Kills.ToString());
-                scores[i].deaths.SetText(scoreBoardData[i].Deaths.ToString());
-                scores[i].classText.SetText(scoreBoardData[i].GameClass.ToString());
-                scores[i].avatar.texture = _avatarLoader.RequestAvatar(scoreBoardData[i].SteamID);
+                scores[i].NickName.SetText(scoreBoardData[i].NickName);
+                scores[i].Kills.SetText(scoreBoardData[i].Kills.ToString());
+                scores[i].Deaths.SetText(scoreBoardData[i].Deaths.ToString());
+                scores[i].ClassText.SetText(scoreBoardData[i].GameClass.ToString());
+                scores[i].Avatar.texture = _avatarLoader.RequestAvatar(scoreBoardData[i].SteamID);
                 scores[i].gameObject.SetActive(true);
             }
         }

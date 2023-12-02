@@ -6,10 +6,29 @@ namespace UI
 {
     public class ScoreUI : MonoBehaviour
     {
-        public RawImage avatar;
-        public TextMeshProUGUI nickName;
-        public TextMeshProUGUI kills;
-        public TextMeshProUGUI deaths;
-        public TextMeshProUGUI classText;
+        [SerializeField]
+        private RawImage avatar;
+
+        public RawImage Avatar => avatar;
+
+        [SerializeField]
+        private TextMeshProUGUI nickName;
+
+        public TextMeshProUGUI NickName => nickName;
+
+        [SerializeField]
+        private TextMeshProUGUI kills;
+
+        public TextMeshProUGUI Kills => kills;
+
+        [SerializeField]
+        private TextMeshProUGUI deaths;
+
+        public TextMeshProUGUI Deaths => deaths;
+
+        [SerializeField]
+        private TextMeshProUGUI classText;
+
+        public TextMeshProUGUI ClassText => classText;
     }
 }
