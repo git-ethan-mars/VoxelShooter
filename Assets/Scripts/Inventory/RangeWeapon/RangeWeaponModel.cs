@@ -17,14 +17,14 @@ namespace Inventory.RangeWeapon
         private readonly RayCaster _rayCaster;
         private readonly ZoomService _zoomService;
         private readonly float _aimSensitivity;
-        private readonly int _sensitivity;
+        private readonly float _sensitivity;
         private readonly Player _player;
         private int _bulletsInMagazine;
 
         public RangeWeaponModel(IStorageService storageService, RayCaster rayCaster, Camera camera,
             RangeWeaponData configure, Player player)
         {
-            var mouseSettings = storageService.Load<MouseSettingsData>(Constants.MouseSettingKey);
+            var mouseSettings = storageService.Load<MouseSettingsData>(Constants.MouseSettingsKey);
             _aimSensitivity = mouseSettings.AimSensitivity;
             _sensitivity = mouseSettings.GeneralSensitivity;
             _rayCaster = rayCaster;

@@ -72,7 +72,7 @@ namespace PlayerLogic
             Health = new ObservableVariable<int>(health);
             _inputService = inputService;
             _movement = new PlayerMovement(hitBox, rigidbody, bodyOrientation, speed, jumpHeight);
-            var sensitivity = storageService.Load<MouseSettingsData>(Constants.MouseSettingKey).GeneralSensitivity;
+            var sensitivity = storageService.Load<MouseSettingsData>(Constants.MouseSettingsKey).GeneralSensitivity;
             _rotation = new PlayerRotation(bodyOrientation, headPivot, sensitivity);
             _hud = uiFactory.CreateHud(this, inputService);
             _inventory = new InventorySystem(_inputService, staticData, meshFactory, storageService, itemIds, _hud, this);
