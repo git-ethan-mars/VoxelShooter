@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 7243867904417476519}
   - component: {fileID: 7486787625224097987}
   - component: {fileID: 8144455097408562770}
-  - component: {fileID: 6827777637336251150}
   - component: {fileID: 5963810836163363616}
   m_Layer: 0
   m_Name: Spectator player
@@ -62,24 +61,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: eace64136c9009d41a25b3da264a7ee1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0.1
-  sensitivityX: 400
-  sensitivityY: 400
-  distance: 5
---- !u!114 &6827777637336251150
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7261819779245193037}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b903dada2e86495dbe83d94ffb38662e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   syncDirection: 0

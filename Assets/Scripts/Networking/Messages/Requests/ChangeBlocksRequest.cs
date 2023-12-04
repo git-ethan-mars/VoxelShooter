@@ -8,13 +8,11 @@ namespace Networking.Messages.Requests
     {
         public readonly Vector3Int[] GlobalPositions;
         public readonly BlockData[] Blocks;
-        public readonly int ItemId;
 
-        public AddBlocksRequest(Vector3Int[] globalPositions, BlockData[] blocks, int itemId)
+        public AddBlocksRequest(Vector3Int[] globalPositions, BlockData[] blocks)
         {
             GlobalPositions = globalPositions;
             Blocks = blocks;
-            ItemId = itemId;
         }
     }
 }

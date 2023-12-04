@@ -4,7 +4,6 @@ using Data;
 using Explosions;
 using Infrastructure;
 using Infrastructure.Factory;
-using Infrastructure.Services.StaticData;
 using Mirror;
 using Networking.Messages.Requests;
 using Networking.Messages.Responses;
@@ -16,32 +15,30 @@ namespace Networking.MessageHandlers.RequestHandlers
     {
         private readonly IServer _server;
         private readonly IEntityFactory _entityFactory;
-        private readonly IStaticDataService _staticData;
         private readonly SingleExplosionBehaviour _singleExplosionBehaviour;
         private readonly ICoroutineRunner _coroutineRunner;
 
         public GrenadeSpawnHandler(IServer server, ICoroutineRunner coroutineRunner, IEntityFactory entityFactory,
-            IStaticDataService staticData, SingleExplosionBehaviour singleExplosionBehaviour)
+            SingleExplosionBehaviour singleExplosionBehaviour)
         {
             _server = server;
             _entityFactory = entityFactory;
-            _staticData = staticData;
             _singleExplosionBehaviour = singleExplosionBehaviour;
             _coroutineRunner = coroutineRunner;
         }
 
         protected override void OnRequestReceived(NetworkConnectionToClient connection, GrenadeSpawnRequest request)
         {
-            var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
+            var result = _server.Data.TryGetPlayerData(connection, out var playerData);
             if (!result || !playerData.IsAlive) return;
-            var grenadeCount = playerData.ItemCountById[request.ItemId];
+            var grenadeCount = playerData.CountByItem[playerData.Items[playerData.SelectedSlotIndex]];
             if (grenadeCount <= 0)
                 return;
-            playerData.ItemCountById[request.ItemId] = grenadeCount - 1;
-            connection.Send(new ItemUseResponse(request.ItemId, grenadeCount - 1));
+            playerData.CountByItem[playerData.Items[playerData.SelectedSlotIndex]] = grenadeCount - 1;
+            connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex, grenadeCount - 1));
             var grenade = _entityFactory.CreateGrenade(request.Ray.origin, Quaternion.identity);
             grenade.GetComponent<Rigidbody>().AddForce(request.Ray.direction * request.ThrowForce);
-            var grenadeData = (GrenadeItem) _staticData.GetItem(request.ItemId);
+            var grenadeData = (GrenadeItem) playerData.Items[playerData.SelectedSlotIndex];
             _coroutineRunner.StartCoroutine(ExplodeGrenade(grenade, grenadeData.delayInSeconds, grenadeData.radius,
                 grenadeData.damage, grenadeData.particlesSpeed, grenadeData.particlesCount, connection));
         }

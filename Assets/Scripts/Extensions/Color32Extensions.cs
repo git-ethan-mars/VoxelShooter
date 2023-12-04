@@ -1,5 +1,4 @@
-﻿using Data;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Extensions
 {
@@ -9,11 +8,6 @@ namespace Extensions
         {
             return firstColor.r == secondColor.r && firstColor.g == secondColor.g && firstColor.b == secondColor.b &&
                    firstColor.a == secondColor.a;
-        }
-
-        public static bool IsSolid(this Color32 color)
-        {
-            return !IsEquals(color, BlockColor.empty);
         }
     }
 }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Data;
 using Infrastructure.Factory;
-using Infrastructure.Services.StaticData;
 using MapLogic;
 using Optimization;
 using Rendering;
@@ -23,16 +22,13 @@ namespace Generators
         private readonly MapProvider _mapProvider;
         private readonly IMeshFactory _meshFactory;
         private readonly IGameFactory _gameFactory;
-        private readonly IStaticDataService _staticData;
         private GameObject _wallContainer;
 
-        public MapGenerator(MapProvider mapProvider, IGameFactory gameFactory, IMeshFactory meshFactory,
-            IStaticDataService staticData)
+        public MapGenerator(MapProvider mapProvider, IGameFactory gameFactory, IMeshFactory meshFactory)
         {
             _mapProvider = mapProvider;
             _gameFactory = gameFactory;
             _meshFactory = meshFactory;
-            _staticData = staticData;
         }
 
         public unsafe void GenerateMap()
@@ -72,11 +68,6 @@ namespace Generators
         public void GenerateLight()
         {
             _gameFactory.CreateDirectionalLight(_mapProvider.SceneData.LightData);
-        }
-
-        public void ApplySkybox()
-        {
-            RenderSettings.skybox = _mapProvider.SceneData.Skybox;
         }
 
         private GameObject[] CreateChunkMeshRenders()

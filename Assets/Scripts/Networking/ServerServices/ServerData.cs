@@ -2,7 +2,6 @@
 using System.Linq;
 using Data;
 using Infrastructure.Services.StaticData;
-using MapLogic;
 using Mirror;
 using Steamworks;
 
@@ -10,25 +9,21 @@ namespace Networking.ServerServices
 {
     public class ServerData
     {
-        public readonly List<KillData> KillStatistics;
-        private readonly List<SpawnPointData> _dynamicSpawnPoints;
         private readonly Dictionary<NetworkConnectionToClient, PlayerData> _dataByConnection;
-        private readonly IStaticDataService _staticData;
+        public readonly IStaticDataService StaticData;
 
-        public ServerData(IStaticDataService staticDataService, MapProvider mapProvider)
+        public ServerData(IStaticDataService staticDataService)
         {
-            _dynamicSpawnPoints = new List<SpawnPointData>();
-            mapProvider.SceneData.SpawnPoints.CopyTo(_dynamicSpawnPoints);
             _dataByConnection = new Dictionary<NetworkConnectionToClient, PlayerData>();
-            KillStatistics = new List<KillData>();
-            _staticData = staticDataService;
+            StaticData = staticDataService;
         }
 
-        public void AddPlayer(NetworkConnectionToClient connection, GameClass chosenClass, CSteamID steamID,
+        public IEnumerable<NetworkConnectionToClient> ClientConnections => _dataByConnection.Keys.ToArray();
+
+        public void AddPlayer(NetworkConnectionToClient connection, CSteamID steamID,
             string nickname)
         {
-            var playerData = new PlayerData(steamID, nickname, _staticData);
-            playerData.GameClass = chosenClass;
+            var playerData = new PlayerData(steamID, nickname, StaticData);
             _dataByConnection[connection] = playerData;
         }
 
@@ -37,11 +32,12 @@ namespace Networking.ServerServices
             _dataByConnection.Remove(connection);
         }
 
-
         public void AddKill(NetworkConnectionToClient killer, NetworkConnectionToClient victim)
         {
-            if (killer is not null && killer != victim) GetPlayerData(killer).Kills += 1;
-            KillStatistics.Add(new KillData(killer, victim));
+            if (killer is not null && killer != victim)
+            {
+                GetPlayerData(killer).Kills += 1;
+            }
         }
 
         public bool TryGetPlayerData(NetworkConnectionToClient connection, out PlayerData playerData)
@@ -60,17 +56,6 @@ namespace Networking.ServerServices
             return _dataByConnection[connectionToClient];
         }
 
-        public List<KeyValuePair<NetworkConnectionToClient, PlayerData>> GetAlivePlayers(
-            NetworkConnectionToClient except)
-        {
-            return _dataByConnection.Where(kvp => kvp.Value.IsAlive && except != kvp.Key).ToList();
-        }
-
-        public IEnumerable<NetworkConnectionToClient> GetConnections()
-        {
-            return _dataByConnection.Keys.ToArray();
-        }
-
         public List<ScoreData> GetScoreData()
         {
             var scoreData = new SortedSet<ScoreData>();
@@ -81,12 +66,6 @@ namespace Networking.ServerServices
             }
 
             return scoreData.ToList();
-        }
-
-        public void UpdateSpawnPoint(SpawnPointData oldSpawnPoint, SpawnPointData newSpawnPoint)
-        {
-            var index = _dynamicSpawnPoints.FindIndex(spawnPoint => spawnPoint.Equals(oldSpawnPoint));
-            _dynamicSpawnPoints[index] = newSpawnPoint;
         }
     }
 }

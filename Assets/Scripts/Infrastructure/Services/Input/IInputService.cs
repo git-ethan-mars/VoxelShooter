@@ -5,6 +5,7 @@ namespace Infrastructure.Services.Input
     public interface IInputService : IService
     {
         Vector2 Axis { get; }
+        Vector2 MouseAxis { get; }
         bool IsFirstActionButtonDown();
         bool IsFirstActionButtonUp();
         bool IsFirstActionButtonHold();
@@ -13,9 +14,12 @@ namespace Infrastructure.Services.Input
         bool IsReloadingButtonDown();
         bool IsJumpButtonDown();
         float GetScrollSpeed();
-        float GetMouseVerticalAxis();
-        float GetMouseHorizontalAxis();
         bool IsScoreboardButtonHold();
         bool IsChooseClassButtonDown();
+        bool IsInGameMenuButtonDown();
+        bool IsLeftArrowButtonDown();
+        bool IsRightArrowButtonDown();
+        bool IsUpArrowButtonDown();
+        bool IsDownArrowButtonDown();
     }
 }

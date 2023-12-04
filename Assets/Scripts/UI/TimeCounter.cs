@@ -15,23 +15,24 @@ namespace UI
         [SerializeField]
         private TextMeshProUGUI respawnTimeText;
 
-        private IInputService _inputService;
-        private CanvasGroup _canvasGroup;
-        private CustomNetworkManager _networkManager;
+        [SerializeField]
+        private CanvasGroup canvasGroup;
 
-        public void Construct(IInputService inputService, CustomNetworkManager networkManager)
+        private IInputService _inputService;
+        private IClient _client;
+
+        public void Construct(IClient client, IInputService inputService)
         {
             _inputService = inputService;
-            _networkManager = networkManager;
-            _canvasGroup = GetComponent<CanvasGroup>();
-            _networkManager.GameFinished += HideTimer;
-            _networkManager.Client.GameTimeChanged += ChangeGameTime;
-            _networkManager.Client.RespawnTimeChanged += ChangeRespawnTime;
+            _client = client;
+            _client.GameFinished += HideTimer;
+            _client.GameTimeChanged += ChangeGameTime;
+            _client.RespawnTimeChanged += ChangeRespawnTime;
         }
 
         public void Update()
         {
-            _canvasGroup.alpha = _inputService.IsScoreboardButtonHold() ? 0 : 1;
+            canvasGroup.alpha = _inputService.IsScoreboardButtonHold() ? 0 : 1;
         }
 
         private void ChangeGameTime(ServerTime timeLeft)
@@ -41,7 +42,7 @@ namespace UI
 
         private void HideTimer()
         {
-            _networkManager.GameFinished -= HideTimer;
+            _client.GameFinished -= HideTimer;
             gameObject.SetActive(false);
         }
 
@@ -55,14 +56,14 @@ namespace UI
             respawnTimeText.SetText($"You will respawn in {timeLeft.TotalSecond}");
             if (timeLeft.TotalSecond == 0)
             {
-                StartCoroutine(Utils.DoActionAfterDelay(1, () => respawnTimeText.gameObject.SetActive(false)));
+                StartCoroutine(Utils.DoActionAfterDelay(() => respawnTimeText.gameObject.SetActive(false), 1));
             }
         }
 
         private void OnDestroy()
         {
-            _networkManager.Client.GameTimeChanged -= ChangeGameTime;
-            _networkManager.Client.RespawnTimeChanged -= ChangeRespawnTime;
+            _client.GameTimeChanged -= ChangeGameTime;
+            _client.RespawnTimeChanged -= ChangeRespawnTime;
         }
     }
 }

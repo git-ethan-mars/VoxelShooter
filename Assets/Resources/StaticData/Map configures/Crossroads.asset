@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e69f3dcd48464cac84150e2016cff25a, type: 3}
   m_Name: Crossroads
   m_EditorClassIdentifier: 
-  mapName: Crossroads
+  image: {fileID: 2800000, guid: fa5e121e8bda0eb4da768b25af89731a, type: 3}
   waterColor:
     serializedVersion: 2
     rgba: 4287052291
@@ -20,10 +20,21 @@ MonoBehaviour:
     serializedVersion: 2
     rgba: 4281283929
   lightData:
-    position: {x: 0, y: 110, z: 280}
-    rotation: {x: -0.08707207, y: 0.8046156, z: -0.31618926, w: 0.4950117}
+    position: {x: 256, y: 100, z: 100}
+    rotation: {x: 0.0028690246, y: 0.7864767, z: -0.42686075, w: -0.4463587}
     color: {r: 1, g: 1, b: 1, a: 1}
-  skyboxMaterial: {fileID: 2100000, guid: 8869ec7f32ba4594aa6a20cbd6c772ec, type: 2}
+  skyboxMaterial: {fileID: 2100000, guid: 4e154bf235e41704bbd6bbc6fd6c63f6, type: 2}
+  ambientMode: 0
+  skyColor: {r: 0.21176471, g: 0.22745098, b: 0.25882354, a: 1}
+  equatorColor: {r: 0.11372549, g: 0.1254902, b: 0.13333334, a: 1}
+  groundColor: {r: 0.047058824, g: 0.043137256, b: 0.03529412, a: 1}
+  ambientIntensity: 1
+  isFogActivated: 0
+  fogMode: 1
+  fogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  fogStartDistance: 0
+  fogEndDistance: 300
+  fogDensity: 0.01
   spawnPoints:
   - position: {x: 143, y: 23, z: 141}
   - position: {x: 177, y: 18, z: 224}

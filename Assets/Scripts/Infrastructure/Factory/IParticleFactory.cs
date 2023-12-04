@@ -1,5 +1,4 @@
-﻿using Data;
-using Infrastructure.Services;
+﻿using Infrastructure.Services;
 using UnityEngine;
 
 namespace Infrastructure.Factory
@@ -10,6 +9,7 @@ namespace Infrastructure.Factory
         void CreateBlood(Vector3 position, Quaternion rotation);
         void CreateRchParticle(Vector3 position, int startSpeed, int burstCount);
 
-        ParticleSystem CreateFallingMeshParticle();
+        ParticleSystem CreateFallingMeshParticle(Transform particleContainer);
+        void CreateWeatherParticle(string mapName, Transform parent);
     }
 }

@@ -8,14 +8,20 @@ namespace Infrastructure.Services.StaticData
     public class StaticDataService : IStaticDataService
     {
         private const string Default = "Default";
+        private const string InventoryItemsPath = "StaticData/Inventory Items";
+        private const string InventoriesPath = "StaticData/Inventories";
+        private const string PlayerCharacteristicsPath = "StaticData/Player Characteristics";
+        private const string MapConfiguresPath = "StaticData/Map configures";
+        private const string LobbyBalancePath = "StaticData/Lobby Balance";
         private Dictionary<GameClass, PlayerCharacteristic> _playerCharacteristicByClass;
         private Dictionary<GameClass, GameInventory> _inventoryByClass;
         private Dictionary<int, InventoryItem> _itemById;
         private Dictionary<string, MapConfigure> _mapConfigureByName;
+        private LobbyBalance _lobbyBalance;
 
         public void LoadItems()
         {
-            _itemById = Resources.LoadAll<InventoryItem>("StaticData/Inventory Items").ToDictionary(x => x.id, x => x);
+            _itemById = Resources.LoadAll<InventoryItem>(InventoryItemsPath).ToDictionary(x => x.id, x => x);
         }
 
         public InventoryItem GetItem(int id)
@@ -25,7 +31,7 @@ namespace Infrastructure.Services.StaticData
 
         public void LoadInventories()
         {
-            _inventoryByClass = Resources.LoadAll<GameInventory>("StaticData/Inventories")
+            _inventoryByClass = Resources.LoadAll<GameInventory>(InventoriesPath)
                 .ToDictionary(x => x.gameClass, x => x);
         }
 
@@ -36,7 +42,7 @@ namespace Infrastructure.Services.StaticData
 
         public void LoadPlayerCharacteristics()
         {
-            _playerCharacteristicByClass = Resources.LoadAll<PlayerCharacteristic>("StaticData/Player Characteristics")
+            _playerCharacteristicByClass = Resources.LoadAll<PlayerCharacteristic>(PlayerCharacteristicsPath)
                 .ToDictionary(x => x.gameClass, x => x);
         }
 
@@ -47,8 +53,8 @@ namespace Infrastructure.Services.StaticData
 
         public void LoadMapConfigures()
         {
-            _mapConfigureByName = Resources.LoadAll<MapConfigure>("StaticData/Map configures")
-                .ToDictionary(configure => configure.mapName, configure => configure);
+            _mapConfigureByName = Resources.LoadAll<MapConfigure>(MapConfiguresPath)
+                .ToDictionary(configure => configure.name, configure => configure);
         }
 
         public MapConfigure GetMapConfigure(string mapName)
@@ -56,6 +62,16 @@ namespace Infrastructure.Services.StaticData
             return _mapConfigureByName.TryGetValue(mapName, out var mapConfigure)
                 ? mapConfigure
                 : GetDefaultMapConfigure();
+        }
+
+        public void LoadLobbyBalance()
+        {
+            _lobbyBalance = Resources.Load<LobbyBalance>(LobbyBalancePath);
+        }
+
+        public LobbyBalance GetLobbyBalance()
+        {
+            return _lobbyBalance;
         }
 
         private MapConfigure GetDefaultMapConfigure()

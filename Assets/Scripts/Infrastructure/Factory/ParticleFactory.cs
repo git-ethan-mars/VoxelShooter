@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using Infrastructure.AssetManagement;
+using Infrastructure.Services.StaticData;
 using Mirror;
 using Particles;
 using UnityEngine;
@@ -9,17 +10,19 @@ namespace Infrastructure.Factory
     public class ParticleFactory : IParticleFactory
     {
         private readonly IAssetProvider _assets;
+        private readonly IStaticDataService _staticData;
         private readonly ICoroutineRunner _coroutineRunner;
 
-        public ParticleFactory(IAssetProvider assets, ICoroutineRunner coroutineRunner)
+        public ParticleFactory(IAssetProvider assets, IStaticDataService staticData, ICoroutineRunner coroutineRunner)
         {
             _assets = assets;
+            _staticData = staticData;
             _coroutineRunner = coroutineRunner;
         }
 
         public void CreateBulletImpact(Vector3 position, Quaternion rotation, Color32 blockColor)
         {
-            var bullet = _assets.Instantiate(ParticlePath.BulletHolePath, position, rotation);
+            var bullet = _assets.Instantiate(ParticlePath.BulletImpactPath, position, rotation);
             var particleColor = bullet.GetComponent<ParticleColor>();
             particleColor.color = blockColor;
             NetworkServer.Spawn(bullet);
@@ -50,9 +53,19 @@ namespace Infrastructure.Factory
             _coroutineRunner.StartCoroutine(DestroyParticle(rchParticle, main.startLifetime.constant));
         }
 
-        public ParticleSystem CreateFallingMeshParticle()
+        public ParticleSystem CreateFallingMeshParticle(Transform particleContainer)
         {
-            return _assets.Instantiate(ParticlePath.FallingMeshParticlePath).GetComponent<ParticleSystem>();
+            return _assets.Instantiate(ParticlePath.FallingMeshParticlePath, particleContainer)
+                .GetComponent<ParticleSystem>();
+        }
+
+        public void CreateWeatherParticle(string mapName, Transform parent)
+        {
+            var particles = _staticData.GetMapConfigure(mapName).weather;
+            if (particles != null)
+            {
+                _assets.Instantiate(particles.gameObject, parent);
+            }
         }
 
         private static IEnumerator DestroyParticle(GameObject particle, float lifetime)

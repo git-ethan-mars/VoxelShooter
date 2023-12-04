@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Data;
 using Entities;
 using MapLogic;
 using UnityEngine;
@@ -8,24 +7,28 @@ namespace Networking.ServerServices
 {
     public class EntityPositionValidator
     {
-        private readonly List<PushableObject> _pushableEntities;
+        private readonly List<IPushable> _pushableEntities;
         private readonly MapProvider _mapProvider;
 
         public EntityPositionValidator(MapUpdater mapUpdater,
             MapProvider mapProvider)
         {
-            _pushableEntities = new List<PushableObject>();
+            _pushableEntities = new List<IPushable>();
             _mapProvider = mapProvider;
             mapUpdater.MapUpdated += OnMapUpdate;
         }
 
-        public void AddEntity(PushableObject entity)
+        public void AddEntity(IPushable entity)
         {
             _pushableEntities.Add(entity);
         }
 
+        public void RemoveEntity(IPushable entity)
+        {
+            _pushableEntities.Remove(entity);
+        }
 
-        private void OnMapUpdate(Vector3Int globalPosition, BlockData blockData)
+        private void OnMapUpdate()
         {
             foreach (var spawnPoint in _pushableEntities)
             {
@@ -44,7 +47,7 @@ namespace Networking.ServerServices
             }
         }
 
-        private bool IsFreeSpace(PushableObject pushable)
+        private bool IsFreeSpace(IPushable pushable)
         {
             for (var x = pushable.Min.x; x <= pushable.Max.x; x++)
             {
@@ -52,9 +55,11 @@ namespace Networking.ServerServices
                 {
                     for (var z = pushable.Min.z; z <= pushable.Max.z; z++)
                     {
-                        if (!_mapProvider.GetBlockByGlobalPosition(pushable.Center.x + x,
-                                    pushable.Center.y + y, pushable.Center.z + z).Color
-                                .Equals(BlockColor.empty)) return false;
+                        if (_mapProvider.GetBlockByGlobalPosition(pushable.Center.x + x,
+                                pushable.Center.y + y, pushable.Center.z + z).IsSolid())
+                        {
+                            return false;
+                        }
                     }
                 }
             }

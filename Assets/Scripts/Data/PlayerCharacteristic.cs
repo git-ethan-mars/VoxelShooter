@@ -8,8 +8,7 @@ namespace Data
         public GameClass gameClass;
         public int maxHealth;
         public float speed;
-        public float jumpMultiplier;
-        public float placeDistance = 15;
-
+        public float jumpHeight;
+        public float placeDistance;
     }
 }

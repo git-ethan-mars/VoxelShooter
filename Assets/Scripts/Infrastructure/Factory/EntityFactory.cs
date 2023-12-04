@@ -1,8 +1,8 @@
 ﻿using Data;
 using Entities;
 using Infrastructure.AssetManagement;
-using MapLogic;
 using Mirror;
+using Networking;
 using UnityEngine;
 
 namespace Infrastructure.Factory
@@ -15,6 +15,9 @@ namespace Infrastructure.Factory
         private const string RocketPath = "Prefabs/Rocket";
         private const string TombstonePath = "Prefabs/Tombstone";
         private const string SpawnPointPath = "Prefabs/Spawnpoint";
+        private const string AmmoBoxPath = "Prefabs/Drops/AmmoBox";
+        private const string HealthBoxPath = "Prefabs/Drops/HealthBox";
+        private const string BlockBoxPath = "Prefabs/Drops/BlockBox";
 
         public EntityFactory(IAssetProvider assets)
         {
@@ -42,19 +45,40 @@ namespace Infrastructure.Factory
             return tombstone;
         }
 
-        public GameObject CreateRocket(Vector3 position, Quaternion rotation, MapProvider mapProvider,
-            MapUpdater mapUpdater,
-            IParticleFactory particleFactory, RocketLauncherItem rocketData, NetworkConnectionToClient owner, MapDestructionAlgorithm mapDestructionAlgorithm)
+        public GameObject CreateRocket(Vector3 position, Quaternion rotation, IServer server,
+            IParticleFactory particleFactory, RocketLauncherItem rocketData, NetworkConnectionToClient owner)
         {
             var rocket = _assets.Instantiate(RocketPath, position, rotation);
-            rocket.GetComponent<Rocket>().Construct(mapProvider, mapUpdater, rocketData, owner, particleFactory, mapDestructionAlgorithm);
+            rocket.GetComponent<Rocket>().Construct(server, rocketData, owner, particleFactory);
+            
             NetworkServer.Spawn(rocket);
             return rocket;
         }
-
-        public GameObject CreateSpawnPoint(Vector3 position, Transform parent)
+        
+        public LootBox CreateAmmoBox(Vector3 position, Transform parent)
         {
-            return _assets.Instantiate(SpawnPointPath, position, Quaternion.identity, parent);
+            var lootBox = _assets.Instantiate(AmmoBoxPath, position, Quaternion.identity, parent);
+            NetworkServer.Spawn(lootBox);
+            return lootBox.GetComponent<LootBox>();
+        }
+        
+        public LootBox CreateHealthBox(Vector3 position, Transform parent)
+        {
+            var lootBox = _assets.Instantiate(HealthBoxPath, position, Quaternion.identity, parent);
+            NetworkServer.Spawn(lootBox);
+            return lootBox.GetComponent<LootBox>();
+        }
+        
+        public LootBox CreateBlockBox(Vector3 position, Transform parent)
+        {
+            var lootBox = _assets.Instantiate(BlockBoxPath, position, Quaternion.identity, parent);
+            NetworkServer.Spawn(lootBox);
+            return lootBox.GetComponent<LootBox>();
+        }
+        
+        public SpawnPoint CreateSpawnPoint(Vector3 position, Transform parent)
+        {
+            return _assets.Instantiate(SpawnPointPath, position, Quaternion.identity, parent).GetComponent<SpawnPoint>();
         }
     }
 }

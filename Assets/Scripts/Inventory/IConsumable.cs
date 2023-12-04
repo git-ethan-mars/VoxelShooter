@@ -1,8 +1,9 @@
-﻿namespace Inventory
+﻿using Infrastructure;
+
+namespace Inventory
 {
     public interface IConsumable
     {
-        public int Count { get; set; }
-        void OnCountChanged();
+        public ObservableVariable<int> Count { get; set; }
     }
 }

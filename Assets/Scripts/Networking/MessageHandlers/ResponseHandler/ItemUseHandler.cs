@@ -1,23 +1,20 @@
-﻿using System.Collections.Generic;
-using Inventory;
+﻿using Inventory;
 using Networking.Messages.Responses;
 
 namespace Networking.MessageHandlers.ResponseHandler
 {
     public class ItemUseHandler : ResponseHandler<ItemUseResponse>
     {
-        private readonly List<Slot> _slots;
+        private readonly InventorySystem _inventory;
 
-        public ItemUseHandler(List<Slot> slots)
+        public ItemUseHandler(InventorySystem inventory)
         {
-            _slots = slots;
+            _inventory = inventory;
         }
 
         protected override void OnResponseReceived(ItemUseResponse response)
         {
-            ((IConsumable) _slots.Find(slot => slot.InventoryItem.id == response.ItemId).ItemHandler).Count =
-                response.Count;
-            ((IConsumable) _slots.Find(slot => slot.InventoryItem.id == response.ItemId).ItemHandler).OnCountChanged();
+            ((IConsumable) _inventory.GetModel(response.SlotIndex)).Count.Value = response.Count;
         }
     }
 }

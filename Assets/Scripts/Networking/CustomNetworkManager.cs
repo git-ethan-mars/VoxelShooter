@@ -1,41 +1,38 @@
-using System;
+using System.Globalization;
 using Data;
-using Generators;
 using Infrastructure;
 using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
+using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
+using Infrastructure.Services.Storage;
 using Infrastructure.States;
-using MapLogic;
 using Mirror;
-using Networking.ClientServices;
-using Networking.Messages.Responses;
+using Networking.Messages.Requests;
 using Networking.ServerServices;
-using MemoryStream = System.IO.MemoryStream;
+using Steamworks;
+using UnityEngine;
 
 namespace Networking
 {
     public class CustomNetworkManager : NetworkManager, ICoroutineRunner
     {
-        public event Action GameFinished;
-        private const string SpawnPointContainerName = "SpawnPointContainer";
         public IClient Client;
         private IStaticDataService _staticData;
         private IEntityFactory _entityFactory;
         private ServerSettings _serverSettings;
         private GameStateMachine _stateMachine;
-        private ServerTimer _serverTimer;
+        private BoxDropService _boxDropService;
         private IParticleFactory _particleFactory;
         private IMeshFactory _meshFactory;
         private IAssetProvider _assets;
         private IGameFactory _gameFactory;
         private IServer _server;
-        private const float ShowResultsDuration = 10;
 
-
-        public void Construct(GameStateMachine stateMachine, IStaticDataService staticData,
+        public void Construct(GameStateMachine stateMachine, IInputService inputService, IStorageService storageService,
+            IStaticDataService staticData,
             IEntityFactory entityFactory, IParticleFactory particleFactory, IAssetProvider assets,
-            IGameFactory gameFactory, IMeshFactory meshFactory,
+            IGameFactory gameFactory, IMeshFactory meshFactory, IUIFactory uiFactory,
             ServerSettings serverSettings)
         {
             _stateMachine = stateMachine;
@@ -46,87 +43,61 @@ namespace Networking
             _gameFactory = gameFactory;
             _meshFactory = meshFactory;
             _serverSettings = serverSettings;
-            Client = new Client(_gameFactory, _meshFactory, _staticData, _particleFactory);
+            Client = new Client(_stateMachine, this, inputService, storageService, _gameFactory, _meshFactory,
+                _staticData,
+                _particleFactory,
+                uiFactory);
         }
 
-        public override void OnStartServer()
+        public override void OnStartHost()
         {
-            _server = new Server(this, _staticData, _serverSettings, _assets, _particleFactory, _entityFactory);
-            _server.RegisterHandlers();
-            var spawnPointContainer = _gameFactory.CreateGameObjectContainer(SpawnPointContainerName);
-            _server.CreateSpawnPoints(spawnPointContainer.transform);
-            _serverTimer = new ServerTimer(this, _serverSettings.MaxDuration, StopHost);
-            _serverTimer.Start();
+            _server = new Server(this, _staticData, _serverSettings, _assets, _gameFactory, _particleFactory,
+                _entityFactory);
+            _server.Start();
         }
-
 
         public override void OnStartClient()
         {
-            Client.RegisterHandlers();
-            Client.Data.State = ClientState.Connecting;
-            Client.MapDownloaded += OnMapDownloaded;
+            Client.Start();
         }
 
         public override void OnServerReady(NetworkConnectionToClient connection)
         {
-            base.OnServerReady(connection);
-            if (IsHost(connection))
+            if (NetworkServer.localConnection == connection)
             {
                 Client.MapProvider = _server.MapProvider;
-                OnMapDownloaded();
+                Client.Data.MapName = _server.MapProvider.MapName;
             }
             else
             {
-                connection.Send(new MapNameResponse(_server.MapProvider.MapName));
-                var memoryStream = new MemoryStream();
-                MapWriter.WriteMap(_server.MapProvider, memoryStream);
-                var bytes = memoryStream.ToArray();
-                var mapSplitter = new MapSplitter();
-                var mapMessages = mapSplitter.SplitBytesIntoMessages(bytes, 100000);
-                StartCoroutine(mapSplitter.SendMessages(mapMessages, connection, 1f));
+                _server.SendCurrentServerState(connection);
             }
+
+            NetworkServer.SetClientReady(connection);
+        }
+
+        public override void OnClientConnect()
+        {
+            NetworkClient.Ready();
+            NetworkClient.Send(new AuthenticationRequest(Constants.isLocalBuild ? CSteamID.Nil : SteamUser.GetSteamID(),
+                Constants.isLocalBuild
+                    ? Random.value.ToString(CultureInfo.InvariantCulture)
+                    : SteamFriends.GetPersonaName()));
         }
 
         public override void OnServerDisconnect(NetworkConnectionToClient connection)
         {
-            base.OnServerDisconnect(connection);
             _server.DeletePlayer(connection);
         }
 
         public override void OnStopClient()
         {
-            Client.UnregisterHandlers();
-            Client.Data.State = ClientState.NotConnected;
-            if (NetworkClient.activeHost) return;
-            _gameFactory.CreateCamera();
-            GameFinished?.Invoke();
-            StartCoroutine(Utils.DoActionAfterDelay(ShowResultsDuration,
-                _stateMachine.Enter<MainMenuState>));
+            Client.Stop();
         }
 
         public override void OnStopServer()
         {
-            _server.UnregisterHandlers();
-            _gameFactory.CreateCamera();
-            GameFinished?.Invoke();
-            StartCoroutine(Utils.DoActionAfterDelay(ShowResultsDuration,
-                _stateMachine.Enter<MainMenuState>));
+            _server.Stop();
         }
-
-        private void OnMapDownloaded()
-        {
-            Client.MapDownloaded -= OnMapDownloaded;
-            Client.Data.State = ClientState.Connected;
-            Client.MapGenerator = new MapGenerator(Client.MapProvider, Client.GameFactory, Client.MeshFactory,
-                Client.StaticData);
-            Client.MapGenerator.GenerateMap();
-            Client.MapGenerator.GenerateWalls();
-            Client.MapGenerator.GenerateLight();
-            Client.MapGenerator.ApplySkybox();
-            _stateMachine.Enter<GameLoopState, CustomNetworkManager>(this);
-        }
-
-        private static bool IsHost(NetworkConnection conn) =>
-            NetworkClient.connection.connectionId == conn.connectionId;
     }
 }

@@ -12,12 +12,12 @@ namespace UI
         private List<Image> bullets;
 
         private float _previousProgress;
-        private CustomNetworkManager _networkManager;
+        private IClient _client;
 
-        public void Construct(CustomNetworkManager networkManager)
+        public void Construct(IClient client)
         {
-            _networkManager = networkManager;
-            _networkManager.Client.MapLoadProgressed += UpdateLoadingBar;
+            _client = client;
+            _client.MapLoadProgressed += UpdateLoadingBar;
         }
 
         private void UpdateLoadingBar(float progress)
@@ -31,6 +31,7 @@ namespace UI
             }
 
             _previousProgress = progress;
+            // ReSharper disable once CompareOfFloatsByEqualityOperator
             if (progress == 1)
             {
                 Destroy(gameObject);
@@ -39,7 +40,7 @@ namespace UI
 
         public void OnDestroy()
         {
-            _networkManager.Client.MapLoadProgressed -= UpdateLoadingBar;
+            _client.MapLoadProgressed -= UpdateLoadingBar;
         }
     }
 }

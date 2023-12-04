@@ -1,25 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using Infrastructure.Services;
 using Infrastructure.Services.Input;
-using Mirror;
 using UnityEngine;
 
 namespace Inventory
 {
-    public class InventoryInput : NetworkBehaviour
+    public class InventoryInput : IInventoryInput
     {
-        public event Action OnScroll;
-        public event Action OnFirstActionButtonDown;
-        public event Action OnFirstActionButtonUp;
-        public event Action OnFirstActionButtonHold;
-        
-        public event Action OnSecondActionButtonDown;
-        public event Action OnSecondActionButtonUp;
-        
-        public event Action<int> OnChangeSlot;
+        public event Action MouseScrolledUp;
+        public event Action MouseScrolledDown;
+        public event Action FirstActionButtonDown;
+        public event Action FirstActionButtonUp;
+        public event Action FirstActionButtonHold;
+        public event Action SecondActionButtonDown;
+        public event Action SecondActionButtonUp;
+        public event Action ReloadButtonDown;
+        public event Action<int> SlotButtonPressed;
 
-        private IInputService _inputService;
+        private readonly IInputService _inputService;
 
 
         private readonly Dictionary<KeyCode, int> _slotIndexByKey = new()
@@ -31,51 +29,60 @@ namespace Inventory
             [KeyCode.Alpha5] = 4,
         };
 
-
-        private void Awake()
+        public InventoryInput(IInputService inputService)
         {
-            _inputService = AllServices.Container.Single<IInputService>();
+            _inputService = inputService;
         }
 
-        private void Update()
+        public void Update()
         {
-            if (!isLocalPlayer) return;
-            if (_inputService.GetScrollSpeed() != 0.0f)
+            var mouseScrollSpeed = _inputService.GetScrollSpeed();
+            if (mouseScrollSpeed > 0)
             {
-                OnScroll?.Invoke();
+                MouseScrolledUp?.Invoke();
+            }
+
+            if (mouseScrollSpeed < 0)
+            {
+                MouseScrolledDown?.Invoke();
             }
 
             foreach (var (key, index) in _slotIndexByKey)
             {
                 if (Input.GetKeyDown(key))
                 {
-                    OnChangeSlot?.Invoke(index);
+                    SlotButtonPressed?.Invoke(index);
                 }
             }
 
             if (_inputService.IsFirstActionButtonDown())
             {
-                OnFirstActionButtonDown?.Invoke();
+                FirstActionButtonDown?.Invoke();
             }
 
             if (_inputService.IsFirstActionButtonHold())
             {
-                OnFirstActionButtonHold?.Invoke();
+                FirstActionButtonHold?.Invoke();
             }
-            
+
             if (_inputService.IsFirstActionButtonUp())
             {
-                OnFirstActionButtonUp?.Invoke();
+                FirstActionButtonUp?.Invoke();
             }
-            
+
             if (_inputService.IsSecondActionButtonDown())
             {
-                OnSecondActionButtonDown?.Invoke();
+                SecondActionButtonDown?.Invoke();
             }
-            
+
             if (_inputService.IsSecondActionButtonUp())
             {
-                OnSecondActionButtonUp?.Invoke();
+                SecondActionButtonUp?.Invoke();
+            }
+
+            if (_inputService.IsReloadingButtonDown())
+            {
+                ReloadButtonDown?.Invoke();
             }
         }
     }

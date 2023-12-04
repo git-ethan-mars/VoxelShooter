@@ -15,10 +15,21 @@ namespace Networking.MessageHandlers.RequestHandlers
 
         protected override void OnRequestReceived(NetworkConnectionToClient connection, ChangeSlotRequest request)
         {
-            var result = _server.ServerData.TryGetPlayerData(connection, out var playerData);
-            if (!result || !playerData.IsAlive) return;
-            connection.identity.GetComponent<PlayerLogic.Inventory>().currentSlotId = request.Index;
-            connection.Send(new ChangeSlotResponse(request.Index));
+            var result = _server.Data.TryGetPlayerData(connection, out var playerData);
+            if (!result || !playerData.IsAlive)
+            {
+                return;
+            }
+
+            if (request.Index < 0 || request.Index >= playerData.Items.Count)
+            {
+                return;
+            }
+
+            playerData.SelectedSlotIndex = request.Index;
+            connection.Send(new ChangeSlotResponse(playerData.SelectedSlotIndex));
+            NetworkServer.SendToReady(new ChangeItemModelResponse(connection.identity,
+                playerData.Items[playerData.SelectedSlotIndex].id));
         }
     }
 }

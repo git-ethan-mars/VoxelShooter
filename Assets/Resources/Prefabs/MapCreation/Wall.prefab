@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6126872290204476689}
   - component: {fileID: 23298336223436630}
   - component: {fileID: 7797491684221084369}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -111,3 +111,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 985bfae2efc81fe4a97670103b253be2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  meshFilter: {fileID: 4659098196728068262}
+  meshCollider: {fileID: 23298336223436630}

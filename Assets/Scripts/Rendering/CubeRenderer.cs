@@ -1,4 +1,5 @@
-﻿using PlayerLogic;
+﻿using CameraLogic;
+using PlayerLogic;
 using UnityEngine;
 
 namespace Rendering
@@ -6,16 +7,15 @@ namespace Rendering
     public class CubeRenderer
     {
         private readonly LineRenderer _lineRenderer;
-        private readonly Raycaster _raycaster;
+        private readonly RayCaster _rayCaster;
         private readonly float _placeDistance;
 
-        public CubeRenderer(LineRenderer lineRenderer, Raycaster raycaster, Player player)
+        public CubeRenderer(LineRenderer lineRenderer, RayCaster rayCaster, float drawDistance)
         {
             _lineRenderer = lineRenderer;
-            _raycaster = raycaster;
-            _placeDistance = player.placeDistance;
+            _rayCaster = rayCaster;
+            _placeDistance = drawDistance;
         }
-
 
         public void EnableCube()
         {
@@ -29,9 +29,9 @@ namespace Rendering
             _lineRenderer.enabled = false;
         }
 
-        public void UpdateCube(bool isBuilding)
+        public void UpdateCube()
         {
-            var raycastResult = _raycaster.GetRayCastHit(out var raycastHit, _placeDistance, Constants.BuildMask);
+            var raycastResult = _rayCaster.GetRayCastHit(out var raycastHit, _placeDistance, Constants.buildMask);
             if (!raycastResult)
             {
                 _lineRenderer.positionCount = 0;
@@ -39,13 +39,12 @@ namespace Rendering
             }
 
             var blockStartPosition =
-                Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2 * (isBuilding ? 1 : -1));
+                Vector3Int.FloorToInt(raycastHit.point - raycastHit.normal / 2);
             DrawCube(blockStartPosition);
         }
 
-
         public bool GetRayCastHit(out RaycastHit raycastHit) =>
-            _raycaster.GetRayCastHit(out raycastHit, _placeDistance, Constants.BuildMask);
+            _rayCaster.GetRayCastHit(out raycastHit, _placeDistance, Constants.buildMask);
 
         private void DrawCube(Vector3Int startPosition)
         {

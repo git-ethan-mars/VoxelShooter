@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Data;
 using MapLogic;
 using UnityEngine;
 
@@ -24,11 +23,12 @@ namespace Explosions
                     for (var z = -radius; z <= radius; z++)
                     {
                         var blockPosition = targetBlock + new Vector3Int(x, y, z);
-                        if (_mapProvider.IsValidPosition(blockPosition))
+                        if (_mapProvider.IsDestructiblePosition(blockPosition) &&
+                            _mapProvider.GetBlockByGlobalPosition(blockPosition).IsSolid())
                         {
                             var blockData = _mapProvider.GetBlockByGlobalPosition(blockPosition);
                             if (Vector3Int.Distance(blockPosition, targetBlock) <= radius
-                                && !blockData.Color.Equals(BlockColor.empty))
+                                && blockData.IsSolid())
                                 blockPositions.Add(blockPosition);
                         }
                     }
