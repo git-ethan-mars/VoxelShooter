@@ -46,7 +46,7 @@ namespace Networking.ServerServices
                             positions[i].z % ChunkData.ChunkSize] =
                     blockData[i];
             }
-
+            
             MapUpdated?.Invoke();
             var updateMessages =
                 _blockSplitter.SplitArraysIntoMessages(positions.ToArray(), blockData.ToArray(), Constants.MessageSize);
@@ -55,7 +55,7 @@ namespace Networking.ServerServices
             _destructionAlgorithm.Add(positions);
         }
 
-        public void DestroyBlocks(List<Vector3Int> positions)
+        public void RemoveBlocks(List<Vector3Int> positions)
         {
             for (var i = 0; i < positions.Count; i++)
             {
@@ -68,7 +68,7 @@ namespace Networking.ServerServices
                             positions[i].z % ChunkData.ChunkSize] =
                     new BlockData();
             }
-
+            
             var fallingPositions = _destructionAlgorithm.Remove(positions);
             var colors = new Color32[fallingPositions.Length];
             for (var i = 0; i < colors.Length; i++)

@@ -27,7 +27,7 @@ namespace Entities
             _particlesCount = rocketData.particlesCount;
             _owner = owner;
             _explosionBehaviour =
-                new SingleExplosionBehaviour(server, particleFactory, new SphereExplosionArea(server.MapProvider));
+                new SingleExplosionBehaviour(server, particleFactory, new SphereDamageArea(server.MapProvider));
         }
 
         private void OnCollisionEnter(Collision collision)

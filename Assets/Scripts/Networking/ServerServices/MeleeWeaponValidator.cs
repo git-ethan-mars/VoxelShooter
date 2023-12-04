@@ -13,14 +13,17 @@ namespace Networking.ServerServices
         private readonly IServer _server;
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly IParticleFactory _particleFactory;
-        private readonly IExplosionArea _lineExplosionArea;
+        private readonly IDamageArea _lineDamageArea;
+        private readonly BlockHealthSystem _blockHealthSystem;
 
-        public MeleeWeaponValidator(IServer server, ICoroutineRunner coroutineRunner, IParticleFactory particleFactory)
+        public MeleeWeaponValidator(IServer server, ICoroutineRunner coroutineRunner, IParticleFactory particleFactory,
+            BlockHealthSystem blockHealthSystem)
         {
             _server = server;
             _particleFactory = particleFactory;
             _coroutineRunner = coroutineRunner;
-            _lineExplosionArea = new LineExplosionArea(_server.MapProvider);
+            _blockHealthSystem = blockHealthSystem;
+            _lineDamageArea = new LineDamageArea(_server.MapProvider);
         }
 
         public void Hit(NetworkConnectionToClient connection, Ray ray, bool isStrongHit)
@@ -90,13 +93,11 @@ namespace Networking.ServerServices
                 var targetBlock = Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2);
                 if (isStrongHit)
                 {
-                    var validPositions = _lineExplosionArea.GetExplodedBlocks(3, targetBlock);
-                    _server.MapUpdater.DestroyBlocks(validPositions);
+                    _blockHealthSystem.DamageBlock(targetBlock, 3, meleeWeapon.damageToBlock, _lineDamageArea);
                 }
                 else
                 {
-                    var validPositions = _lineExplosionArea.GetExplodedBlocks(1, targetBlock);
-                    _server.MapUpdater.DestroyBlocks(validPositions);
+                    _blockHealthSystem.DamageBlock(targetBlock, 1, meleeWeapon.damageToBlock, _lineDamageArea);
                 }
 
                 return true;

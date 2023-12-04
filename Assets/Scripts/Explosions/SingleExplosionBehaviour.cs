@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using Infrastructure.Factory;
-using MapLogic;
 using Mirror;
 using Networking;
-using Networking.ServerServices;
 using UnityEngine;
 
 namespace Explosions
@@ -11,7 +9,7 @@ namespace Explosions
     public class SingleExplosionBehaviour : ExplosionBehaviour
     {
         public SingleExplosionBehaviour(IServer server, IParticleFactory particleFactory,
-            IExplosionArea explosionArea) : base(server, particleFactory, explosionArea)
+            IDamageArea damageArea) : base(server, particleFactory, damageArea)
         {
         }
 
@@ -19,7 +17,7 @@ namespace Explosions
             NetworkConnectionToClient connection, int damage, int particlesSpeed,
             int particlesCount, List<GameObject> exploded, string explosiveTag)
         {
-            DestroyExplosiveWithBlocks(explosionCenter, explosive, radius, particlesSpeed, particlesCount);
+            DestroyExplosiveWithBlocks(explosionCenter, explosive, radius, particlesSpeed, particlesCount, damage);
             Collider[] hitColliders = Physics.OverlapSphere(explosionCenter, radius);
             foreach (var hitCollider in hitColliders)
             {

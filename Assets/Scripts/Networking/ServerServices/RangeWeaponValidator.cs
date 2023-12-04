@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using Data;
+using Explosions;
 using Infrastructure;
 using Infrastructure.Factory;
 using Mirror;
@@ -14,12 +15,17 @@ namespace Networking.ServerServices
         private readonly IServer _server;
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly IParticleFactory _particleFactory;
+        private readonly BlockHealthSystem _blockHealthSystem;
+        private readonly LineDamageArea _lineDamageArea;
 
-        public RangeWeaponValidator(IServer server, ICoroutineRunner coroutineRunner, IParticleFactory particleFactory)
+        public RangeWeaponValidator(IServer server, ICoroutineRunner coroutineRunner, IParticleFactory particleFactory,
+            BlockHealthSystem blockHealthSystem)
         {
             _server = server;
             _coroutineRunner = coroutineRunner;
             _particleFactory = particleFactory;
+            _blockHealthSystem = blockHealthSystem;
+            _lineDamageArea = new LineDamageArea(_server.MapProvider);
         }
 
         public void Shoot(NetworkConnectionToClient connection, Ray ray, bool requestIsButtonHolding)
@@ -179,8 +185,9 @@ namespace Networking.ServerServices
 
             if (rayHit.collider.CompareTag("Chunk"))
             {
-                var block = _server.MapProvider.GetBlockByGlobalPosition(
-                    Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2));
+                var blockPosition = Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2);
+                var block = _server.MapProvider.GetBlockByGlobalPosition(blockPosition);
+                _blockHealthSystem.DamageBlock(blockPosition,1, configure.damage, _lineDamageArea);
                 _particleFactory.CreateBulletImpact(rayHit.point, Quaternion.Euler(rayHit.normal.y * -90,
                     rayHit.normal.x * 90 + (rayHit.normal.z == -1 ? 180 : 0), 0), block.Color);
             }

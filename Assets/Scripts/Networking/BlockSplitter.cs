@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using Data;
@@ -13,8 +12,8 @@ namespace Networking
         public UpdateMapResponse[] SplitArraysIntoMessages(Vector3Int[] positions, BlockData[] blocks, int maxPacketSize)
         {
             var messages = new List<UpdateMapResponse>();
-            var positionBuffer = new List<Vector3Int>(maxPacketSize);
-            var blockBuffer = new List<BlockData>(maxPacketSize);
+            var positionBuffer = new List<Vector3Int>();
+            var blockBuffer = new List<BlockData>();
             for (var i = 0; i < blocks.Length; i++)
             {
                 positionBuffer.Add(positions[i]);
@@ -36,8 +35,8 @@ namespace Networking
         public FallBlockResponse[] SplitArraysIntoMessages(Vector3Int[] positions, Color32[] blocks, int maxPacketSize)
         {
             var messages = new List<FallBlockResponse>();
-            var positionBuffer = new List<Vector3Int>(maxPacketSize);
-            var blockBuffer = new List<Color32>(maxPacketSize);
+            var positionBuffer = new List<Vector3Int>();
+            var blockBuffer = new List<Color32>();
             var size = sizeof(int) * 8;
             for (var i = 0; i < blocks.Length; i++)
             {

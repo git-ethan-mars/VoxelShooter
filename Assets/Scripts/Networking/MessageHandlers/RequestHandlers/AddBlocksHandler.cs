@@ -60,7 +60,7 @@ namespace Networking.MessageHandlers.RequestHandlers
             playerData.CountByItem[playerData.Items[playerData.SelectedSlotIndex]] = blockAmount - blocksUsed;
             connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex,
                 blockAmount - blocksUsed));
-            _server.MapUpdater.SetBlocksByGlobalPositions(validPositions, validBlockData);
+            _server.BlockHealthSystem.InitializeBlocks(validPositions, validBlockData);
         }
     }
 }
