@@ -14,7 +14,6 @@ namespace Infrastructure.Factory
             bool isHost);
 
         GameObject CreateGameObjectContainer(string containerName);
-        void CreateCamera();
         void CreateDirectionalLight(LightData lightData);
     }
 }

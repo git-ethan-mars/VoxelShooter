@@ -7,6 +7,7 @@ using Infrastructure.Services.StaticData;
 using Infrastructure.Services.Storage;
 using Inventory;
 using Mirror;
+using PlayerLogic.Spectator;
 using TMPro;
 using UI;
 using UnityEngine;
@@ -27,8 +28,7 @@ namespace PlayerLogic
         private Transform itemPosition;
 
         public Transform ItemPosition => itemPosition;
-
-
+        
         [SerializeField]
         private MeshRenderer[] bodyParts;
 
@@ -36,7 +36,6 @@ namespace PlayerLogic
         private GameObject nickNameCanvas;
 
         public Transform BodyOrientation => bodyOrientation;
-
 
         [SerializeField]
         private Transform bodyOrientation;
@@ -53,6 +52,7 @@ namespace PlayerLogic
         [SerializeField]
         private new Rigidbody rigidbody;
 
+        private Camera _mainCamera;
         private Hud _hud;
 
         private IInputService _inputService;
@@ -75,7 +75,9 @@ namespace PlayerLogic
             var sensitivity = storageService.Load<MouseSettingsData>(Constants.MouseSettingKey).GeneralSensitivity;
             _rotation = new PlayerRotation(bodyOrientation, headPivot, sensitivity);
             _hud = uiFactory.CreateHud(this, inputService);
-            _inventory = new InventorySystem(_inputService, staticData, meshFactory, storageService, itemIds, _hud, this);
+            _mainCamera = Camera.main;
+            _inventory = new InventorySystem(_inputService, staticData, meshFactory, storageService, itemIds, _hud,
+                this);
             TurnOffNickName();
             TurnOffBodyRender();
             MountCamera();
@@ -118,7 +120,7 @@ namespace PlayerLogic
         {
             for (var i = 0; i < bodyParts.Length; i++)
             {
-                bodyParts[i].GetComponent<MeshRenderer>().enabled = false;
+                bodyParts[i].enabled = false;
             }
         }
 
@@ -129,20 +131,16 @@ namespace PlayerLogic
 
         private void MountCamera()
         {
-            var cameraTransform = Camera.main.gameObject.transform;
-            cameraTransform.parent = cameraMountPoint.transform;
-            cameraTransform.position = cameraMountPoint.position;
-            cameraTransform.rotation = cameraMountPoint.rotation;
-            Camera.main.fieldOfView = Constants.DefaultFov;
+            var cameraTransform = _mainCamera.transform;
+            cameraTransform.SetParent(cameraMountPoint.transform);
+            cameraTransform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
         }
 
-        private void OnDestroy()
+        public override void OnStopLocalPlayer()
         {
-            if (_hud != null)
-            {
-                _inventory.Clear();
-                Destroy(_hud.gameObject);
-            }
+            _mainCamera.transform.SetParent(null);
+            _inventory.Clear();
+            Destroy(_hud.gameObject);
         }
     }
 }

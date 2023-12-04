@@ -13,10 +13,10 @@ namespace Inventory.MeleeWeapon
         private readonly IGameFactory _gameFactory;
         private readonly CubeRenderer _cubeRenderer;
 
-        public MeleeWeaponView(RayCaster rayCaster, Player player, MeleeWeaponData configure)
+        public MeleeWeaponView(RayCaster rayCaster, Player player, MeleeWeaponItem configure)
         {
-            _cubeRenderer = new CubeRenderer(player.GetComponent<LineRenderer>(), rayCaster, player);
-            Icon = configure.Icon;
+            _cubeRenderer = new CubeRenderer(player.GetComponent<LineRenderer>(), rayCaster, configure.range);
+            Icon = configure.inventoryIcon;
         }
 
         public void Enable()

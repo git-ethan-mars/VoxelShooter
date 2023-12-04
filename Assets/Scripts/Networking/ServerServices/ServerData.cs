@@ -9,14 +9,12 @@ namespace Networking.ServerServices
 {
     public class ServerData
     {
-        public readonly List<KillData> KillStatistics;
         private readonly Dictionary<NetworkConnectionToClient, PlayerData> _dataByConnection;
         public readonly IStaticDataService StaticData;
 
         public ServerData(IStaticDataService staticDataService)
         {
             _dataByConnection = new Dictionary<NetworkConnectionToClient, PlayerData>();
-            KillStatistics = new List<KillData>();
             StaticData = staticDataService;
         }
 
@@ -40,8 +38,6 @@ namespace Networking.ServerServices
             {
                 GetPlayerData(killer).Kills += 1;
             }
-
-            KillStatistics.Add(new KillData(killer, victim));
         }
 
         public bool TryGetPlayerData(NetworkConnectionToClient connection, out PlayerData playerData)
@@ -58,12 +54,6 @@ namespace Networking.ServerServices
         public PlayerData GetPlayerData(NetworkConnectionToClient connectionToClient)
         {
             return _dataByConnection[connectionToClient];
-        }
-
-        public List<KeyValuePair<NetworkConnectionToClient, PlayerData>> GetAlivePlayers(
-            NetworkConnectionToClient except)
-        {
-            return _dataByConnection.Where(kvp => kvp.Value.IsAlive && except != kvp.Key).ToList();
         }
 
         public List<ScoreData> GetScoreData()

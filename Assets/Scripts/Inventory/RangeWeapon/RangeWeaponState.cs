@@ -17,12 +17,11 @@ namespace Inventory.RangeWeapon
 
 
         public RangeWeaponState(IInventoryInput inventoryInput, IStorageService storageService, RayCaster rayCaster,
-            RangeWeaponData configure,
-            Camera camera, Player player, Hud hud)
+            RangeWeaponItem configure, RangeWeaponData data, Camera camera, Player player, Hud hud)
         {
             _inventoryInput = inventoryInput;
-            _rangeWeaponModel = new RangeWeaponModel(storageService, rayCaster, camera, configure, player);
-            _rangeWeaponView = new RangeWeaponView(configure, hud);
+            _rangeWeaponModel = new RangeWeaponModel(storageService, rayCaster, camera, configure, data, player);
+            _rangeWeaponView = new RangeWeaponView(configure, data, hud);
         }
 
         public void Enter()
