@@ -7,8 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: "\u0421\u043D\u0430\u0439\u043F\u0435\u0440 \u041B\u0435\u0432\u0430\u044F
-    \u0440\u0443\u043A\u0430 \u0432\u0435\u0440\u0445\u043D\u044F\u044F \u0447\u0430\u0441\u0442\u044C"
+  m_Name: Chest
   m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
   m_ValidKeywords: []
   m_InvalidKeywords: []
@@ -42,7 +41,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 7b3493074024ceb4ba5dfcf87dfcece4, type: 3}
+        m_Texture: {fileID: 2800000, guid: f7934c70fd81ab84197d1cae160ff16c, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
