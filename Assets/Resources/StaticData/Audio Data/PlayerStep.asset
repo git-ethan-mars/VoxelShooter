@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e252e319c61c4beba81ce941dd9260e5, type: 3}
   m_Name: PlayerStep
   m_EditorClassIdentifier: 
-  clip: {fileID: 8300000, guid: ac5f4287421a7624abe900b236c704cd, type: 3}
+  clip: {fileID: 8300000, guid: dad20c0f10502454dafa0f71078aae83, type: 3}
   volume: 1
   minDistance: 0
   maxDistance: 50
