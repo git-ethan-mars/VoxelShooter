@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86e314455d2c4fbbbd4018257c25814c, type: 3}
   m_Name: Block Health
   m_EditorClassIdentifier: 
-  blockFullHealth: 60
-  damagedBlockHealthThreshold: 40
-  wreckedBlockHealthThreshold: 20
-  fullHealthColorCoefficient: 1
-  damagedColorCoefficient: 0.7
-  wreckedBlockColorCoefficient: 0.5
+  blockFullHealth: 50
+  damagedBlockHealth: 30
+  wreckedBlockHealth: 10
+  fullHealthColor: 1
+  damagedColor: 0.75
+  wreckedColor: 0.5
