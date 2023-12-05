@@ -52,7 +52,7 @@ MeshRenderer:
   m_GameObject: {fileID: 4209641614228366073}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
@@ -116,4 +116,3 @@ MonoBehaviour:
   meshFilter: {fileID: 8264681656219096422}
   rigidbody: {fileID: -6508187311240828720}
   meshRenderer: {fileID: 2485591047693363179}
-  collider: {fileID: 0}
