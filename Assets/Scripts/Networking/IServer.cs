@@ -10,7 +10,7 @@ namespace Networking
     {
         MapProvider MapProvider { get; }
         ServerData Data { get; }
-        MapUpdater MapUpdater { get; }
+        BlockHealthSystem BlockHealthSystem { get; }
 
         void AddPlayer(NetworkConnectionToClient connection, CSteamID steamID,
             string nickname);

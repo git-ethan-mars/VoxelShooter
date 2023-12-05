@@ -22,7 +22,8 @@ namespace Networking
     {
         public MapProvider MapProvider { get; }
         public ServerData Data { get; }
-        public MapUpdater MapUpdater { get; }
+        public BlockHealthSystem BlockHealthSystem { get; }
+
         private readonly ServerSettings _serverSettings;
         private readonly EntityPositionValidator _entityPositionValidator;
         private readonly BoxDropService _boxDropService;
@@ -52,8 +53,8 @@ namespace Networking
             _serverSettings = serverSettings;
             _entityFactory = entityFactory;
             MapProvider = MapReader.ReadFromFile(serverSettings.MapName, staticData);
-            MapUpdater = new MapUpdater(customNetworkManager, MapProvider);
-            _entityPositionValidator = new EntityPositionValidator(MapUpdater, MapProvider);
+            var mapUpdater = new MapUpdater(customNetworkManager, MapProvider);
+            _entityPositionValidator = new EntityPositionValidator(mapUpdater, MapProvider);
             _spawnPointService =
                 new SpawnPointService(MapProvider, gameFactory, entityFactory, _entityPositionValidator);
             _playerFactory = new PlayerFactory(assets, _spawnPointService);
@@ -61,11 +62,12 @@ namespace Networking
             _serverTimer = new ServerTimer(customNetworkManager, serverSettings.MaxDuration);
             _boxDropService = new BoxDropService(this, customNetworkManager, serverSettings, entityFactory,
                 _entityPositionValidator, gameFactory);
-            var sphereExplosionArea = new SphereExplosionArea(MapProvider);
+            var sphereExplosionArea = new SphereDamageArea(MapProvider);
             var singleExplosionBehaviour = new SingleExplosionBehaviour(this, particleFactory,
                 sphereExplosionArea);
             var chainExplosionBehaviour = new ChainExplosionBehaviour(this, particleFactory,
                 sphereExplosionArea);
+            BlockHealthSystem = new BlockHealthSystem(staticData, MapProvider, mapUpdater);
             var rangeWeaponValidator = new RangeWeaponValidator(this, customNetworkManager, particleFactory);
             var meleeWeaponValidator = new MeleeWeaponValidator(this, customNetworkManager, particleFactory);
             _addBlocksHandler = new AddBlocksHandler(this);
@@ -88,6 +90,7 @@ namespace Networking
         {
             RegisterHandlers();
             _serverTimer.Start();
+            _entityPositionValidator.Start();
             _boxDropService.Start();
             _spawnPointService.CreateSpawnPoints();
         }
@@ -178,6 +181,7 @@ namespace Networking
 
         public void Stop()
         {
+            _entityPositionValidator.Stop();
             _boxDropService.Stop();
             _spawnPointService.RemoveSpawnPoints();
             UnregisterHandlers();

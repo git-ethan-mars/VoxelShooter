@@ -10,8 +10,8 @@ namespace Explosions
     public class ChainExplosionBehaviour : ExplosionBehaviour
     {
         public ChainExplosionBehaviour(IServer server, IParticleFactory particleFactory,
-            IExplosionArea explosionArea)
-            : base(server, particleFactory, explosionArea)
+            IDamageArea damageArea)
+            : base(server, particleFactory, damageArea)
         {
         }
 
@@ -20,7 +20,7 @@ namespace Explosions
             int particlesCount, List<GameObject> exploded, string explosiveTag)
         {
             exploded.Add(explosive);
-            DestroyExplosiveWithBlocks(explosionCenter, explosive, radius, particlesSpeed, particlesCount);
+            DestroyExplosiveWithBlocks(explosionCenter, explosive, radius, particlesSpeed, particlesCount, damage);
             Collider[] hitColliders = Physics.OverlapSphere(explosionCenter, radius);
             foreach (var hitCollider in hitColliders)
             {

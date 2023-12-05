@@ -15,5 +15,7 @@ namespace Infrastructure.Services.StaticData
         MapConfigure GetMapConfigure(string mapName);
         void LoadLobbyBalance();
         LobbyBalance GetLobbyBalance();
+        void LoadBlockHealthBalance();
+        BlockHealthBalance GetBlockHealthBalance();
     }
 }

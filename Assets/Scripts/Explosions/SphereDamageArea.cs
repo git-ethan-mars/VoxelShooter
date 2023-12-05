@@ -4,16 +4,16 @@ using UnityEngine;
 
 namespace Explosions
 {
-    public class SphereExplosionArea : IExplosionArea
+    public class SphereDamageArea : IDamageArea
     {
         private readonly MapProvider _mapProvider;
 
-        public SphereExplosionArea(MapProvider mapProvider)
+        public SphereDamageArea(MapProvider mapProvider)
         {
             _mapProvider = mapProvider;
         }
 
-        public List<Vector3Int> GetExplodedBlocks(int radius, Vector3Int targetBlock)
+        public List<Vector3Int> GetDamagedBlocks(int radius, Vector3Int targetBlock)
         {
             var blockPositions = new List<Vector3Int>();
             for (var x = -radius; x <= radius; x++)

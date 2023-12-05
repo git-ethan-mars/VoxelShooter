@@ -30,9 +30,11 @@ namespace Inventory.Block
             var raycastResult = _rayCaster.GetRayCastHit(out var raycastHit, _placeDistance, Constants.buildMask);
             if (raycastResult)
             {
-                NetworkClient.Send(new AddBlocksRequest(
-                    new[] {Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2)},
-                    new[] {new BlockData(BlockColor.Value)}));
+                NetworkClient.Send(new AddBlocksRequest(new BlockDataWithPosition[]
+                {
+                    new(Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2),
+                        new BlockData(BlockColor.Value))
+                }));
             }
         }
 

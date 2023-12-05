@@ -23,7 +23,7 @@ MonoBehaviour:
   chestMultiplier: 1
   legMultiplier: 0.8
   armMultiplier: 0.6
-  damageToBlock: 0
+  damageToBlock: 30
   hasStrongHit: 1
   diggingAudioClip: {fileID: 8300000, guid: 2896e6c3a3596404eaef3fa750a52b31, type: 3}
   diggingVolume: 0.229

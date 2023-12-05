@@ -1,21 +1,28 @@
 ﻿using System.Collections.Generic;
 using Entities;
 using MapLogic;
-using UnityEngine;
 
 namespace Networking.ServerServices
 {
     public class EntityPositionValidator
     {
         private readonly List<IPushable> _pushableEntities;
+
         private readonly MapProvider _mapProvider;
+
+        private readonly MapUpdater _mapUpdater;
 
         public EntityPositionValidator(MapUpdater mapUpdater,
             MapProvider mapProvider)
         {
             _pushableEntities = new List<IPushable>();
             _mapProvider = mapProvider;
-            mapUpdater.MapUpdated += OnMapUpdate;
+            _mapUpdater = mapUpdater;
+        }
+
+        public void Start()
+        {
+            _mapUpdater.MapUpdated += OnMapUpdate;
         }
 
         public void AddEntity(IPushable entity)
@@ -26,6 +33,11 @@ namespace Networking.ServerServices
         public void RemoveEntity(IPushable entity)
         {
             _pushableEntities.Remove(entity);
+        }
+
+        public void Stop()
+        {
+            _mapUpdater.MapUpdated -= OnMapUpdate;
         }
 
         private void OnMapUpdate()

@@ -1,17 +1,14 @@
 ﻿using Data;
 using Mirror;
-using UnityEngine;
 
 namespace Networking.Messages.Requests
 {
     public struct AddBlocksRequest : NetworkMessage
     {
-        public readonly Vector3Int[] GlobalPositions;
-        public readonly BlockData[] Blocks;
+        public readonly BlockDataWithPosition[] Blocks;
 
-        public AddBlocksRequest(Vector3Int[] globalPositions, BlockData[] blocks)
+        public AddBlocksRequest(BlockDataWithPosition[] blocks)
         {
-            GlobalPositions = globalPositions;
             Blocks = blocks;
         }
     }
