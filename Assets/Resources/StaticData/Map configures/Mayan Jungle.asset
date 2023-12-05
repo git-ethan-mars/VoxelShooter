@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e69f3dcd48464cac84150e2016cff25a, type: 3}
-  m_Name: BranCastle
+  m_Name: Mayan Jungle
   m_EditorClassIdentifier: 
-  image: {fileID: 2800000, guid: 3c75b466d1eba4640af92acc3d16009a, type: 3}
+  image: {fileID: 2800000, guid: 875ac56d7cfd90e49a13888b8cfd345e, type: 3}
   waterColor:
     serializedVersion: 2
     rgba: 4287052291
@@ -21,9 +21,9 @@ MonoBehaviour:
     rgba: 4281283929
   lightData:
     position: {x: 0, y: 0, z: 0}
-    rotation: {x: -0.8024852, y: 0.037844922, z: -0.5932661, w: -0.05119118}
-    color: {r: 1, g: 1, b: 1, a: 1}
-  skyboxMaterial: {fileID: 2100000, guid: e2341a9d03e86ec4290c72b1e22bbc7c, type: 2}
+    rotation: {x: 0.883627, y: -0.07666667, z: 0.15580718, w: 0.43479854}
+    color: {r: 0, g: 0.764151, b: 0.19867925, a: 1}
+  skyboxMaterial: {fileID: 2100000, guid: ebc9df751692e5740abb521f3539fcd0, type: 2}
   ambientMode: 0
   skyColor: {r: 0.21176471, g: 0.22745098, b: 0.25882354, a: 1}
   equatorColor: {r: 0.11372549, g: 0.1254902, b: 0.13333334, a: 1}
@@ -36,10 +36,10 @@ MonoBehaviour:
   fogEndDistance: 300
   fogDensity: 0.01
   spawnPoints:
-  - position: {x: 413, y: 10, z: 112}
-  - position: {x: 184, y: 12, z: 72}
-  - position: {x: 72, y: 21, z: 256}
-  - position: {x: 170, y: 58, z: 285}
-  - position: {x: 254, y: 63, z: 261}
-  - position: {x: 169, y: 69, z: 230}
-  - position: {x: 187, y: 95, z: 160}
+  - position: {x: 71, y: 51, z: 270}
+  - position: {x: 122, y: 21, z: 222}
+  - position: {x: 190, y: 8, z: 300}
+  - position: {x: 237, y: 8, z: 258}
+  - position: {x: 336, y: 14, z: 193}
+  - position: {x: 350, y: 20, z: 267}
+  - position: {x: 417, y: 31, z: 213}
