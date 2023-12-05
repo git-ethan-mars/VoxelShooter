@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Data;
-using UnityEngine;
+using Infrastructure.AssetManagement;
 
 namespace Infrastructure.Services.StaticData
 {
@@ -14,16 +14,24 @@ namespace Infrastructure.Services.StaticData
         private const string MapConfiguresPath = "StaticData/Map configures";
         private const string LobbyBalancePath = "StaticData/Lobby Balance";
         private const string BlockHealthBalancePath = "StaticData/Block Health";
+        private const string SoundPath = "StaticData/Audio Data";
+        private readonly IAssetProvider _assets;
         private Dictionary<GameClass, PlayerCharacteristic> _playerCharacteristicByClass;
         private Dictionary<GameClass, GameInventory> _inventoryByClass;
         private Dictionary<int, InventoryItem> _itemById;
         private Dictionary<string, MapConfigure> _mapConfigureByName;
+        private List<AudioData> _audios;
         private LobbyBalance _lobbyBalance;
         private BlockHealthBalance _blockHealthBalance;
 
+        public StaticDataService(IAssetProvider assets)
+        {
+            _assets = assets;
+        }
+
         public void LoadItems()
         {
-            _itemById = Resources.LoadAll<InventoryItem>(InventoryItemsPath).ToDictionary(x => x.id, x => x);
+            _itemById = _assets.LoadAll<InventoryItem>(InventoryItemsPath).ToDictionary(x => x.id, x => x);
         }
 
         public InventoryItem GetItem(int id)
@@ -33,7 +41,7 @@ namespace Infrastructure.Services.StaticData
 
         public void LoadInventories()
         {
-            _inventoryByClass = Resources.LoadAll<GameInventory>(InventoriesPath)
+            _inventoryByClass = _assets.LoadAll<GameInventory>(InventoriesPath)
                 .ToDictionary(x => x.gameClass, x => x);
         }
 
@@ -44,7 +52,7 @@ namespace Infrastructure.Services.StaticData
 
         public void LoadPlayerCharacteristics()
         {
-            _playerCharacteristicByClass = Resources.LoadAll<PlayerCharacteristic>(PlayerCharacteristicsPath)
+            _playerCharacteristicByClass = _assets.LoadAll<PlayerCharacteristic>(PlayerCharacteristicsPath)
                 .ToDictionary(x => x.gameClass, x => x);
         }
 
@@ -55,7 +63,7 @@ namespace Infrastructure.Services.StaticData
 
         public void LoadMapConfigures()
         {
-            _mapConfigureByName = Resources.LoadAll<MapConfigure>(MapConfiguresPath)
+            _mapConfigureByName = _assets.LoadAll<MapConfigure>(MapConfiguresPath)
                 .ToDictionary(configure => configure.name, configure => configure);
         }
 
@@ -68,7 +76,7 @@ namespace Infrastructure.Services.StaticData
 
         public void LoadLobbyBalance()
         {
-            _lobbyBalance = Resources.Load<LobbyBalance>(LobbyBalancePath);
+            _lobbyBalance = _assets.Load<LobbyBalance>(LobbyBalancePath);
         }
 
         public LobbyBalance GetLobbyBalance()
@@ -78,7 +86,7 @@ namespace Infrastructure.Services.StaticData
 
         public void LoadBlockHealthBalance()
         {
-            _blockHealthBalance = Resources.Load<BlockHealthBalance>(BlockHealthBalancePath);
+            _blockHealthBalance = _assets.Load<BlockHealthBalance>(BlockHealthBalancePath);
         }
 
         public BlockHealthBalance GetBlockHealthBalance()
@@ -89,6 +97,30 @@ namespace Infrastructure.Services.StaticData
         private MapConfigure GetDefaultMapConfigure()
         {
             return _mapConfigureByName[Default];
+        }
+
+        public void LoadSounds()
+        {
+            _audios = _assets.LoadAll<AudioData>(SoundPath).ToList();
+        }
+
+        public AudioData GetAudio(int soundId)
+        {
+            return _audios[soundId];
+        }
+
+        public int GetAudioIndex(AudioData audio)
+        {
+            var index = 0;
+            for (var i = 0; i < _audios.Count; i++)
+            {
+                if (_audios[i] == audio)
+                {
+                    index = i;
+                }
+            }
+
+            return index;
         }
     }
 }

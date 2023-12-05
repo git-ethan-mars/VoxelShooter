@@ -77,6 +77,10 @@ namespace Networking
         private readonly PlayerConfigureHandler _playerConfigureHandler;
         private readonly SpectatorConfigureHandler _spectatorConfigureHandler;
         private readonly NickNameHandler _nickNameHandler;
+        private readonly PlayerSoundHandler _playerSoundHandler;
+        private readonly StartContinuousSoundHandler _startContinuousSoundHandler;
+        private readonly StopContinuousSoundHandler _stopContinuousSoundHandler;
+        private readonly SurroundingSoundHandler _surroundingSoundHandler;
 
         public Client(GameStateMachine stateMachine, ICoroutineRunner coroutineRunner, IInputService inputService,
             IStorageService storageService,
@@ -90,7 +94,7 @@ namespace Networking
             _gameFactory = gameFactory;
             _meshFactory = meshFactory;
             StaticData = staticData;
-            var fallingMeshParticlePool = new FallingMeshFallingMeshParticlePool(gameFactory, particleFactory);
+            var fallingMeshParticlePool = new FallingMeshParticlePool(gameFactory, particleFactory);
             FallMeshGenerator = new FallMeshGenerator(meshFactory, fallingMeshParticlePool);
             Data = new ClientData();
             _mapNameHandler = new MapNameHandler(this);
@@ -107,6 +111,11 @@ namespace Networking
                     staticData);
             _spectatorConfigureHandler = new SpectatorConfigureHandler(inputService, storageService);
             _nickNameHandler = new NickNameHandler();
+            var audioPool = new AudioPool(gameFactory);
+            _playerSoundHandler = new PlayerSoundHandler(staticData, coroutineRunner, audioPool);
+            _startContinuousSoundHandler = new StartContinuousSoundHandler(staticData);
+            _stopContinuousSoundHandler = new StopContinuousSoundHandler();
+            _surroundingSoundHandler = new SurroundingSoundHandler(staticData, coroutineRunner, audioPool);
         }
 
         public void Start()
@@ -139,6 +148,10 @@ namespace Networking
             _playerConfigureHandler.Register();
             _spectatorConfigureHandler.Register();
             _nickNameHandler.Register();
+            _playerSoundHandler.Register();
+            _startContinuousSoundHandler.Register();
+            _stopContinuousSoundHandler.Register();
+            _surroundingSoundHandler.Register();
         }
 
         private void UnregisterHandlers()
@@ -155,6 +168,10 @@ namespace Networking
             _playerConfigureHandler.Unregister();
             _spectatorConfigureHandler.Unregister();
             _nickNameHandler.Unregister();
+            _playerSoundHandler.Unregister();
+            _startContinuousSoundHandler.Unregister();
+            _stopContinuousSoundHandler.Unregister();
+            _surroundingSoundHandler.Unregister();
         }
 
         private void OnMapDownloaded()

@@ -25,7 +25,5 @@ MonoBehaviour:
   armMultiplier: 0.6
   damageToBlock: 30
   hasStrongHit: 1
-  diggingAudioClip: {fileID: 8300000, guid: 2896e6c3a3596404eaef3fa750a52b31, type: 3}
-  diggingVolume: 0.229
-  hitAudioClip: {fileID: 8300000, guid: c7cffae3770d237449625ae494f5c634, type: 3}
-  hitVolume: 0.24
+  diggingAudio: {fileID: 11400000, guid: b35fe9f022132ea4dbe8979b7b3e005d, type: 2}
+  hittingAudio: {fileID: 11400000, guid: 6a9768d7f6700f045a126a67de2e0a64, type: 2}

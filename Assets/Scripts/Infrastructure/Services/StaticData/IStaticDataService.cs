@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Data;
+using UnityEngine;
 
 namespace Infrastructure.Services.StaticData
 {
@@ -17,5 +18,8 @@ namespace Infrastructure.Services.StaticData
         LobbyBalance GetLobbyBalance();
         void LoadBlockHealthBalance();
         BlockHealthBalance GetBlockHealthBalance();
+        void LoadSounds();
+        AudioData GetAudio(int soundId);
+        int GetAudioIndex(AudioData audio);
     }
 }

@@ -14,11 +14,14 @@ namespace Networking.ServerServices
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly IParticleFactory _particleFactory;
         private readonly IDamageArea _lineDamageArea;
+        private readonly AudioService _audioService;
 
-        public MeleeWeaponValidator(IServer server, ICoroutineRunner coroutineRunner, IParticleFactory particleFactory)
+        public MeleeWeaponValidator(IServer server, ICoroutineRunner coroutineRunner, IParticleFactory particleFactory,
+            AudioService audioService)
         {
             _server = server;
             _particleFactory = particleFactory;
+            _audioService = audioService;
             _coroutineRunner = coroutineRunner;
             _lineDamageArea = new LineDamageArea(_server.MapProvider);
         }
@@ -33,9 +36,10 @@ namespace Networking.ServerServices
             {
                 return;
             }
-
+            
             var isSurface = ApplyRaycast(connection, ray, meleeWeapon, isStrongHit);
             _coroutineRunner.StartCoroutine(ResetHit(connection, meleeWeapon, meleeWeaponData));
+            _audioService.SendAudio(isSurface ? meleeWeapon.diggingAudio : meleeWeapon.hittingAudio, connection.identity);
         }
 
         private IEnumerator ResetHit(NetworkConnectionToClient connection, MeleeWeaponItem configure,
@@ -50,7 +54,6 @@ namespace Networking.ServerServices
                 {
                     break;
                 }
-
                 waitForHitReset = new WaitWithoutSlotChange(_server, connection, configure.timeBetweenHit);
             }
 

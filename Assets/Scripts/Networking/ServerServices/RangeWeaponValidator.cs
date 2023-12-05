@@ -16,13 +16,16 @@ namespace Networking.ServerServices
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly IParticleFactory _particleFactory;
         private readonly LineDamageArea _lineDamageArea;
+        private readonly AudioService _audioService;
 
-        public RangeWeaponValidator(IServer server, ICoroutineRunner coroutineRunner, IParticleFactory particleFactory)
+        public RangeWeaponValidator(IServer server, ICoroutineRunner coroutineRunner, IParticleFactory particleFactory,
+            AudioService audioService)
         {
             _server = server;
             _coroutineRunner = coroutineRunner;
             _particleFactory = particleFactory;
             _lineDamageArea = new LineDamageArea(_server.MapProvider);
+            _audioService = audioService;
         }
 
         public void Shoot(NetworkConnectionToClient connection, Ray ray, bool requestIsButtonHolding)
@@ -30,26 +33,33 @@ namespace Networking.ServerServices
             var playerData = _server.Data.GetPlayerData(connection);
             var rangeWeapon = (RangeWeaponItem) playerData.Items[playerData.SelectedSlotIndex];
             var rangeWeaponData = (RangeWeaponData) playerData.ItemData[playerData.SelectedSlotIndex];
-
-            if (!CanShoot(rangeWeaponData) || requestIsButtonHolding != rangeWeapon.isAutomatic)
-            {
-                return;
-            }
-
             for (var i = 0; i < rangeWeapon.bulletsPerTap; i++)
             {
+                if (!CanShoot(rangeWeaponData) || requestIsButtonHolding != rangeWeapon.isAutomatic)
+                {
+                    _audioService.StopContinuousSound(connection.identity);
+                    return;
+                }
+
                 ApplyRaycast(connection, ray, rangeWeapon, rangeWeaponData);
+                rangeWeaponData.BulletsInMagazine -= 1;
+                connection.Send(new ShootResultResponse(rangeWeaponData.BulletsInMagazine));
+                _coroutineRunner.StartCoroutine(ResetShoot(connection, rangeWeapon, rangeWeaponData));
+                _coroutineRunner.StartCoroutine(ResetRecoil(connection, rangeWeapon, rangeWeaponData));
+                if (rangeWeapon.isAutomatic)
+                {
+                    _audioService.StartContinuousAudio(rangeWeapon.shootingSound, connection.identity);
+                }
+                else
+                {
+                    _audioService.SendAudio(rangeWeapon.shootingSound, connection.identity);
+                }
             }
+        }
 
-            rangeWeaponData.BulletsInMagazine -= 1;
-            if (rangeWeaponData.BulletsInMagazine <= 0)
-            {
-                rangeWeaponData.BulletsInMagazine = 0;
-            }
-
-            connection.Send(new ShootResultResponse(rangeWeaponData.BulletsInMagazine));
-            _coroutineRunner.StartCoroutine(ResetShoot(connection, rangeWeapon, rangeWeaponData));
-            _coroutineRunner.StartCoroutine(ResetRecoil(connection, rangeWeapon, rangeWeaponData));
+        public void CancelShoot(NetworkConnectionToClient connection)
+        {
+            _audioService.StopContinuousSound(connection.identity);
         }
 
         public void Reload(NetworkConnectionToClient connection)
@@ -63,6 +73,7 @@ namespace Networking.ServerServices
             }
 
             _coroutineRunner.StartCoroutine(ReloadInternal(connection, rangeWeapon, rangeWeaponData));
+            _audioService.SendAudio(rangeWeapon.reloadingSound, connection.identity);
         }
 
         private IEnumerator ReloadInternal(NetworkConnectionToClient connection, RangeWeaponItem configure,
@@ -184,7 +195,7 @@ namespace Networking.ServerServices
             {
                 var blockPosition = Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2);
                 var block = _server.MapProvider.GetBlockByGlobalPosition(blockPosition);
-                _server.BlockHealthSystem.DamageBlock(blockPosition,1, configure.damage, _lineDamageArea);
+                _server.BlockHealthSystem.DamageBlock(blockPosition, 1, configure.damage, _lineDamageArea);
                 _particleFactory.CreateBulletImpact(rayHit.point, Quaternion.Euler(rayHit.normal.y * -90,
                     rayHit.normal.x * 90 + (rayHit.normal.z == -1 ? 180 : 0), 0), block.Color);
             }

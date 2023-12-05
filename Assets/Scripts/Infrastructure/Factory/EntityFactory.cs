@@ -3,6 +3,7 @@ using Entities;
 using Infrastructure.AssetManagement;
 using Mirror;
 using Networking;
+using Networking.ServerServices;
 using UnityEngine;
 
 namespace Infrastructure.Factory
@@ -46,11 +47,11 @@ namespace Infrastructure.Factory
         }
 
         public GameObject CreateRocket(Vector3 position, Quaternion rotation, IServer server,
-            IParticleFactory particleFactory, RocketLauncherItem rocketData, NetworkConnectionToClient owner)
+            IParticleFactory particleFactory, RocketLauncherItem rocketData, NetworkConnectionToClient owner,
+            AudioService audioService)
         {
             var rocket = _assets.Instantiate(RocketPath, position, rotation);
-            rocket.GetComponent<Rocket>().Construct(server, rocketData, owner, particleFactory);
-            
+            rocket.GetComponent<Rocket>().Construct(server, rocketData, owner, particleFactory, audioService);
             NetworkServer.Spawn(rocket);
             return rocket;
         }

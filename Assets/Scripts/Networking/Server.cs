@@ -41,6 +41,7 @@ namespace Networking
         private readonly IncrementSlotIndexHandler _incrementSlotIndexHandler;
         private readonly DecrementSlotIndexHandler _decrementSlotIndexHandler;
         private readonly ShootHandler _shootHandler;
+        private readonly CancelShootHandler _cancelShootHandler;
         private readonly ReloadHandler _reloadHandler;
         private readonly HitHandler _hitHandler;
         private readonly AuthenticationHandler _authenticationHandler;
@@ -68,19 +69,21 @@ namespace Networking
             var chainExplosionBehaviour = new ChainExplosionBehaviour(this, particleFactory,
                 sphereExplosionArea);
             BlockHealthSystem = new BlockHealthSystem(staticData, MapProvider, mapUpdater);
-            var rangeWeaponValidator = new RangeWeaponValidator(this, customNetworkManager, particleFactory);
-            var meleeWeaponValidator = new MeleeWeaponValidator(this, customNetworkManager, particleFactory);
+            var audioService = new AudioService(staticData);
+            var rangeWeaponValidator = new RangeWeaponValidator(this, customNetworkManager, particleFactory, audioService);
+            var meleeWeaponValidator = new MeleeWeaponValidator(this, customNetworkManager, particleFactory, audioService);
             _addBlocksHandler = new AddBlocksHandler(this);
             _changeClassHandler = new ChangeClassHandler(this);
             _changeSlotHandler = new ChangeSlotHandler(this);
             _incrementSlotIndexHandler = new IncrementSlotIndexHandler(this);
             _decrementSlotIndexHandler = new DecrementSlotIndexHandler(this);
             _grenadeSpawnHandler = new GrenadeSpawnHandler(this, customNetworkManager, entityFactory,
-                singleExplosionBehaviour);
-            _rocketSpawnHandler = new RocketSpawnHandler(this, customNetworkManager, entityFactory, particleFactory);
+                singleExplosionBehaviour, audioService);
+            _rocketSpawnHandler = new RocketSpawnHandler(this, staticData, entityFactory, particleFactory, audioService);
             _tntSpawnHandler =
                 new TntSpawnHandler(this, customNetworkManager, entityFactory, chainExplosionBehaviour);
             _shootHandler = new ShootHandler(this, rangeWeaponValidator);
+            _cancelShootHandler = new CancelShootHandler(this, rangeWeaponValidator);
             _reloadHandler = new ReloadHandler(this, rangeWeaponValidator);
             _hitHandler = new HitHandler(this, meleeWeaponValidator);
             _authenticationHandler = new AuthenticationHandler(this);
@@ -198,6 +201,7 @@ namespace Networking
             _rocketSpawnHandler.Register();
             _tntSpawnHandler.Register();
             _shootHandler.Register();
+            _cancelShootHandler.Register();
             _reloadHandler.Register();
             _hitHandler.Register();
             _authenticationHandler.Register();
@@ -214,6 +218,7 @@ namespace Networking
             _rocketSpawnHandler.Unregister();
             _tntSpawnHandler.Unregister();
             _shootHandler.Unregister();
+            _cancelShootHandler.Unregister();
             _reloadHandler.Unregister();
             _hitHandler.Unregister();
             _authenticationHandler.Unregister();

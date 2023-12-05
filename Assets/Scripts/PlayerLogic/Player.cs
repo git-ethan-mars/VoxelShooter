@@ -7,7 +7,6 @@ using Infrastructure.Services.StaticData;
 using Infrastructure.Services.Storage;
 using Inventory;
 using Mirror;
-using PlayerLogic.Spectator;
 using TMPro;
 using UI;
 using UnityEngine;
@@ -28,7 +27,7 @@ namespace PlayerLogic
         private Transform itemPosition;
 
         public Transform ItemPosition => itemPosition;
-        
+
         [SerializeField]
         private MeshRenderer[] bodyParts;
 
@@ -52,14 +51,27 @@ namespace PlayerLogic
         [SerializeField]
         private new Rigidbody rigidbody;
 
+        [SerializeField]
+        private AudioSource continuousAudio;
+
+        public AudioSource ContinuousAudio => continuousAudio;
+
+        [SerializeField]
+        private AudioSource stepAudio;
+
+        [SerializeField]
+        private AudioData stepAudioData;
+
         private Camera _mainCamera;
         private Hud _hud;
+
 
         private IInputService _inputService;
         private InventorySystem _inventory;
 
         private PlayerMovement _movement;
         private PlayerRotation _rotation;
+        private PlayerAudio _audio;
 
 
         public void Construct(IUIFactory uiFactory, IMeshFactory meshFactory, IInputService inputService,
@@ -83,8 +95,22 @@ namespace PlayerLogic
             MountCamera();
         }
 
+        private void Start()
+        {
+            _audio = new PlayerAudio(stepAudio, stepAudioData);
+        }
+
         private void Update()
         {
+            if (Vector3.Scale(rigidbody.velocity, new Vector3(1, 0, 1)).magnitude > Constants.Epsilon)
+            {
+                _audio.EnableStepSound();
+            }
+            else
+            {
+                _audio.DisableStepSound();
+            }
+
             if (!isLocalPlayer)
             {
                 return;

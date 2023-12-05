@@ -4,6 +4,7 @@ using Data;
 using Entities;
 using Infrastructure.AssetManagement;
 using MapLogic;
+using Networking.ClientServices;
 using Rendering;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -27,7 +28,7 @@ namespace Infrastructure.Factory
         }
 
         public void CreateFallingMesh(MeshData meshData,
-            FallingMeshFallingMeshParticlePool fallingMeshFallingMeshParticlePool)
+            FallingMeshParticlePool fallingMeshFallingMeshParticlePool)
         {
             var mesh = new Mesh();
             mesh.indexFormat = meshData.IndexFormat;
