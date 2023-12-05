@@ -24,7 +24,6 @@ namespace Networking
         public ServerData Data { get; }
         public BlockHealthSystem BlockHealthSystem { get; }
 
-        private readonly MapUpdater _mapUpdater;
         private readonly ServerSettings _serverSettings;
         private readonly EntityPositionValidator _entityPositionValidator;
         private readonly BoxDropService _boxDropService;
@@ -54,8 +53,8 @@ namespace Networking
             _serverSettings = serverSettings;
             _entityFactory = entityFactory;
             MapProvider = MapReader.ReadFromFile(serverSettings.MapName, staticData);
-            _mapUpdater = new MapUpdater(customNetworkManager, MapProvider);
-            _entityPositionValidator = new EntityPositionValidator(_mapUpdater, MapProvider);
+            var mapUpdater = new MapUpdater(customNetworkManager, MapProvider);
+            _entityPositionValidator = new EntityPositionValidator(mapUpdater, MapProvider);
             _spawnPointService =
                 new SpawnPointService(MapProvider, gameFactory, entityFactory, _entityPositionValidator);
             _playerFactory = new PlayerFactory(assets, _spawnPointService);
@@ -68,9 +67,9 @@ namespace Networking
                 sphereExplosionArea);
             var chainExplosionBehaviour = new ChainExplosionBehaviour(this, particleFactory,
                 sphereExplosionArea);
-            BlockHealthSystem = new BlockHealthSystem(MapProvider, _mapUpdater);
-            var rangeWeaponValidator = new RangeWeaponValidator(this, customNetworkManager, particleFactory, BlockHealthSystem);
-            var meleeWeaponValidator = new MeleeWeaponValidator(this, customNetworkManager, particleFactory, BlockHealthSystem);
+            BlockHealthSystem = new BlockHealthSystem(MapProvider, mapUpdater);
+            var rangeWeaponValidator = new RangeWeaponValidator(this, customNetworkManager, particleFactory);
+            var meleeWeaponValidator = new MeleeWeaponValidator(this, customNetworkManager, particleFactory);
             _addBlocksHandler = new AddBlocksHandler(this);
             _changeClassHandler = new ChangeClassHandler(this);
             _changeSlotHandler = new ChangeSlotHandler(this);
@@ -91,6 +90,7 @@ namespace Networking
         {
             RegisterHandlers();
             _serverTimer.Start();
+            _entityPositionValidator.Start();
             _boxDropService.Start();
             _spawnPointService.CreateSpawnPoints();
         }
@@ -181,6 +181,7 @@ namespace Networking
 
         public void Stop()
         {
+            _entityPositionValidator.Stop();
             _boxDropService.Stop();
             _spawnPointService.RemoveSpawnPoints();
             UnregisterHandlers();

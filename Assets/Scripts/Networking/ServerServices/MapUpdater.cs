@@ -4,8 +4,6 @@ using System.Linq;
 using Data;
 using Infrastructure;
 using MapLogic;
-using Mirror;
-using Networking.Messages.Responses;
 using UnityEngine;
 
 namespace Networking.ServerServices
@@ -26,78 +24,72 @@ namespace Networking.ServerServices
             _blockSplitter = new BlockSplitter();
         }
 
-        public void SetBlocksByGlobalPositions(List<Vector3Int> positions, List<BlockData> blockData)
+        public void SetBlocksByGlobalPositions(List<BlockDataWithPosition> blocks)
         {
-            for (var i = 0; i < positions.Count; i++)
+            var createdBlocks = new List<BlockDataWithPosition>();
+            var removedBlocks = new List<BlockDataWithPosition>();
+            for (var i = 0; i < blocks.Count; i++)
             {
-                if (!blockData[i].IsSolid())
+                if (!_mapProvider.GetBlockByGlobalPosition(blocks[i].Position).IsSolid() &&
+                    blocks[i].BlockData.IsSolid())
                 {
-                    Debug.LogWarning("This method doesn't support empty blocks");
-                    return;
+                    createdBlocks.Add(blocks[i]);
                 }
 
-                _mapProvider.MapData
-                        .Chunks[
-                            _mapProvider.GetChunkNumberByGlobalPosition(positions[i].x, positions[i].y,
-                                positions[i].z)]
-                        .Blocks[
-                            positions[i].x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
-                            positions[i].y % ChunkData.ChunkSize * ChunkData.ChunkSize +
-                            positions[i].z % ChunkData.ChunkSize] =
-                    blockData[i];
+                if (_mapProvider.GetBlockByGlobalPosition(blocks[i].Position).IsSolid() &&
+                    !blocks[i].BlockData.IsSolid())
+                {
+                    removedBlocks.Add(blocks[i]);
+                }
+
+                SetBlockByGlobalPosition(blocks[i].Position, blocks[i].BlockData);
             }
-            
+
+            _destructionAlgorithm.Add(createdBlocks.Select(block => block.Position));
+            var fallingPositions = _destructionAlgorithm.Remove(removedBlocks.Select(block => block.Position).ToList());
+
+            SendUpdatedBlocks(blocks, fallingPositions);
+            SendFallingBlocks(fallingPositions);
+
+            foreach (var fallingPosition in fallingPositions)
+            {
+                SetBlockByGlobalPosition(fallingPosition, new BlockData());
+            }
+
             MapUpdated?.Invoke();
-            var updateMessages =
-                _blockSplitter.SplitArraysIntoMessages(positions.ToArray(), blockData.ToArray(), Constants.MessageSize);
-            _coroutineRunner.StartCoroutine(_blockSplitter.SendMessages(updateMessages, Constants.MessageDelay));
-            NetworkServer.SendToAll(new UpdateMapResponse(positions.ToArray(), blockData.ToArray()));
-            _destructionAlgorithm.Add(positions);
         }
 
-        public void RemoveBlocks(List<Vector3Int> positions)
+        private void SendFallingBlocks(Vector3Int[] fallingPositions)
         {
-            for (var i = 0; i < positions.Count; i++)
+            var fallingBlocks = new BlockDataWithPosition[fallingPositions.Length];
+            for (var i = 0; i < fallingBlocks.Length; i++)
             {
-                _mapProvider.MapData
-                        .Chunks[
-                            _mapProvider.GetChunkNumberByGlobalPosition(positions[i].x, positions[i].y, positions[i].z)]
-                        .Blocks[
-                            positions[i].x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
-                            positions[i].y % ChunkData.ChunkSize * ChunkData.ChunkSize +
-                            positions[i].z % ChunkData.ChunkSize] =
-                    new BlockData();
-            }
-            
-            var fallingPositions = _destructionAlgorithm.Remove(positions);
-            var colors = new Color32[fallingPositions.Length];
-            for (var i = 0; i < colors.Length; i++)
-            {
-                colors[i] = _mapProvider.GetBlockByGlobalPosition(fallingPositions[i]).Color;
+                fallingBlocks[i] = new BlockDataWithPosition(fallingPositions[i],
+                    _mapProvider.GetBlockByGlobalPosition(fallingPositions[i]));
             }
 
-            for (var i = 0; i < fallingPositions.Length; i++)
-            {
-                _mapProvider.MapData
-                        .Chunks[
-                            _mapProvider.GetChunkNumberByGlobalPosition(fallingPositions[i].x, fallingPositions[i].y,
-                                fallingPositions[i].z)]
-                        .Blocks[
-                            fallingPositions[i].x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
-                            fallingPositions[i].y % ChunkData.ChunkSize * ChunkData.ChunkSize +
-                            fallingPositions[i].z % ChunkData.ChunkSize] =
-                    new BlockData();
-            }
-
-            MapUpdated?.Invoke();
-            var destroyedBlocks = positions.Union(fallingPositions).ToArray();
-            var updateMessages = _blockSplitter.SplitArraysIntoMessages(destroyedBlocks,
-                new BlockData[destroyedBlocks.Length],
-                Constants.MessageSize);
-            _coroutineRunner.StartCoroutine(_blockSplitter.SendMessages(updateMessages, Constants.MessageDelay));
             var fallingBlockMessages =
-                _blockSplitter.SplitArraysIntoMessages(fallingPositions, colors, Constants.MessageSize);
+                _blockSplitter.SplitBlocksIntoFallingMessages(fallingBlocks, Constants.MessageSize);
             _coroutineRunner.StartCoroutine(_blockSplitter.SendMessages(fallingBlockMessages, Constants.MessageDelay));
+        }
+
+        private void SendUpdatedBlocks(List<BlockDataWithPosition> blocks, Vector3Int[] fallingPositions)
+        {
+            var updatedBlocks = new List<BlockDataWithPosition>(blocks.Count + fallingPositions.Length);
+            updatedBlocks.AddRange(blocks);
+            updatedBlocks.AddRange(fallingPositions.Select(fallingPosition =>
+                new BlockDataWithPosition(fallingPosition, new BlockData())));
+            var updateMessages = _blockSplitter.SplitBlocksIntoUpdateMessages(updatedBlocks, Constants.MessageSize);
+            _coroutineRunner.StartCoroutine(_blockSplitter.SendMessages(updateMessages, Constants.MessageDelay));
+        }
+
+        private void SetBlockByGlobalPosition(Vector3Int position, BlockData block)
+        {
+            var chunkIndex = _mapProvider.GetChunkNumberByGlobalPosition(position.x, position.y, position.z);
+            var blockIndex = position.x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
+                             position.y % ChunkData.ChunkSize * ChunkData.ChunkSize +
+                             position.z % ChunkData.ChunkSize;
+            _mapProvider.MapData.Chunks[chunkIndex].Blocks[blockIndex] = block;
         }
     }
 }
