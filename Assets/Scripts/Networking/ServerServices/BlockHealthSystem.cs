@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Data;
 using Explosions;
+using Infrastructure.Services.StaticData;
 using MapLogic;
 using UnityEngine;
 
@@ -8,26 +9,35 @@ namespace Networking.ServerServices
 {
     public class BlockHealthSystem
     {
-        private const int FullHealthBlockThreshold = 60;
-        private const int DamagedBlockThreshold = 40;
-        private const int WreckedBlockThreshold = 20;
-        private const float FullHealthBlockLerp = 1;
-        private const float DamagedBlockLerp = 0.7f;
-        private const float WreckedBlockLerp = 0.5f;
+        private readonly int _blockFullHealth;
+        private readonly int _damagedBlockHealthThreshold;
+        private readonly int _wreckedBlockHealthThreshold;
+        private readonly float _fullHealthColorCoefficient;
+        private readonly float _damagedColorCoefficient;
+        private readonly float _wreckedColorCoefficient;
 
         private readonly int[] _healthByBlock;
         private readonly MapProvider _mapProvider;
         private readonly MapUpdater _mapUpdater;
         private readonly IBlockDamageCalculator _blockDamageCalculator = new LinearBlockDamageCalculator();
 
-        public BlockHealthSystem(MapProvider mapProvider, MapUpdater mapUpdater)
+        public BlockHealthSystem(IStaticDataService staticData, MapProvider mapProvider, MapUpdater mapUpdater)
         {
             _mapProvider = mapProvider;
             _mapUpdater = mapUpdater;
+
+            var healthBalance = staticData.GetBlockHealthBalance();
+            _blockFullHealth = healthBalance.BlockFullHealth;
+            _damagedBlockHealthThreshold = healthBalance.DamagedBlockHealthThreshold;
+            _wreckedBlockHealthThreshold = healthBalance.WreckedBlockHealthThreshold;
+            _fullHealthColorCoefficient = healthBalance.FullHealthColorCoefficient;
+            _damagedColorCoefficient = healthBalance.DamagedColor;
+            _wreckedColorCoefficient = healthBalance.WreckedColor;
+
             _healthByBlock = new int[_mapProvider.BlockCount];
             for (var i = 0; i < _healthByBlock.Length; i++)
             {
-                _healthByBlock[i] = FullHealthBlockThreshold;
+                _healthByBlock[i] = _blockFullHealth;
             }
         }
 
@@ -36,7 +46,7 @@ namespace Networking.ServerServices
             foreach (var block in blocks)
             {
                 var blockIndex = GetBlockIndex(block.Position);
-                _healthByBlock[blockIndex] = FullHealthBlockThreshold;
+                _healthByBlock[blockIndex] = _blockFullHealth;
             }
 
             _mapUpdater.SetBlocksByGlobalPositions(blocks);
@@ -72,21 +82,25 @@ namespace Networking.ServerServices
         private BlockData CalculateBlockColor(int blockIndex, BlockData blockData, int previousHealth)
         {
             var newBlockData = new BlockData(BlockColor.empty);
-            if (_healthByBlock[blockIndex] >= DamagedBlockThreshold)
+            if (_healthByBlock[blockIndex] >= _damagedBlockHealthThreshold)
             {
-                return new BlockData(Color32.Lerp(BlockColor.empty, blockData.Color, FullHealthBlockLerp));
+                return new BlockData(Color32.Lerp(BlockColor.empty, blockData.Color, _fullHealthColorCoefficient));
             }
 
-            if (_healthByBlock[blockIndex] >= WreckedBlockThreshold)
+            if (_healthByBlock[blockIndex] >= _wreckedBlockHealthThreshold)
             {
                 return new BlockData(Color32.Lerp(BlockColor.empty, blockData.Color,
-                    previousHealth >= DamagedBlockThreshold ? DamagedBlockLerp : FullHealthBlockLerp));
+                    previousHealth >= _damagedBlockHealthThreshold
+                        ? _damagedColorCoefficient
+                        : _fullHealthColorCoefficient));
             }
 
             if (_healthByBlock[blockIndex] > 0)
             {
                 return new BlockData(Color32.Lerp(BlockColor.empty, blockData.Color,
-                    previousHealth >= WreckedBlockThreshold ? WreckedBlockLerp : FullHealthBlockLerp));
+                    previousHealth >= _wreckedBlockHealthThreshold
+                        ? _wreckedColorCoefficient
+                        : _fullHealthColorCoefficient));
             }
 
             return newBlockData;

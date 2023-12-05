@@ -13,11 +13,13 @@ namespace Infrastructure.Services.StaticData
         private const string PlayerCharacteristicsPath = "StaticData/Player Characteristics";
         private const string MapConfiguresPath = "StaticData/Map configures";
         private const string LobbyBalancePath = "StaticData/Lobby Balance";
+        private const string BlockHealthBalancePath = "StaticData/Block Health";
         private Dictionary<GameClass, PlayerCharacteristic> _playerCharacteristicByClass;
         private Dictionary<GameClass, GameInventory> _inventoryByClass;
         private Dictionary<int, InventoryItem> _itemById;
         private Dictionary<string, MapConfigure> _mapConfigureByName;
         private LobbyBalance _lobbyBalance;
+        private BlockHealthBalance _blockHealthBalance;
 
         public void LoadItems()
         {
@@ -72,6 +74,16 @@ namespace Infrastructure.Services.StaticData
         public LobbyBalance GetLobbyBalance()
         {
             return _lobbyBalance;
+        }
+
+        public void LoadBlockHealthBalance()
+        {
+            _blockHealthBalance = Resources.Load<BlockHealthBalance>(BlockHealthBalancePath);
+        }
+
+        public BlockHealthBalance GetBlockHealthBalance()
+        {
+            return _blockHealthBalance;
         }
 
         private MapConfigure GetDefaultMapConfigure()

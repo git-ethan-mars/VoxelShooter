@@ -51,6 +51,7 @@ namespace Infrastructure.States
             staticData.LoadPlayerCharacteristics();
             staticData.LoadMapConfigures();
             staticData.LoadLobbyBalance();
+            staticData.LoadBlockHealthBalance();
             _allServices.RegisterSingle<IInputService>(new StandaloneInputService());
             _allServices.RegisterSingle<IAssetProvider>(new AssetProvider());
             if (Constants.isLocalBuild)

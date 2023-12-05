@@ -67,7 +67,7 @@ namespace Networking
                 sphereExplosionArea);
             var chainExplosionBehaviour = new ChainExplosionBehaviour(this, particleFactory,
                 sphereExplosionArea);
-            BlockHealthSystem = new BlockHealthSystem(MapProvider, mapUpdater);
+            BlockHealthSystem = new BlockHealthSystem(staticData, MapProvider, mapUpdater);
             var rangeWeaponValidator = new RangeWeaponValidator(this, customNetworkManager, particleFactory);
             var meleeWeaponValidator = new MeleeWeaponValidator(this, customNetworkManager, particleFactory);
             _addBlocksHandler = new AddBlocksHandler(this);
