@@ -33,27 +33,30 @@ namespace Networking.ServerServices
             var playerData = _server.Data.GetPlayerData(connection);
             var rangeWeapon = (RangeWeaponItem) playerData.Items[playerData.SelectedSlotIndex];
             var rangeWeaponData = (RangeWeaponData) playerData.ItemData[playerData.SelectedSlotIndex];
+
+            if (!CanShoot(rangeWeaponData) || requestIsButtonHolding != rangeWeapon.isAutomatic)
+            {
+                _audioService.StopContinuousSound(connection.identity);
+                return;
+            }
+
             for (var i = 0; i < rangeWeapon.bulletsPerTap; i++)
             {
-                if (!CanShoot(rangeWeaponData) || requestIsButtonHolding != rangeWeapon.isAutomatic)
-                {
-                    _audioService.StopContinuousSound(connection.identity);
-                    return;
-                }
-
                 ApplyRaycast(connection, ray, rangeWeapon, rangeWeaponData);
-                rangeWeaponData.BulletsInMagazine -= 1;
-                connection.Send(new ShootResultResponse(rangeWeaponData.BulletsInMagazine));
-                _coroutineRunner.StartCoroutine(ResetShoot(connection, rangeWeapon, rangeWeaponData));
-                _coroutineRunner.StartCoroutine(ResetRecoil(connection, rangeWeapon, rangeWeaponData));
-                if (rangeWeapon.isAutomatic)
-                {
-                    _audioService.StartContinuousAudio(rangeWeapon.shootingSound, connection.identity);
-                }
-                else
-                {
-                    _audioService.SendAudio(rangeWeapon.shootingSound, connection.identity);
-                }
+            }
+
+            rangeWeaponData.BulletsInMagazine -= 1;
+            connection.Send(new ShootResultResponse(rangeWeaponData.BulletsInMagazine));
+            _coroutineRunner.StartCoroutine(ResetShoot(connection, rangeWeapon, rangeWeaponData));
+            _coroutineRunner.StartCoroutine(ResetRecoil(connection, rangeWeapon, rangeWeaponData));
+
+            if (rangeWeapon.isAutomatic)
+            {
+                _audioService.StartContinuousAudio(rangeWeapon.shootingSound, connection.identity);
+            }
+            else
+            {
+                _audioService.SendAudio(rangeWeapon.shootingSound, connection.identity);
             }
         }
 
