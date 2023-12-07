@@ -31,10 +31,5 @@ namespace PlayerLogic
         {
             _stepAudio.loop = false;
         }
-
-        public void DisableSpatial()
-        {
-            _stepAudio.spatialBlend = Sound2D;
-        }
     }
 }
