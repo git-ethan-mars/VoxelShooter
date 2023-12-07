@@ -14,7 +14,8 @@ namespace Infrastructure.Services.Input
         bool IsReloadingButtonDown();
         bool IsJumpButtonDown();
         float GetScrollSpeed();
-        bool IsScoreboardButtonHold();
+        bool IsScoreboardButtonDown();
+        bool IsScoreboardButtonUp();
         bool IsChooseClassButtonDown();
         bool IsInGameMenuButtonDown();
         bool IsLeftArrowButtonDown();

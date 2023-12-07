@@ -8,6 +8,7 @@ using Networking;
 using PlayerLogic;
 using UI;
 using UI.SettingsMenu;
+using UI.Windows;
 using UnityEngine;
 
 namespace Infrastructure.Factory
@@ -22,6 +23,8 @@ namespace Infrastructure.Factory
         private const string ScoreboardPath = "Prefabs/UI/Scoreboard";
         private const string LoadingWindowPath = "Prefabs/UI/LoadingWindow";
         private const string SettingsMenuPath = "Prefabs/UI/SettingsMenu";
+        private const string InGameMenuPath = "Prefabs/UI/InGameMenu";
+        private const string InGameUIPath = "Prefabs/UI/InGameUI";
         private readonly IAssetProvider _assets;
         private readonly IStaticDataService _staticData;
 
@@ -35,16 +38,9 @@ namespace Infrastructure.Factory
         public Hud CreateHud(Player player, IInputService inputService)
         {
             var hud = _assets.Instantiate(HudPath).GetComponent<Hud>();
-            hud.Construct(inputService);
             hud.healthCounter.Construct(player);
             hud.palette.Construct(inputService);
             return hud;
-        }
-
-        public void CreateChooseClassMenu(IClient client, IInputService inputService)
-        {
-            _assets.Instantiate(ChooseClassMenuPath).GetComponent<ChooseClassMenu>()
-                .Construct(client, inputService);
         }
 
         public GameObject CreateMainMenu(GameStateMachine gameStateMachine)
@@ -54,6 +50,11 @@ namespace Infrastructure.Factory
             return mainMenu;
         }
 
+        public void CreateLoadingWindow(IClient client)
+        {
+            _assets.Instantiate(LoadingWindowPath).GetComponent<LoadingWindow>().Construct(client);
+        }
+
         public GameObject CreateMatchMenu(GameStateMachine gameStateMachine, IMapRepository mapRepository)
         {
             var matchMenu = _assets.Instantiate(MatchMenuPath);
@@ -61,27 +62,45 @@ namespace Infrastructure.Factory
             return matchMenu;
         }
 
-        public void CreateTimeCounter(IClient client, IInputService inputService)
-        {
-            _assets.Instantiate(TimeCounterPath).GetComponent<TimeCounter>().Construct(client, inputService);
-        }
-
-        public void CreateScoreboard(IClient client, IInputService inputService, IAvatarLoader avatarLoader)
-        {
-            _assets.Instantiate(ScoreboardPath).GetComponent<Scoreboard>()
-                .Construct(client, inputService, avatarLoader);
-        }
-
-        public void CreateLoadingWindow(IClient client)
-        {
-            _assets.Instantiate(LoadingWindowPath).GetComponent<LoadingWindow>().Construct(client);
-        }
-
         public GameObject CreateSettingsMenu(GameStateMachine gameStateMachine, IStorageService storageService)
         {
             var settingsMenu = _assets.Instantiate(SettingsMenuPath);
             settingsMenu.GetComponent<SettingsMenu>().Construct(gameStateMachine, storageService);
             return settingsMenu;
+        }
+
+        public void CreateInGameUI(IClient client, IInputService inputService, IAvatarLoader avatarLoader)
+        {
+            _assets.Instantiate(InGameUIPath).GetComponent<InGameUI>()
+                .Construct(this, inputService, client, avatarLoader);
+        }
+
+        public ChooseClassMenu CreateChooseClassMenu(Transform parent)
+        {
+            var chooseClassMenu = _assets.Instantiate(ChooseClassMenuPath, parent).GetComponent<ChooseClassMenu>();
+            chooseClassMenu.Construct();
+            return chooseClassMenu;
+        }
+
+        public Scoreboard CreateScoreBoard(Transform parent, IClient client, IAvatarLoader avatarLoader)
+        {
+            var scoreboard = _assets.Instantiate(ScoreboardPath, parent).GetComponent<Scoreboard>();
+            scoreboard.Construct(client, avatarLoader);
+            return scoreboard;
+        }
+
+        public TimeCounter CreateTimeCounter(Transform parent, IClient client)
+        {
+            var timeCounter = _assets.Instantiate(TimeCounterPath, parent).GetComponent<TimeCounter>();
+            timeCounter.Construct(client);
+            return timeCounter;
+        }
+
+        public InGameMenu CreateInGameMenu(Transform parent)
+        {
+            var inGameMenu = _assets.Instantiate(InGameMenuPath, parent).GetComponent<InGameMenu>();
+            inGameMenu.Construct();
+            return inGameMenu;
         }
     }
 }

@@ -31,15 +31,6 @@ namespace UI
         public TextMeshProUGUI itemCount;
         public HealthCounter healthCounter;
         private IInputService _inputService;
-
-        public void Construct(IInputService inputService)
-        {
-            _inputService = inputService;
-        }
-
-        public void Update()
-        {
-            canvasGroup.alpha = _inputService.IsScoreboardButtonHold() ? 0 : 1;
-        }
+        
     }
 }

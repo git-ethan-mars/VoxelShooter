@@ -7,6 +7,7 @@ using Infrastructure.States;
 using Networking;
 using PlayerLogic;
 using UI;
+using UI.Windows;
 using UnityEngine;
 
 namespace Infrastructure.Factory
@@ -14,12 +15,14 @@ namespace Infrastructure.Factory
     public interface IUIFactory : IService
     {
         Hud CreateHud(Player player, IInputService inputService);
-        void CreateChooseClassMenu(IClient client, IInputService inputService);
         GameObject CreateMainMenu(GameStateMachine gameStateMachine);
         GameObject CreateMatchMenu(GameStateMachine gameStateMachine, IMapRepository mapRepository);
-        void CreateTimeCounter(IClient client, IInputService inputService);
-        void CreateScoreboard(IClient client, IInputService inputService, IAvatarLoader avatarLoader);
-        void CreateLoadingWindow(IClient client);
         GameObject CreateSettingsMenu(GameStateMachine gameStateMachine, IStorageService storageService);
+        void CreateLoadingWindow(IClient client);
+        void CreateInGameUI(IClient client, IInputService inputService, IAvatarLoader avatarLoader);
+        ChooseClassMenu CreateChooseClassMenu(Transform parent);
+        Scoreboard CreateScoreBoard(Transform parent, IClient client, IAvatarLoader avatarLoader);
+        TimeCounter CreateTimeCounter(Transform parent, IClient client);
+        InGameMenu CreateInGameMenu(Transform parent);
     }
 }

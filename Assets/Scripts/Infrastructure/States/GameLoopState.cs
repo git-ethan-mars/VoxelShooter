@@ -20,9 +20,7 @@ namespace Infrastructure.States
 
         public void Enter(IClient client)
         {
-            _uiFactory.CreateChooseClassMenu(client, _inputService);
-            _uiFactory.CreateTimeCounter(client, _inputService);
-            _uiFactory.CreateScoreboard(client, _inputService, _avatarLoader);
+            _uiFactory.CreateInGameUI(client, _inputService, _avatarLoader);
         }
 
         public void Exit()

@@ -1,12 +1,10 @@
 ﻿using Data;
-using Infrastructure.Services.Input;
 using Networking;
 using TMPro;
 using UnityEngine;
 
-namespace UI
+namespace UI.Windows
 {
-    [RequireComponent(typeof(CanvasGroup))]
     public class TimeCounter : MonoBehaviour
     {
         [SerializeField]
@@ -15,35 +13,25 @@ namespace UI
         [SerializeField]
         private TextMeshProUGUI respawnTimeText;
 
+        public CanvasGroup CanvasGroup => canvasGroup;
+
         [SerializeField]
         private CanvasGroup canvasGroup;
 
-        private IInputService _inputService;
         private IClient _client;
 
-        public void Construct(IClient client, IInputService inputService)
+        public void Construct(IClient client)
         {
-            _inputService = inputService;
             _client = client;
             _client.GameFinished += HideTimer;
             _client.GameTimeChanged += ChangeGameTime;
             _client.RespawnTimeChanged += ChangeRespawnTime;
-        }
-
-        public void Update()
-        {
-            canvasGroup.alpha = _inputService.IsScoreboardButtonHold() ? 0 : 1;
+            canvasGroup.alpha = 0.0f;
         }
 
         private void ChangeGameTime(ServerTime timeLeft)
         {
             serverTimeText.SetText($"{timeLeft.Minutes}:{timeLeft.Seconds:00}");
-        }
-
-        private void HideTimer()
-        {
-            _client.GameFinished -= HideTimer;
-            gameObject.SetActive(false);
         }
 
         private void ChangeRespawnTime(ServerTime timeLeft)
@@ -60,8 +48,14 @@ namespace UI
             }
         }
 
+        private void HideTimer()
+        {
+            gameObject.SetActive(false);
+        }
+
         private void OnDestroy()
         {
+            _client.GameFinished -= HideTimer;
             _client.GameTimeChanged -= ChangeGameTime;
             _client.RespawnTimeChanged -= ChangeRespawnTime;
         }

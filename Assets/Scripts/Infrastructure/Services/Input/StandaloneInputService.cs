@@ -16,7 +16,9 @@ namespace Infrastructure.Services.Input
         public bool IsReloadingButtonDown() => UnityEngine.Input.GetKeyDown(KeyCode.R);
         public bool IsJumpButtonDown() => UnityEngine.Input.GetKeyDown(KeyCode.Space);
         public float GetScrollSpeed() => UnityEngine.Input.GetAxis("Mouse ScrollWheel");
-        public bool IsScoreboardButtonHold() => UnityEngine.Input.GetKey(KeyCode.Tab);
+        public bool IsScoreboardButtonDown() => UnityEngine.Input.GetKeyDown(KeyCode.Tab);
+        public bool IsScoreboardButtonUp() => UnityEngine.Input.GetKeyUp(KeyCode.Tab);
+
         public bool IsChooseClassButtonDown() => UnityEngine.Input.GetKeyDown(KeyCode.M);
         public bool IsInGameMenuButtonDown() => UnityEngine.Input.GetKeyDown(KeyCode.Escape);
         public bool IsLeftArrowButtonDown() => UnityEngine.Input.GetKeyDown(KeyCode.LeftArrow);
