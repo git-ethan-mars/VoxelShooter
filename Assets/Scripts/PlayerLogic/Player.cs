@@ -65,11 +65,13 @@ namespace PlayerLogic
         private Camera _mainCamera;
         private Hud _hud;
 
-
         private IInputService _inputService;
         private InventorySystem _inventory;
 
         private PlayerMovement _movement;
+        private float _speed;
+        private float _jumpHeight;
+
         private PlayerRotation _rotation;
         private PlayerAudio _audio;
 
@@ -83,7 +85,8 @@ namespace PlayerLogic
             PlaceDistance = placeDistance;
             Health = new ObservableVariable<int>(health);
             _inputService = inputService;
-            _movement = new PlayerMovement(hitBox, rigidbody, bodyOrientation, speed, jumpHeight);
+            _speed = speed;
+            _jumpHeight = jumpHeight;
             var sensitivity = storageService.Load<MouseSettingsData>(Constants.MouseSettingKey).GeneralSensitivity;
             _rotation = new PlayerRotation(bodyOrientation, headPivot, sensitivity);
             _hud = uiFactory.CreateHud(this, inputService);
@@ -98,13 +101,14 @@ namespace PlayerLogic
         private void Start()
         {
             _audio = new PlayerAudio(stepAudio, stepAudioData);
+            _movement = new PlayerMovement(hitBox, rigidbody, bodyOrientation);
         }
 
         private void Update()
         {
             if (!isLocalPlayer)
             {
-                if (Vector3.Scale(rigidbody.velocity, new Vector3(1, 0, 1)).magnitude > Constants.Epsilon)
+                if (_movement.GetHorizontalVelocity().magnitude > Constants.Epsilon && _movement.IsGrounded())
                 {
                     _audio.EnableStepSound();
                 }
@@ -116,11 +120,11 @@ namespace PlayerLogic
                 return;
             }
 
-            _movement.Move(_inputService.Axis);
+            _movement.Move(_inputService.Axis, _speed);
 
             if (_inputService.IsJumpButtonDown())
             {
-                _movement.Jump();
+                _movement.Jump(_jumpHeight);
             }
 
             _rotation.Rotate(_inputService.MouseAxis);
@@ -144,9 +148,9 @@ namespace PlayerLogic
 
         private void TurnOffBodyRender()
         {
-            for (var i = 0; i < bodyParts.Length; i++)
+            foreach (var bodyPart in bodyParts)
             {
-                bodyParts[i].enabled = false;
+                bodyPart.enabled = false;
             }
         }
 
