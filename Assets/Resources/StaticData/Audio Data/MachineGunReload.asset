@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e252e319c61c4beba81ce941dd9260e5, type: 3}
   m_Name: MachineGunReload
   m_EditorClassIdentifier: 
-  clip: {fileID: 8300000, guid: a2503e92ee60ee045aad67f54ebe92ec, type: 3}
+  clip: {fileID: 8300000, guid: 770c353d8ee179243b31afce6bbb3d3b, type: 3}
   volume: 1
   minDistance: 0
   maxDistance: 50
