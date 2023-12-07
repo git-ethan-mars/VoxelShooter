@@ -112,6 +112,8 @@ namespace PlayerLogic
                 {
                     _audio.DisableStepSound();
                 }
+
+                return;
             }
 
             _movement.Move(_inputService.Axis);
