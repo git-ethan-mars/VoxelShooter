@@ -8,7 +8,9 @@ namespace Networking.MessageHandlers.ResponseHandler
 {
     public class PlayerSoundHandler : ResponseHandler<PlayerSoundResponse>
     {
+        private const float Sound3D = 1.0f;
         private const float Sound2D = 0.0f;
+
         private readonly IStaticDataService _staticData;
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly AudioPool _audioPool;
@@ -27,16 +29,13 @@ namespace Networking.MessageHandlers.ResponseHandler
                 var audioSource = _audioPool.Get();
                 var transformFollower = audioSource.GetComponent<TransformFollower>();
                 transformFollower.Target = response.Source.transform;
+                transformFollower.enabled = true;
                 var audio = _staticData.GetAudio(response.SoundId);
                 audioSource.clip = audio.clip;
                 audioSource.volume = audio.volume;
                 audioSource.minDistance = audio.minDistance;
                 audioSource.maxDistance = audio.maxDistance;
-                if (response.Source == NetworkClient.localPlayer)
-                {
-                    audioSource.spatialBlend = Sound2D;
-                }
-
+                audioSource.spatialBlend = response.Source == NetworkClient.localPlayer ? Sound2D : Sound3D;
                 audioSource.Play();
                 _coroutineRunner.StartCoroutine(_audioPool.ReleaseOnDelay(audioSource, audio.clip.length));
             }

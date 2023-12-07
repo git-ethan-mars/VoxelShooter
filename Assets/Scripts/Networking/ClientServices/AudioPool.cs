@@ -34,6 +34,7 @@ namespace Networking.ClientServices
         {
             audioSource.gameObject.SetActive(false);
             audioSource.transform.position = Vector3.zero;
+            audioSource.GetComponent<TransformFollower>().enabled = false;
             _stack.Push(audioSource);
         }
         
