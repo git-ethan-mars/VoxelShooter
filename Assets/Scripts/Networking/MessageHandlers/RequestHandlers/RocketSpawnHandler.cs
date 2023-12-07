@@ -31,17 +31,19 @@ namespace Networking.MessageHandlers.RequestHandlers
         protected override void OnRequestReceived(NetworkConnectionToClient connection, RocketSpawnRequest request)
         {
             var result = _server.Data.TryGetPlayerData(connection, out var playerData);
-            if (!result || !playerData.IsAlive)
+            if (!result || !playerData.IsAlive || playerData.SelectedItem is not RocketLauncherItem rocketData)
             {
                 return;
             }
 
-            var rocketCount = playerData.CountByItem[playerData.Items[playerData.SelectedSlotIndex]];
+            var rocketCount = playerData.CountByItem[rocketData];
             if (rocketCount <= 0)
+            {
                 return;
-            playerData.CountByItem[playerData.Items[playerData.SelectedSlotIndex]] = rocketCount - 1;
+            }
+
+            playerData.CountByItem[rocketData] = rocketCount - 1;
             connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex, rocketCount - 1));
-            var rocketData = (RocketLauncherItem) playerData.Items[playerData.SelectedSlotIndex];
             var direction = request.Ray.direction;
             var rocket = _entityFactory.CreateRocket(request.Ray.origin + direction * 3,
                 Quaternion.LookRotation(direction), _server, _particleFactory, rocketData, connection, _audioService);

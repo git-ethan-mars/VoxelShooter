@@ -30,14 +30,20 @@ namespace Networking.MessageHandlers.RequestHandlers
         protected override void OnRequestReceived(NetworkConnectionToClient connection, TntSpawnRequest request)
         {
             var result = _server.Data.TryGetPlayerData(connection, out var playerData);
-            if (!result || !playerData.IsAlive) return;
-            var tntCount = playerData.CountByItem[playerData.Items[playerData.SelectedSlotIndex]];
-            if (tntCount <= 0)
+            if (!result || !playerData.IsAlive || playerData.SelectedItem is not TntItem tntData)
+            {
                 return;
-            playerData.CountByItem[playerData.Items[playerData.SelectedSlotIndex]] = tntCount - 1;
+            }
+
+            var tntCount = playerData.CountByItem[tntData];
+            if (tntCount <= 0)
+            {
+                return;
+            }
+
+            playerData.CountByItem[tntData] = tntCount - 1;
             connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex, tntCount - 1));
             var tnt = _entityFactory.CreateTnt(request.Position, request.Rotation);
-            var tntData = (TntItem) playerData.Items[playerData.SelectedSlotIndex];
             _coroutineRunner.StartCoroutine(ExplodeTnt(Vector3Int.FloorToInt(request.ExplosionCenter), tnt,
                 tntData.delayInSeconds,
                 tntData.radius, connection, tntData.damage, tntData.particlesSpeed, tntData.particlesCount));

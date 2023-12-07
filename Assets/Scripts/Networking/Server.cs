@@ -265,7 +265,7 @@ namespace Networking
                 if (Data.TryGetPlayerData(anotherClient, out var anotherPlayer) && playerData.IsAlive)
                 {
                     connection.Send(new ChangeItemModelResponse(anotherClient.identity,
-                        anotherPlayer.Items[anotherPlayer.SelectedSlotIndex].id));
+                        anotherPlayer.SelectedItem.id));
                     connection.Send(new NickNameResponse(anotherClient.identity, anotherPlayer.NickName));
                 }
             }

@@ -33,15 +33,21 @@ namespace Networking.MessageHandlers.RequestHandlers
         protected override void OnRequestReceived(NetworkConnectionToClient connection, GrenadeSpawnRequest request)
         {
             var result = _server.Data.TryGetPlayerData(connection, out var playerData);
-            if (!result || !playerData.IsAlive) return;
-            var grenadeCount = playerData.CountByItem[playerData.Items[playerData.SelectedSlotIndex]];
-            if (grenadeCount <= 0)
+            if (!result || !playerData.IsAlive || playerData.SelectedItem is not GrenadeItem grenadeData)
+            {
                 return;
-            playerData.CountByItem[playerData.Items[playerData.SelectedSlotIndex]] = grenadeCount - 1;
+            }
+
+            var grenadeCount = playerData.CountByItem[grenadeData];
+            if (grenadeCount <= 0)
+            {
+                return;
+            }
+
+            playerData.CountByItem[grenadeData] = grenadeCount - 1;
             connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex, grenadeCount - 1));
             var grenade = _entityFactory.CreateGrenade(request.Ray.origin, Quaternion.identity);
             grenade.GetComponent<Rigidbody>().AddForce(request.Ray.direction * request.ThrowForce);
-            var grenadeData = (GrenadeItem) playerData.Items[playerData.SelectedSlotIndex];
             _coroutineRunner.StartCoroutine(ExplodeGrenade(grenade, grenadeData, connection));
         }
 

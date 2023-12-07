@@ -31,7 +31,7 @@ namespace Networking.ServerServices
         public void Shoot(NetworkConnectionToClient connection, Ray ray, bool requestIsButtonHolding)
         {
             var playerData = _server.Data.GetPlayerData(connection);
-            var rangeWeapon = (RangeWeaponItem) playerData.Items[playerData.SelectedSlotIndex];
+            var rangeWeapon = (RangeWeaponItem) playerData.SelectedItem;
             var rangeWeaponData = (RangeWeaponData) playerData.ItemData[playerData.SelectedSlotIndex];
 
             if (!CanShoot(rangeWeaponData) || requestIsButtonHolding != rangeWeapon.isAutomatic)
@@ -68,7 +68,7 @@ namespace Networking.ServerServices
         public void Reload(NetworkConnectionToClient connection)
         {
             var playerData = _server.Data.GetPlayerData(connection);
-            var rangeWeapon = (RangeWeaponItem) playerData.Items[playerData.SelectedSlotIndex];
+            var rangeWeapon = (RangeWeaponItem) playerData.SelectedItem;
             var rangeWeaponData = (RangeWeaponData) playerData.ItemData[playerData.SelectedSlotIndex];
             if (!CanReload(rangeWeapon, rangeWeaponData))
             {

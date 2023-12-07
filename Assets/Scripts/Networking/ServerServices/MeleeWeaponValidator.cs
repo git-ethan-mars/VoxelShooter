@@ -29,7 +29,7 @@ namespace Networking.ServerServices
         public void Hit(NetworkConnectionToClient connection, Ray ray, bool isStrongHit)
         {
             var playerData = _server.Data.GetPlayerData(connection);
-            var meleeWeapon = (MeleeWeaponItem) playerData.Items[playerData.SelectedSlotIndex];
+            var meleeWeapon = (MeleeWeaponItem) playerData.SelectedItem;
             var meleeWeaponData = (MeleeWeaponData) playerData.ItemData[playerData.SelectedSlotIndex];
 
             if (!CanHit(meleeWeaponData))
