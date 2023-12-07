@@ -5,6 +5,7 @@ namespace PlayerLogic
 {
     public class PlayerAudio
     {
+        private const float Sound2D = 0.0f;
         private readonly AudioSource _stepAudio;
 
         public PlayerAudio(AudioSource stepAudio, AudioData stepAudioData)
@@ -29,6 +30,11 @@ namespace PlayerLogic
         public void DisableStepSound()
         {
             _stepAudio.loop = false;
+        }
+
+        public void DisableSpatial()
+        {
+            _stepAudio.spatialBlend = Sound2D;
         }
     }
 }

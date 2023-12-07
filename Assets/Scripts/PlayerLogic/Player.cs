@@ -100,6 +100,11 @@ namespace PlayerLogic
             _audio = new PlayerAudio(stepAudio, stepAudioData);
         }
 
+        public override void OnStartLocalPlayer()
+        {
+            _audio.DisableSpatial();
+        }
+
         private void Update()
         {
             if (Vector3.Scale(rigidbody.velocity, new Vector3(1, 0, 1)).magnitude > Constants.Epsilon)
