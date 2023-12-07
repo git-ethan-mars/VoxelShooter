@@ -22,7 +22,7 @@ MonoBehaviour:
   baseRecoil: 0.003
   stepRecoil: 0.02
   resetTimeRecoil: 2
-  range: 500
+  range: 350
   reloadTime: 3
   magazineSize: 5
   bulletsPerTap: 1

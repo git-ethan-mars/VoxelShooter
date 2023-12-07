@@ -15,4 +15,4 @@ MonoBehaviour:
   clip: {fileID: 8300000, guid: 5e6b2e49513ddb74da2571eea6c679aa, type: 3}
   volume: 1
   minDistance: 0
-  maxDistance: 50
+  maxDistance: 10
