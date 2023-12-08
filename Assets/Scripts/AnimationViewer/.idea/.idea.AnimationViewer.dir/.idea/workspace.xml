@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="2cac0905-1d70-43d8-8ac6-9ad3a77f4c10" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../../Animations/ArmsAnimations/AssaultRifle/ShootHip(Assault Rifle).anim" beforeDir="false" afterPath="$PROJECT_DIR$/../../Animations/ArmsAnimations/AssaultRifle/ShootHip(Assault Rifle).anim" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Animations/Player Animator.controller" beforeDir="false" afterPath="$PROJECT_DIR$/../../Animations/Player Animator.controller" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.AnimationViewer.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AnimationViewer.dir/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/AnimationPlayer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AnimationPlayer.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -13,9 +16,12 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../.." />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 7
-}]]></component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/AnimationPlayer.cs" root0="SKIP_HIGHLIGHTING" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
   <component name="ProjectId" id="2ZE4B29B7RcMhsCYEQ6ye5Po3HF" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -27,6 +33,10 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
     "git-widget-placeholder": "player-animations",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
     "vue.rearranger.settings.migration": "true"
   },
   "keyToStringList": {
@@ -46,6 +56,7 @@
       <option name="presentableId" value="Default" />
       <updated>1701973767677</updated>
       <workItem from="1701973770525" duration="162000" />
+      <workItem from="1701974127942" duration="672000" />
     </task>
     <servers />
   </component>

@@ -24,6 +24,9 @@ public class AnimationPlayer : MonoBehaviour
     [SerializeField]
     private float jumpMultiplier;
 
+    [SerializeField]
+    private bool disableCamera;
+
 
     private PlayerLegAnimator _legAnimator;
     private IInputService _inputService;
@@ -31,6 +34,7 @@ public class AnimationPlayer : MonoBehaviour
     private CharacterController _characterController;
     private float _jumpSpeed;
     private float _speedModifier = 1f;
+    
 
     private void Awake()
     {
@@ -47,7 +51,11 @@ public class AnimationPlayer : MonoBehaviour
 
     void Update()
     {
-        HandleHeadRotation();
+        if (disableCamera)
+        {
+            HandleHeadRotation();
+        }
+
         HandleMovement();
         HandleSneaking();
         HandleSquatting();
