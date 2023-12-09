@@ -29,6 +29,8 @@ namespace UI.Palette
         private PalettePointerMover _pointerMover;
         private PaletteColorCreator _colorCreator;
 
+        private IEnumerator coroutine;
+
         public void Construct(IInputService inputService)
         {
             _inputService = inputService;
@@ -46,7 +48,8 @@ namespace UI.Palette
 
         private void OnEnable()
         {
-            StartCoroutine(ChangePointerColor());
+            coroutine = ChangePointerColor();
+            StartCoroutine(coroutine);
         }
 
         private void Update()
@@ -74,7 +77,7 @@ namespace UI.Palette
 
         private void OnDisable()
         {
-            StopCoroutine(ChangePointerColor());
+            StopCoroutine(coroutine);
         }
 
         private void OnDestroy()
