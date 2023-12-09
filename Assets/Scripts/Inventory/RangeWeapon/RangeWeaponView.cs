@@ -17,13 +17,12 @@ namespace Inventory.RangeWeapon
         private int _bulletsInMagazine;
         private bool _isSelected;
 
-        public RangeWeaponView(RangeWeaponData configure,
-            Hud hud)
+        public RangeWeaponView(RangeWeaponItem configure, RangeWeaponData data, Hud hud)
         {
-            Icon = configure.InventoryIcon;
-            _ammoTypeIcon = configure.AmmoTypeIcon;
-            _bulletsInMagazine = configure.BulletsInMagazine;
-            _totalBullets = configure.TotalBullets;
+            Icon = configure.inventoryIcon;
+            _ammoTypeIcon = configure.ammoIcon;
+            _bulletsInMagazine = data.BulletsInMagazine;
+            _totalBullets = data.TotalBullets;
             _ammoInfo = hud.ammoInfo;
             _ammoCount = hud.ammoCount;
             _ammoType = hud.ammoType;

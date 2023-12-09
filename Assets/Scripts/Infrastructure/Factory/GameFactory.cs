@@ -16,6 +16,7 @@ namespace Infrastructure.Factory
         private const string NetworkManagerPath = "Prefabs/Network/LocalNetworkManager";
         private const string SteamNetworkManagerPath = "Prefabs/Network/SteamManager";
         private const string DirectionalLightName = "Directional Light";
+        private const string AudioSourcePath = "Prefabs/AudioSource";
         private readonly IAssetProvider _assets;
         private readonly IInputService _inputService;
         private readonly IStorageService _storageService;
@@ -83,6 +84,11 @@ namespace Infrastructure.Factory
             light.type = LightType.Directional;
             light.shadows = LightShadows.Soft;
             light.shadowNormalBias = 0;
+        }
+
+        public AudioSource CreateAudioSource(Transform container)
+        {
+            return _assets.Instantiate(AudioSourcePath, container).GetComponent<AudioSource>();
         }
     }
 }

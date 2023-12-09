@@ -1,3 +1,4 @@
+using System.Collections;
 using Data;
 using Explosions;
 using Infrastructure;
@@ -12,69 +13,79 @@ namespace Networking.ServerServices
         private readonly IServer _server;
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly IParticleFactory _particleFactory;
-        private readonly IExplosionArea _lineExplosionArea;
+        private readonly IDamageArea _lineDamageArea;
+        private readonly AudioService _audioService;
 
-        public MeleeWeaponValidator(IServer server, ICoroutineRunner coroutineRunner, IParticleFactory particleFactory)
+        public MeleeWeaponValidator(IServer server, ICoroutineRunner coroutineRunner, IParticleFactory particleFactory,
+            AudioService audioService)
         {
             _server = server;
             _particleFactory = particleFactory;
+            _audioService = audioService;
             _coroutineRunner = coroutineRunner;
-            _lineExplosionArea = new LineExplosionArea(_server.MapProvider);
+            _lineDamageArea = new LineDamageArea(_server.MapProvider);
         }
 
         public void Hit(NetworkConnectionToClient connection, Ray ray, bool isStrongHit)
         {
             var playerData = _server.Data.GetPlayerData(connection);
-            if (!playerData.MeleeWeaponsById.TryGetValue(playerData.ItemIds[playerData.SelectedSlotIndex],
-                    out var weapon))
+            var meleeWeapon = (MeleeWeaponItem) playerData.SelectedItem;
+            var meleeWeaponData = (MeleeWeaponData) playerData.ItemData[playerData.SelectedSlotIndex];
+
+            if (!CanHit(meleeWeaponData))
             {
                 return;
             }
+            
+            var isSurface = ApplyRaycast(connection, ray, meleeWeapon, isStrongHit);
+            _coroutineRunner.StartCoroutine(ResetHit(connection, meleeWeapon, meleeWeaponData));
+            _audioService.SendAudio(isSurface ? meleeWeapon.diggingAudio : meleeWeapon.hittingAudio, connection.identity);
+        }
 
-            if (!CanHit(weapon))
+        private IEnumerator ResetHit(NetworkConnectionToClient connection, MeleeWeaponItem configure,
+            MeleeWeaponData data)
+        {
+            data.IsReady = false;
+            var waitForHitReset = new WaitWithoutSlotChange(_server, connection, configure.timeBetweenHit);
+            while (true)
             {
-                return;
+                yield return waitForHitReset;
+                if (waitForHitReset.CompletedSuccessfully || waitForHitReset.IsAborted)
+                {
+                    break;
+                }
+                waitForHitReset = new WaitWithoutSlotChange(_server, connection, configure.timeBetweenHit);
             }
 
-            var isSurface = ApplyRaycast(connection, ray, weapon, isStrongHit);
-            weapon.IsReady = false;
-            StartHitCoroutines(weapon);
+            if (waitForHitReset.CompletedSuccessfully)
+            {
+                data.IsReady = true;
+            }
         }
 
-        private void StartHitCoroutines(MeleeWeaponData meleeWeapon)
-        {
-            _coroutineRunner.StartCoroutine(Utils.DoActionAfterDelay(() => ResetHit(meleeWeapon), meleeWeapon.TimeBetweenHit));
-        }
-
-        private void ResetHit(MeleeWeaponData meleeWeapon)
-        {
-            if (meleeWeapon is not null)
-                meleeWeapon.IsReady = true;
-        }
-
-        private bool ApplyRaycast(NetworkConnectionToClient source, Ray ray, MeleeWeaponData meleeWeapon,
+        private bool ApplyRaycast(NetworkConnectionToClient source, Ray ray, MeleeWeaponItem meleeWeapon,
             bool isStrongHit)
         {
-            var raycastResult = Physics.Raycast(ray, out var rayHit, meleeWeapon.Range, Constants.attackMask);
+            var raycastResult = Physics.Raycast(ray, out var rayHit, meleeWeapon.range, Constants.attackMask);
             if (!raycastResult) return false;
             if (rayHit.collider.CompareTag("Head"))
             {
-                HitImpact(source, rayHit, (int) (meleeWeapon.HeadMultiplier * meleeWeapon.DamageToPlayer));
+                HitImpact(source, rayHit, (int) (meleeWeapon.headMultiplier * meleeWeapon.damageToPlayer));
             }
 
             if (rayHit.collider.CompareTag("Leg"))
             {
-                HitImpact(source, rayHit, (int) (meleeWeapon.LegMultiplier * meleeWeapon.DamageToPlayer));
+                HitImpact(source, rayHit, (int) (meleeWeapon.legMultiplier * meleeWeapon.damageToPlayer));
             }
 
             if (rayHit.collider.CompareTag("Chest"))
             {
-                HitImpact(source, rayHit, (int) (meleeWeapon.ChestMultiplier * meleeWeapon.DamageToPlayer));
+                HitImpact(source, rayHit, (int) (meleeWeapon.chestMultiplier * meleeWeapon.damageToPlayer));
             }
 
             if (rayHit.collider.CompareTag("Arm"))
             {
-                HitImpact(source, rayHit, (int) (meleeWeapon.ArmMultiplier * meleeWeapon.DamageToPlayer));
+                HitImpact(source, rayHit, (int) (meleeWeapon.armMultiplier * meleeWeapon.damageToPlayer));
             }
 
             if (rayHit.collider.CompareTag("Chunk"))
@@ -82,13 +93,11 @@ namespace Networking.ServerServices
                 var targetBlock = Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2);
                 if (isStrongHit)
                 {
-                    var validPositions = _lineExplosionArea.GetExplodedBlocks(3, targetBlock);
-                    _server.MapUpdater.DestroyBlocks(validPositions);
+                    _server.BlockHealthSystem.DamageBlock(targetBlock, 3, meleeWeapon.damageToBlock, _lineDamageArea);
                 }
                 else
                 {
-                    var validPositions = _lineExplosionArea.GetExplodedBlocks(1, targetBlock);
-                    _server.MapUpdater.DestroyBlocks(validPositions);
+                    _server.BlockHealthSystem.DamageBlock(targetBlock, 1, meleeWeapon.damageToBlock, _lineDamageArea);
                 }
 
                 return true;

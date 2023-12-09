@@ -5,6 +5,6 @@ namespace Infrastructure.Factory
     public interface IPlayerFactory
     {
         GameObject CreatePlayer();
-        GameObject CreateSpectatorPlayer();
+        GameObject CreateSpectatorPlayer(Vector3 deathPosition);
     }
 }

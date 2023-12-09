@@ -43,13 +43,13 @@ namespace Generators
             }
         }
 
-        public void SpawnBlocks(List<(Vector3Int, BlockData)> data)
+        public void SpawnBlocks(List<BlockDataWithPosition> blocks)
         {
             var neighbourChunksToRegenerate = Faces.None;
-            for (var i = 0; i < data.Count; i++)
+            for (var i = 0; i < blocks.Count; i++)
             {
-                var blockPosition = data[i].Item1;
-                var blockData = data[i].Item2;
+                var blockPosition = blocks[i].Position;
+                var blockData = blocks[i].BlockData;
                 _chunkData.Blocks[
                     blockPosition.x * ChunkData.ChunkSizeSquared + blockPosition.y * ChunkData.ChunkSize +
                     blockPosition.z] = blockData;

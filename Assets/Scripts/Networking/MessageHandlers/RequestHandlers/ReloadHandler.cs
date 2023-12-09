@@ -1,3 +1,4 @@
+using Data;
 using Mirror;
 using Networking.Messages.Requests;
 using Networking.ServerServices;
@@ -17,7 +18,7 @@ namespace Networking.MessageHandlers.RequestHandlers
         protected override void OnRequestReceived(NetworkConnectionToClient connection, ReloadRequest request)
         {
             var result = _server.Data.TryGetPlayerData(connection, out var playerData);
-            if (!result || !playerData.IsAlive)
+            if (!result || !playerData.IsAlive || playerData.SelectedItem is not RangeWeaponItem)
             {
                 return;
             }

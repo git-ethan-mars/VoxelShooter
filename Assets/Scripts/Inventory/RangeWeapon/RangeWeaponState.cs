@@ -17,21 +17,21 @@ namespace Inventory.RangeWeapon
 
 
         public RangeWeaponState(IInventoryInput inventoryInput, IStorageService storageService, RayCaster rayCaster,
-            RangeWeaponData configure,
-            Camera camera, Player player, Hud hud)
+            RangeWeaponItem configure, RangeWeaponData data, Camera camera, Player player, Hud hud)
         {
             _inventoryInput = inventoryInput;
-            _rangeWeaponModel = new RangeWeaponModel(storageService, rayCaster, camera, configure, player);
-            _rangeWeaponView = new RangeWeaponView(configure, hud);
+            _rangeWeaponModel = new RangeWeaponModel(storageService, rayCaster, camera, configure, data, player);
+            _rangeWeaponView = new RangeWeaponView(configure, data, hud);
         }
 
         public void Enter()
         {
             _inventoryInput.FirstActionButtonDown += _rangeWeaponModel.ShootSingle;
             _inventoryInput.FirstActionButtonHold += _rangeWeaponModel.ShootAutomatic;
-            _inventoryInput.ReloadButtonDown += _rangeWeaponModel.Reload;
+            _inventoryInput.FirstActionButtonUp += _rangeWeaponModel.CancelShoot;
             _inventoryInput.SecondActionButtonDown += _rangeWeaponModel.ZoomIn;
             _inventoryInput.SecondActionButtonUp += _rangeWeaponModel.ZoomOut;
+            _inventoryInput.ReloadButtonDown += _rangeWeaponModel.Reload;
             _rangeWeaponModel.BulletsInMagazine.ValueChanged += _rangeWeaponView.OnBulletsInMagazineChanged;
             _rangeWeaponModel.TotalBullets.ValueChanged += _rangeWeaponView.OnTotalBulletsChanged;
             _rangeWeaponView.Enable();
@@ -45,11 +45,13 @@ namespace Inventory.RangeWeapon
         {
             _inventoryInput.FirstActionButtonDown -= _rangeWeaponModel.ShootSingle;
             _inventoryInput.FirstActionButtonHold -= _rangeWeaponModel.ShootAutomatic;
-            _inventoryInput.ReloadButtonDown -= _rangeWeaponModel.Reload;
+            _inventoryInput.FirstActionButtonUp -= _rangeWeaponModel.CancelShoot;
             _inventoryInput.SecondActionButtonDown -= _rangeWeaponModel.ZoomIn;
             _inventoryInput.SecondActionButtonUp -= _rangeWeaponModel.ZoomOut;
+            _inventoryInput.ReloadButtonDown -= _rangeWeaponModel.Reload;
             _rangeWeaponModel.BulletsInMagazine.ValueChanged -= _rangeWeaponView.OnBulletsInMagazineChanged;
             _rangeWeaponModel.TotalBullets.ValueChanged -= _rangeWeaponView.OnTotalBulletsChanged;
+            _rangeWeaponModel.CancelShoot();
             _rangeWeaponModel.ZoomOut();
             _rangeWeaponView.Disable();
         }

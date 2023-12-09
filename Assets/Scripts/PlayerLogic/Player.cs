@@ -28,7 +28,6 @@ namespace PlayerLogic
 
         public Transform ItemPosition => itemPosition;
 
-
         [SerializeField]
         private MeshRenderer[] bodyParts;
 
@@ -36,7 +35,6 @@ namespace PlayerLogic
         private GameObject nickNameCanvas;
 
         public Transform BodyOrientation => bodyOrientation;
-
 
         [SerializeField]
         private Transform bodyOrientation;
@@ -53,13 +51,29 @@ namespace PlayerLogic
         [SerializeField]
         private new Rigidbody rigidbody;
 
+        [SerializeField]
+        private AudioSource continuousAudio;
+
+        public AudioSource ContinuousAudio => continuousAudio;
+
+        [SerializeField]
+        private AudioSource stepAudio;
+
+        [SerializeField]
+        private AudioData stepAudioData;
+
+        private Camera _mainCamera;
         private Hud _hud;
 
         private IInputService _inputService;
         private InventorySystem _inventory;
 
         private PlayerMovement _movement;
+        private float _speed;
+        private float _jumpHeight;
+
         private PlayerRotation _rotation;
+        private PlayerAudio _audio;
 
 
         public void Construct(IUIFactory uiFactory, IMeshFactory meshFactory, IInputService inputService,
@@ -71,28 +85,46 @@ namespace PlayerLogic
             PlaceDistance = placeDistance;
             Health = new ObservableVariable<int>(health);
             _inputService = inputService;
-            _movement = new PlayerMovement(hitBox, rigidbody, bodyOrientation, speed, jumpHeight);
+            _speed = speed;
+            _jumpHeight = jumpHeight;
             var sensitivity = storageService.Load<MouseSettingsData>(Constants.MouseSettingsKey).GeneralSensitivity;
             _rotation = new PlayerRotation(bodyOrientation, headPivot, sensitivity);
             _hud = uiFactory.CreateHud(this, inputService);
-            _inventory = new InventorySystem(_inputService, staticData, meshFactory, storageService, itemIds, _hud, this);
+            _mainCamera = Camera.main;
+            _inventory = new InventorySystem(_inputService, staticData, meshFactory, storageService, itemIds, _hud,
+                this);
             TurnOffNickName();
             TurnOffBodyRender();
             MountCamera();
+        }
+
+        private void Start()
+        {
+            _audio = new PlayerAudio(stepAudio, stepAudioData);
+            _movement = new PlayerMovement(hitBox, rigidbody, bodyOrientation);
         }
 
         private void Update()
         {
             if (!isLocalPlayer)
             {
+                if (_movement.GetHorizontalVelocity().magnitude > Constants.Epsilon && _movement.IsGrounded())
+                {
+                    _audio.EnableStepSound();
+                }
+                else
+                {
+                    _audio.DisableStepSound();
+                }
+
                 return;
             }
 
-            _movement.Move(_inputService.Axis);
+            _movement.Move(_inputService.Axis, _speed);
 
             if (_inputService.IsJumpButtonDown())
             {
-                _movement.Jump();
+                _movement.Jump(_jumpHeight);
             }
 
             _rotation.Rotate(_inputService.MouseAxis);
@@ -116,9 +148,9 @@ namespace PlayerLogic
 
         private void TurnOffBodyRender()
         {
-            for (var i = 0; i < bodyParts.Length; i++)
+            foreach (var bodyPart in bodyParts)
             {
-                bodyParts[i].GetComponent<MeshRenderer>().enabled = false;
+                bodyPart.enabled = false;
             }
         }
 
@@ -129,20 +161,16 @@ namespace PlayerLogic
 
         private void MountCamera()
         {
-            var cameraTransform = Camera.main.gameObject.transform;
-            cameraTransform.parent = cameraMountPoint.transform;
-            cameraTransform.position = cameraMountPoint.position;
-            cameraTransform.rotation = cameraMountPoint.rotation;
-            Camera.main.fieldOfView = Constants.DefaultFov;
+            var cameraTransform = _mainCamera.transform;
+            cameraTransform.SetParent(cameraMountPoint.transform);
+            cameraTransform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
         }
 
-        private void OnDestroy()
+        public override void OnStopLocalPlayer()
         {
-            if (_hud != null)
-            {
-                _inventory.Clear();
-                Destroy(_hud.gameObject);
-            }
+            _mainCamera.transform.SetParent(null);
+            _inventory.Clear();
+            Destroy(_hud.gameObject);
         }
     }
 }

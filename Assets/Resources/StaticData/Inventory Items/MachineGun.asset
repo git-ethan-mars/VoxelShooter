@@ -22,7 +22,7 @@ MonoBehaviour:
   baseRecoil: 0.015
   stepRecoil: 0.05
   resetTimeRecoil: 1
-  range: 150
+  range: 100
   reloadTime: 2
   magazineSize: 20
   bulletsPerTap: 1
@@ -33,7 +33,5 @@ MonoBehaviour:
   chestMultiplier: 1
   legMultiplier: 0.8
   armMultiplier: 0.6
-  shootingAudioClip: {fileID: 8300000, guid: a2503e92ee60ee045aad67f54ebe92ec, type: 3}
-  shootingVolume: 1
-  reloadingAudioClip: {fileID: 8300000, guid: 770c353d8ee179243b31afce6bbb3d3b, type: 3}
-  reloadingVolume: 1
+  shootingSound: {fileID: 11400000, guid: 87fa49c1c9ef23d49baa37ba035f9253, type: 2}
+  reloadingSound: {fileID: 11400000, guid: 41682c121f964f94ebe0b6eef4050a3a, type: 2}

@@ -5,15 +5,14 @@ namespace PlayerLogic
 {
     public class PlayerMovement
     {
-        private const float JumpHeightOffset = 0.5f;
         private const float AccelerationTime = 0.3f;
         private const float GravityScale = 3;
 
         private static readonly Vector3 HorizontalMask = new(1, 0, 1);
 
-        private readonly float _speed;
-        private readonly float _jumpHeight;
-        
+        private float _speed;
+        private float _jumpHeight;
+
         private readonly Rigidbody _rigidbody;
         private readonly Transform _bodyOrientation;
         private readonly CapsuleCollider _hitBox;
@@ -22,29 +21,35 @@ namespace PlayerLogic
         private bool _jumpRequested;
         private bool _shouldResetHorizontalVelocity;
 
-        public PlayerMovement(CapsuleCollider hitBox, Rigidbody rigidbody, Transform bodyOrientation, float speed, float jumpHeight)
+        public PlayerMovement(CapsuleCollider hitBox, Rigidbody rigidbody, Transform bodyOrientation)
         {
-            _speed = speed;
-            _jumpHeight = jumpHeight + JumpHeightOffset;
             _hitBox = hitBox;
             _rigidbody = rigidbody;
             _bodyOrientation = bodyOrientation;
         }
 
-        public void Move(Vector2 direction)
+        public void Move(Vector2 direction, float speed)
         {
-            var horizontalDirection = (direction.x * _bodyOrientation.forward + direction.y * _bodyOrientation.right).normalized;
+            var horizontalDirection = (direction.x * _bodyOrientation.forward + direction.y * _bodyOrientation.right)
+                .normalized;
             if (Vector3.Dot(_desiredDirection, horizontalDirection) <= 0)
             {
                 _shouldResetHorizontalVelocity = true;
             }
 
             _desiredDirection = horizontalDirection;
+            _speed = speed;
         }
 
-        public void Jump()
+        public void Jump(float jumpHeight)
         {
             _jumpRequested = true;
+            _jumpHeight = jumpHeight;
+        }
+
+        public Vector3 GetHorizontalVelocity()
+        {
+            return Vector3.Scale(HorizontalMask, _rigidbody.velocity);
         }
 
         public void FixedUpdate()
@@ -76,17 +81,12 @@ namespace PlayerLogic
             _shouldResetHorizontalVelocity = false;
         }
 
-        private bool IsGrounded()
+        public bool IsGrounded()
         {
             var isGrounded = Physics.CheckBox(_rigidbody.position + _hitBox.height / 2 * Vector3.down,
                 new Vector3(_hitBox.radius / 2, Constants.Epsilon, _hitBox.radius / 2),
                 Quaternion.identity, Constants.buildMask);
             return isGrounded;
-        }
-
-        private Vector3 GetHorizontalVelocity()
-        {
-            return Vector3.Scale(HorizontalMask, _rigidbody.velocity);
         }
     }
 }

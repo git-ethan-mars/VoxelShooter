@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using Data;
+using Explosions;
 using Infrastructure;
 using Infrastructure.Factory;
 using Mirror;
@@ -13,137 +15,160 @@ namespace Networking.ServerServices
         private readonly IServer _server;
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly IParticleFactory _particleFactory;
+        private readonly LineDamageArea _lineDamageArea;
+        private readonly AudioService _audioService;
 
-        public RangeWeaponValidator(IServer server, ICoroutineRunner coroutineRunner, IParticleFactory particleFactory)
+        public RangeWeaponValidator(IServer server, ICoroutineRunner coroutineRunner, IParticleFactory particleFactory,
+            AudioService audioService)
         {
             _server = server;
             _coroutineRunner = coroutineRunner;
             _particleFactory = particleFactory;
+            _lineDamageArea = new LineDamageArea(_server.MapProvider);
+            _audioService = audioService;
         }
 
         public void Shoot(NetworkConnectionToClient connection, Ray ray, bool requestIsButtonHolding)
         {
             var playerData = _server.Data.GetPlayerData(connection);
-            if (!playerData.RangeWeaponsById.TryGetValue(playerData.ItemIds[playerData.SelectedSlotIndex],
-                    out var weapon))
+            var rangeWeapon = (RangeWeaponItem) playerData.SelectedItem;
+            var rangeWeaponData = (RangeWeaponData) playerData.ItemData[playerData.SelectedSlotIndex];
+
+            if (!CanShoot(rangeWeaponData) || requestIsButtonHolding != rangeWeapon.isAutomatic)
             {
+                _audioService.StopContinuousSound(connection.identity);
                 return;
             }
 
-            if (!CanShoot(weapon) || requestIsButtonHolding != weapon.IsAutomatic)
+            for (var i = 0; i < rangeWeapon.bulletsPerTap; i++)
             {
-                return;
+                ApplyRaycast(connection, ray, rangeWeapon, rangeWeaponData);
             }
 
-            for (var i = 0; i < weapon.BulletsPerShot; i++)
+            rangeWeaponData.BulletsInMagazine -= 1;
+            connection.Send(new ShootResultResponse(rangeWeaponData.BulletsInMagazine));
+            _coroutineRunner.StartCoroutine(ResetShoot(connection, rangeWeapon, rangeWeaponData));
+            _coroutineRunner.StartCoroutine(ResetRecoil(connection, rangeWeapon, rangeWeaponData));
+
+            if (rangeWeapon.isAutomatic)
             {
-                ApplyRaycast(connection, ray, weapon);
+                _audioService.StartContinuousAudio(rangeWeapon.shootingSound, connection.identity);
             }
+            else
+            {
+                _audioService.SendAudio(rangeWeapon.shootingSound, connection.identity);
+            }
+        }
 
-            UpdateWeaponState(weapon);
-            connection.Send(new ShootResultResponse(weapon.BulletsInMagazine));
-            StartShootCoroutines(weapon);
-
-            //GetComponent<SoundSynchronization>().PlayAudioClip(connection!.identity,
-            //    _audioClips.FindIndex(audioClip => audioClip == weapon.ShootAudioClip), weapon.ShootingVolume);
+        public void CancelShoot(NetworkConnectionToClient connection)
+        {
+            _audioService.StopContinuousSound(connection.identity);
         }
 
         public void Reload(NetworkConnectionToClient connection)
         {
             var playerData = _server.Data.GetPlayerData(connection);
-            if (!playerData.RangeWeaponsById.TryGetValue(playerData.ItemIds[playerData.SelectedSlotIndex],
-                    out var weapon))
+            var rangeWeapon = (RangeWeaponItem) playerData.SelectedItem;
+            var rangeWeaponData = (RangeWeaponData) playerData.ItemData[playerData.SelectedSlotIndex];
+            if (!CanReload(rangeWeapon, rangeWeaponData))
             {
                 return;
             }
 
-            if (!CanReload(weapon))
+            _coroutineRunner.StartCoroutine(ReloadInternal(connection, rangeWeapon, rangeWeaponData));
+            _audioService.SendAudio(rangeWeapon.reloadingSound, connection.identity);
+        }
+
+        private IEnumerator ReloadInternal(NetworkConnectionToClient connection, RangeWeaponItem configure,
+            RangeWeaponData data)
+        {
+            data.IsReloading = true;
+            var waitReloading = new WaitWithoutSlotChange(_server, connection, configure.reloadTime);
+            yield return waitReloading;
+            if (!waitReloading.CompletedSuccessfully)
             {
-                return;
+                data.IsReloading = false;
+                yield break;
             }
 
-            ReloadInternal(weapon);
-            connection.Send(new ReloadResultResponse(playerData.SelectedSlotIndex, weapon.TotalBullets,
-                weapon.BulletsInMagazine));
-            StartReloadCoroutine(weapon);
-            //GetComponent<SoundSynchronization>().PlayAudioClip(connection!.identity,
-            //    _audioClips.FindIndex(audioClip => audioClip == weapon.ReloadingAudioClip), weapon.ReloadingVolume);
-        }
-
-        private void StartShootCoroutines(RangeWeaponData rangeWeapon)
-        {
-            _coroutineRunner.StartCoroutine(Utils.DoActionAfterDelay(() => ResetShoot(rangeWeapon),
-                rangeWeapon.TimeBetweenShooting));
-            _coroutineRunner.StartCoroutine(Utils.DoActionAfterDelay(() => ResetRecoil(rangeWeapon),
-                rangeWeapon.ResetTimeRecoil));
-        }
-
-
-        private void StartReloadCoroutine(RangeWeaponData rangeWeapon)
-        {
-            _coroutineRunner.StartCoroutine(Utils.DoActionAfterDelay(() => ReloadFinished(rangeWeapon),
-                rangeWeapon.ReloadTime));
-        }
-
-        private void ResetRecoil(RangeWeaponData rangeWeapon)
-        {
-            if (rangeWeapon is not null)
-                rangeWeapon.RecoilModifier -= rangeWeapon.StepRecoil;
-        }
-
-        private void ResetShoot(RangeWeaponData rangeWeapon)
-        {
-            if (rangeWeapon is not null)
-                rangeWeapon.IsReady = true;
-        }
-
-        private void ReloadInternal(RangeWeaponData rangeWeapon)
-        {
-            rangeWeapon.IsReloading = true;
-            if (rangeWeapon.TotalBullets + rangeWeapon.BulletsInMagazine - rangeWeapon.MagazineSize <= 0)
+            data.IsReloading = false;
+            if (data.TotalBullets + data.BulletsInMagazine - configure.magazineSize <= 0)
             {
-                rangeWeapon.BulletsInMagazine += rangeWeapon.TotalBullets;
-                rangeWeapon.TotalBullets = 0;
+                data.BulletsInMagazine += data.TotalBullets;
+                data.TotalBullets = 0;
             }
             else
             {
-                rangeWeapon.TotalBullets -= rangeWeapon.MagazineSize - rangeWeapon.BulletsInMagazine;
-                rangeWeapon.BulletsInMagazine = rangeWeapon.MagazineSize;
+                data.TotalBullets -= configure.magazineSize - data.BulletsInMagazine;
+                data.BulletsInMagazine = configure.magazineSize;
+            }
+
+            var playerData = _server.Data.GetPlayerData(connection);
+            connection.Send(new ReloadResultResponse(playerData.SelectedSlotIndex, data.TotalBullets,
+                data.BulletsInMagazine));
+        }
+
+        private IEnumerator ResetRecoil(NetworkConnectionToClient connection, RangeWeaponItem configure,
+            RangeWeaponData data)
+        {
+            data.RecoilModifier += configure.stepRecoil;
+            var waitForRecoilReset = new WaitWithoutSlotChange(_server, connection, configure.resetTimeRecoil);
+            while (true)
+            {
+                yield return waitForRecoilReset;
+                if (waitForRecoilReset.CompletedSuccessfully || waitForRecoilReset.IsAborted)
+                {
+                    break;
+                }
+
+                waitForRecoilReset = new WaitWithoutSlotChange(_server, connection, configure.resetTimeRecoil);
+            }
+
+            if (waitForRecoilReset.CompletedSuccessfully)
+            {
+                data.RecoilModifier -= configure.stepRecoil;
             }
         }
 
-        private void ReloadFinished(RangeWeaponData rangeWeapon)
+        private IEnumerator ResetShoot(NetworkConnectionToClient connection, RangeWeaponItem configure,
+            RangeWeaponData data)
         {
-            if (rangeWeapon is not null)
-                rangeWeapon.IsReloading = false;
-        }
+            data.IsReady = false;
+            var waitForShootReset = new WaitWithoutSlotChange(_server, connection, configure.timeBetweenShooting);
+            while (true)
+            {
+                yield return waitForShootReset;
+                if (waitForShootReset.CompletedSuccessfully || waitForShootReset.IsAborted)
+                {
+                    break;
+                }
 
-        private void UpdateWeaponState(RangeWeaponData rangeWeapon)
-        {
-            rangeWeapon.BulletsInMagazine -= 1;
-            if (rangeWeapon.BulletsInMagazine <= 0)
-                rangeWeapon.BulletsInMagazine = 0;
-            rangeWeapon.IsReady = false;
-            rangeWeapon.RecoilModifier += rangeWeapon.StepRecoil;
+                waitForShootReset = new WaitWithoutSlotChange(_server, connection, configure.timeBetweenShooting);
+            }
+
+            if (waitForShootReset.CompletedSuccessfully)
+            {
+                data.IsReady = true;
+            }
         }
 
         private void ApplyRaycast(NetworkConnectionToClient source, Ray ray,
-            RangeWeaponData rangeWeapon)
+            RangeWeaponItem configure, RangeWeaponData data)
         {
-            var x = Math.Abs(rangeWeapon.RecoilModifier) < 0.00001
+            var x = Math.Abs(data.RecoilModifier) < Constants.Epsilon
                 ? 0
-                : UnityEngine.Random.Range(-rangeWeapon.BaseRecoil, rangeWeapon.BaseRecoil) *
-                  (rangeWeapon.RecoilModifier + 1);
-            var y = Math.Abs(rangeWeapon.RecoilModifier) < 0.00001
+                : UnityEngine.Random.Range(-configure.baseRecoil, configure.baseRecoil) *
+                  (data.RecoilModifier + 1);
+            var y = Math.Abs(data.RecoilModifier) < Constants.Epsilon
                 ? 0
-                : UnityEngine.Random.Range(-rangeWeapon.BaseRecoil, rangeWeapon.BaseRecoil) *
-                  (rangeWeapon.RecoilModifier + 1);
-            var z = Math.Abs(rangeWeapon.RecoilModifier) < 0.00001
+                : UnityEngine.Random.Range(-configure.baseRecoil, configure.baseRecoil) *
+                  (data.RecoilModifier + 1);
+            var z = Math.Abs(data.RecoilModifier) < Constants.Epsilon
                 ? 0
-                : UnityEngine.Random.Range(-rangeWeapon.BaseRecoil, rangeWeapon.BaseRecoil) *
-                  (rangeWeapon.RecoilModifier + 1);
+                : UnityEngine.Random.Range(-configure.baseRecoil, configure.baseRecoil) *
+                  (data.RecoilModifier + 1);
             ray = new Ray(ray.origin, ray.direction + new Vector3(x, y, z));
-            var raycastResult = Physics.Raycast(ray, out var rayHit, rangeWeapon.Range, Constants.attackMask);
+            var raycastResult = Physics.Raycast(ray, out var rayHit, configure.range, Constants.attackMask);
             if (!raycastResult)
             {
                 return;
@@ -151,28 +176,29 @@ namespace Networking.ServerServices
 
             if (rayHit.collider.CompareTag("Head"))
             {
-                ShootImpact(source, rayHit, (int) (rangeWeapon.HeadMultiplier * rangeWeapon.Damage));
+                ShootImpact(source, rayHit, (int) (configure.headMultiplier * configure.damage));
             }
 
             if (rayHit.collider.CompareTag("Leg"))
             {
-                ShootImpact(source, rayHit, (int) (rangeWeapon.LegMultiplier * rangeWeapon.Damage));
+                ShootImpact(source, rayHit, (int) (configure.legMultiplier * configure.damage));
             }
 
             if (rayHit.collider.CompareTag("Chest"))
             {
-                ShootImpact(source, rayHit, (int) (rangeWeapon.ChestMultiplier * rangeWeapon.Damage));
+                ShootImpact(source, rayHit, (int) (configure.chestMultiplier * configure.damage));
             }
 
             if (rayHit.collider.CompareTag("Arm"))
             {
-                ShootImpact(source, rayHit, (int) (rangeWeapon.ArmMultiplier * rangeWeapon.Damage));
+                ShootImpact(source, rayHit, (int) (configure.armMultiplier * configure.damage));
             }
 
             if (rayHit.collider.CompareTag("Chunk"))
             {
-                var block = _server.MapProvider.GetBlockByGlobalPosition(
-                    Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2));
+                var blockPosition = Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2);
+                var block = _server.MapProvider.GetBlockByGlobalPosition(blockPosition);
+                _server.BlockHealthSystem.DamageBlock(blockPosition, 1, configure.damage, _lineDamageArea);
                 _particleFactory.CreateBulletImpact(rayHit.point, Quaternion.Euler(rayHit.normal.y * -90,
                     rayHit.normal.x * 90 + (rayHit.normal.z == -1 ? 180 : 0), 0), block.Color);
             }
@@ -193,10 +219,10 @@ namespace Networking.ServerServices
             return rangeWeapon.IsReady && !rangeWeapon.IsReloading && rangeWeapon.BulletsInMagazine > 0;
         }
 
-        private bool CanReload(RangeWeaponData rangeWeapon)
+        private bool CanReload(RangeWeaponItem configure, RangeWeaponData data)
         {
-            return rangeWeapon.BulletsInMagazine < rangeWeapon.MagazineSize &&
-                   !rangeWeapon.IsReloading && rangeWeapon.TotalBullets > 0;
+            return data.BulletsInMagazine < configure.magazineSize &&
+                   !data.IsReloading && data.TotalBullets > 0;
         }
     }
 }
