@@ -1,4 +1,5 @@
 using Infrastructure.Services.Input;
+using UnityEngine;
 
 namespace UI.InGameUI.States
 {
@@ -15,6 +16,7 @@ namespace UI.InGameUI.States
 
         public void Enter()
         {
+            Cursor.lockState = CursorLockMode.Locked;
             _inputService.Enable();
             _scoreboard.CanvasGroup.alpha = 1.0f;
         }

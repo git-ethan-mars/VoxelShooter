@@ -2,6 +2,7 @@ using Infrastructure.Services.Input;
 using Mirror;
 using Networking;
 using PlayerLogic;
+using UnityEngine;
 
 namespace UI.InGameUI.States
 {
@@ -20,6 +21,7 @@ namespace UI.InGameUI.States
 
         public void Enter()
         {
+            Cursor.lockState = CursorLockMode.Locked;
             _inputService.Enable();
             _timeCounter.CanvasGroup.alpha = 1.0f;
             _networkManager.Client.PlayerCreated += ShowHud;
@@ -39,6 +41,7 @@ namespace UI.InGameUI.States
             {
                 return;
             }
+
             var identity = NetworkClient.connection.identity;
             if (identity != null && identity.TryGetComponent<Player>(out var player) && player.IsInitialized)
             {

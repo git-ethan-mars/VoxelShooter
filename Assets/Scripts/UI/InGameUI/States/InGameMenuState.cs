@@ -30,6 +30,7 @@ namespace UI.InGameUI.States
 
         public void Enter()
         {
+            Cursor.lockState = CursorLockMode.None;
             _inGameMenu.CanvasGroup.alpha = 1.0f;
             _inGameMenu.CanvasGroup.interactable = true;
             _inGameMenu.CanvasGroup.blocksRaycasts = true;

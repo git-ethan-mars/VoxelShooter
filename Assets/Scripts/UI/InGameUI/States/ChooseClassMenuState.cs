@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace UI.InGameUI.States
 {
     public class ChooseClassMenuState : IInGameUIState
@@ -13,6 +15,7 @@ namespace UI.InGameUI.States
 
         public void Enter()
         {
+            Cursor.lockState = CursorLockMode.None;
             _chooseClassMenu.CanvasGroup.alpha = 1.0f;
             _chooseClassMenu.CanvasGroup.interactable = true;
             _chooseClassMenu.CanvasGroup.blocksRaycasts = true;
