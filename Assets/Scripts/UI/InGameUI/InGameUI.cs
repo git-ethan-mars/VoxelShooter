@@ -21,7 +21,8 @@ namespace UI.InGameUI
             IAvatarLoader avatarLoader)
         {
             _inputService = inputService;
-            _uiStateMachine = new InGameUIStateMachine(gameStateMachine, networkManager, uiFactory, storageService,
+            _uiStateMachine = new InGameUIStateMachine(gameStateMachine, networkManager, inputService, uiFactory,
+                storageService,
                 avatarLoader, transform);
             _uiStateMachine.SwitchState<ChooseClassMenuState>();
         }

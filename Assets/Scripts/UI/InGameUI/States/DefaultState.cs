@@ -1,3 +1,4 @@
+using Infrastructure.Services.Input;
 using Mirror;
 using Networking;
 using PlayerLogic;
@@ -7,16 +8,19 @@ namespace UI.InGameUI.States
     public class DefaultState : IInGameUIState
     {
         private readonly CustomNetworkManager _networkManager;
+        private readonly IInputService _inputService;
         private readonly TimeCounter _timeCounter;
 
-        public DefaultState(CustomNetworkManager networkManager, TimeCounter timeCounter)
+        public DefaultState(CustomNetworkManager networkManager, IInputService inputService, TimeCounter timeCounter)
         {
             _networkManager = networkManager;
+            _inputService = inputService;
             _timeCounter = timeCounter;
         }
 
         public void Enter()
         {
+            _inputService.Enable();
             _timeCounter.CanvasGroup.alpha = 1.0f;
             _networkManager.Client.PlayerCreated += ShowHud;
             var identity = NetworkClient.connection.identity;
@@ -28,6 +32,7 @@ namespace UI.InGameUI.States
 
         public void Exit()
         {
+            _inputService.Disable();
             _timeCounter.CanvasGroup.alpha = 0.0f;
             _networkManager.Client.PlayerCreated -= ShowHud;
             if (NetworkClient.connection is null)

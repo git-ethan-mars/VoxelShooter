@@ -56,7 +56,10 @@ namespace UI.InGameUI.States
 
         private void HideSettingsMenu()
         {
-            _settingsMenu.SetActive(false);
+            if (_settingsMenu != null)
+            {
+                _settingsMenu.SetActive(false);
+            }
         }
 
         private void ExitToMainMenu()
