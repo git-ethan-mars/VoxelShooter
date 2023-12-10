@@ -4,7 +4,7 @@ using Infrastructure.Services.PlayerDataLoader;
 using Networking;
 using UnityEngine;
 
-namespace UI.Windows
+namespace UI.InGameUI
 {
     public class Scoreboard : MonoBehaviour
     {
@@ -17,12 +17,12 @@ namespace UI.Windows
         private List<ScoreUI> scores;
 
         private IAvatarLoader _avatarLoader;
-        private IClient _client;
+        private CustomNetworkManager _networkManager;
 
-        public void Construct(IClient client, IAvatarLoader avatarLoader)
+        public void Construct(CustomNetworkManager networkManager, IAvatarLoader avatarLoader)
         {
-            _client = client;
-            _client.ScoreboardChanged += UpdateScoreboard;
+            _networkManager = networkManager;
+            _networkManager.Client.ScoreboardChanged += UpdateScoreboard;
             _avatarLoader = avatarLoader;
             canvasGroup.alpha = 0;
         }
@@ -53,7 +53,7 @@ namespace UI.Windows
 
         private void OnDestroy()
         {
-            _client.ScoreboardChanged -= UpdateScoreboard;
+            _networkManager.Client.ScoreboardChanged -= UpdateScoreboard;
         }
     }
 }

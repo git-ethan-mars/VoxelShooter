@@ -1,4 +1,5 @@
-﻿using Infrastructure.AssetManagement;
+﻿using System;
+using Infrastructure.AssetManagement;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.PlayerDataLoader;
 using Infrastructure.Services.StaticData;
@@ -7,8 +8,8 @@ using Infrastructure.States;
 using Networking;
 using PlayerLogic;
 using UI;
+using UI.InGameUI;
 using UI.SettingsMenu;
-using UI.Windows;
 using UnityEngine;
 
 namespace Infrastructure.Factory
@@ -62,17 +63,19 @@ namespace Infrastructure.Factory
             return matchMenu;
         }
 
-        public GameObject CreateSettingsMenu(GameStateMachine gameStateMachine, IStorageService storageService)
+        public GameObject CreateSettingsMenu(IStorageService storageService, Action onBackButtonPressed)
         {
             var settingsMenu = _assets.Instantiate(SettingsMenuPath);
-            settingsMenu.GetComponent<SettingsMenu>().Construct(gameStateMachine, storageService);
+            settingsMenu.GetComponent<SettingsMenu>().Construct(storageService, onBackButtonPressed);
             return settingsMenu;
         }
 
-        public void CreateInGameUI(IClient client, IInputService inputService, IAvatarLoader avatarLoader)
+        public void CreateInGameUI(GameStateMachine gameStateMachine, CustomNetworkManager networkManager,
+            IInputService inputService, IStorageService storageService,
+            IAvatarLoader avatarLoader)
         {
             _assets.Instantiate(InGameUIPath).GetComponent<InGameUI>()
-                .Construct(this, inputService, client, avatarLoader);
+                .Construct(gameStateMachine, networkManager, this, storageService, inputService, avatarLoader);
         }
 
         public ChooseClassMenu CreateChooseClassMenu(Transform parent)
@@ -82,17 +85,18 @@ namespace Infrastructure.Factory
             return chooseClassMenu;
         }
 
-        public Scoreboard CreateScoreBoard(Transform parent, IClient client, IAvatarLoader avatarLoader)
+        public Scoreboard CreateScoreBoard(Transform parent, CustomNetworkManager networkManager,
+            IAvatarLoader avatarLoader)
         {
             var scoreboard = _assets.Instantiate(ScoreboardPath, parent).GetComponent<Scoreboard>();
-            scoreboard.Construct(client, avatarLoader);
+            scoreboard.Construct(networkManager, avatarLoader);
             return scoreboard;
         }
 
-        public TimeCounter CreateTimeCounter(Transform parent, IClient client)
+        public TimeCounter CreateTimeCounter(Transform parent, CustomNetworkManager networkManager)
         {
             var timeCounter = _assets.Instantiate(TimeCounterPath, parent).GetComponent<TimeCounter>();
-            timeCounter.Construct(client);
+            timeCounter.Construct(networkManager);
             return timeCounter;
         }
 

@@ -1,4 +1,4 @@
-namespace UI.Windows.States
+namespace UI.InGameUI.States
 {
     public class ScoreboardState : IInGameUIState
     {

@@ -9,15 +9,21 @@ namespace UI
         private CanvasGroup canvasGroup;
 
         public CanvasGroup CanvasGroup => canvasGroup;
-    
+
         [SerializeField]
         private Button resumeButton;
+
+        public Button ResumeButton => resumeButton;
 
         [SerializeField]
         private Button settingsButton;
 
+        public Button SettingsButton => settingsButton;
+
         [SerializeField]
         private Button exitButton;
+
+        public Button ExitButton => exitButton;
 
         public void Construct()
         {

@@ -3,7 +3,7 @@ using Networking;
 using TMPro;
 using UnityEngine;
 
-namespace UI.Windows
+namespace UI.InGameUI
 {
     public class TimeCounter : MonoBehaviour
     {
@@ -18,14 +18,14 @@ namespace UI.Windows
         [SerializeField]
         private CanvasGroup canvasGroup;
 
-        private IClient _client;
+        private CustomNetworkManager _networkManager;
 
-        public void Construct(IClient client)
+        public void Construct(CustomNetworkManager networkManager)
         {
-            _client = client;
-            _client.GameFinished += HideTimer;
-            _client.GameTimeChanged += ChangeGameTime;
-            _client.RespawnTimeChanged += ChangeRespawnTime;
+            _networkManager = networkManager;
+            _networkManager.Client.GameFinished += HideTimer;
+            _networkManager.Client.GameTimeChanged += ChangeGameTime;
+            _networkManager.Client.RespawnTimeChanged += ChangeRespawnTime;
             canvasGroup.alpha = 0.0f;
         }
 
@@ -55,9 +55,9 @@ namespace UI.Windows
 
         private void OnDestroy()
         {
-            _client.GameFinished -= HideTimer;
-            _client.GameTimeChanged -= ChangeGameTime;
-            _client.RespawnTimeChanged -= ChangeRespawnTime;
+            _networkManager.Client.GameFinished -= HideTimer;
+            _networkManager.Client.GameTimeChanged -= ChangeGameTime;
+            _networkManager.Client.RespawnTimeChanged -= ChangeRespawnTime;
         }
     }
 }

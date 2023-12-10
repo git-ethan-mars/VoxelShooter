@@ -4,7 +4,7 @@ using Networking.Messages.Requests;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace UI.Windows
+namespace UI.InGameUI
 {
     [RequireComponent(typeof(CanvasGroup))]
     public class ChooseClassMenu : MonoBehaviour

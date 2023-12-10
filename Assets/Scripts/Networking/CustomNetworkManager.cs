@@ -17,6 +17,8 @@ namespace Networking
 {
     public class CustomNetworkManager : NetworkManager, ICoroutineRunner
     {
+        private const float ShowResultsDuration = 10;
+
         public IClient Client;
         private IStaticDataService _staticData;
         private IEntityFactory _entityFactory;
@@ -93,6 +95,8 @@ namespace Networking
         public override void OnStopClient()
         {
             Client.Stop();
+            StartCoroutine(Utils.DoActionAfterDelay(_stateMachine.Enter<MainMenuState>,
+                ShowResultsDuration));
         }
 
         public override void OnStopServer()

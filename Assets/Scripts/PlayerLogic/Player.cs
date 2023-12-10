@@ -63,10 +63,11 @@ namespace PlayerLogic
         private AudioData stepAudioData;
 
         private Camera _mainCamera;
-        private Hud _hud;
+        public bool IsInitialized { get; private set; }
 
         private IInputService _inputService;
         private InventorySystem _inventory;
+        private Hud _hud;
 
         private PlayerMovement _movement;
         private float _speed;
@@ -96,6 +97,7 @@ namespace PlayerLogic
             TurnOffNickName();
             TurnOffBodyRender();
             MountCamera();
+            IsInitialized = true;
         }
 
         private void Start()
@@ -144,6 +146,22 @@ namespace PlayerLogic
         public void SetNickName(string nickName)
         {
             nickNameText.SetText(nickName);
+        }
+
+        public void ShowHud()
+        {
+            if (IsInitialized)
+            {
+                _hud.CanvasGroup.alpha = 1.0f;
+            }
+        }
+
+        public void HideHud()
+        {
+            if (IsInitialized)
+            {
+                _hud.CanvasGroup.alpha = 0.0f;
+            }
         }
 
         private void TurnOffBodyRender()

@@ -1,8 +1,9 @@
+using System;
 using Infrastructure.Services.Storage;
-using Infrastructure.States;
 using UI.Carousel;
 using UI.SettingsMenu.States;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace UI.SettingsMenu
@@ -54,12 +55,12 @@ namespace UI.SettingsMenu
         [SerializeField]
         private Button backButton;
 
-        private GameStateMachine _gameStateMachine;
         private SettingsMenuStateMachine _menuStateMachine;
+        private Action _onBackButtonPressed;
 
-        public void Construct(GameStateMachine gameStateMachine, IStorageService storageService)
+        public void Construct(IStorageService storageService, Action onBackButtonPressed)
         {
-            _gameStateMachine = gameStateMachine;
+            _onBackButtonPressed = onBackButtonPressed;
             _menuStateMachine =
                 new SettingsMenuStateMachine(new MouseSettingsState(mouseSection,
                     generalSensitivity, aimSensitivity, storageService), new VolumeSettingsState(volumeSection,
@@ -68,7 +69,7 @@ namespace UI.SettingsMenu
             mouseSectionButton.onClick.AddListener(_menuStateMachine.SwitchState<MouseSettingsState>);
             volumeSectionButton.onClick.AddListener(_menuStateMachine.SwitchState<VolumeSettingsState>);
             videoSectionButton.onClick.AddListener(_menuStateMachine.SwitchState<VideoSettingsState>);
-            backButton.onClick.AddListener(_gameStateMachine.Enter<MainMenuState>);
+            backButton.onClick.AddListener(new UnityAction(_onBackButtonPressed));
             _menuStateMachine.SwitchState<MouseSettingsState>();
         }
 
@@ -77,7 +78,7 @@ namespace UI.SettingsMenu
             mouseSectionButton.onClick.RemoveListener(_menuStateMachine.SwitchState<MouseSettingsState>);
             volumeSectionButton.onClick.RemoveListener(_menuStateMachine.SwitchState<VolumeSettingsState>);
             videoSectionButton.onClick.RemoveListener(_menuStateMachine.SwitchState<VideoSettingsState>);
-            backButton.onClick.RemoveListener(_gameStateMachine.Enter<MainMenuState>);
+            backButton.onClick.RemoveListener(new UnityAction(_onBackButtonPressed));
             _menuStateMachine.Clear();
         }
     }

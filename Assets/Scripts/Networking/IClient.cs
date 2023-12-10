@@ -5,6 +5,7 @@ using Generators;
 using Infrastructure.Services.StaticData;
 using MapLogic;
 using Networking.ClientServices;
+using PlayerLogic;
 
 namespace Networking
 {
@@ -22,5 +23,6 @@ namespace Networking
         MapGenerator MapGenerator { get; }
         void Start();
         void Stop();
+        event Action<Player> PlayerCreated;
     }
 }

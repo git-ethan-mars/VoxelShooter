@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Data;
 using Generators;
-using Infrastructure;
 using Infrastructure.Factory;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
@@ -11,13 +10,13 @@ using Infrastructure.States;
 using MapLogic;
 using Networking.ClientServices;
 using Networking.MessageHandlers.ResponseHandler;
+using PlayerLogic;
 using Environment = MapLogic.Environment;
 
 namespace Networking
 {
     public class Client : IClient
     {
-        private const float ShowResultsDuration = 10;
         public event Action GameFinished;
         public event Action MapDownloaded;
 
@@ -45,6 +44,12 @@ namespace Networking
             remove => _scoreboardHandler.ScoreboardChanged -= value;
         }
 
+        public event Action<Player> PlayerCreated
+        {
+            add => _playerConfigureHandler.PlayerCreated += value;
+            remove => _playerConfigureHandler.PlayerCreated += value;
+        }
+
         public FallMeshGenerator FallMeshGenerator { get; }
         public IStaticDataService StaticData { get; }
         public ClientData Data { get; }
@@ -61,10 +66,10 @@ namespace Networking
 
         public MapGenerator MapGenerator { get; private set; }
         private MapProvider _mapProvider;
+        private readonly CustomNetworkManager _customNetworkManager;
         private readonly IGameFactory _gameFactory;
         private readonly IMeshFactory _meshFactory;
         private readonly GameStateMachine _stateMachine;
-        private readonly ICoroutineRunner _coroutineRunner;
         private readonly MapNameHandler _mapNameHandler;
         private readonly DownloadMapHandler _downloadMapHandler;
         private readonly UpdateMapHandler _updateMapHandler;
@@ -82,7 +87,7 @@ namespace Networking
         private readonly StopContinuousSoundHandler _stopContinuousSoundHandler;
         private readonly SurroundingSoundHandler _surroundingSoundHandler;
 
-        public Client(GameStateMachine stateMachine, ICoroutineRunner coroutineRunner, IInputService inputService,
+        public Client(GameStateMachine stateMachine, CustomNetworkManager customNetworkManager, IInputService inputService,
             IStorageService storageService,
             IGameFactory gameFactory,
             IMeshFactory meshFactory,
@@ -90,7 +95,7 @@ namespace Networking
             IParticleFactory particleFactory, IUIFactory uiFactory)
         {
             _stateMachine = stateMachine;
-            _coroutineRunner = coroutineRunner;
+            _customNetworkManager = customNetworkManager;
             _gameFactory = gameFactory;
             _meshFactory = meshFactory;
             StaticData = staticData;
@@ -112,10 +117,10 @@ namespace Networking
             _spectatorConfigureHandler = new SpectatorConfigureHandler(inputService, storageService);
             _nickNameHandler = new NickNameHandler();
             var audioPool = new AudioPool(gameFactory);
-            _playerSoundHandler = new PlayerSoundHandler(staticData, coroutineRunner, audioPool);
+            _playerSoundHandler = new PlayerSoundHandler(staticData, customNetworkManager, audioPool);
             _startContinuousSoundHandler = new StartContinuousSoundHandler(staticData);
             _stopContinuousSoundHandler = new StopContinuousSoundHandler();
-            _surroundingSoundHandler = new SurroundingSoundHandler(staticData, coroutineRunner, audioPool);
+            _surroundingSoundHandler = new SurroundingSoundHandler(staticData, customNetworkManager, audioPool);
         }
 
         public void Start()
@@ -130,8 +135,6 @@ namespace Networking
             UnregisterHandlers();
             Data.State = ClientState.NotConnected;
             GameFinished?.Invoke();
-            _coroutineRunner.StartCoroutine(Utils.DoActionAfterDelay(_stateMachine.Enter<MainMenuState>,
-                ShowResultsDuration));
         }
 
         private void RegisterHandlers()
@@ -184,7 +187,7 @@ namespace Networking
             MapGenerator.GenerateLight();
             Environment.ApplyAmbientLighting(_mapProvider.SceneData);
             Environment.ApplyFog(_mapProvider.SceneData);
-            _stateMachine.Enter<GameLoopState, IClient>(this);
+            _stateMachine.Enter<GameLoopState, CustomNetworkManager>(_customNetworkManager);
         }
     }
 }

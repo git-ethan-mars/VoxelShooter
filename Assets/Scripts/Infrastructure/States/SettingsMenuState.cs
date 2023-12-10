@@ -20,7 +20,7 @@ namespace Infrastructure.States
 
         public void Enter()
         {
-            _settingsMenu = _uiFactory.CreateSettingsMenu(_stateMachine, _storageService);
+            _settingsMenu = _uiFactory.CreateSettingsMenu(_storageService, _stateMachine.Enter<MainMenuState>);
         }
 
         public void Exit()

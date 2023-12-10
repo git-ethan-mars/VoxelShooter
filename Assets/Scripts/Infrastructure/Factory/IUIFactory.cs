@@ -1,4 +1,5 @@
-﻿using Infrastructure.Services;
+﻿using System;
+using Infrastructure.Services;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.PlayerDataLoader;
 using Infrastructure.Services.StaticData;
@@ -7,7 +8,7 @@ using Infrastructure.States;
 using Networking;
 using PlayerLogic;
 using UI;
-using UI.Windows;
+using UI.InGameUI;
 using UnityEngine;
 
 namespace Infrastructure.Factory
@@ -17,12 +18,16 @@ namespace Infrastructure.Factory
         Hud CreateHud(Player player, IInputService inputService);
         GameObject CreateMainMenu(GameStateMachine gameStateMachine);
         GameObject CreateMatchMenu(GameStateMachine gameStateMachine, IMapRepository mapRepository);
-        GameObject CreateSettingsMenu(GameStateMachine gameStateMachine, IStorageService storageService);
+        GameObject CreateSettingsMenu(IStorageService storageService, Action onBackButtonPressed);
         void CreateLoadingWindow(IClient client);
-        void CreateInGameUI(IClient client, IInputService inputService, IAvatarLoader avatarLoader);
+
+        void CreateInGameUI(GameStateMachine gameStateMachine, CustomNetworkManager networkManager,
+            IInputService inputService, IStorageService storageService,
+            IAvatarLoader avatarLoader);
+
         ChooseClassMenu CreateChooseClassMenu(Transform parent);
-        Scoreboard CreateScoreBoard(Transform parent, IClient client, IAvatarLoader avatarLoader);
-        TimeCounter CreateTimeCounter(Transform parent, IClient client);
+        Scoreboard CreateScoreBoard(Transform parent, CustomNetworkManager networkManager, IAvatarLoader avatarLoader);
+        TimeCounter CreateTimeCounter(Transform parent, CustomNetworkManager networkManager);
         InGameMenu CreateInGameMenu(Transform parent);
     }
 }
