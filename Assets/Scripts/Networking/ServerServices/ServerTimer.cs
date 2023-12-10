@@ -11,6 +11,7 @@ namespace Networking.ServerServices
         private readonly NetworkManager _networkManager;
         private readonly int _timeInSeconds;
         private ServerTime _timeLeft;
+        private IEnumerator coroutine;
 
         public ServerTimer(NetworkManager networkManager, int timeInMinutes)
         {
@@ -20,7 +21,8 @@ namespace Networking.ServerServices
 
         public void Start()
         {
-            _networkManager.StartCoroutine(SendTime());
+            coroutine = SendTime();
+            _networkManager.StartCoroutine(coroutine);
         }
 
         private IEnumerator SendTime()

@@ -51,7 +51,6 @@ namespace Inventory.RangeWeapon
             _inventoryInput.ReloadButtonDown -= _rangeWeaponModel.Reload;
             _rangeWeaponModel.BulletsInMagazine.ValueChanged -= _rangeWeaponView.OnBulletsInMagazineChanged;
             _rangeWeaponModel.TotalBullets.ValueChanged -= _rangeWeaponView.OnTotalBulletsChanged;
-            _rangeWeaponModel.CancelShoot();
             _rangeWeaponModel.ZoomOut();
             _rangeWeaponView.Disable();
         }
