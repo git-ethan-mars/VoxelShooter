@@ -23,7 +23,6 @@ namespace UI.InGameUI
         public void Construct(CustomNetworkManager networkManager)
         {
             _networkManager = networkManager;
-            _networkManager.Client.GameFinished += HideTimer;
             _networkManager.Client.GameTimeChanged += ChangeGameTime;
             _networkManager.Client.RespawnTimeChanged += ChangeRespawnTime;
             canvasGroup.alpha = 0.0f;
@@ -48,14 +47,8 @@ namespace UI.InGameUI
             }
         }
 
-        private void HideTimer()
-        {
-            gameObject.SetActive(false);
-        }
-
         private void OnDestroy()
         {
-            _networkManager.Client.GameFinished -= HideTimer;
             _networkManager.Client.GameTimeChanged -= ChangeGameTime;
             _networkManager.Client.RespawnTimeChanged -= ChangeRespawnTime;
         }
