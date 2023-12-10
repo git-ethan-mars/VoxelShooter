@@ -74,9 +74,9 @@ namespace Networking
             var meleeWeaponValidator = new MeleeWeaponValidator(this, customNetworkManager, particleFactory, audioService);
             _addBlocksHandler = new AddBlocksHandler(this);
             _changeClassHandler = new ChangeClassHandler(this);
-            _changeSlotHandler = new ChangeSlotHandler(this);
-            _incrementSlotIndexHandler = new IncrementSlotIndexHandler(this);
-            _decrementSlotIndexHandler = new DecrementSlotIndexHandler(this);
+            _changeSlotHandler = new ChangeSlotHandler(this, audioService);
+            _incrementSlotIndexHandler = new IncrementSlotIndexHandler(this, audioService);
+            _decrementSlotIndexHandler = new DecrementSlotIndexHandler(this, audioService);
             _grenadeSpawnHandler = new GrenadeSpawnHandler(this, customNetworkManager, entityFactory,
                 singleExplosionBehaviour, audioService);
             _rocketSpawnHandler = new RocketSpawnHandler(this, staticData, entityFactory, particleFactory, audioService);

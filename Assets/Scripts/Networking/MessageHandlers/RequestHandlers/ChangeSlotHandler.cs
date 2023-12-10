@@ -1,16 +1,19 @@
 ﻿using Mirror;
 using Networking.Messages.Requests;
 using Networking.Messages.Responses;
+using Networking.ServerServices;
 
 namespace Networking.MessageHandlers.RequestHandlers
 {
     public class ChangeSlotHandler : RequestHandler<ChangeSlotRequest>
     {
         private readonly IServer _server;
+        private readonly AudioService _audioService;
 
-        public ChangeSlotHandler(IServer server)
+        public ChangeSlotHandler(IServer server, AudioService audioService)
         {
             _server = server;
+            _audioService = audioService;
         }
 
         protected override void OnRequestReceived(NetworkConnectionToClient connection, ChangeSlotRequest request)
@@ -30,6 +33,7 @@ namespace Networking.MessageHandlers.RequestHandlers
             connection.Send(new ChangeSlotResponse(playerData.SelectedSlotIndex));
             NetworkServer.SendToReady(new ChangeItemModelResponse(connection.identity,
                 playerData.Items[playerData.SelectedSlotIndex].id));
+            _audioService.StopContinuousSound(connection.identity);
         }
     }
 }
