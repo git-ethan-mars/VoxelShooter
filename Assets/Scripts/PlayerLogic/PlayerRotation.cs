@@ -8,7 +8,7 @@ namespace PlayerLogic
 {
     public class PlayerRotation
     {
-        private const float SensitivityMultiplier = 100.0f;
+        private const float SensitivityMultiplier = 50.0f;
 
         private readonly IStorageService _storageService;
         private readonly ZoomService _zoomService;
