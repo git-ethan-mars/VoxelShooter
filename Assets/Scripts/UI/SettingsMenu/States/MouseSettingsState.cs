@@ -1,4 +1,3 @@
-using Data;
 using Infrastructure.Services.Storage;
 using UnityEngine;
 
@@ -6,8 +5,8 @@ namespace UI.SettingsMenu.States
 {
     public class MouseSettingsState : ISettingsMenuState
     {
-        private const float MinSliderValue = 0.0f;
-        private const float MaxSliderValue = 1.0f;
+        private const float MinSliderValue = 1.0f;
+        private const float MaxSliderValue = 5.0f;
 
         private readonly GameObject _mouseSection;
         private readonly IStorageService _storageService;

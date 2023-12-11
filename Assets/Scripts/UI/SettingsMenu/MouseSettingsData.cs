@@ -16,8 +16,8 @@ namespace UI.SettingsMenu
 
         public MouseSettingsData()
         {
-            GeneralSensitivity = 0.5f;
-            AimSensitivity = 0.5f;
+            GeneralSensitivity = 1.0f;
+            AimSensitivity = 1.0f;
         }
     }
 }
