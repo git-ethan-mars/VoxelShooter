@@ -8,9 +8,13 @@ using Infrastructure.Services.StaticData;
 using Infrastructure.Services.Storage;
 using Infrastructure.States;
 using MapLogic;
+using Mirror;
 using Networking.ClientServices;
 using Networking.MessageHandlers.ResponseHandler;
 using PlayerLogic;
+using PlayerLogic.Spectator;
+using UI.SettingsMenu;
+using UnityEngine;
 using Environment = MapLogic.Environment;
 
 namespace Networking
@@ -51,8 +55,9 @@ namespace Networking
         }
 
         public FallMeshGenerator FallMeshGenerator { get; }
-        public IStaticDataService StaticData { get; }
         public ClientData Data { get; }
+        public MapGenerator MapGenerator { get; private set; }
+
 
         public MapProvider MapProvider
         {
@@ -64,11 +69,11 @@ namespace Networking
             }
         }
 
-        public MapGenerator MapGenerator { get; private set; }
         private MapProvider _mapProvider;
         private readonly CustomNetworkManager _customNetworkManager;
         private readonly IGameFactory _gameFactory;
         private readonly IMeshFactory _meshFactory;
+        private readonly IStorageService _storageService;
         private readonly GameStateMachine _stateMachine;
         private readonly MapNameHandler _mapNameHandler;
         private readonly DownloadMapHandler _downloadMapHandler;
@@ -87,7 +92,8 @@ namespace Networking
         private readonly StopContinuousSoundHandler _stopContinuousSoundHandler;
         private readonly SurroundingSoundHandler _surroundingSoundHandler;
 
-        public Client(GameStateMachine stateMachine, CustomNetworkManager customNetworkManager, IInputService inputService,
+        public Client(GameStateMachine stateMachine, CustomNetworkManager customNetworkManager,
+            IInputService inputService,
             IStorageService storageService,
             IGameFactory gameFactory,
             IMeshFactory meshFactory,
@@ -98,12 +104,12 @@ namespace Networking
             _customNetworkManager = customNetworkManager;
             _gameFactory = gameFactory;
             _meshFactory = meshFactory;
-            StaticData = staticData;
+            _storageService = storageService;
             var fallingMeshParticlePool = new FallingMeshParticlePool(gameFactory, particleFactory);
             FallMeshGenerator = new FallMeshGenerator(meshFactory, fallingMeshParticlePool);
             Data = new ClientData();
             _mapNameHandler = new MapNameHandler(this);
-            _downloadMapHandler = new DownloadMapHandler(this);
+            _downloadMapHandler = new DownloadMapHandler(this, staticData);
             _updateMapHandler = new UpdateMapHandler(this);
             _fallBlockHandler = new FallBlockHandler(this);
             _gameTimeHandler = new GameTimeHandler();
@@ -117,21 +123,26 @@ namespace Networking
             _spectatorConfigureHandler = new SpectatorConfigureHandler(inputService, storageService);
             _nickNameHandler = new NickNameHandler();
             var audioPool = new AudioPool(gameFactory);
-            _playerSoundHandler = new PlayerSoundHandler(staticData, customNetworkManager, audioPool);
+            _playerSoundHandler = new PlayerSoundHandler(staticData, storageService, customNetworkManager, audioPool);
             _startContinuousSoundHandler = new StartContinuousSoundHandler(staticData);
             _stopContinuousSoundHandler = new StopContinuousSoundHandler();
-            _surroundingSoundHandler = new SurroundingSoundHandler(staticData, customNetworkManager, audioPool);
+            _surroundingSoundHandler =
+                new SurroundingSoundHandler(staticData, storageService, customNetworkManager, audioPool);
         }
 
         public void Start()
         {
             MapDownloaded += OnMapDownloaded;
+            AudioListener.volume = _storageService.Load<VolumeSettingsData>(Constants.VolumeSettingsKey).MasterVolume;
+            _storageService.DataSaved += OnDataSaved;
             RegisterHandlers();
             Data.State = ClientState.Connecting;
         }
 
         public void Stop()
         {
+            MapDownloaded -= OnMapDownloaded;
+            _storageService.DataSaved -= OnDataSaved;
             UnregisterHandlers();
             Data.State = ClientState.NotConnected;
             GameFinished?.Invoke();
@@ -179,7 +190,6 @@ namespace Networking
 
         private void OnMapDownloaded()
         {
-            MapDownloaded -= OnMapDownloaded;
             Data.State = ClientState.Connected;
             MapGenerator = new MapGenerator(_mapProvider, _gameFactory, _meshFactory);
             MapGenerator.GenerateMap();
@@ -188,6 +198,38 @@ namespace Networking
             Environment.ApplyAmbientLighting(_mapProvider.SceneData);
             Environment.ApplyFog(_mapProvider.SceneData);
             _stateMachine.Enter<GameLoopState, CustomNetworkManager>(_customNetworkManager);
+        }
+
+        private void OnDataSaved(ISettingsData data)
+        {
+            var identity = NetworkClient.connection.identity;
+            if (data is VolumeSettingsData volumeSettings)
+            {
+                _playerSoundHandler.SoundMultiplier = volumeSettings.SoundVolume;
+                _surroundingSoundHandler.SoundMultiplier = volumeSettings.SoundVolume;
+                if (identity != null && identity.TryGetComponent<Player>(out var player))
+                {
+                    player.Audio.ChangeSoundMultiplier(volumeSettings.SoundVolume);
+                }
+            }
+
+            if (data is MouseSettingsData mouseSettings)
+            {
+                if (identity == null)
+                {
+                    return;
+                }
+
+                if (identity.TryGetComponent<Player>(out var player))
+                {
+                    player.Rotation.ChangeMouseSettings(mouseSettings);
+                }
+
+                if (identity.TryGetComponent<SpectatorPlayer>(out var spectator))
+                {
+                    spectator.Rotation.ChangeMouseSettings(mouseSettings);
+                }
+            }
         }
     }
 }

@@ -29,7 +29,6 @@ namespace Infrastructure.Factory
         private readonly IAssetProvider _assets;
         private readonly IStaticDataService _staticData;
 
-
         public UIFactory(IAssetProvider assets, IStaticDataService staticData)
         {
             _assets = assets;

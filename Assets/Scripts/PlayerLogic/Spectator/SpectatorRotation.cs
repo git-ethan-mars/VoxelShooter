@@ -8,7 +8,6 @@ namespace PlayerLogic.Spectator
     {
         private const float SensitivityMultiplier = 50.0f;
 
-        private readonly IStorageService _storageService;
         private readonly Transform _spectator;
         private float _sensitivity;
         private float _xRotation;
@@ -17,9 +16,7 @@ namespace PlayerLogic.Spectator
         public SpectatorRotation(Transform spectator, IStorageService storageService)
         {
             _spectator = spectator;
-            _storageService = storageService;
-            _sensitivity = _storageService.Load<MouseSettingsData>(Constants.MouseSettingsKey).GeneralSensitivity;
-            _storageService.DataSaved += OnMouseSettingsChanged;
+            _sensitivity = storageService.Load<MouseSettingsData>(Constants.MouseSettingsKey).GeneralSensitivity;
         }
 
         public void Rotate(Vector2 direction)
@@ -31,17 +28,9 @@ namespace PlayerLogic.Spectator
             _spectator.rotation = Quaternion.Euler(_xRotation, _yRotation, 0);
         }
 
-        public void OnDestroy()
+        public void ChangeMouseSettings(MouseSettingsData mouseSettings)
         {
-            _storageService.DataSaved -= OnMouseSettingsChanged;
-        }
-
-        private void OnMouseSettingsChanged(object data)
-        {
-            if (data is MouseSettingsData mouseSettingsData)
-            {
-                _sensitivity = mouseSettingsData.GeneralSensitivity;
-            }
+            _sensitivity = mouseSettings.GeneralSensitivity;
         }
     }
 }

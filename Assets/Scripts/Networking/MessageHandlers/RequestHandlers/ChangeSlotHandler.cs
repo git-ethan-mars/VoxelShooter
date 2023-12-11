@@ -33,7 +33,11 @@ namespace Networking.MessageHandlers.RequestHandlers
             connection.Send(new ChangeSlotResponse(playerData.SelectedSlotIndex));
             NetworkServer.SendToReady(new ChangeItemModelResponse(connection.identity,
                 playerData.Items[playerData.SelectedSlotIndex].id));
-            _audioService.StopContinuousSound(connection.identity);
+            if (playerData.HasContinuousSound)
+            {
+                _audioService.StopContinuousSound(connection.identity);
+                playerData.HasContinuousSound = false;
+            }
         }
     }
 }

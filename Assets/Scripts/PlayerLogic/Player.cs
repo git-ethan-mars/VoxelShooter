@@ -10,6 +10,7 @@ using Inventory;
 using Mirror;
 using TMPro;
 using UI;
+using UI.SettingsMenu;
 using UnityEngine;
 
 namespace PlayerLogic
@@ -55,8 +56,6 @@ namespace PlayerLogic
         [SerializeField]
         private AudioSource continuousAudio;
 
-        public AudioSource ContinuousAudio => continuousAudio;
-
         [SerializeField]
         private AudioSource stepAudio;
 
@@ -65,10 +64,10 @@ namespace PlayerLogic
 
         public ZoomService ZoomService { get; private set; }
         public bool IsInitialized { get; private set; }
-
+        public PlayerAudio Audio { get; private set; }
 
         private Camera _mainCamera;
-        
+
         private IInputService _inputService;
         private InventorySystem _inventory;
         private Hud _hud;
@@ -78,8 +77,6 @@ namespace PlayerLogic
         private float _jumpHeight;
 
         private PlayerRotation _rotation;
-        private PlayerAudio _audio;
-
 
         public void Construct(IUIFactory uiFactory, IMeshFactory meshFactory, IInputService inputService,
             IStorageService storageService,
@@ -94,10 +91,13 @@ namespace PlayerLogic
             _jumpHeight = jumpHeight;
             _mainCamera = Camera.main;
             ZoomService = new ZoomService(_mainCamera);
-            _rotation = new PlayerRotation(storageService ,ZoomService, bodyOrientation, headPivot);
+            _rotation = new PlayerRotation(storageService, ZoomService, bodyOrientation, headPivot);
             _hud = uiFactory.CreateHud(this, inputService);
             _inventory = new InventorySystem(_inputService, staticData, meshFactory, itemIds, _hud,
                 this);
+            var volumeSettings = storageService.Load<VolumeSettingsData>(Constants.VolumeSettingsKey);
+            Audio ??= new PlayerAudio(stepAudio, stepAudioData, continuousAudio);
+            Audio.ChangeSoundMultiplier(volumeSettings.SoundVolume);
             TurnOffNickName();
             TurnOffBodyRender();
             MountCamera();
@@ -106,7 +106,7 @@ namespace PlayerLogic
 
         private void Start()
         {
-            _audio = new PlayerAudio(stepAudio, stepAudioData);
+            Audio ??= new PlayerAudio(stepAudio, stepAudioData, continuousAudio);
             _movement = new PlayerMovement(hitBox, rigidbody, bodyOrientation);
         }
 
@@ -116,11 +116,11 @@ namespace PlayerLogic
             {
                 if (_movement.GetHorizontalVelocity().magnitude > Constants.Epsilon && _movement.IsGrounded())
                 {
-                    _audio.EnableStepSound();
+                    Audio.EnableStepSound();
                 }
                 else
                 {
-                    _audio.DisableStepSound();
+                    Audio.DisableStepSound();
                 }
 
                 return;
@@ -187,12 +187,11 @@ namespace PlayerLogic
             cameraTransform.SetParent(cameraMountPoint.transform);
             cameraTransform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
         }
-        
+
         public override void OnStopLocalPlayer()
         {
             _mainCamera.transform.SetParent(null);
             _inventory.OnDestroy();
-            _rotation.OnDestroy();
             Destroy(_hud.gameObject);
         }
     }

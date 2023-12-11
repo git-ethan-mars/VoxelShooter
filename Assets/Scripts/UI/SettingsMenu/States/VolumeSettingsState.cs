@@ -7,6 +7,8 @@ namespace UI.SettingsMenu.States
     {
         private const int MinSliderValue = 0;
         private const int MaxSliderValue = 100;
+        private const float SliderToAudioListenerValue = 0.01f;
+        private const int AudioListenerValueToSlider = 100;
 
         private readonly GameObject _volumeSection;
         private readonly SliderWithDisplayedValue _masterVolume;
@@ -24,22 +26,33 @@ namespace UI.SettingsMenu.States
             _soundVolume = soundVolume;
             _storageService = storageService;
             var currentSettings = _storageService.Load<VolumeSettingsData>(Constants.VolumeSettingsKey);
-            _masterVolume.Construct(currentSettings.MasterVolume, MinSliderValue, MaxSliderValue);
-            _musicVolume.Construct(currentSettings.MusicVolume, MinSliderValue, MaxSliderValue);
-            _soundVolume.Construct(currentSettings.SoundVolume, MinSliderValue, MaxSliderValue);
+            _masterVolume.Construct((int) currentSettings.MasterVolume * AudioListenerValueToSlider, MinSliderValue,
+                MaxSliderValue);
+            _musicVolume.Construct((int) currentSettings.MusicVolume * AudioListenerValueToSlider, MinSliderValue,
+                MaxSliderValue);
+            _soundVolume.Construct((int) currentSettings.SoundVolume * AudioListenerValueToSlider, MinSliderValue,
+                MaxSliderValue);
         }
 
         public void Enter()
         {
             _volumeSection.SetActive(true);
+            _masterVolume.SliderValue.ValueChanged += OnMasterValueChanged;
         }
 
         public void Exit()
         {
             _storageService.Save(Constants.VolumeSettingsKey,
-                new VolumeSettingsData((int) _masterVolume.SliderValue, (int) _musicVolume.SliderValue,
-                    (int) _soundVolume.SliderValue));
+                new VolumeSettingsData(_masterVolume.SliderValue.Value * SliderToAudioListenerValue,
+                    _musicVolume.SliderValue.Value * SliderToAudioListenerValue,
+                    _soundVolume.SliderValue.Value * SliderToAudioListenerValue));
+            _masterVolume.SliderValue.ValueChanged -= OnMasterValueChanged;
             _volumeSection.SetActive(false);
+        }
+
+        private void OnMasterValueChanged(float volume)
+        {
+            AudioListener.volume = volume * SliderToAudioListenerValue;
         }
     }
 }

@@ -20,6 +20,7 @@ namespace PlayerLogic.States
             _playerData.Items = null;
             _playerData.ItemData = null;
             _playerData.CountByItem = null;
+            _playerData.HasContinuousSound = false;
         }
 
         public void Exit()

@@ -7,6 +7,6 @@ namespace Infrastructure.Services.Storage
     {
         void Save<T>(string key, T data) where T : ISettingsData;
         T Load<T>(string key) where T : ISettingsData, new();
-        event Action<object> DataSaved;
+        event Action<ISettingsData> DataSaved;
     }
 }

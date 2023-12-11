@@ -33,7 +33,7 @@ namespace UI.SettingsMenu.States
         public void Exit()
         {
             _storageService.Save(Constants.MouseSettingsKey,
-                new MouseSettingsData(_sensitivity.SliderValue, _aimSensitivity.SliderValue));
+                new MouseSettingsData(_sensitivity.SliderValue.Value, _aimSensitivity.SliderValue.Value));
             _mouseSection.SetActive(false);
         }
     }

@@ -4,12 +4,12 @@ namespace UI.SettingsMenu
 {
     public class VolumeSettingsData : ISettingsData
     {
-        public readonly int MasterVolume;
-        public readonly int MusicVolume;
-        public readonly int SoundVolume;
+        public readonly float MasterVolume;
+        public readonly float MusicVolume;
+        public readonly float SoundVolume;
 
         [JsonConstructor]
-        public VolumeSettingsData(int masterVolume, int musicVolume, int soundVolume)
+        public VolumeSettingsData(float masterVolume, float musicVolume, float soundVolume)
         {
             MasterVolume = masterVolume;
             MusicVolume = musicVolume;
@@ -18,9 +18,9 @@ namespace UI.SettingsMenu
 
         public VolumeSettingsData()
         {
-            MasterVolume = 50;
-            MusicVolume = 50;
-            SoundVolume = 50;
+            MasterVolume = 0.5f;
+            MusicVolume = 0.5f;
+            SoundVolume = 0.5f;
         }
     }
 }

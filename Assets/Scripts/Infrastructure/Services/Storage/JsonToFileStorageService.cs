@@ -8,7 +8,7 @@ namespace Infrastructure.Services.Storage
 {
     public class JsonToFileStorageService : IStorageService
     {
-        public event Action<object> DataSaved;
+        public event Action<ISettingsData> DataSaved;
 
         public void Save<T>(string key, T data) where T : ISettingsData
         {

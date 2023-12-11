@@ -9,8 +9,7 @@ namespace Networking.MessageHandlers.ResponseHandler
         {
             if (response.Source != null)
             {
-                var audioSource = response.Source.GetComponent<Player>().ContinuousAudio;
-                audioSource.loop = false;
+                response.Source.GetComponent<Player>().Audio.StopContinuousSound();
             }
         }
     }

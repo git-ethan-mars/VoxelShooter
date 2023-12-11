@@ -10,28 +10,24 @@ namespace PlayerLogic
     {
         private const float SensitivityMultiplier = 50.0f;
 
-        private readonly IStorageService _storageService;
-        private readonly ZoomService _zoomService;
         private float Sensitivity => _zoomService.IsZoomed ? _aimSensitivity : _generalSensitivity;
-
-        private float _generalSensitivity;
-        private float _aimSensitivity;
-
+        
         private readonly Transform _headPivot;
         private readonly Transform _bodyOrientation;
-
+        private readonly ZoomService _zoomService;
+        
+        private float _generalSensitivity;
+        private float _aimSensitivity;
         private float _xRotation;
         private float _yRotation;
 
         public PlayerRotation(IStorageService storageService, ZoomService zoomService, Transform bodyOrientation,
             Transform headPivot)
         {
-            _storageService = storageService;
             _zoomService = zoomService;
-            var mouseSettings = _storageService.Load<MouseSettingsData>(Constants.MouseSettingsKey);
+            var mouseSettings = storageService.Load<MouseSettingsData>(Constants.MouseSettingsKey);
             _generalSensitivity = mouseSettings.GeneralSensitivity;
             _aimSensitivity = mouseSettings.AimSensitivity;
-            _storageService.DataSaved += OnMouseSettingsChanged;
             _bodyOrientation = bodyOrientation;
             _headPivot = headPivot;
         }
@@ -47,20 +43,10 @@ namespace PlayerLogic
             _headPivot.rotation = Quaternion.Euler(_xRotation, _yRotation, 0);
         }
 
-        public void OnDestroy()
+        public void ChangeMouseSettings(MouseSettingsData mouseSettings)
         {
-            _storageService.DataSaved -= OnMouseSettingsChanged;
-        }
-
-        private void OnMouseSettingsChanged(object data)
-        {
-            if (data is not MouseSettingsData mouseSettingsData)
-            {
-                return;
-            }
-
-            _generalSensitivity = mouseSettingsData.GeneralSensitivity;
-            _aimSensitivity = mouseSettingsData.AimSensitivity;
+            _generalSensitivity = mouseSettings.GeneralSensitivity;
+            _aimSensitivity = mouseSettings.AimSensitivity;
         }
     }
 }

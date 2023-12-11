@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using Infrastructure;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,10 +15,11 @@ namespace UI
         [SerializeField]
         private Slider slider;
 
-        public float SliderValue { get; private set; }
+        public ObservableVariable<float> SliderValue { get; private set; }
 
         public void Construct(int initializedValue, int minValue, int maxValue)
         {
+            SliderValue = new ObservableVariable<float>(initializedValue);
             slider.wholeNumbers = true;
             slider.onValueChanged.AddListener(UpdateDisplayedValue);
             slider.maxValue = maxValue;
@@ -27,6 +29,7 @@ namespace UI
 
         public void Construct(float initializedValue, float minValue, float maxValue)
         {
+            SliderValue = new ObservableVariable<float>(initializedValue);
             slider.wholeNumbers = false;
             slider.onValueChanged.AddListener(UpdateDisplayedValue);
             slider.maxValue = maxValue;
@@ -38,14 +41,14 @@ namespace UI
         {
             if (!slider.wholeNumbers)
             {
-                SliderValue = (float) Math.Round(value, 1);
+                SliderValue.Value = (float) Math.Round(value, 1);
             }
             else
             {
-                SliderValue = value;
+                SliderValue.Value = value;
             }
 
-            displayedValue.SetText(SliderValue.ToString(CultureInfo.InvariantCulture));
+            displayedValue.SetText(SliderValue.Value.ToString(CultureInfo.InvariantCulture));
         }
 
         private void OnDestroy()

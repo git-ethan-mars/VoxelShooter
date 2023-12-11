@@ -18,7 +18,7 @@ namespace Networking.MessageHandlers.RequestHandlers
         protected override void OnRequestReceived(NetworkConnectionToClient connection, CancelShootRequest request)
         {
             var result = _server.Data.TryGetPlayerData(connection, out var playerData);
-            if (!result || !playerData.IsAlive)
+            if (!result || !playerData.IsAlive || !playerData.HasContinuousSound)
             {
                 return;
             }
