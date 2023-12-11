@@ -19,7 +19,7 @@ namespace Networking.MessageHandlers.RequestHandlers
         protected override void OnRequestReceived(NetworkConnectionToClient connection, AddBlocksRequest request)
         {
             var result = _server.Data.TryGetPlayerData(connection, out var playerData);
-            if (result || !playerData.IsAlive || playerData.SelectedItem is not BlockItem)
+            if (!result || !playerData.IsAlive || playerData.SelectedItem is not BlockItem)
             {
                 return;
             }
