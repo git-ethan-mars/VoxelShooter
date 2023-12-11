@@ -1,6 +1,5 @@
 using System;
 using CameraLogic;
-using Data;
 using Infrastructure.Services.Storage;
 using UI.SettingsMenu;
 using UnityEngine;
