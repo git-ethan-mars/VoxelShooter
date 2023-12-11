@@ -30,6 +30,8 @@ namespace Inventory
         private readonly ItemUseHandler _itemUseHandler;
         private readonly ReloadResultHandler _reloadHandler;
         private readonly ShootResultHandler _shootHandler;
+        private readonly RocketSpawnHandler _rocketSpawnHandler;
+        private readonly RocketReloadHandler _rocketReloadHandler;
         private readonly InventoryInput _inventoryInput;
         private readonly Hud _hud;
 
@@ -76,8 +78,9 @@ namespace Inventory
 
                 if (item.itemType == ItemType.RocketLauncher)
                 {
+                    var rocketLauncher = (RocketLauncherItem) item;
                     _states.Add(new RocketLauncherState(_inventoryInput, rayCaster,
-                        (RocketLauncherItem) item, hud));
+                        (RocketLauncherItem) item, hud, new RocketLauncherData(rocketLauncher)));
                 }
             }
 
@@ -96,6 +99,10 @@ namespace Inventory
             _reloadHandler.Register();
             _shootHandler = new ShootResultHandler(this);
             _shootHandler.Register();
+            _rocketSpawnHandler = new RocketSpawnHandler(this);
+            _rocketSpawnHandler.Register();
+            _rocketReloadHandler = new RocketReloadHandler(this);
+            _rocketReloadHandler.Register();
 
             ChangeSlotRequest(_index);
         }
@@ -116,6 +123,8 @@ namespace Inventory
             _itemUseHandler.Unregister();
             _reloadHandler.Unregister();
             _shootHandler.Unregister();
+            _rocketReloadHandler.Unregister();
+            _rocketSpawnHandler.Unregister();
         }
 
         public void SwitchActiveSlot(int slotIndex)

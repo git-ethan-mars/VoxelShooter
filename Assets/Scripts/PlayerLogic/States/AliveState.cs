@@ -70,6 +70,13 @@ namespace PlayerLogic.States
                     _playerData.ItemData.Add(new MeleeWeaponData(meleeWeapon));
                     continue;
                 }
+                
+                if (item.itemType == ItemType.RocketLauncher)
+                {
+                    var rocketLauncher = (RocketLauncherItem) item;
+                    _playerData.ItemData.Add(new RocketLauncherData(rocketLauncher));
+                    continue;
+                }
 
                 _playerData.ItemData.Add(null);
             }
