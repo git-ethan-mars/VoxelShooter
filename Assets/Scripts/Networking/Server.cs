@@ -45,6 +45,7 @@ namespace Networking
         private readonly ReloadHandler _reloadHandler;
         private readonly HitHandler _hitHandler;
         private readonly AuthenticationHandler _authenticationHandler;
+        private readonly FallDamageService _fallDamageService;
 
         public Server(CustomNetworkManager customNetworkManager, IStaticDataService staticData,
             ServerSettings serverSettings, IAssetProvider assets, IGameFactory gameFactory,
@@ -87,6 +88,7 @@ namespace Networking
             _reloadHandler = new ReloadHandler(this, rangeWeaponValidator);
             _hitHandler = new HitHandler(this, meleeWeaponValidator);
             _authenticationHandler = new AuthenticationHandler(this);
+            _fallDamageService = new FallDamageService(this, customNetworkManager);
         }
 
         public void Start()
@@ -96,6 +98,7 @@ namespace Networking
             _entityPositionValidator.Start();
             _boxDropService.Start();
             _spawnPointService.CreateSpawnPoints();
+            _fallDamageService.Start();
         }
 
         public void AddPlayer(NetworkConnectionToClient connection, CSteamID steamID,
@@ -187,6 +190,7 @@ namespace Networking
             _entityPositionValidator.Stop();
             _boxDropService.Stop();
             _spawnPointService.RemoveSpawnPoints();
+            _fallDamageService.Stop();
             UnregisterHandlers();
         }
 

@@ -45,9 +45,13 @@ namespace PlayerLogic
         [SerializeField]
         private Transform cameraMountPoint;
 
+        public CapsuleCollider HitBox => hitBox;
+        
         [SerializeField]
         private CapsuleCollider hitBox;
 
+        public Rigidbody Rigidbody => rigidbody;
+        
         [SerializeField]
         private new Rigidbody rigidbody;
 

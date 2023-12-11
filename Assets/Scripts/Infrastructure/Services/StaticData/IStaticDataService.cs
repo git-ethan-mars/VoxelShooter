@@ -21,5 +21,7 @@ namespace Infrastructure.Services.StaticData
         void LoadSounds();
         AudioData GetAudio(int soundId);
         int GetAudioIndex(AudioData audio);
+        void LoadFallDamageConfiguration();
+        FallDamageData GetFallDamageConfiguration();
     }
 }

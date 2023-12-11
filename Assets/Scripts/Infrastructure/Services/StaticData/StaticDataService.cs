@@ -15,6 +15,7 @@ namespace Infrastructure.Services.StaticData
         private const string LobbyBalancePath = "StaticData/Lobby Balance";
         private const string BlockHealthBalancePath = "StaticData/Block Health";
         private const string SoundPath = "StaticData/Audio Data";
+        private const string FallDamageConfigPath = "StaticData/Fall damage configuration";
         private readonly IAssetProvider _assets;
         private Dictionary<GameClass, PlayerCharacteristic> _playerCharacteristicByClass;
         private Dictionary<GameClass, GameInventory> _inventoryByClass;
@@ -23,6 +24,7 @@ namespace Infrastructure.Services.StaticData
         private List<AudioData> _audios;
         private LobbyBalance _lobbyBalance;
         private BlockHealthBalance _blockHealthBalance;
+        private FallDamageData _fallDamageData;
 
         public StaticDataService(IAssetProvider assets)
         {
@@ -121,6 +123,16 @@ namespace Infrastructure.Services.StaticData
             }
 
             return index;
+        }
+        
+        public void LoadFallDamageConfiguration()
+        {
+            _fallDamageData = _assets.Load<FallDamageData>(FallDamageConfigPath);
+        }
+        
+        public FallDamageData GetFallDamageConfiguration()
+        {
+            return _fallDamageData;
         }
     }
 }

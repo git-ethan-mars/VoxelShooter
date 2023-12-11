@@ -55,6 +55,7 @@ namespace Infrastructure.States
             staticData.LoadLobbyBalance();
             staticData.LoadBlockHealthBalance();
             staticData.LoadSounds();
+            staticData.LoadFallDamageConfiguration();
             _allServices.RegisterSingle<IInputService>(new StandaloneInputService());
             if (Constants.isLocalBuild)
             {
