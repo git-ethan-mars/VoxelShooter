@@ -5,7 +5,6 @@ using Data;
 using Infrastructure.Factory;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
-using Infrastructure.Services.Storage;
 using Inventory.Block;
 using Inventory.Grenade;
 using Inventory.MeleeWeapon;
@@ -34,7 +33,7 @@ namespace Inventory
         private readonly Hud _hud;
 
         public InventorySystem(IInputService inputService, IStaticDataService staticData,
-            IMeshFactory meshFactory, IStorageService storageService, List<int> itemIds, Hud hud, Player player)
+            IMeshFactory meshFactory, List<int> itemIds, Hud hud, Player player)
         {
             var rayCaster = new RayCaster(Camera.main);
             _inventoryInput = new InventoryInput(inputService);
@@ -47,8 +46,8 @@ namespace Inventory
                 if (item.itemType == ItemType.RangeWeapon)
                 {
                     var rangeWeapon = (RangeWeaponItem) item;
-                    _states.Add(new RangeWeaponState(_inventoryInput, storageService, rayCaster,
-                        rangeWeapon, new RangeWeaponData(rangeWeapon), Camera.main, player, hud));
+                    _states.Add(new RangeWeaponState(_inventoryInput, rayCaster,
+                        rangeWeapon, new RangeWeaponData(rangeWeapon), player, hud));
                 }
 
                 if (item.itemType == ItemType.MeleeWeapon)
@@ -106,7 +105,7 @@ namespace Inventory
             _inventoryInput.Update();
         }
 
-        public void Clear()
+        public void OnDestroy()
         {
             _inventoryInput.SlotButtonPressed -= ChangeSlotRequest;
             _inventoryInput.MouseScrolledUp -= SendIncrementSlotIndexRequest;

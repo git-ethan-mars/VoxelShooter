@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using CameraLogic;
 using Data;
 using Infrastructure;
 using Infrastructure.Factory;
@@ -9,6 +10,7 @@ using Inventory;
 using Mirror;
 using TMPro;
 using UI;
+using UI.SettingsMenu;
 using UnityEngine;
 
 namespace PlayerLogic
@@ -58,27 +60,27 @@ namespace PlayerLogic
         [SerializeField]
         private AudioSource continuousAudio;
 
-        public AudioSource ContinuousAudio => continuousAudio;
-
         [SerializeField]
         private AudioSource stepAudio;
 
         [SerializeField]
         private AudioData stepAudioData;
 
+        public ZoomService ZoomService { get; private set; }
+        public bool IsInitialized { get; private set; }
+        public PlayerAudio Audio { get; private set; }
+
         private Camera _mainCamera;
-        private Hud _hud;
 
         private IInputService _inputService;
         private InventorySystem _inventory;
+        private Hud _hud;
 
         private PlayerMovement _movement;
         private float _speed;
         private float _jumpHeight;
 
         private PlayerRotation _rotation;
-        private PlayerAudio _audio;
-
 
         public void Construct(IUIFactory uiFactory, IMeshFactory meshFactory, IInputService inputService,
             IStorageService storageService,
@@ -91,20 +93,24 @@ namespace PlayerLogic
             _inputService = inputService;
             _speed = speed;
             _jumpHeight = jumpHeight;
-            var sensitivity = storageService.Load<MouseSettingsData>(Constants.MouseSettingKey).GeneralSensitivity;
-            _rotation = new PlayerRotation(bodyOrientation, headPivot, sensitivity);
-            _hud = uiFactory.CreateHud(this, inputService);
             _mainCamera = Camera.main;
-            _inventory = new InventorySystem(_inputService, staticData, meshFactory, storageService, itemIds, _hud,
+            ZoomService = new ZoomService(_mainCamera);
+            _rotation = new PlayerRotation(storageService, ZoomService, bodyOrientation, headPivot);
+            _hud = uiFactory.CreateHud(this, inputService);
+            _inventory = new InventorySystem(_inputService, staticData, meshFactory, itemIds, _hud,
                 this);
+            var volumeSettings = storageService.Load<VolumeSettingsData>(Constants.VolumeSettingsKey);
+            Audio ??= new PlayerAudio(stepAudio, stepAudioData, continuousAudio);
+            Audio.ChangeSoundMultiplier(volumeSettings.SoundVolume);
             TurnOffNickName();
             TurnOffBodyRender();
             MountCamera();
+            IsInitialized = true;
         }
 
         private void Start()
         {
-            _audio = new PlayerAudio(stepAudio, stepAudioData);
+            Audio ??= new PlayerAudio(stepAudio, stepAudioData, continuousAudio);
             _movement = new PlayerMovement(hitBox, rigidbody, bodyOrientation);
         }
 
@@ -114,11 +120,11 @@ namespace PlayerLogic
             {
                 if (_movement.GetHorizontalVelocity().magnitude > Constants.Epsilon && _movement.IsGrounded())
                 {
-                    _audio.EnableStepSound();
+                    Audio.EnableStepSound();
                 }
                 else
                 {
-                    _audio.DisableStepSound();
+                    Audio.DisableStepSound();
                 }
 
                 return;
@@ -150,6 +156,22 @@ namespace PlayerLogic
             nickNameText.SetText(nickName);
         }
 
+        public void ShowHud()
+        {
+            if (IsInitialized)
+            {
+                _hud.CanvasGroup.alpha = 1.0f;
+            }
+        }
+
+        public void HideHud()
+        {
+            if (IsInitialized)
+            {
+                _hud.CanvasGroup.alpha = 0.0f;
+            }
+        }
+
         private void TurnOffBodyRender()
         {
             foreach (var bodyPart in bodyParts)
@@ -173,7 +195,7 @@ namespace PlayerLogic
         public override void OnStopLocalPlayer()
         {
             _mainCamera.transform.SetParent(null);
-            _inventory.Clear();
+            _inventory.OnDestroy();
             Destroy(_hud.gameObject);
         }
     }

@@ -17,7 +17,7 @@ namespace Networking
 {
     public class CustomNetworkManager : NetworkManager, ICoroutineRunner
     {
-        public IClient Client;
+        public IClient Client { get; private set; }
         private IStaticDataService _staticData;
         private IEntityFactory _entityFactory;
         private ServerSettings _serverSettings;

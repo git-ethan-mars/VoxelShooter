@@ -34,9 +34,13 @@ namespace Networking.ServerServices
             var rangeWeapon = (RangeWeaponItem) playerData.SelectedItem;
             var rangeWeaponData = (RangeWeaponData) playerData.ItemData[playerData.SelectedSlotIndex];
 
-            if (!CanShoot(rangeWeaponData) || requestIsButtonHolding != rangeWeapon.isAutomatic)
+            if (rangeWeaponData.BulletsInMagazine == 0 && !playerData.HasContinuousSound)
             {
                 _audioService.StopContinuousSound(connection.identity);
+            }
+            
+            if (!CanShoot(rangeWeaponData) || requestIsButtonHolding != rangeWeapon.isAutomatic)
+            {
                 return;
             }
 
@@ -53,6 +57,7 @@ namespace Networking.ServerServices
             if (rangeWeapon.isAutomatic)
             {
                 _audioService.StartContinuousAudio(rangeWeapon.shootingSound, connection.identity);
+                playerData.HasContinuousSound = true;
             }
             else
             {

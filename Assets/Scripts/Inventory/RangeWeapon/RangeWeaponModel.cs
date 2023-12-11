@@ -1,11 +1,9 @@
 using CameraLogic;
 using Data;
 using Infrastructure;
-using Infrastructure.Services.Storage;
 using Mirror;
 using Networking.Messages.Requests;
 using PlayerLogic;
-using UnityEngine;
 
 namespace Inventory.RangeWeapon
 {
@@ -15,21 +13,15 @@ namespace Inventory.RangeWeapon
         public ObservableVariable<int> TotalBullets { get; }
 
         private readonly RayCaster _rayCaster;
-        private readonly ZoomService _zoomService;
-        private readonly float _aimSensitivity;
-        private readonly int _sensitivity;
         private readonly Player _player;
-        private int _bulletsInMagazine;
+        private readonly float _zoomMultiplier;
 
-        public RangeWeaponModel(IStorageService storageService, RayCaster rayCaster, Camera camera,
+        public RangeWeaponModel(RayCaster rayCaster,
             RangeWeaponItem configure, RangeWeaponData data, Player player)
         {
-            var mouseSettings = storageService.Load<MouseSettingsData>(Constants.MouseSettingKey);
-            _aimSensitivity = mouseSettings.AimSensitivity;
-            _sensitivity = mouseSettings.GeneralSensitivity;
             _rayCaster = rayCaster;
-            _zoomService = new ZoomService(camera, configure.zoomMultiplier);
             _player = player;
+            _zoomMultiplier = configure.zoomMultiplier;
             BulletsInMagazine = new ObservableVariable<int>(data.BulletsInMagazine);
             TotalBullets = new ObservableVariable<int>(data.TotalBullets);
         }
@@ -56,14 +48,12 @@ namespace Inventory.RangeWeapon
 
         public void ZoomIn()
         {
-            _zoomService.ZoomIn();
-            _player.Rotation.Sensitivity = _aimSensitivity;
+            _player.ZoomService.ZoomIn(_zoomMultiplier);
         }
 
         public void ZoomOut()
         {
-            _zoomService.ZoomOut();
-            _player.Rotation.Sensitivity = _sensitivity;
+            _player.ZoomService.ZoomOut();
         }
     }
 }

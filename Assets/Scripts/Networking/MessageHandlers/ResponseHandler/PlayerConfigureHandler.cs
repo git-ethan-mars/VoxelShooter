@@ -1,3 +1,4 @@
+using System;
 using Infrastructure.Factory;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
@@ -10,6 +11,7 @@ namespace Networking.MessageHandlers.ResponseHandler
 {
     public class PlayerConfigureHandler : ResponseHandler<PlayerConfigureResponse>
     {
+        public event Action<Player> PlayerCreated;
         private readonly IClient _client;
         private readonly IParticleFactory _particleFactory;
         private readonly IUIFactory _uiFactory;
@@ -39,6 +41,7 @@ namespace Networking.MessageHandlers.ResponseHandler
                 response.PlaceDistance,
                 response.ItemIds, response.Speed, response.JumpHeight, response.Health);
             _particleFactory.CreateWeatherParticle(_client.Data.MapName, player.BodyOrientation);
+            PlayerCreated?.Invoke(player);
         }
     }
 }

@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace UI
 {
-    public class MatchMenu : Window
+    public class MatchMenu : MonoBehaviour
     {
         [SerializeField]
         private Button backButton;
@@ -73,16 +73,6 @@ namespace UI
                 mapName.SetText(configure.Item1);
                 mapImage.texture = configure.Item2.image;
             }
-        }
-
-        private void OnEnable()
-        {
-            ShowCursor();
-        }
-
-        private void OnDisable()
-        {
-            HideCursor();
         }
 
         private void OnDestroy()

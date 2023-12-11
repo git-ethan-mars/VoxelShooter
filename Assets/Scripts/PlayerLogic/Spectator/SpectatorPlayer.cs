@@ -1,4 +1,3 @@
-using Data;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.Storage;
 using Mirror;
@@ -10,12 +9,14 @@ namespace PlayerLogic.Spectator
     public class SpectatorPlayer : NetworkBehaviour
     {
         private const float DistanceToPlayer = 5.0f;
+
+        public SpectatorRotation Rotation { get; private set; }
+
         private IInputService _inputService;
         private NetworkIdentity _target;
         private Vector3 _staticMapPosition;
         private bool _messageSent;
         private IServer _server;
-        private SpectatorRotation _rotation;
         private Camera _camera;
         private bool _isInitialized;
 
@@ -24,8 +25,7 @@ namespace PlayerLogic.Spectator
             _inputService = inputService;
             _camera = Camera.main;
             MountCamera();
-            var sensitivity = storageService.Load<MouseSettingsData>(Constants.MouseSettingKey).GeneralSensitivity;
-            _rotation = new SpectatorRotation(transform, sensitivity);
+            Rotation = new SpectatorRotation(transform, storageService);
             _isInitialized = true;
         }
 
@@ -36,7 +36,7 @@ namespace PlayerLogic.Spectator
                 return;
             }
 
-            _rotation.Rotate(_inputService.MouseAxis);
+            Rotation.Rotate(_inputService.MouseAxis);
         }
 
         public override void OnStopLocalPlayer()

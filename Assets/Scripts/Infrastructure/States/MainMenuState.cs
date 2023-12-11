@@ -20,6 +20,7 @@ namespace Infrastructure.States
 
         public void Enter()
         {
+            Cursor.lockState = CursorLockMode.None;
             _sceneLoader.Load(MainMenu, EnterLoadLevel);
         }
 

@@ -1,4 +1,5 @@
-﻿using Infrastructure.AssetManagement;
+﻿using System;
+using Infrastructure.AssetManagement;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.PlayerDataLoader;
 using Infrastructure.Services.StaticData;
@@ -7,6 +8,7 @@ using Infrastructure.States;
 using Networking;
 using PlayerLogic;
 using UI;
+using UI.InGameUI;
 using UI.SettingsMenu;
 using UnityEngine;
 
@@ -22,9 +24,10 @@ namespace Infrastructure.Factory
         private const string ScoreboardPath = "Prefabs/UI/Scoreboard";
         private const string LoadingWindowPath = "Prefabs/UI/LoadingWindow";
         private const string SettingsMenuPath = "Prefabs/UI/SettingsMenu";
+        private const string InGameMenuPath = "Prefabs/UI/InGameMenu";
+        private const string InGameUIPath = "Prefabs/UI/InGameUI";
         private readonly IAssetProvider _assets;
         private readonly IStaticDataService _staticData;
-
 
         public UIFactory(IAssetProvider assets, IStaticDataService staticData)
         {
@@ -35,16 +38,9 @@ namespace Infrastructure.Factory
         public Hud CreateHud(Player player, IInputService inputService)
         {
             var hud = _assets.Instantiate(HudPath).GetComponent<Hud>();
-            hud.Construct(inputService);
             hud.healthCounter.Construct(player);
             hud.palette.Construct(inputService);
             return hud;
-        }
-
-        public void CreateChooseClassMenu(IClient client, IInputService inputService)
-        {
-            _assets.Instantiate(ChooseClassMenuPath).GetComponent<ChooseClassMenu>()
-                .Construct(client, inputService);
         }
 
         public GameObject CreateMainMenu(GameStateMachine gameStateMachine)
@@ -54,6 +50,11 @@ namespace Infrastructure.Factory
             return mainMenu;
         }
 
+        public void CreateLoadingWindow(IClient client)
+        {
+            _assets.Instantiate(LoadingWindowPath).GetComponent<LoadingWindow>().Construct(client);
+        }
+
         public GameObject CreateMatchMenu(GameStateMachine gameStateMachine, IMapRepository mapRepository)
         {
             var matchMenu = _assets.Instantiate(MatchMenuPath);
@@ -61,27 +62,48 @@ namespace Infrastructure.Factory
             return matchMenu;
         }
 
-        public void CreateTimeCounter(IClient client, IInputService inputService)
-        {
-            _assets.Instantiate(TimeCounterPath).GetComponent<TimeCounter>().Construct(client, inputService);
-        }
-
-        public void CreateScoreboard(IClient client, IInputService inputService, IAvatarLoader avatarLoader)
-        {
-            _assets.Instantiate(ScoreboardPath).GetComponent<Scoreboard>()
-                .Construct(client, inputService, avatarLoader);
-        }
-
-        public void CreateLoadingWindow(IClient client)
-        {
-            _assets.Instantiate(LoadingWindowPath).GetComponent<LoadingWindow>().Construct(client);
-        }
-
-        public GameObject CreateSettingsMenu(GameStateMachine gameStateMachine, IStorageService storageService)
+        public GameObject CreateSettingsMenu(IStorageService storageService, Action onBackButtonPressed)
         {
             var settingsMenu = _assets.Instantiate(SettingsMenuPath);
-            settingsMenu.GetComponent<SettingsMenu>().Construct(gameStateMachine, storageService);
+            settingsMenu.GetComponent<SettingsMenu>().Construct(storageService, onBackButtonPressed);
             return settingsMenu;
+        }
+
+        public void CreateInGameUI(GameStateMachine gameStateMachine, CustomNetworkManager networkManager,
+            IInputService inputService, IStorageService storageService,
+            IAvatarLoader avatarLoader)
+        {
+            _assets.Instantiate(InGameUIPath).GetComponent<InGameUI>()
+                .Construct(gameStateMachine, networkManager, this, storageService, inputService, avatarLoader);
+        }
+
+        public ChooseClassMenu CreateChooseClassMenu(Transform parent)
+        {
+            var chooseClassMenu = _assets.Instantiate(ChooseClassMenuPath, parent).GetComponent<ChooseClassMenu>();
+            chooseClassMenu.Construct();
+            return chooseClassMenu;
+        }
+
+        public Scoreboard CreateScoreBoard(Transform parent, CustomNetworkManager networkManager,
+            IAvatarLoader avatarLoader)
+        {
+            var scoreboard = _assets.Instantiate(ScoreboardPath, parent).GetComponent<Scoreboard>();
+            scoreboard.Construct(networkManager, avatarLoader);
+            return scoreboard;
+        }
+
+        public TimeCounter CreateTimeCounter(Transform parent, CustomNetworkManager networkManager)
+        {
+            var timeCounter = _assets.Instantiate(TimeCounterPath, parent).GetComponent<TimeCounter>();
+            timeCounter.Construct(networkManager);
+            return timeCounter;
+        }
+
+        public InGameMenu CreateInGameMenu(Transform parent)
+        {
+            var inGameMenu = _assets.Instantiate(InGameMenuPath, parent).GetComponent<InGameMenu>();
+            inGameMenu.Construct();
+            return inGameMenu;
         }
     }
 }
