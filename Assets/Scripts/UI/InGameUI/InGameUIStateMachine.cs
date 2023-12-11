@@ -45,7 +45,6 @@ namespace UI.InGameUI
             _currentState?.Exit();
             _currentState = _states[typeof(T)];
             _currentState.Enter();
-            Debug.Log(typeof(T).ToString());
         }
 
         public void Destroy()

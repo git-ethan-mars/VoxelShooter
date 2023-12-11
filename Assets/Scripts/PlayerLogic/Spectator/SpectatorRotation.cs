@@ -6,7 +6,7 @@ namespace PlayerLogic.Spectator
 {
     public class SpectatorRotation
     {
-        private const float SensitivityMultiplier = 100.0f;
+        private const float SensitivityMultiplier = 50.0f;
 
         private readonly IStorageService _storageService;
         private readonly Transform _spectator;
