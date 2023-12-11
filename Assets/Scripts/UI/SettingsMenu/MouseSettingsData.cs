@@ -1,8 +1,8 @@
 using Newtonsoft.Json;
 
-namespace Data
+namespace UI.SettingsMenu
 {
-    public class MouseSettingsData
+    public class MouseSettingsData : ISettingsData
     {
         public readonly float GeneralSensitivity;
         public readonly float AimSensitivity;

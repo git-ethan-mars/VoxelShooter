@@ -1,8 +1,8 @@
 using Newtonsoft.Json;
 
-namespace Data
+namespace UI.SettingsMenu
 {
-    public class VolumeSettingsData
+    public class VolumeSettingsData : ISettingsData
     {
         public readonly int MasterVolume;
         public readonly int MusicVolume;

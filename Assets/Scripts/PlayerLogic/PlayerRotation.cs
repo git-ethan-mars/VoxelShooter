@@ -1,4 +1,8 @@
 using System;
+using CameraLogic;
+using Data;
+using Infrastructure.Services.Storage;
+using UI.SettingsMenu;
 using UnityEngine;
 
 namespace PlayerLogic
@@ -7,20 +11,30 @@ namespace PlayerLogic
     {
         private const float SensitivityMultiplier = 100.0f;
 
-        public float Sensitivity { get; set; }
+        private readonly IStorageService _storageService;
+        private readonly ZoomService _zoomService;
+        private float Sensitivity => _zoomService.IsZoomed ? _aimSensitivity : _generalSensitivity;
+
+        private float _generalSensitivity;
+        private float _aimSensitivity;
 
         private readonly Transform _headPivot;
         private readonly Transform _bodyOrientation;
 
-
         private float _xRotation;
         private float _yRotation;
 
-        public PlayerRotation(Transform bodyOrientation, Transform headPivot, float sensitivity)
+        public PlayerRotation(IStorageService storageService, ZoomService zoomService, Transform bodyOrientation,
+            Transform headPivot)
         {
+            _storageService = storageService;
+            _zoomService = zoomService;
+            var mouseSettings = _storageService.Load<MouseSettingsData>(Constants.MouseSettingsKey);
+            _generalSensitivity = mouseSettings.GeneralSensitivity;
+            _aimSensitivity = mouseSettings.AimSensitivity;
+            _storageService.DataSaved += OnMouseSettingsChanged;
             _bodyOrientation = bodyOrientation;
             _headPivot = headPivot;
-            Sensitivity = sensitivity;
         }
 
         public void Rotate(Vector2 direction)
@@ -32,6 +46,22 @@ namespace PlayerLogic
             _xRotation = Math.Clamp(_xRotation, -90, 90);
             _bodyOrientation.rotation = Quaternion.Euler(0, _yRotation, 0);
             _headPivot.rotation = Quaternion.Euler(_xRotation, _yRotation, 0);
+        }
+
+        public void OnDestroy()
+        {
+            _storageService.DataSaved -= OnMouseSettingsChanged;
+        }
+
+        private void OnMouseSettingsChanged(object data)
+        {
+            if (data is not MouseSettingsData mouseSettingsData)
+            {
+                return;
+            }
+
+            _generalSensitivity = mouseSettingsData.GeneralSensitivity;
+            _aimSensitivity = mouseSettingsData.AimSensitivity;
         }
     }
 }

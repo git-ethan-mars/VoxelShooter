@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using CameraLogic;
 using Data;
 using Infrastructure;
 using Infrastructure.Factory;
@@ -62,9 +63,12 @@ namespace PlayerLogic
         [SerializeField]
         private AudioData stepAudioData;
 
-        private Camera _mainCamera;
+        public ZoomService ZoomService { get; private set; }
         public bool IsInitialized { get; private set; }
 
+
+        private Camera _mainCamera;
+        
         private IInputService _inputService;
         private InventorySystem _inventory;
         private Hud _hud;
@@ -88,11 +92,11 @@ namespace PlayerLogic
             _inputService = inputService;
             _speed = speed;
             _jumpHeight = jumpHeight;
-            var sensitivity = storageService.Load<MouseSettingsData>(Constants.MouseSettingsKey).GeneralSensitivity;
-            _rotation = new PlayerRotation(bodyOrientation, headPivot, sensitivity);
-            _hud = uiFactory.CreateHud(this, inputService);
             _mainCamera = Camera.main;
-            _inventory = new InventorySystem(_inputService, staticData, meshFactory, storageService, itemIds, _hud,
+            ZoomService = new ZoomService(_mainCamera);
+            _rotation = new PlayerRotation(storageService ,ZoomService, bodyOrientation, headPivot);
+            _hud = uiFactory.CreateHud(this, inputService);
+            _inventory = new InventorySystem(_inputService, staticData, meshFactory, itemIds, _hud,
                 this);
             TurnOffNickName();
             TurnOffBodyRender();
@@ -183,11 +187,12 @@ namespace PlayerLogic
             cameraTransform.SetParent(cameraMountPoint.transform);
             cameraTransform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
         }
-
+        
         public override void OnStopLocalPlayer()
         {
             _mainCamera.transform.SetParent(null);
-            _inventory.Clear();
+            _inventory.OnDestroy();
+            _rotation.OnDestroy();
             Destroy(_hud.gameObject);
         }
     }

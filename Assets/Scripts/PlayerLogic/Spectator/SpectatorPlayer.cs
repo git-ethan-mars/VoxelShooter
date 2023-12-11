@@ -1,4 +1,3 @@
-using Data;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.Storage;
 using Mirror;
@@ -24,8 +23,7 @@ namespace PlayerLogic.Spectator
             _inputService = inputService;
             _camera = Camera.main;
             MountCamera();
-            var sensitivity = storageService.Load<MouseSettingsData>(Constants.MouseSettingsKey).GeneralSensitivity;
-            _rotation = new SpectatorRotation(transform, sensitivity);
+            _rotation = new SpectatorRotation(transform, storageService);
             _isInitialized = true;
         }
 
@@ -42,6 +40,7 @@ namespace PlayerLogic.Spectator
         public override void OnStopLocalPlayer()
         {
             _camera.transform.SetParent(null);
+            _rotation.OnDestroy();
         }
 
         private void MountCamera()

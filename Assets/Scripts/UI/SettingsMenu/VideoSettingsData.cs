@@ -1,9 +1,9 @@
 using Newtonsoft.Json;
 using UnityEngine;
 
-namespace Data
+namespace UI.SettingsMenu
 {
-    public class VideoSettingsData
+    public class VideoSettingsData : ISettingsData
     {
         public readonly Resolution Resolution;
         public readonly FullScreenMode ScreenMode;

@@ -73,13 +73,22 @@ namespace UI.SettingsMenu
             _menuStateMachine.SwitchState<MouseSettingsState>();
         }
 
+        private void OnEnable()
+        {
+            _menuStateMachine?.SwitchState<MouseSettingsState>();
+        }
+
+        private void OnDisable()
+        {
+            _menuStateMachine?.Reset();
+        }
+
         private void OnDestroy()
         {
             mouseSectionButton.onClick.RemoveListener(_menuStateMachine.SwitchState<MouseSettingsState>);
             volumeSectionButton.onClick.RemoveListener(_menuStateMachine.SwitchState<VolumeSettingsState>);
             videoSectionButton.onClick.RemoveListener(_menuStateMachine.SwitchState<VideoSettingsState>);
             backButton.onClick.RemoveListener(new UnityAction(_onBackButtonPressed));
-            _menuStateMachine.Clear();
         }
     }
 }

@@ -1,9 +1,7 @@
 using CameraLogic;
 using Data;
-using Infrastructure.Services.Storage;
 using PlayerLogic;
 using UI;
-using UnityEngine;
 
 namespace Inventory.RangeWeapon
 {
@@ -11,16 +9,16 @@ namespace Inventory.RangeWeapon
     {
         public IInventoryItemModel ItemModel => _rangeWeaponModel;
         public IInventoryItemView ItemView => _rangeWeaponView;
-        private readonly IInventoryInput _inventoryInput;
         private readonly RangeWeaponModel _rangeWeaponModel;
         private readonly RangeWeaponView _rangeWeaponView;
+        private readonly IInventoryInput _inventoryInput;
 
 
-        public RangeWeaponState(IInventoryInput inventoryInput, IStorageService storageService, RayCaster rayCaster,
-            RangeWeaponItem configure, RangeWeaponData data, Camera camera, Player player, Hud hud)
+        public RangeWeaponState(IInventoryInput inventoryInput, RayCaster rayCaster,
+            RangeWeaponItem configure, RangeWeaponData data, Player player, Hud hud)
         {
             _inventoryInput = inventoryInput;
-            _rangeWeaponModel = new RangeWeaponModel(storageService, rayCaster, camera, configure, data, player);
+            _rangeWeaponModel = new RangeWeaponModel(rayCaster, configure, data, player);
             _rangeWeaponView = new RangeWeaponView(configure, data, hud);
         }
 
