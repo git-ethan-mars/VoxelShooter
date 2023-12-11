@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Fall damage configuration
   m_EditorClassIdentifier: 
   minSpeedToDamage: 14
-  damageMultiplier: 5
+  damagePerMetersPerSecond: 5

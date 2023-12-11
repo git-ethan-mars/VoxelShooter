@@ -13,10 +13,10 @@ namespace Networking.ServerServices
         private readonly IServer _server;
         private IEnumerator _coroutine;
         private readonly ICoroutineRunner _coroutineRunner;
-        private Dictionary<NetworkConnectionToClient, float> _fallSpeedDictionary = new();
+        private readonly Dictionary<NetworkConnectionToClient, float> _speedByConnection = new();
         private readonly FallDamageData _fallDamageData;
 
-        public FallDamageService(Server server, ICoroutineRunner coroutineRunner)
+        public FallDamageService(IServer server, ICoroutineRunner coroutineRunner)
         {
             _server = server;
             _coroutineRunner = coroutineRunner;
@@ -41,36 +41,26 @@ namespace Networking.ServerServices
                 foreach (var connection in _server.Data.ClientConnections)
                 {
                     if (!connection.identity) continue;
-                    if (!_fallSpeedDictionary.ContainsKey(connection))
-                        _fallSpeedDictionary[connection] = 0;
+                    if (!_speedByConnection.ContainsKey(connection))
+                        _speedByConnection[connection] = 0;
                     else
                     {
-                        var result = connection.identity.gameObject.TryGetComponent<Player>(out var player);
+                        var result = connection.identity.TryGetComponent<Player>(out var player);
+                        var velocity = player.Rigidbody.velocity.y;
                         if (!result) continue;
-                        if (IsGrounded(player.Rigidbody, player.HitBox) 
-                            && _fallSpeedDictionary[connection] < -Constants.Epsilon
-                            && player.Rigidbody.velocity.y > -Constants.Epsilon
-                            && player.Rigidbody.velocity.y < Constants.Epsilon)
+                        if (_speedByConnection[connection] < -_fallDamageData.minSpeedToDamage 
+                            && Mathf.Abs(velocity) < Constants.Epsilon)
                         {
-                            if (_fallSpeedDictionary[connection] < -_fallDamageData.minSpeedToDamage)
-                                _server.Damage(connection, connection, 
-                                    (int)(-(_fallSpeedDictionary[connection] + _fallDamageData.minSpeedToDamage) * _fallDamageData.damageMultiplier));
-                            _fallSpeedDictionary[connection] = 0;
+                            _server.Damage(connection, connection,
+                                (int)(-(_speedByConnection[connection] + _fallDamageData.minSpeedToDamage) *
+                                      _fallDamageData.damagePerMetersPerSecond));
                         }
-                        _fallSpeedDictionary[connection] = player.Rigidbody.velocity.y;
+                        _speedByConnection[connection] = velocity;
                     }
                 }
 
                 yield return new WaitForFixedUpdate();
             }
-        }
-        
-        private bool IsGrounded(Rigidbody rigidbody, CapsuleCollider hitBox)
-        {
-            var isGrounded = Physics.CheckBox(rigidbody.position + hitBox.height / 2 * Vector3.down,
-                new Vector3(hitBox.radius / 2, Constants.Epsilon, hitBox.radius / 2),
-                Quaternion.identity, Constants.buildMask);
-            return isGrounded;
         }
     }
 }

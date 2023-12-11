@@ -153,6 +153,7 @@ namespace Networking
         public void Damage(NetworkConnectionToClient source, NetworkConnectionToClient receiver, int totalDamage)
         {
             var result = Data.TryGetPlayerData(receiver, out var playerData);
+            Debug.Log(11111111);
             if (!result || !playerData.IsAlive) return;
             playerData.Health -= totalDamage;
             if (playerData.Health <= 0)

@@ -8,7 +8,7 @@ namespace Data
         [Header("Minimal speed to damage")]
         public int minSpeedToDamage;
 
-        [Header("Damage multiplier")]
-        public int damageMultiplier;
+        [Header("Damage per meters per second")]
+        public int damagePerMetersPerSecond;
     }
 }
