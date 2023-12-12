@@ -17,7 +17,7 @@ namespace PlayerLogic
 {
     public class Player : NetworkBehaviour
     {
-        public ObservableVariable<int> Health;
+        public ObservableVariable<int> Health { get; private set; }
         public float PlaceDistance { get; private set; }
 
         public PlayerRotation Rotation => _rotation;

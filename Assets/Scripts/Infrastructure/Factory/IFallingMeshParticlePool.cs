@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using Infrastructure.Services;
 using UnityEngine;

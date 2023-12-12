@@ -12,6 +12,7 @@ using Mirror;
 using Networking.MessageHandlers.RequestHandlers;
 using Networking.Messages.Responses;
 using Networking.ServerServices;
+using PlayerLogic;
 using PlayerLogic.States;
 using Steamworks;
 using UnityEngine;
@@ -46,6 +47,7 @@ namespace Networking
         private readonly HitHandler _hitHandler;
         private readonly AuthenticationHandler _authenticationHandler;
         private readonly FallDamageService _fallDamageService;
+        private readonly IAssetProvider _assets;
 
         public Server(CustomNetworkManager customNetworkManager, IStaticDataService staticData,
             ServerSettings serverSettings, IAssetProvider assets, IGameFactory gameFactory,
@@ -59,6 +61,7 @@ namespace Networking
             _entityPositionValidator = new EntityPositionValidator(mapUpdater, MapProvider);
             _spawnPointService =
                 new SpawnPointService(MapProvider, gameFactory, entityFactory, _entityPositionValidator);
+            _assets = assets;
             _playerFactory = new PlayerFactory(assets, _spawnPointService);
             Data = new ServerData(staticData);
             _serverTimer = new ServerTimer(customNetworkManager, serverSettings.MaxDuration);

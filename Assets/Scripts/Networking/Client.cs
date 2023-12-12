@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Data;
 using Generators;
+using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
@@ -16,6 +17,7 @@ using PlayerLogic.Spectator;
 using UI.SettingsMenu;
 using UnityEngine;
 using Environment = MapLogic.Environment;
+using Object = UnityEngine.Object;
 
 namespace Networking
 {
@@ -73,6 +75,7 @@ namespace Networking
         private readonly CustomNetworkManager _customNetworkManager;
         private readonly IGameFactory _gameFactory;
         private readonly IMeshFactory _meshFactory;
+        private readonly IAssetProvider _assets;
         private readonly IStorageService _storageService;
         private readonly GameStateMachine _stateMachine;
         private readonly MapNameHandler _mapNameHandler;
@@ -98,12 +101,13 @@ namespace Networking
             IGameFactory gameFactory,
             IMeshFactory meshFactory,
             IStaticDataService staticData,
-            IParticleFactory particleFactory, IUIFactory uiFactory)
+            IParticleFactory particleFactory, IUIFactory uiFactory, IAssetProvider assets)
         {
             _stateMachine = stateMachine;
             _customNetworkManager = customNetworkManager;
             _gameFactory = gameFactory;
             _meshFactory = meshFactory;
+            _assets = assets;
             _storageService = storageService;
             var fallingMeshParticlePool = new FallingMeshParticlePool(gameFactory, particleFactory);
             FallMeshGenerator = new FallMeshGenerator(meshFactory, fallingMeshParticlePool);
@@ -135,9 +139,26 @@ namespace Networking
             MapDownloaded += OnMapDownloaded;
             AudioListener.volume = _storageService.Load<VolumeSettingsData>(Constants.VolumeSettingsKey).MasterVolume;
             _storageService.DataSaved += OnDataSaved;
+            NetworkClient.RegisterPrefab(_assets.Load<GameObject>(PlayerPath.MainPlayerPath), SpawnHandler,
+                UnspawnHandler);
             RegisterHandlers();
             Data.State = ClientState.Connecting;
         }
+
+        GameObject SpawnHandler(SpawnMessage msg)
+        {
+            Debug.Log("Spawn");
+            return Object.Instantiate(_assets.Load<GameObject>(PlayerPath.MainPlayerPath), msg.position,
+                msg.rotation);
+        }
+
+        // used by NetworkClient.RegisterPrefab
+        void UnspawnHandler(GameObject spawned)
+        {
+            Debug.Log("Destroy");
+            Object.Destroy(spawned);
+        }
+
 
         public void Stop()
         {

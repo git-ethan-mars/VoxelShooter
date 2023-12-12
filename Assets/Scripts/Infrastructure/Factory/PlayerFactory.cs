@@ -6,9 +6,6 @@ namespace Infrastructure.Factory
 {
     public class PlayerFactory : IPlayerFactory
     {
-        private const string PlayerPath = "Prefabs/Player";
-        private const string SpectatorPlayerPath = "Prefabs/Spectator player";
-
         private readonly IAssetProvider _assets;
         private readonly SpawnPointService _spawnPointService;
 
@@ -20,13 +17,13 @@ namespace Infrastructure.Factory
 
         public GameObject CreatePlayer()
         {
-            var player = _assets.Instantiate(PlayerPath, _spawnPointService.GetSpawnPosition(), Quaternion.identity);
+            var player = _assets.Instantiate(PlayerPath.MainPlayerPath, _spawnPointService.GetSpawnPosition(), Quaternion.identity);
             return player;
         }
 
         public GameObject CreateSpectatorPlayer(Vector3 deathPosition)
         {
-            var spectator = _assets.Instantiate(SpectatorPlayerPath, deathPosition, Quaternion.identity);
+            var spectator = _assets.Instantiate(PlayerPath.SpectatorPlayerPath, deathPosition, Quaternion.identity);
             return spectator;
         }
     }
