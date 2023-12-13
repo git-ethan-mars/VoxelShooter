@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using Data;
 using Entities;
@@ -275,7 +274,12 @@ namespace Networking
 
         private void RespawnPlayer(NetworkConnectionToClient connection)
         {
-            var playerData = Data.GetPlayerData(connection);
+            var result = Data.TryGetPlayerData(connection, out var playerData);
+            if (!result)
+            {
+                return;
+            }
+
             playerData.PlayerStateMachine.Enter<LifeState>();
             var player = _playerFactory.CreatePlayer(_spawnPointService.GetSpawnPosition());
             ReplacePlayer(connection, player);
@@ -295,7 +299,15 @@ namespace Networking
 
             var oldPlayer = connection.identity.gameObject;
             NetworkServer.ReplacePlayerForConnection(connection, newPlayer, true);
-            _networkManager.StartCoroutine(Utils.DoActionAfterDelay(() => NetworkServer.Destroy(oldPlayer), 0.1f));
+            _networkManager.StartCoroutine(Utils.DoActionAfterDelay(() => DestroyPlayer(oldPlayer), 0.1f));
+        }
+
+        private void DestroyPlayer(GameObject oldPlayer)
+        {
+            if (oldPlayer != null)
+            {
+                NetworkServer.Destroy(oldPlayer);
+            }
         }
     }
 }
