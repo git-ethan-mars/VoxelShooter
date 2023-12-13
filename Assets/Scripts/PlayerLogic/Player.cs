@@ -19,8 +19,10 @@ namespace PlayerLogic
     {
         public ObservableVariable<int> Health { get; private set; }
         public float PlaceDistance { get; private set; }
-
-        public PlayerRotation Rotation => _rotation;
+        public PlayerRotation Rotation { get; private set; }
+        public ZoomService ZoomService { get; private set; }
+        public PlayerAudio Audio { get; private set; }
+        public bool IsInitialized { get; private set; }
 
         [SerializeField]
         private TextMeshProUGUI nickNameText;
@@ -47,13 +49,11 @@ namespace PlayerLogic
         [SerializeField]
         private Transform cameraMountPoint;
 
-        public CapsuleCollider HitBox => hitBox;
-        
         [SerializeField]
         private CapsuleCollider hitBox;
 
         public Rigidbody Rigidbody => rigidbody;
-        
+
         [SerializeField]
         private new Rigidbody rigidbody;
 
@@ -66,52 +66,53 @@ namespace PlayerLogic
         [SerializeField]
         private AudioData stepAudioData;
 
-        public ZoomService ZoomService { get; private set; }
-        public bool IsInitialized { get; private set; }
-        public PlayerAudio Audio { get; private set; }
-
-        private Camera _mainCamera;
-
+        private IUIFactory _uiFactory;
+        private IMeshFactory _meshFactory;
         private IInputService _inputService;
+        private IStorageService _storageService;
+        private IStaticDataService _staticData;
+
         private InventorySystem _inventory;
+        private Camera _mainCamera;
         private Hud _hud;
 
         private PlayerMovement _movement;
         private float _speed;
         private float _jumpHeight;
 
-        private PlayerRotation _rotation;
 
-        public void Construct(IUIFactory uiFactory, IMeshFactory meshFactory, IInputService inputService,
-            IStorageService storageService,
-            IStaticDataService staticData,
-            float placeDistance,
-            List<int> itemIds, float speed, float jumpHeight, int health)
+        public void Construct(IInputService inputService, IStorageService storageService, IStaticDataService staticData,
+            IUIFactory uiFactory,
+            IMeshFactory meshFactory)
+        {
+            _uiFactory = uiFactory;
+            _meshFactory = meshFactory;
+            _inputService = inputService;
+            _storageService = storageService;
+            _staticData = staticData;
+            _movement = new PlayerMovement(hitBox, rigidbody, bodyOrientation);
+            var volumeSettings = storageService.Load<VolumeSettingsData>(Constants.VolumeSettingsKey);
+            Audio = new PlayerAudio(stepAudio, stepAudioData, continuousAudio);
+            Audio.ChangeSoundMultiplier(volumeSettings.SoundVolume);
+            storageService.DataSaved += OnDataSaved;
+        }
+
+        public void ConstructLocalPlayer(float placeDistance, List<int> itemIds, float speed, float jumpHeight,
+            int health)
         {
             PlaceDistance = placeDistance;
             Health = new ObservableVariable<int>(health);
-            _inputService = inputService;
             _speed = speed;
             _jumpHeight = jumpHeight;
             _mainCamera = Camera.main;
             ZoomService = new ZoomService(_mainCamera);
-            _rotation = new PlayerRotation(storageService, ZoomService, bodyOrientation, headPivot);
-            _hud = uiFactory.CreateHud(this, inputService);
-            _inventory = new InventorySystem(_inputService, staticData, meshFactory, itemIds, _hud,
-                this);
-            var volumeSettings = storageService.Load<VolumeSettingsData>(Constants.VolumeSettingsKey);
-            Audio ??= new PlayerAudio(stepAudio, stepAudioData, continuousAudio);
-            Audio.ChangeSoundMultiplier(volumeSettings.SoundVolume);
+            Rotation = new PlayerRotation(_storageService, ZoomService, bodyOrientation, headPivot);
+            _hud = _uiFactory.CreateHud(this, _inputService);
+            _inventory = new InventorySystem(_inputService, _staticData, _meshFactory, itemIds, _hud, this);
             TurnOffNickName();
             TurnOffBodyRender();
             MountCamera();
             IsInitialized = true;
-        }
-
-        private void Start()
-        {
-            Audio ??= new PlayerAudio(stepAudio, stepAudioData, continuousAudio);
-            _movement = new PlayerMovement(hitBox, rigidbody, bodyOrientation);
         }
 
         private void Update()
@@ -126,19 +127,19 @@ namespace PlayerLogic
                 {
                     Audio.DisableStepSound();
                 }
-
-                return;
             }
-
-            _movement.Move(_inputService.Axis, _speed);
-
-            if (_inputService.IsJumpButtonDown())
+            else
             {
-                _movement.Jump(_jumpHeight);
-            }
+                _movement.Move(_inputService.Axis, _speed);
 
-            _rotation.Rotate(_inputService.MouseAxis);
-            _inventory.Update();
+                if (_inputService.IsJumpButtonDown())
+                {
+                    _movement.Jump(_jumpHeight);
+                }
+
+                Rotation.Rotate(_inputService.MouseAxis);
+                _inventory.Update();
+            }
         }
 
         private void FixedUpdate()
@@ -192,11 +193,24 @@ namespace PlayerLogic
             cameraTransform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
         }
 
+        public override void OnStopClient()
+        {
+            _storageService.DataSaved -= OnDataSaved;
+        }
+
         public override void OnStopLocalPlayer()
         {
             _mainCamera.transform.SetParent(null);
             _inventory.OnDestroy();
             Destroy(_hud.gameObject);
+        }
+
+        private void OnDataSaved(ISettingsData data)
+        {
+            if (data is VolumeSettingsData volumeSetting)
+            {
+                Audio.ChangeSoundMultiplier(volumeSetting.SoundVolume);
+            }
         }
     }
 }
