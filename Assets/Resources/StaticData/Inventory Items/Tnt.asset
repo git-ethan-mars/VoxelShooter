@@ -19,7 +19,8 @@ MonoBehaviour:
   countIcon: {fileID: 2038079468, guid: e7634cc0bf7762649a525e59875cd9d1, type: 3}
   count: 6
   delayInSeconds: 3
-  radius: 7
-  damage: 200
+  radius: 5
+  damage: 250
   particlesSpeed: 6
-  particlesCount: 70
+  particlesCount: 200
+  explosionSound: {fileID: 11400000, guid: 9eebc9c80e42edd4f94203f43574c8b4, type: 2}

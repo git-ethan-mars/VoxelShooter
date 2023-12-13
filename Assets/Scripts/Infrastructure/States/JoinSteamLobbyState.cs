@@ -27,9 +27,8 @@ namespace Infrastructure.States
 
         private void OnLoaded()
         {
-            var networkManager = _gameFactory.CreateSteamNetworkManager(_stateMachine, null, false)
-                .GetComponent<CustomNetworkManager>();
-            _uiFactory.CreateLoadingWindow(networkManager);
+            var networkManager = _gameFactory.CreateSteamNetworkManager(_stateMachine, null, false);
+            _uiFactory.CreateLoadingWindow(networkManager.Client);
         }
 
         public void Exit()

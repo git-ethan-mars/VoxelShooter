@@ -1,21 +1,39 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Data;
-using UnityEngine;
+using Infrastructure.AssetManagement;
 
 namespace Infrastructure.Services.StaticData
 {
     public class StaticDataService : IStaticDataService
     {
         private const string Default = "Default";
+        private const string InventoryItemsPath = "StaticData/Inventory Items";
+        private const string InventoriesPath = "StaticData/Inventories";
+        private const string PlayerCharacteristicsPath = "StaticData/Player Characteristics";
+        private const string MapConfiguresPath = "StaticData/Map configures";
+        private const string LobbyBalancePath = "StaticData/Lobby Balance";
+        private const string BlockHealthBalancePath = "StaticData/Block Health";
+        private const string SoundPath = "StaticData/Audio Data";
+        private const string FallDamageConfigPath = "StaticData/Fall damage configuration";
+        private readonly IAssetProvider _assets;
         private Dictionary<GameClass, PlayerCharacteristic> _playerCharacteristicByClass;
         private Dictionary<GameClass, GameInventory> _inventoryByClass;
         private Dictionary<int, InventoryItem> _itemById;
         private Dictionary<string, MapConfigure> _mapConfigureByName;
+        private List<AudioData> _audios;
+        private LobbyBalance _lobbyBalance;
+        private BlockHealthBalance _blockHealthBalance;
+        private FallDamageData _fallDamageData;
+
+        public StaticDataService(IAssetProvider assets)
+        {
+            _assets = assets;
+        }
 
         public void LoadItems()
         {
-            _itemById = Resources.LoadAll<InventoryItem>("StaticData/Inventory Items").ToDictionary(x => x.id, x => x);
+            _itemById = _assets.LoadAll<InventoryItem>(InventoryItemsPath).ToDictionary(x => x.id, x => x);
         }
 
         public InventoryItem GetItem(int id)
@@ -25,7 +43,7 @@ namespace Infrastructure.Services.StaticData
 
         public void LoadInventories()
         {
-            _inventoryByClass = Resources.LoadAll<GameInventory>("StaticData/Inventories")
+            _inventoryByClass = _assets.LoadAll<GameInventory>(InventoriesPath)
                 .ToDictionary(x => x.gameClass, x => x);
         }
 
@@ -36,7 +54,7 @@ namespace Infrastructure.Services.StaticData
 
         public void LoadPlayerCharacteristics()
         {
-            _playerCharacteristicByClass = Resources.LoadAll<PlayerCharacteristic>("StaticData/Player Characteristics")
+            _playerCharacteristicByClass = _assets.LoadAll<PlayerCharacteristic>(PlayerCharacteristicsPath)
                 .ToDictionary(x => x.gameClass, x => x);
         }
 
@@ -47,7 +65,7 @@ namespace Infrastructure.Services.StaticData
 
         public void LoadMapConfigures()
         {
-            _mapConfigureByName = Resources.LoadAll<MapConfigure>("StaticData/Map configures")
+            _mapConfigureByName = _assets.LoadAll<MapConfigure>(MapConfiguresPath)
                 .ToDictionary(configure => configure.name, configure => configure);
         }
 
@@ -58,9 +76,63 @@ namespace Infrastructure.Services.StaticData
                 : GetDefaultMapConfigure();
         }
 
+        public void LoadLobbyBalance()
+        {
+            _lobbyBalance = _assets.Load<LobbyBalance>(LobbyBalancePath);
+        }
+
+        public LobbyBalance GetLobbyBalance()
+        {
+            return _lobbyBalance;
+        }
+
+        public void LoadBlockHealthBalance()
+        {
+            _blockHealthBalance = _assets.Load<BlockHealthBalance>(BlockHealthBalancePath);
+        }
+
+        public BlockHealthBalance GetBlockHealthBalance()
+        {
+            return _blockHealthBalance;
+        }
+
         private MapConfigure GetDefaultMapConfigure()
         {
             return _mapConfigureByName[Default];
+        }
+
+        public void LoadSounds()
+        {
+            _audios = _assets.LoadAll<AudioData>(SoundPath).ToList();
+        }
+
+        public AudioData GetAudio(int soundId)
+        {
+            return _audios[soundId];
+        }
+
+        public int GetAudioIndex(AudioData audio)
+        {
+            var index = 0;
+            for (var i = 0; i < _audios.Count; i++)
+            {
+                if (_audios[i] == audio)
+                {
+                    index = i;
+                }
+            }
+
+            return index;
+        }
+        
+        public void LoadFallDamageConfiguration()
+        {
+            _fallDamageData = _assets.Load<FallDamageData>(FallDamageConfigPath);
+        }
+        
+        public FallDamageData GetFallDamageConfiguration()
+        {
+            return _fallDamageData;
         }
     }
 }

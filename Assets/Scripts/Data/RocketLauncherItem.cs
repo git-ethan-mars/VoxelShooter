@@ -12,6 +12,8 @@ namespace Data
         public int speed;
         public int particlesSpeed;
         public int particlesCount;
+        public AudioData explosionSound;
+        public AudioData reloadSound;
 
         public void Awake()
         {

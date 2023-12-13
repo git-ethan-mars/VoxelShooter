@@ -50,11 +50,18 @@ namespace MapLogic
                 globalPosition.z % ChunkData.ChunkSize);
         }
 
-        public bool IsValidPosition(Vector3Int globalPosition)
+        public bool IsInsideMap(int x, int y, int z)
         {
-            return !(globalPosition.x < 0 || globalPosition.x >= MapData.Width || globalPosition.y <= 0 ||
-                     globalPosition.y >= MapData.Height ||
-                     globalPosition.z < 0 || globalPosition.z >= MapData.Depth);
+            return x >= 0 && x < MapData.Width &&
+                   y >= 0 && y < MapData.Height &&
+                   z >= 0 && z < MapData.Depth;
+        }
+
+        public bool IsDestructiblePosition(Vector3Int position)
+        {
+            return position.x >= 0 && position.x < MapData.Width &&
+                   position.y > 0 && position.y < MapData.Height &&
+                   position.z >= 0 && position.z < MapData.Depth;
         }
 
         public int GetChunkCount()
@@ -62,5 +69,7 @@ namespace MapLogic
             return MapData.Width / ChunkData.ChunkSize * MapData.Height / ChunkData.ChunkSize * MapData.Depth /
                    ChunkData.ChunkSize;
         }
+
+        public int BlockCount => MapData.Width * MapData.Height * MapData.Depth;
     }
 }

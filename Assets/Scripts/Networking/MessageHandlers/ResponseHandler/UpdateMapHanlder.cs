@@ -2,15 +2,14 @@
 using Data;
 using Networking.ClientServices;
 using Networking.Messages.Responses;
-using UnityEngine;
 
 namespace Networking.MessageHandlers.ResponseHandler
 {
     public class UpdateMapHandler : ResponseHandler<UpdateMapResponse>
     {
-        private readonly Client _client;
+        private readonly IClient _client;
 
-        public UpdateMapHandler(Client client)
+        public UpdateMapHandler(IClient client)
         {
             _client = client;
         }
@@ -20,28 +19,30 @@ namespace Networking.MessageHandlers.ResponseHandler
             _client.Data.BufferToUpdateMap.Add(message);
             if (_client.Data.State == ClientState.Connecting)
                 return;
-            var dataByChunkIndex = new Dictionary<int, List<(Vector3Int, BlockData)>>();
+            var blocksByChunkIndex = new Dictionary<int, List<BlockDataWithPosition>>();
             for (var i = 0; i < _client.Data.BufferToUpdateMap.Count; i++)
             {
-                for (var j = 0; j < _client.Data.BufferToUpdateMap[i].Positions.Length; j++)
+                for (var j = 0; j < _client.Data.BufferToUpdateMap[i].Blocks.Length; j++)
                 {
                     var chunkIndex =
-                        _client.MapProvider.GetChunkNumberByGlobalPosition(_client.Data.BufferToUpdateMap[i]
-                            .Positions[j]);
-                    if (!dataByChunkIndex.ContainsKey(chunkIndex))
+                        _client.MapProvider.GetChunkNumberByGlobalPosition(_client.Data.BufferToUpdateMap[i].Blocks[j]
+                            .Position);
+                    if (!blocksByChunkIndex.ContainsKey(chunkIndex))
                     {
-                        dataByChunkIndex[chunkIndex] = new List<(Vector3Int, BlockData)>();
+                        blocksByChunkIndex[chunkIndex] = new List<BlockDataWithPosition>();
                     }
 
                     var localPosition =
-                        _client.MapProvider.GetLocalPositionByGlobal(_client.Data.BufferToUpdateMap[i].Positions[j]);
-                    dataByChunkIndex[chunkIndex].Add((localPosition, _client.Data.BufferToUpdateMap[i].BlockData[j]));
+                        _client.MapProvider.GetLocalPositionByGlobal(_client.Data.BufferToUpdateMap[i].Blocks[j]
+                            .Position);
+                    blocksByChunkIndex[chunkIndex].Add(new BlockDataWithPosition(localPosition,
+                        _client.Data.BufferToUpdateMap[i].Blocks[j].BlockData));
                 }
             }
 
-            foreach (var (chunkIndex, data) in dataByChunkIndex)
+            foreach (var (chunkIndex, blocks) in blocksByChunkIndex)
             {
-                _client.MapGenerator.ChunkGenerators[chunkIndex].SpawnBlocks(data);
+                _client.MapGenerator.ChunkGenerators[chunkIndex].SpawnBlocks(blocks);
             }
 
             _client.Data.BufferToUpdateMap.Clear();

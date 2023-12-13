@@ -2,15 +2,15 @@
 
 namespace Networking.Messages.Responses
 {
-    public struct ReloadResponse : NetworkMessage
+    public struct ReloadResultResponse : NetworkMessage
     {
-        public readonly int WeaponId;
+        public readonly int SlotIndex;
         public readonly int TotalBullets;
         public readonly int BulletsInMagazine;
 
-        public ReloadResponse(int weaponId, int totalBullets, int bulletsInMagazine)
+        public ReloadResultResponse(int slotIndex, int totalBullets, int bulletsInMagazine)
         {
-            WeaponId = weaponId;
+            SlotIndex = slotIndex;
             TotalBullets = totalBullets;
             BulletsInMagazine = bulletsInMagazine;
         }

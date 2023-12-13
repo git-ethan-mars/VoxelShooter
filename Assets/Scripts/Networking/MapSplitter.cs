@@ -1,14 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Mirror;
 using Networking.Messages.Responses;
-using UnityEngine;
 
 namespace Networking
 {
-    public class MapSplitter : MessageSplitter<DownloadMapResponse, byte>
+    public class MapSplitter
     {
-        public override DownloadMapResponse[] SplitBytesIntoMessages(byte[] blocks, int maxPacketSize)
+        public DownloadMapResponse[] SplitBytesIntoMessages(byte[] blocks, int maxPacketSize)
         {
             var messages = new List<DownloadMapResponse>();
             for (var i = 0; i < blocks.Length; i += maxPacketSize)
@@ -22,14 +20,14 @@ namespace Networking
             return messages.ToArray();
         }
 
-        public override IEnumerator SendMessages(DownloadMapResponse[] messages, NetworkConnectionToClient destination,
-            float delayInSeconds)
+        public void SendMessages(DownloadMapResponse[] messages, NetworkConnectionToClient destination)
         {
             for (var i = 0; i < messages.Length; i++)
             {
                 destination.Send(messages[i]);
-                yield return new WaitForSeconds(delayInSeconds);
             }
+
+            NetworkServer.SetClientReady(destination);
         }
     }
 }

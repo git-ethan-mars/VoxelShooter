@@ -181,7 +181,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_AdditionalShaderChannelsFlag: 25
+  m_AdditionalShaderChannelsFlag: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -239,6 +239,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   joinMatchButton: {fileID: 6574665460549933866}
   createMatchButton: {fileID: 6574665460197726164}
+  settingButton: {fileID: 6574665458850848070}
   exitButton: {fileID: 6574665460306759942}
 --- !u!1 &6574665459184950057
 GameObject:

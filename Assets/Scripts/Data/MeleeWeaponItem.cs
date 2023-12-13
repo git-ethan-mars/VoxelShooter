@@ -23,10 +23,8 @@ namespace Data
         public bool hasStrongHit;
         
         [Header("Audio")]
-        public AudioClip diggingAudioClip;
-        [Range(0, 1)] public float diggingVolume;
-        public AudioClip hitAudioClip;
-        [Range(0, 1)] public float hitVolume;
+        public AudioData diggingAudio;
+        public AudioData hittingAudio;
         
         private void Awake()
         {

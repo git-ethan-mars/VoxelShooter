@@ -5,7 +5,9 @@ using Generators;
 using Infrastructure;
 using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
+using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
+using Infrastructure.Services.Storage;
 using MapLogic;
 using Optimization;
 using UnityEditor;
@@ -165,7 +167,8 @@ namespace MapCustomizer
 
         public GameObject CreateSpawnPoint(Vector3Int position)
         {
-            var spawnPoint = _instance._entityFactory.CreateSpawnPoint(position, spawnPointsContainer.transform);
+            var spawnPoint = _instance._entityFactory.CreateSpawnPoint(position, spawnPointsContainer.transform)
+                .gameObject;
             spawnPoint.AddComponent<PositionAligner>();
             return spawnPoint;
         }
@@ -173,12 +176,17 @@ namespace MapCustomizer
         private void InitializeFactories()
         {
             var assets = new AssetProvider();
+            var storageService = new JsonToFileStorageService();
             _instance._entityFactory = new EntityFactory(assets);
-            _instance._staticData = new StaticDataService();
-            var particleFactory = new ParticleFactory(assets, this);
+            _instance._staticData = new StaticDataService(assets);
+            var particleFactory = new ParticleFactory(assets, _instance._staticData, this);
             _instance._meshFactory = new MeshFactory(assets);
+            var uiFactory = new UIFactory(assets, _staticData);
+            var inputService = new StandaloneInputService();
             _instance._gameFactory =
-                new GameFactory(assets, _entityFactory, _staticData, particleFactory, _meshFactory);
+                new GameFactory(assets, inputService, storageService, _entityFactory, _staticData, particleFactory,
+                    _meshFactory,
+                    uiFactory);
         }
 
         private void LoadConfigure()

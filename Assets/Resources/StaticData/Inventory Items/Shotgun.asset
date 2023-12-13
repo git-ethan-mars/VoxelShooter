@@ -19,8 +19,8 @@ MonoBehaviour:
   ammoIcon: {fileID: 2005296590, guid: e7634cc0bf7762649a525e59875cd9d1, type: 3}
   isAutomatic: 0
   timeBetweenShooting: 0.8
-  baseRecoil: 0.03
-  stepRecoil: 1
+  baseRecoil: 0.3
+  stepRecoil: 0.05
   resetTimeRecoil: 1
   range: 50
   reloadTime: 3
@@ -33,7 +33,5 @@ MonoBehaviour:
   chestMultiplier: 1
   legMultiplier: 0.8
   armMultiplier: 0.6
-  shootingAudioClip: {fileID: 8300000, guid: 6fccd7e7c2e3f15418aa226445563722, type: 3}
-  shootingVolume: 1
-  reloadingAudioClip: {fileID: 8300000, guid: 5abd4b18501572e449d9c2ef3308d7ea, type: 3}
-  reloadingVolume: 1
+  shootingSound: {fileID: 11400000, guid: 70f5226e6c01b5143b978a59a9ea5437, type: 2}
+  reloadingSound: {fileID: 11400000, guid: ef3a03c99631c06448a01180f47ffe17, type: 2}

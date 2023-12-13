@@ -1,105 +1,92 @@
-using Data;
-using Infrastructure.Services;
-using Infrastructure.Services.Input;
-using Mirror;
-using Networking.Synchronization;
+using System;
 using UnityEngine;
 
 namespace PlayerLogic
 {
-    public class PlayerMovement : NetworkBehaviour
+    public class PlayerMovement
     {
-        [SyncVar] private float _speed;
-        [SyncVar] private float _jumpMultiplier;
-        private CharacterController _characterController;
-        private IInputService _inputService;
-        private Vector3 _movementDirection;
-        private float _jumpSpeed;
-        private const float Gravity = -30f;
-        private float _speedModifier = 1f;
-        private const float NormalSpeed = 1f;
-        private const float SneakingSpeed = 0.7f;
-        private const float SquattingSpeed = 0.4f;
-        private const float SquattingSize = 0.5f;
-        private float _stayingHeight;
-        private float _squattingHeight;
-        private Vector3 _stayingColliderCenter;
-        private Vector3 _squattingColliderCenter;
+        private const float AccelerationTime = 0.3f;
+        private const float GravityScale = 3;
 
-        public void Construct(PlayerCharacteristic characteristic)
+        private static readonly Vector3 HorizontalMask = new(1, 0, 1);
+
+        private float _speed;
+        private float _jumpHeight;
+
+        private readonly Rigidbody _rigidbody;
+        private readonly Transform _bodyOrientation;
+        private readonly CapsuleCollider _hitBox;
+
+        private Vector3 _desiredDirection;
+        private bool _jumpRequested;
+        private bool _shouldResetHorizontalVelocity;
+
+        public PlayerMovement(CapsuleCollider hitBox, Rigidbody rigidbody, Transform bodyOrientation)
         {
-            _speed = characteristic.speed;
-            _jumpMultiplier = characteristic.jumpMultiplier;
+            _hitBox = hitBox;
+            _rigidbody = rigidbody;
+            _bodyOrientation = bodyOrientation;
         }
 
-        private void Awake()
+        public void Move(Vector2 direction, float speed)
         {
-            _inputService = AllServices.Container.Single<IInputService>();
-        }
-
-        public void Start()
-        {
-            _characterController = GetComponent<CharacterController>();
-            _stayingHeight = _characterController.height;
-            _squattingHeight = _stayingHeight - SquattingSize;
-            _stayingColliderCenter = _characterController.center;
-            _squattingColliderCenter = new Vector3(_stayingColliderCenter.x,
-                _stayingColliderCenter.y - SquattingSize / 2, _stayingColliderCenter.z);
-        }
-
-        private void Update()
-        {
-            if (!isLocalPlayer) return;
-            HandleSneaking();
-            HandleSquatting();
-            
-            var axis = _inputService.Axis;
-            var playerTransform = transform;
-            _movementDirection = (axis.x * playerTransform.forward + axis.y * playerTransform.right).normalized;
-            if (_characterController.isGrounded)
+            var horizontalDirection = (direction.x * _bodyOrientation.forward + direction.y * _bodyOrientation.right)
+                .normalized;
+            if (Vector3.Dot(_desiredDirection, horizontalDirection) <= 0)
             {
-                _jumpSpeed = 0;
-                if (_inputService.IsJumpButtonDown())
+                _shouldResetHorizontalVelocity = true;
+            }
+
+            _desiredDirection = horizontalDirection;
+            _speed = speed;
+        }
+
+        public void Jump(float jumpHeight)
+        {
+            _jumpRequested = true;
+            _jumpHeight = jumpHeight;
+        }
+
+        public Vector3 GetHorizontalVelocity()
+        {
+            return Vector3.Scale(HorizontalMask, _rigidbody.velocity);
+        }
+
+        public void FixedUpdate()
+        {
+            if (IsGrounded())
+            {
+                if (_jumpRequested)
                 {
-                    _jumpSpeed = _jumpMultiplier;
+                    _rigidbody.AddForce(Mathf.Sqrt(-2 * GravityScale * Physics.gravity.y * _jumpHeight) * Vector3.up,
+                        ForceMode.Impulse);
                 }
             }
+            else
+            {
+                _rigidbody.AddForce(GravityScale * Physics.gravity);
+            }
 
-            _jumpSpeed += Gravity * Time.deltaTime;
-            Vector3 direction = new Vector3(_movementDirection.x * _speed * _speedModifier * Time.deltaTime,
-                _jumpSpeed * Time.deltaTime,
-                _movementDirection.z * Time.deltaTime * _speed * _speedModifier);
-            _characterController.Move(direction);
+            _rigidbody.AddForce(-GetHorizontalVelocity() / Time.deltaTime);
+
+            if (!_shouldResetHorizontalVelocity)
+            {
+                _rigidbody.AddForce(_desiredDirection * GetHorizontalVelocity().magnitude / Time.deltaTime);
+                _rigidbody.AddForce(
+                    Math.Min((_speed - GetHorizontalVelocity().magnitude) / Time.deltaTime,
+                        _speed / AccelerationTime) * _desiredDirection);
+            }
+
+            _jumpRequested = false;
+            _shouldResetHorizontalVelocity = false;
         }
 
-        private void HandleSneaking()
+        public bool IsGrounded()
         {
-            if (Input.GetKeyDown(KeyCode.LeftShift))
-            {
-                _speedModifier = SneakingSpeed;
-            }
-
-            if (Input.GetKeyUp(KeyCode.LeftShift))
-            {
-                _speedModifier = NormalSpeed;
-            }
-        }
-
-        private void HandleSquatting()
-        {
-            if (Input.GetKeyDown(KeyCode.LeftControl))
-            {
-                _speedModifier = SquattingSpeed;
-                _characterController.height = _squattingHeight;
-                _characterController.center = _squattingColliderCenter;
-            }
-
-            if (Input.GetKeyUp(KeyCode.LeftControl))
-            {
-                _speedModifier = NormalSpeed;
-                _characterController.height = _stayingHeight;
-                _characterController.center = _stayingColliderCenter;
-            }
+            var isGrounded = Physics.CheckBox(_rigidbody.position + _hitBox.height / 2 * Vector3.down,
+                new Vector3(_hitBox.radius / 2, Constants.Epsilon, _hitBox.radius / 2),
+                Quaternion.identity, Constants.buildMask);
+            return isGrounded;
         }
     }
 }

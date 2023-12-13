@@ -1,8 +1,8 @@
 ﻿using Data;
 using Entities;
 using Infrastructure.AssetManagement;
-using MapLogic;
 using Mirror;
+using Networking;
 using Networking.ServerServices;
 using UnityEngine;
 
@@ -11,11 +11,6 @@ namespace Infrastructure.Factory
     public class EntityFactory : IEntityFactory
     {
         private readonly IAssetProvider _assets;
-        private const string TntPath = "Prefabs/SpawningTnt";
-        private const string GrenadePath = "Prefabs/SpawningGrenade";
-        private const string RocketPath = "Prefabs/Rocket";
-        private const string TombstonePath = "Prefabs/Tombstone";
-        private const string SpawnPointPath = "Prefabs/Spawnpoint";
 
         public EntityFactory(IAssetProvider assets)
         {
@@ -24,38 +19,59 @@ namespace Infrastructure.Factory
 
         public GameObject CreateTnt(Vector3 position, Quaternion rotation)
         {
-            var tnt = _assets.Instantiate(TntPath, position, rotation);
+            var tnt = _assets.Instantiate(EntityPath.TntPath, position, rotation);
             NetworkServer.Spawn(tnt);
             return tnt;
         }
 
         public GameObject CreateGrenade(Vector3 position, Quaternion rotation)
         {
-            var grenade = _assets.Instantiate(GrenadePath, position, rotation);
+            var grenade = _assets.Instantiate(EntityPath.GrenadePath, position, rotation);
             NetworkServer.Spawn(grenade);
             return grenade;
         }
 
         public GameObject CreateTombstone(Vector3 position)
         {
-            var tombstone = _assets.Instantiate(TombstonePath, position, Quaternion.identity);
+            var tombstone = _assets.Instantiate(EntityPath.TombstonePath, position, Quaternion.identity);
             NetworkServer.Spawn(tombstone);
             return tombstone;
         }
 
-        public GameObject CreateRocket(Vector3 position, Quaternion rotation, MapProvider mapProvider,
-            MapUpdater mapUpdater,
-            IParticleFactory particleFactory, RocketLauncherItem rocketData, NetworkConnectionToClient owner, MapDestructionAlgorithm mapDestructionAlgorithm)
+        public GameObject CreateRocket(Vector3 position, Quaternion rotation, IServer server,
+            IParticleFactory particleFactory, RocketLauncherItem rocketData, NetworkConnectionToClient owner,
+            AudioService audioService)
         {
-            var rocket = _assets.Instantiate(RocketPath, position, rotation);
-            rocket.GetComponent<Rocket>().Construct(mapProvider, mapUpdater, rocketData, owner, particleFactory, mapDestructionAlgorithm);
+            var rocket = _assets.Instantiate(EntityPath.RocketPath, position, rotation);
+            rocket.GetComponent<Rocket>().Construct(server, rocketData, owner, particleFactory, audioService);
             NetworkServer.Spawn(rocket);
             return rocket;
         }
-
-        public GameObject CreateSpawnPoint(Vector3 position, Transform parent)
+        
+        public LootBox CreateAmmoBox(Vector3 position, Transform parent)
         {
-            return _assets.Instantiate(SpawnPointPath, position, Quaternion.identity, parent);
+            var lootBox = _assets.Instantiate(EntityPath.AmmoBoxPath, position, Quaternion.identity, parent);
+            NetworkServer.Spawn(lootBox);
+            return lootBox.GetComponent<LootBox>();
+        }
+        
+        public LootBox CreateHealthBox(Vector3 position, Transform parent)
+        {
+            var lootBox = _assets.Instantiate(EntityPath.HealthBoxPath, position, Quaternion.identity, parent);
+            NetworkServer.Spawn(lootBox);
+            return lootBox.GetComponent<LootBox>();
+        }
+        
+        public LootBox CreateBlockBox(Vector3 position, Transform parent)
+        {
+            var lootBox = _assets.Instantiate(EntityPath.BlockBoxPath, position, Quaternion.identity, parent);
+            NetworkServer.Spawn(lootBox);
+            return lootBox.GetComponent<LootBox>();
+        }
+        
+        public SpawnPoint CreateSpawnPoint(Vector3 position, Transform parent)
+        {
+            return _assets.Instantiate(EntityPath.SpawnPointPath, position, Quaternion.identity, parent).GetComponent<SpawnPoint>();
         }
     }
 }

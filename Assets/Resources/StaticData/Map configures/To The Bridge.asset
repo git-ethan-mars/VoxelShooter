@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e69f3dcd48464cac84150e2016cff25a, type: 3}
+  m_Name: To The Bridge
+  m_EditorClassIdentifier: 
+  image: {fileID: 2800000, guid: 61fea502dfc7ea841a8b6d76b0b22b12, type: 3}
+  waterColor:
+    serializedVersion: 2
+    rgba: 4287052291
+  innerColor:
+    serializedVersion: 2
+    rgba: 4281283929
+  lightData:
+    position: {x: 0, y: 0, z: 0}
+    rotation: {x: -0.24343291, y: -0.37222832, z: 0.10183013, w: -0.8898411}
+    color: {r: 1, g: 1, b: 1, a: 1}
+  skyboxMaterial: {fileID: 2100000, guid: 20d4f77b9022eab48b4d94599ed4bf82, type: 2}
+  ambientMode: 0
+  skyColor: {r: 0.21176471, g: 0.22745098, b: 0.25882354, a: 1}
+  equatorColor: {r: 0.11372549, g: 0.1254902, b: 0.13333334, a: 1}
+  groundColor: {r: 0.047058824, g: 0.043137256, b: 0.03529412, a: 1}
+  ambientIntensity: 1
+  isFogActivated: 0
+  fogMode: 1
+  fogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  fogStartDistance: 0
+  fogEndDistance: 300
+  fogDensity: 0.01
+  spawnPoints:
+  - position: {x: 125, y: 21, z: 159}
+  - position: {x: 114, y: 18, z: 25}
+  - position: {x: 204, y: 16, z: 56}
+  - position: {x: 277, y: 15, z: 27}
+  - position: {x: 385, y: 10, z: 104}
+  - position: {x: 403, y: 9, z: 208}
+  - position: {x: 237, y: 15, z: 309}
+  - position: {x: 378, y: 10, z: 433}
+  - position: {x: 218, y: 24, z: 461}
+  - position: {x: 128, y: 13, z: 419}
+  - position: {x: 74, y: 20, z: 384}

@@ -1,11 +1,10 @@
-﻿using Mirror;
+﻿using UnityEngine;
 
 namespace Infrastructure.Factory
 {
     public interface IPlayerFactory
     {
-        void CreatePlayer(NetworkConnectionToClient connection);
-        void CreateSpectatorPlayer(NetworkConnectionToClient connection);
-        void RespawnPlayer(NetworkConnectionToClient connection);
+        GameObject CreatePlayer();
+        GameObject CreateSpectatorPlayer(Vector3 deathPosition);
     }
 }

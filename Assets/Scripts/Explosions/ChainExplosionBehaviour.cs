@@ -1,34 +1,40 @@
 using System.Collections.Generic;
 using System.Linq;
 using Infrastructure.Factory;
-using MapLogic;
 using Mirror;
 using Networking;
-using Networking.ServerServices;
 using UnityEngine;
 
 namespace Explosions
 {
     public class ChainExplosionBehaviour : ExplosionBehaviour
     {
-        public ChainExplosionBehaviour(MapUpdater mapUpdater, IParticleFactory particleFactory, 
-            IExplosionArea explosionArea, MapDestructionAlgorithm mapDestructionAlgorithm) 
-            : base(mapUpdater, particleFactory, explosionArea, mapDestructionAlgorithm) { }
+        public ChainExplosionBehaviour(IServer server, IParticleFactory particleFactory,
+            IDamageArea damageArea)
+            : base(server, particleFactory, damageArea)
+        {
+        }
 
-        public override void Explode(Vector3Int explosionCenter, GameObject explosive, int radius, 
-            NetworkConnectionToClient connection, int damage, int particlesSpeed, 
+        public override void Explode(Vector3Int explosionCenter, GameObject explosive, int radius,
+            NetworkConnectionToClient connection, int damage, int particlesSpeed,
             int particlesCount, List<GameObject> exploded, string explosiveTag)
         {
             exploded.Add(explosive);
-            DestroyExplosiveWithBlocks(explosionCenter, explosive, radius, particlesSpeed, particlesCount);
+            DestroyExplosiveWithBlocks(explosionCenter, explosive, radius, particlesSpeed, particlesCount, damage);
             Collider[] hitColliders = Physics.OverlapSphere(explosionCenter, radius);
             foreach (var hitCollider in hitColliders)
             {
                 if (hitCollider.CompareTag(explosiveTag) && exploded.All(x => x.gameObject != hitCollider.gameObject))
+                {
                     Explode(Vector3Int.FloorToInt(hitCollider.gameObject.transform.position),
                         hitCollider.gameObject, radius, connection, damage, particlesSpeed,
                         particlesCount, exploded, explosiveTag);
-                DamagePlayer(hitCollider, explosionCenter, radius, damage, particlesSpeed, connection);
+                }
+
+                if (hitCollider.CompareTag("Player"))
+                {
+                    DamagePlayer(hitCollider.gameObject, explosionCenter, radius, damage, connection);
+                }
             }
         }
     }

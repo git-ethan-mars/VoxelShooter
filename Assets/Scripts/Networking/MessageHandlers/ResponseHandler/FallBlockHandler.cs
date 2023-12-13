@@ -4,16 +4,16 @@ namespace Networking.MessageHandlers.ResponseHandler
 {
     public class FallBlockHandler : ResponseHandler<FallBlockResponse>
     {
-        private readonly Client _client;
+        private readonly IClient _client;
 
-        public FallBlockHandler(Client client)
+        public FallBlockHandler(IClient client)
         {
             _client = client;
         }
 
         protected override void OnResponseReceived(FallBlockResponse message)
         {
-            _client.FallMeshGenerator.GenerateFallBlocks(message.Positions, message.Colors);
+            _client.FallMeshGenerator.GenerateFallBlocks(message.Blocks);
         }
     }
 }

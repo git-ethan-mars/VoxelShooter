@@ -1,30 +1,41 @@
-﻿using System;
-using Data;
+﻿using Data;
 using UnityEngine;
 
 namespace Entities
 {
-    public class SpawnPoint : PushableObject
+    public class SpawnPoint : MonoBehaviour, IPushable
     {
-        public event Action<SpawnPointData, SpawnPointData> PositionUpdated;
-        private SpawnPointData _data;
+        [SerializeField]
+        private new Collider collider;
+
+        public SpawnPointData Data { get; private set; }
+
+        private Vector3Int _size;
+        public Vector3Int Center => Vector3Int.FloorToInt(transform.position);
+        public Vector3Int Min => new(-_size.x / 2, -_size.y / 2, -_size.z / 2);
+        public Vector3Int Max => new(_size.x / 2, _size.y / 2, _size.z / 2);
 
         public void Construct(SpawnPointData data)
         {
-            _data = data;
+            Data = data;
+            _size = Vector3Int.RoundToInt(collider.bounds.size);
         }
 
-        public override void Push()
+        public void Push()
         {
-            var previousData = _data;
             transform.position += Vector3.up;
-            _data = new SpawnPointData(Center);
-            PositionUpdated?.Invoke(previousData, _data);
+            Data.position = Center;
         }
 
-        public override void Fall()
+        public void Fall()
         {
             transform.position += Vector3.down;
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireCube(transform.position, _size);
         }
     }
 }

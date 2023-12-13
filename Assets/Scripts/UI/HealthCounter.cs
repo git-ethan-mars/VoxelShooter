@@ -6,17 +6,26 @@ namespace UI
 {
     public class HealthCounter : MonoBehaviour
     {
-        [SerializeField] private TextMeshProUGUI healthText;
-        
-        public void Construct(GameObject player)
+        [SerializeField]
+        private TextMeshProUGUI healthText;
+
+        private Player _player;
+
+        public void Construct(Player player)
         {
-            player.GetComponent<Player>().OnHealthChanged += OnHealthChanged; 
-            OnHealthChanged(player.GetComponent<Player>().health);
+            _player = player;
+            healthText.SetText(_player.Health.Value.ToString());
+            _player.Health.ValueChanged += OnHealthChanged;
         }
 
         private void OnHealthChanged(int currentHealth)
         {
             healthText.SetText(currentHealth.ToString());
+        }
+
+        private void OnDestroy()
+        {
+            _player.Health.ValueChanged -= OnHealthChanged;
         }
     }
 }

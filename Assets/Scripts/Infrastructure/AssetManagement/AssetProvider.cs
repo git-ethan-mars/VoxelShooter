@@ -16,9 +16,9 @@ namespace Infrastructure.AssetManagement
             return objects;
         }
 
-        public GameObject Instantiate(GameObject prefab, Transform itemPosition)
+        public void Instantiate(GameObject prefab, Transform parent)
         {
-            return Object.Instantiate(prefab, itemPosition);
+            Object.Instantiate(prefab, parent);
         }
 
         public GameObject Instantiate(string path)

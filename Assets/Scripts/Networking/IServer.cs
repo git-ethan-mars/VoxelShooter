@@ -3,25 +3,24 @@ using MapLogic;
 using Mirror;
 using Networking.ServerServices;
 using Steamworks;
-using UnityEngine;
 
 namespace Networking
 {
     public interface IServer
     {
         MapProvider MapProvider { get; }
-        ServerData ServerData { get; }
-        MapUpdater MapUpdater { get; }
-        MapDestructionAlgorithm MapDestructionAlgorithm { get; }
-        void AddKill(NetworkConnectionToClient source, NetworkConnectionToClient receiver);
+        ServerData Data { get; }
+        BlockHealthSystem BlockHealthSystem { get; }
 
-        void AddPlayer(NetworkConnectionToClient connection, GameClass chosenClass, CSteamID steamID,
+        void AddPlayer(NetworkConnectionToClient connection, CSteamID steamID,
             string nickname);
 
         void ChangeClass(NetworkConnectionToClient connection, GameClass chosenClass);
         void DeletePlayer(NetworkConnectionToClient connection);
-        void CreateSpawnPoints(Transform parent);
-        void RegisterHandlers();
-        void UnregisterHandlers();
+        void Damage(NetworkConnectionToClient source, NetworkConnectionToClient receiver, int totalDamage);
+        void Heal(NetworkConnectionToClient receiver, int totalHeal);
+        void SendCurrentServerState(NetworkConnectionToClient connection);
+        void Start();
+        void Stop();
     }
 }

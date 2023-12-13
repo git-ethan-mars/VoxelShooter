@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using Infrastructure.Factory;
 using Infrastructure.Services;
+using Infrastructure.Services.Input;
+using Infrastructure.Services.PlayerDataLoader;
 using Infrastructure.Services.StaticData;
+using Infrastructure.Services.Storage;
 
 namespace Infrastructure.States
 {
@@ -11,17 +14,18 @@ namespace Infrastructure.States
         private readonly Dictionary<Type, IExitableState> _states;
         private IExitableState _activeState;
 
-        public GameStateMachine(SceneLoader sceneLoader, ICoroutineRunner coroutineRunner, AllServices allServices,
-            bool isLocalBuild)
+        public GameStateMachine(SceneLoader sceneLoader, ICoroutineRunner coroutineRunner, AllServices allServices)
         {
             _states = new Dictionary<Type, IExitableState>
             {
                 [typeof(BootstrapState)] =
-                    new BootstrapState(this, sceneLoader, allServices, coroutineRunner, isLocalBuild),
+                    new BootstrapState(this, sceneLoader, allServices, coroutineRunner),
                 [typeof(MainMenuState)] =
-                    new MainMenuState(this, sceneLoader, allServices.Single<IUIFactory>(), isLocalBuild),
+                    new MainMenuState(this, sceneLoader, allServices.Single<IUIFactory>()),
+                [typeof(SettingsMenuState)] = new SettingsMenuState(this, allServices.Single<IUIFactory>(),
+                    allServices.Single<IStorageService>()),
                 [typeof(CreateMatchState)] = new CreateMatchState(this, allServices.Single<IMapRepository>(),
-                    allServices.Single<IUIFactory>(), isLocalBuild),
+                    allServices.Single<IUIFactory>()),
                 [typeof(StartSteamLobbyState)] =
                     new StartSteamLobbyState(this, sceneLoader, allServices.Single<IGameFactory>()),
                 [typeof(JoinSteamLobbyState)] = new JoinSteamLobbyState(this, sceneLoader,
@@ -30,7 +34,9 @@ namespace Infrastructure.States
                 [typeof(JoinLocalMatchState)] = new JoinLocalMatchState(this, sceneLoader,
                     allServices.Single<IGameFactory>(), allServices.Single<IUIFactory>()),
                 [typeof(GameLoopState)] =
-                    new GameLoopState(allServices.Single<IUIFactory>(), isLocalBuild)
+                    new GameLoopState(this, allServices.Single<IUIFactory>(), allServices.Single<IInputService>(),
+                        allServices.Single<IStorageService>(),
+                        allServices.Single<IAvatarLoader>())
             };
         }
 

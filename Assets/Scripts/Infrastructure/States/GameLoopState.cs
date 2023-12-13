@@ -1,29 +1,38 @@
 ﻿using Infrastructure.Factory;
+using Infrastructure.Services.Input;
+using Infrastructure.Services.PlayerDataLoader;
+using Infrastructure.Services.Storage;
+using Mirror;
 using Networking;
 
 namespace Infrastructure.States
 {
     public class GameLoopState : IPayloadedState<CustomNetworkManager>
     {
+        private readonly GameStateMachine _gameStateMachine;
         private readonly IUIFactory _uiFactory;
-        private readonly bool _isLocalBuild;
-        
-        public GameLoopState(IUIFactory uiFactory, bool isLocalBuild)
+        private readonly IInputService _inputService;
+        private readonly IStorageService _storageService;
+        private readonly IAvatarLoader _avatarLoader;
+
+        public GameLoopState(GameStateMachine gameStateMachine, IUIFactory uiFactory, IInputService inputService,
+            IStorageService storageService,
+            IAvatarLoader avatarLoader)
         {
+            _gameStateMachine = gameStateMachine;
             _uiFactory = uiFactory;
-            _isLocalBuild = isLocalBuild;
+            _inputService = inputService;
+            _storageService = storageService;
+            _avatarLoader = avatarLoader;
         }
 
         public void Enter(CustomNetworkManager networkManager)
         {
-            _uiFactory.CreateChooseClassMenu(networkManager, _isLocalBuild);
-            _uiFactory.CreateTimeCounter(networkManager);
-            _uiFactory.CreateScoreboard(networkManager);
+            _uiFactory.CreateInGameUI(_gameStateMachine, networkManager, _inputService, _storageService, _avatarLoader);
         }
 
         public void Exit()
         {
         }
-
     }
 }

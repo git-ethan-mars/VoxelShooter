@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using Data;
-using Extensions;
 using Infrastructure.Services.StaticData;
 using UnityEngine;
 
@@ -8,14 +7,10 @@ namespace MapLogic
 {
     public static class MapReader
     {
-        private const string RchExtension = ".rch";
-
-        private const string VxlExtension = ".vxl";
-
         public static MapProvider ReadFromFile(string mapName, IStaticDataService staticData)
         {
-            var rchFilePath = Application.dataPath + $"/Maps/{mapName}" + RchExtension;
-            var vxlFilePath = Application.dataPath + $"/Maps/{mapName}" + VxlExtension;
+            var rchFilePath = Path.Combine(Constants.mapFolderPath, $"{mapName}{Constants.RchExtension}");
+            var vxlFilePath = Path.Combine(Constants.mapFolderPath, $"{mapName}{Constants.VxlExtension}");
             MapProvider mapProvider;
             var mapConfigure = staticData.GetMapConfigure(mapName);
 
@@ -39,7 +34,7 @@ namespace MapLogic
         public static MapData ReadFromStream(Stream stream, MapConfigure mapConfigure)
         {
             stream.Seek(0, SeekOrigin.Begin);
-            var binaryReader = new BinaryReader(stream);
+            using var binaryReader = new BinaryReader(stream);
             var width = binaryReader.ReadInt32();
             var height = binaryReader.ReadInt32();
             var depth = binaryReader.ReadInt32();
@@ -86,21 +81,27 @@ namespace MapLogic
             return mapData;
         }
 
-        public static void AddWater(MapProvider mapProvider)
+        private static void AddWater(MapProvider mapProvider)
         {
             for (var x = 0; x < mapProvider.MapData.Width; x++)
             {
                 for (var z = 0; z < mapProvider.MapData.Depth; z++)
                 {
                     var blocks = mapProvider.MapData.Chunks[mapProvider.GetChunkNumberByGlobalPosition(x, 0, z)].Blocks;
-                    var block = blocks[
+                    var zeroHeightBlock = blocks[
                         (x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
                         (z & (ChunkData.ChunkSize - 1))];
-                    if (!block.Color.IsSolid())
+                    var oneHeightBlock = blocks[
+                        (x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
+                        (1 & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSize +
+                        (z & (ChunkData.ChunkSize - 1))];
+                    if (!zeroHeightBlock.IsSolid())
                     {
                         blocks[(x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
                                (z & (ChunkData.ChunkSize - 1))] = new BlockData(mapProvider.MapData.WaterColor);
                     }
+                    if (oneHeightBlock.IsSolid())
+                        mapProvider.MapData.BoxSpawnLayer.Add(new Vector3Int(x, mapProvider.MapData.Height - 1, z));
                 }
             }
         }

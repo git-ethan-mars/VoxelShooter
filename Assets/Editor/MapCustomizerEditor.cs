@@ -49,6 +49,7 @@ public class MapCustomizerEditor : UnityEditor.Editor
         var imageProperty = _configure.FindProperty("image");
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.ObjectField(imageProperty, new GUIContent(imageProperty.displayName));
+
         if (EditorGUI.EndChangeCheck())
         {
             _configure.ApplyModifiedProperties();
@@ -84,11 +85,23 @@ public class MapCustomizerEditor : UnityEditor.Editor
 
         DrawAmbientProperties();
         DrawFogProperties();
+        DrawWeatherProperty();
         _spawnPoints.DoLayoutList();
         _configure.ApplyModifiedProperties();
         if (EditorUtility.IsDirty(_mapEditorScript.mapConfigure) && GUILayout.Button("Save configure"))
         {
             AssetDatabase.SaveAssets();
+        }
+    }
+
+    private void DrawWeatherProperty()
+    {
+        var weatherProperty = _configure.FindProperty("weather");
+        EditorGUI.BeginChangeCheck();
+        EditorGUILayout.ObjectField(weatherProperty, new GUIContent(weatherProperty.displayName));
+        if (EditorGUI.EndChangeCheck())
+        {
+            _configure.ApplyModifiedProperties();
         }
     }
 

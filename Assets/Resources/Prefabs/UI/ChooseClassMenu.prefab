@@ -1216,7 +1216,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_AdditionalShaderChannelsFlag: 25
+  m_AdditionalShaderChannelsFlag: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -1272,10 +1272,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4e49966de4b69641914c50a8192fee7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canvasGroup: {fileID: 172937459948263850}
   builderButton: {fileID: 3768349693843250709}
   sniperButton: {fileID: 452592361852125138}
   combatantButton: {fileID: 2714429266595045976}
   grenadierButton: {fileID: 7231122801333671136}
+  exitButton: {fileID: 7575343517220128717}
 --- !u!225 &172937459948263850
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -1286,7 +1288,7 @@ CanvasGroup:
   m_Enabled: 1
   m_Alpha: 1
   m_Interactable: 1
-  m_BlocksRaycasts: 1
+  m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
 --- !u!1 &1743774952885865988
 GameObject:

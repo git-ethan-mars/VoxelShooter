@@ -1,81 +1,99 @@
-﻿using Infrastructure.AssetManagement;
+﻿using System;
+using Infrastructure.AssetManagement;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.PlayerDataLoader;
 using Infrastructure.Services.StaticData;
+using Infrastructure.Services.Storage;
 using Infrastructure.States;
-using Inventory;
 using Networking;
+using PlayerLogic;
 using UI;
+using UI.InGameUI;
+using UI.SettingsMenu;
 using UnityEngine;
 
 namespace Infrastructure.Factory
 {
     public class UIFactory : IUIFactory
     {
-        private const string HudPath = "Prefabs/UI/HUD";
-        private const string ChooseClassMenuPath = "Prefabs/UI/ChooseClassMenu";
-        private const string MainMenuPath = "Prefabs/UI/MainMenu";
-        private const string MatchMenuPath = "Prefabs/UI/CreateMatchMenu";
-        private const string TimeCounterPath = "Prefabs/UI/TimeInfo";
-        private const string ScoreboardPath = "Prefabs/UI/Scoreboard";
-        private const string LoadingWindowPath = "Prefabs/UI/LoadingWindow";
         private readonly IAssetProvider _assets;
-        private readonly IInputService _inputService;
         private readonly IStaticDataService _staticData;
-        private readonly IAvatarLoader _avatarLoader;
 
-
-        public UIFactory(IAssetProvider assets, IInputService inputService, IStaticDataService staticData,
-            IAvatarLoader avatarLoader)
+        public UIFactory(IAssetProvider assets, IStaticDataService staticData)
         {
             _assets = assets;
-            _inputService = inputService;
             _staticData = staticData;
-            _avatarLoader = avatarLoader;
         }
 
-        public GameObject CreateHud(GameObject player)
+        public Hud CreateHud(Player player, IInputService inputService)
         {
-            var hud = _assets.Instantiate(HudPath);
-            hud.GetComponent<Hud>().Construct(_inputService);
-            var inventoryController = hud.GetComponent<Hud>().inventory.GetComponent<InventoryController>();
-            inventoryController.Construct(_inputService, _assets, _staticData, hud, player);
-            hud.GetComponent<Hud>().healthCounter.Construct(player);
+            var hud = _assets.Instantiate(UIPath.HudPath).GetComponent<Hud>();
+            hud.healthCounter.Construct(player);
+            hud.palette.Construct(inputService);
             return hud;
         }
 
-        public void CreateChooseClassMenu(CustomNetworkManager networkManager, bool isLocalBuild)
+        public GameObject CreateMainMenu(GameStateMachine gameStateMachine)
         {
-            _assets.Instantiate(ChooseClassMenuPath).GetComponent<ChooseClassMenu>().Construct(networkManager, _inputService, isLocalBuild);
-        }
-
-        public GameObject CreateMainMenu(GameStateMachine gameStateMachine, bool isLocalBuild)
-        {
-            var mainMenu = _assets.Instantiate(MainMenuPath);
-            mainMenu.GetComponent<MainMenu>().Construct(gameStateMachine, isLocalBuild);
+            var mainMenu = _assets.Instantiate(UIPath.MainMenuPath);
+            mainMenu.GetComponent<MainMenu>().Construct(gameStateMachine);
             return mainMenu;
         }
 
-        public GameObject CreateMatchMenu(IMapRepository mapRepository, GameStateMachine gameStateMachine, bool isLocalBuild)
+        public void CreateLoadingWindow(IClient client)
         {
-            var matchMenu = _assets.Instantiate(MatchMenuPath);
-            matchMenu.GetComponent<MatchMenu>().Construct(mapRepository, gameStateMachine, isLocalBuild);
+            _assets.Instantiate(UIPath.LoadingWindowPath).GetComponent<LoadingWindow>().Construct(client);
+        }
+
+        public GameObject CreateMatchMenu(GameStateMachine gameStateMachine, IMapRepository mapRepository)
+        {
+            var matchMenu = _assets.Instantiate(UIPath.MatchMenuPath);
+            matchMenu.GetComponent<MatchMenu>().Construct(mapRepository, _staticData, gameStateMachine);
             return matchMenu;
         }
 
-        public void CreateTimeCounter(CustomNetworkManager networkManager)
+        public GameObject CreateSettingsMenu(IStorageService storageService, Action onBackButtonPressed)
         {
-            _assets.Instantiate(TimeCounterPath).GetComponent<TimeCounter>().Construct(_inputService, networkManager);
+            var settingsMenu = _assets.Instantiate(UIPath.SettingsMenuPath);
+            settingsMenu.GetComponent<SettingsMenu>().Construct(storageService, onBackButtonPressed);
+            return settingsMenu;
         }
 
-        public void CreateScoreboard(CustomNetworkManager networkManager)
+        public void CreateInGameUI(GameStateMachine gameStateMachine, CustomNetworkManager networkManager,
+            IInputService inputService, IStorageService storageService,
+            IAvatarLoader avatarLoader)
         {
-            _assets.Instantiate(ScoreboardPath).GetComponent<Scoreboard>().Construct(_inputService, _avatarLoader, networkManager);
+            _assets.Instantiate(UIPath.InGameUIPath).GetComponent<InGameUI>()
+                .Construct(gameStateMachine, networkManager, this, storageService, inputService, avatarLoader);
         }
 
-        public void CreateLoadingWindow(CustomNetworkManager networkManager)
+        public ChooseClassMenu CreateChooseClassMenu(Transform parent)
         {
-            _assets.Instantiate(LoadingWindowPath).GetComponent<LoadingWindow>().Construct(networkManager);
+            var chooseClassMenu = _assets.Instantiate(UIPath.ChooseClassMenuPath, parent).GetComponent<ChooseClassMenu>();
+            chooseClassMenu.Construct();
+            return chooseClassMenu;
+        }
+
+        public Scoreboard CreateScoreBoard(Transform parent, CustomNetworkManager networkManager,
+            IAvatarLoader avatarLoader)
+        {
+            var scoreboard = _assets.Instantiate(UIPath.ScoreboardPath, parent).GetComponent<Scoreboard>();
+            scoreboard.Construct(networkManager, avatarLoader);
+            return scoreboard;
+        }
+
+        public TimeCounter CreateTimeCounter(Transform parent, CustomNetworkManager networkManager)
+        {
+            var timeCounter = _assets.Instantiate(UIPath.TimeCounterPath, parent).GetComponent<TimeCounter>();
+            timeCounter.Construct(networkManager);
+            return timeCounter;
+        }
+
+        public InGameMenu CreateInGameMenu(Transform parent)
+        {
+            var inGameMenu = _assets.Instantiate(UIPath.InGameMenuPath, parent).GetComponent<InGameMenu>();
+            inGameMenu.Construct();
+            return inGameMenu;
         }
     }
 }
