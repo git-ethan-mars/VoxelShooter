@@ -22,8 +22,8 @@ MonoBehaviour:
   radius: 4
   damage: 150
   maxThrowDuration: 1
-  throwForceModifier: 1000
-  minThrowForce: 300
+  throwForceModifier: 1500
+  minThrowForce: 800
   particlesSpeed: 3
   particlesCount: 30
   explosionSound: {fileID: 11400000, guid: 9eebc9c80e42edd4f94203f43574c8b4, type: 2}
