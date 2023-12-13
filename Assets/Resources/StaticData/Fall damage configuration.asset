@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98335da051da455794d5507905f973ca, type: 3}
   m_Name: Fall damage configuration
   m_EditorClassIdentifier: 
-  minSpeedToDamage: 14
-  damagePerMetersPerSecond: 5
+  minSpeedToDamage: 25
+  damagePerMetersPerSecond: 3

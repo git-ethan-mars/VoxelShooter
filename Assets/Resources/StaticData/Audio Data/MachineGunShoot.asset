@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: MachineGunShoot
   m_EditorClassIdentifier: 
   clip: {fileID: 8300000, guid: a2503e92ee60ee045aad67f54ebe92ec, type: 3}
-  volume: 1
+  volume: 0.8
   minDistance: 0
   maxDistance: 100
