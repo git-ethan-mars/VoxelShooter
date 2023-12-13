@@ -10,14 +10,14 @@ namespace Generators
     public class FallMeshGenerator
     {
         private readonly IMeshFactory _meshFactory;
-        private readonly IFallingMeshParticlePool _fallingMeshFallingMeshParticlePool;
+        private readonly FallingMeshParticlePool _fallingMeshFallingMeshParticlePool;
         private readonly List<Vector3> _vertices;
         private readonly List<int> _triangles;
         private readonly List<Color32> _colors;
         private readonly List<Vector3> _normals;
 
         public FallMeshGenerator(IMeshFactory meshFactory,
-            IFallingMeshParticlePool fallingMeshFallingMeshParticlePool)
+            FallingMeshParticlePool fallingMeshFallingMeshParticlePool)
         {
             _meshFactory = meshFactory;
             _fallingMeshFallingMeshParticlePool = fallingMeshFallingMeshParticlePool;

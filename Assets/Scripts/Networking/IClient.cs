@@ -15,7 +15,6 @@ namespace Networking
         event Action<ServerTime> RespawnTimeChanged;
         event Action<List<ScoreData>> ScoreboardChanged;
         event Action GameFinished;
-        FallMeshGenerator FallMeshGenerator { get; }
         ClientData Data { get; }
         MapProvider MapProvider { get; set; }
         MapGenerator MapGenerator { get; }

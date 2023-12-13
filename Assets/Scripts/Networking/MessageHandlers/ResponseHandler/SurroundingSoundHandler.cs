@@ -11,21 +11,19 @@ namespace Networking.MessageHandlers.ResponseHandler
     public class SurroundingSoundHandler : ResponseHandler<SurroundingSoundResponse>
     {
         private const float Sound3D = 1.0f;
-        
+
         public float SoundMultiplier { get; set; }
 
         private readonly IStaticDataService _staticData;
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly AudioPool _audioPool;
 
-        public SurroundingSoundHandler(IStaticDataService staticData, IStorageService storageService,
-            ICoroutineRunner coroutineRunner,
-            AudioPool audioPool)
+        public SurroundingSoundHandler(CustomNetworkManager networkManager, AudioPool audioPool)
         {
-            _staticData = staticData;
-            _coroutineRunner = coroutineRunner;
+            _staticData = networkManager.StaticData;
+            _coroutineRunner = networkManager;
             _audioPool = audioPool;
-            SoundMultiplier = storageService.Load<VolumeSettingsData>(Constants.VolumeSettingsKey).SoundVolume;
+            SoundMultiplier = networkManager.StorageService.Load<VolumeSettingsData>(Constants.VolumeSettingsKey).SoundVolume;
         }
 
         protected override void OnResponseReceived(SurroundingSoundResponse response)

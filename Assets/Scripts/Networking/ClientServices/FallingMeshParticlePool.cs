@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Networking.ClientServices
 {
-    public class FallingMeshParticlePool : IFallingMeshParticlePool
+    public class FallingMeshParticlePool
     {
         private const int PoolSize = 3000;
         private const string ContainerName = "FallingMeshParticleContainer";

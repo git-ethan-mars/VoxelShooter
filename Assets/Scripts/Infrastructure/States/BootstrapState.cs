@@ -76,11 +76,7 @@ namespace Infrastructure.States
             _allServices.RegisterSingle<IUIFactory>(new UIFactory(_allServices.Single<IAssetProvider>(),
                 _allServices.Single<IStaticDataService>()));
             _allServices.RegisterSingle<IGameFactory>(
-                new GameFactory(_allServices.Single<IAssetProvider>(), _allServices.Single<IInputService>(),
-                    _allServices.Single<IStorageService>(),
-                    _allServices.Single<IEntityFactory>(),
-                    staticData, _allServices.Single<IParticleFactory>(), _allServices.Single<IMeshFactory>(),
-                    _allServices.Single<IUIFactory>()));
+                new GameFactory(_allServices));
         }
     }
 }

@@ -23,7 +23,7 @@ namespace Infrastructure.Factory
         }
 
         public void CreateFallingMesh(MeshData meshData,
-            IFallingMeshParticlePool fallingMeshFallingMeshParticlePool)
+            FallingMeshParticlePool fallingMeshFallingMeshParticlePool)
         {
             var mesh = new Mesh();
             mesh.indexFormat = meshData.IndexFormat;

@@ -16,13 +16,13 @@ namespace Networking.ServerServices
         private readonly IDamageArea _lineDamageArea;
         private readonly AudioService _audioService;
 
-        public MeleeWeaponValidator(IServer server, ICoroutineRunner coroutineRunner, IParticleFactory particleFactory,
+        public MeleeWeaponValidator(IServer server, CustomNetworkManager networkManager,
             AudioService audioService)
         {
             _server = server;
-            _particleFactory = particleFactory;
+            _coroutineRunner = networkManager;
+            _particleFactory = networkManager.ParticleFactory;
             _audioService = audioService;
-            _coroutineRunner = coroutineRunner;
             _lineDamageArea = new LineDamageArea(_server.MapProvider);
         }
 

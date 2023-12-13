@@ -18,12 +18,12 @@ namespace Networking.MessageHandlers.RequestHandlers
         private readonly IEntityFactory _entityFactory;
         private readonly ExplosionBehaviour _chainExplosionBehaviour;
 
-        public TntSpawnHandler(IServer server, ICoroutineRunner coroutineRunner, IEntityFactory entityFactory,
+        public TntSpawnHandler(IServer server, CustomNetworkManager networkManager,
             ExplosionBehaviour chainExplosionBehaviour)
         {
             _server = server;
-            _coroutineRunner = coroutineRunner;
-            _entityFactory = entityFactory;
+            _coroutineRunner = networkManager;
+            _entityFactory = networkManager.EntityFactory;
             _chainExplosionBehaviour = chainExplosionBehaviour;
         }
 

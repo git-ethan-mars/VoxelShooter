@@ -17,14 +17,12 @@ namespace Networking.MessageHandlers.RequestHandlers
         private readonly IParticleFactory _particleFactory;
         private readonly AudioService _audioService;
 
-        public RocketSpawnHandler(IServer server, IStaticDataService staticData,
-            IEntityFactory entityFactory,
-            IParticleFactory particleFactory, AudioService audioService)
+        public RocketSpawnHandler(IServer server, CustomNetworkManager networkManager, AudioService audioService)
         {
             _server = server;
-            _staticData = staticData;
-            _entityFactory = entityFactory;
-            _particleFactory = particleFactory;
+            _staticData = networkManager.StaticData;
+            _entityFactory = networkManager.EntityFactory;
+            _particleFactory = networkManager.ParticleFactory;
             _audioService = audioService;
         }
 

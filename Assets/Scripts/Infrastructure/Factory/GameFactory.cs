@@ -1,5 +1,6 @@
 ﻿using Data;
 using Infrastructure.AssetManagement;
+using Infrastructure.Services;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.PlayerDataLoader;
 using Infrastructure.Services.StaticData;
@@ -28,19 +29,16 @@ namespace Infrastructure.Factory
         private readonly IMeshFactory _meshFactory;
         private readonly IUIFactory _uiFactory;
 
-        public GameFactory(IAssetProvider assets, IInputService inputService, IStorageService storageService,
-            IEntityFactory entityFactory,
-            IStaticDataService staticData, IParticleFactory particleFactory, IMeshFactory meshFactory,
-            IUIFactory uiFactory)
+        public GameFactory(AllServices allServices)
         {
-            _assets = assets;
-            _inputService = inputService;
-            _storageService = storageService;
-            _entityFactory = entityFactory;
-            _particleFactory = particleFactory;
-            _meshFactory = meshFactory;
-            _staticData = staticData;
-            _uiFactory = uiFactory;
+            _assets = allServices.Single<IAssetProvider>();
+            _inputService = allServices.Single<IInputService>();
+            _storageService = allServices.Single<IStorageService>();
+            _entityFactory = allServices.Single<IEntityFactory>();
+            _particleFactory = allServices.Single<IParticleFactory>();
+            _meshFactory = allServices.Single<IMeshFactory>();
+            _staticData = allServices.Single<IStaticDataService>();
+            _uiFactory = allServices.Single<IUIFactory>();
         }
 
         public CustomNetworkManager CreateLocalNetworkManager(GameStateMachine stateMachine,
@@ -49,7 +47,7 @@ namespace Infrastructure.Factory
             var networkManager = _assets.Instantiate(NetworkManagerPath).GetComponent<CustomNetworkManager>();
             networkManager.Construct(stateMachine, _inputService, _storageService, _staticData,
                 _entityFactory,
-                _particleFactory, _assets, this, _meshFactory, _uiFactory, serverSettings);
+                _particleFactory, this, _meshFactory, _uiFactory, _assets, serverSettings);
             return networkManager;
         }
 
@@ -60,7 +58,7 @@ namespace Infrastructure.Factory
             var networkManager = _assets.Instantiate(SteamNetworkManagerPath).GetComponent<CustomNetworkManager>();
             networkManager.Construct(stateMachine, _inputService, _storageService, _staticData,
                 _entityFactory,
-                _particleFactory, _assets, this, _meshFactory, _uiFactory, serverSettings);
+                _particleFactory, this, _meshFactory, _uiFactory, _assets, serverSettings);
             networkManager.GetComponent<SteamLobby>().Construct(isHost);
             return networkManager;
         }

@@ -25,15 +25,15 @@ namespace Networking.ServerServices
         private readonly Transform _parent;
         private IEnumerator _coroutine;
 
-        public BoxDropService(IServer server, ICoroutineRunner coroutineRunner, ServerSettings serverSettings,
-            IEntityFactory entityFactory, EntityPositionValidator entityPositionValidator, IGameFactory gameFactory)
+        public BoxDropService(IServer server, CustomNetworkManager networkManager, ServerSettings serverSettings,
+            EntityPositionValidator entityPositionValidator)
         {
-            _coroutineRunner = coroutineRunner;
+            _coroutineRunner = networkManager;
             _spawnRate = serverSettings.BoxSpawnTime;
-            _entityFactory = entityFactory;
+            _entityFactory = networkManager.EntityFactory;
             _server = server;
             _entityPositionValidator = entityPositionValidator;
-            _parent = gameFactory.CreateGameObjectContainer(LootBoxContainer).transform;
+            _parent = networkManager.GameFactory.CreateGameObjectContainer(LootBoxContainer).transform;
         }
 
         public void Start()
@@ -52,32 +52,32 @@ namespace Networking.ServerServices
         {
             while (true)
             {
-                    var boxSpawnLayer = _server.MapProvider.MapData.BoxSpawnLayer;
-                    var spawnPosition = boxSpawnLayer[Random.Range(0, boxSpawnLayer.Count - 1)];
-                    var spawnBlock = _server.MapProvider.GetBlockByGlobalPosition(spawnPosition.x,
-                        spawnPosition.y, spawnPosition.z);
-                    if (spawnBlock.IsSolid())
-                        continue;
-                    var spawnCoordinates = spawnPosition + Constants.worldOffset;
-                    LootBox lootBox;
-                    var lootBoxType = (LootBoxType) Random.Range(0, Enum.GetNames(typeof(LootBoxType)).Length);
-                    switch (lootBoxType)
-                    {
-                        case LootBoxType.Ammo:
-                            lootBox = _entityFactory.CreateAmmoBox(spawnCoordinates, _parent);
-                            break;
-                        case LootBoxType.Health:
-                            lootBox = _entityFactory.CreateHealthBox(spawnCoordinates, _parent);
-                            break;
-                        default:
-                            lootBox = _entityFactory.CreateBlockBox(spawnCoordinates, _parent);
-                            break;
-                    }
+                var boxSpawnLayer = _server.MapProvider.MapData.BoxSpawnLayer;
+                var spawnPosition = boxSpawnLayer[Random.Range(0, boxSpawnLayer.Count - 1)];
+                var spawnBlock = _server.MapProvider.GetBlockByGlobalPosition(spawnPosition.x,
+                    spawnPosition.y, spawnPosition.z);
+                if (spawnBlock.IsSolid())
+                    continue;
+                var spawnCoordinates = spawnPosition + Constants.worldOffset;
+                LootBox lootBox;
+                var lootBoxType = (LootBoxType) Random.Range(0, Enum.GetNames(typeof(LootBoxType)).Length);
+                switch (lootBoxType)
+                {
+                    case LootBoxType.Ammo:
+                        lootBox = _entityFactory.CreateAmmoBox(spawnCoordinates, _parent);
+                        break;
+                    case LootBoxType.Health:
+                        lootBox = _entityFactory.CreateHealthBox(spawnCoordinates, _parent);
+                        break;
+                    default:
+                        lootBox = _entityFactory.CreateBlockBox(spawnCoordinates, _parent);
+                        break;
+                }
 
-                    _entityPositionValidator.AddEntity(lootBox);
-                    _lootBoxes.Add(lootBox, lootBoxType);
-                    lootBox.OnPickUp += OnPickUp;
-                
+                _entityPositionValidator.AddEntity(lootBox);
+                _lootBoxes.Add(lootBox, lootBoxType);
+                lootBox.OnPickUp += OnPickUp;
+
                 yield return new WaitForSeconds(_spawnRate);
             }
         }
@@ -141,7 +141,8 @@ namespace Networking.ServerServices
                     var rangeWeapon = (RangeWeaponItem) item;
                     var rangeWeaponData = (RangeWeaponData) itemData;
                     rangeWeaponData.TotalBullets += rangeWeapon.magazineSize * 2;
-                    receiver.Send(new ReloadResultResponse(i, rangeWeaponData.TotalBullets, rangeWeaponData.BulletsInMagazine));
+                    receiver.Send(new ReloadResultResponse(i, rangeWeaponData.TotalBullets,
+                        rangeWeaponData.BulletsInMagazine));
                     continue;
                 }
 

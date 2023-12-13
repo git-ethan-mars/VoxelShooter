@@ -20,14 +20,14 @@ namespace Networking.MessageHandlers.RequestHandlers
         private readonly AudioService _audioService;
         private readonly ICoroutineRunner _coroutineRunner;
 
-        public GrenadeSpawnHandler(IServer server, ICoroutineRunner coroutineRunner, IEntityFactory entityFactory,
+        public GrenadeSpawnHandler(IServer server, CustomNetworkManager networkManager,
             ExplosionBehaviour explosionBehaviour, AudioService audioService)
         {
             _server = server;
-            _entityFactory = entityFactory;
+            _entityFactory = networkManager.EntityFactory;
             _explosionBehaviour = explosionBehaviour;
             _audioService = audioService;
-            _coroutineRunner = coroutineRunner;
+            _coroutineRunner = networkManager;
         }
 
         protected override void OnRequestReceived(NetworkConnectionToClient connection, GrenadeSpawnRequest request)

@@ -19,13 +19,13 @@ namespace Networking.MessageHandlers.ResponseHandler
         private readonly AudioPool _audioPool;
 
 
-        public PlayerSoundHandler(IStaticDataService staticData, IStorageService storageService,
-            ICoroutineRunner coroutineRunner, AudioPool audioPool)
+        public PlayerSoundHandler(CustomNetworkManager customNetworkManager, AudioPool audioPool)
         {
-            _staticData = staticData;
-            _coroutineRunner = coroutineRunner;
+            _staticData = customNetworkManager.StaticData;
+            _coroutineRunner = customNetworkManager;
             _audioPool = audioPool;
-            SoundMultiplier = storageService.Load<VolumeSettingsData>(Constants.VolumeSettingsKey).SoundVolume;
+            SoundMultiplier = customNetworkManager.StorageService.Load<VolumeSettingsData>(Constants.VolumeSettingsKey)
+                .SoundVolume;
         }
 
         protected override void OnResponseReceived(PlayerSoundResponse response)

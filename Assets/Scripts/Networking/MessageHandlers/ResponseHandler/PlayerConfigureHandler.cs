@@ -20,26 +20,18 @@ namespace Networking.MessageHandlers.ResponseHandler
         private readonly IStorageService _storageService;
         private readonly IStaticDataService _staticData;
 
-        public PlayerConfigureHandler(IClient client, IParticleFactory particleFactory, IUIFactory uiFactory,
-            IMeshFactory meshFactory, IInputService inputService, IStorageService storageService,
-            IStaticDataService staticData)
+        public PlayerConfigureHandler(IClient client, IParticleFactory particleFactory)
         {
             _client = client;
             _particleFactory = particleFactory;
-            _uiFactory = uiFactory;
-            _meshFactory = meshFactory;
-            _inputService = inputService;
-            _storageService = storageService;
-            _staticData = staticData;
         }
 
         protected override void OnResponseReceived(PlayerConfigureResponse response)
         {
             var playerGameObject = NetworkClient.connection.identity;
             var player = playerGameObject.GetComponent<Player>();
-            player.Construct(_uiFactory, _meshFactory, _inputService, _storageService, _staticData,
-                response.PlaceDistance,
-                response.ItemIds, response.Speed, response.JumpHeight, response.Health);
+            player.ConstructLocalPlayer(response.PlaceDistance, response.ItemIds, response.Speed, response.JumpHeight,
+                response.Health);
             _particleFactory.CreateWeatherParticle(_client.Data.MapName, player.BodyOrientation);
             PlayerCreated?.Invoke(player);
         }

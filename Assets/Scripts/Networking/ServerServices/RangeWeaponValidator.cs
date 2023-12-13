@@ -18,12 +18,11 @@ namespace Networking.ServerServices
         private readonly LineDamageArea _lineDamageArea;
         private readonly AudioService _audioService;
 
-        public RangeWeaponValidator(IServer server, ICoroutineRunner coroutineRunner, IParticleFactory particleFactory,
-            AudioService audioService)
+        public RangeWeaponValidator(IServer server, CustomNetworkManager networkManager, AudioService audioService)
         {
             _server = server;
-            _coroutineRunner = coroutineRunner;
-            _particleFactory = particleFactory;
+            _coroutineRunner = networkManager;
+            _particleFactory = networkManager.ParticleFactory;
             _lineDamageArea = new LineDamageArea(_server.MapProvider);
             _audioService = audioService;
         }
