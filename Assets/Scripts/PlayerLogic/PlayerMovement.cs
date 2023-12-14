@@ -83,7 +83,7 @@ namespace PlayerLogic
 
         public bool IsGrounded()
         {
-            var isGrounded = Physics.CheckBox(_rigidbody.position + _hitBox.height / 2 * Vector3.down,
+            var isGrounded = Physics.CheckBox(_rigidbody.position + _hitBox.height / 2 * Vector3.down + _hitBox.center,
                 new Vector3(_hitBox.radius / 2, Constants.Epsilon, _hitBox.radius / 2),
                 Quaternion.identity, Constants.buildMask);
             return isGrounded;
