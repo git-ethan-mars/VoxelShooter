@@ -44,6 +44,7 @@ namespace Networking.MessageHandlers.RequestHandlers
             playerData.CountByItem[tntData] = tntCount - 1;
             connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex, tntCount - 1));
             var tnt = _entityFactory.CreateTnt(request.Position, request.Rotation);
+            NetworkServer.Spawn(tnt);
             _coroutineRunner.StartCoroutine(ExplodeTnt(Vector3Int.FloorToInt(request.ExplosionCenter), tnt,
                 tntData.delayInSeconds,
                 tntData.radius, connection, tntData.damage, tntData.particlesSpeed, tntData.particlesCount));

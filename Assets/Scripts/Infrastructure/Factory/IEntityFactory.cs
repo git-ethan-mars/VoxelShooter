@@ -13,7 +13,7 @@ namespace Infrastructure.Factory
     {
         GameObject CreateTnt(Vector3 position, Quaternion rotation);
 
-        GameObject CreateGrenade(Vector3 position, Quaternion rotation);
+        GameObject CreateGrenade(Vector3 position, Quaternion rotation, Vector3 force);
 
         GameObject CreateTombstone(Vector3 position);
 

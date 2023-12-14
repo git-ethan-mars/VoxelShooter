@@ -46,8 +46,9 @@ namespace Networking.MessageHandlers.RequestHandlers
 
             playerData.CountByItem[grenadeData] = grenadeCount - 1;
             connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex, grenadeCount - 1));
-            var grenade = _entityFactory.CreateGrenade(request.Ray.origin, Quaternion.identity);
-            grenade.GetComponent<Rigidbody>().AddForce(request.Ray.direction * request.ThrowForce);
+            var grenade = _entityFactory.CreateGrenade(request.Ray.origin, Quaternion.identity,
+                request.Ray.direction * request.ThrowForce);
+            NetworkServer.Spawn(grenade);
             _coroutineRunner.StartCoroutine(ExplodeGrenade(grenade, grenadeData, connection));
         }
 

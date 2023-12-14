@@ -43,7 +43,8 @@ namespace Explosions
         protected void DestroyExplosiveWithBlocks(Vector3Int explosionCenter, GameObject explosive, int radius,
             int particlesSpeed, int particlesCount, int damage)
         {
-            _particleFactory.CreateRchParticle(explosionCenter, particlesSpeed, particlesCount);
+            var rchParticle = _particleFactory.CreateRchParticle(explosionCenter, particlesSpeed, particlesCount);
+            NetworkServer.Spawn(rchParticle);
             NetworkServer.Destroy(explosive);
             _server.BlockHealthSystem.DamageBlock(explosionCenter, radius, damage, _damageArea);
         }

@@ -226,6 +226,7 @@ namespace Networking
             var tombstonePosition = Vector3Int.FloorToInt(victim.identity.transform.position) +
                                     Constants.worldOffset;
             var tombstone = _entityFactory.CreateTombstone(tombstonePosition);
+            NetworkServer.Spawn(tombstone);
             _entityPositionValidator.AddEntity(tombstone.GetComponent<IPushable>());
             Data.AddKill(killer, victim);
             var playerData = Data.GetPlayerData(victim);

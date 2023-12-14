@@ -16,9 +16,9 @@ namespace Networking.ClientServices
             var particleContainer = gameFactory.CreateGameObjectContainer(ContainerName).transform;
             for (var i = 0; i < PoolSize; i++)
             {
-                var obj = particleFactory.CreateFallingMeshParticle(particleContainer);
-                obj.gameObject.SetActive(false);
-                _stack.Push(obj);
+                var meshParticle = particleFactory.CreateFallingMeshParticle(particleContainer);
+                meshParticle.gameObject.SetActive(false);
+                _stack.Push(meshParticle);
             }
         }
 

@@ -20,21 +20,19 @@ namespace Infrastructure.Factory
         public GameObject CreateTnt(Vector3 position, Quaternion rotation)
         {
             var tnt = _assets.Instantiate(EntityPath.TntPath, position, rotation);
-            NetworkServer.Spawn(tnt);
             return tnt;
         }
 
-        public GameObject CreateGrenade(Vector3 position, Quaternion rotation)
+        public GameObject CreateGrenade(Vector3 position, Quaternion rotation, Vector3 force)
         {
             var grenade = _assets.Instantiate(EntityPath.GrenadePath, position, rotation);
-            NetworkServer.Spawn(grenade);
+            grenade.GetComponent<Rigidbody>().AddForce(force);
             return grenade;
         }
 
         public GameObject CreateTombstone(Vector3 position)
         {
             var tombstone = _assets.Instantiate(EntityPath.TombstonePath, position, Quaternion.identity);
-            NetworkServer.Spawn(tombstone);
             return tombstone;
         }
 
@@ -51,21 +49,18 @@ namespace Infrastructure.Factory
         public LootBox CreateAmmoBox(Vector3 position, Transform parent)
         {
             var lootBox = _assets.Instantiate(EntityPath.AmmoBoxPath, position, Quaternion.identity, parent);
-            NetworkServer.Spawn(lootBox);
             return lootBox.GetComponent<LootBox>();
         }
 
         public LootBox CreateHealthBox(Vector3 position, Transform parent)
         {
             var lootBox = _assets.Instantiate(EntityPath.HealthBoxPath, position, Quaternion.identity, parent);
-            NetworkServer.Spawn(lootBox);
             return lootBox.GetComponent<LootBox>();
         }
 
         public LootBox CreateBlockBox(Vector3 position, Transform parent)
         {
             var lootBox = _assets.Instantiate(EntityPath.BlockBoxPath, position, Quaternion.identity, parent);
-            NetworkServer.Spawn(lootBox);
             return lootBox.GetComponent<LootBox>();
         }
 

@@ -74,6 +74,7 @@ namespace Networking.ServerServices
                         break;
                 }
 
+                NetworkServer.Spawn(lootBox.gameObject);
                 _entityPositionValidator.AddEntity(lootBox);
                 _lootBoxes.Add(lootBox, lootBoxType);
                 lootBox.OnPickUp += OnPickUp;

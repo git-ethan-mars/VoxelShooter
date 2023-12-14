@@ -206,8 +206,9 @@ namespace Networking.ServerServices
                 var blockPosition = Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2);
                 var block = _server.MapProvider.GetBlockByGlobalPosition(blockPosition);
                 _server.BlockHealthSystem.DamageBlock(blockPosition, 1, configure.damage, _lineDamageArea);
-                _particleFactory.CreateBulletImpact(rayHit.point, Quaternion.Euler(rayHit.normal.y * -90,
+                var bullet = _particleFactory.CreateBulletImpact(rayHit.point, Quaternion.Euler(rayHit.normal.y * -90,
                     rayHit.normal.x * 90 + (rayHit.normal.z == -1 ? 180 : 0), 0), block.Color);
+                NetworkServer.Spawn(bullet);
             }
         }
 
@@ -217,7 +218,8 @@ namespace Networking.ServerServices
             if (source != receiver)
             {
                 _server.Damage(source, receiver, damage);
-                _particleFactory.CreateBlood(rayHit.point, Quaternion.LookRotation(rayHit.normal));
+                var blood = _particleFactory.CreateBlood(rayHit.point, Quaternion.LookRotation(rayHit.normal));
+                NetworkServer.Spawn(blood);
             }
         }
 

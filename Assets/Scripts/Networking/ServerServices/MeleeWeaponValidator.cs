@@ -112,7 +112,8 @@ namespace Networking.ServerServices
             if (source != receiver)
             {
                 _server.Damage(source, receiver, damage);
-                _particleFactory.CreateBlood(rayHit.point, Quaternion.LookRotation(rayHit.normal));
+                var blood = _particleFactory.CreateBlood(rayHit.point, Quaternion.LookRotation(rayHit.normal));
+                NetworkServer.Spawn(blood);
             }
         }
 
