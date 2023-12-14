@@ -20,9 +20,9 @@ namespace Infrastructure.Factory
         GameObject CreateRocket(Vector3 position, Quaternion rotation, IServer server,
             IParticleFactory particleFactory, RocketLauncherItem rocketData, NetworkConnectionToClient owner,
             AudioService audioService);
-        
+
         LootBox CreateAmmoBox(Vector3 position, Transform parent);
-        
+
         LootBox CreateHealthBox(Vector3 position, Transform parent);
 
         LootBox CreateBlockBox(Vector3 position, Transform parent);

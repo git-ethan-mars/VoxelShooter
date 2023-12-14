@@ -44,34 +44,35 @@ namespace Infrastructure.Factory
         {
             var rocket = _assets.Instantiate(EntityPath.RocketPath, position, rotation);
             rocket.GetComponent<Rocket>().Construct(server, rocketData, owner, particleFactory, audioService);
-            NetworkServer.Spawn(rocket);
+            rocket.GetComponent<Rigidbody>().velocity = rocket.transform.forward * rocketData.speed;
             return rocket;
         }
-        
+
         public LootBox CreateAmmoBox(Vector3 position, Transform parent)
         {
             var lootBox = _assets.Instantiate(EntityPath.AmmoBoxPath, position, Quaternion.identity, parent);
             NetworkServer.Spawn(lootBox);
             return lootBox.GetComponent<LootBox>();
         }
-        
+
         public LootBox CreateHealthBox(Vector3 position, Transform parent)
         {
             var lootBox = _assets.Instantiate(EntityPath.HealthBoxPath, position, Quaternion.identity, parent);
             NetworkServer.Spawn(lootBox);
             return lootBox.GetComponent<LootBox>();
         }
-        
+
         public LootBox CreateBlockBox(Vector3 position, Transform parent)
         {
             var lootBox = _assets.Instantiate(EntityPath.BlockBoxPath, position, Quaternion.identity, parent);
             NetworkServer.Spawn(lootBox);
             return lootBox.GetComponent<LootBox>();
         }
-        
+
         public SpawnPoint CreateSpawnPoint(Vector3 position, Transform parent)
         {
-            return _assets.Instantiate(EntityPath.SpawnPointPath, position, Quaternion.identity, parent).GetComponent<SpawnPoint>();
+            return _assets.Instantiate(EntityPath.SpawnPointPath, position, Quaternion.identity, parent)
+                .GetComponent<SpawnPoint>();
         }
     }
 }

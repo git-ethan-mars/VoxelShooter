@@ -32,7 +32,6 @@ namespace Networking
         private readonly AddBlocksHandler _addBlocksHandler;
         private readonly ChangeClassHandler _changeClassHandler;
         private readonly GrenadeSpawnHandler _grenadeSpawnHandler;
-        private readonly RocketSpawnHandler _rocketSpawnHandler;
         private readonly TntSpawnHandler _tntSpawnHandler;
         private readonly ChangeSlotHandler _changeSlotHandler;
         private readonly IncrementSlotIndexHandler _incrementSlotIndexHandler;
@@ -69,6 +68,7 @@ namespace Networking
             var audioService = new AudioService(staticData);
             var rangeWeaponValidator = new RangeWeaponValidator(this, networkManager, audioService);
             var meleeWeaponValidator = new MeleeWeaponValidator(this, networkManager, audioService);
+            var rocketLauncherValidator = new RocketLauncherValidator(this, networkManager, audioService);
             _addBlocksHandler = new AddBlocksHandler(this);
             _changeClassHandler = new ChangeClassHandler(this);
             _changeSlotHandler = new ChangeSlotHandler(this, audioService);
@@ -76,13 +76,11 @@ namespace Networking
             _decrementSlotIndexHandler = new DecrementSlotIndexHandler(this, audioService);
             _grenadeSpawnHandler = new GrenadeSpawnHandler(this, networkManager,
                 singleExplosionBehaviour, audioService);
-            _rocketSpawnHandler =
-                new RocketSpawnHandler(this, networkManager, audioService);
             _tntSpawnHandler =
                 new TntSpawnHandler(this, networkManager, chainExplosionBehaviour);
-            _shootHandler = new ShootHandler(this, rangeWeaponValidator);
+            _shootHandler = new ShootHandler(this, rangeWeaponValidator, rocketLauncherValidator);
             _cancelShootHandler = new CancelShootHandler(this, rangeWeaponValidator);
-            _reloadHandler = new ReloadHandler(this, rangeWeaponValidator);
+            _reloadHandler = new ReloadHandler(this, rangeWeaponValidator, rocketLauncherValidator);
             _hitHandler = new HitHandler(this, meleeWeaponValidator);
             _authenticationHandler = new AuthenticationHandler(this);
             _fallDamageService = new FallDamageService(this, networkManager);
@@ -199,7 +197,6 @@ namespace Networking
             _incrementSlotIndexHandler.Register();
             _decrementSlotIndexHandler.Register();
             _grenadeSpawnHandler.Register();
-            _rocketSpawnHandler.Register();
             _tntSpawnHandler.Register();
             _shootHandler.Register();
             _cancelShootHandler.Register();
@@ -216,7 +213,6 @@ namespace Networking
             _incrementSlotIndexHandler.Unregister();
             _decrementSlotIndexHandler.Unregister();
             _grenadeSpawnHandler.Unregister();
-            _rocketSpawnHandler.Unregister();
             _tntSpawnHandler.Unregister();
             _shootHandler.Unregister();
             _cancelShootHandler.Unregister();

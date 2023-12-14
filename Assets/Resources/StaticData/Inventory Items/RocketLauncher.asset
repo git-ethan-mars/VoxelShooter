@@ -21,6 +21,9 @@ MonoBehaviour:
   radius: 5
   damage: 180
   speed: 80
+  reloadTime: 3
+  rocketSlotsCount: 1
+  rechargeableRocketsCount: 1
   particlesSpeed: 7
   particlesCount: 100
   explosionSound: {fileID: 11400000, guid: 39f9e93379fb0de4686abc82d8ababc3, type: 2}
