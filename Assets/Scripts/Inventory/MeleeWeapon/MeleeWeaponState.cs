@@ -41,5 +41,9 @@ namespace Inventory.MeleeWeapon
             _inventoryInput.SecondActionButtonDown -= _meleeWeaponModel.StrongHit;
             _meleeWeaponView.Disable();
         }
+
+        public void Dispose()
+        {
+        }
     }
 }

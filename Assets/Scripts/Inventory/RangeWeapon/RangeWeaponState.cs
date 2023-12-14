@@ -52,5 +52,9 @@ namespace Inventory.RangeWeapon
             _rangeWeaponModel.ZoomOut();
             _rangeWeaponView.Disable();
         }
+
+        public void Dispose()
+        {
+        }
     }
 }

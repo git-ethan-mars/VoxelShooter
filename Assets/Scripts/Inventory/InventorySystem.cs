@@ -111,6 +111,11 @@ namespace Inventory
             _inventoryInput.MouseScrolledUp -= SendIncrementSlotIndexRequest;
             _inventoryInput.MouseScrolledDown -= SendDecrementSlotIndexRequest;
             _states[_index].Exit();
+            foreach (var state in _states)
+            {
+                state.Dispose();
+            }
+
             _changeSlotHandler.Unregister();
             _itemUseHandler.Unregister();
             _reloadHandler.Unregister();

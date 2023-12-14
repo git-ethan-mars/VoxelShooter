@@ -48,5 +48,10 @@ namespace Inventory.Block
             _hud.palette.Color.ValueChanged -= _blockModel.ChangeColor;
             _blockView.Disable();
         }
+
+        public void Dispose()
+        {
+            _blockView.Dispose();
+        }
     }
 }

@@ -39,5 +39,9 @@ namespace Inventory.Grenade
             _grenadeModel.Count.ValueChanged -= _grenadeView.OnCountChanged;
             _grenadeView.Disable();
         }
+
+        public void Dispose()
+        {
+        }
     }
 }

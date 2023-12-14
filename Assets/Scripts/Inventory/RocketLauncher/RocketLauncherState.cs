@@ -38,5 +38,9 @@ namespace Inventory.RocketLauncher
             _rocketLauncherModel.Count.ValueChanged -= _rocketLauncherView.OnCountChanged;
             _rocketLauncherView.Disable();
         }
+
+        public void Dispose()
+        {
+        }
     }
 }

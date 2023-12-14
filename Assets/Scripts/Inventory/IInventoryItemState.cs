@@ -7,5 +7,6 @@ namespace Inventory
         void Enter();
         void Update();
         void Exit();
+        void Dispose();
     }
 }
