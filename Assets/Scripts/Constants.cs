@@ -12,7 +12,7 @@ public static class Constants
     public const string VxlExtension = ".vxl";
     public const string RchExtension = ".rch";
     public const float Epsilon = 0.001f;
-    public const int DefaultFov = 60;
+    public const int DefaultFov = 90;
     public const int MessageSize = 500 * 1024;
     public const float MessageDelay = 1f;
     public static readonly bool isLocalBuild;
