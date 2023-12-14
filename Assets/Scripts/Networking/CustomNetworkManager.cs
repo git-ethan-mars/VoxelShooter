@@ -17,42 +17,47 @@ namespace Networking
 {
     public class CustomNetworkManager : NetworkManager, ICoroutineRunner
     {
-        public IClient Client;
-        private IStaticDataService _staticData;
-        private IEntityFactory _entityFactory;
+        public IClient Client { get; private set; }
+        public IAssetProvider Assets { get; private set; }
+        public IStaticDataService StaticData { get; private set; }
+        public IStorageService StorageService { get; private set; }
+        public IInputService InputService { get; private set; }
+        public IGameFactory GameFactory { get; private set; }
+        public IEntityFactory EntityFactory { get; private set; }
+        public IMeshFactory MeshFactory { get; private set; }
+        public IParticleFactory ParticleFactory { get; private set; }
+        public IPlayerFactory PlayerFactory { get; private set; }
+        public IUIFactory UIFactory { get; private set; }
         private ServerSettings _serverSettings;
         private GameStateMachine _stateMachine;
         private BoxDropService _boxDropService;
-        private IParticleFactory _particleFactory;
-        private IMeshFactory _meshFactory;
-        private IAssetProvider _assets;
-        private IGameFactory _gameFactory;
         private IServer _server;
+
 
         public void Construct(GameStateMachine stateMachine, IInputService inputService, IStorageService storageService,
             IStaticDataService staticData,
-            IEntityFactory entityFactory, IParticleFactory particleFactory, IAssetProvider assets,
-            IGameFactory gameFactory, IMeshFactory meshFactory, IUIFactory uiFactory,
+            IEntityFactory entityFactory, IParticleFactory particleFactory, IGameFactory gameFactory,
+            IMeshFactory meshFactory, IUIFactory uiFactory, IAssetProvider assets,
             ServerSettings serverSettings)
         {
             _stateMachine = stateMachine;
-            _staticData = staticData;
-            _entityFactory = entityFactory;
-            _particleFactory = particleFactory;
-            _assets = assets;
-            _gameFactory = gameFactory;
-            _meshFactory = meshFactory;
+            Assets = assets;
+            StaticData = staticData;
+            StorageService = storageService;
+            InputService = inputService;
+            GameFactory = gameFactory;
+            EntityFactory = entityFactory;
+            MeshFactory = meshFactory;
+            ParticleFactory = particleFactory;
+            PlayerFactory = new PlayerFactory(assets, inputService, storageService, staticData, uiFactory, meshFactory);
+            UIFactory = uiFactory;
             _serverSettings = serverSettings;
-            Client = new Client(_stateMachine, this, inputService, storageService, _gameFactory, _meshFactory,
-                _staticData,
-                _particleFactory,
-                uiFactory);
+            Client = new Client(_stateMachine, this);
         }
 
         public override void OnStartHost()
         {
-            _server = new Server(this, _staticData, _serverSettings, _assets, _gameFactory, _particleFactory,
-                _entityFactory);
+            _server = new Server(this, _serverSettings);
             _server.Start();
         }
 

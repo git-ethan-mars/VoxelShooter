@@ -15,5 +15,6 @@ namespace Infrastructure.Factory
 
         GameObject CreateGameObjectContainer(string containerName);
         void CreateDirectionalLight(LightData lightData);
+        AudioSource CreateAudioSource(Transform container);
     }
 }

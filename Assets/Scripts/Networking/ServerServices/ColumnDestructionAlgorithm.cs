@@ -35,13 +35,13 @@ namespace Networking.ServerServices
             PreProcessGraph();
         }
 
-        public void Add(List<Vector3Int> blockPositions)
+        public void Add(IEnumerable<Vector3Int> blockPositions)
         {
-            for (var i = 0; i < blockPositions.Count; i++)
+            foreach (var position in blockPositions)
             {
-                var singleVoxelRun = new Run(blockPositions[i].x, blockPositions[i].z, blockPositions[i].y, 1, true);
+                var singleVoxelRun = new Run(position.x, position.z, position.y, 1, true);
                 if (!TryMergeRuns(singleVoxelRun,
-                        _columns[blockPositions[i].x * _mapProvider.MapData.Depth + blockPositions[i].z]))
+                        _columns[position.x * _mapProvider.MapData.Depth + position.z]))
                 {
                     AddRun(singleVoxelRun);
                 }
@@ -53,13 +53,13 @@ namespace Networking.ServerServices
             _runsToDelete.Clear();
             _pathStack.Clear();
             _connectedNeighbours.Clear();
-            for (var i = 0; i < removingPositions.Count; i++)
+            foreach (var position in removingPositions)
             {
-                var run = FindRunInColumn(removingPositions[i].x, removingPositions[i].z, removingPositions[i].y);
-                if (removingPositions[i].y == run.Begin || removingPositions[i].y == run.Begin + run.Length - 1)
+                var run = FindRunInColumn(position.x, position.z, position.y);
+                if (position.y == run.Begin || position.y == run.Begin + run.Length - 1)
                 {
                     var newRun = new Run(run.X, run.Z, run.Begin, run.Length, run.IsCreatedByPlayer);
-                    if (removingPositions[i].y == newRun.Begin)
+                    if (position.y == newRun.Begin)
                     {
                         newRun.Begin += 1;
                     }
@@ -70,7 +70,7 @@ namespace Networking.ServerServices
                 }
                 else
                 {
-                    SplitRun(run, removingPositions[i].y, out var firstRun, out var secondRun);
+                    SplitRun(run, position.y, out var firstRun, out var secondRun);
                     RemoveRun(run);
                     AddRun(firstRun);
                     AddRun(secondRun);

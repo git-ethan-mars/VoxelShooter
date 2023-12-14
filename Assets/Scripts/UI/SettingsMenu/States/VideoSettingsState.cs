@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Data;
 using Infrastructure.Services.Storage;
 using UI.Carousel;
 using UnityEngine;

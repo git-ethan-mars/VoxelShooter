@@ -10,8 +10,13 @@ namespace Data
         public int radius;
         public int damage;
         public int speed;
+        public float reloadTime;
+        public int rocketSlotsCount;
+        public int rechargeableRocketsCount;
         public int particlesSpeed;
         public int particlesCount;
+        public AudioData explosionSound;
+        public AudioData reloadSound;
 
         public void Awake()
         {

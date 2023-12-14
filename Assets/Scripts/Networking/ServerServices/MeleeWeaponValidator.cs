@@ -13,29 +13,33 @@ namespace Networking.ServerServices
         private readonly IServer _server;
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly IParticleFactory _particleFactory;
-        private readonly IExplosionArea _lineExplosionArea;
+        private readonly IDamageArea _lineDamageArea;
+        private readonly AudioService _audioService;
 
-        public MeleeWeaponValidator(IServer server, ICoroutineRunner coroutineRunner, IParticleFactory particleFactory)
+        public MeleeWeaponValidator(IServer server, CustomNetworkManager networkManager,
+            AudioService audioService)
         {
             _server = server;
-            _particleFactory = particleFactory;
-            _coroutineRunner = coroutineRunner;
-            _lineExplosionArea = new LineExplosionArea(_server.MapProvider);
+            _coroutineRunner = networkManager;
+            _particleFactory = networkManager.ParticleFactory;
+            _audioService = audioService;
+            _lineDamageArea = new LineDamageArea(_server.MapProvider);
         }
 
         public void Hit(NetworkConnectionToClient connection, Ray ray, bool isStrongHit)
         {
             var playerData = _server.Data.GetPlayerData(connection);
-            var meleeWeapon = (MeleeWeaponItem) playerData.Items[playerData.SelectedSlotIndex];
+            var meleeWeapon = (MeleeWeaponItem) playerData.SelectedItem;
             var meleeWeaponData = (MeleeWeaponData) playerData.ItemData[playerData.SelectedSlotIndex];
 
             if (!CanHit(meleeWeaponData))
             {
                 return;
             }
-
+            
             var isSurface = ApplyRaycast(connection, ray, meleeWeapon, isStrongHit);
             _coroutineRunner.StartCoroutine(ResetHit(connection, meleeWeapon, meleeWeaponData));
+            _audioService.SendAudio(isSurface ? meleeWeapon.diggingAudio : meleeWeapon.hittingAudio, connection.identity);
         }
 
         private IEnumerator ResetHit(NetworkConnectionToClient connection, MeleeWeaponItem configure,
@@ -50,7 +54,6 @@ namespace Networking.ServerServices
                 {
                     break;
                 }
-
                 waitForHitReset = new WaitWithoutSlotChange(_server, connection, configure.timeBetweenHit);
             }
 
@@ -90,13 +93,11 @@ namespace Networking.ServerServices
                 var targetBlock = Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2);
                 if (isStrongHit)
                 {
-                    var validPositions = _lineExplosionArea.GetExplodedBlocks(3, targetBlock);
-                    _server.MapUpdater.DestroyBlocks(validPositions);
+                    _server.BlockHealthSystem.DamageBlock(targetBlock, 3, meleeWeapon.damageToBlock, _lineDamageArea);
                 }
                 else
                 {
-                    var validPositions = _lineExplosionArea.GetExplodedBlocks(1, targetBlock);
-                    _server.MapUpdater.DestroyBlocks(validPositions);
+                    _server.BlockHealthSystem.DamageBlock(targetBlock, 1, meleeWeapon.damageToBlock, _lineDamageArea);
                 }
 
                 return true;
@@ -111,7 +112,8 @@ namespace Networking.ServerServices
             if (source != receiver)
             {
                 _server.Damage(source, receiver, damage);
-                _particleFactory.CreateBlood(rayHit.point, Quaternion.LookRotation(rayHit.normal));
+                var blood = _particleFactory.CreateBlood(rayHit.point, Quaternion.LookRotation(rayHit.normal));
+                NetworkServer.Spawn(blood);
             }
         }
 

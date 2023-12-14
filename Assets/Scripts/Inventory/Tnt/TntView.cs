@@ -79,5 +79,10 @@ namespace Inventory.Tnt
                 _tntCountText.SetText(_count.ToString());
             }
         }
+
+        public void Dispose()
+        {
+            Object.Destroy(_transparentTnt);
+        }
     }
 }

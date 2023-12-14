@@ -16,27 +16,35 @@ namespace Networking.MessageHandlers.RequestHandlers
         private readonly IServer _server;
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly IEntityFactory _entityFactory;
-        private readonly ChainExplosionBehaviour _chainExplosionBehaviour;
+        private readonly ExplosionBehaviour _chainExplosionBehaviour;
 
-        public TntSpawnHandler(IServer server, ICoroutineRunner coroutineRunner, IEntityFactory entityFactory, ChainExplosionBehaviour chainExplosionBehaviour)
+        public TntSpawnHandler(IServer server, CustomNetworkManager networkManager,
+            ExplosionBehaviour chainExplosionBehaviour)
         {
             _server = server;
-            _coroutineRunner = coroutineRunner;
-            _entityFactory = entityFactory;
+            _coroutineRunner = networkManager;
+            _entityFactory = networkManager.EntityFactory;
             _chainExplosionBehaviour = chainExplosionBehaviour;
         }
 
         protected override void OnRequestReceived(NetworkConnectionToClient connection, TntSpawnRequest request)
         {
             var result = _server.Data.TryGetPlayerData(connection, out var playerData);
-            if (!result || !playerData.IsAlive) return;
-            var tntCount = playerData.CountByItem[playerData.Items[playerData.SelectedSlotIndex]];
-            if (tntCount <= 0)
+            if (!result || !playerData.IsAlive || playerData.SelectedItem is not TntItem tntData)
+            {
                 return;
-            playerData.CountByItem[playerData.Items[playerData.SelectedSlotIndex]] = tntCount - 1;
+            }
+
+            var tntCount = playerData.CountByItem[tntData];
+            if (tntCount <= 0)
+            {
+                return;
+            }
+
+            playerData.CountByItem[tntData] = tntCount - 1;
             connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex, tntCount - 1));
             var tnt = _entityFactory.CreateTnt(request.Position, request.Rotation);
-            var tntData = (TntItem) playerData.Items[playerData.SelectedSlotIndex];
+            NetworkServer.Spawn(tnt);
             _coroutineRunner.StartCoroutine(ExplodeTnt(Vector3Int.FloorToInt(request.ExplosionCenter), tnt,
                 tntData.delayInSeconds,
                 tntData.radius, connection, tntData.damage, tntData.particlesSpeed, tntData.particlesCount));

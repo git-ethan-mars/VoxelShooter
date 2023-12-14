@@ -3,7 +3,6 @@ using System.Collections;
 using Data;
 using Infrastructure;
 using Mirror;
-using Networking.Messages;
 using Networking.Messages.Responses;
 using UnityEngine;
 
@@ -29,11 +28,6 @@ namespace Networking.ServerServices
         public void Start()
         {
             _coroutineRunner.StartCoroutine(SendTime());
-        }
-
-        public void Stop()
-        {
-            _coroutineRunner.StopCoroutine(SendTime());
         }
 
         private IEnumerator SendTime()

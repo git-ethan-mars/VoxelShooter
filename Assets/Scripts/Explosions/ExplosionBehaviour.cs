@@ -10,7 +10,7 @@ namespace Explosions
     public abstract class ExplosionBehaviour
     {
         private readonly IServer _server;
-        private readonly IExplosionArea _explosionArea;
+        private readonly IDamageArea _damageArea;
         private readonly IParticleFactory _particleFactory;
 
         public abstract void Explode(Vector3Int explosionCenter, GameObject explosive, int radius,
@@ -18,10 +18,10 @@ namespace Explosions
             int particlesCount, List<GameObject> exploded, string explosiveTag);
 
         protected ExplosionBehaviour(IServer server, IParticleFactory particleFactory,
-            IExplosionArea explosionArea)
+            IDamageArea damageArea)
         {
             _server = server;
-            _explosionArea = explosionArea;
+            _damageArea = damageArea;
             _particleFactory = particleFactory;
         }
 
@@ -41,11 +41,12 @@ namespace Explosions
         }
 
         protected void DestroyExplosiveWithBlocks(Vector3Int explosionCenter, GameObject explosive, int radius,
-            int particlesSpeed, int particlesCount)
+            int particlesSpeed, int particlesCount, int damage)
         {
-            _particleFactory.CreateRchParticle(explosionCenter, particlesSpeed, particlesCount);
+            var rchParticle = _particleFactory.CreateRchParticle(explosionCenter, particlesSpeed, particlesCount);
+            NetworkServer.Spawn(rchParticle);
             NetworkServer.Destroy(explosive);
-            _server.MapUpdater.DestroyBlocks(_explosionArea.GetExplodedBlocks(radius, explosionCenter));
+            _server.BlockHealthSystem.DamageBlock(explosionCenter, radius, damage, _damageArea);
         }
     }
 }

@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Infrastructure.Services.Input;
-using Inventory;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,6 +18,8 @@ namespace UI
         [SerializeField]
         private List<GameObject> boarders;
 
+        public CanvasGroup CanvasGroup => canvasGroup;
+
         [SerializeField]
         private CanvasGroup canvasGroup;
 
@@ -31,15 +32,5 @@ namespace UI
         public TextMeshProUGUI itemCount;
         public HealthCounter healthCounter;
         private IInputService _inputService;
-
-        public void Construct(IInputService inputService)
-        {
-            _inputService = inputService;
-        }
-
-        public void Update()
-        {
-            canvasGroup.alpha = _inputService.IsScoreboardButtonHold() ? 0 : 1;
-        }
     }
 }

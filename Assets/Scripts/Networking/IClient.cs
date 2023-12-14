@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using Data;
 using Generators;
-using Infrastructure.Services.StaticData;
 using MapLogic;
 using Networking.ClientServices;
+using PlayerLogic;
 
 namespace Networking
 {
@@ -15,12 +15,11 @@ namespace Networking
         event Action<ServerTime> RespawnTimeChanged;
         event Action<List<ScoreData>> ScoreboardChanged;
         event Action GameFinished;
-        FallMeshGenerator FallMeshGenerator { get; }
-        IStaticDataService StaticData { get; }
         ClientData Data { get; }
         MapProvider MapProvider { get; set; }
         MapGenerator MapGenerator { get; }
         void Start();
         void Stop();
+        event Action<Player> PlayerCreated;
     }
 }

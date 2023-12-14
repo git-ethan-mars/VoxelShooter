@@ -39,5 +39,10 @@ namespace Inventory.Tnt
             _tntModel.Count.ValueChanged -= _tntView.OnCountChanged;
             _tntView.Disable();
         }
+
+        public void Dispose()
+        {
+            _tntView.Dispose();
+        }
     }
 }

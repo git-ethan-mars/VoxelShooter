@@ -5,6 +5,7 @@ using Generators;
 using Infrastructure;
 using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
+using Infrastructure.Services;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
 using Infrastructure.Services.Storage;
@@ -31,10 +32,6 @@ namespace MapCustomizer
         [SerializeField]
         private GameObject spawnPointsContainer;
 
-        private StaticDataService _staticData;
-        private MeshFactory _meshFactory;
-        private GameFactory _gameFactory;
-        private EntityFactory _entityFactory;
         private static MapCustomizer _instance;
         private MapConfigure _previousConfigure;
         private MapProvider _mapProvider;
@@ -147,16 +144,19 @@ namespace MapCustomizer
         {
             DestroyChildren();
             LoadConfigure();
-            _instance._staticData.LoadMapConfigures();
+            AllServices.Container.Single<IStaticDataService>().LoadMapConfigures();
             _instance._mapProvider =
-                SimpleBenchmark.Execute(MapReader.ReadFromFile, mapConfigure.name, _instance._staticData);
+                SimpleBenchmark.Execute(MapReader.ReadFromFile, mapConfigure.name,
+                    AllServices.Container.Single<IStaticDataService>());
             var mapGenerator =
-                new MapGenerator(_instance._mapProvider, _instance._gameFactory, _instance._meshFactory);
+                new MapGenerator(_instance._mapProvider, AllServices.Container.Single<IGameFactory>(),
+                    AllServices.Container.Single<IMeshFactory>());
             SimpleBenchmark.Execute(mapGenerator.GenerateMap);
             chunkContainer = mapGenerator.ChunkContainer;
             chunkContainer.transform.SetParent(transform);
             spawnPoints.Clear();
-            spawnPointsContainer = _instance._gameFactory.CreateGameObjectContainer("SpawnPointsContainer");
+            spawnPointsContainer = AllServices.Container.Single<IGameFactory>()
+                .CreateGameObjectContainer("SpawnPointsContainer");
             spawnPointsContainer.transform.SetParent(transform);
 
             for (var i = 0; i < mapConfigure.spawnPoints.Count; i++)
@@ -167,7 +167,8 @@ namespace MapCustomizer
 
         public GameObject CreateSpawnPoint(Vector3Int position)
         {
-            var spawnPoint = _instance._entityFactory.CreateSpawnPoint(position, spawnPointsContainer.transform)
+            var spawnPoint = AllServices.Container.Single<IEntityFactory>()
+                .CreateSpawnPoint(position, spawnPointsContainer.transform)
                 .gameObject;
             spawnPoint.AddComponent<PositionAligner>();
             return spawnPoint;
@@ -175,18 +176,18 @@ namespace MapCustomizer
 
         private void InitializeFactories()
         {
-            var assets = new AssetProvider();
-            var storageService = new JsonToFileStorageService();
-            _instance._entityFactory = new EntityFactory(assets);
-            _instance._staticData = new StaticDataService();
-            var particleFactory = new ParticleFactory(assets, _instance._staticData, this);
-            _instance._meshFactory = new MeshFactory(assets);
-            var uiFactory = new UIFactory(assets, _staticData);
-            var inputService = new StandaloneInputService();
-            _instance._gameFactory =
-                new GameFactory(assets, inputService, storageService, _entityFactory, _staticData, particleFactory,
-                    _meshFactory,
-                    uiFactory);
+            AllServices.Container.RegisterSingle<IAssetProvider>(new AssetProvider());
+            var assets = AllServices.Container.Single<IAssetProvider>();
+            AllServices.Container.RegisterSingle<IStaticDataService>(new StaticDataService(assets));
+            var staticData = AllServices.Container.Single<IStaticDataService>();
+            AllServices.Container.RegisterSingle<IInputService>(new StandaloneInputService());
+            AllServices.Container.RegisterSingle<IStorageService>(new JsonToFileStorageService());
+            AllServices.Container.RegisterSingle<IEntityFactory>(
+                new EntityFactory(assets));
+            AllServices.Container.RegisterSingle<IParticleFactory>(new ParticleFactory(assets, staticData, this));
+            AllServices.Container.RegisterSingle<IMeshFactory>(new MeshFactory(assets));
+            AllServices.Container.RegisterSingle<IUIFactory>(new UIFactory(assets, staticData));
+            AllServices.Container.RegisterSingle<IGameFactory>(new GameFactory(AllServices.Container));
         }
 
         private void LoadConfigure()

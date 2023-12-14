@@ -67,5 +67,10 @@ namespace Networking.ServerServices
 
             return scoreData.ToList();
         }
+
+        public Dictionary<NetworkConnectionToClient, PlayerData> GetDataByConnection()
+        {
+            return _dataByConnection;
+        }
     }
 }

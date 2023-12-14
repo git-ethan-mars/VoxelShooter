@@ -42,7 +42,9 @@ namespace Infrastructure.States
 
         private void RegisterServices()
         {
-            _allServices.RegisterSingle<IStaticDataService>(new StaticDataService());
+            _allServices.RegisterSingle<IAssetProvider>(new AssetProvider());
+            _allServices.RegisterSingle<IStaticDataService>(
+                new StaticDataService(_allServices.Single<IAssetProvider>()));
             _allServices.RegisterSingle<IStorageService>(new JsonToFileStorageService());
             var staticData = _allServices.Single<IStaticDataService>();
             _allServices.RegisterSingle<IMapRepository>(new MapRepository(staticData));
@@ -51,8 +53,10 @@ namespace Infrastructure.States
             staticData.LoadPlayerCharacteristics();
             staticData.LoadMapConfigures();
             staticData.LoadLobbyBalance();
+            staticData.LoadBlockHealthBalance();
+            staticData.LoadSounds();
+            staticData.LoadFallDamageConfiguration();
             _allServices.RegisterSingle<IInputService>(new StandaloneInputService());
-            _allServices.RegisterSingle<IAssetProvider>(new AssetProvider());
             if (Constants.isLocalBuild)
             {
                 _allServices.RegisterSingle<IAvatarLoader>(
@@ -72,11 +76,7 @@ namespace Infrastructure.States
             _allServices.RegisterSingle<IUIFactory>(new UIFactory(_allServices.Single<IAssetProvider>(),
                 _allServices.Single<IStaticDataService>()));
             _allServices.RegisterSingle<IGameFactory>(
-                new GameFactory(_allServices.Single<IAssetProvider>(), _allServices.Single<IInputService>(),
-                    _allServices.Single<IStorageService>(),
-                    _allServices.Single<IEntityFactory>(),
-                    staticData, _allServices.Single<IParticleFactory>(), _allServices.Single<IMeshFactory>(),
-                    _allServices.Single<IUIFactory>()));
+                new GameFactory(_allServices));
         }
     }
 }

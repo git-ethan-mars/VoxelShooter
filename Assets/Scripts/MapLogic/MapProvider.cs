@@ -69,5 +69,7 @@ namespace MapLogic
             return MapData.Width / ChunkData.ChunkSize * MapData.Height / ChunkData.ChunkSize * MapData.Depth /
                    ChunkData.ChunkSize;
         }
+
+        public int BlockCount => MapData.Width * MapData.Height * MapData.Depth;
     }
 }

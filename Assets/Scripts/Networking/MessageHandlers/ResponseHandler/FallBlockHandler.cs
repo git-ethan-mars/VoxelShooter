@@ -1,19 +1,20 @@
-﻿using Networking.Messages.Responses;
+﻿using Generators;
+using Networking.Messages.Responses;
 
 namespace Networking.MessageHandlers.ResponseHandler
 {
     public class FallBlockHandler : ResponseHandler<FallBlockResponse>
     {
-        private readonly IClient _client;
+        private readonly FallMeshGenerator _fallMeshGenerator;
 
-        public FallBlockHandler(IClient client)
+        public FallBlockHandler(FallMeshGenerator fallMeshGenerator)
         {
-            _client = client;
+            _fallMeshGenerator = fallMeshGenerator;
         }
 
         protected override void OnResponseReceived(FallBlockResponse message)
         {
-            _client.FallMeshGenerator.GenerateFallBlocks(message.Positions, message.Colors);
+            _fallMeshGenerator.GenerateFallBlocks(message.Blocks);
         }
     }
 }

@@ -3,10 +3,7 @@ using System.Linq;
 using Data;
 using Entities;
 using Explosions;
-using Infrastructure;
-using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
-using Infrastructure.Services.StaticData;
 using MapLogic;
 using Mirror;
 using Networking.MessageHandlers.RequestHandlers;
@@ -22,74 +19,81 @@ namespace Networking
     {
         public MapProvider MapProvider { get; }
         public ServerData Data { get; }
-        public MapUpdater MapUpdater { get; }
+        public BlockHealthSystem BlockHealthSystem { get; }
+
         private readonly ServerSettings _serverSettings;
+        private readonly IPlayerFactory _playerFactory;
+        private readonly IEntityFactory _entityFactory;
         private readonly EntityPositionValidator _entityPositionValidator;
         private readonly BoxDropService _boxDropService;
         private readonly SpawnPointService _spawnPointService;
         private readonly ServerTimer _serverTimer;
-        private readonly IEntityFactory _entityFactory;
-        private readonly IPlayerFactory _playerFactory;
-        private readonly ICoroutineRunner _customNetworkManager;
+        private readonly CustomNetworkManager _networkManager;
         private readonly AddBlocksHandler _addBlocksHandler;
         private readonly ChangeClassHandler _changeClassHandler;
         private readonly GrenadeSpawnHandler _grenadeSpawnHandler;
-        private readonly RocketSpawnHandler _rocketSpawnHandler;
         private readonly TntSpawnHandler _tntSpawnHandler;
         private readonly ChangeSlotHandler _changeSlotHandler;
         private readonly IncrementSlotIndexHandler _incrementSlotIndexHandler;
         private readonly DecrementSlotIndexHandler _decrementSlotIndexHandler;
         private readonly ShootHandler _shootHandler;
+        private readonly CancelShootHandler _cancelShootHandler;
         private readonly ReloadHandler _reloadHandler;
         private readonly HitHandler _hitHandler;
         private readonly AuthenticationHandler _authenticationHandler;
+        private readonly FallDamageService _fallDamageService;
 
-        public Server(CustomNetworkManager customNetworkManager, IStaticDataService staticData,
-            ServerSettings serverSettings, IAssetProvider assets, IGameFactory gameFactory,
-            IParticleFactory particleFactory, IEntityFactory entityFactory)
+        public Server(CustomNetworkManager networkManager, ServerSettings serverSettings)
         {
-            _customNetworkManager = customNetworkManager;
+            _networkManager = networkManager;
+            var staticData = networkManager.StaticData;
+            _entityFactory = networkManager.EntityFactory;
+            _playerFactory = networkManager.PlayerFactory;
             _serverSettings = serverSettings;
-            _entityFactory = entityFactory;
-            MapProvider = MapReader.ReadFromFile(serverSettings.MapName, staticData);
-            MapUpdater = new MapUpdater(customNetworkManager, MapProvider);
-            _entityPositionValidator = new EntityPositionValidator(MapUpdater, MapProvider);
+            MapProvider = MapReader.ReadFromFile(serverSettings.MapName, networkManager.StaticData);
+            var mapUpdater = new MapUpdater(networkManager, MapProvider);
+            _entityPositionValidator = new EntityPositionValidator(mapUpdater, MapProvider);
             _spawnPointService =
-                new SpawnPointService(MapProvider, gameFactory, entityFactory, _entityPositionValidator);
-            _playerFactory = new PlayerFactory(assets, _spawnPointService);
-            Data = new ServerData(staticData);
-            _serverTimer = new ServerTimer(customNetworkManager, serverSettings.MaxDuration);
-            _boxDropService = new BoxDropService(this, customNetworkManager, serverSettings, entityFactory,
-                _entityPositionValidator, gameFactory);
-            var sphereExplosionArea = new SphereExplosionArea(MapProvider);
-            var singleExplosionBehaviour = new SingleExplosionBehaviour(this, particleFactory,
+                new SpawnPointService(MapProvider, networkManager.GameFactory, networkManager.EntityFactory,
+                    _entityPositionValidator);
+            Data = new ServerData(networkManager.StaticData);
+            _serverTimer = new ServerTimer(networkManager, serverSettings.MaxDuration);
+            _boxDropService = new BoxDropService(this, networkManager, serverSettings, _entityPositionValidator);
+            var sphereExplosionArea = new SphereDamageArea(MapProvider);
+            var singleExplosionBehaviour = new SingleExplosionBehaviour(this, networkManager.ParticleFactory,
                 sphereExplosionArea);
-            var chainExplosionBehaviour = new ChainExplosionBehaviour(this, particleFactory,
+            var chainExplosionBehaviour = new ChainExplosionBehaviour(this, networkManager.ParticleFactory,
                 sphereExplosionArea);
-            var rangeWeaponValidator = new RangeWeaponValidator(this, customNetworkManager, particleFactory);
-            var meleeWeaponValidator = new MeleeWeaponValidator(this, customNetworkManager, particleFactory);
+            BlockHealthSystem = new BlockHealthSystem(networkManager.StaticData, MapProvider, mapUpdater);
+            var audioService = new AudioService(staticData);
+            var rangeWeaponValidator = new RangeWeaponValidator(this, networkManager, audioService);
+            var meleeWeaponValidator = new MeleeWeaponValidator(this, networkManager, audioService);
+            var rocketLauncherValidator = new RocketLauncherValidator(this, networkManager, audioService);
             _addBlocksHandler = new AddBlocksHandler(this);
             _changeClassHandler = new ChangeClassHandler(this);
-            _changeSlotHandler = new ChangeSlotHandler(this);
-            _incrementSlotIndexHandler = new IncrementSlotIndexHandler(this);
-            _decrementSlotIndexHandler = new DecrementSlotIndexHandler(this);
-            _grenadeSpawnHandler = new GrenadeSpawnHandler(this, customNetworkManager, entityFactory,
-                singleExplosionBehaviour);
-            _rocketSpawnHandler = new RocketSpawnHandler(this, customNetworkManager, entityFactory, particleFactory);
+            _changeSlotHandler = new ChangeSlotHandler(this, audioService);
+            _incrementSlotIndexHandler = new IncrementSlotIndexHandler(this, audioService);
+            _decrementSlotIndexHandler = new DecrementSlotIndexHandler(this, audioService);
+            _grenadeSpawnHandler = new GrenadeSpawnHandler(this, networkManager,
+                singleExplosionBehaviour, audioService);
             _tntSpawnHandler =
-                new TntSpawnHandler(this, customNetworkManager, entityFactory, chainExplosionBehaviour);
-            _shootHandler = new ShootHandler(this, rangeWeaponValidator);
-            _reloadHandler = new ReloadHandler(this, rangeWeaponValidator);
+                new TntSpawnHandler(this, networkManager, chainExplosionBehaviour);
+            _shootHandler = new ShootHandler(this, rangeWeaponValidator, rocketLauncherValidator);
+            _cancelShootHandler = new CancelShootHandler(this, rangeWeaponValidator);
+            _reloadHandler = new ReloadHandler(this, rangeWeaponValidator, rocketLauncherValidator);
             _hitHandler = new HitHandler(this, meleeWeaponValidator);
             _authenticationHandler = new AuthenticationHandler(this);
+            _fallDamageService = new FallDamageService(this, networkManager);
         }
 
         public void Start()
         {
             RegisterHandlers();
             _serverTimer.Start();
+            _entityPositionValidator.Start();
             _boxDropService.Start();
             _spawnPointService.CreateSpawnPoints();
+            _fallDamageService.Start();
         }
 
         public void AddPlayer(NetworkConnectionToClient connection, CSteamID steamID,
@@ -105,7 +109,7 @@ namespace Networking
             {
                 playerData.GameClass = chosenClass;
                 playerData.PlayerStateMachine.Enter<LifeState>();
-                var player = _playerFactory.CreatePlayer();
+                var player = _playerFactory.CreatePlayer(_spawnPointService.GetSpawnPosition());
                 NetworkServer.AddPlayerForConnection(connection, player);
                 connection.Send(new PlayerConfigureResponse(playerData.Characteristic.placeDistance,
                     playerData.Characteristic.speed, playerData.Characteristic.jumpHeight,
@@ -126,7 +130,7 @@ namespace Networking
                 var spectator = _playerFactory.CreateSpectatorPlayer(connection.identity.transform.position);
                 ReplacePlayer(connection, spectator);
                 connection.Send(new SpectatorConfigureResponse());
-                var respawnTimer = new RespawnTimer(_customNetworkManager, connection, _serverSettings.SpawnTime,
+                var respawnTimer = new RespawnTimer(_networkManager, connection, _serverSettings.SpawnTime,
                     () => RespawnPlayer(connection));
                 respawnTimer.Start();
             }
@@ -178,8 +182,10 @@ namespace Networking
 
         public void Stop()
         {
+            _entityPositionValidator.Stop();
             _boxDropService.Stop();
             _spawnPointService.RemoveSpawnPoints();
+            _fallDamageService.Stop();
             UnregisterHandlers();
         }
 
@@ -191,9 +197,9 @@ namespace Networking
             _incrementSlotIndexHandler.Register();
             _decrementSlotIndexHandler.Register();
             _grenadeSpawnHandler.Register();
-            _rocketSpawnHandler.Register();
             _tntSpawnHandler.Register();
             _shootHandler.Register();
+            _cancelShootHandler.Register();
             _reloadHandler.Register();
             _hitHandler.Register();
             _authenticationHandler.Register();
@@ -207,9 +213,9 @@ namespace Networking
             _incrementSlotIndexHandler.Unregister();
             _decrementSlotIndexHandler.Unregister();
             _grenadeSpawnHandler.Unregister();
-            _rocketSpawnHandler.Unregister();
             _tntSpawnHandler.Unregister();
             _shootHandler.Unregister();
+            _cancelShootHandler.Unregister();
             _reloadHandler.Unregister();
             _hitHandler.Unregister();
             _authenticationHandler.Unregister();
@@ -220,6 +226,7 @@ namespace Networking
             var tombstonePosition = Vector3Int.FloorToInt(victim.identity.transform.position) +
                                     Constants.worldOffset;
             var tombstone = _entityFactory.CreateTombstone(tombstonePosition);
+            NetworkServer.Spawn(tombstone);
             _entityPositionValidator.AddEntity(tombstone.GetComponent<IPushable>());
             Data.AddKill(killer, victim);
             var playerData = Data.GetPlayerData(victim);
@@ -227,7 +234,7 @@ namespace Networking
             var spectatorPlayer = _playerFactory.CreateSpectatorPlayer(tombstonePosition);
             ReplacePlayer(victim, spectatorPlayer);
             victim.Send(new SpectatorConfigureResponse());
-            var respawnTimer = new RespawnTimer(_customNetworkManager, victim, _serverSettings.SpawnTime,
+            var respawnTimer = new RespawnTimer(_networkManager, victim, _serverSettings.SpawnTime,
                 () => RespawnPlayer(victim));
             respawnTimer.Start();
             NetworkServer.SendToReady(new ScoreboardResponse(Data.GetScoreData()));
@@ -256,7 +263,7 @@ namespace Networking
                 if (Data.TryGetPlayerData(anotherClient, out var anotherPlayer) && playerData.IsAlive)
                 {
                     connection.Send(new ChangeItemModelResponse(anotherClient.identity,
-                        anotherPlayer.Items[anotherPlayer.SelectedSlotIndex].id));
+                        anotherPlayer.SelectedItem.id));
                     connection.Send(new NickNameResponse(anotherClient.identity, anotherPlayer.NickName));
                 }
             }
@@ -264,9 +271,14 @@ namespace Networking
 
         private void RespawnPlayer(NetworkConnectionToClient connection)
         {
-            var playerData = Data.GetPlayerData(connection);
+            var result = Data.TryGetPlayerData(connection, out var playerData);
+            if (!result)
+            {
+                return;
+            }
+
             playerData.PlayerStateMachine.Enter<LifeState>();
-            var player = _playerFactory.CreatePlayer();
+            var player = _playerFactory.CreatePlayer(_spawnPointService.GetSpawnPosition());
             ReplacePlayer(connection, player);
             connection.Send(new PlayerConfigureResponse(playerData.Characteristic.placeDistance,
                 playerData.Characteristic.speed, playerData.Characteristic.jumpHeight,
@@ -284,7 +296,15 @@ namespace Networking
 
             var oldPlayer = connection.identity.gameObject;
             NetworkServer.ReplacePlayerForConnection(connection, newPlayer, true);
-            Object.Destroy(oldPlayer, 0.1f);
+            _networkManager.StartCoroutine(Utils.DoActionAfterDelay(() => DestroyPlayer(oldPlayer), 0.1f));
+        }
+
+        private void DestroyPlayer(GameObject oldPlayer)
+        {
+            if (oldPlayer != null)
+            {
+                NetworkServer.Destroy(oldPlayer);
+            }
         }
     }
 }

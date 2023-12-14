@@ -16,6 +16,7 @@ namespace Data
         public float minThrowForce;
         public int particlesSpeed;
         public int particlesCount;
+        public AudioData explosionSound;
 
         public void Awake()
         {

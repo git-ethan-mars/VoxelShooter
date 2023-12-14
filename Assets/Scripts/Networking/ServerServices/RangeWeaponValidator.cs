@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using Data;
+using Explosions;
 using Infrastructure;
 using Infrastructure.Factory;
 using Mirror;
@@ -14,20 +15,30 @@ namespace Networking.ServerServices
         private readonly IServer _server;
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly IParticleFactory _particleFactory;
+        private readonly LineDamageArea _lineDamageArea;
+        private readonly AudioService _audioService;
 
-        public RangeWeaponValidator(IServer server, ICoroutineRunner coroutineRunner, IParticleFactory particleFactory)
+        public RangeWeaponValidator(IServer server, CustomNetworkManager networkManager, AudioService audioService)
         {
             _server = server;
-            _coroutineRunner = coroutineRunner;
-            _particleFactory = particleFactory;
+            _coroutineRunner = networkManager;
+            _particleFactory = networkManager.ParticleFactory;
+            _lineDamageArea = new LineDamageArea(_server.MapProvider);
+            _audioService = audioService;
         }
 
         public void Shoot(NetworkConnectionToClient connection, Ray ray, bool requestIsButtonHolding)
         {
             var playerData = _server.Data.GetPlayerData(connection);
-            var rangeWeapon = (RangeWeaponItem) playerData.Items[playerData.SelectedSlotIndex];
+            var rangeWeapon = (RangeWeaponItem) playerData.SelectedItem;
             var rangeWeaponData = (RangeWeaponData) playerData.ItemData[playerData.SelectedSlotIndex];
 
+            if (rangeWeaponData.BulletsInMagazine == 0 && playerData.HasContinuousSound)
+            {
+                _audioService.StopContinuousSound(connection.identity);
+                playerData.HasContinuousSound = false;
+            }
+            
             if (!CanShoot(rangeWeaponData) || requestIsButtonHolding != rangeWeapon.isAutomatic)
             {
                 return;
@@ -39,20 +50,32 @@ namespace Networking.ServerServices
             }
 
             rangeWeaponData.BulletsInMagazine -= 1;
-            if (rangeWeaponData.BulletsInMagazine <= 0)
-            {
-                rangeWeaponData.BulletsInMagazine = 0;
-            }
-
             connection.Send(new ShootResultResponse(rangeWeaponData.BulletsInMagazine));
             _coroutineRunner.StartCoroutine(ResetShoot(connection, rangeWeapon, rangeWeaponData));
             _coroutineRunner.StartCoroutine(ResetRecoil(connection, rangeWeapon, rangeWeaponData));
+
+            if (rangeWeapon.isAutomatic)
+            {
+                _audioService.StartContinuousAudio(rangeWeapon.shootingSound, connection.identity);
+                playerData.HasContinuousSound = true;
+            }
+            else
+            {
+                _audioService.SendAudio(rangeWeapon.shootingSound, connection.identity);
+            }
+        }
+
+        public void CancelShoot(NetworkConnectionToClient connection)
+        {
+            var playerData = _server.Data.GetPlayerData(connection);
+            _audioService.StopContinuousSound(connection.identity);
+            playerData.HasContinuousSound = false;
         }
 
         public void Reload(NetworkConnectionToClient connection)
         {
             var playerData = _server.Data.GetPlayerData(connection);
-            var rangeWeapon = (RangeWeaponItem) playerData.Items[playerData.SelectedSlotIndex];
+            var rangeWeapon = (RangeWeaponItem) playerData.SelectedItem;
             var rangeWeaponData = (RangeWeaponData) playerData.ItemData[playerData.SelectedSlotIndex];
             if (!CanReload(rangeWeapon, rangeWeaponData))
             {
@@ -60,6 +83,7 @@ namespace Networking.ServerServices
             }
 
             _coroutineRunner.StartCoroutine(ReloadInternal(connection, rangeWeapon, rangeWeaponData));
+            _audioService.SendAudio(rangeWeapon.reloadingSound, connection.identity);
         }
 
         private IEnumerator ReloadInternal(NetworkConnectionToClient connection, RangeWeaponItem configure,
@@ -179,10 +203,12 @@ namespace Networking.ServerServices
 
             if (rayHit.collider.CompareTag("Chunk"))
             {
-                var block = _server.MapProvider.GetBlockByGlobalPosition(
-                    Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2));
-                _particleFactory.CreateBulletImpact(rayHit.point, Quaternion.Euler(rayHit.normal.y * -90,
+                var blockPosition = Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2);
+                var block = _server.MapProvider.GetBlockByGlobalPosition(blockPosition);
+                _server.BlockHealthSystem.DamageBlock(blockPosition, 1, configure.damage, _lineDamageArea);
+                var bullet = _particleFactory.CreateBulletImpact(rayHit.point, Quaternion.Euler(rayHit.normal.y * -90,
                     rayHit.normal.x * 90 + (rayHit.normal.z == -1 ? 180 : 0), 0), block.Color);
+                NetworkServer.Spawn(bullet);
             }
         }
 
@@ -192,7 +218,8 @@ namespace Networking.ServerServices
             if (source != receiver)
             {
                 _server.Damage(source, receiver, damage);
-                _particleFactory.CreateBlood(rayHit.point, Quaternion.LookRotation(rayHit.normal));
+                var blood = _particleFactory.CreateBlood(rayHit.point, Quaternion.LookRotation(rayHit.normal));
+                NetworkServer.Spawn(blood);
             }
         }
 

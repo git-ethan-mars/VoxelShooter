@@ -15,14 +15,14 @@ MonoBehaviour:
   id: 8
   itemType: 0
   inventoryIcon: {fileID: 1027491563, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
-  prefab: {fileID: 6832412113328611646, guid: 2d0374a3da8ee3a4c821020715dce190, type: 3}
+  prefab: {fileID: 9030222180740480023, guid: bad7feca91d5cae45acf91b46eeac0d9, type: 3}
   ammoIcon: {fileID: -183867098, guid: e7634cc0bf7762649a525e59875cd9d1, type: 3}
   isAutomatic: 1
   timeBetweenShooting: 0.06
   baseRecoil: 0.006
   stepRecoil: 0.05
   resetTimeRecoil: 0.5
-  range: 250
+  range: 200
   reloadTime: 1
   magazineSize: 60
   bulletsPerTap: 1
@@ -33,7 +33,5 @@ MonoBehaviour:
   chestMultiplier: 1
   legMultiplier: 0.8
   armMultiplier: 0.6
-  shootingAudioClip: {fileID: 8300000, guid: 3765d92c4c9b5534d8b5f82a49dd8dc6, type: 3}
-  shootingVolume: 0.7
-  reloadingAudioClip: {fileID: 8300000, guid: 5e6b2e49513ddb74da2571eea6c679aa, type: 3}
-  reloadingVolume: 1
+  shootingSound: {fileID: 11400000, guid: 99fef55f8818002438ca06dd3cbef51f, type: 2}
+  reloadingSound: {fileID: 11400000, guid: 1afb59dd54d474c46b08dbf548e0ae83, type: 2}

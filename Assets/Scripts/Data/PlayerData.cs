@@ -20,6 +20,8 @@ namespace Data
         public List<InventoryItem> Items { get; set; }
         public List<IMutableItemData> ItemData { get; set; }
         public Dictionary<InventoryItem, int> CountByItem { get; set; }
+        public InventoryItem SelectedItem => Items[SelectedSlotIndex];
+        public bool HasContinuousSound { get; set; }
 
         public PlayerData(CSteamID steamID, string nickName, IStaticDataService staticDataService)
         {

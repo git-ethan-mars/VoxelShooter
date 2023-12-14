@@ -4,7 +4,6 @@ using Data;
 using Mirror;
 using Networking.Messages.Requests;
 using Networking.Messages.Responses;
-using UnityEngine;
 
 namespace Networking.MessageHandlers.RequestHandlers
 {
@@ -20,19 +19,26 @@ namespace Networking.MessageHandlers.RequestHandlers
         protected override void OnRequestReceived(NetworkConnectionToClient connection, AddBlocksRequest request)
         {
             var result = _server.Data.TryGetPlayerData(connection, out var playerData);
-            if (!result || !playerData.IsAlive) return;
-            var blockAmount = playerData.CountByItem[playerData.Items[playerData.SelectedSlotIndex]];
-            var validPositions = new List<Vector3Int>();
-            var validBlockData = new List<BlockData>();
-            var blocksUsed = Math.Min(blockAmount, request.GlobalPositions.Length);
+            if (!result || !playerData.IsAlive || playerData.SelectedItem is not BlockItem)
+            {
+                return;
+            }
+
+            var blockAmount = playerData.CountByItem[playerData.SelectedItem];
+            var validBlocks = new List<BlockDataWithPosition>();
+            var blocksUsed = Math.Min(blockAmount, request.Blocks.Length);
             for (var i = 0; i < blocksUsed; i++)
             {
+                var blockPosition = request.Blocks[i].Position;
                 foreach (var otherConnection in _server.Data.ClientConnections)
                 {
                     result = _server.Data.TryGetPlayerData(otherConnection, out var otherPlayer);
-                    if (!result || !otherPlayer.IsAlive) continue;
+                    if (!result || !otherPlayer.IsAlive)
+                    {
+                        continue;
+                    }
+
                     var playerPosition = otherConnection.identity.gameObject.transform.position;
-                    var blockPosition = request.GlobalPositions[i];
                     if (playerPosition.x > blockPosition.x
                         && playerPosition.x < blockPosition.x + 1
                         && playerPosition.z > blockPosition.z
@@ -42,25 +48,24 @@ namespace Networking.MessageHandlers.RequestHandlers
                         return;
                 }
 
-                if (!_server.MapProvider.IsDestructiblePosition(request.GlobalPositions[i]))
+                if (!_server.MapProvider.IsDestructiblePosition(blockPosition))
                 {
                     return;
                 }
 
-                var currentBlock = _server.MapProvider.GetBlockByGlobalPosition(request.GlobalPositions[i]);
-                if (currentBlock.Equals(request.Blocks[i]))
+                var currentBlock = _server.MapProvider.GetBlockByGlobalPosition(blockPosition);
+                if (currentBlock.Equals(request.Blocks[i].BlockData))
                 {
                     return;
                 }
 
-                validPositions.Add(request.GlobalPositions[i]);
-                validBlockData.Add(request.Blocks[i]);
+                validBlocks.Add(request.Blocks[i]);
             }
 
-            playerData.CountByItem[playerData.Items[playerData.SelectedSlotIndex]] = blockAmount - blocksUsed;
+            playerData.CountByItem[playerData.SelectedItem] = blockAmount - blocksUsed;
             connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex,
                 blockAmount - blocksUsed));
-            _server.MapUpdater.SetBlocksByGlobalPositions(validPositions, validBlockData);
+            _server.BlockHealthSystem.InitializeBlocks(validBlocks);
         }
     }
 }

@@ -5,7 +5,6 @@ using Data;
 using Infrastructure.Factory;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
-using Infrastructure.Services.Storage;
 using Inventory.Block;
 using Inventory.Grenade;
 using Inventory.MeleeWeapon;
@@ -30,11 +29,13 @@ namespace Inventory
         private readonly ItemUseHandler _itemUseHandler;
         private readonly ReloadResultHandler _reloadHandler;
         private readonly ShootResultHandler _shootHandler;
+        private readonly RocketSpawnHandler _rocketSpawnHandler;
+        private readonly RocketReloadHandler _rocketReloadHandler;
         private readonly InventoryInput _inventoryInput;
         private readonly Hud _hud;
 
         public InventorySystem(IInputService inputService, IStaticDataService staticData,
-            IMeshFactory meshFactory, IStorageService storageService, List<int> itemIds, Hud hud, Player player)
+            IMeshFactory meshFactory, List<int> itemIds, Hud hud, Player player)
         {
             var rayCaster = new RayCaster(Camera.main);
             _inventoryInput = new InventoryInput(inputService);
@@ -47,8 +48,8 @@ namespace Inventory
                 if (item.itemType == ItemType.RangeWeapon)
                 {
                     var rangeWeapon = (RangeWeaponItem) item;
-                    _states.Add(new RangeWeaponState(_inventoryInput, storageService, rayCaster,
-                        rangeWeapon, new RangeWeaponData(rangeWeapon), Camera.main, player, hud));
+                    _states.Add(new RangeWeaponState(_inventoryInput, rayCaster,
+                        rangeWeapon, new RangeWeaponData(rangeWeapon), player, hud));
                 }
 
                 if (item.itemType == ItemType.MeleeWeapon)
@@ -76,8 +77,9 @@ namespace Inventory
 
                 if (item.itemType == ItemType.RocketLauncher)
                 {
+                    var rocketLauncher = (RocketLauncherItem) item;
                     _states.Add(new RocketLauncherState(_inventoryInput, rayCaster,
-                        (RocketLauncherItem) item, hud));
+                        (RocketLauncherItem) item, hud, new RocketLauncherData(rocketLauncher)));
                 }
             }
 
@@ -96,6 +98,10 @@ namespace Inventory
             _reloadHandler.Register();
             _shootHandler = new ShootResultHandler(this);
             _shootHandler.Register();
+            _rocketSpawnHandler = new RocketSpawnHandler(this);
+            _rocketSpawnHandler.Register();
+            _rocketReloadHandler = new RocketReloadHandler(this);
+            _rocketReloadHandler.Register();
 
             ChangeSlotRequest(_index);
         }
@@ -106,16 +112,23 @@ namespace Inventory
             _inventoryInput.Update();
         }
 
-        public void Clear()
+        public void OnDestroy()
         {
             _inventoryInput.SlotButtonPressed -= ChangeSlotRequest;
             _inventoryInput.MouseScrolledUp -= SendIncrementSlotIndexRequest;
             _inventoryInput.MouseScrolledDown -= SendDecrementSlotIndexRequest;
             _states[_index].Exit();
+            foreach (var state in _states)
+            {
+                state.Dispose();
+            }
+
             _changeSlotHandler.Unregister();
             _itemUseHandler.Unregister();
             _reloadHandler.Unregister();
             _shootHandler.Unregister();
+            _rocketReloadHandler.Unregister();
+            _rocketSpawnHandler.Unregister();
         }
 
         public void SwitchActiveSlot(int slotIndex)

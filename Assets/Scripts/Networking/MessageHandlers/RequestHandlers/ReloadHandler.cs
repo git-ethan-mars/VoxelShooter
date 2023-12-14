@@ -1,28 +1,38 @@
+using Data;
 using Mirror;
 using Networking.Messages.Requests;
 using Networking.ServerServices;
+using UnityEngine;
 
 namespace Networking.MessageHandlers.RequestHandlers
 {
     public class ReloadHandler : RequestHandler<ReloadRequest>
     {
         private readonly IServer _server;
-        private readonly RangeWeaponValidator _weaponValidator;
+        private readonly RangeWeaponValidator _rangeWeaponValidator;
+        private readonly RocketLauncherValidator _rocketLauncherValidator;
 
-        public ReloadHandler(IServer server, RangeWeaponValidator weaponValidator)
+        public ReloadHandler(IServer server, RangeWeaponValidator rangeWeaponValidator, RocketLauncherValidator rocketLauncherValidator)
         {
             _server = server;
-            _weaponValidator = weaponValidator;
+            _rangeWeaponValidator = rangeWeaponValidator;
+            _rocketLauncherValidator = rocketLauncherValidator;
         }
         protected override void OnRequestReceived(NetworkConnectionToClient connection, ReloadRequest request)
         {
             var result = _server.Data.TryGetPlayerData(connection, out var playerData);
-            if (!result || !playerData.IsAlive)
+            if (result && playerData.IsAlive)
             {
-                return;
-            }
+                if (playerData.SelectedItem is RangeWeaponItem)
+                {
+                    _rangeWeaponValidator.Reload(connection);
+                }
 
-            _weaponValidator.Reload(connection);
+                if (playerData.SelectedItem is RocketLauncherItem)
+                {
+                    _rocketLauncherValidator.Reload(connection);
+                }
+            }
         }
     }
 }

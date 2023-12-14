@@ -4,23 +4,24 @@ namespace CameraLogic
 {
     public class ZoomService
     {
+        public bool IsZoomed { get; private set; }
         private readonly Camera _camera;
-        private readonly float _zoomMultiplier;
 
-        public ZoomService(Camera camera, float zoomMultiplier)
+        public ZoomService(Camera camera)
         {
             _camera = camera;
-            _zoomMultiplier = zoomMultiplier;
         }
 
-        public void ZoomIn()
+        public void ZoomIn(float zoomMultiplier)
         {
-            _camera.fieldOfView = Constants.DefaultFov / _zoomMultiplier;
+            _camera.fieldOfView = Constants.DefaultFov / zoomMultiplier;
+            IsZoomed = true;
         }
 
         public void ZoomOut()
         {
             _camera.fieldOfView = Constants.DefaultFov;
+            IsZoomed = false;
         }
     }
 }

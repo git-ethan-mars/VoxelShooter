@@ -7,7 +7,8 @@ public static class Constants
     public static readonly LayerMask attackMask = LayerMask.GetMask("Body") | LayerMask.GetMask("Chunk");
     public static readonly LayerMask buildMask = LayerMask.GetMask("Chunk");
     public const string VideoSettingsKey = "video_settings";
-    public const string MouseSettingKey = "mouse_setting";
+    public const string MouseSettingsKey = "mouse_settings";
+    public const string VolumeSettingsKey = "volume_settings";
     public const string VxlExtension = ".vxl";
     public const string RchExtension = ".rch";
     public const float Epsilon = 0.001f;

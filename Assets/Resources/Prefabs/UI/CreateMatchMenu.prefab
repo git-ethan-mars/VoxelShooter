@@ -750,7 +750,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_AdditionalShaderChannelsFlag: 25
+  m_AdditionalShaderChannelsFlag: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -809,9 +809,6 @@ MonoBehaviour:
   backButton: {fileID: 395605714154993111}
   resetButton: {fileID: 3061433538795144814}
   applyButton: {fileID: 8746748109361143213}
-  spawnTimeText: {fileID: 0}
-  incrementPlayerNumber: {fileID: 0}
-  decrementPlayerNumber: {fileID: 0}
   gameDuration: {fileID: 7263906329179727706}
   incrementGameDuration: {fileID: 435648626827097155}
   decrementGameDuration: {fileID: 624849803149315274}
@@ -819,9 +816,6 @@ MonoBehaviour:
   nextMapButton: {fileID: 601326420477128533}
   previousMapButton: {fileID: 8637619598222882878}
   mapImage: {fileID: 8417798989634124943}
-  boxSpawnTime: {fileID: 0}
-  incrementBoxSpawnTime: {fileID: 0}
-  decrementBoxSpawnTime: {fileID: 0}
 --- !u!1 &1950939087548743195
 GameObject:
   m_ObjectHideFlags: 0

@@ -15,7 +15,7 @@ namespace UI.SettingsMenu.States
             {
                 [typeof(MouseSettingsState)] = mouseSettingsState,
                 [typeof(VolumeSettingsState)] = volumeSettingsState,
-                [typeof(VideoSettingsState)] = videoSettingsState
+                [typeof(VideoSettingsState)] = videoSettingsState,
             };
         }
 
@@ -32,9 +32,10 @@ namespace UI.SettingsMenu.States
             _currentState.Enter();
         }
 
-        public void Clear()
+        public void Reset()
         {
             _currentState?.Exit();
+            _currentState = null;
         }
     }
 }

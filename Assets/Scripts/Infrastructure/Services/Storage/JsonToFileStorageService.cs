@@ -1,12 +1,16 @@
+using System;
 using System.IO;
 using Newtonsoft.Json;
+using UI.SettingsMenu;
 using UnityEngine;
 
 namespace Infrastructure.Services.Storage
 {
     public class JsonToFileStorageService : IStorageService
     {
-        public void Save(string key, object data)
+        public event Action<ISettingsData> DataSaved;
+
+        public void Save<T>(string key, T data) where T : ISettingsData
         {
             var path = BuildPath(key);
             var json = JsonConvert.SerializeObject(data);
@@ -14,9 +18,11 @@ namespace Infrastructure.Services.Storage
             {
                 fileStream.Write(json);
             }
+
+            DataSaved?.Invoke(data);
         }
 
-        public T Load<T>(string key) where T : new()
+        public T Load<T>(string key) where T : ISettingsData, new()
         {
             var path = BuildPath(key);
             if (!File.Exists(path))

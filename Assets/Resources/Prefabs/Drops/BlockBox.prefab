@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 2172793907154742833}
   - component: {fileID: 2152020212705423522}
   - component: {fileID: -191076255817143959}
-  m_Layer: 7
+  m_Layer: 12
   m_Name: BlockBox
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -15,4 +15,4 @@ MonoBehaviour:
   boxSpawnTime: 10
   spawnTime: 7
   minMatchDuration: 10
-  maxMatchDuration: 20
+  maxMatchDuration: 15

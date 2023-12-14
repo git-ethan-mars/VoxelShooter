@@ -14,17 +14,19 @@ namespace Inventory.RocketLauncher
         private readonly RocketLauncherView _rocketLauncherView;
 
         public RocketLauncherState(IInventoryInput inventoryInput, RayCaster rayCaster, RocketLauncherItem configure,
-            Hud hud)
+            Hud hud, RocketLauncherData rocketLauncherData)
         {
             _inventoryInput = inventoryInput;
-            _rocketLauncherModel = new RocketLauncherModel(rayCaster, configure);
-            _rocketLauncherView = new RocketLauncherView(configure, hud);
+            _rocketLauncherModel = new RocketLauncherModel(rayCaster, configure, rocketLauncherData);
+            _rocketLauncherView = new RocketLauncherView(configure, hud, rocketLauncherData);
         }
 
         public void Enter()
         {
             _inventoryInput.FirstActionButtonDown += _rocketLauncherModel.Shoot;
-            _rocketLauncherModel.Count.ValueChanged += _rocketLauncherView.OnCountChanged;
+            _rocketLauncherModel.Count.ValueChanged += _rocketLauncherView.OnTotalRocketCountChanged;
+            _rocketLauncherModel.RocketsInSlotsCount.ValueChanged += _rocketLauncherView.OnRocketInSlotsCountChanged;
+            _inventoryInput.ReloadButtonDown += _rocketLauncherModel.Reload;
             _rocketLauncherView.Enable();
         }
 
@@ -35,8 +37,14 @@ namespace Inventory.RocketLauncher
         public void Exit()
         {
             _inventoryInput.FirstActionButtonDown -= _rocketLauncherModel.Shoot;
-            _rocketLauncherModel.Count.ValueChanged -= _rocketLauncherView.OnCountChanged;
+            _rocketLauncherModel.Count.ValueChanged -= _rocketLauncherView.OnTotalRocketCountChanged;
+            _rocketLauncherModel.RocketsInSlotsCount.ValueChanged += _rocketLauncherView.OnRocketInSlotsCountChanged;
+            _inventoryInput.ReloadButtonDown -= _rocketLauncherModel.Reload;
             _rocketLauncherView.Disable();
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

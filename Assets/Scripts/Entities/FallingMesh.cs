@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Infrastructure.Factory;
+using Networking.ClientServices;
 using UnityEngine;
 
 namespace Entities
@@ -17,13 +17,13 @@ namespace Entities
         [SerializeField]
         private MeshRenderer meshRenderer;
 
-        private IFallingMeshParticlePool _particlePool;
+        private FallingMeshParticlePool _particlePool;
         private bool _hasCollided;
         private const int DestructionTime = 4;
         private const int ParticleSystemsCountModifier = 200;
         private const int MaxVerticesForMeshCollider = 24000;
 
-        public void Construct(IFallingMeshParticlePool particlePool)
+        public void Construct(FallingMeshParticlePool particlePool)
         {
             _particlePool = particlePool;
         }
