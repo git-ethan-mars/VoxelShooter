@@ -24,6 +24,7 @@ namespace Networking.ServerServices
         private readonly EntityPositionValidator _entityPositionValidator;
         private readonly Transform _parent;
         private IEnumerator _coroutine;
+        private readonly List<Vector3Int> _lootBoxSpawnPositions;
 
         public BoxDropService(IServer server, CustomNetworkManager networkManager, ServerSettings serverSettings,
             EntityPositionValidator entityPositionValidator)
@@ -34,6 +35,7 @@ namespace Networking.ServerServices
             _server = server;
             _entityPositionValidator = entityPositionValidator;
             _parent = networkManager.GameFactory.CreateGameObjectContainer(LootBoxContainer).transform;
+            _lootBoxSpawnPositions = GetLootBoxSpawnPositions();
         }
 
         public void Start()
@@ -47,13 +49,29 @@ namespace Networking.ServerServices
             _coroutineRunner.StopCoroutine(_coroutine);
         }
 
+        private List<Vector3Int> GetLootBoxSpawnPositions()
+        {
+            var spawnPositions = new List<Vector3Int>();
+            for (var x = 0; x < _server.MapProvider.MapData.Width; x++)
+            {
+                for (var z = 0; z < _server.MapProvider.MapData.Depth; z++)
+                {
+                    if (_server.MapProvider.GetBlockByGlobalPosition(x, 1, z).IsSolid())
+                    {
+                        spawnPositions.Add(new Vector3Int(x, _server.MapProvider.MapData.Height - 1, z));
+                    }
+                }
+            }
+
+            return spawnPositions;
+        }
+
         // If build up top layer, game will go into infinite loop
         private IEnumerator SpawnLootBox()
         {
             while (true)
             {
-                var boxSpawnLayer = _server.MapProvider.MapData.BoxSpawnLayer;
-                var spawnPosition = boxSpawnLayer[Random.Range(0, boxSpawnLayer.Count - 1)];
+                var spawnPosition = _lootBoxSpawnPositions[Random.Range(0, _lootBoxSpawnPositions.Count - 1)];
                 var spawnBlock = _server.MapProvider.GetBlockByGlobalPosition(spawnPosition.x,
                     spawnPosition.y, spawnPosition.z);
                 if (spawnBlock.IsSolid())
