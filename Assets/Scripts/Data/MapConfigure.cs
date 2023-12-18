@@ -11,7 +11,7 @@ namespace Data
         [Header("Image")]
         [ReadOnly]
         public Texture2D image;
-    
+
         [Header("Color")]
         [ReadOnly]
         public Color32 waterColor = new(3, 58, 135, 255);
@@ -20,7 +20,7 @@ namespace Data
         public Color32 innerColor = new(89, 53, 47, 255);
 
         [Header("Lighting")]
-        public LightData lightData = new(Vector3.zero, Quaternion.identity, Color.white);
+        public LightData lightData = new(Vector3.zero, Quaternion.identity, Color.white, 0, 0);
 
         [Header("Skybox")]
         [ReadOnly]
@@ -41,7 +41,7 @@ namespace Data
 
         [ReadOnly]
         public float ambientIntensity = 1;
-    
+
         [Header("Weather")]
         [ReadOnly]
         public ParticleSystem weather;

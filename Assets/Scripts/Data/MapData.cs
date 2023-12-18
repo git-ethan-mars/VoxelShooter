@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Data
 {
@@ -11,7 +10,6 @@ namespace Data
         public readonly int Depth;
         public readonly int Height;
         public readonly ChunkData[] Chunks;
-        public readonly List<Vector3Int> BoxSpawnLayer = new();
 
         public MapData(ChunkData[] chunks, int width, int height, int depth, Color32 solidColor, Color32 waterColor)
         {

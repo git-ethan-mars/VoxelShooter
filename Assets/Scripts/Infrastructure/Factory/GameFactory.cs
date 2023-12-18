@@ -81,7 +81,8 @@ namespace Infrastructure.Factory
             light.color = lightData.color;
             light.type = LightType.Directional;
             light.shadows = LightShadows.Soft;
-            light.shadowNormalBias = 0;
+            light.shadowBias = lightData.bias;
+            light.shadowNormalBias = lightData.normalBias;
         }
 
         public AudioSource CreateAudioSource(Transform container)

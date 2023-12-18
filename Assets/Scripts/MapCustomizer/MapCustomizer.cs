@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Data;
@@ -13,6 +14,7 @@ using MapLogic;
 using Optimization;
 using UnityEditor;
 using UnityEngine;
+using Environment = MapLogic.Environment;
 
 namespace MapCustomizer
 {
@@ -109,6 +111,18 @@ namespace MapCustomizer
                     mapConfigure.lightData.color = lightSource.color;
                     EditorUtility.SetDirty(mapConfigure);
                 }
+
+                if (Math.Abs(mapConfigure.lightData.bias - lightSource.shadowBias) > Constants.Epsilon)
+                {
+                    mapConfigure.lightData.bias = lightSource.shadowBias;
+                    EditorUtility.SetDirty(mapConfigure);
+                }
+
+                if (Math.Abs(mapConfigure.lightData.normalBias - lightSource.shadowNormalBias) > Constants.Epsilon)
+                {
+                    mapConfigure.lightData.normalBias = lightSource.shadowNormalBias;
+                    EditorUtility.SetDirty(mapConfigure);
+                }
             }
 
             UpdateSpawnPointGameObjects();
@@ -197,6 +211,8 @@ namespace MapCustomizer
                 lightSource.transform.position = mapConfigure.lightData.position;
                 lightSource.transform.rotation = mapConfigure.lightData.rotation;
                 lightSource.color = mapConfigure.lightData.color;
+                lightSource.shadowBias = mapConfigure.lightData.bias;
+                lightSource.shadowNormalBias = mapConfigure.lightData.normalBias;
             }
 
             Environment.ApplyAmbientLighting(mapConfigure);
