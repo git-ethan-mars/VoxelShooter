@@ -23,6 +23,8 @@ MonoBehaviour:
     position: {x: 256, y: 100, z: 100}
     rotation: {x: -0.2828916, y: -0.5241832, z: 0.7333457, w: -0.3277322}
     color: {r: 1, g: 1, b: 1, a: 1}
+    bias: 0.3
+    normalBias: 0.5
   skyboxMaterial: {fileID: 2100000, guid: 54fe2f000ad8f424fb63cc3ea0ae2bb2, type: 2}
   ambientMode: 0
   skyColor: {r: 0.21176471, g: 0.22745098, b: 0.25882354, a: 1}
