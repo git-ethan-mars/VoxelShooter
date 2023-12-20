@@ -16,6 +16,7 @@ namespace Generators
     {
         private const string ChunkContainerName = "ChunkContainer";
         private const string WallContainerName = "WallContainer";
+        private const float WaterScale = 2.0f;
         public ChunkMeshGenerator[] ChunkGenerators { get; private set; }
         public GameObject ChunkContainer { get; private set; }
 
@@ -63,6 +64,15 @@ namespace Generators
         {
             _wallContainer = _gameFactory.CreateGameObjectContainer(WallContainerName);
             _meshFactory.CreateWalls(_mapProvider, _wallContainer.transform);
+        }
+
+        public void GenerateWater()
+        {
+            _meshFactory.CreateWaterPlane(
+                new Vector3((float) _mapProvider.MapData.Width / 2, 0.5f, (float) _mapProvider.MapData.Width / 2) +
+                Constants.worldOffset,
+                new Vector3(_mapProvider.MapData.Width * WaterScale, 1, _mapProvider.MapData.Depth * WaterScale),
+                _mapProvider.MapData.WaterColor);
         }
 
         public void GenerateLight()

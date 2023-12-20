@@ -7,5 +7,6 @@ namespace Infrastructure.AssetManagement
         public const string WallPath = "Prefabs/MapCreation/Wall";
         public const string TransparentSamplePath = "Prefabs/TransparentSample";
         public const string PhysicMaterial = "Physics Materials/HighFrictionMaterial";
+        public const string WaterPlane = "Prefabs/MapCreation/WaterPlane";
     }
 }

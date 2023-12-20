@@ -26,7 +26,7 @@ namespace MapLogic
                     : CreateNewMap(mapConfigure);
             }
 
-            AddWater(mapProvider);
+            SetWaterLayer(mapProvider);
             return mapProvider;
         }
 
@@ -80,21 +80,15 @@ namespace MapLogic
             return mapData;
         }
 
-        private static void AddWater(MapProvider mapProvider)
+        private static void SetWaterLayer(MapProvider mapProvider)
         {
             for (var x = 0; x < mapProvider.MapData.Width; x++)
             {
                 for (var z = 0; z < mapProvider.MapData.Depth; z++)
                 {
                     var blocks = mapProvider.MapData.Chunks[mapProvider.GetChunkNumberByGlobalPosition(x, 0, z)].Blocks;
-                    var zeroHeightBlock = blocks[
-                        (x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
-                        (z & (ChunkData.ChunkSize - 1))];
-                    if (!zeroHeightBlock.IsSolid())
-                    {
-                        blocks[(x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
-                               (z & (ChunkData.ChunkSize - 1))] = new BlockData(mapProvider.MapData.WaterColor);
-                    }
+                    blocks[(x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
+                           (z & (ChunkData.ChunkSize - 1))] = new BlockData(mapProvider.MapData.WaterColor);
                 }
             }
         }

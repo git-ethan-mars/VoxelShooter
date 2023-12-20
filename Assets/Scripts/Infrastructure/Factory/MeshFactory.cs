@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Data;
 using Entities;
@@ -65,7 +66,8 @@ namespace Infrastructure.Factory
             var allFaces = Enum.GetValues(typeof(Faces)).Cast<Faces>().Where(face => face != Faces.None);
             foreach (var face in allFaces)
             {
-                _assets.Instantiate(MeshPath.WallPath, parent).GetComponent<WallRenderer>().Construct(mapProvider, face);
+                _assets.Instantiate(MeshPath.WallPath, parent).GetComponent<WallRenderer>()
+                    .Construct(mapProvider, face);
             }
         }
 
@@ -85,6 +87,19 @@ namespace Infrastructure.Factory
             transparentObject.GetComponent<MeshRenderer>().material = new Material(material);
             transparentObject.transform.localScale = prefab.transform.localScale;
             return transparentObject;
+        }
+
+        public void CreateWaterPlane(Vector3 position, Vector3 scale, Color32 waterColor)
+        {
+            var waterPlane = _assets.Instantiate(MeshPath.WaterPlane, position, Quaternion.identity);
+            waterPlane.transform.localScale = scale;
+            var mesh = new Mesh();
+            mesh.SetVertices(new List<Vector3>()
+                {new(-0.5f, 0, -0.5f), new(-0.5f, 0, 0.5f), new(0.5f, 0, -0.5f), new(0.5f, 0, 0.5f)});
+            mesh.SetTriangles(new[] {0, 1, 2, 1, 3, 2}, 0);
+            mesh.SetColors(Enumerable.Range(0, mesh.vertexCount).Select(_ => waterColor).ToList());
+            mesh.SetNormals(Enumerable.Range(0, mesh.vertexCount).Select(_ => Vector3.up).ToList());
+            waterPlane.GetComponent<MeshFilter>().sharedMesh = mesh;
         }
     }
 }

@@ -198,6 +198,7 @@ namespace Networking
             MapGenerator = new MapGenerator(_mapProvider, _gameFactory, _meshFactory);
             MapGenerator.GenerateMap();
             MapGenerator.GenerateWalls();
+            MapGenerator.GenerateWater();
             MapGenerator.GenerateLight();
             Environment.ApplyAmbientLighting(_mapProvider.SceneData);
             Environment.ApplyFog(_mapProvider.SceneData);
