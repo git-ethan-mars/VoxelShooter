@@ -68,11 +68,6 @@ namespace Infrastructure.Factory
             return new GameObject(containerName);
         }
 
-        public void CreateCamera()
-        {
-            new GameObject().AddComponent<Camera>();
-        }
-
         public void CreateDirectionalLight(LightData lightData)
         {
             var light = new GameObject(DirectionalLightName).AddComponent<Light>();

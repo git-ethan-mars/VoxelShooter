@@ -9,27 +9,25 @@ namespace PlayerLogic
     public class PlayerRotation
     {
         private const float SensitivityMultiplier = 50.0f;
+        private const float HeadRotationLimit = 88.5f;
 
         private float Sensitivity => _zoomService.IsZoomed ? _aimSensitivity : _generalSensitivity;
-        
-        private readonly Transform _headPivot;
-        private readonly Transform _bodyOrientation;
+
         private readonly ZoomService _zoomService;
-        
+        private readonly Transform _trackObjectPivot;
+
         private float _generalSensitivity;
         private float _aimSensitivity;
         private float _xRotation;
         private float _yRotation;
 
-        public PlayerRotation(IStorageService storageService, ZoomService zoomService, Transform bodyOrientation,
-            Transform headPivot)
+        public PlayerRotation(IStorageService storageService, ZoomService zoomService, Transform cameraMountPoint)
         {
             _zoomService = zoomService;
+            _trackObjectPivot = cameraMountPoint;
             var mouseSettings = storageService.Load<MouseSettingsData>(Constants.MouseSettingsKey);
             _generalSensitivity = mouseSettings.GeneralSensitivity;
             _aimSensitivity = mouseSettings.AimSensitivity;
-            _bodyOrientation = bodyOrientation;
-            _headPivot = headPivot;
         }
 
         public void Rotate(Vector2 direction)
@@ -38,9 +36,8 @@ namespace PlayerLogic
             var mouseY = direction.y * SensitivityMultiplier * Sensitivity * Time.deltaTime;
             _yRotation += mouseX;
             _xRotation -= mouseY;
-            _xRotation = Math.Clamp(_xRotation, -90, 90);
-            _bodyOrientation.rotation = Quaternion.Euler(0, _yRotation, 0);
-            _headPivot.rotation = Quaternion.Euler(_xRotation, _yRotation, 0);
+            _xRotation = Math.Clamp(_xRotation, -HeadRotationLimit, HeadRotationLimit);
+            _trackObjectPivot.rotation = Quaternion.Euler(_xRotation, _yRotation, 0);
         }
 
         public void ChangeMouseSettings(MouseSettingsData mouseSettings)
