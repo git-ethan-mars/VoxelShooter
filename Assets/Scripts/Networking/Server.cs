@@ -245,9 +245,9 @@ namespace Networking
             using var memoryStream = new MemoryStream();
             MapWriter.WriteMap(MapProvider, memoryStream);
             var bytes = memoryStream.ToArray();
-            var mapSplitter = new MapSplitter();
-            var mapMessages = mapSplitter.SplitBytesIntoMessages(bytes, Constants.MessageSize);
-            mapSplitter.SendMessages(mapMessages, connection);
+            var mapMessages = MessageSplitter.SplitBytesIntoMessages(bytes, Constants.MessageSize);
+            _networkManager.StartCoroutine(
+                MessageSplitter.SendMessages(mapMessages, Constants.MessageDelay, false, connection));
         }
 
         private void SendDataFromOtherPlayers(NetworkConnectionToClient connection)
