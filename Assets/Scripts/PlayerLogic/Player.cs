@@ -33,7 +33,7 @@ namespace PlayerLogic
         public Transform ItemPosition => itemPosition;
 
         [SerializeField]
-        private MeshRenderer[] bodyParts;
+        private SkinnedMeshRenderer skin;
 
         [SerializeField]
         private GameObject nickNameCanvas;
@@ -42,9 +42,6 @@ namespace PlayerLogic
 
         [SerializeField]
         private Transform bodyOrientation;
-
-        [SerializeField]
-        private Transform headPivot;
 
         [SerializeField]
         private Transform cameraMountPoint;
@@ -106,7 +103,7 @@ namespace PlayerLogic
             _jumpHeight = jumpHeight;
             _mainCamera = Camera.main;
             ZoomService = new ZoomService(_mainCamera);
-            Rotation = new PlayerRotation(_storageService, ZoomService, bodyOrientation, headPivot);
+            Rotation = new PlayerRotation(_storageService, ZoomService, cameraMountPoint);
             _hud = _uiFactory.CreateHud(this, _inputService);
             _inventory = new InventorySystem(_inputService, _staticData, _meshFactory, itemIds, _hud, this);
             TurnOffNickName();
@@ -175,10 +172,7 @@ namespace PlayerLogic
 
         private void TurnOffBodyRender()
         {
-            foreach (var bodyPart in bodyParts)
-            {
-                bodyPart.enabled = false;
-            }
+            skin.enabled = false;
         }
 
         private void TurnOffNickName()
