@@ -34,7 +34,7 @@ namespace Networking.ServerServices
             _entityFactory = networkManager.EntityFactory;
             _server = server;
             _entityPositionValidator = entityPositionValidator;
-            _parent = networkManager.GameFactory.CreateGameObjectContainer(LootBoxContainer).transform;
+            _parent = networkManager.GameFactory.CreateGameObjectContainer(LootBoxContainer);
             _lootBoxSpawnPositions = GetLootBoxSpawnPositions();
         }
 

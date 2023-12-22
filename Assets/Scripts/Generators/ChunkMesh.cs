@@ -5,42 +5,26 @@ using UnityEngine;
 
 namespace Generators
 {
-    public class ChunkMeshGenerator
+    public class ChunkMesh
     {
-        public ChunkMeshGenerator UpperNeighbour { get; set; }
-        public ChunkMeshGenerator LowerNeighbour { get; set; }
-        public ChunkMeshGenerator LeftNeighbour { get; set; }
-        public ChunkMeshGenerator RightNeighbour { get; set; }
-        public ChunkMeshGenerator FrontNeighbour { get; set; }
-        public ChunkMeshGenerator BackNeighbour { get; set; }
-        private Mesh ChunkMesh { get; }
+        public ChunkMesh UpperNeighbour { get; set; }
+        public ChunkMesh LowerNeighbour { get; set; }
+        public ChunkMesh LeftNeighbour { get; set; }
+        public ChunkMesh RightNeighbour { get; set; }
+        public ChunkMesh FrontNeighbour { get; set; }
+        public ChunkMesh BackNeighbour { get; set; }
+        private readonly Mesh _mesh;
         private readonly MeshData _meshData;
         private readonly ChunkData _chunkData;
-        private readonly GameObject _chunkMeshRenderer;
+        private readonly GameObject _chunkMeshObject;
 
-        public ChunkMeshGenerator(GameObject chunkMeshRenderer, ChunkData chunkData, MeshData meshData)
+        public ChunkMesh(GameObject chunkMeshObject, ChunkData chunkData, MeshData meshData)
         {
             _chunkData = chunkData;
             _meshData = meshData;
-            _chunkMeshRenderer = chunkMeshRenderer;
-            ChunkMesh = new Mesh();
-        }
-
-        public void ApplyMesh()
-        {
-            ChunkMesh.SetVertices(_meshData.Vertices);
-            ChunkMesh.SetTriangles(_meshData.Triangles, 0);
-            ChunkMesh.SetColors(_meshData.Colors);
-            ChunkMesh.SetNormals(_meshData.Normals);
-            if (_meshData.Vertices.Count == 0)
-            {
-                _chunkMeshRenderer.GetComponent<MeshCollider>().sharedMesh = null;
-            }
-            else
-            {
-                _chunkMeshRenderer.GetComponent<MeshFilter>().mesh = ChunkMesh;
-                _chunkMeshRenderer.GetComponent<MeshCollider>().sharedMesh = ChunkMesh;
-            }
+            _chunkMeshObject = chunkMeshObject;
+            _mesh = new Mesh();
+            ApplyMesh();
         }
 
         public void SpawnBlocks(List<BlockDataWithPosition> blocks)
@@ -124,6 +108,23 @@ namespace Generators
             }
         }
 
+        private void ApplyMesh()
+        {
+            _mesh.SetVertices(_meshData.Vertices);
+            _mesh.SetTriangles(_meshData.Triangles, 0);
+            _mesh.SetColors(_meshData.Colors);
+            _mesh.SetNormals(_meshData.Normals);
+            if (_meshData.Vertices.Count == 0)
+            {
+                _chunkMeshObject.GetComponent<MeshCollider>().sharedMesh = null;
+            }
+            else
+            {
+                _chunkMeshObject.GetComponent<MeshFilter>().mesh = _mesh;
+                _chunkMeshObject.GetComponent<MeshCollider>().sharedMesh = _mesh;
+            }
+        }
+
         private void SetNeighboursFaces(Vector3Int blockPosition)
         {
             if (ChunkData.IsValidPosition(blockPosition.x + 1, blockPosition.y, blockPosition.z))
@@ -159,11 +160,11 @@ namespace Generators
 
         private void RegenerateMesh()
         {
-            ChunkMesh.Clear();
+            _mesh.Clear();
             _meshData.Vertices.Clear();
             _meshData.Triangles.Clear();
             _meshData.Colors.Clear();
-            ChunkMesh.Clear();
+            _mesh.Clear();
             _meshData.Normals.Clear();
             for (var i = 0; i < ChunkData.ChunkSizeCubed; i++)
             {

@@ -30,7 +30,7 @@ namespace Networking
 
         public void CreateSpawnPoints()
         {
-            var parent = _gameFactory.CreateGameObjectContainer(SpawnPointContainerName).transform;
+            var parent = _gameFactory.CreateGameObjectContainer(SpawnPointContainerName);
             foreach (var spawnPointData in _mapProvider.SceneData.SpawnPoints)
             {
                 var spawnPoint = _entityFactory.CreateSpawnPoint(spawnPointData.ToVectorWithOffset(), parent);

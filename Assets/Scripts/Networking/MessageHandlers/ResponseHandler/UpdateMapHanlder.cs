@@ -2,6 +2,7 @@
 using Data;
 using Networking.ClientServices;
 using Networking.Messages.Responses;
+using Networking.ServerServices;
 
 namespace Networking.MessageHandlers.ResponseHandler
 {
@@ -42,7 +43,7 @@ namespace Networking.MessageHandlers.ResponseHandler
 
             foreach (var (chunkIndex, blocks) in blocksByChunkIndex)
             {
-                _client.MapGenerator.ChunkGenerators[chunkIndex].SpawnBlocks(blocks);
+                _client.ChunkMeshProvider.UpdateChunk(chunkIndex, blocks);
             }
 
             _client.Data.BufferToUpdateMap.Clear();

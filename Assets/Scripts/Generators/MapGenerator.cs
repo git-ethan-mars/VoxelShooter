@@ -14,16 +14,12 @@ namespace Generators
 {
     public class MapGenerator
     {
-        private const string ChunkContainerName = "ChunkContainer";
         private const string WallContainerName = "WallContainer";
         private const float WaterScale = 2.0f;
-        public ChunkMeshGenerator[] ChunkGenerators { get; private set; }
-        public GameObject ChunkContainer { get; private set; }
 
         private readonly MapProvider _mapProvider;
         private readonly IMeshFactory _meshFactory;
         private readonly IGameFactory _gameFactory;
-        private GameObject _wallContainer;
 
         public MapGenerator(MapProvider mapProvider, IGameFactory gameFactory, IMeshFactory meshFactory)
         {
@@ -32,38 +28,36 @@ namespace Generators
             _meshFactory = meshFactory;
         }
 
-        public unsafe void GenerateMap()
+        public unsafe ChunkMesh[] GenerateMap(Transform parent)
         {
-            ChunkContainer = _gameFactory.CreateGameObjectContainer(ChunkContainerName);
-            ChunkGenerators = new ChunkMeshGenerator[_mapProvider.GetChunkCount()];
             var handles = new ulong[_mapProvider.GetChunkCount()];
             var addresses = new void*[_mapProvider.GetChunkCount()];
 
-            for (var i = 0; i < _mapProvider.MapData.Chunks.Length; i++)
+            for (var i = 0; i < addresses.Length; i++)
             {
                 addresses[i] =
                     UnsafeUtility.PinGCArrayAndGetDataAddress(_mapProvider.MapData.Chunks[i].Blocks, out handles[i]);
             }
 
+            var chunkMeshObjects = CreateChunkMeshObjects(parent);
             var jobs = InitializeJobs(addresses);
-            RunJobs(jobs);
-            SetChunkNeighbours();
-
-            for (var i = 0; i < ChunkGenerators.Length; i++)
-            {
-                ChunkGenerators[i].ApplyMesh();
-            }
+            var jobHandles = RunJobs(jobs);
+            var meshes = CreateChunkMeshes(jobs, chunkMeshObjects);
 
             for (var i = 0; i < handles.Length; i++)
             {
                 UnsafeUtility.ReleaseGCObject(handles[i]);
             }
+
+            DisposeJobs(jobs);
+            jobHandles.Dispose();
+            return meshes;
         }
 
         public void GenerateWalls()
         {
-            _wallContainer = _gameFactory.CreateGameObjectContainer(WallContainerName);
-            _meshFactory.CreateWalls(_mapProvider, _wallContainer.transform);
+            var wallContainer = _gameFactory.CreateGameObjectContainer(WallContainerName);
+            _meshFactory.CreateWalls(_mapProvider, wallContainer);
         }
 
         public void GenerateWater()
@@ -80,9 +74,9 @@ namespace Generators
             _gameFactory.CreateDirectionalLight(_mapProvider.SceneData.LightData);
         }
 
-        private GameObject[] CreateChunkMeshRenders()
+        private GameObject[] CreateChunkMeshObjects(Transform chunkContainer)
         {
-            var chunkMeshRenderers = new GameObject[_mapProvider.GetChunkCount()];
+            var chunkMeshObjects = new GameObject[_mapProvider.GetChunkCount()];
             var index = 0;
             for (var x = 0; x < _mapProvider.MapData.Width / ChunkData.ChunkSize; x++)
             {
@@ -90,30 +84,30 @@ namespace Generators
                 {
                     for (var z = 0; z < _mapProvider.MapData.Depth / ChunkData.ChunkSize; z++)
                     {
-                        chunkMeshRenderers[index] = _meshFactory.CreateChunkMeshRender(
+                        chunkMeshObjects[index] = _meshFactory.CreateChunkMeshRender(
                             new Vector3(x * ChunkData.ChunkSize, y * ChunkData.ChunkSize, z * ChunkData.ChunkSize),
-                            Quaternion.identity, ChunkContainer.transform);
+                            Quaternion.identity, chunkContainer);
 
                         index += 1;
                     }
                 }
             }
 
-            return chunkMeshRenderers;
+            return chunkMeshObjects;
         }
 
-        private void SetChunkNeighbours()
+        private void SetChunkNeighbours(IReadOnlyList<ChunkMesh> meshes)
         {
-            for (var i = 0; i < ChunkGenerators.Length; i++)
+            for (var i = 0; i < meshes.Count; i++)
             {
-                if (i + _mapProvider.MapData.Depth / ChunkData.ChunkSize < ChunkGenerators.Length &&
+                if (i + _mapProvider.MapData.Depth / ChunkData.ChunkSize < meshes.Count &&
                     i / (_mapProvider.MapData.Depth / ChunkData.ChunkSize * _mapProvider.MapData.Height /
                          ChunkData.ChunkSize) ==
                     (i + _mapProvider.MapData.Depth / ChunkData.ChunkSize) /
                     (_mapProvider.MapData.Depth / ChunkData.ChunkSize * _mapProvider.MapData.Height /
                      ChunkData.ChunkSize))
-                    ChunkGenerators[i].UpperNeighbour =
-                        ChunkGenerators[i + _mapProvider.MapData.Depth / ChunkData.ChunkSize];
+                    meshes[i].UpperNeighbour =
+                        meshes[i + _mapProvider.MapData.Depth / ChunkData.ChunkSize];
 
                 if (i - _mapProvider.MapData.Depth / ChunkData.ChunkSize >= 0 &&
                     i / (_mapProvider.MapData.Depth / ChunkData.ChunkSize * _mapProvider.MapData.Height /
@@ -121,42 +115,42 @@ namespace Generators
                     (i - _mapProvider.MapData.Depth / ChunkData.ChunkSize) /
                     (_mapProvider.MapData.Depth / ChunkData.ChunkSize * _mapProvider.MapData.Height /
                      ChunkData.ChunkSize))
-                    ChunkGenerators[i].LowerNeighbour =
-                        ChunkGenerators[i - _mapProvider.MapData.Depth / ChunkData.ChunkSize];
+                    meshes[i].LowerNeighbour =
+                        meshes[i - _mapProvider.MapData.Depth / ChunkData.ChunkSize];
 
-                if (i + 1 < ChunkGenerators.Length &&
+                if (i + 1 < meshes.Count &&
                     i / (_mapProvider.MapData.Depth / ChunkData.ChunkSize) ==
                     (i + 1) / (_mapProvider.MapData.Depth / ChunkData.ChunkSize))
-                    ChunkGenerators[i].FrontNeighbour = ChunkGenerators[i + 1];
+                    meshes[i].FrontNeighbour = meshes[i + 1];
 
                 if (i - 1 >= 0 && i / (_mapProvider.MapData.Depth / ChunkData.ChunkSize) ==
                     (i - 1) / (_mapProvider.MapData.Depth / ChunkData.ChunkSize))
-                    ChunkGenerators[i].BackNeighbour = ChunkGenerators[i - 1];
+                    meshes[i].BackNeighbour = meshes[i - 1];
 
                 if (i + _mapProvider.MapData.Height / ChunkData.ChunkSize * _mapProvider.MapData.Depth /
-                    ChunkData.ChunkSize < ChunkGenerators.Length)
-                    ChunkGenerators[i].RightNeighbour =
-                        ChunkGenerators[
+                    ChunkData.ChunkSize < meshes.Count)
+                    meshes[i].RightNeighbour =
+                        meshes[
                             i + _mapProvider.MapData.Height / ChunkData.ChunkSize * _mapProvider.MapData.Depth /
                             ChunkData.ChunkSize];
 
                 if (i - _mapProvider.MapData.Height / ChunkData.ChunkSize * _mapProvider.MapData.Depth /
                     ChunkData.ChunkSize >= 0)
-                    ChunkGenerators[i].LeftNeighbour =
-                        ChunkGenerators[
+                    meshes[i].LeftNeighbour =
+                        meshes[
                             i - _mapProvider.MapData.Height / ChunkData.ChunkSize * _mapProvider.MapData.Depth /
                             ChunkData.ChunkSize];
             }
         }
 
-        private unsafe ChunkMeshGeneration[] InitializeJobs(void*[] addresses)
+        private unsafe ChunkMeshGenerator[] InitializeJobs(void*[] addresses)
         {
-            var jobs = new ChunkMeshGeneration[ChunkGenerators.Length];
-            for (var i = 0; i < ChunkGenerators.Length; i++)
+            var jobs = new ChunkMeshGenerator[addresses.Length];
+            for (var i = 0; i < addresses.Length; i++)
             {
                 var addressByNeighbour = new NativeParallelHashMap<int, IntPtr>(6, Allocator.TempJob);
                 // order: up = 0, down = 1, front = 2, back = 3, right = 4, left = 5.
-                if (i + _mapProvider.MapData.Depth / ChunkData.ChunkSize < ChunkGenerators.Length &&
+                if (i + _mapProvider.MapData.Depth / ChunkData.ChunkSize < addresses.Length &&
                     i / (_mapProvider.MapData.Depth / ChunkData.ChunkSize * _mapProvider.MapData.Height /
                          ChunkData.ChunkSize) ==
                     (i + _mapProvider.MapData.Depth / ChunkData.ChunkSize) /
@@ -184,7 +178,7 @@ namespace Generators
                     addressByNeighbour[1] = IntPtr.Zero;
                 }
 
-                if (i + 1 < ChunkGenerators.Length &&
+                if (i + 1 < addresses.Length &&
                     i / (_mapProvider.MapData.Depth / ChunkData.ChunkSize) ==
                     (i + 1) / (_mapProvider.MapData.Depth / ChunkData.ChunkSize))
                 {
@@ -206,7 +200,7 @@ namespace Generators
                 }
 
                 if (i + _mapProvider.MapData.Height / ChunkData.ChunkSize * _mapProvider.MapData.Depth /
-                    ChunkData.ChunkSize < ChunkGenerators.Length)
+                    ChunkData.ChunkSize < addresses.Length)
                 {
                     addressByNeighbour[4] = (IntPtr) addresses[i + _mapProvider.MapData.Height /
                         ChunkData.ChunkSize * _mapProvider.MapData.Depth /
@@ -229,7 +223,7 @@ namespace Generators
                     addressByNeighbour[5] = IntPtr.Zero;
                 }
 
-                jobs[i] = new ChunkMeshGeneration
+                jobs[i] = new ChunkMeshGenerator
                 {
                     Blocks = new NativeArray<BlockData>(_mapProvider.MapData.Chunks[i].Blocks, Allocator.TempJob),
                     Faces = new NativeArray<Faces>(_mapProvider.MapData.Chunks[i].Faces.Length, Allocator.TempJob),
@@ -244,7 +238,7 @@ namespace Generators
             return jobs;
         }
 
-        private void RunJobs(ChunkMeshGeneration[] jobs)
+        private NativeArray<JobHandle> RunJobs(ChunkMeshGenerator[] jobs)
         {
             var jobHandles = new NativeArray<JobHandle>(jobs.Length, Allocator.Temp);
             for (var i = 0; i < jobHandles.Length; i++)
@@ -253,21 +247,25 @@ namespace Generators
             }
 
             JobHandle.CompleteAll(jobHandles);
+            return jobHandles;
+        }
 
-            var chunkMeshRenders = CreateChunkMeshRenders();
-            for (var i = 0; i < _mapProvider.GetChunkCount(); i++)
+        private ChunkMesh[] CreateChunkMeshes(ChunkMeshGenerator[] jobs, GameObject[] chunkMeshObjects)
+        {
+            var meshes = new ChunkMesh[chunkMeshObjects.Length];
+            for (var i = 0; i < meshes.Length; i++)
             {
                 _mapProvider.MapData.Chunks[i].Faces = jobs[i].Faces.ToArray();
                 var meshData = new MeshData(NativeToList(jobs[i].Vertices), NativeToList(jobs[i].Triangles),
                     NativeToList(jobs[i].Colors),
                     NativeToList(jobs[i].Normals));
 
-                ChunkGenerators[i] =
-                    new ChunkMeshGenerator(chunkMeshRenders[i], _mapProvider.MapData.Chunks[i], meshData);
+                meshes[i] =
+                    new ChunkMesh(chunkMeshObjects[i], _mapProvider.MapData.Chunks[i], meshData);
             }
 
-            DisposeJobs(jobs);
-            jobHandles.Dispose();
+            SetChunkNeighbours(meshes);
+            return meshes;
         }
 
         private List<T> NativeToList<T>(NativeList<T> nativeList) where T : unmanaged
@@ -281,7 +279,7 @@ namespace Generators
             return list;
         }
 
-        private void DisposeJobs(ChunkMeshGeneration[] jobs)
+        private void DisposeJobs(ChunkMeshGenerator[] jobs)
         {
             for (var i = 0; i < jobs.Length; i++)
             {

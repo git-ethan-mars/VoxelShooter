@@ -13,7 +13,7 @@ namespace Infrastructure.Factory
         CustomNetworkManager CreateSteamNetworkManager(GameStateMachine stateMachine, ServerSettings serverSettings,
             bool isHost);
 
-        GameObject CreateGameObjectContainer(string containerName);
+        Transform CreateGameObjectContainer(string containerName);
         void CreateDirectionalLight(LightData lightData);
         AudioSource CreateAudioSource(Transform container);
     }

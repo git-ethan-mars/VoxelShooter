@@ -21,6 +21,7 @@ namespace Networking
 {
     public class Client : IClient
     {
+        private const string ChunkContainerName = "ChunkContainer";
         public event Action GameFinished;
         public event Action MapDownloaded;
 
@@ -54,9 +55,8 @@ namespace Networking
             remove => _playerConfigureHandler.PlayerCreated += value;
         }
 
-        public ClientData Data { get; }
-        public MapGenerator MapGenerator { get; private set; }
 
+        public ClientData Data { get; }
 
         public MapProvider MapProvider
         {
@@ -68,6 +68,8 @@ namespace Networking
             }
         }
 
+        public ChunkMeshProvider ChunkMeshProvider { get; private set; }
+
         private readonly GameStateMachine _stateMachine;
         private readonly CustomNetworkManager _networkManager;
         private readonly IAssetProvider _assets;
@@ -75,7 +77,6 @@ namespace Networking
         private readonly IGameFactory _gameFactory;
         private readonly IMeshFactory _meshFactory;
         private readonly IPlayerFactory _playerFactory;
-        private MapProvider _mapProvider;
         private readonly MapNameHandler _mapNameHandler;
         private readonly DownloadMapHandler _downloadMapHandler;
         private readonly UpdateMapHandler _updateMapHandler;
@@ -92,6 +93,8 @@ namespace Networking
         private readonly StartContinuousSoundHandler _startContinuousSoundHandler;
         private readonly StopContinuousSoundHandler _stopContinuousSoundHandler;
         private readonly SurroundingSoundHandler _surroundingSoundHandler;
+        private MapProvider _mapProvider;
+
 
         public Client(GameStateMachine stateMachine, CustomNetworkManager networkManager)
         {
@@ -195,11 +198,13 @@ namespace Networking
         private void OnMapDownloaded()
         {
             Data.State = ClientState.Connected;
-            MapGenerator = new MapGenerator(_mapProvider, _gameFactory, _meshFactory);
-            MapGenerator.GenerateMap();
-            MapGenerator.GenerateWalls();
-            MapGenerator.GenerateWater();
-            MapGenerator.GenerateLight();
+            var mapGenerator = new MapGenerator(_mapProvider, _gameFactory, _meshFactory);
+            ChunkMeshProvider =
+                new ChunkMeshProvider(
+                    mapGenerator.GenerateMap(_gameFactory.CreateGameObjectContainer(ChunkContainerName)));
+            mapGenerator.GenerateWalls();
+            mapGenerator.GenerateWater();
+            mapGenerator.GenerateLight();
             Environment.ApplyAmbientLighting(_mapProvider.SceneData);
             Environment.ApplyFog(_mapProvider.SceneData);
             _stateMachine.Enter<GameLoopState, CustomNetworkManager>(_networkManager);

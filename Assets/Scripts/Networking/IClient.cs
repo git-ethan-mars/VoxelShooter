@@ -17,7 +17,7 @@ namespace Networking
         event Action GameFinished;
         ClientData Data { get; }
         MapProvider MapProvider { get; set; }
-        MapGenerator MapGenerator { get; }
+        ChunkMeshProvider ChunkMeshProvider { get; }
         void Start();
         void Stop();
         event Action<Player> PlayerCreated;
