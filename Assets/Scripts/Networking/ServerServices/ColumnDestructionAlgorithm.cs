@@ -19,7 +19,7 @@ namespace Networking.ServerServices
         public ColumnDestructionAlgorithm(MapProvider mapProvider)
         {
             _mapProvider = mapProvider;
-            _columns = new List<Run>[mapProvider.MapData.Width * mapProvider.MapData.Depth];
+            _columns = new List<Run>[mapProvider.Width * mapProvider.Depth];
             _runsToDelete = new List<Run>();
             _pathStack = new Stack<Run>();
             _connectedNeighbours = new HashSet<Vector3Int>();
@@ -41,7 +41,7 @@ namespace Networking.ServerServices
             {
                 var singleVoxelRun = new Run(position.x, position.z, position.y, 1, true);
                 if (!TryMergeRuns(singleVoxelRun,
-                        _columns[position.x * _mapProvider.MapData.Depth + position.z]))
+                        _columns[position.x * _mapProvider.Depth + position.z]))
                 {
                     AddRun(singleVoxelRun);
                 }
@@ -150,7 +150,7 @@ namespace Networking.ServerServices
 
         private void AddRun(Run run)
         {
-            _columns[run.X * _mapProvider.MapData.Depth + run.Z].Add(run);
+            _columns[run.X * _mapProvider.Depth + run.Z].Add(run);
             _neighboursByRun[run] = new HashSet<Run>();
             for (var y = run.Begin; y < run.Begin + run.Length; y++)
             {
@@ -179,7 +179,7 @@ namespace Networking.ServerServices
 
         private void RemoveRun(Run run)
         {
-            _columns[run.X * _mapProvider.MapData.Depth + run.Z].Remove(run);
+            _columns[run.X * _mapProvider.Depth + run.Z].Remove(run);
             foreach (var adjacentRun in _neighboursByRun[run])
             {
                 _neighboursByRun[adjacentRun].Remove(run);
@@ -190,14 +190,14 @@ namespace Networking.ServerServices
 
         private void PreProcessColumns()
         {
-            for (var x = 0; x < _mapProvider.MapData.Width; x++)
+            for (var x = 0; x < _mapProvider.Width; x++)
             {
-                for (var z = 0; z < _mapProvider.MapData.Depth; z++)
+                for (var z = 0; z < _mapProvider.Depth; z++)
                 {
                     var runs = new List<Run>();
                     var startRun = 0;
                     var length = 0;
-                    for (var y = 0; y < _mapProvider.MapData.Height; y++)
+                    for (var y = 0; y < _mapProvider.Height; y++)
                     {
                         var isSolid = _mapProvider.GetBlockByGlobalPosition(x, y, z).IsSolid();
                         if (isSolid)
@@ -210,7 +210,7 @@ namespace Networking.ServerServices
                             length += 1;
                         }
 
-                        if (!isSolid || y == _mapProvider.MapData.Height - 1)
+                        if (!isSolid || y == _mapProvider.Height - 1)
                         {
                             if (length > 0)
                             {
@@ -221,7 +221,7 @@ namespace Networking.ServerServices
                         }
                     }
 
-                    _columns[x * _mapProvider.MapData.Depth + z] = runs;
+                    _columns[x * _mapProvider.Depth + z] = runs;
                 }
             }
         }
@@ -236,11 +236,11 @@ namespace Networking.ServerServices
                 }
             }
 
-            for (var x = 0; x < _mapProvider.MapData.Width; x++)
+            for (var x = 0; x < _mapProvider.Width; x++)
             {
-                for (var z = 0; z < _mapProvider.MapData.Depth; z++)
+                for (var z = 0; z < _mapProvider.Depth; z++)
                 {
-                    for (var y = 0; y < _mapProvider.MapData.Height; y++)
+                    for (var y = 0; y < _mapProvider.Height; y++)
                     {
                         if (!_mapProvider.GetBlockByGlobalPosition(x, y, z).IsSolid())
                         {
@@ -300,7 +300,7 @@ namespace Networking.ServerServices
 
         private Run FindRunInColumn(int columnX, int columnZ, int height)
         {
-            var column = _columns[columnX * _mapProvider.MapData.Depth + columnZ];
+            var column = _columns[columnX * _mapProvider.Depth + columnZ];
             for (var i = 0; i < column.Count; i++)
             {
                 if (column[i].Begin <= height && height < column[i].Begin + column[i].Length)

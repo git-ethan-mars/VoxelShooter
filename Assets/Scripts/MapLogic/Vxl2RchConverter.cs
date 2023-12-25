@@ -65,7 +65,7 @@ namespace MapLogic
                             break;
                         }
 
-                        var topLength = (number4ByteChunks - 1) - bottomLength;
+                        var topLength = number4ByteChunks - 1 - bottomLength;
 
                         currentPosition += data[currentPosition] * 4;
 
@@ -101,12 +101,8 @@ namespace MapLogic
                 {
                     for (var z = 0; z < Depth; z++)
                     {
-                        var chunk = chunks[mapProvider.GetChunkNumberByGlobalPosition(
-                            Width - 1 - x, _height - heightOffset - 1 - y, z)];
-                        chunk.Blocks[((Width - 1 - x) & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
-                                     ((_height - heightOffset - 1 - y) & (ChunkData.ChunkSize - 1)) *
-                                     ChunkData.ChunkSize +
-                                     (z & (ChunkData.ChunkSize - 1))] = new BlockData(colors[GetPosition(x, y, z)]);
+                        mapProvider.SetBlockByGlobalPosition(Width - 1 - x, _height - heightOffset - 1 - y, z,
+                            new BlockData(colors[GetPosition(x, y, z)]));
                     }
                 }
             }

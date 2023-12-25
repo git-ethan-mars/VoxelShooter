@@ -6,14 +6,20 @@ namespace MapLogic
 {
     public class MapProvider
     {
+        public int Width => _mapData.Width;
+        public int Height => _mapData.Height;
+        public int Depth => _mapData.Depth;
+        public Color32 WaterColor => _mapData.WaterColor;
+        public Color32 SolidColor => _mapData.SolidColor;
+
         public readonly string MapName;
-        public readonly MapData MapData;
+        private readonly MapData _mapData;
         public readonly MapSceneData SceneData;
 
         public MapProvider(MapData mapData, MapConfigure mapConfigure)
         {
             MapName = mapConfigure.name;
-            MapData = mapData;
+            _mapData = mapData;
             SceneData = new MapSceneData(mapConfigure);
         }
 
@@ -24,7 +30,7 @@ namespace MapLogic
                 throw new ArgumentException($"{x} {y} {z} is not valid position");
             }
 
-            return MapData.Chunks[GetChunkNumberByGlobalPosition(x, y, z)]
+            return _mapData.Chunks[GetChunkNumberByGlobalPosition(x, y, z)]
                 .Blocks[x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
                         y % ChunkData.ChunkSize * ChunkData.ChunkSize + z % ChunkData.ChunkSize];
         }
@@ -32,18 +38,20 @@ namespace MapLogic
         public BlockData GetBlockByGlobalPosition(Vector3Int position) =>
             GetBlockByGlobalPosition(position.x, position.y, position.z);
 
-        public int GetChunkNumberByGlobalPosition(int x, int y, int z)
+        public void SetBlockByGlobalPosition(int x, int y, int z, BlockData blockData)
         {
             if (!IsInsideMap(x, y, z))
             {
                 throw new ArgumentException($"{x} {y} {z} is not valid position");
             }
 
-            return z / ChunkData.ChunkSize +
-                   y / ChunkData.ChunkSize * (MapData.Depth / ChunkData.ChunkSize) +
-                   x / ChunkData.ChunkSize *
-                   (MapData.Height / ChunkData.ChunkSize * MapData.Depth / ChunkData.ChunkSize);
+            _mapData.Chunks[GetChunkNumberByGlobalPosition(x, y, z)].Blocks[
+                x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
+                y % ChunkData.ChunkSize * ChunkData.ChunkSize + z % ChunkData.ChunkSize] = blockData;
         }
+
+        public void SetBlockByGlobalPosition(Vector3Int position, BlockData blockData) =>
+            SetBlockByGlobalPosition(position.x, position.y, position.z, blockData);
 
         public int GetChunkNumberByGlobalPosition(Vector3Int position) =>
             GetChunkNumberByGlobalPosition(position.x, position.y, position.z);
@@ -54,12 +62,22 @@ namespace MapLogic
                 globalPosition.z % ChunkData.ChunkSize);
         }
 
+        public ChunkData GetChunkByIndex(int chunkIndex)
+        {
+            if (chunkIndex < 0 || chunkIndex > ChunkCount)
+            {
+                throw new ArgumentException($"Invalid chunk index: {chunkIndex}");
+            }
+
+            return _mapData.Chunks[chunkIndex];
+        }
+
         public bool TryGetFrontChunkNumber(int chunkNumber, out int neighbourChunkNumber)
         {
             var notValidatedChunkNumber = chunkNumber + 1;
             if (notValidatedChunkNumber < ChunkCount &&
-                chunkNumber / (MapData.Depth / ChunkData.ChunkSize) ==
-                notValidatedChunkNumber / (MapData.Depth / ChunkData.ChunkSize))
+                chunkNumber / (_mapData.Depth / ChunkData.ChunkSize) ==
+                notValidatedChunkNumber / (_mapData.Depth / ChunkData.ChunkSize))
             {
                 neighbourChunkNumber = notValidatedChunkNumber;
                 return true;
@@ -72,8 +90,8 @@ namespace MapLogic
         public bool TryGetBackChunkNumber(int chunkNumber, out int neighbourChunkNumber)
         {
             var notValidatedChunkNumber = chunkNumber - 1;
-            if (notValidatedChunkNumber >= 0 && chunkNumber / (MapData.Depth / ChunkData.ChunkSize) ==
-                notValidatedChunkNumber / (MapData.Depth / ChunkData.ChunkSize))
+            if (notValidatedChunkNumber >= 0 && chunkNumber / (_mapData.Depth / ChunkData.ChunkSize) ==
+                notValidatedChunkNumber / (_mapData.Depth / ChunkData.ChunkSize))
             {
                 neighbourChunkNumber = notValidatedChunkNumber;
                 return true;
@@ -85,12 +103,12 @@ namespace MapLogic
 
         public bool TryGetUpChunkNumber(int chunkNumber, out int neighbourChunkNumber)
         {
-            var notValidatedChunkNumber = chunkNumber + MapData.Depth / ChunkData.ChunkSize;
+            var notValidatedChunkNumber = chunkNumber + _mapData.Depth / ChunkData.ChunkSize;
             if (notValidatedChunkNumber < ChunkCount &&
-                chunkNumber / (MapData.Depth / ChunkData.ChunkSize * MapData.Height /
+                chunkNumber / (_mapData.Depth / ChunkData.ChunkSize * _mapData.Height /
                                ChunkData.ChunkSize) ==
                 notValidatedChunkNumber /
-                (MapData.Depth / ChunkData.ChunkSize * MapData.Height /
+                (_mapData.Depth / ChunkData.ChunkSize * _mapData.Height /
                  ChunkData.ChunkSize))
             {
                 neighbourChunkNumber = notValidatedChunkNumber;
@@ -103,12 +121,12 @@ namespace MapLogic
 
         public bool TryGetDownChunkNumber(int chunkNumber, out int neighbourChunkNumber)
         {
-            var notValidatedChunkNumber = chunkNumber - MapData.Depth / ChunkData.ChunkSize;
+            var notValidatedChunkNumber = chunkNumber - _mapData.Depth / ChunkData.ChunkSize;
             if (notValidatedChunkNumber >= 0 &&
-                chunkNumber / (MapData.Depth / ChunkData.ChunkSize * MapData.Height /
+                chunkNumber / (_mapData.Depth / ChunkData.ChunkSize * _mapData.Height /
                                ChunkData.ChunkSize) ==
                 notValidatedChunkNumber /
-                (MapData.Depth / ChunkData.ChunkSize * MapData.Height /
+                (_mapData.Depth / ChunkData.ChunkSize * _mapData.Height /
                  ChunkData.ChunkSize))
             {
                 neighbourChunkNumber = notValidatedChunkNumber;
@@ -122,7 +140,7 @@ namespace MapLogic
         public bool TryGetRightChunkNumber(int chunkNumber, out int neighbourChunkNumber)
         {
             var notValidatedChunkNumber =
-                chunkNumber + MapData.Height / ChunkData.ChunkSize * MapData.Depth / ChunkData.ChunkSize;
+                chunkNumber + _mapData.Height / ChunkData.ChunkSize * _mapData.Depth / ChunkData.ChunkSize;
             if (notValidatedChunkNumber < ChunkCount)
             {
                 neighbourChunkNumber = notValidatedChunkNumber;
@@ -136,7 +154,7 @@ namespace MapLogic
         public bool TryGetLeftChunkNumber(int chunkNumber, out int neighbourChunkNumber)
         {
             var notValidatedChunkNumber =
-                chunkNumber - MapData.Height / ChunkData.ChunkSize * MapData.Depth /
+                chunkNumber - _mapData.Height / ChunkData.ChunkSize * _mapData.Depth /
                 ChunkData.ChunkSize;
             if (notValidatedChunkNumber >= 0)
             {
@@ -150,35 +168,48 @@ namespace MapLogic
 
         public int GetChunkXOffset(int chunkIndex)
         {
-            return chunkIndex / (MapData.Height * MapData.Depth / ChunkData.ChunkSizeSquared) * ChunkData.ChunkSize;
+            return chunkIndex / (_mapData.Height * _mapData.Depth / ChunkData.ChunkSizeSquared) * ChunkData.ChunkSize;
         }
-        
+
         public int GetChunkYOffset(int chunkIndex)
         {
-            return chunkIndex / (MapData.Depth / ChunkData.ChunkSize) * ChunkData.ChunkSize;
+            return chunkIndex / (_mapData.Depth / ChunkData.ChunkSize) * ChunkData.ChunkSize;
         }
-        
+
         public int GetChunkZOffset(int chunkIndex)
         {
-            return chunkIndex % (MapData.Depth / ChunkData.ChunkSize) * ChunkData.ChunkSize;
+            return chunkIndex % (_mapData.Depth / ChunkData.ChunkSize) * ChunkData.ChunkSize;
         }
 
         public bool IsInsideMap(int x, int y, int z)
         {
-            return x >= 0 && x < MapData.Width &&
-                   y >= 0 && y < MapData.Height &&
-                   z >= 0 && z < MapData.Depth;
+            return x >= 0 && x < _mapData.Width &&
+                   y >= 0 && y < _mapData.Height &&
+                   z >= 0 && z < _mapData.Depth;
         }
 
         public bool IsDestructiblePosition(Vector3Int position)
         {
-            return position.x >= 0 && position.x < MapData.Width &&
-                   position.y > 0 && position.y < MapData.Height &&
-                   position.z >= 0 && position.z < MapData.Depth;
+            return position.x >= 0 && position.x < _mapData.Width &&
+                   position.y > 0 && position.y < _mapData.Height &&
+                   position.z >= 0 && position.z < _mapData.Depth;
         }
 
-        public int ChunkCount => MapData.Chunks.Length;
+        public int ChunkCount => _mapData.Chunks.Length;
 
-        public int BlockCount => MapData.Width * MapData.Height * MapData.Depth;
+        public int BlockCount => _mapData.Width * _mapData.Height * _mapData.Depth;
+
+        private int GetChunkNumberByGlobalPosition(int x, int y, int z)
+        {
+            if (!IsInsideMap(x, y, z))
+            {
+                throw new ArgumentException($"{x} {y} {z} is not valid position");
+            }
+
+            return z / ChunkData.ChunkSize +
+                   y / ChunkData.ChunkSize * (_mapData.Depth / ChunkData.ChunkSize) +
+                   x / ChunkData.ChunkSize *
+                   (_mapData.Height / ChunkData.ChunkSize * _mapData.Depth / ChunkData.ChunkSize);
+        }
     }
 }

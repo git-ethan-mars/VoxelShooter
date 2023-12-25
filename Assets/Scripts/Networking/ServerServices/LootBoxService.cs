@@ -52,13 +52,13 @@ namespace Networking.ServerServices
         private List<Vector3Int> GetLootBoxSpawnPositions()
         {
             var spawnPositions = new List<Vector3Int>();
-            for (var x = 0; x < _server.MapProvider.MapData.Width; x++)
+            for (var x = 0; x < _server.MapProvider.Width; x++)
             {
-                for (var z = 0; z < _server.MapProvider.MapData.Depth; z++)
+                for (var z = 0; z < _server.MapProvider.Depth; z++)
                 {
                     if (_server.MapProvider.GetBlockByGlobalPosition(x, 1, z).IsSolid())
                     {
-                        spawnPositions.Add(new Vector3Int(x, _server.MapProvider.MapData.Height - 1, z));
+                        spawnPositions.Add(new Vector3Int(x, _server.MapProvider.Height - 1, z));
                     }
                 }
             }

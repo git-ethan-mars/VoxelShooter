@@ -109,8 +109,8 @@ namespace Networking.ServerServices
 
         private int GetBlockIndex(Vector3Int position)
         {
-            return position.x * _mapProvider.MapData.Height * _mapProvider.MapData.Depth +
-                   position.y * _mapProvider.MapData.Depth + position.z;
+            return position.x * _mapProvider.Height * _mapProvider.Depth +
+                   position.y * _mapProvider.Depth + position.z;
         }
     }
 }

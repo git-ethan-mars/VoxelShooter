@@ -48,7 +48,7 @@ namespace UI
             {
                 for (var z = 0; z < ChunkData.ChunkSize; z++)
                 {
-                    for (var y = _mapProvider.MapData.Height - 1; y >= 0; y--)
+                    for (var y = _mapProvider.Height - 1; y >= 0; y--)
                     {
                         var block = _mapProvider.GetBlockByGlobalPosition(x + _mapProvider.GetChunkXOffset(chunkIndex),
                             y, z + _mapProvider.GetChunkZOffset(chunkIndex));

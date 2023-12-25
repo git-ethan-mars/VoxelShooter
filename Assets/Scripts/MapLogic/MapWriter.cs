@@ -20,20 +20,20 @@ namespace MapLogic
 
         public static void WriteMap(MapProvider mapProvider, Stream stream)
         {
-            var result = new List<NativeList<byte>>(mapProvider.MapData.Chunks.Length);
-            var blocks = new List<NativeArray<BlockData>>(mapProvider.MapData.Chunks.Length);
-            for (var i = 0; i < mapProvider.MapData.Chunks.Length; i++)
+            var result = new List<NativeList<byte>>(mapProvider.ChunkCount);
+            var blocks = new List<NativeArray<BlockData>>(mapProvider.ChunkCount);
+            for (var i = 0; i < mapProvider.ChunkCount; i++)
             {
                 result.Add(new NativeList<byte>(Allocator.TempJob));
-                blocks.Add(new NativeArray<BlockData>(mapProvider.MapData.Chunks[i].Blocks, Allocator.TempJob));
+                blocks.Add(new NativeArray<BlockData>(mapProvider.GetChunkByIndex(i).Blocks, Allocator.TempJob));
             }
 
             var jobHandles = new NativeList<JobHandle>(Allocator.Temp);
-            for (var i = 0; i < mapProvider.MapData.Chunks.Length; i++)
+            for (var i = 0; i < mapProvider.ChunkCount; i++)
             {
                 var job = new ChunkSerializer(result[i],
                     blocks[i],
-                    mapProvider.MapData.SolidColor);
+                    mapProvider.SolidColor);
                 var jobHandle = job.Schedule();
                 jobHandles.Add(jobHandle);
             }
@@ -41,10 +41,10 @@ namespace MapLogic
             JobHandle.CompleteAll(jobHandles);
             using var memoryStream = new MemoryStream();
             using var binaryWriter = new BinaryWriter(memoryStream);
-            binaryWriter.Write(mapProvider.MapData.Width);
-            binaryWriter.Write(mapProvider.MapData.Height);
-            binaryWriter.Write(mapProvider.MapData.Depth);
-            for (var i = 0; i < mapProvider.MapData.Chunks.Length; i++)
+            binaryWriter.Write(mapProvider.Width);
+            binaryWriter.Write(mapProvider.Height);
+            binaryWriter.Write(mapProvider.Depth);
+            for (var i = 0; i < mapProvider.ChunkCount; i++)
             {
                 for (var j = 0; j < result[i].Length; j++)
                 {

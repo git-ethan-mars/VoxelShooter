@@ -40,7 +40,7 @@ namespace Networking.ServerServices
                     removedBlocks.Add(blocks[i]);
                 }
 
-                SetBlockByGlobalPosition(blocks[i].Position, blocks[i].BlockData);
+                _mapProvider.SetBlockByGlobalPosition(blocks[i].Position, blocks[i].BlockData);
             }
 
             _destructionAlgorithm.Add(createdBlocks.Select(block => block.Position));
@@ -51,7 +51,7 @@ namespace Networking.ServerServices
 
             foreach (var fallingPosition in fallingPositions)
             {
-                SetBlockByGlobalPosition(fallingPosition, new BlockData());
+                _mapProvider.SetBlockByGlobalPosition(fallingPosition, new BlockData());
             }
 
             MapUpdated?.Invoke();
@@ -68,7 +68,8 @@ namespace Networking.ServerServices
 
             var fallingBlockMessages =
                 MessageSplitter.SplitBlocksIntoFallingMessages(fallingBlocks, Constants.MessageSize);
-            _coroutineRunner.StartCoroutine(MessageSplitter.SendMessages(fallingBlockMessages, Constants.MessageDelay, true));
+            _coroutineRunner.StartCoroutine(MessageSplitter.SendMessages(fallingBlockMessages, Constants.MessageDelay,
+                true));
         }
 
         private void SendUpdatedBlocks(List<BlockDataWithPosition> blocks, Vector3Int[] fallingPositions)
@@ -79,15 +80,6 @@ namespace Networking.ServerServices
                 new BlockDataWithPosition(fallingPosition, new BlockData())));
             var updateMessages = MessageSplitter.SplitBlocksIntoUpdateMessages(updatedBlocks, Constants.MessageSize);
             _coroutineRunner.StartCoroutine(MessageSplitter.SendMessages(updateMessages, Constants.MessageDelay));
-        }
-
-        private void SetBlockByGlobalPosition(Vector3Int position, BlockData block)
-        {
-            var chunkIndex = _mapProvider.GetChunkNumberByGlobalPosition(position.x, position.y, position.z);
-            var blockIndex = position.x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
-                             position.y % ChunkData.ChunkSize * ChunkData.ChunkSize +
-                             position.z % ChunkData.ChunkSize;
-            _mapProvider.MapData.Chunks[chunkIndex].Blocks[blockIndex] = block;
         }
     }
 }

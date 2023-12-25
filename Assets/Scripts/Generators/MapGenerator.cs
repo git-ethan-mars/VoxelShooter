@@ -36,7 +36,7 @@ namespace Generators
             for (var i = 0; i < blockAddresses.Length; i++)
             {
                 blockAddresses[i] =
-                    UnsafeUtility.PinGCArrayAndGetDataAddress(_mapProvider.MapData.Chunks[i].Blocks, out handles[i]);
+                    UnsafeUtility.PinGCArrayAndGetDataAddress(_mapProvider.GetChunkByIndex(i).Blocks, out handles[i]);
             }
 
             var chunkMeshObjects = CreateChunkMeshObjects(parent);
@@ -63,10 +63,10 @@ namespace Generators
         public void GenerateWater()
         {
             _meshFactory.CreateWaterPlane(
-                new Vector3((float) _mapProvider.MapData.Width / 2, 0.5f, (float) _mapProvider.MapData.Width / 2) +
+                new Vector3((float) _mapProvider.Width / 2, 0.5f, (float) _mapProvider.Width / 2) +
                 Constants.worldOffset,
-                new Vector3(_mapProvider.MapData.Width * WaterScale, 1, _mapProvider.MapData.Depth * WaterScale),
-                _mapProvider.MapData.WaterColor);
+                new Vector3(_mapProvider.Width * WaterScale, 1, _mapProvider.Depth * WaterScale),
+                _mapProvider.WaterColor);
         }
 
         public void GenerateLight()
@@ -78,11 +78,11 @@ namespace Generators
         {
             var chunkMeshObjects = new GameObject[_mapProvider.ChunkCount];
             var index = 0;
-            for (var x = 0; x < _mapProvider.MapData.Width / ChunkData.ChunkSize; x++)
+            for (var x = 0; x < _mapProvider.Width / ChunkData.ChunkSize; x++)
             {
-                for (var y = 0; y < _mapProvider.MapData.Height / ChunkData.ChunkSize; y++)
+                for (var y = 0; y < _mapProvider.Height / ChunkData.ChunkSize; y++)
                 {
-                    for (var z = 0; z < _mapProvider.MapData.Depth / ChunkData.ChunkSize; z++)
+                    for (var z = 0; z < _mapProvider.Depth / ChunkData.ChunkSize; z++)
                     {
                         chunkMeshObjects[index] = _meshFactory.CreateChunkMeshRender(
                             new Vector3(x * ChunkData.ChunkSize, y * ChunkData.ChunkSize, z * ChunkData.ChunkSize),
@@ -195,8 +195,8 @@ namespace Generators
 
                 jobs[i] = new ChunkMeshGenerator
                 {
-                    Blocks = new NativeArray<BlockData>(_mapProvider.MapData.Chunks[i].Blocks, Allocator.TempJob),
-                    Faces = new NativeArray<Faces>(_mapProvider.MapData.Chunks[i].Faces.Length, Allocator.TempJob),
+                    Blocks = new NativeArray<BlockData>(_mapProvider.GetChunkByIndex(i).Blocks, Allocator.TempJob),
+                    Faces = new NativeArray<Faces>(_mapProvider.GetChunkByIndex(i).Faces.Length, Allocator.TempJob),
                     Vertices = new NativeList<Vector3>(Allocator.TempJob),
                     Triangles = new NativeList<int>(Allocator.TempJob),
                     Colors = new NativeList<Color32>(Allocator.TempJob),
@@ -225,13 +225,13 @@ namespace Generators
             var meshes = new ChunkMesh[chunkMeshObjects.Length];
             for (var i = 0; i < meshes.Length; i++)
             {
-                _mapProvider.MapData.Chunks[i].Faces = jobs[i].Faces.ToArray();
+                _mapProvider.GetChunkByIndex(i).Faces = jobs[i].Faces.ToArray();
                 var meshData = new MeshData(NativeToList(jobs[i].Vertices), NativeToList(jobs[i].Triangles),
                     NativeToList(jobs[i].Colors),
                     NativeToList(jobs[i].Normals));
 
                 meshes[i] =
-                    new ChunkMesh(chunkMeshObjects[i], _mapProvider.MapData.Chunks[i], meshData);
+                    new ChunkMesh(chunkMeshObjects[i], _mapProvider.GetChunkByIndex(i), meshData);
             }
 
             SetChunkNeighbours(meshes);
