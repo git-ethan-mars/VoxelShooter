@@ -11,10 +11,13 @@ namespace MapLogic
         public int Depth => _mapData.Depth;
         public Color32 WaterColor => _mapData.WaterColor;
         public Color32 SolidColor => _mapData.SolidColor;
+        public int ChunkCount => _mapData.Chunks.Length;
+        public int BlockCount => _mapData.Width * _mapData.Height * _mapData.Depth;
 
         public readonly string MapName;
         private readonly MapData _mapData;
         public readonly MapSceneData SceneData;
+
 
         public MapProvider(MapData mapData, MapConfigure mapConfigure)
         {
@@ -172,10 +175,6 @@ namespace MapLogic
                    position.z >= 0 && position.z < _mapData.Depth;
         }
 
-        public int ChunkCount => _mapData.Chunks.Length;
-
-        public int BlockCount => _mapData.Width * _mapData.Height * _mapData.Depth;
-
         private int GetChunkNumberByGlobalPosition(int x, int y, int z)
         {
             if (!IsInsideMap(x, y, z))
@@ -187,6 +186,22 @@ namespace MapLogic
                    y / ChunkData.ChunkSize * (_mapData.Depth / ChunkData.ChunkSize) +
                    x / ChunkData.ChunkSize *
                    (_mapData.Height / ChunkData.ChunkSize * _mapData.Depth / ChunkData.ChunkSize);
+        }
+
+        public BlockData GetHighestBlock(int x, int z)
+        {
+            for (var y = Height - 1; y >= 0; y--)
+            {
+                var block = GetBlockByGlobalPosition(x, y, z);
+                if (!block.IsSolid())
+                {
+                    continue;
+                }
+
+                return block;
+            }
+
+            return new BlockData(BlockColor.empty);
         }
 
         private void AssertPosition(int x, int y, int z)

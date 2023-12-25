@@ -68,6 +68,7 @@ namespace Networking
             }
         }
 
+        public VerticalMapProjector MapProjector { get; set; }
         public string MapName { get; set; }
 
         private readonly GameStateMachine _stateMachine;
@@ -137,6 +138,7 @@ namespace Networking
         public void Stop()
         {
             MapDownloaded -= OnMapDownloaded;
+            MapProjector.Dispose();
             _storageService.DataSaved -= OnDataSaved;
             UnregisterHandlers();
             NetworkClient.UnregisterPrefab(_assets.Load<GameObject>(PlayerPath.MainPlayerPath));
@@ -185,6 +187,7 @@ namespace Networking
 
         private void OnMapDownloaded()
         {
+            MapProjector = new VerticalMapProjector(this);
             _stateMachine.Enter<GameLoopState, CustomNetworkManager>(_networkManager);
         }
 
