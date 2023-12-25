@@ -30,9 +30,9 @@ namespace Networking.MessageHandlers.ResponseHandler
         {
             var playerGameObject = NetworkClient.connection.identity;
             var player = playerGameObject.GetComponent<Player>();
-            player.ConstructLocalPlayer(response.PlaceDistance, response.ItemIds, response.Speed, response.JumpHeight,
+            player.ConstructLocalPlayer(_client, response.PlaceDistance, response.ItemIds, response.Speed, response.JumpHeight,
                 response.Health);
-            _particleFactory.CreateWeatherParticle(_client.Data.MapName, player.BodyOrientation);
+            _particleFactory.CreateWeatherParticle(_client.MapName, player.BodyOrientation);
             PlayerCreated?.Invoke(player);
         }
     }

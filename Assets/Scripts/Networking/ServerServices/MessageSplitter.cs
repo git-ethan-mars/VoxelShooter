@@ -7,7 +7,7 @@ using Mirror;
 using Networking.Messages.Responses;
 using UnityEngine;
 
-namespace Networking
+namespace Networking.ServerServices
 {
     public static class MessageSplitter
     {

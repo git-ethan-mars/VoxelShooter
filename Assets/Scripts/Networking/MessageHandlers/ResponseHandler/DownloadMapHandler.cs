@@ -29,7 +29,7 @@ namespace Networking.MessageHandlers.ResponseHandler
                 return;
             }
 
-            var mapConfigure = _staticData.GetMapConfigure(_client.Data.MapName);
+            var mapConfigure = _staticData.GetMapConfigure(_client.MapName);
             var mapData = MapReader.ReadFromStream(new MemoryStream(_byteChunks.ToArray()), mapConfigure);
             _client.MapProvider = new MapProvider(mapData, mapConfigure);
         }
