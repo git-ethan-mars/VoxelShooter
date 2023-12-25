@@ -1,4 +1,4 @@
-using System.Linq;
+using System.Collections;
 using Data;
 using MapLogic;
 using Networking;
@@ -10,75 +10,78 @@ namespace UI
 {
     public class MiniMap : MonoBehaviour
     {
+        private const int MiniMapSize = 31;
+        private const float MapUpdateRateInSeconds = 0.5f;
+
         [SerializeField]
         private RawImage minimapImage;
+
+        [SerializeField]
+        private Image minimapCursor;
 
         private Texture2D _miniMapTexture;
         private MapProvider _mapProvider;
         private IClient _client;
         private Player _player;
-        private int _chunkIndex;
+        private Color32[] _pixels;
+        private Vector3Int _playerPosition;
 
         public void Construct(IClient client, Player player)
         {
             _client = client;
-            _client.MapUpdated += OnMapUpdated;
             _mapProvider = _client.MapProvider;
             _player = player;
-            _miniMapTexture = new Texture2D(ChunkData.ChunkSize, ChunkData.ChunkSize);
+            _miniMapTexture = new Texture2D(MiniMapSize, MiniMapSize);
+            _pixels = new Color32[MiniMapSize * MiniMapSize];
             _miniMapTexture.filterMode = FilterMode.Point;
+            StartCoroutine(RedrawMinimap());
         }
 
         private void Update()
         {
-            var chunkIndex =
-                _mapProvider.GetChunkNumberByGlobalPosition(Vector3Int.RoundToInt(_player.transform.position));
-            if (_chunkIndex != chunkIndex)
-            {
-                RedrawMinimap(chunkIndex);
-            }
-
-            _chunkIndex = chunkIndex;
+            minimapCursor.transform.rotation = Quaternion.Euler(0, 0, -_player.BodyOrientation.rotation.eulerAngles.y);
         }
 
-        private void RedrawMinimap(int chunkIndex)
+        private IEnumerator RedrawMinimap()
         {
-            var pixels = new Color32[ChunkData.ChunkSizeSquared];
-            for (var x = 0; x < ChunkData.ChunkSize; x++)
+            while (true)
             {
-                for (var z = 0; z < ChunkData.ChunkSize; z++)
+                _playerPosition = Vector3Int.FloorToInt(_player.transform.position);
+                for (var x = 0; x < MiniMapSize; x++)
                 {
-                    for (var y = _mapProvider.Height - 1; y >= 0; y--)
+                    for (var z = 0; z < MiniMapSize; z++)
                     {
-                        var block = _mapProvider.GetBlockByGlobalPosition(x + _mapProvider.GetChunkXOffset(chunkIndex),
-                            y, z + _mapProvider.GetChunkZOffset(chunkIndex));
-                        if (!block.IsSolid())
+                        for (var y = _mapProvider.Height - 1; y >= 0; y--)
                         {
-                            continue;
-                        }
+                            var xPosition = _playerPosition.x + x - MiniMapSize / 2;
+                            var zPosition = _playerPosition.z + z - MiniMapSize / 2;
+                            BlockData block;
+                            if (_mapProvider.IsInsideMap(xPosition, y, zPosition))
+                            {
+                                block = _mapProvider.GetBlockByGlobalPosition(xPosition,
+                                    y, zPosition);
 
-                        pixels[x * ChunkData.ChunkSize + z] = block.Color;
-                        break;
+                                if (!block.IsSolid())
+                                {
+                                    continue;
+                                }
+                            }
+                            else
+                            {
+                                block = new BlockData(_mapProvider.WaterColor);
+                            }
+
+                            _pixels[z * MiniMapSize + x] = block.Color;
+                            break;
+                        }
                     }
                 }
+
+                _miniMapTexture.SetPixels32(_pixels);
+                _miniMapTexture.Apply();
+                minimapImage.texture = _miniMapTexture;
+                yield return new WaitForSeconds(MapUpdateRateInSeconds);
             }
-
-            _miniMapTexture.SetPixels32(pixels);
-            _miniMapTexture.Apply();
-            minimapImage.texture = _miniMapTexture;
-        }
-
-        private void OnMapUpdated(BlockDataWithPosition[] blocks)
-        {
-            if (blocks.Any(block => _mapProvider.GetChunkNumberByGlobalPosition(block.Position) == _chunkIndex))
-            {
-                RedrawMinimap(_chunkIndex);
-            }
-        }
-
-        private void OnDestroy()
-        {
-            _client.MapUpdated -= OnMapUpdated;
         }
     }
 }

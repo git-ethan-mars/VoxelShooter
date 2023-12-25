@@ -25,11 +25,7 @@ namespace MapLogic
 
         public BlockData GetBlockByGlobalPosition(int x, int y, int z)
         {
-            if (!IsInsideMap(x, y, z))
-            {
-                throw new ArgumentException($"{x} {y} {z} is not valid position");
-            }
-
+            AssertPosition(x, y, z);
             return _mapData.Chunks[GetChunkNumberByGlobalPosition(x, y, z)]
                 .Blocks[x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
                         y % ChunkData.ChunkSize * ChunkData.ChunkSize + z % ChunkData.ChunkSize];
@@ -40,11 +36,7 @@ namespace MapLogic
 
         public void SetBlockByGlobalPosition(int x, int y, int z, BlockData blockData)
         {
-            if (!IsInsideMap(x, y, z))
-            {
-                throw new ArgumentException($"{x} {y} {z} is not valid position");
-            }
-
+            AssertPosition(x, y, z);
             _mapData.Chunks[GetChunkNumberByGlobalPosition(x, y, z)].Blocks[
                 x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
                 y % ChunkData.ChunkSize * ChunkData.ChunkSize + z % ChunkData.ChunkSize] = blockData;
@@ -166,21 +158,6 @@ namespace MapLogic
             return false;
         }
 
-        public int GetChunkXOffset(int chunkIndex)
-        {
-            return chunkIndex / (_mapData.Height * _mapData.Depth / ChunkData.ChunkSizeSquared) * ChunkData.ChunkSize;
-        }
-
-        public int GetChunkYOffset(int chunkIndex)
-        {
-            return chunkIndex / (_mapData.Depth / ChunkData.ChunkSize) * ChunkData.ChunkSize;
-        }
-
-        public int GetChunkZOffset(int chunkIndex)
-        {
-            return chunkIndex % (_mapData.Depth / ChunkData.ChunkSize) * ChunkData.ChunkSize;
-        }
-
         public bool IsInsideMap(int x, int y, int z)
         {
             return x >= 0 && x < _mapData.Width &&
@@ -210,6 +187,14 @@ namespace MapLogic
                    y / ChunkData.ChunkSize * (_mapData.Depth / ChunkData.ChunkSize) +
                    x / ChunkData.ChunkSize *
                    (_mapData.Height / ChunkData.ChunkSize * _mapData.Depth / ChunkData.ChunkSize);
+        }
+
+        private void AssertPosition(int x, int y, int z)
+        {
+            if (!IsInsideMap(x, y, z))
+            {
+                throw new ArgumentException($"X={x} Y={y} Z={z} is not valid position");
+            }
         }
     }
 }
