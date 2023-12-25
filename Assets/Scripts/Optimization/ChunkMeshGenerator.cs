@@ -13,7 +13,7 @@ namespace Optimization
     public unsafe struct ChunkMeshGenerator : IJob
     {
         [ReadOnly]
-        public NativeParallelHashMap<int, IntPtr> AddressByNeighbour;
+        public NativeArray<IntPtr> AddressByNeighbour;
 
         [ReadOnly]
         public NativeArray<BlockData> Blocks;

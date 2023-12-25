@@ -32,46 +32,48 @@ namespace Generators
             var neighbourChunksToRegenerate = Faces.None;
             for (var i = 0; i < blocks.Count; i++)
             {
-                var blockPosition = blocks[i].Position;
-                var blockData = blocks[i].BlockData;
-                _chunkData.Blocks[
-                    blockPosition.x * ChunkData.ChunkSizeSquared + blockPosition.y * ChunkData.ChunkSize +
-                    blockPosition.z] = blockData;
-                SetFaces(blockPosition.x, blockPosition.y, blockPosition.z);
-                SetNeighboursFaces(blockPosition);
-                if (blockPosition.z == ChunkData.ChunkSize - 1 && FrontNeighbour is not null)
+                var x = blocks[i].Position.x;
+                var y = blocks[i].Position.y;
+                var z = blocks[i].Position.z;
+                _chunkData.SetBlock(x, y, z, blocks[i].BlockData);
+                SetFaces(x, y, z);
+                SetNeighboursFaces(blocks[i].Position);
+                if (z == ChunkData.ChunkSize - 1 && FrontNeighbour is not null)
                 {
-                    FrontNeighbour.SetFaces(blockPosition.x, blockPosition.y, 0);
+                    FrontNeighbour.SetFaces(x, y, 0);
                     neighbourChunksToRegenerate |= Faces.Front;
                 }
 
-                if (blockPosition.z == 0 && BackNeighbour is not null)
+                if (z == 0 && BackNeighbour is not null)
                 {
-                    BackNeighbour.SetFaces(blockPosition.x, blockPosition.y, ChunkData.ChunkSize - 1);
+                    BackNeighbour.SetFaces(x, y, ChunkData.ChunkSize - 1);
                     neighbourChunksToRegenerate |= Faces.Back;
                 }
 
-                if (blockPosition.y == ChunkData.ChunkSize - 1)
+                if (y == ChunkData.ChunkSize - 1)
                 {
                     if (UpperNeighbour is not null)
-                        UpperNeighbour.SetFaces(blockPosition.x, 0, blockPosition.z);
+                    {
+                        UpperNeighbour.SetFaces(x, 0, z);
+                    }
+
                     neighbourChunksToRegenerate |= Faces.Top;
                 }
 
-                if (blockPosition.y == 0 && LowerNeighbour is not null)
+                if (y == 0 && LowerNeighbour is not null)
                 {
-                    LowerNeighbour.SetFaces(blockPosition.x, ChunkData.ChunkSize - 1, blockPosition.z);
+                    LowerNeighbour.SetFaces(x, ChunkData.ChunkSize - 1, z);
                     neighbourChunksToRegenerate |= Faces.Bottom;
                 }
 
-                if (blockPosition.x == ChunkData.ChunkSize - 1 && RightNeighbour is not null)
+                if (x == ChunkData.ChunkSize - 1 && RightNeighbour is not null)
                 {
-                    RightNeighbour.SetFaces(0, blockPosition.y, blockPosition.z);
+                    RightNeighbour.SetFaces(0, y, z);
                     neighbourChunksToRegenerate |= Faces.Right;
                 }
-                else if (blockPosition.x == 0 && LeftNeighbour is not null)
+                else if (x == 0 && LeftNeighbour is not null)
                 {
-                    LeftNeighbour.SetFaces(ChunkData.ChunkSize - 1, blockPosition.y, blockPosition.z);
+                    LeftNeighbour.SetFaces(ChunkData.ChunkSize - 1, y, z);
                     neighbourChunksToRegenerate |= Faces.Left;
                 }
             }
@@ -79,12 +81,12 @@ namespace Generators
             RegenerateMesh();
             if (neighbourChunksToRegenerate.HasFlag(Faces.Front))
             {
-                FrontNeighbour.RegenerateMesh();
+                FrontNeighbour!.RegenerateMesh();
             }
 
             if (neighbourChunksToRegenerate.HasFlag(Faces.Back))
             {
-                BackNeighbour.RegenerateMesh();
+                BackNeighbour!.RegenerateMesh();
             }
 
             if (neighbourChunksToRegenerate.HasFlag(Faces.Top) && UpperNeighbour is not null)
@@ -94,17 +96,17 @@ namespace Generators
 
             if (neighbourChunksToRegenerate.HasFlag(Faces.Bottom))
             {
-                LowerNeighbour.RegenerateMesh();
+                LowerNeighbour!.RegenerateMesh();
             }
 
             if (neighbourChunksToRegenerate.HasFlag(Faces.Right))
             {
-                RightNeighbour.RegenerateMesh();
+                RightNeighbour!.RegenerateMesh();
             }
 
             if (neighbourChunksToRegenerate.HasFlag(Faces.Left))
             {
-                LeftNeighbour.RegenerateMesh();
+                LeftNeighbour!.RegenerateMesh();
             }
         }
 
@@ -166,47 +168,57 @@ namespace Generators
             _meshData.Colors.Clear();
             _mesh.Clear();
             _meshData.Normals.Clear();
-            for (var i = 0; i < ChunkData.ChunkSizeCubed; i++)
+            for (var x = 0; x < ChunkData.ChunkSize; x++)
             {
-                var x = i / ChunkData.ChunkSizeSquared;
-                var y = (i - x * ChunkData.ChunkSizeSquared) / ChunkData.ChunkSize;
-                var z = i - x * ChunkData.ChunkSizeSquared - y * ChunkData.ChunkSize;
-                if (_chunkData.Faces[i] == Faces.None) continue;
-                var color = _chunkData.Blocks[i].Color;
-                if (_chunkData.Faces[i].HasFlag(Faces.Top))
+                for (var y = 0; y < ChunkData.ChunkSize; y++)
                 {
-                    ChunkGeneratorHelper.GenerateTopSide(x, y, z, color, _meshData.Vertices, _meshData.Normals,
-                        _meshData.Colors, _meshData.Triangles);
-                }
+                    for (var z = 0; z < ChunkData.ChunkSize; z++)
+                    {
+                        if (_chunkData.GetFaces(x, y, z) == Faces.None)
+                        {
+                            continue;
+                        }
 
-                if (_chunkData.Faces[i].HasFlag(Faces.Bottom))
-                {
-                    ChunkGeneratorHelper.GenerateBottomSide(x, y, z, color, _meshData.Vertices, _meshData.Normals,
-                        _meshData.Colors, _meshData.Triangles);
-                }
+                        var color = _chunkData.GetBlock(x, y, z).Color;
+                        if (_chunkData.GetFaces(x, y, z).HasFlag(Faces.Top))
+                        {
+                            ChunkGeneratorHelper.GenerateTopSide(x, y, z, color, _meshData.Vertices, _meshData.Normals,
+                                _meshData.Colors, _meshData.Triangles);
+                        }
 
-                if (_chunkData.Faces[i].HasFlag(Faces.Front))
-                {
-                    ChunkGeneratorHelper.GenerateFrontSide(x, y, z, color, _meshData.Vertices, _meshData.Normals,
-                        _meshData.Colors, _meshData.Triangles);
-                }
+                        if (_chunkData.GetFaces(x, y, z).HasFlag(Faces.Bottom))
+                        {
+                            ChunkGeneratorHelper.GenerateBottomSide(x, y, z, color, _meshData.Vertices,
+                                _meshData.Normals,
+                                _meshData.Colors, _meshData.Triangles);
+                        }
 
-                if (_chunkData.Faces[i].HasFlag(Faces.Back))
-                {
-                    ChunkGeneratorHelper.GenerateBackSide(x, y, z, color, _meshData.Vertices, _meshData.Normals,
-                        _meshData.Colors, _meshData.Triangles);
-                }
+                        if (_chunkData.GetFaces(x, y, z).HasFlag(Faces.Front))
+                        {
+                            ChunkGeneratorHelper.GenerateFrontSide(x, y, z, color, _meshData.Vertices,
+                                _meshData.Normals,
+                                _meshData.Colors, _meshData.Triangles);
+                        }
 
-                if (_chunkData.Faces[i].HasFlag(Faces.Left))
-                {
-                    ChunkGeneratorHelper.GenerateLeftSide(x, y, z, color, _meshData.Vertices, _meshData.Normals,
-                        _meshData.Colors, _meshData.Triangles);
-                }
+                        if (_chunkData.GetFaces(x, y, z).HasFlag(Faces.Back))
+                        {
+                            ChunkGeneratorHelper.GenerateBackSide(x, y, z, color, _meshData.Vertices, _meshData.Normals,
+                                _meshData.Colors, _meshData.Triangles);
+                        }
 
-                if (_chunkData.Faces[i].HasFlag(Faces.Right))
-                {
-                    ChunkGeneratorHelper.GenerateRightSide(x, y, z, color, _meshData.Vertices, _meshData.Normals,
-                        _meshData.Colors, _meshData.Triangles);
+                        if (_chunkData.GetFaces(x, y, z).HasFlag(Faces.Left))
+                        {
+                            ChunkGeneratorHelper.GenerateLeftSide(x, y, z, color, _meshData.Vertices, _meshData.Normals,
+                                _meshData.Colors, _meshData.Triangles);
+                        }
+
+                        if (_chunkData.GetFaces(x, y, z).HasFlag(Faces.Right))
+                        {
+                            ChunkGeneratorHelper.GenerateRightSide(x, y, z, color, _meshData.Vertices,
+                                _meshData.Normals,
+                                _meshData.Colors, _meshData.Triangles);
+                        }
+                    }
                 }
             }
 
@@ -215,60 +227,56 @@ namespace Generators
 
         private void SetFaces(int x, int y, int z)
         {
-            _chunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] = Faces.None;
-            if (!_chunkData.Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].IsSolid())
+            var resultFaces = Faces.None;
+            if (!_chunkData.GetBlock(x, y, z).IsSolid())
             {
+                _chunkData.SetFaces(x, y, z, resultFaces);
                 return;
             }
 
             if (!ChunkData.IsValidPosition(x, y + 1, z) && (UpperNeighbour is null || UpperNeighbour is not null &&
-                    !UpperNeighbour._chunkData.Blocks[x * ChunkData.ChunkSizeSquared + z].IsSolid()) ||
-                ChunkData.IsValidPosition(x, y + 1, z) && !_chunkData
-                    .Blocks[x * ChunkData.ChunkSizeSquared + (y + 1) * ChunkData.ChunkSize + z].IsSolid())
+                    !UpperNeighbour._chunkData.GetBlock(x, 0, z).IsSolid()) ||
+                ChunkData.IsValidPosition(x, y + 1, z) && !_chunkData.GetBlock(x, y + 1, z).IsSolid())
             {
-                _chunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Top;
+                resultFaces |= Faces.Top;
             }
 
-            if (!ChunkData.IsValidPosition(x, y - 1, z) && LowerNeighbour is not null && !LowerNeighbour._chunkData
-                    .Blocks[x * ChunkData.ChunkSizeSquared + (ChunkData.ChunkSize - 1) * ChunkData.ChunkSize + z]
-                    .IsSolid() || ChunkData.IsValidPosition(x, y - 1, z) && !_chunkData
-                    .Blocks[x * ChunkData.ChunkSizeSquared + (y - 1) * ChunkData.ChunkSize + z].IsSolid())
+            if (!ChunkData.IsValidPosition(x, y - 1, z) && LowerNeighbour is not null &&
+                !LowerNeighbour._chunkData.GetBlock(x, ChunkData.ChunkSize - 1, z).IsSolid() ||
+                ChunkData.IsValidPosition(x, y - 1, z) && !_chunkData.GetBlock(x, y - 1, z).IsSolid())
             {
-                _chunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Bottom;
+                resultFaces |= Faces.Bottom;
             }
 
             if (!ChunkData.IsValidPosition(x, y, z + 1) && FrontNeighbour is not null &&
-                !FrontNeighbour._chunkData.Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize].IsSolid() ||
-                ChunkData.IsValidPosition(x, y, z + 1) && !_chunkData
-                    .Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z + 1].IsSolid())
+                !FrontNeighbour._chunkData.GetBlock(x, y, 0).IsSolid() ||
+                ChunkData.IsValidPosition(x, y, z + 1) && !_chunkData.GetBlock(x, y, z + 1).IsSolid())
             {
-                _chunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Front;
+                resultFaces |= Faces.Front;
             }
 
             if (!ChunkData.IsValidPosition(x, y, z - 1) && BackNeighbour is not null &&
-                !BackNeighbour._chunkData
-                    .Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + ChunkData.ChunkSize - 1]
-                    .IsSolid() || ChunkData.IsValidPosition(x, y, z - 1) && !_chunkData
-                    .Blocks[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z - 1].IsSolid())
+                !BackNeighbour._chunkData.GetBlock(x, y, ChunkData.ChunkSize - 1).IsSolid() ||
+                ChunkData.IsValidPosition(x, y, z - 1) && !_chunkData.GetBlock(x, y, z - 1).IsSolid())
             {
-                _chunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Back;
+                resultFaces |= Faces.Back;
             }
 
             if (!ChunkData.IsValidPosition(x + 1, y, z) && RightNeighbour is not null &&
-                !RightNeighbour._chunkData.Blocks[y * ChunkData.ChunkSize + z].IsSolid() ||
-                ChunkData.IsValidPosition(x + 1, y, z) && !_chunkData
-                    .Blocks[(x + 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].IsSolid())
+                !RightNeighbour._chunkData.GetBlock(0, y, z).IsSolid() ||
+                ChunkData.IsValidPosition(x + 1, y, z) && !_chunkData.GetBlock(x + 1, y, z).IsSolid())
             {
-                _chunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Right;
+                resultFaces |= Faces.Right;
             }
 
-            if (!ChunkData.IsValidPosition(x - 1, y, z) && LeftNeighbour is not null && !LeftNeighbour._chunkData
-                    .Blocks[(ChunkData.ChunkSize - 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z]
-                    .IsSolid() || ChunkData.IsValidPosition(x - 1, y, z) && !_chunkData
-                    .Blocks[(x - 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].IsSolid())
+            if (!ChunkData.IsValidPosition(x - 1, y, z) && LeftNeighbour is not null &&
+                !LeftNeighbour._chunkData.GetBlock(ChunkData.ChunkSize - 1, y, z).IsSolid() ||
+                ChunkData.IsValidPosition(x - 1, y, z) && !_chunkData.GetBlock(x - 1, y, z).IsSolid())
             {
-                _chunkData.Faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] |= Faces.Left;
+                resultFaces |= Faces.Left;
             }
+
+            _chunkData.SetFaces(x, y, z, resultFaces);
         }
     }
 }
