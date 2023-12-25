@@ -27,7 +27,6 @@ namespace Networking
         public IMeshFactory MeshFactory { get; private set; }
         public IParticleFactory ParticleFactory { get; private set; }
         public IPlayerFactory PlayerFactory { get; private set; }
-        public IUIFactory UIFactory { get; private set; }
         private ServerSettings _serverSettings;
         private GameStateMachine _stateMachine;
         private BoxDropService _boxDropService;
@@ -49,10 +48,9 @@ namespace Networking
             EntityFactory = entityFactory;
             MeshFactory = meshFactory;
             ParticleFactory = particleFactory;
-            PlayerFactory = new PlayerFactory(assets, inputService, storageService, staticData, uiFactory, meshFactory);
-            UIFactory = uiFactory;
             _serverSettings = serverSettings;
             Client = new Client(_stateMachine, this);
+            PlayerFactory = new PlayerFactory(assets, inputService, storageService, staticData, uiFactory, meshFactory);
         }
 
         public override void OnStartHost()
@@ -71,7 +69,7 @@ namespace Networking
             if (NetworkServer.localConnection == connection)
             {
                 Client.MapProvider = _server.MapProvider;
-                Client.Data.MapName = _server.MapProvider.MapName;
+                Client.MapName = _server.MapProvider.MapName;
             }
             else
             {

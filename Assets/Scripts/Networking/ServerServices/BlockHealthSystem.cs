@@ -9,6 +9,7 @@ namespace Networking.ServerServices
 {
     public class BlockHealthSystem
     {
+        private static Color32 _destructedBlockColor = new Color32(0,0,0,255);
         private readonly int _blockFullHealth;
         private readonly int _damagedBlockHealthThreshold;
         private readonly int _wreckedBlockHealthThreshold;
@@ -84,12 +85,12 @@ namespace Networking.ServerServices
             var newBlockData = new BlockData(BlockColor.empty);
             if (_healthByBlock[blockIndex] >= _damagedBlockHealthThreshold)
             {
-                return new BlockData(Color32.Lerp(BlockColor.empty, blockData.Color, _fullHealthColorCoefficient));
+                return new BlockData(Color32.Lerp(_destructedBlockColor, blockData.Color, _fullHealthColorCoefficient));
             }
 
             if (_healthByBlock[blockIndex] >= _wreckedBlockHealthThreshold)
             {
-                return new BlockData(Color32.Lerp(BlockColor.empty, blockData.Color,
+                return new BlockData(Color32.Lerp(_destructedBlockColor, blockData.Color,
                     previousHealth >= _damagedBlockHealthThreshold
                         ? _damagedColorCoefficient
                         : _fullHealthColorCoefficient));
@@ -97,7 +98,7 @@ namespace Networking.ServerServices
 
             if (_healthByBlock[blockIndex] > 0)
             {
-                return new BlockData(Color32.Lerp(BlockColor.empty, blockData.Color,
+                return new BlockData(Color32.Lerp(_destructedBlockColor, blockData.Color,
                     previousHealth >= _wreckedBlockHealthThreshold
                         ? _wreckedColorCoefficient
                         : _fullHealthColorCoefficient));

@@ -21,7 +21,7 @@ namespace Inventory.Block
         {
             _inventoryInput = inventoryInput;
             _hud = hud;
-            var initialColor = _hud.palette.Color.Value;
+            var initialColor = _hud.Palette.Color.Value;
             _blockModel = new BlockModel(configure, rayCaster, player, initialColor);
             _blockView = new BlockView(meshFactory, configure, rayCaster, player, hud, initialColor);
         }
@@ -31,7 +31,7 @@ namespace Inventory.Block
             _inventoryInput.FirstActionButtonDown += _blockModel.PlaceBlock;
             _blockModel.Count.ValueChanged += _blockView.OnCountChanged;
             _blockModel.BlockColor.ValueChanged += _blockView.ChangeTransparentBlockColor;
-            _hud.palette.Color.ValueChanged += _blockModel.ChangeColor;
+            _hud.Palette.Color.ValueChanged += _blockModel.ChangeColor;
             _blockView.Enable();
         }
 
@@ -45,7 +45,7 @@ namespace Inventory.Block
             _inventoryInput.FirstActionButtonDown -= _blockModel.PlaceBlock;
             _blockModel.Count.ValueChanged -= _blockView.OnCountChanged;
             _blockModel.BlockColor.ValueChanged -= _blockView.ChangeTransparentBlockColor;
-            _hud.palette.Color.ValueChanged -= _blockModel.ChangeColor;
+            _hud.Palette.Color.ValueChanged -= _blockModel.ChangeColor;
             _blockView.Disable();
         }
 

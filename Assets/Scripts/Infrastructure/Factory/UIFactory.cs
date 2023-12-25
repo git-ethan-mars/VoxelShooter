@@ -5,6 +5,7 @@ using Infrastructure.Services.PlayerDataLoader;
 using Infrastructure.Services.StaticData;
 using Infrastructure.Services.Storage;
 using Infrastructure.States;
+using Mirror;
 using Networking;
 using PlayerLogic;
 using UI;
@@ -25,11 +26,12 @@ namespace Infrastructure.Factory
             _staticData = staticData;
         }
 
-        public Hud CreateHud(Player player, IInputService inputService)
+        public Hud CreateHud(IClient client, Player player, IInputService inputService)
         {
             var hud = _assets.Instantiate(UIPath.HudPath).GetComponent<Hud>();
-            hud.healthCounter.Construct(player);
-            hud.palette.Construct(inputService);
+            hud.HealthCounter.Construct(player);
+            hud.Palette.Construct(inputService);
+            hud.Minimap.Construct(client, player);
             return hud;
         }
 

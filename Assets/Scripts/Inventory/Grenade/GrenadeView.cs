@@ -20,10 +20,10 @@ namespace Inventory.Grenade
         public GrenadeView(GrenadeItem configure, Hud hud)
         {
             Icon = configure.inventoryIcon;
-            _grenadeInfo = hud.itemInfo;
-            _grenadeCountText = hud.itemCount;
+            _grenadeInfo = hud.ItemInfo;
+            _grenadeCountText = hud.ItemCount;
             _grenadeCountIcon = configure.countIcon;
-            _itemType = hud.itemIcon;
+            _itemType = hud.ItemIcon;
             _count = configure.count;
         }
 

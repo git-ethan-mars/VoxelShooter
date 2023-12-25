@@ -19,10 +19,10 @@ namespace Inventory.RocketLauncher
         public RocketLauncherView(RocketLauncherItem configuration, Hud hud, RocketLauncherData rocketLauncherData)
         {
             Icon = configuration.inventoryIcon;
-            _rocketLauncherInfo = hud.itemInfo;
-            _rocketLauncherCountText = hud.itemCount;
+            _rocketLauncherInfo = hud.ItemInfo;
+            _rocketLauncherCountText = hud.ItemCount;
             _rocketLauncherCountIcon = configuration.countIcon;
-            _itemType = hud.itemIcon;
+            _itemType = hud.ItemIcon;
             _rocketLauncherData = rocketLauncherData;
         }
 

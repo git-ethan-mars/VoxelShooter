@@ -23,9 +23,9 @@ namespace Inventory.RangeWeapon
             _ammoTypeIcon = configure.ammoIcon;
             _bulletsInMagazine = data.BulletsInMagazine;
             _totalBullets = data.TotalBullets;
-            _ammoInfo = hud.ammoInfo;
-            _ammoCount = hud.ammoCount;
-            _ammoType = hud.ammoType;
+            _ammoInfo = hud.AmmoInfo;
+            _ammoCount = hud.AmmoCount;
+            _ammoType = hud.AmmoType;
         }
 
         public void Enable()
