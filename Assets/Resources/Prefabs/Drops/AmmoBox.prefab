@@ -53,7 +53,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0.1
-  miniMapIcon: {fileID: 0}
+  miniMapImage: {fileID: 21300000, guid: 47c85395d7eb47c43a195129f2c8311b, type: 3}
   collider: {fileID: 131467749748963534}
   parachute: {fileID: 7302551272095989573}
 --- !u!65 &131467749748963534

@@ -2,7 +2,6 @@ using System;
 using Mirror;
 using Networking;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Entities
 {
@@ -17,9 +16,9 @@ namespace Entities
         public Vector3Int Max => new(_size.x / 2, _size.y / 2, _size.z / 2);
 
         [SerializeField]
-        private Image miniMapIcon;
+        private Sprite miniMapImage;
 
-        public Image MiniMapIcon => miniMapIcon;
+        public Sprite MiniMapImage => miniMapImage;
 
         [SerializeField]
         private new Collider collider;
