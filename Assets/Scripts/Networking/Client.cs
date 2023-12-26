@@ -187,7 +187,6 @@ namespace Networking
 
         private void OnMapDownloaded()
         {
-            MapProjector = new VerticalMapProjector(this);
             _stateMachine.Enter<GameLoopState, CustomNetworkManager>(_networkManager);
         }
 
@@ -219,9 +218,9 @@ namespace Networking
             }
         }
 
-        private GameObject SpawnPlayerHandler(SpawnMessage msg)
+        private GameObject SpawnPlayerHandler(SpawnMessage message)
         {
-            return _playerFactory.CreatePlayer(msg.position);
+            return _playerFactory.CreatePlayer(message.position);
         }
 
         private void UnSpawnPlayerHandler(GameObject spawned)

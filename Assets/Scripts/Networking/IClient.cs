@@ -17,7 +17,7 @@ namespace Networking
         event Action GameFinished;
         event Action<Player> PlayerCreated;
         MapProvider MapProvider { get; set; }
-        VerticalMapProjector MapProjector { get; }
+        VerticalMapProjector MapProjector { get; set; }
         string MapName { get; set; }
         void Start();
         void Stop();

@@ -37,6 +37,7 @@ namespace Infrastructure.States
 
         public void Enter(CustomNetworkManager networkManager)
         {
+            networkManager.Client.MapProjector = new VerticalMapProjector(networkManager.Client);
             var mapGenerator = new MapGenerator(networkManager.Client.MapProvider, _gameFactory, _meshFactory);
             var chunkMeshes = mapGenerator.GenerateMap(_gameFactory.CreateGameObjectContainer(ChunkContainerName));
             _chunkMeshUpdater = new ChunkMeshUpdater(networkManager.Client, chunkMeshes);
