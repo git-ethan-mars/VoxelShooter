@@ -22,8 +22,6 @@ namespace Inventory
 {
     public class InventorySystem
     {
-        public IInventoryItemModel ActiveItemModel => _states[_index].ItemModel;
-        private int _index;
         private readonly List<IInventoryItemState> _states = new();
         private readonly ChangeSlotResultHandler _changeSlotHandler;
         private readonly ItemUseHandler _itemUseHandler;
@@ -33,6 +31,7 @@ namespace Inventory
         private readonly RocketReloadHandler _rocketReloadHandler;
         private readonly InventoryInput _inventoryInput;
         private readonly Hud _hud;
+        private int _index;
 
         public InventorySystem(IInputService inputService, IStaticDataService staticData,
             IMeshFactory meshFactory, List<int> itemIds, Hud hud, Player player)
@@ -49,7 +48,7 @@ namespace Inventory
                 {
                     var rangeWeapon = (RangeWeaponItem) item;
                     _states.Add(new RangeWeaponState(_inventoryInput, rayCaster,
-                        rangeWeapon, new RangeWeaponData(rangeWeapon), player, hud));
+                        rangeWeapon, new RangeWeaponItemData(rangeWeapon), player, hud));
                 }
 
                 if (item.itemType == ItemType.MeleeWeapon)
@@ -60,26 +59,30 @@ namespace Inventory
 
                 if (item.itemType == ItemType.Block)
                 {
-                    _states.Add(new BlockState(meshFactory, _inventoryInput, (BlockItem) item, rayCaster,
+                    var block = (BlockItem) item;
+                    _states.Add(new BlockState(meshFactory, _inventoryInput, block, new BlockItemData(block), rayCaster,
                         player, hud));
                 }
 
                 if (item.itemType == ItemType.Grenade)
                 {
-                    _states.Add(new GrenadeState(_inventoryInput, rayCaster, (GrenadeItem) item, hud));
+                    var grenade = (GrenadeItem) item;
+                    _states.Add(
+                        new GrenadeState(_inventoryInput, rayCaster, grenade, new GrenadeItemData(grenade), hud));
                 }
 
                 if (item.itemType == ItemType.Tnt)
                 {
-                    _states.Add(new TntState(meshFactory, _inventoryInput, rayCaster, (TntItem) item,
-                        player, hud));
+                    var tnt = (TntItem) item;
+                    _states.Add(new TntState(meshFactory, _inventoryInput, rayCaster, tnt, new TntItemData(tnt), player,
+                        hud));
                 }
 
                 if (item.itemType == ItemType.RocketLauncher)
                 {
                     var rocketLauncher = (RocketLauncherItem) item;
                     _states.Add(new RocketLauncherState(_inventoryInput, rayCaster,
-                        (RocketLauncherItem) item, hud, new RocketLauncherData(rocketLauncher)));
+                        (RocketLauncherItem) item, hud, new RocketLauncherItemData(rocketLauncher)));
                 }
             }
 

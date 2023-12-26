@@ -6,7 +6,7 @@ using UI;
 namespace Inventory.RangeWeapon
 {
     public class RangeWeaponState : IInventoryItemState
-    {
+    { 
         public IInventoryItemModel ItemModel => _rangeWeaponModel;
         public IInventoryItemView ItemView => _rangeWeaponView;
         private readonly RangeWeaponModel _rangeWeaponModel;
@@ -15,11 +15,11 @@ namespace Inventory.RangeWeapon
 
 
         public RangeWeaponState(IInventoryInput inventoryInput, RayCaster rayCaster,
-            RangeWeaponItem configure, RangeWeaponData data, Player player, Hud hud)
+            RangeWeaponItem configure, RangeWeaponItemData itemData, Player player, Hud hud)
         {
             _inventoryInput = inventoryInput;
-            _rangeWeaponModel = new RangeWeaponModel(rayCaster, configure, data, player);
-            _rangeWeaponView = new RangeWeaponView(configure, data, hud);
+            _rangeWeaponModel = new RangeWeaponModel(rayCaster, configure, itemData, player);
+            _rangeWeaponView = new RangeWeaponView(configure, hud);
         }
 
         public void Enter()
@@ -30,9 +30,9 @@ namespace Inventory.RangeWeapon
             _inventoryInput.SecondActionButtonDown += _rangeWeaponModel.ZoomIn;
             _inventoryInput.SecondActionButtonUp += _rangeWeaponModel.ZoomOut;
             _inventoryInput.ReloadButtonDown += _rangeWeaponModel.Reload;
-            _rangeWeaponModel.BulletsInMagazine.ValueChanged += _rangeWeaponView.OnBulletsInMagazineChanged;
-            _rangeWeaponModel.TotalBullets.ValueChanged += _rangeWeaponView.OnTotalBulletsChanged;
             _rangeWeaponView.Enable();
+            _rangeWeaponModel.ModelUpdated += UpdateViewDescription;
+            UpdateViewDescription();
         }
 
         public void Update()
@@ -47,14 +47,18 @@ namespace Inventory.RangeWeapon
             _inventoryInput.SecondActionButtonDown -= _rangeWeaponModel.ZoomIn;
             _inventoryInput.SecondActionButtonUp -= _rangeWeaponModel.ZoomOut;
             _inventoryInput.ReloadButtonDown -= _rangeWeaponModel.Reload;
-            _rangeWeaponModel.BulletsInMagazine.ValueChanged -= _rangeWeaponView.OnBulletsInMagazineChanged;
-            _rangeWeaponModel.TotalBullets.ValueChanged -= _rangeWeaponView.OnTotalBulletsChanged;
             _rangeWeaponModel.ZoomOut();
             _rangeWeaponView.Disable();
+            _rangeWeaponModel.ModelUpdated -= UpdateViewDescription;
         }
 
         public void Dispose()
         {
+        }
+
+        private void UpdateViewDescription()
+        {
+            _rangeWeaponView.UpdateAmmoText($"{_rangeWeaponModel.BulletsInMagazine}/{_rangeWeaponModel.TotalBullets}");
         }
     }
 }

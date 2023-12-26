@@ -15,9 +15,9 @@ namespace Networking.MessageHandlers.ResponseHandler
 
         protected override void OnResponseReceived(RocketReloadResponse response)
         {
-            var reloading = (IRocketReloadable) _inventory.GetModel(response.SlotIndex);
-            reloading.Count.Value = response.TotalRockets;
-            reloading.RocketsInSlotsCount.Value = response.RocketsInSlotsCount;
+            var rocketLauncher = (RocketLauncherModel) _inventory.GetModel(response.SlotIndex);
+            rocketLauncher.CarriedRockets = response.CarriedRockets;
+            rocketLauncher.ChargedRockets = response.ChargedRockets;
         }
     }
 }

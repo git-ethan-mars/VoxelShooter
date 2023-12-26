@@ -1,3 +1,4 @@
+using System;
 using CameraLogic;
 using Data;
 using Infrastructure;
@@ -10,18 +11,31 @@ namespace Inventory.Block
 {
     public class BlockModel : IInventoryItemModel, IConsumable
     {
-        public ObservableVariable<int> Count { get; set; }
+        public event Action<int> AmountChanged;
+
+        public int Amount
+        {
+            get => _blockItemData.Count;
+            set
+            {
+                _blockItemData.Count = value;
+                AmountChanged?.Invoke(value);
+            }
+        }
+
         public ObservableVariable<Color32> BlockColor { get; }
 
         private readonly GameObject _transparentBlock;
         private readonly RayCaster _rayCaster;
         private readonly float _placeDistance;
+        private readonly BlockItemData _blockItemData;
 
-        public BlockModel(BlockItem configure, RayCaster rayCaster, Player player, Color32 initialColor)
+
+        public BlockModel(BlockItemData data, RayCaster rayCaster, Player player, Color32 initialColor)
         {
             _rayCaster = rayCaster;
             _placeDistance = player.PlaceDistance;
-            Count = new ObservableVariable<int>(configure.count);
+            _blockItemData = data;
             BlockColor = new ObservableVariable<Color32>(initialColor);
         }
 

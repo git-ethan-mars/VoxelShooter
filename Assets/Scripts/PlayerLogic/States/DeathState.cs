@@ -19,7 +19,6 @@ namespace PlayerLogic.States
             _playerData.Health = 0;
             _playerData.Items = null;
             _playerData.ItemData = null;
-            _playerData.CountByItem = null;
             _playerData.HasContinuousSound = false;
         }
 

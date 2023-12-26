@@ -29,7 +29,7 @@ namespace Networking.ServerServices
         {
             var playerData = _server.Data.GetPlayerData(connection);
             var rocketLauncher = (RocketLauncherItem) playerData.SelectedItem;
-            var rocketLauncherData = (RocketLauncherData) playerData.ItemData[playerData.SelectedSlotIndex];
+            var rocketLauncherData = (RocketLauncherItemData) playerData.ItemData[playerData.SelectedSlotIndex];
 
             if (!CanShoot(rocketLauncherData))
             {
@@ -40,15 +40,15 @@ namespace Networking.ServerServices
                 Quaternion.LookRotation(ray.direction), _server, _particleFactory, rocketLauncher, connection,
                 _audioService);
             NetworkServer.Spawn(rocket);
-            rocketLauncherData.RocketsInSlotsCount -= 1;
-            connection.Send(new RocketSpawnResponse(rocketLauncherData.RocketsInSlotsCount));
+            rocketLauncherData.ChargedRockets -= 1;
+            connection.Send(new RocketSpawnResponse(playerData.SelectedSlotIndex, rocketLauncherData.ChargedRockets));
         }
 
         public void Reload(NetworkConnectionToClient connection)
         {
             var playerData = _server.Data.GetPlayerData(connection);
             var rocketLauncher = (RocketLauncherItem) playerData.SelectedItem;
-            var rocketLauncherData = (RocketLauncherData) playerData.ItemData[playerData.SelectedSlotIndex];
+            var rocketLauncherData = (RocketLauncherItemData) playerData.ItemData[playerData.SelectedSlotIndex];
 
             if (!CanReload(rocketLauncher, rocketLauncherData))
             {
@@ -60,34 +60,35 @@ namespace Networking.ServerServices
         }
 
         private IEnumerator ReloadInternal(NetworkConnectionToClient connection, RocketLauncherItem configure,
-            RocketLauncherData data)
+            RocketLauncherItemData itemData)
         {
-            data.IsReloading = true;
+            itemData.IsReloading = true;
             var waitReloading = new WaitWithoutSlotChange(_server, connection, configure.reloadTime);
             yield return waitReloading;
             if (!waitReloading.CompletedSuccessfully)
             {
-                data.IsReloading = false;
+                itemData.IsReloading = false;
                 yield break;
             }
 
-            data.IsReloading = false;
-            data.TotalRockets -= configure.rechargeableRocketsCount;
-            data.RocketsInSlotsCount += configure.rechargeableRocketsCount;
+            itemData.IsReloading = false;
+            itemData.CarriedRockets -= configure.rechargeableRocketsCount;
+            itemData.ChargedRockets += configure.rechargeableRocketsCount;
 
             var playerData = _server.Data.GetPlayerData(connection);
-            connection.Send(new RocketReloadResponse(playerData.SelectedSlotIndex, data.TotalRockets,
-                data.RocketsInSlotsCount));
+            connection.Send(new RocketReloadResponse(playerData.SelectedSlotIndex, itemData.ChargedRockets,
+                itemData.CarriedRockets));
         }
 
-        private bool CanReload(RocketLauncherItem configure, RocketLauncherData data)
+        private bool CanReload(RocketLauncherItem configure, RocketLauncherItemData itemData)
         {
-            return data.TotalRockets > 0 && !data.IsReloading && data.RocketsInSlotsCount < configure.rocketSlotsCount;
+            return itemData.CarriedRockets > 0 && !itemData.IsReloading &&
+                   itemData.ChargedRockets < configure.chargedRocketsCapacity;
         }
 
-        private bool CanShoot(RocketLauncherData data)
+        private bool CanShoot(RocketLauncherItemData itemData)
         {
-            return !data.IsReloading && data.RocketsInSlotsCount > 0;
+            return !itemData.IsReloading && itemData.ChargedRockets > 0;
         }
     }
 }

@@ -22,7 +22,7 @@ MonoBehaviour:
   damage: 180
   speed: 80
   reloadTime: 3
-  rocketSlotsCount: 1
+  chargedRocketsCapacity: 1
   rechargeableRocketsCount: 1
   particlesSpeed: 7
   particlesCount: 100

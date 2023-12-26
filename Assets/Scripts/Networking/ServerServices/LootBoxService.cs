@@ -7,6 +7,7 @@ using Infrastructure;
 using Infrastructure.Factory;
 using Mirror;
 using Networking.Messages.Responses;
+using PlayerLogic.States;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -140,8 +141,9 @@ namespace Networking.ServerServices
             {
                 if (playerData.Items[i].itemType == ItemType.Block)
                 {
-                    playerData.CountByItem[playerData.Items[i]] += 50;
-                    receiver.Send(new ItemUseResponse(i, playerData.CountByItem[playerData.Items[i]]));
+                    var blockItemData = (BlockItemData) playerData.ItemData[i];
+                    blockItemData.Count += 50;
+                    receiver.Send(new ItemUseResponse(i, blockItemData.Count));
                 }
             }
         }
@@ -158,7 +160,7 @@ namespace Networking.ServerServices
                 if (item.itemType == ItemType.RangeWeapon)
                 {
                     var rangeWeapon = (RangeWeaponItem) item;
-                    var rangeWeaponData = (RangeWeaponData) itemData;
+                    var rangeWeaponData = (RangeWeaponItemData) itemData;
                     rangeWeaponData.TotalBullets += rangeWeapon.magazineSize * 2;
                     receiver.Send(new ReloadResultResponse(i, rangeWeaponData.TotalBullets,
                         rangeWeaponData.BulletsInMagazine));
@@ -167,22 +169,26 @@ namespace Networking.ServerServices
 
                 if (item.itemType == ItemType.Tnt)
                 {
-                    playerData.CountByItem[item] += 1;
-                    receiver.Send(new ItemUseResponse(i, playerData.CountByItem[item]));
+                    var tntData = (TntItemData) itemData;
+                    tntData.Amount += 1;
+                    receiver.Send(new ItemUseResponse(i, tntData.Amount));
                     continue;
                 }
 
                 if (item.itemType == ItemType.Grenade)
                 {
-                    playerData.CountByItem[item] += 1;
-                    receiver.Send(new ItemUseResponse(i, playerData.CountByItem[item]));
+                    var grenadeData = (GrenadeItemData) itemData;
+                    grenadeData.Count += 1;
+                    receiver.Send(new ItemUseResponse(i, grenadeData.Count));
                     continue;
                 }
 
                 if (item.itemType == ItemType.RocketLauncher)
                 {
-                    playerData.CountByItem[item] += 1;
-                    receiver.Send(new ItemUseResponse(i, playerData.CountByItem[item]));
+                    var rocketLauncherData = (RocketLauncherItemData) itemData;
+                    rocketLauncherData.CarriedRockets += 1;
+                    receiver.Send(new RocketReloadResponse(i, rocketLauncherData.ChargedRockets,
+                        rocketLauncherData.CarriedRockets));
                 }
             }
         }

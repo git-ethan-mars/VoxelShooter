@@ -1,6 +1,6 @@
 namespace Data
 {
-    public class RangeWeaponData : IMutableItemData
+    public class RangeWeaponItemData : IMutableItemData
     {
         public int TotalBullets { get; set; }
         public float RecoilModifier { get; set; }
@@ -8,7 +8,7 @@ namespace Data
         public bool IsReady { get; set; }
         public bool IsReloading { get; set; }
 
-        public RangeWeaponData(RangeWeaponItem rangeWeapon)
+        public RangeWeaponItemData(RangeWeaponItem rangeWeapon)
         {
             TotalBullets = rangeWeapon.totalBullets;
             RecoilModifier = 0.0f;

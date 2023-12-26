@@ -1,29 +1,47 @@
+using System;
 using CameraLogic;
 using Data;
-using Infrastructure;
 using Mirror;
 using Networking.Messages.Requests;
 using PlayerLogic;
 
 namespace Inventory.RangeWeapon
 {
-    public class RangeWeaponModel : IInventoryItemModel, IShooting, IReloading
+    public class RangeWeaponModel : IInventoryItemModel
     {
-        public ObservableVariable<int> BulletsInMagazine { get; }
-        public ObservableVariable<int> TotalBullets { get; }
+        public event Action ModelUpdated;
+        public int BulletsInMagazine
+        {
+            get => _rangeWeaponItemData.BulletsInMagazine;
+            set
+            {
+                _rangeWeaponItemData.BulletsInMagazine = value;
+                ModelUpdated?.Invoke();
+            }
+        }
+
+        public int TotalBullets
+        {
+            get => _rangeWeaponItemData.TotalBullets;
+            set
+            {
+                _rangeWeaponItemData.TotalBullets = value;
+                ModelUpdated?.Invoke();
+            }
+        }
 
         private readonly RayCaster _rayCaster;
+        private readonly RangeWeaponItemData _rangeWeaponItemData;
         private readonly Player _player;
         private readonly float _zoomMultiplier;
 
         public RangeWeaponModel(RayCaster rayCaster,
-            RangeWeaponItem configure, RangeWeaponData data, Player player)
+            RangeWeaponItem configure, RangeWeaponItemData rangeWeaponItemData, Player player)
         {
             _rayCaster = rayCaster;
+            _rangeWeaponItemData = rangeWeaponItemData;
             _player = player;
             _zoomMultiplier = configure.zoomMultiplier;
-            BulletsInMagazine = new ObservableVariable<int>(data.BulletsInMagazine);
-            TotalBullets = new ObservableVariable<int>(data.TotalBullets);
         }
 
         public void ShootSingle()

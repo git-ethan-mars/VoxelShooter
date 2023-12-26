@@ -4,10 +4,13 @@ namespace Networking.Messages.Responses
 {
     public struct RocketSpawnResponse : NetworkMessage
     {
-        public readonly int RocketsInSlotsCount;
-        public RocketSpawnResponse(int rocketsInSlotsCount)
+        public readonly int SlotIndex;
+        public readonly int ChargedRockets;
+
+        public RocketSpawnResponse(int slotIndex, int chargedRockets)
         {
-            RocketsInSlotsCount = rocketsInSlotsCount;
+            SlotIndex = slotIndex;
+            ChargedRockets = chargedRockets;
         }
     }
 }

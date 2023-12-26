@@ -1,7 +1,6 @@
 using System;
 using CameraLogic;
 using Data;
-using Infrastructure;
 using Mirror;
 using Networking.Messages.Requests;
 using UnityEngine;
@@ -10,21 +9,33 @@ namespace Inventory.Grenade
 {
     public class GrenadeModel : IInventoryItemModel, IConsumable
     {
-        public ObservableVariable<int> Count { get; set; }
+        public event Action ModelChanged;
+
+        public int Amount
+        {
+            get => _grenadeItemData.Count;
+            set
+            {
+                _grenadeItemData.Count = value;
+                ModelChanged?.Invoke();
+            }
+        }
+
         private float _holdDownStartTime;
         private readonly RayCaster _rayCaster;
         private readonly float _minThrowForce;
         private readonly float _maxThrowDuration;
         private readonly float _throwForceModifier;
+        private readonly GrenadeItemData _grenadeItemData;
 
 
-        public GrenadeModel(RayCaster rayCaster, GrenadeItem configure)
+        public GrenadeModel(RayCaster rayCaster, GrenadeItem configure, GrenadeItemData data)
         {
             _rayCaster = rayCaster;
             _minThrowForce = configure.minThrowForce;
             _maxThrowDuration = configure.maxThrowDuration;
             _throwForceModifier = configure.throwForceModifier;
-            Count = new ObservableVariable<int>(configure.count);
+            _grenadeItemData = data;
         }
 
         public void PullPin()

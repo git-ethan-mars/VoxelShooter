@@ -14,40 +14,31 @@ namespace Inventory.RocketLauncher
         private readonly Sprite _rocketLauncherCountIcon;
         private readonly Sprite _itemTypeIcon;
         private readonly Image _itemType;
-        private readonly RocketLauncherData _rocketLauncherData;
+        private bool _isSelected;
 
-        public RocketLauncherView(RocketLauncherItem configuration, Hud hud, RocketLauncherData rocketLauncherData)
+        public RocketLauncherView(RocketLauncherItem configuration, Hud hud)
         {
             Icon = configuration.inventoryIcon;
             _rocketLauncherInfo = hud.itemInfo;
             _rocketLauncherCountText = hud.itemCount;
             _rocketLauncherCountIcon = configuration.countIcon;
             _itemType = hud.itemIcon;
-            _rocketLauncherData = rocketLauncherData;
         }
 
         public void Enable()
         {
             _rocketLauncherInfo.SetActive(true);
             _itemType.sprite = _rocketLauncherCountIcon;
-            _rocketLauncherCountText.SetText($"{_rocketLauncherData.RocketsInSlotsCount}/{_rocketLauncherData.TotalRockets}");
+        }
+
+        public void UpdateAmmoText(string ammoText)
+        {
+            _rocketLauncherCountText.SetText(ammoText);
         }
 
         public void Disable()
         {
             _rocketLauncherInfo.SetActive(false);
-        }
-
-        public void OnTotalRocketCountChanged(int count)
-        {
-            _rocketLauncherData.TotalRockets = count;
-            _rocketLauncherCountText.SetText($"{_rocketLauncherData.RocketsInSlotsCount}/{count}");
-        }
-        
-        public void OnRocketInSlotsCountChanged(int count)
-        {
-            _rocketLauncherData.RocketsInSlotsCount = count;
-            _rocketLauncherCountText.SetText($"{count}/{_rocketLauncherData.TotalRockets}");
         }
     }
 }

@@ -65,6 +65,7 @@ namespace Networking
             var chainExplosionBehaviour = new ChainExplosionBehaviour(this, networkManager.ParticleFactory,
                 sphereExplosionArea);
             BlockHealthSystem = new BlockHealthSystem(networkManager.StaticData, MapProvider, mapUpdater);
+            _fallDamageService = new FallDamageService(this, networkManager);
             var audioService = new AudioService(staticData);
             var rangeWeaponValidator = new RangeWeaponValidator(this, networkManager, audioService);
             var meleeWeaponValidator = new MeleeWeaponValidator(this, networkManager, audioService);
@@ -83,7 +84,6 @@ namespace Networking
             _reloadHandler = new ReloadHandler(this, rangeWeaponValidator, rocketLauncherValidator);
             _hitHandler = new HitHandler(this, meleeWeaponValidator);
             _authenticationHandler = new AuthenticationHandler(this);
-            _fallDamageService = new FallDamageService(this, networkManager);
         }
 
         public void Start()

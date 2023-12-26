@@ -13,10 +13,11 @@ namespace Inventory.Grenade
         private readonly IInventoryInput _inventoryInput;
 
 
-        public GrenadeState(IInventoryInput inventoryInput, RayCaster rayCaster, GrenadeItem configure, Hud hud)
+        public GrenadeState(IInventoryInput inventoryInput, RayCaster rayCaster, GrenadeItem configure,
+            GrenadeItemData data, Hud hud)
         {
             _inventoryInput = inventoryInput;
-            _grenadeModel = new GrenadeModel(rayCaster, configure);
+            _grenadeModel = new GrenadeModel(rayCaster, configure, data);
             _grenadeView = new GrenadeView(configure, hud);
         }
 
@@ -24,8 +25,9 @@ namespace Inventory.Grenade
         {
             _inventoryInput.FirstActionButtonDown += _grenadeModel.PullPin;
             _inventoryInput.FirstActionButtonUp += _grenadeModel.Throw;
-            _grenadeModel.Count.ValueChanged += _grenadeView.OnCountChanged;
             _grenadeView.Enable();
+            _grenadeModel.ModelChanged += UpdateViewDescription;
+            UpdateViewDescription();
         }
 
         public void Update()
@@ -36,12 +38,17 @@ namespace Inventory.Grenade
         {
             _inventoryInput.FirstActionButtonDown -= _grenadeModel.PullPin;
             _inventoryInput.FirstActionButtonUp -= _grenadeModel.Throw;
-            _grenadeModel.Count.ValueChanged -= _grenadeView.OnCountChanged;
             _grenadeView.Disable();
+            _grenadeModel.ModelChanged -= UpdateViewDescription;
         }
 
         public void Dispose()
         {
+        }
+
+        private void UpdateViewDescription()
+        {
+            _grenadeView.UpdateAmmoText($"{_grenadeModel.Amount}");
         }
     }
 }

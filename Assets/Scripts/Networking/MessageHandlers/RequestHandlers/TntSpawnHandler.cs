@@ -30,24 +30,24 @@ namespace Networking.MessageHandlers.RequestHandlers
         protected override void OnRequestReceived(NetworkConnectionToClient connection, TntSpawnRequest request)
         {
             var result = _server.Data.TryGetPlayerData(connection, out var playerData);
-            if (!result || !playerData.IsAlive || playerData.SelectedItem is not TntItem tntData)
+            if (!result || !playerData.IsAlive || playerData.SelectedItem is not TntItem tntItem)
             {
                 return;
             }
 
-            var tntCount = playerData.CountByItem[tntData];
-            if (tntCount <= 0)
+            var tntData = (TntItemData) playerData.SelectedItemData;
+            if (tntData.Amount <= 0)
             {
                 return;
             }
 
-            playerData.CountByItem[tntData] = tntCount - 1;
-            connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex, tntCount - 1));
+            tntData.Amount -= 1;
+            connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex, tntData.Amount));
             var tnt = _entityFactory.CreateTnt(request.Position, request.Rotation);
             NetworkServer.Spawn(tnt);
             _coroutineRunner.StartCoroutine(ExplodeTnt(Vector3Int.FloorToInt(request.ExplosionCenter), tnt,
-                tntData.delayInSeconds,
-                tntData.radius, connection, tntData.damage, tntData.particlesSpeed, tntData.particlesCount));
+                tntItem.delayInSeconds,
+                tntItem.radius, connection, tntItem.damage, tntItem.particlesSpeed, tntItem.particlesCount));
         }
 
         private IEnumerator ExplodeTnt(Vector3Int explosionCenter, GameObject tnt, float delayInSeconds,

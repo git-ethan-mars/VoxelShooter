@@ -15,7 +15,7 @@ namespace Networking.MessageHandlers.ResponseHandler
 
         protected override void OnResponseReceived(ShootResultResponse response)
         {
-            ((IShooting) _inventory.ActiveItemModel).BulletsInMagazine.Value = response.BulletsInMagazine;
+            ((RangeWeaponModel) _inventory.GetModel(response.SlotIndex)).BulletsInMagazine = response.BulletsInMagazine;
         }
     }
 }

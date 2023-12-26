@@ -14,7 +14,7 @@ namespace Networking.MessageHandlers.ResponseHandler
 
         protected override void OnResponseReceived(ItemUseResponse response)
         {
-            ((IConsumable) _inventory.GetModel(response.SlotIndex)).Count.Value = response.Count;
+            ((IConsumable) _inventory.GetModel(response.SlotIndex)).Amount = response.Count;
         }
     }
 }

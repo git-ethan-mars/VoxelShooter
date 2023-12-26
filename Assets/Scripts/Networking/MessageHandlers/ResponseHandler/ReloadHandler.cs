@@ -15,9 +15,9 @@ namespace Networking.MessageHandlers.ResponseHandler
 
         protected override void OnResponseReceived(ReloadResultResponse response)
         {
-            var reloading = (IReloading) _inventory.GetModel(response.SlotIndex);
-            reloading.TotalBullets.Value = response.TotalBullets;
-            reloading.BulletsInMagazine.Value = response.BulletsInMagazine;
+            var rangeWeapon = (RangeWeaponModel)_inventory.GetModel(response.SlotIndex);
+            rangeWeapon.TotalBullets = response.TotalBullets;
+            rangeWeapon.BulletsInMagazine = response.BulletsInMagazine;
         }
     }
 }

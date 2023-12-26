@@ -31,14 +31,14 @@ namespace Networking.ServerServices
         {
             var playerData = _server.Data.GetPlayerData(connection);
             var rangeWeapon = (RangeWeaponItem) playerData.SelectedItem;
-            var rangeWeaponData = (RangeWeaponData) playerData.ItemData[playerData.SelectedSlotIndex];
+            var rangeWeaponData = (RangeWeaponItemData) playerData.SelectedItemData;
 
             if (rangeWeaponData.BulletsInMagazine == 0 && playerData.HasContinuousSound)
             {
                 _audioService.StopContinuousSound(connection.identity);
                 playerData.HasContinuousSound = false;
             }
-            
+
             if (!CanShoot(rangeWeaponData) || requestIsButtonHolding != rangeWeapon.isAutomatic)
             {
                 return;
@@ -50,7 +50,7 @@ namespace Networking.ServerServices
             }
 
             rangeWeaponData.BulletsInMagazine -= 1;
-            connection.Send(new ShootResultResponse(rangeWeaponData.BulletsInMagazine));
+            connection.Send(new ShootResultResponse(playerData.SelectedSlotIndex, rangeWeaponData.BulletsInMagazine));
             _coroutineRunner.StartCoroutine(ResetShoot(connection, rangeWeapon, rangeWeaponData));
             _coroutineRunner.StartCoroutine(ResetRecoil(connection, rangeWeapon, rangeWeaponData));
 
@@ -76,7 +76,7 @@ namespace Networking.ServerServices
         {
             var playerData = _server.Data.GetPlayerData(connection);
             var rangeWeapon = (RangeWeaponItem) playerData.SelectedItem;
-            var rangeWeaponData = (RangeWeaponData) playerData.ItemData[playerData.SelectedSlotIndex];
+            var rangeWeaponData = (RangeWeaponItemData) playerData.SelectedItemData;
             if (!CanReload(rangeWeapon, rangeWeaponData))
             {
                 return;
@@ -87,38 +87,38 @@ namespace Networking.ServerServices
         }
 
         private IEnumerator ReloadInternal(NetworkConnectionToClient connection, RangeWeaponItem configure,
-            RangeWeaponData data)
+            RangeWeaponItemData itemData)
         {
-            data.IsReloading = true;
+            itemData.IsReloading = true;
             var waitReloading = new WaitWithoutSlotChange(_server, connection, configure.reloadTime);
             yield return waitReloading;
             if (!waitReloading.CompletedSuccessfully)
             {
-                data.IsReloading = false;
+                itemData.IsReloading = false;
                 yield break;
             }
 
-            data.IsReloading = false;
-            if (data.TotalBullets + data.BulletsInMagazine - configure.magazineSize <= 0)
+            itemData.IsReloading = false;
+            if (itemData.TotalBullets + itemData.BulletsInMagazine - configure.magazineSize <= 0)
             {
-                data.BulletsInMagazine += data.TotalBullets;
-                data.TotalBullets = 0;
+                itemData.BulletsInMagazine += itemData.TotalBullets;
+                itemData.TotalBullets = 0;
             }
             else
             {
-                data.TotalBullets -= configure.magazineSize - data.BulletsInMagazine;
-                data.BulletsInMagazine = configure.magazineSize;
+                itemData.TotalBullets -= configure.magazineSize - itemData.BulletsInMagazine;
+                itemData.BulletsInMagazine = configure.magazineSize;
             }
 
             var playerData = _server.Data.GetPlayerData(connection);
-            connection.Send(new ReloadResultResponse(playerData.SelectedSlotIndex, data.TotalBullets,
-                data.BulletsInMagazine));
+            connection.Send(new ReloadResultResponse(playerData.SelectedSlotIndex, itemData.TotalBullets,
+                itemData.BulletsInMagazine));
         }
 
         private IEnumerator ResetRecoil(NetworkConnectionToClient connection, RangeWeaponItem configure,
-            RangeWeaponData data)
+            RangeWeaponItemData itemData)
         {
-            data.RecoilModifier += configure.stepRecoil;
+            itemData.RecoilModifier += configure.stepRecoil;
             var waitForRecoilReset = new WaitWithoutSlotChange(_server, connection, configure.resetTimeRecoil);
             while (true)
             {
@@ -133,14 +133,14 @@ namespace Networking.ServerServices
 
             if (waitForRecoilReset.CompletedSuccessfully)
             {
-                data.RecoilModifier -= configure.stepRecoil;
+                itemData.RecoilModifier -= configure.stepRecoil;
             }
         }
 
         private IEnumerator ResetShoot(NetworkConnectionToClient connection, RangeWeaponItem configure,
-            RangeWeaponData data)
+            RangeWeaponItemData itemData)
         {
-            data.IsReady = false;
+            itemData.IsReady = false;
             var waitForShootReset = new WaitWithoutSlotChange(_server, connection, configure.timeBetweenShooting);
             while (true)
             {
@@ -155,25 +155,25 @@ namespace Networking.ServerServices
 
             if (waitForShootReset.CompletedSuccessfully)
             {
-                data.IsReady = true;
+                itemData.IsReady = true;
             }
         }
 
         private void ApplyRaycast(NetworkConnectionToClient source, Ray ray,
-            RangeWeaponItem configure, RangeWeaponData data)
+            RangeWeaponItem configure, RangeWeaponItemData itemData)
         {
-            var x = Math.Abs(data.RecoilModifier) < Constants.Epsilon
+            var x = Math.Abs(itemData.RecoilModifier) < Constants.Epsilon
                 ? 0
                 : UnityEngine.Random.Range(-configure.baseRecoil, configure.baseRecoil) *
-                  (data.RecoilModifier + 1);
-            var y = Math.Abs(data.RecoilModifier) < Constants.Epsilon
+                  (itemData.RecoilModifier + 1);
+            var y = Math.Abs(itemData.RecoilModifier) < Constants.Epsilon
                 ? 0
                 : UnityEngine.Random.Range(-configure.baseRecoil, configure.baseRecoil) *
-                  (data.RecoilModifier + 1);
-            var z = Math.Abs(data.RecoilModifier) < Constants.Epsilon
+                  (itemData.RecoilModifier + 1);
+            var z = Math.Abs(itemData.RecoilModifier) < Constants.Epsilon
                 ? 0
                 : UnityEngine.Random.Range(-configure.baseRecoil, configure.baseRecoil) *
-                  (data.RecoilModifier + 1);
+                  (itemData.RecoilModifier + 1);
             ray = new Ray(ray.origin, ray.direction + new Vector3(x, y, z));
             var raycastResult = Physics.Raycast(ray, out var rayHit, configure.range, Constants.attackMask);
             if (!raycastResult)
@@ -223,15 +223,15 @@ namespace Networking.ServerServices
             }
         }
 
-        private bool CanShoot(RangeWeaponData rangeWeapon)
+        private bool CanShoot(RangeWeaponItemData rangeWeaponItem)
         {
-            return rangeWeapon.IsReady && !rangeWeapon.IsReloading && rangeWeapon.BulletsInMagazine > 0;
+            return rangeWeaponItem.IsReady && !rangeWeaponItem.IsReloading && rangeWeaponItem.BulletsInMagazine > 0;
         }
 
-        private bool CanReload(RangeWeaponItem configure, RangeWeaponData data)
+        private bool CanReload(RangeWeaponItem configure, RangeWeaponItemData itemData)
         {
-            return data.BulletsInMagazine < configure.magazineSize &&
-                   !data.IsReloading && data.TotalBullets > 0;
+            return itemData.BulletsInMagazine < configure.magazineSize &&
+                   !itemData.IsReloading && itemData.TotalBullets > 0;
         }
     }
 }
