@@ -13,10 +13,10 @@ namespace Inventory.Grenade
 
         public int Amount
         {
-            get => _grenadeItemData.Count;
+            get => _grenadeItemData.Amount;
             set
             {
-                _grenadeItemData.Count = value;
+                _grenadeItemData.Amount = value;
                 ModelChanged?.Invoke();
             }
         }

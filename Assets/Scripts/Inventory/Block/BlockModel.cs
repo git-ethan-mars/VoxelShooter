@@ -15,10 +15,10 @@ namespace Inventory.Block
 
         public int Amount
         {
-            get => _blockItemData.Count;
+            get => _blockItemData.Amount;
             set
             {
-                _blockItemData.Count = value;
+                _blockItemData.Amount = value;
                 AmountChanged?.Invoke(value);
             }
         }

@@ -39,13 +39,13 @@ namespace Networking.MessageHandlers.RequestHandlers
             }
 
             var grenadeData = (GrenadeItemData) playerData.ItemData[playerData.SelectedSlotIndex];
-            if (grenadeData.Count <= 0)
+            if (grenadeData.Amount <= 0)
             {
                 return;
             }
 
-            grenadeData.Count -= 1;
-            connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex, grenadeData.Count - 1));
+            grenadeData.Amount -= 1;
+            connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex, grenadeData.Amount - 1));
             var grenade = _entityFactory.CreateGrenade(request.Ray.origin, Quaternion.identity,
                 request.Ray.direction * request.ThrowForce);
             NetworkServer.Spawn(grenade);

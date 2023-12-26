@@ -142,8 +142,8 @@ namespace Networking.ServerServices
                 if (playerData.Items[i].itemType == ItemType.Block)
                 {
                     var blockItemData = (BlockItemData) playerData.ItemData[i];
-                    blockItemData.Count += 50;
-                    receiver.Send(new ItemUseResponse(i, blockItemData.Count));
+                    blockItemData.Amount += 50;
+                    receiver.Send(new ItemUseResponse(i, blockItemData.Amount));
                 }
             }
         }
@@ -178,8 +178,8 @@ namespace Networking.ServerServices
                 if (item.itemType == ItemType.Grenade)
                 {
                     var grenadeData = (GrenadeItemData) itemData;
-                    grenadeData.Count += 1;
-                    receiver.Send(new ItemUseResponse(i, grenadeData.Count));
+                    grenadeData.Amount += 1;
+                    receiver.Send(new ItemUseResponse(i, grenadeData.Amount));
                     continue;
                 }
 
