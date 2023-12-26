@@ -14,18 +14,20 @@ namespace Inventory.Tnt
         private readonly TntModel _tntModel;
         private readonly TntView _tntView;
 
-        public TntState(IMeshFactory meshFactory, IInventoryInput inventoryInput, RayCaster rayCaster, TntItem configure, Player player, Hud hud)
+        public TntState(IMeshFactory meshFactory, IInventoryInput inventoryInput, RayCaster rayCaster,
+            TntItem configure, TntItemData data, Player player, Hud hud)
         {
             _inventoryInput = inventoryInput;
-            _tntModel = new TntModel(rayCaster, player, configure);
+            _tntModel = new TntModel(rayCaster, player, data);
             _tntView = new TntView(meshFactory, rayCaster, configure, player, hud);
         }
 
         public void Enter()
         {
             _inventoryInput.FirstActionButtonDown += _tntModel.PlaceTnt;
-            _tntModel.Count.ValueChanged += _tntView.OnCountChanged;
             _tntView.Enable();
+            _tntModel.ModelChanged += UpdateViewDescription;
+            UpdateViewDescription();
         }
 
         public void Update()
@@ -36,13 +38,18 @@ namespace Inventory.Tnt
         public void Exit()
         {
             _inventoryInput.FirstActionButtonDown -= _tntModel.PlaceTnt;
-            _tntModel.Count.ValueChanged -= _tntView.OnCountChanged;
             _tntView.Disable();
+            _tntModel.ModelChanged -= UpdateViewDescription;
         }
 
         public void Dispose()
         {
             _tntView.Dispose();
+        }
+
+        private void UpdateViewDescription()
+        {
+            _tntView.UpdateAmmoText($"{_tntModel.Amount}");
         }
     }
 }

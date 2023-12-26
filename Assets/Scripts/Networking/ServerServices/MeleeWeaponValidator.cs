@@ -30,7 +30,7 @@ namespace Networking.ServerServices
         {
             var playerData = _server.Data.GetPlayerData(connection);
             var meleeWeapon = (MeleeWeaponItem) playerData.SelectedItem;
-            var meleeWeaponData = (MeleeWeaponData) playerData.ItemData[playerData.SelectedSlotIndex];
+            var meleeWeaponData = (MeleeWeaponItemData) playerData.SelectedItemData;
 
             if (!CanHit(meleeWeaponData))
             {
@@ -43,9 +43,9 @@ namespace Networking.ServerServices
         }
 
         private IEnumerator ResetHit(NetworkConnectionToClient connection, MeleeWeaponItem configure,
-            MeleeWeaponData data)
+            MeleeWeaponItemData itemData)
         {
-            data.IsReady = false;
+            itemData.IsReady = false;
             var waitForHitReset = new WaitWithoutSlotChange(_server, connection, configure.timeBetweenHit);
             while (true)
             {
@@ -59,7 +59,7 @@ namespace Networking.ServerServices
 
             if (waitForHitReset.CompletedSuccessfully)
             {
-                data.IsReady = true;
+                itemData.IsReady = true;
             }
         }
 
@@ -117,9 +117,9 @@ namespace Networking.ServerServices
             }
         }
 
-        private bool CanHit(MeleeWeaponData meleeWeapon)
+        private bool CanHit(MeleeWeaponItemData meleeWeaponItem)
         {
-            return meleeWeapon.IsReady;
+            return meleeWeaponItem.IsReady;
         }
     }
 }

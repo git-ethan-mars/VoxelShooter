@@ -20,8 +20,6 @@ namespace Inventory.Tnt
         private readonly Sprite _itemTypeIcon;
         private readonly Image _itemType;
         private readonly float _placeDistance;
-        private int _count;
-        private bool _isSelected;
 
         public TntView(IMeshFactory meshFactory, RayCaster rayCaster, TntItem configuration, Player player,
             Hud hud)
@@ -33,19 +31,15 @@ namespace Inventory.Tnt
             _tntCountText = hud.ItemCount;
             _tntCountIcon = configuration.countIcon;
             _itemType = hud.ItemIcon;
-            _count = configuration.count;
-            _transparentTnt =
-                meshFactory.CreateTransparentGameObject(configuration.prefab, Color.red);
+            _transparentTnt = meshFactory.CreateTransparentGameObject(configuration.prefab, Color.red);
             _transparentTnt.SetActive(false);
         }
 
         public void Enable()
         {
-            _isSelected = true;
             _transparentTnt.SetActive(true);
             _tntInfo.SetActive(true);
             _itemType.sprite = _tntCountIcon;
-            _tntCountText.SetText(_count.ToString());
         }
 
         public void Update()
@@ -64,20 +58,15 @@ namespace Inventory.Tnt
             }
         }
 
-        public void Disable()
+        public void UpdateAmmoText(string ammoText)
         {
-            _isSelected = false;
-            _transparentTnt.gameObject.SetActive(false);
-            _tntInfo.SetActive(false);
+            _tntCountText.SetText(ammoText);
         }
 
-        public void OnCountChanged(int count)
+        public void Disable()
         {
-            _count = count;
-            if (_isSelected)
-            {
-                _tntCountText.SetText(_count.ToString());
-            }
+            _transparentTnt.gameObject.SetActive(false);
+            _tntInfo.SetActive(false);
         }
 
         public void Dispose()

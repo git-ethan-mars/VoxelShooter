@@ -1,6 +1,6 @@
+using System;
 using CameraLogic;
 using Data;
-using Infrastructure;
 using Mirror;
 using Networking.Messages.Requests;
 using PlayerLogic;
@@ -10,15 +10,27 @@ namespace Inventory.Tnt
 {
     public class TntModel : IInventoryItemModel, IConsumable
     {
-        public ObservableVariable<int> Count { get; set; }
+        public event Action ModelChanged;
+
+        public int Amount
+        {
+            get => _tntData.Amount;
+            set
+            {
+                _tntData.Amount = value;
+                ModelChanged?.Invoke();
+            }
+        }
+
         private readonly RayCaster _rayCaster;
         private readonly float _placeDistance;
+        private readonly TntItemData _tntData;
 
-        public TntModel(RayCaster rayCaster, Player player, TntItem configure)
+        public TntModel(RayCaster rayCaster, Player player, TntItemData tntData)
         {
             _rayCaster = rayCaster;
             _placeDistance = player.PlaceDistance;
-            Count = new ObservableVariable<int>(configure.count);
+            _tntData = tntData;
         }
 
         public void PlaceTnt()

@@ -9,7 +9,7 @@ namespace Inventory.MeleeWeapon
         private readonly IInventoryInput _inventoryInput;
         private readonly RayCaster _rayCaster;
         private readonly Player _player;
-        private readonly MeleeWeaponData _configuration;
+        private readonly MeleeWeaponItemData _configuration;
         public IInventoryItemModel ItemModel => _meleeWeaponModel;
         public IInventoryItemView ItemView => _meleeWeaponView;
         private readonly MeleeWeaponModel _meleeWeaponModel;

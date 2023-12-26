@@ -10,12 +10,12 @@ namespace Networking.ServerServices
     public class ServerData
     {
         private readonly Dictionary<NetworkConnectionToClient, PlayerData> _dataByConnection;
-        public readonly IStaticDataService StaticData;
+        private readonly IStaticDataService _staticData;
 
         public ServerData(IStaticDataService staticDataService)
         {
             _dataByConnection = new Dictionary<NetworkConnectionToClient, PlayerData>();
-            StaticData = staticDataService;
+            _staticData = staticDataService;
         }
 
         public IEnumerable<NetworkConnectionToClient> ClientConnections => _dataByConnection.Keys.ToArray();
@@ -23,7 +23,7 @@ namespace Networking.ServerServices
         public void AddPlayer(NetworkConnectionToClient connection, CSteamID steamID,
             string nickname)
         {
-            var playerData = new PlayerData(steamID, nickname, StaticData);
+            var playerData = new PlayerData(steamID, nickname, _staticData);
             _dataByConnection[connection] = playerData;
         }
 
@@ -66,11 +66,6 @@ namespace Networking.ServerServices
             }
 
             return scoreData.ToList();
-        }
-
-        public Dictionary<NetworkConnectionToClient, PlayerData> GetDataByConnection()
-        {
-            return _dataByConnection;
         }
     }
 }

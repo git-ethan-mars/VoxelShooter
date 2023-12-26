@@ -15,7 +15,7 @@ namespace Networking.MessageHandlers.ResponseHandler
 
         protected override void OnResponseReceived(RocketSpawnResponse response)
         {
-            ((ILaunching) _inventory.ActiveItemModel).RocketsInSlotsCount.Value = response.RocketsInSlotsCount;
+            ((RocketLauncherModel) _inventory.GetModel(response.SlotIndex)).ChargedRockets = response.ChargedRockets;
         }
     }
 }

@@ -5,14 +5,14 @@ namespace Networking.Messages.Responses
     public struct RocketReloadResponse : NetworkMessage
     {
         public readonly int SlotIndex;
-        public readonly int TotalRockets;
-        public readonly int RocketsInSlotsCount;
+        public readonly int ChargedRockets;
+        public readonly int CarriedRockets;
 
-        public RocketReloadResponse(int slotIndex, int totalRockets, int rocketsInSlotsCount)
+        public RocketReloadResponse(int slotIndex, int chargedRockets, int carriedRockets)
         {
             SlotIndex = slotIndex;
-            TotalRockets = totalRockets;
-            RocketsInSlotsCount = rocketsInSlotsCount;
+            ChargedRockets = chargedRockets;
+            CarriedRockets = carriedRockets;
         }
     }
 }

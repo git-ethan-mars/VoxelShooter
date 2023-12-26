@@ -19,8 +19,8 @@ namespace Data
         public int SelectedSlotIndex { get; set; }
         public List<InventoryItem> Items { get; set; }
         public List<IMutableItemData> ItemData { get; set; }
-        public Dictionary<InventoryItem, int> CountByItem { get; set; }
         public InventoryItem SelectedItem => Items[SelectedSlotIndex];
+        public IMutableItemData SelectedItemData => ItemData[SelectedSlotIndex];
         public bool HasContinuousSound { get; set; }
 
         public PlayerData(CSteamID steamID, string nickName, IStaticDataService staticDataService)

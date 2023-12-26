@@ -24,9 +24,9 @@ namespace Networking.MessageHandlers.RequestHandlers
                 return;
             }
 
-            var blockAmount = playerData.CountByItem[playerData.SelectedItem];
+            var blockItemData = (BlockItemData) playerData.SelectedItemData;
             var validBlocks = new List<BlockDataWithPosition>();
-            var blocksUsed = Math.Min(blockAmount, request.Blocks.Length);
+            var blocksUsed = Math.Min(blockItemData.Amount, request.Blocks.Length);
             for (var i = 0; i < blocksUsed; i++)
             {
                 var blockPosition = request.Blocks[i].Position;
@@ -62,9 +62,9 @@ namespace Networking.MessageHandlers.RequestHandlers
                 validBlocks.Add(request.Blocks[i]);
             }
 
-            playerData.CountByItem[playerData.SelectedItem] = blockAmount - blocksUsed;
+            blockItemData.Amount -= blocksUsed;
             connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex,
-                blockAmount - blocksUsed));
+                blockItemData.Amount));
             _server.BlockHealthSystem.InitializeBlocks(validBlocks);
         }
     }

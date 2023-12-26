@@ -12,26 +12,26 @@ namespace Networking.ServerServices
     {
         private readonly IServer _server;
         private IEnumerator _coroutine;
-        private readonly ICoroutineRunner _coroutineRunner;
+        private readonly ICoroutineRunner _networkManager;
         private readonly Dictionary<NetworkConnectionToClient, float> _speedByConnection = new();
         private readonly FallDamageData _fallDamageData;
 
-        public FallDamageService(IServer server, ICoroutineRunner coroutineRunner)
+        public FallDamageService(IServer server, CustomNetworkManager networkManager)
         {
             _server = server;
-            _coroutineRunner = coroutineRunner;
-            _fallDamageData = server.Data.StaticData.GetFallDamageConfiguration();
+            _networkManager = networkManager;
+            _fallDamageData = networkManager.StaticData.GetFallDamageConfiguration();
         }
 
         public void Start()
         {
             _coroutine = CheckFallDamage();
-            _coroutineRunner.StartCoroutine(_coroutine);
+            _networkManager.StartCoroutine(_coroutine);
         }
 
         public void Stop()
         {
-            _coroutineRunner.StopCoroutine(_coroutine);
+            _networkManager.StopCoroutine(_coroutine);
         }
 
         private IEnumerator CheckFallDamage()

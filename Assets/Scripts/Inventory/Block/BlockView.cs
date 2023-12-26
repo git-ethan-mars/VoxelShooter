@@ -20,8 +20,6 @@ namespace Inventory.Block
         private readonly GameObject _transparentBlock;
         private readonly RayCaster _rayCaster;
         private readonly float _placeDistance;
-        private int _count;
-        private bool _isSelected;
 
         public BlockView(IMeshFactory meshFactory, BlockItem configure, RayCaster rayCaster, Player player,
             Hud hud, Color32 initialColor)
@@ -34,24 +32,20 @@ namespace Inventory.Block
             _blockCountText = hud.ItemCount;
             Icon = configure.inventoryIcon;
             _blockSprite = configure.itemSprite;
-            _count = configure.count;
             _transparentBlock = meshFactory.CreateTransparentGameObject(configure.prefab, initialColor);
             _transparentBlock.SetActive(false);
         }
 
         public void Enable()
         {
-            _isSelected = true;
             _transparentBlock.SetActive(true);
             _palette.SetActive(true);
             _blockInfo.SetActive(true);
             _blockImage.sprite = _blockSprite;
-            _blockCountText.SetText(_count.ToString());
         }
 
         public void Disable()
         {
-            _isSelected = false;
             _palette.SetActive(false);
             _blockInfo.SetActive(false);
             _transparentBlock.SetActive(false);
@@ -69,15 +63,6 @@ namespace Inventory.Block
             _transparentBlock.SetActive(raycastResult);
         }
 
-        public void OnCountChanged(int count)
-        {
-            _count = count;
-            if (_isSelected)
-            {
-                _blockCountText.SetText(_count.ToString());
-            }
-        }
-
         public void ChangeTransparentBlockColor(Color32 color)
         {
             var floatColor = (Color) color;
@@ -89,6 +74,11 @@ namespace Inventory.Block
         public void Dispose()
         {
             Object.Destroy(_transparentBlock);
+        }
+
+        public void UpdateAmmoText(string ammoText)
+        {
+            _blockCountText.SetText(ammoText);
         }
     }
 }
