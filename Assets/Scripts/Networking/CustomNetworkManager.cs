@@ -40,6 +40,7 @@ namespace Networking
             ServerSettings serverSettings)
         {
             _stateMachine = stateMachine;
+            _serverSettings = serverSettings;
             Assets = assets;
             StaticData = staticData;
             StorageService = storageService;
@@ -48,9 +49,8 @@ namespace Networking
             EntityFactory = entityFactory;
             MeshFactory = meshFactory;
             ParticleFactory = particleFactory;
-            _serverSettings = serverSettings;
-            Client = new Client(_stateMachine, this);
             PlayerFactory = new PlayerFactory(assets, inputService, storageService, staticData, uiFactory, meshFactory);
+            Client = new Client(_stateMachine, this);
         }
 
         public override void OnStartHost()
