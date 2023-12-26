@@ -6,8 +6,6 @@ using Entities;
 using Infrastructure;
 using Infrastructure.Factory;
 using Mirror;
-using Networking.Messages.Responses;
-using PlayerLogic.States;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -21,7 +19,6 @@ namespace Networking.ServerServices
         private readonly IEntityFactory _entityFactory;
         private readonly IServer _server;
         private readonly int _spawnRate;
-        private readonly Dictionary<LootBox, LootBoxType> _lootBoxes = new();
         private readonly EntityPositionValidator _entityPositionValidator;
         private readonly Transform _parent;
         private IEnumerator _coroutine;
@@ -83,114 +80,28 @@ namespace Networking.ServerServices
                 switch (lootBoxType)
                 {
                     case LootBoxType.Ammo:
-                        lootBox = _entityFactory.CreateAmmoBox(spawnCoordinates, _parent);
+                        lootBox = _entityFactory.CreateAmmoBox(_server, spawnCoordinates, _parent);
                         break;
                     case LootBoxType.Health:
-                        lootBox = _entityFactory.CreateHealthBox(spawnCoordinates, _parent);
+                        lootBox = _entityFactory.CreateHealthBox(_server, spawnCoordinates, _parent);
                         break;
                     default:
-                        lootBox = _entityFactory.CreateBlockBox(spawnCoordinates, _parent);
+                        lootBox = _entityFactory.CreateBlockBox(_server, spawnCoordinates, _parent);
                         break;
                 }
 
                 NetworkServer.Spawn(lootBox.gameObject);
                 _entityPositionValidator.AddEntity(lootBox);
-                _lootBoxes.Add(lootBox, lootBoxType);
-                lootBox.OnPickUp += OnPickUp;
-
+                lootBox.PickedUp += OnPickedUp;
                 yield return new WaitForSeconds(_spawnRate);
             }
         }
 
-        private void OnPickUp(LootBox lootBox, NetworkConnectionToClient connection)
+        private void OnPickedUp(LootBox lootBox, NetworkConnectionToClient connection)
         {
             _entityPositionValidator.RemoveEntity(lootBox);
-            if (_lootBoxes[lootBox] == LootBoxType.Ammo)
-            {
-                PickUpAmmoBox(connection);
-            }
-
-            if (_lootBoxes[lootBox] == LootBoxType.Health)
-            {
-                PickUpHealthBox(connection);
-            }
-
-            if (_lootBoxes[lootBox] == LootBoxType.Block)
-            {
-                PickUpBlockBox(connection);
-            }
-
-            lootBox.OnPickUp -= OnPickUp;
+            lootBox.PickedUp -= OnPickedUp;
             NetworkServer.Destroy(lootBox.gameObject);
-        }
-
-        private void PickUpHealthBox(NetworkConnectionToClient connection)
-        {
-            _server.Heal(connection, 50);
-        }
-
-        private void PickUpBlockBox(NetworkConnectionToClient receiver)
-        {
-            var result = _server.Data.TryGetPlayerData(receiver, out var playerData);
-            if (!result || !playerData.IsAlive)
-            {
-                return;
-            }
-
-            for (var i = 0; i < playerData.Items.Count; i++)
-            {
-                if (playerData.Items[i].itemType == ItemType.Block)
-                {
-                    var blockItemData = (BlockItemData) playerData.ItemData[i];
-                    blockItemData.Amount += 50;
-                    receiver.Send(new ItemUseResponse(i, blockItemData.Amount));
-                }
-            }
-        }
-
-        private void PickUpAmmoBox(NetworkConnectionToClient receiver)
-        {
-            var result = _server.Data.TryGetPlayerData(receiver, out var playerData);
-            if (!result || !playerData.IsAlive) return;
-
-            for (var i = 0; i < playerData.Items.Count; i++)
-            {
-                var item = playerData.Items[i];
-                var itemData = playerData.ItemData[i];
-                if (item.itemType == ItemType.RangeWeapon)
-                {
-                    var rangeWeapon = (RangeWeaponItem) item;
-                    var rangeWeaponData = (RangeWeaponItemData) itemData;
-                    rangeWeaponData.TotalBullets += rangeWeapon.magazineSize * 2;
-                    receiver.Send(new ReloadResultResponse(i, rangeWeaponData.TotalBullets,
-                        rangeWeaponData.BulletsInMagazine));
-                    continue;
-                }
-
-                if (item.itemType == ItemType.Tnt)
-                {
-                    var tntData = (TntItemData) itemData;
-                    tntData.Amount += 1;
-                    receiver.Send(new ItemUseResponse(i, tntData.Amount));
-                    continue;
-                }
-
-                if (item.itemType == ItemType.Grenade)
-                {
-                    var grenadeData = (GrenadeItemData) itemData;
-                    grenadeData.Amount += 1;
-                    receiver.Send(new ItemUseResponse(i, grenadeData.Amount));
-                    continue;
-                }
-
-                if (item.itemType == ItemType.RocketLauncher)
-                {
-                    var rocketLauncherData = (RocketLauncherItemData) itemData;
-                    rocketLauncherData.CarriedRockets += 1;
-                    receiver.Send(new RocketReloadResponse(i, rocketLauncherData.ChargedRockets,
-                        rocketLauncherData.CarriedRockets));
-                }
-            }
         }
     }
 }
