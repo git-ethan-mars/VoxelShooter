@@ -22,7 +22,6 @@ namespace MapLogic
             _client.MapUpdated -= OnMapUpdated;
         }
 
-        
         private void OnMapUpdated(BlockDataWithPosition[] updatedBlocks)
         {
             var blocksByChunkIndex = updatedBlocks

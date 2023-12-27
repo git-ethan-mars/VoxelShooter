@@ -1,7 +1,6 @@
 ﻿using Data;
 using Entities;
 using Infrastructure.Services;
-using MapLogic;
 using Mirror;
 using Networking;
 using Networking.ServerServices;
@@ -21,11 +20,11 @@ namespace Infrastructure.Factory
             IParticleFactory particleFactory, RocketLauncherItem rocketData, NetworkConnectionToClient owner,
             AudioService audioService);
 
-        LootBox CreateAmmoBox(IServer server, Vector3 position, Transform parent);
+        LootBox CreateAmmoBox(Vector3 position, Transform parent);
 
-        LootBox CreateHealthBox(IServer server, Vector3 position, Transform parent);
+        LootBox CreateHealthBox(Vector3 position, Transform parent);
 
-        LootBox CreateBlockBox(IServer server, Vector3 position, Transform parent);
+        LootBox CreateBlockBox(Vector3 position, Transform parent);
 
         SpawnPoint CreateSpawnPoint(Vector3 position, Transform parent);
     }

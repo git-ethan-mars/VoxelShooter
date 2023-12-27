@@ -20,6 +20,7 @@ namespace Infrastructure.States
         private readonly IStorageService _storageService;
         private readonly IAvatarLoader _avatarLoader;
         private ChunkMeshUpdater _chunkMeshUpdater;
+        private VerticalMapProjector _mapProjector;
 
         public GameLoopState(GameStateMachine gameStateMachine, IGameFactory gameFactory, IUIFactory uiFactory,
             IMeshFactory meshFactory, IInputService inputService,
@@ -37,7 +38,6 @@ namespace Infrastructure.States
 
         public void Enter(CustomNetworkManager networkManager)
         {
-            networkManager.Client.MapProjector = new VerticalMapProjector(networkManager.Client);
             var mapGenerator = new MapGenerator(networkManager.Client.MapProvider, _gameFactory, _meshFactory);
             var chunkMeshes = mapGenerator.GenerateMap(_gameFactory.CreateGameObjectContainer(ChunkContainerName));
             _chunkMeshUpdater = new ChunkMeshUpdater(networkManager.Client, chunkMeshes);
@@ -46,12 +46,15 @@ namespace Infrastructure.States
             mapGenerator.GenerateLight();
             Environment.ApplyAmbientLighting(networkManager.Client.MapProvider.SceneData);
             Environment.ApplyFog(networkManager.Client.MapProvider.SceneData);
+            _mapProjector = new VerticalMapProjector(networkManager.Client);
+            networkManager.Client.MapProjector = _mapProjector;
             _uiFactory.CreateInGameUI(_gameStateMachine, networkManager, _inputService, _storageService, _avatarLoader);
         }
 
         public void Exit()
         {
             _chunkMeshUpdater.Dispose();
+            _mapProjector.Dispose();
         }
     }
 }

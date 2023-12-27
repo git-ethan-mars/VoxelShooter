@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Data;
+using Entities;
 using MapLogic;
 using PlayerLogic;
 
@@ -19,6 +20,7 @@ namespace Networking
         MapProvider MapProvider { get; set; }
         VerticalMapProjector MapProjector { get; set; }
         string MapName { get; set; }
+        HashSet<LootBox> LootBoxes { get; set; }
         void Start();
         void Stop();
     }

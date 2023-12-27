@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Data;
-using Infrastructure.AssetManagement;
-using Infrastructure.Factory;
+using Entities;
 using Infrastructure.Services.Storage;
 using Infrastructure.States;
 using MapLogic;
@@ -12,8 +11,6 @@ using Networking.MessageHandlers.ResponseHandler;
 using PlayerLogic;
 using PlayerLogic.Spectator;
 using UI.SettingsMenu;
-using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Networking
 {
@@ -70,12 +67,11 @@ namespace Networking
 
         public VerticalMapProjector MapProjector { get; set; }
         public string MapName { get; set; }
+        public HashSet<LootBox> LootBoxes { get; set; } = new();
 
         private readonly GameStateMachine _stateMachine;
         private readonly CustomNetworkManager _networkManager;
-        private readonly IAssetProvider _assets;
         private readonly IStorageService _storageService;
-        private readonly IPlayerFactory _playerFactory;
         private readonly MapNameHandler _mapNameHandler;
         private readonly DownloadMapHandler _downloadMapHandler;
         private readonly UpdateMapHandler _updateMapHandler;
@@ -92,6 +88,7 @@ namespace Networking
         private readonly StartContinuousSoundHandler _startContinuousSoundHandler;
         private readonly StopContinuousSoundHandler _stopContinuousSoundHandler;
         private readonly SurroundingSoundHandler _surroundingSoundHandler;
+        private readonly ClientPrefabRegistrar _clientPrefabRegistrar;
         private MapProvider _mapProvider;
 
 
@@ -99,9 +96,7 @@ namespace Networking
         {
             _stateMachine = stateMachine;
             _networkManager = networkManager;
-            _assets = networkManager.Assets;
             _storageService = networkManager.StorageService;
-            _playerFactory = networkManager.PlayerFactory;
             _mapNameHandler = new MapNameHandler(this);
             _downloadMapHandler = new DownloadMapHandler(this, networkManager.StaticData);
             _updateMapHandler = new UpdateMapHandler(this);
@@ -123,6 +118,8 @@ namespace Networking
             _stopContinuousSoundHandler = new StopContinuousSoundHandler();
             _surroundingSoundHandler =
                 new SurroundingSoundHandler(networkManager, audioPool);
+            _clientPrefabRegistrar = new ClientPrefabRegistrar(this, networkManager.Assets, networkManager.GameFactory,
+                networkManager.PlayerFactory, networkManager.EntityFactory);
         }
 
         public void Start()
@@ -130,18 +127,16 @@ namespace Networking
             MapDownloaded += OnMapDownloaded;
             _storageService.DataSaved += OnDataSaved;
             RegisterHandlers();
-            NetworkClient.RegisterPrefab(_assets.Load<GameObject>(PlayerPath.MainPlayerPath), SpawnPlayerHandler,
-                UnSpawnPlayerHandler);
+            _clientPrefabRegistrar.RegisterPrefabs();
         }
 
 
         public void Stop()
         {
             MapDownloaded -= OnMapDownloaded;
-            MapProjector.Dispose();
             _storageService.DataSaved -= OnDataSaved;
             UnregisterHandlers();
-            NetworkClient.UnregisterPrefab(_assets.Load<GameObject>(PlayerPath.MainPlayerPath));
+            _clientPrefabRegistrar.UnregisterPrefabs();
             GameFinished?.Invoke();
         }
 
@@ -216,16 +211,6 @@ namespace Networking
                     spectator.Rotation.ChangeMouseSettings(mouseSettings);
                 }
             }
-        }
-
-        private GameObject SpawnPlayerHandler(SpawnMessage message)
-        {
-            return _playerFactory.CreatePlayer(message.position);
-        }
-
-        private void UnSpawnPlayerHandler(GameObject spawned)
-        {
-            Object.Destroy(spawned);
         }
     }
 }

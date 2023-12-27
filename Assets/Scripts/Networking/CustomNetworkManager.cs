@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using System.Globalization;
 using Data;
+using Entities;
 using Infrastructure;
 using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
@@ -9,7 +11,6 @@ using Infrastructure.Services.Storage;
 using Infrastructure.States;
 using Mirror;
 using Networking.Messages.Requests;
-using Networking.ServerServices;
 using Steamworks;
 using UnityEngine;
 
@@ -29,7 +30,6 @@ namespace Networking
         public IPlayerFactory PlayerFactory { get; private set; }
         private ServerSettings _serverSettings;
         private GameStateMachine _stateMachine;
-        private BoxDropService _boxDropService;
         private IServer _server;
 
 
@@ -50,7 +50,6 @@ namespace Networking
             MeshFactory = meshFactory;
             ParticleFactory = particleFactory;
             PlayerFactory = new PlayerFactory(assets, inputService, storageService, staticData, uiFactory, meshFactory);
-            Client = new Client(_stateMachine, this);
         }
 
         public override void OnStartHost()
@@ -61,6 +60,7 @@ namespace Networking
 
         public override void OnStartClient()
         {
+            Client = new Client(_stateMachine, this);
             Client.Start();
         }
 
@@ -70,6 +70,7 @@ namespace Networking
             {
                 Client.MapProvider = _server.MapProvider;
                 Client.MapName = _server.MapProvider.MapName;
+                Client.LootBoxes = _server.LootBoxes;
             }
             else
             {

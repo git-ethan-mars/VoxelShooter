@@ -12,6 +12,7 @@ using UI;
 using UI.InGameUI;
 using UI.SettingsMenu;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Infrastructure.Factory
 {
@@ -31,7 +32,7 @@ namespace Infrastructure.Factory
             var hud = _assets.Instantiate(UIPath.HudPath).GetComponent<Hud>();
             hud.HealthCounter.Construct(player);
             hud.Palette.Construct(inputService);
-            hud.Minimap.Construct(client, player);
+            hud.Minimap.Construct(client, player, this);
             return hud;
         }
 
@@ -96,6 +97,11 @@ namespace Infrastructure.Factory
             var inGameMenu = _assets.Instantiate(UIPath.InGameMenuPath, parent).GetComponent<InGameMenu>();
             inGameMenu.Construct();
             return inGameMenu;
+        }
+
+        public Image CreateLootBoxImage(Transform parent)
+        {
+            return _assets.Instantiate(UIPath.LootBoxImagePath, parent).GetComponent<Image>();
         }
     }
 }

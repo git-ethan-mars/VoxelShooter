@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Data;
 using Entities;
@@ -20,6 +21,7 @@ namespace Networking
         public MapProvider MapProvider { get; }
         public ServerData Data { get; }
         public BlockHealthSystem BlockHealthSystem { get; }
+        public HashSet<LootBox> LootBoxes => _boxDropService.LootBoxes;
 
         private readonly ServerSettings _serverSettings;
         private readonly IPlayerFactory _playerFactory;
@@ -46,7 +48,6 @@ namespace Networking
         public Server(CustomNetworkManager networkManager, ServerSettings serverSettings)
         {
             _networkManager = networkManager;
-            var staticData = networkManager.StaticData;
             _entityFactory = networkManager.EntityFactory;
             _playerFactory = networkManager.PlayerFactory;
             _serverSettings = serverSettings;
@@ -66,7 +67,7 @@ namespace Networking
                 sphereExplosionArea);
             BlockHealthSystem = new BlockHealthSystem(networkManager.StaticData, MapProvider, mapUpdater);
             _fallDamageService = new FallDamageService(this, networkManager);
-            var audioService = new AudioService(staticData);
+            var audioService = new AudioService(networkManager.StaticData);
             var rangeWeaponValidator = new RangeWeaponValidator(this, networkManager, audioService);
             var meleeWeaponValidator = new MeleeWeaponValidator(this, networkManager, audioService);
             var rocketLauncherValidator = new RocketLauncherValidator(this, networkManager, audioService);

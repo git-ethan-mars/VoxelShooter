@@ -46,19 +46,19 @@ namespace Infrastructure.Factory
             return rocket;
         }
 
-        public LootBox CreateAmmoBox(IServer server, Vector3 position, Transform parent)
+        public LootBox CreateAmmoBox(Vector3 position, Transform parent)
         {
-            return CreateLootBox(server, position, parent, EntityPath.AmmoBoxPath);
+            return CreateLootBox(position, parent, EntityPath.AmmoBoxPath);
         }
 
-        public LootBox CreateHealthBox(IServer server, Vector3 position, Transform parent)
+        public LootBox CreateHealthBox(Vector3 position, Transform parent)
         {
-            return CreateLootBox(server, position, parent, EntityPath.HealthBoxPath);
+            return CreateLootBox(position, parent, EntityPath.HealthBoxPath);
         }
 
-        public LootBox CreateBlockBox(IServer server, Vector3 position, Transform parent)
+        public LootBox CreateBlockBox(Vector3 position, Transform parent)
         {
-            return CreateLootBox(server, position, parent, EntityPath.BlockBoxPath);
+            return CreateLootBox(position, parent, EntityPath.BlockBoxPath);
         }
 
         public SpawnPoint CreateSpawnPoint(Vector3 position, Transform parent)
@@ -67,11 +67,10 @@ namespace Infrastructure.Factory
                 .GetComponent<SpawnPoint>();
         }
 
-        private LootBox CreateLootBox(IServer server, Vector3 position, Transform parent, string prefabPath)
+        private LootBox CreateLootBox(Vector3 position, Transform parent, string prefabPath)
         {
             var lootBox = _assets.Instantiate(prefabPath, position, Quaternion.identity, parent)
                 .GetComponent<LootBox>();
-            lootBox.Construct(server);
             return lootBox;
         }
     }

@@ -13,6 +13,7 @@ namespace Networking.ServerServices
 {
     public class BoxDropService
     {
+        public readonly HashSet<LootBox> LootBoxes = new();
         private const string LootBoxContainer = "LootBoxContainer";
 
         private readonly ICoroutineRunner _coroutineRunner;
@@ -80,16 +81,18 @@ namespace Networking.ServerServices
                 switch (lootBoxType)
                 {
                     case LootBoxType.Ammo:
-                        lootBox = _entityFactory.CreateAmmoBox(_server, spawnCoordinates, _parent);
+                        lootBox = _entityFactory.CreateAmmoBox(spawnCoordinates, _parent);
                         break;
                     case LootBoxType.Health:
-                        lootBox = _entityFactory.CreateHealthBox(_server, spawnCoordinates, _parent);
+                        lootBox = _entityFactory.CreateHealthBox(spawnCoordinates, _parent);
                         break;
                     default:
-                        lootBox = _entityFactory.CreateBlockBox(_server, spawnCoordinates, _parent);
+                        lootBox = _entityFactory.CreateBlockBox(spawnCoordinates, _parent);
                         break;
                 }
 
+                lootBox.Construct(_server);
+                LootBoxes.Add(lootBox);
                 NetworkServer.Spawn(lootBox.gameObject);
                 _entityPositionValidator.AddEntity(lootBox);
                 lootBox.PickedUp += OnPickedUp;
@@ -99,6 +102,7 @@ namespace Networking.ServerServices
 
         private void OnPickedUp(LootBox lootBox, NetworkConnectionToClient connection)
         {
+            LootBoxes.Remove(lootBox);
             _entityPositionValidator.RemoveEntity(lootBox);
             lootBox.PickedUp -= OnPickedUp;
             NetworkServer.Destroy(lootBox.gameObject);
