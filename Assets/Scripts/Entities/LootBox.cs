@@ -19,6 +19,8 @@ namespace Entities
         private Sprite miniMapImage;
 
         public Sprite MiniMapImage => miniMapImage;
+        
+        public bool IsLanded { get; private set; }
 
         [SerializeField]
         private new Collider collider;
@@ -41,6 +43,7 @@ namespace Entities
             if (other.gameObject.CompareTag("Chunk"))
             {
                 parachute.SetActive(false);
+                IsLanded = true;
             }
 
             if (!isServer)

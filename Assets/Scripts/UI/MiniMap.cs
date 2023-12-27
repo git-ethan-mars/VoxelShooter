@@ -91,8 +91,7 @@ namespace UI
             foreach (var lootBox in _lootBoxes)
             {
                 var lootBoxPosition = Vector3Int.FloorToInt(lootBox.transform.position);
-                if (Mathf.Abs(playerPosition.x - lootBoxPosition.x) < MiniMapSize / 2 &&
-                    Mathf.Abs(playerPosition.z - lootBoxPosition.z) < MiniMapSize / 2)
+                if (IsLootBoxInsideMiniMap(lootBoxPosition) && lootBox.IsLanded)
                 {
                     lootBoxesToDraw += 1;
                     if (lootBoxesToDraw > _lootBoxImages.Count)
@@ -108,6 +107,13 @@ namespace UI
                     _lootBoxImages[imageIndex].gameObject.SetActive(true);
                 }
             }
+        }
+
+        private bool IsLootBoxInsideMiniMap(Vector3Int lootBoxPosition)
+        {
+            var playerPosition = Vector3Int.FloorToInt(_player.transform.position);
+            return Mathf.Abs(playerPosition.x - lootBoxPosition.x) < MiniMapSize / 2 &&
+                   Mathf.Abs(playerPosition.z - lootBoxPosition.z) < MiniMapSize / 2;
         }
     }
 }
