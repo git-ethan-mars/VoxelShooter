@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Data;
 using Explosions;
 using Infrastructure;
@@ -44,9 +45,11 @@ namespace Networking.ServerServices
                 return;
             }
 
+            var bulletImpactColors = new Dictionary<Vector3Int, Color32>();
             for (var i = 0; i < rangeWeapon.bulletsPerTap; i++)
             {
-                ApplyRaycast(connection, ray, rangeWeapon, rangeWeaponData);
+                ApplyRaycast(connection, ray, rangeWeapon, rangeWeaponData, bulletImpactColors);
+                rangeWeaponData.RecoilModifier += rangeWeapon.stepRecoil;
             }
 
             rangeWeaponData.BulletsInMagazine -= 1;
@@ -118,7 +121,6 @@ namespace Networking.ServerServices
         private IEnumerator ResetRecoil(NetworkConnectionToClient connection, RangeWeaponItem configure,
             RangeWeaponItemData itemData)
         {
-            itemData.RecoilModifier += configure.stepRecoil;
             var waitForRecoilReset = new WaitWithoutSlotChange(_server, connection, configure.resetTimeRecoil);
             while (true)
             {
@@ -133,7 +135,7 @@ namespace Networking.ServerServices
 
             if (waitForRecoilReset.CompletedSuccessfully)
             {
-                itemData.RecoilModifier -= configure.stepRecoil;
+                itemData.RecoilModifier -= configure.stepRecoil * configure.bulletsPerTap;
             }
         }
 
@@ -160,7 +162,7 @@ namespace Networking.ServerServices
         }
 
         private void ApplyRaycast(NetworkConnectionToClient source, Ray ray,
-            RangeWeaponItem configure, RangeWeaponItemData itemData)
+            RangeWeaponItem configure, RangeWeaponItemData itemData, Dictionary<Vector3Int, Color32> bulletImpactColors)
         {
             var x = Math.Abs(itemData.RecoilModifier) < Constants.Epsilon
                 ? 0
@@ -205,10 +207,21 @@ namespace Networking.ServerServices
             {
                 var blockPosition = Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2);
                 var block = _server.MapProvider.GetBlockByGlobalPosition(blockPosition);
-                _server.BlockHealthSystem.DamageBlock(blockPosition, 1, configure.damage, _lineDamageArea);
-                var bullet = _particleFactory.CreateBulletImpact(rayHit.point, Quaternion.Euler(rayHit.normal.y * -90,
-                    rayHit.normal.x * 90 + (rayHit.normal.z == -1 ? 180 : 0), 0), block.Color);
-                NetworkServer.Spawn(bullet);
+                
+                if (block.IsSolid())
+                {
+                    bulletImpactColors[blockPosition] = block.Color;
+                    _server.BlockHealthSystem.DamageBlock(blockPosition, 1, configure.damage, _lineDamageArea);
+                }
+
+                if (bulletImpactColors.ContainsKey(blockPosition))
+                {
+                    var bullet = _particleFactory.CreateBulletImpact(rayHit.point, Quaternion.Euler(
+                            rayHit.normal.y * -90,
+                            rayHit.normal.x * 90 + (rayHit.normal.z == -1 ? 180 : 0), 0),
+                        bulletImpactColors[blockPosition]);
+                    NetworkServer.Spawn(bullet);
+                }
             }
         }
 
