@@ -92,6 +92,8 @@ namespace Networking
         private readonly StartContinuousSoundHandler _startContinuousSoundHandler;
         private readonly StopContinuousSoundHandler _stopContinuousSoundHandler;
         private readonly SurroundingSoundHandler _surroundingSoundHandler;
+        private readonly StartMuzzleFlashHandler _startMuzzleFlashHandler;
+        private readonly StopMuzzleFlashHandler _stopMuzzleFlashHandler;
 
         public Client(GameStateMachine stateMachine, CustomNetworkManager networkManager)
         {
@@ -127,6 +129,8 @@ namespace Networking
             _stopContinuousSoundHandler = new StopContinuousSoundHandler();
             _surroundingSoundHandler =
                 new SurroundingSoundHandler(networkManager, audioPool);
+            _startMuzzleFlashHandler = new StartMuzzleFlashHandler();
+            _stopMuzzleFlashHandler = new StopMuzzleFlashHandler();
         }
 
         public void Start()
@@ -167,6 +171,8 @@ namespace Networking
             _startContinuousSoundHandler.Register();
             _stopContinuousSoundHandler.Register();
             _surroundingSoundHandler.Register();
+            _startMuzzleFlashHandler.Register();
+            _stopMuzzleFlashHandler.Register();
             NetworkClient.RegisterPrefab(_assets.Load<GameObject>(PlayerPath.MainPlayerPath), SpawnPlayerHandler,
                 UnSpawnPlayerHandler);
         }
@@ -189,6 +195,8 @@ namespace Networking
             _startContinuousSoundHandler.Unregister();
             _stopContinuousSoundHandler.Unregister();
             _surroundingSoundHandler.Unregister();
+            _startMuzzleFlashHandler.Unregister();
+            _stopMuzzleFlashHandler.Unregister();
             NetworkClient.UnregisterPrefab(_assets.Load<GameObject>(PlayerPath.MainPlayerPath));
         }
 

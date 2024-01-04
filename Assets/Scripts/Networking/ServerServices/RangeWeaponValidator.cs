@@ -18,14 +18,17 @@ namespace Networking.ServerServices
         private readonly IParticleFactory _particleFactory;
         private readonly LineDamageArea _lineDamageArea;
         private readonly AudioService _audioService;
+        private readonly MuzzleFlashService _muzzleFlashService;
 
-        public RangeWeaponValidator(IServer server, CustomNetworkManager networkManager, AudioService audioService)
+        public RangeWeaponValidator(IServer server, CustomNetworkManager networkManager, AudioService audioService,
+            MuzzleFlashService muzzleFlashService)
         {
             _server = server;
             _coroutineRunner = networkManager;
             _particleFactory = networkManager.ParticleFactory;
             _lineDamageArea = new LineDamageArea(_server.MapProvider);
             _audioService = audioService;
+            _muzzleFlashService = muzzleFlashService;
         }
 
         public void Shoot(NetworkConnectionToClient connection, Ray ray, bool requestIsButtonHolding)
@@ -33,18 +36,16 @@ namespace Networking.ServerServices
             var playerData = _server.Data.GetPlayerData(connection);
             var rangeWeapon = (RangeWeaponItem) playerData.SelectedItem;
             var rangeWeaponData = (RangeWeaponItemData) playerData.SelectedItemData;
-            var particleSystem = connection.identity.gameObject.GetComponentInChildren<ParticleSystem>();
 
             if (rangeWeaponData.BulletsInMagazine == 0 && playerData.HasContinuousSound)
             {
                 _audioService.StopContinuousSound(connection.identity);
                 playerData.HasContinuousSound = false;
-                particleSystem.loop = false;
+                _muzzleFlashService.StopMuzzleFlash(connection.identity);
             }
 
             if (!CanShoot(rangeWeaponData) || requestIsButtonHolding != rangeWeapon.isAutomatic)
             {
-                Debug.Log(1);
                 return;
             }
 
@@ -64,23 +65,20 @@ namespace Networking.ServerServices
             {
                 _audioService.StartContinuousAudio(rangeWeapon.shootingSound, connection.identity);
                 playerData.HasContinuousSound = true;
-                particleSystem.loop = true;
             }
             else
             {
                 _audioService.SendAudio(rangeWeapon.shootingSound, connection.identity);
-                particleSystem.loop = false;
             }
-            particleSystem.Play();
+            _muzzleFlashService.StartMuzzleFlash(connection.identity);
         }
 
         public void CancelShoot(NetworkConnectionToClient connection)
         {
             var playerData = _server.Data.GetPlayerData(connection);
-            var particleSystem = connection.identity.gameObject.GetComponentInChildren<ParticleSystem>();
             _audioService.StopContinuousSound(connection.identity);
             playerData.HasContinuousSound = false;
-            particleSystem.loop = false;
+            _muzzleFlashService.StopMuzzleFlash(connection.identity);
         }
 
         public void Reload(NetworkConnectionToClient connection)
@@ -95,6 +93,7 @@ namespace Networking.ServerServices
 
             _coroutineRunner.StartCoroutine(ReloadInternal(connection, rangeWeapon, rangeWeaponData));
             _audioService.SendAudio(rangeWeapon.reloadingSound, connection.identity);
+            _muzzleFlashService.StopMuzzleFlash(connection.identity);
         }
 
         private IEnumerator ReloadInternal(NetworkConnectionToClient connection, RangeWeaponItem configure,

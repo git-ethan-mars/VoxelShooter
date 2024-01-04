@@ -28,7 +28,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 8992566655093637391}
+  - {fileID: 8273098399645549615}
   m_Father: {fileID: 322977147622222594}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -116,7 +116,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!1001 &1166675085686100662
+--- !u!1001 &2176131819198912406
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -126,10 +126,6 @@ PrefabInstance:
     - target: {fileID: 6697332420508056661, guid: 43f02bfab6cb2c24881df00085a8bdbe, type: 3}
       propertyPath: m_Name
       value: MachineGunParticle
-      objectReference: {fileID: 0}
-    - target: {fileID: 7346217845250167101, guid: 43f02bfab6cb2c24881df00085a8bdbe, type: 3}
-      propertyPath: playOnAwake
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7853397544997442489, guid: 43f02bfab6cb2c24881df00085a8bdbe, type: 3}
       propertyPath: m_RootOrder
@@ -177,8 +173,8 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 43f02bfab6cb2c24881df00085a8bdbe, type: 3}
---- !u!4 &8992566655093637391 stripped
+--- !u!4 &8273098399645549615 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7853397544997442489, guid: 43f02bfab6cb2c24881df00085a8bdbe, type: 3}
-  m_PrefabInstance: {fileID: 1166675085686100662}
+  m_PrefabInstance: {fileID: 2176131819198912406}
   m_PrefabAsset: {fileID: 0}
