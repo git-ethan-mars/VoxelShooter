@@ -33,15 +33,18 @@ namespace Networking.ServerServices
             var playerData = _server.Data.GetPlayerData(connection);
             var rangeWeapon = (RangeWeaponItem) playerData.SelectedItem;
             var rangeWeaponData = (RangeWeaponItemData) playerData.SelectedItemData;
+            var particleSystem = connection.identity.gameObject.GetComponentInChildren<ParticleSystem>();
 
             if (rangeWeaponData.BulletsInMagazine == 0 && playerData.HasContinuousSound)
             {
                 _audioService.StopContinuousSound(connection.identity);
                 playerData.HasContinuousSound = false;
+                particleSystem.loop = false;
             }
 
             if (!CanShoot(rangeWeaponData) || requestIsButtonHolding != rangeWeapon.isAutomatic)
             {
+                Debug.Log(1);
                 return;
             }
 
@@ -56,23 +59,28 @@ namespace Networking.ServerServices
             connection.Send(new ShootResultResponse(playerData.SelectedSlotIndex, rangeWeaponData.BulletsInMagazine));
             _coroutineRunner.StartCoroutine(ResetShoot(connection, rangeWeapon, rangeWeaponData));
             _coroutineRunner.StartCoroutine(ResetRecoil(connection, rangeWeapon, rangeWeaponData));
-
+            
             if (rangeWeapon.isAutomatic)
             {
                 _audioService.StartContinuousAudio(rangeWeapon.shootingSound, connection.identity);
                 playerData.HasContinuousSound = true;
+                particleSystem.loop = true;
             }
             else
             {
                 _audioService.SendAudio(rangeWeapon.shootingSound, connection.identity);
+                particleSystem.loop = false;
             }
+            particleSystem.Play();
         }
 
         public void CancelShoot(NetworkConnectionToClient connection)
         {
             var playerData = _server.Data.GetPlayerData(connection);
+            var particleSystem = connection.identity.gameObject.GetComponentInChildren<ParticleSystem>();
             _audioService.StopContinuousSound(connection.identity);
             playerData.HasContinuousSound = false;
+            particleSystem.loop = false;
         }
 
         public void Reload(NetworkConnectionToClient connection)
