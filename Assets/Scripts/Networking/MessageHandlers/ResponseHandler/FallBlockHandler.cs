@@ -7,9 +7,9 @@ namespace Networking.MessageHandlers.ResponseHandler
     {
         private readonly FallMeshGenerator _fallMeshGenerator;
 
-        public FallBlockHandler(FallMeshGenerator fallMeshGenerator)
-        {
-            _fallMeshGenerator = fallMeshGenerator;
+        public FallBlockHandler(CustomNetworkManager networkManager)
+        { 
+            _fallMeshGenerator = new FallMeshGenerator(networkManager);
         }
 
         protected override void OnResponseReceived(FallBlockResponse message)

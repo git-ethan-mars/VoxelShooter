@@ -12,5 +12,6 @@ namespace Infrastructure.AssetManagement
         public const string SettingsMenuPath = "Prefabs/UI/SettingsMenu";
         public const string InGameMenuPath = "Prefabs/UI/InGameMenu";
         public const string InGameUIPath = "Prefabs/UI/InGameUI";
+        public const string LootBoxImagePath = "Prefabs/UI/LootBoxImage";
     }
 }

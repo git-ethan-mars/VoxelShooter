@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Data;
 using Infrastructure.Factory;
+using Networking;
 using Networking.ClientServices;
 using Rendering;
 using UnityEngine;
@@ -10,21 +11,17 @@ namespace Generators
     public class FallMeshGenerator
     {
         private readonly IMeshFactory _meshFactory;
-        private readonly FallingMeshParticlePool _fallingMeshFallingMeshParticlePool;
-        private readonly List<Vector3> _vertices;
-        private readonly List<int> _triangles;
-        private readonly List<Color32> _colors;
-        private readonly List<Vector3> _normals;
+        private readonly FallingMeshParticlePool _fallingMeshParticlePool;
+        private readonly List<Vector3> _vertices = new();
+        private readonly List<int> _triangles = new();
+        private readonly List<Color32> _colors = new();
+        private readonly List<Vector3> _normals = new();
 
-        public FallMeshGenerator(IMeshFactory meshFactory,
-            FallingMeshParticlePool fallingMeshFallingMeshParticlePool)
+        public FallMeshGenerator(CustomNetworkManager networkManager)
         {
-            _meshFactory = meshFactory;
-            _fallingMeshFallingMeshParticlePool = fallingMeshFallingMeshParticlePool;
-            _vertices = new List<Vector3>();
-            _triangles = new List<int>();
-            _colors = new List<Color32>();
-            _normals = new List<Vector3>();
+            _fallingMeshParticlePool =
+                new FallingMeshParticlePool(networkManager.GameFactory, networkManager.ParticleFactory);
+            _meshFactory = networkManager.MeshFactory;
         }
 
         public void GenerateFallBlocks(BlockDataWithPosition[] blocks)
@@ -36,8 +33,8 @@ namespace Generators
                 var z = blocks[i].Position.z;
                 ChunkGeneratorHelper.GenerateTopSide(x, y, z, blocks[i].BlockData.Color, _vertices, _normals, _colors,
                     _triangles);
-                ChunkGeneratorHelper.GenerateBottomSide(x, y, z, blocks[i].BlockData.Color, _vertices, _normals, _colors,
-                    _triangles);
+                ChunkGeneratorHelper.GenerateBottomSide(x, y, z, blocks[i].BlockData.Color, _vertices, _normals,
+                    _colors, _triangles);
                 ChunkGeneratorHelper.GenerateLeftSide(x, y, z, blocks[i].BlockData.Color, _vertices, _normals, _colors,
                     _triangles);
                 ChunkGeneratorHelper.GenerateRightSide(x, y, z, blocks[i].BlockData.Color, _vertices, _normals, _colors,
@@ -49,7 +46,7 @@ namespace Generators
             }
 
             var meshData = new MeshData(_vertices, _triangles, _colors, _normals);
-            _meshFactory.CreateFallingMesh(meshData, _fallingMeshFallingMeshParticlePool);
+            _meshFactory.CreateFallingMesh(meshData, _fallingMeshParticlePool);
             ClearMeshData();
         }
 

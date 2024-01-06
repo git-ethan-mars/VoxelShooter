@@ -8,6 +8,7 @@ using Infrastructure.Services.StaticData;
 using Infrastructure.Services.Storage;
 using Inventory;
 using Mirror;
+using Networking;
 using TMPro;
 using UI;
 using UI.SettingsMenu;
@@ -80,7 +81,6 @@ namespace PlayerLogic
         private float _speed;
         private float _jumpHeight;
 
-
         public void Construct(IInputService inputService, IStorageService storageService, IStaticDataService staticData,
             IUIFactory uiFactory,
             IMeshFactory meshFactory)
@@ -97,7 +97,8 @@ namespace PlayerLogic
             storageService.DataSaved += OnDataSaved;
         }
 
-        public void ConstructLocalPlayer(float placeDistance, List<int> itemIds, float speed, float jumpHeight,
+        public void ConstructLocalPlayer(IClient client, float placeDistance, List<int> itemIds, float speed,
+            float jumpHeight,
             int health)
         {
             PlaceDistance = placeDistance;
@@ -107,7 +108,7 @@ namespace PlayerLogic
             _mainCamera = Camera.main;
             ZoomService = new ZoomService(_mainCamera);
             Rotation = new PlayerRotation(_storageService, ZoomService, bodyOrientation, headPivot);
-            _hud = _uiFactory.CreateHud(this, _inputService);
+            _hud = _uiFactory.CreateHud(client, this, _inputService);
             _inventory = new InventorySystem(_inputService, _staticData, _meshFactory, itemIds, _hud, this);
             TurnOffNickName();
             TurnOffBodyRender();

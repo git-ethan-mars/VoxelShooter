@@ -13,7 +13,7 @@ namespace Networking.ClientServices
 
         public FallingMeshParticlePool(IGameFactory gameFactory, IParticleFactory particleFactory)
         {
-            var particleContainer = gameFactory.CreateGameObjectContainer(ContainerName).transform;
+            var particleContainer = gameFactory.CreateGameObjectContainer(ContainerName);
             for (var i = 0; i < PoolSize; i++)
             {
                 var meshParticle = particleFactory.CreateFallingMeshParticle(particleContainer);

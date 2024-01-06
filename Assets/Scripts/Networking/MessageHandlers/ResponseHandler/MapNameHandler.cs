@@ -4,16 +4,16 @@ namespace Networking.MessageHandlers.ResponseHandler
 {
     public class MapNameHandler : ResponseHandler<MapNameResponse>
     {
-        private readonly Client _client;
+        private readonly IClient _client;
 
-        public MapNameHandler(Client client)
+        public MapNameHandler(IClient client)
         {
             _client = client;
         }
 
         protected override void OnResponseReceived(MapNameResponse response)
         {
-            _client.Data.MapName = response.MapName;
+            _client.MapName = response.MapName;
         }
     }
 }

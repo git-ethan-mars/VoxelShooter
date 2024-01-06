@@ -14,14 +14,12 @@ namespace Networking.ServerServices
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly MapProvider _mapProvider;
         private readonly ColumnDestructionAlgorithm _destructionAlgorithm;
-        private readonly BlockSplitter _blockSplitter;
 
         public MapUpdater(ICoroutineRunner coroutineRunner, MapProvider mapProvider)
         {
             _coroutineRunner = coroutineRunner;
             _mapProvider = mapProvider;
             _destructionAlgorithm = new ColumnDestructionAlgorithm(mapProvider);
-            _blockSplitter = new BlockSplitter();
         }
 
         public void SetBlocksByGlobalPositions(List<BlockDataWithPosition> blocks)
@@ -42,7 +40,7 @@ namespace Networking.ServerServices
                     removedBlocks.Add(blocks[i]);
                 }
 
-                SetBlockByGlobalPosition(blocks[i].Position, blocks[i].BlockData);
+                _mapProvider.SetBlockByGlobalPosition(blocks[i].Position, blocks[i].BlockData);
             }
 
             _destructionAlgorithm.Add(createdBlocks.Select(block => block.Position));
@@ -53,7 +51,7 @@ namespace Networking.ServerServices
 
             foreach (var fallingPosition in fallingPositions)
             {
-                SetBlockByGlobalPosition(fallingPosition, new BlockData());
+                _mapProvider.SetBlockByGlobalPosition(fallingPosition, new BlockData());
             }
 
             MapUpdated?.Invoke();
@@ -69,8 +67,9 @@ namespace Networking.ServerServices
             }
 
             var fallingBlockMessages =
-                _blockSplitter.SplitBlocksIntoFallingMessages(fallingBlocks, Constants.MessageSize);
-            _coroutineRunner.StartCoroutine(_blockSplitter.SendMessages(fallingBlockMessages, Constants.MessageDelay));
+                MessageSplitter.SplitBlocksIntoFallingMessages(fallingBlocks, Constants.MessageSize);
+            _coroutineRunner.StartCoroutine(MessageSplitter.SendMessages(fallingBlockMessages, Constants.MessageDelay,
+                true));
         }
 
         private void SendUpdatedBlocks(List<BlockDataWithPosition> blocks, Vector3Int[] fallingPositions)
@@ -79,17 +78,8 @@ namespace Networking.ServerServices
             updatedBlocks.AddRange(blocks);
             updatedBlocks.AddRange(fallingPositions.Select(fallingPosition =>
                 new BlockDataWithPosition(fallingPosition, new BlockData())));
-            var updateMessages = _blockSplitter.SplitBlocksIntoUpdateMessages(updatedBlocks, Constants.MessageSize);
-            _coroutineRunner.StartCoroutine(_blockSplitter.SendMessages(updateMessages, Constants.MessageDelay));
-        }
-
-        private void SetBlockByGlobalPosition(Vector3Int position, BlockData block)
-        {
-            var chunkIndex = _mapProvider.GetChunkNumberByGlobalPosition(position.x, position.y, position.z);
-            var blockIndex = position.x % ChunkData.ChunkSize * ChunkData.ChunkSizeSquared +
-                             position.y % ChunkData.ChunkSize * ChunkData.ChunkSize +
-                             position.z % ChunkData.ChunkSize;
-            _mapProvider.MapData.Chunks[chunkIndex].Blocks[blockIndex] = block;
+            var updateMessages = MessageSplitter.SplitBlocksIntoUpdateMessages(updatedBlocks, Constants.MessageSize);
+            _coroutineRunner.StartCoroutine(MessageSplitter.SendMessages(updateMessages, Constants.MessageDelay));
         }
     }
 }

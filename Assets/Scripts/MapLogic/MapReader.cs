@@ -82,13 +82,11 @@ namespace MapLogic
 
         private static void SetWaterLayer(MapProvider mapProvider)
         {
-            for (var x = 0; x < mapProvider.MapData.Width; x++)
+            for (var x = 0; x < mapProvider.Width; x++)
             {
-                for (var z = 0; z < mapProvider.MapData.Depth; z++)
+                for (var z = 0; z < mapProvider.Depth; z++)
                 {
-                    var blocks = mapProvider.MapData.Chunks[mapProvider.GetChunkNumberByGlobalPosition(x, 0, z)].Blocks;
-                    blocks[(x & (ChunkData.ChunkSize - 1)) * ChunkData.ChunkSizeSquared +
-                           (z & (ChunkData.ChunkSize - 1))] = new BlockData(mapProvider.MapData.WaterColor);
+                    mapProvider.SetBlockByGlobalPosition(x, 0, z, new BlockData(mapProvider.WaterColor));
                 }
             }
         }

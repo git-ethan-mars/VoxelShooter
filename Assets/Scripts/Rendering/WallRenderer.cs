@@ -17,11 +17,11 @@ namespace Rendering
             mesh.vertices = new Vector3[4];
             if (face == Faces.Top)
             {
-                var startPoint = new Vector3(0, mapProvider.MapData.Height, 0);
-                var endPoint = new Vector3(mapProvider.MapData.Width, mapProvider.MapData.Height,
-                    mapProvider.MapData.Depth);
-                var secondPoint = new Vector3(0, mapProvider.MapData.Height, mapProvider.MapData.Depth);
-                var thirdPoint = new Vector3(mapProvider.MapData.Width, mapProvider.MapData.Height, 0);
+                var startPoint = new Vector3(0, mapProvider.Height, 0);
+                var endPoint = new Vector3(mapProvider.Width, mapProvider.Height,
+                    mapProvider.Depth);
+                var secondPoint = new Vector3(0, mapProvider.Height, mapProvider.Depth);
+                var thirdPoint = new Vector3(mapProvider.Width, mapProvider.Height, 0);
                 mesh.vertices = new[] {startPoint, secondPoint, thirdPoint, endPoint};
                 mesh.triangles = new[] {0, 2, 1, 2, 3, 1};
             }
@@ -29,9 +29,9 @@ namespace Rendering
             if (face == Faces.Bottom)
             {
                 var startPoint = new Vector3(0, 0, 0);
-                var endPoint = new Vector3(mapProvider.MapData.Width, 0, mapProvider.MapData.Depth);
-                var secondPoint = new Vector3(0, 0, mapProvider.MapData.Depth);
-                var thirdPoint = new Vector3(mapProvider.MapData.Width, 0, 0);
+                var endPoint = new Vector3(mapProvider.Width, 0, mapProvider.Depth);
+                var secondPoint = new Vector3(0, 0, mapProvider.Depth);
+                var thirdPoint = new Vector3(mapProvider.Width, 0, 0);
                 mesh.vertices = new[] {startPoint, secondPoint, thirdPoint, endPoint};
                 mesh.triangles = new[] {0, 1, 2, 3, 2, 1};
             }
@@ -39,31 +39,31 @@ namespace Rendering
             if (face == Faces.Left)
             {
                 var startPoint = new Vector3(0, 0, 0);
-                var endPoint = new Vector3(0, mapProvider.MapData.Height, mapProvider.MapData.Depth);
-                var secondPoint = new Vector3(0, 0, mapProvider.MapData.Depth);
-                var thirdPoint = new Vector3(0, mapProvider.MapData.Height, 0);
+                var endPoint = new Vector3(0, mapProvider.Height, mapProvider.Depth);
+                var secondPoint = new Vector3(0, 0, mapProvider.Depth);
+                var thirdPoint = new Vector3(0, mapProvider.Height, 0);
                 mesh.vertices = new[] {startPoint, secondPoint, thirdPoint, endPoint};
                 mesh.triangles = new[] {0, 2, 1, 2, 3, 1};
             }
 
             if (face == Faces.Right)
             {
-                var startPoint = new Vector3(mapProvider.MapData.Width, 0, 0);
-                var endPoint = new Vector3(mapProvider.MapData.Width, mapProvider.MapData.Height,
-                    mapProvider.MapData.Depth);
-                var secondPoint = new Vector3(mapProvider.MapData.Width, 0, mapProvider.MapData.Depth);
-                var thirdPoint = new Vector3(mapProvider.MapData.Width, mapProvider.MapData.Height, 0);
+                var startPoint = new Vector3(mapProvider.Width, 0, 0);
+                var endPoint = new Vector3(mapProvider.Width, mapProvider.Height,
+                    mapProvider.Depth);
+                var secondPoint = new Vector3(mapProvider.Width, 0, mapProvider.Depth);
+                var thirdPoint = new Vector3(mapProvider.Width, mapProvider.Height, 0);
                 mesh.vertices = new[] {startPoint, secondPoint, thirdPoint, endPoint};
                 mesh.triangles = new[] {0, 1, 2, 3, 2, 1};
             }
 
             if (face == Faces.Front)
             {
-                var startPoint = new Vector3(0, 0, mapProvider.MapData.Depth);
-                var endPoint = new Vector3(mapProvider.MapData.Width, mapProvider.MapData.Height,
-                    mapProvider.MapData.Depth);
-                var secondPoint = new Vector3(mapProvider.MapData.Width, 0, mapProvider.MapData.Depth);
-                var thirdPoint = new Vector3(0, mapProvider.MapData.Height, mapProvider.MapData.Depth);
+                var startPoint = new Vector3(0, 0, mapProvider.Depth);
+                var endPoint = new Vector3(mapProvider.Width, mapProvider.Height,
+                    mapProvider.Depth);
+                var secondPoint = new Vector3(mapProvider.Width, 0, mapProvider.Depth);
+                var thirdPoint = new Vector3(0, mapProvider.Height, mapProvider.Depth);
                 mesh.vertices = new[] {startPoint, secondPoint, thirdPoint, endPoint};
                 mesh.triangles = new[] {0, 2, 1, 2, 3, 1};
             }
@@ -71,9 +71,9 @@ namespace Rendering
             if (face == Faces.Back)
             {
                 var startPoint = new Vector3(0, 0, 0);
-                var endPoint = new Vector3(mapProvider.MapData.Width, mapProvider.MapData.Height, 0);
-                var secondPoint = new Vector3(mapProvider.MapData.Width, 0, 0);
-                var thirdPoint = new Vector3(0, mapProvider.MapData.Height, 0);
+                var endPoint = new Vector3(mapProvider.Width, mapProvider.Height, 0);
+                var secondPoint = new Vector3(mapProvider.Width, 0, 0);
+                var thirdPoint = new Vector3(0, mapProvider.Height, 0);
                 mesh.vertices = new[] {startPoint, secondPoint, thirdPoint, endPoint};
                 mesh.triangles = new[] {0, 1, 2, 3, 2, 1};
             }

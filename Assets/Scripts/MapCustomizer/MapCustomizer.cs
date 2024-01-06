@@ -11,6 +11,7 @@ using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
 using Infrastructure.Services.Storage;
 using MapLogic;
+using Networking;
 using Optimization;
 using UnityEditor;
 using UnityEngine;
@@ -23,16 +24,19 @@ namespace MapCustomizer
     public class MapCustomizer : MonoBehaviour, ICoroutineRunner
     {
 #if UNITY_EDITOR
+        private const string ChunkContainerName = "ChunkContainer";
+        private const string SpawnPointsContainer = "SpawnPointsContainer";
+
         public bool IsMapGenerated => chunkContainer != null || spawnPointsContainer != null;
         public MapConfigure mapConfigure;
         public Light lightSource;
         public List<GameObject> spawnPoints;
 
         [SerializeField]
-        private GameObject chunkContainer;
+        private Transform chunkContainer;
 
         [SerializeField]
-        private GameObject spawnPointsContainer;
+        private Transform spawnPointsContainer;
 
         private static MapCustomizer _instance;
         private MapConfigure _previousConfigure;
@@ -165,13 +169,12 @@ namespace MapCustomizer
             var mapGenerator =
                 new MapGenerator(_instance._mapProvider, AllServices.Container.Single<IGameFactory>(),
                     AllServices.Container.Single<IMeshFactory>());
-            SimpleBenchmark.Execute(mapGenerator.GenerateMap);
-            chunkContainer = mapGenerator.ChunkContainer;
-            chunkContainer.transform.SetParent(transform);
+            chunkContainer = AllServices.Container.Single<IGameFactory>().CreateGameObjectContainer(ChunkContainerName);
+            SimpleBenchmark.Execute(mapGenerator.GenerateMap, chunkContainer);
             spawnPoints.Clear();
             spawnPointsContainer = AllServices.Container.Single<IGameFactory>()
-                .CreateGameObjectContainer("SpawnPointsContainer");
-            spawnPointsContainer.transform.SetParent(transform);
+                .CreateGameObjectContainer(SpawnPointsContainer);
+            spawnPointsContainer.SetParent(transform);
 
             for (var i = 0; i < mapConfigure.spawnPoints.Count; i++)
             {
@@ -182,7 +185,7 @@ namespace MapCustomizer
         public GameObject CreateSpawnPoint(Vector3Int position)
         {
             var spawnPoint = AllServices.Container.Single<IEntityFactory>()
-                .CreateSpawnPoint(position, spawnPointsContainer.transform)
+                .CreateSpawnPoint(position, spawnPointsContainer)
                 .gameObject;
             spawnPoint.AddComponent<PositionAligner>();
             return spawnPoint;
