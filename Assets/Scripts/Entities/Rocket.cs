@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Data;
 using Explosions;
 using Infrastructure.Factory;
@@ -11,37 +10,47 @@ namespace Entities
 {
     public class Rocket : NetworkBehaviour
     {
-        private ExplosionBehaviour _explosionBehaviour;
         private NetworkConnectionToClient _owner;
         private bool _isExploded;
         private AudioService _audioService;
         private RocketLauncherItem _rocketData;
+        private IParticleFactory _particleFactory;
+        private ExplosionBehaviour _explosionBehaviour;
 
         public void Construct(IServer server, RocketLauncherItem rocketData,
             NetworkConnectionToClient owner, IParticleFactory particleFactory, AudioService audioService)
         {
             _owner = owner;
-            _explosionBehaviour =
-                new SingleExplosionBehaviour(server, particleFactory, new SphereDamageArea(server.MapProvider));
             _rocketData = rocketData;
+            _particleFactory = particleFactory;
             _audioService = audioService;
+            _explosionBehaviour = new ExplosionBehaviour(server, owner, rocketData.radius, rocketData.damage);
+        }
+
+        public void Explode()
+        {
+            var rocketPosition = transform.position;
+            _explosionBehaviour.Explode(rocketPosition);
+            _particleFactory.CreateRchParticle(rocketPosition, _rocketData.particlesSpeed,
+                _rocketData.particlesCount);
+            _audioService.SendAudio(_rocketData.explosionSound, rocketPosition);
+            NetworkServer.Destroy(gameObject);
         }
 
         private void OnCollisionEnter(Collision collision)
         {
-            if (!isServer || _isExploded) return;
-            if (collision.gameObject.GetComponentInParent<NetworkIdentity>()?.connectionToClient == _owner)
+            if (!isServer || _isExploded)
+            {
                 return;
+            }
 
+            if (collision.gameObject.GetComponentInParent<NetworkIdentity>()?.connectionToClient == _owner)
+            {
+                return;
+            }
+
+            Explode();
             _isExploded = true;
-            var position = transform.position;
-            var rocketPosition = new Vector3Int((int) position.x,
-                (int) position.y, (int) position.z);
-
-            var explodedRockets = new List<GameObject>();
-            _explosionBehaviour.Explode(rocketPosition, gameObject, _rocketData.radius, _owner, _rocketData.damage,
-                _rocketData.particlesSpeed, _rocketData.particlesCount, explodedRockets, gameObject.tag);
-            _audioService.SendAudio(_rocketData.explosionSound, rocketPosition);
         }
     }
 }

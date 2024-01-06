@@ -2,7 +2,6 @@
 using System.Linq;
 using Data;
 using Entities;
-using Explosions;
 using Infrastructure.Factory;
 using MapLogic;
 using Mirror;
@@ -18,6 +17,7 @@ namespace Networking
     public class Server : IServer
     {
         public MapProvider MapProvider { get; }
+        public MapUpdater MapUpdater { get; }
         public ServerData Data { get; }
         public BlockHealthSystem BlockHealthSystem { get; }
 
@@ -51,20 +51,15 @@ namespace Networking
             _playerFactory = networkManager.PlayerFactory;
             _serverSettings = serverSettings;
             MapProvider = MapReader.ReadFromFile(serverSettings.MapName, networkManager.StaticData);
-            var mapUpdater = new MapUpdater(networkManager, MapProvider);
-            _entityPositionValidator = new EntityPositionValidator(mapUpdater, MapProvider);
+            MapUpdater = new MapUpdater(networkManager, MapProvider);
+            _entityPositionValidator = new EntityPositionValidator(this);
             _spawnPointService =
                 new SpawnPointService(MapProvider, networkManager.GameFactory, networkManager.EntityFactory,
                     _entityPositionValidator);
             Data = new ServerData(networkManager.StaticData);
             _serverTimer = new ServerTimer(networkManager, serverSettings.MaxDuration);
             _boxDropService = new BoxDropService(this, networkManager, serverSettings, _entityPositionValidator);
-            var sphereExplosionArea = new SphereDamageArea(MapProvider);
-            var singleExplosionBehaviour = new SingleExplosionBehaviour(this, networkManager.ParticleFactory,
-                sphereExplosionArea);
-            var chainExplosionBehaviour = new ChainExplosionBehaviour(this, networkManager.ParticleFactory,
-                sphereExplosionArea);
-            BlockHealthSystem = new BlockHealthSystem(networkManager.StaticData, MapProvider, mapUpdater);
+            BlockHealthSystem = new BlockHealthSystem(networkManager.StaticData, this);
             _fallDamageService = new FallDamageService(this, networkManager);
             var audioService = new AudioService(staticData);
             var rangeWeaponValidator = new RangeWeaponValidator(this, networkManager, audioService);
@@ -75,10 +70,9 @@ namespace Networking
             _changeSlotHandler = new ChangeSlotHandler(this, audioService);
             _incrementSlotIndexHandler = new IncrementSlotIndexHandler(this, audioService);
             _decrementSlotIndexHandler = new DecrementSlotIndexHandler(this, audioService);
-            _grenadeSpawnHandler = new GrenadeSpawnHandler(this, networkManager,
-                singleExplosionBehaviour, audioService);
+            _grenadeSpawnHandler = new GrenadeSpawnHandler(this, networkManager, audioService);
             _tntSpawnHandler =
-                new TntSpawnHandler(this, networkManager, chainExplosionBehaviour);
+                new TntSpawnHandler(this, networkManager, audioService);
             _shootHandler = new ShootHandler(this, rangeWeaponValidator, rocketLauncherValidator);
             _cancelShootHandler = new CancelShootHandler(this, rangeWeaponValidator);
             _reloadHandler = new ReloadHandler(this, rangeWeaponValidator, rocketLauncherValidator);

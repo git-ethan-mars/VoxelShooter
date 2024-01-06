@@ -7,7 +7,6 @@ using Infrastructure;
 using Infrastructure.Factory;
 using Mirror;
 using Networking.Messages.Responses;
-using PlayerLogic.States;
 using UnityEngine;
 using Random = UnityEngine.Random;
 

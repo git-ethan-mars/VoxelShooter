@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Data;
-using Explosions;
 using Infrastructure.Services.StaticData;
 using MapLogic;
 using UnityEngine;
@@ -19,13 +18,11 @@ namespace Networking.ServerServices
         private readonly int[] _healthByBlock;
         private readonly MapProvider _mapProvider;
         private readonly MapUpdater _mapUpdater;
-        private readonly IBlockDamageCalculator _blockDamageCalculator = new LinearBlockDamageCalculator();
 
-        public BlockHealthSystem(IStaticDataService staticData, MapProvider mapProvider, MapUpdater mapUpdater)
+        public BlockHealthSystem(IStaticDataService staticData, IServer server)
         {
-            _mapProvider = mapProvider;
-            _mapUpdater = mapUpdater;
-
+            _mapProvider = server.MapProvider;
+            _mapUpdater = server.MapUpdater;
             var healthBalance = staticData.GetBlockHealthBalance();
             _blockFullHealth = healthBalance.BlockFullHealth;
             _damagedBlockHealthThreshold = healthBalance.DamagedBlockHealthThreshold;
@@ -52,31 +49,13 @@ namespace Networking.ServerServices
             _mapUpdater.SetBlocksByGlobalPositions(blocks);
         }
 
-        public void DamageBlock(Vector3Int targetBlock, int radius, int damage, IDamageArea lineDamageArea)
+        public BlockData DamageBlock(Vector3Int blockPosition, int damage)
         {
-            var damagedBlocks = lineDamageArea.GetDamagedBlocks(radius, targetBlock);
-            var changedBlocks = new List<BlockDataWithPosition>();
-            for (var i = 0; i < damagedBlocks.Count; i++)
-            {
-                var blockData = _mapProvider.GetBlockByGlobalPosition(damagedBlocks[i]);
-                var blockIndex = GetBlockIndex(damagedBlocks[i]);
-                var previousHealth = _healthByBlock[blockIndex];
-                _healthByBlock[blockIndex] -=
-                    _blockDamageCalculator.Calculate(targetBlock, radius, damage, damagedBlocks[i]);
-                var newBlockData = CalculateBlockColor(blockIndex, blockData, previousHealth);
-                if (!newBlockData.Color.Equals(blockData.Color) && _healthByBlock[blockIndex] > 0)
-                {
-                    changedBlocks.Add(new BlockDataWithPosition(damagedBlocks[i], newBlockData));
-                }
-
-                if (_healthByBlock[blockIndex] <= 0)
-                {
-                    _healthByBlock[blockIndex] = 0;
-                    changedBlocks.Add(new BlockDataWithPosition(damagedBlocks[i], new BlockData()));
-                }
-            }
-
-            _mapUpdater.SetBlocksByGlobalPositions(changedBlocks);
+            var blockData = _mapProvider.GetBlockByGlobalPosition(blockPosition);
+            var blockIndex = GetBlockIndex(blockPosition);
+            var previousHealth = _healthByBlock[blockIndex];
+            _healthByBlock[blockIndex] -= damage;
+            return CalculateBlockColor(blockIndex, blockData, previousHealth);
         }
 
         private BlockData CalculateBlockColor(int blockIndex, BlockData blockData, int previousHealth)

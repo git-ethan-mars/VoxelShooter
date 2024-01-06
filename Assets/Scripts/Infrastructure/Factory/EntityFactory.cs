@@ -11,21 +11,30 @@ namespace Infrastructure.Factory
     public class EntityFactory : IEntityFactory
     {
         private readonly IAssetProvider _assets;
+        private readonly IParticleFactory _particleFactory;
 
-        public EntityFactory(IAssetProvider assets)
+        public EntityFactory(IAssetProvider assets, IParticleFactory particleFactory)
         {
             _assets = assets;
+            _particleFactory = particleFactory;
         }
 
-        public GameObject CreateTnt(Vector3 position, Quaternion rotation)
+        public Tnt CreateTnt(Vector3 position, Quaternion rotation, IServer server,
+            NetworkConnectionToClient owner, TntItem tntItem,
+            AudioService audioService)
         {
-            var tnt = _assets.Instantiate(EntityPath.TntPath, position, rotation);
+            var tnt = _assets.Instantiate(EntityPath.TntPath, position, rotation).GetComponent<Tnt>();
+            tnt.Construct(server, owner, _particleFactory, audioService, tntItem);
             return tnt;
         }
 
-        public GameObject CreateGrenade(Vector3 position, Quaternion rotation, Vector3 force)
+        public Grenade CreateGrenade(Vector3 position, Vector3 force, IServer server,
+            NetworkConnectionToClient owner, GrenadeItem grenadeItem,
+            AudioService audioService)
         {
-            var grenade = _assets.Instantiate(EntityPath.GrenadePath, position, rotation);
+            var grenade = _assets.Instantiate(EntityPath.GrenadePath, position, Quaternion.identity)
+                .GetComponent<Grenade>();
+            grenade.Construct(server, owner, _particleFactory, audioService, grenadeItem);
             grenade.GetComponent<Rigidbody>().AddForce(force);
             return grenade;
         }
@@ -37,11 +46,11 @@ namespace Infrastructure.Factory
         }
 
         public GameObject CreateRocket(Vector3 position, Quaternion rotation, IServer server,
-            IParticleFactory particleFactory, RocketLauncherItem rocketData, NetworkConnectionToClient owner,
+            NetworkConnectionToClient owner, RocketLauncherItem rocketData,
             AudioService audioService)
         {
             var rocket = _assets.Instantiate(EntityPath.RocketPath, position, rotation);
-            rocket.GetComponent<Rocket>().Construct(server, rocketData, owner, particleFactory, audioService);
+            rocket.GetComponent<Rocket>().Construct(server, rocketData, owner, _particleFactory, audioService);
             rocket.GetComponent<Rigidbody>().velocity = rocket.transform.forward * rocketData.speed;
             return rocket;
         }

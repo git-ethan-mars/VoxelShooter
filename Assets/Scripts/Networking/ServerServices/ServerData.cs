@@ -4,6 +4,7 @@ using Data;
 using Infrastructure.Services.StaticData;
 using Mirror;
 using Steamworks;
+using UnityEngine;
 
 namespace Networking.ServerServices
 {
@@ -18,7 +19,7 @@ namespace Networking.ServerServices
             _staticData = staticDataService;
         }
 
-        public IEnumerable<NetworkConnectionToClient> ClientConnections => _dataByConnection.Keys.ToArray();
+        public IEnumerable<NetworkConnectionToClient> ClientConnections => _dataByConnection.Keys;
 
         public void AddPlayer(NetworkConnectionToClient connection, CSteamID steamID,
             string nickname)

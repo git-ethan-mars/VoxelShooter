@@ -72,7 +72,8 @@ namespace Infrastructure.States
                 _allServices.Single<IStaticDataService>(),
                 _coroutineRunner));
             _allServices.RegisterSingle<IMeshFactory>(new MeshFactory(_allServices.Single<IAssetProvider>()));
-            _allServices.RegisterSingle<IEntityFactory>(new EntityFactory(_allServices.Single<IAssetProvider>()));
+            _allServices.RegisterSingle<IEntityFactory>(new EntityFactory(_allServices.Single<IAssetProvider>(),
+                _allServices.Single<IParticleFactory>()));
             _allServices.RegisterSingle<IUIFactory>(new UIFactory(_allServices.Single<IAssetProvider>(),
                 _allServices.Single<IStaticDataService>()));
             _allServices.RegisterSingle<IGameFactory>(

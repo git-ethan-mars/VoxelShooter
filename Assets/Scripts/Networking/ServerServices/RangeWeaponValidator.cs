@@ -16,7 +16,7 @@ namespace Networking.ServerServices
         private readonly IServer _server;
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly IParticleFactory _particleFactory;
-        private readonly LineDamageArea _lineDamageArea;
+        private readonly BlockDestructionBehaviour _blockDestructionBehaviour;
         private readonly AudioService _audioService;
 
         public RangeWeaponValidator(IServer server, CustomNetworkManager networkManager, AudioService audioService)
@@ -24,7 +24,9 @@ namespace Networking.ServerServices
             _server = server;
             _coroutineRunner = networkManager;
             _particleFactory = networkManager.ParticleFactory;
-            _lineDamageArea = new LineDamageArea(_server.MapProvider);
+            var blockArea = new SingleBlockArea(server.MapProvider);
+            _blockDestructionBehaviour =
+                new BlockDestructionBehaviour(server, blockArea);
             _audioService = audioService;
         }
 
@@ -207,11 +209,11 @@ namespace Networking.ServerServices
             {
                 var blockPosition = Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2);
                 var block = _server.MapProvider.GetBlockByGlobalPosition(blockPosition);
-                
+
                 if (block.IsSolid())
                 {
                     bulletImpactColors[blockPosition] = block.Color;
-                    _server.BlockHealthSystem.DamageBlock(blockPosition, 1, configure.damage, _lineDamageArea);
+                    _blockDestructionBehaviour.DamageBlocks(blockPosition, configure.damage);
                 }
 
                 if (bulletImpactColors.ContainsKey(blockPosition))

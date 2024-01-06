@@ -12,7 +12,6 @@ namespace Networking.ServerServices
     {
         private readonly IServer _server;
         private readonly ICoroutineRunner _coroutineRunner;
-        private readonly IParticleFactory _particleFactory;
         private readonly AudioService _audioService;
         private readonly IEntityFactory _entityFactory;
 
@@ -20,7 +19,6 @@ namespace Networking.ServerServices
         {
             _server = server;
             _coroutineRunner = networkManager;
-            _particleFactory = networkManager.ParticleFactory;
             _entityFactory = networkManager.EntityFactory;
             _audioService = audioService;
         }
@@ -37,8 +35,8 @@ namespace Networking.ServerServices
             }
 
             var rocket = _entityFactory.CreateRocket(ray.origin + ray.direction * 3,
-                Quaternion.LookRotation(ray.direction), _server, _particleFactory, rocketLauncher, connection,
-                _audioService);
+                Quaternion.LookRotation(ray.direction), _server, connection,
+                rocketLauncher, _audioService);
             NetworkServer.Spawn(rocket);
             rocketLauncherData.ChargedRockets -= 1;
             connection.Send(new RocketSpawnResponse(playerData.SelectedSlotIndex, rocketLauncherData.ChargedRockets));

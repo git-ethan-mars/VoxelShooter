@@ -9,6 +9,7 @@ namespace Networking
     public interface IServer
     {
         MapProvider MapProvider { get; }
+        MapUpdater MapUpdater { get; }
         ServerData Data { get; }
         BlockHealthSystem BlockHealthSystem { get; }
 

@@ -12,12 +12,11 @@ namespace Networking.ServerServices
 
         private readonly MapUpdater _mapUpdater;
 
-        public EntityPositionValidator(MapUpdater mapUpdater,
-            MapProvider mapProvider)
+        public EntityPositionValidator(IServer server)
         {
             _pushableEntities = new List<IPushable>();
-            _mapProvider = mapProvider;
-            _mapUpdater = mapUpdater;
+            _mapProvider = server.MapProvider;
+            _mapUpdater = server.MapUpdater;
         }
 
         public void Start()

@@ -11,14 +11,20 @@ namespace Infrastructure.Factory
 {
     public interface IEntityFactory : IService
     {
-        GameObject CreateTnt(Vector3 position, Quaternion rotation);
+        Tnt CreateTnt(Vector3 position, Quaternion rotation, IServer server,
+            NetworkConnectionToClient owner, TntItem tntItem,
+            AudioService audioService);
 
-        GameObject CreateGrenade(Vector3 position, Quaternion rotation, Vector3 force);
+        Grenade CreateGrenade(Vector3 position, Vector3 force, IServer server,
+            NetworkConnectionToClient owner,
+            GrenadeItem grenadeItem,
+            AudioService audioService);
 
         GameObject CreateTombstone(Vector3 position);
 
         GameObject CreateRocket(Vector3 position, Quaternion rotation, IServer server,
-            IParticleFactory particleFactory, RocketLauncherItem rocketData, NetworkConnectionToClient owner,
+            NetworkConnectionToClient owner,
+            RocketLauncherItem rocketData,
             AudioService audioService);
 
         LootBox CreateAmmoBox(Vector3 position, Transform parent);
