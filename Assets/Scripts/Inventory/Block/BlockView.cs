@@ -26,10 +26,10 @@ namespace Inventory.Block
         {
             _rayCaster = rayCaster;
             _placeDistance = player.PlaceDistance;
-            _palette = hud.palette.gameObject;
-            _blockInfo = hud.itemInfo;
-            _blockImage = hud.itemIcon;
-            _blockCountText = hud.itemCount;
+            _palette = hud.Palette.gameObject;
+            _blockInfo = hud.ItemInfo;
+            _blockImage = hud.ItemIcon;
+            _blockCountText = hud.ItemCount;
             Icon = configure.inventoryIcon;
             _blockSprite = configure.itemSprite;
             _transparentBlock = meshFactory.CreateTransparentGameObject(configure.prefab, initialColor);

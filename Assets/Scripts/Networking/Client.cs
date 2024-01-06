@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Data;
-using Generators;
-using Infrastructure.AssetManagement;
-using Infrastructure.Factory;
+using Entities;
 using Infrastructure.Services.Storage;
 using Infrastructure.States;
 using MapLogic;
@@ -13,9 +11,6 @@ using Networking.MessageHandlers.ResponseHandler;
 using PlayerLogic;
 using PlayerLogic.Spectator;
 using UI.SettingsMenu;
-using UnityEngine;
-using Environment = MapLogic.Environment;
-using Object = UnityEngine.Object;
 
 namespace Networking
 {
@@ -23,6 +18,12 @@ namespace Networking
     {
         public event Action GameFinished;
         public event Action MapDownloaded;
+
+        public event Action<BlockDataWithPosition[]> MapUpdated
+        {
+            add => _updateMapHandler.MapUpdated += value;
+            remove => _updateMapHandler.MapUpdated -= value;
+        }
 
         public event Action<float> MapLoadProgressed
         {
@@ -54,10 +55,6 @@ namespace Networking
             remove => _playerConfigureHandler.PlayerCreated += value;
         }
 
-        public ClientData Data { get; }
-        public MapGenerator MapGenerator { get; private set; }
-
-
         public MapProvider MapProvider
         {
             get => _mapProvider;
@@ -68,14 +65,13 @@ namespace Networking
             }
         }
 
+        public VerticalMapProjector MapProjector { get; set; }
+        public string MapName { get; set; }
+        public HashSet<LootBox> LootBoxes { get; set; } = new();
+
         private readonly GameStateMachine _stateMachine;
         private readonly CustomNetworkManager _networkManager;
-        private readonly IAssetProvider _assets;
         private readonly IStorageService _storageService;
-        private readonly IGameFactory _gameFactory;
-        private readonly IMeshFactory _meshFactory;
-        private readonly IPlayerFactory _playerFactory;
-        private MapProvider _mapProvider;
         private readonly MapNameHandler _mapNameHandler;
         private readonly DownloadMapHandler _downloadMapHandler;
         private readonly UpdateMapHandler _updateMapHandler;
@@ -92,24 +88,19 @@ namespace Networking
         private readonly StartContinuousSoundHandler _startContinuousSoundHandler;
         private readonly StopContinuousSoundHandler _stopContinuousSoundHandler;
         private readonly SurroundingSoundHandler _surroundingSoundHandler;
+        private readonly ClientPrefabRegistrar _clientPrefabRegistrar;
+        private MapProvider _mapProvider;
+
 
         public Client(GameStateMachine stateMachine, CustomNetworkManager networkManager)
         {
             _stateMachine = stateMachine;
             _networkManager = networkManager;
-            _assets = networkManager.Assets;
             _storageService = networkManager.StorageService;
-            _gameFactory = networkManager.GameFactory;
-            _meshFactory = networkManager.MeshFactory;
-            _playerFactory = networkManager.PlayerFactory;
-            var fallingMeshParticlePool =
-                new FallingMeshParticlePool(networkManager.GameFactory, networkManager.ParticleFactory);
-            var fallMeshGenerator = new FallMeshGenerator(networkManager.MeshFactory, fallingMeshParticlePool);
-            Data = new ClientData();
             _mapNameHandler = new MapNameHandler(this);
             _downloadMapHandler = new DownloadMapHandler(this, networkManager.StaticData);
             _updateMapHandler = new UpdateMapHandler(this);
-            _fallBlockHandler = new FallBlockHandler(fallMeshGenerator);
+            _fallBlockHandler = new FallBlockHandler(networkManager);
             _gameTimeHandler = new GameTimeHandler();
             _respawnTimeHandler = new RespawnTimeHandler();
             _scoreboardHandler = new ScoreboardHandler();
@@ -127,16 +118,16 @@ namespace Networking
             _stopContinuousSoundHandler = new StopContinuousSoundHandler();
             _surroundingSoundHandler =
                 new SurroundingSoundHandler(networkManager, audioPool);
+            _clientPrefabRegistrar = new ClientPrefabRegistrar(this, networkManager.Assets, networkManager.GameFactory,
+                networkManager.PlayerFactory, networkManager.EntityFactory);
         }
 
         public void Start()
         {
             MapDownloaded += OnMapDownloaded;
-            AudioListener.volume = _storageService.Load<VolumeSettingsData>(Constants.VolumeSettingsKey).MasterVolume;
             _storageService.DataSaved += OnDataSaved;
-
             RegisterHandlers();
-            Data.State = ClientState.Connecting;
+            _clientPrefabRegistrar.RegisterPrefabs();
         }
 
 
@@ -145,7 +136,7 @@ namespace Networking
             MapDownloaded -= OnMapDownloaded;
             _storageService.DataSaved -= OnDataSaved;
             UnregisterHandlers();
-            Data.State = ClientState.NotConnected;
+            _clientPrefabRegistrar.UnregisterPrefabs();
             GameFinished?.Invoke();
         }
 
@@ -167,8 +158,6 @@ namespace Networking
             _startContinuousSoundHandler.Register();
             _stopContinuousSoundHandler.Register();
             _surroundingSoundHandler.Register();
-            NetworkClient.RegisterPrefab(_assets.Load<GameObject>(PlayerPath.MainPlayerPath), SpawnPlayerHandler,
-                UnSpawnPlayerHandler);
         }
 
         private void UnregisterHandlers()
@@ -189,19 +178,10 @@ namespace Networking
             _startContinuousSoundHandler.Unregister();
             _stopContinuousSoundHandler.Unregister();
             _surroundingSoundHandler.Unregister();
-            NetworkClient.UnregisterPrefab(_assets.Load<GameObject>(PlayerPath.MainPlayerPath));
         }
 
         private void OnMapDownloaded()
         {
-            Data.State = ClientState.Connected;
-            MapGenerator = new MapGenerator(_mapProvider, _gameFactory, _meshFactory);
-            MapGenerator.GenerateMap();
-            MapGenerator.GenerateWalls();
-            MapGenerator.GenerateWater();
-            MapGenerator.GenerateLight();
-            Environment.ApplyAmbientLighting(_mapProvider.SceneData);
-            Environment.ApplyFog(_mapProvider.SceneData);
             _stateMachine.Enter<GameLoopState, CustomNetworkManager>(_networkManager);
         }
 
@@ -231,16 +211,6 @@ namespace Networking
                     spectator.Rotation.ChangeMouseSettings(mouseSettings);
                 }
             }
-        }
-
-        private GameObject SpawnPlayerHandler(SpawnMessage msg)
-        {
-            return _playerFactory.CreatePlayer(msg.position);
-        }
-
-        private void UnSpawnPlayerHandler(GameObject spawned)
-        {
-            Object.Destroy(spawned);
         }
     }
 }

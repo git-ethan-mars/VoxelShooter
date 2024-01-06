@@ -63,14 +63,9 @@ namespace Infrastructure.Factory
             return networkManager;
         }
 
-        public GameObject CreateGameObjectContainer(string containerName)
+        public Transform CreateGameObjectContainer(string containerName)
         {
-            return new GameObject(containerName);
-        }
-
-        public void CreateCamera()
-        {
-            new GameObject().AddComponent<Camera>();
+            return new GameObject(containerName).transform;
         }
 
         public void CreateDirectionalLight(LightData lightData)

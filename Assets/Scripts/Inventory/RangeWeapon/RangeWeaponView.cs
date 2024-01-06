@@ -18,9 +18,9 @@ namespace Inventory.RangeWeapon
         {
             Icon = configure.inventoryIcon;
             _ammoTypeIcon = configure.ammoIcon;
-            _ammoInfo = hud.ammoInfo;
-            _ammoCount = hud.ammoCount;
-            _ammoType = hud.ammoType;
+            _ammoInfo = hud.AmmoInfo;
+            _ammoCount = hud.AmmoCount;
+            _ammoType = hud.AmmoType;
         }
 
         public void Enable()

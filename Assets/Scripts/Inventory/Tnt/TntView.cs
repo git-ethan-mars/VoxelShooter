@@ -27,10 +27,10 @@ namespace Inventory.Tnt
             Icon = configuration.inventoryIcon;
             _rayCaster = rayCaster;
             _placeDistance = player.PlaceDistance;
-            _tntInfo = hud.itemInfo;
-            _tntCountText = hud.itemCount;
+            _tntInfo = hud.ItemInfo;
+            _tntCountText = hud.ItemCount;
             _tntCountIcon = configuration.countIcon;
-            _itemType = hud.itemIcon;
+            _itemType = hud.ItemIcon;
             _transparentTnt = meshFactory.CreateTransparentGameObject(configuration.prefab, Color.red);
             _transparentTnt.SetActive(false);
         }

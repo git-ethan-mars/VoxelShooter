@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Infrastructure.Services.Input;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,14 +22,56 @@ namespace UI
         [SerializeField]
         private CanvasGroup canvasGroup;
 
-        public Palette.Palette palette;
-        public GameObject ammoInfo;
-        public Image ammoType;
-        public TextMeshProUGUI ammoCount;
-        public GameObject itemInfo;
-        public Image itemIcon;
-        public TextMeshProUGUI itemCount;
-        public HealthCounter healthCounter;
-        private IInputService _inputService;
+        [SerializeField]
+        private MiniMap miniMap;
+
+        public MiniMap Minimap => miniMap;
+
+        [SerializeField]
+        private Palette.Palette palette;
+
+        public Palette.Palette Palette => palette;
+
+
+        [SerializeField]
+        private GameObject ammoInfo;
+
+        public GameObject AmmoInfo => ammoInfo;
+
+
+        [SerializeField]
+        private Image ammoType;
+
+        public Image AmmoType => ammoType;
+
+
+        [SerializeField]
+        private TextMeshProUGUI ammoCount;
+
+        public TextMeshProUGUI AmmoCount => ammoCount;
+
+
+        [SerializeField]
+        private GameObject itemInfo;
+
+        public GameObject ItemInfo => itemInfo;
+
+
+        [SerializeField]
+        private Image itemIcon;
+
+        public Image ItemIcon => itemIcon;
+
+
+        [SerializeField]
+        private TextMeshProUGUI itemCount;
+
+        public TextMeshProUGUI ItemCount => itemCount;
+
+
+        [SerializeField]
+        private HealthCounter healthCounter;
+
+        public HealthCounter HealthCounter => healthCounter;
     }
 }

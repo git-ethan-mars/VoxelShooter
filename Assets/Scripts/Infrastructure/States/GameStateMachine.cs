@@ -21,7 +21,8 @@ namespace Infrastructure.States
                 [typeof(BootstrapState)] =
                     new BootstrapState(this, sceneLoader, allServices, coroutineRunner),
                 [typeof(MainMenuState)] =
-                    new MainMenuState(this, sceneLoader, allServices.Single<IUIFactory>()),
+                    new MainMenuState(this, sceneLoader, allServices.Single<IUIFactory>(),
+                        allServices.Single<IStorageService>()),
                 [typeof(SettingsMenuState)] = new SettingsMenuState(this, allServices.Single<IUIFactory>(),
                     allServices.Single<IStorageService>()),
                 [typeof(CreateMatchState)] = new CreateMatchState(this, allServices.Single<IMapRepository>(),
@@ -34,7 +35,8 @@ namespace Infrastructure.States
                 [typeof(JoinLocalMatchState)] = new JoinLocalMatchState(this, sceneLoader,
                     allServices.Single<IGameFactory>(), allServices.Single<IUIFactory>()),
                 [typeof(GameLoopState)] =
-                    new GameLoopState(this, allServices.Single<IUIFactory>(), allServices.Single<IInputService>(),
+                    new GameLoopState(this, allServices.Single<IGameFactory>(), allServices.Single<IUIFactory>(),
+                        allServices.Single<IMeshFactory>(), allServices.Single<IInputService>(),
                         allServices.Single<IStorageService>(),
                         allServices.Single<IAvatarLoader>())
             };

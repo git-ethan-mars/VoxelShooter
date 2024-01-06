@@ -10,10 +10,10 @@ using UnityEngine;
 namespace Optimization
 {
     [BurstCompile]
-    public unsafe struct ChunkMeshGeneration : IJob
+    public unsafe struct ChunkMeshGenerator : IJob
     {
         [ReadOnly]
-        public NativeParallelHashMap<int, IntPtr> AddressByNeighbour;
+        public NativeArray<IntPtr> AddressByNeighbour;
 
         [ReadOnly]
         public NativeArray<BlockData> Blocks;

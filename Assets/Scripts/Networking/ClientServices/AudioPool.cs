@@ -14,7 +14,7 @@ namespace Networking.ClientServices
         public AudioPool(IGameFactory gameFactory)
         {
             _stack = new Stack<AudioSource>(PoolSize);
-            var container = gameFactory.CreateGameObjectContainer(ContainerName).transform;
+            var container = gameFactory.CreateGameObjectContainer(ContainerName);
             for (var i = 0; i < PoolSize; i++)
             {
                 var audioSource = gameFactory.CreateAudioSource(container);
