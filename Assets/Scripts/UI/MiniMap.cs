@@ -19,7 +19,7 @@ namespace UI
         [SerializeField]
         private Image minimapCursor;
 
-        private List<Image> _lootBoxImages = new();
+        private readonly List<Image> _lootBoxImages = new();
 
         private MapProvider _mapProvider;
         private Player _player;
@@ -33,7 +33,7 @@ namespace UI
         {
             _mapProvider = client.MapProvider;
             _fullMapPixels = client.MapProjector.Projection;
-            _lootBoxes = client.LootBoxes;
+            _lootBoxes = client.PrefabRegistrar.LootBoxes;
             _player = player;
             _uiFactory = uiFactory;
             _miniMapPixels = new Color32[MiniMapSize * MiniMapSize];

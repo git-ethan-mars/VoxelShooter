@@ -38,7 +38,7 @@ namespace Networking.ServerServices
         {
             while (true)
             {
-                foreach (var connection in _server.Data.ClientConnections)
+                foreach (var connection in _server.ClientConnections)
                 {
                     if (!connection.identity)
                     {

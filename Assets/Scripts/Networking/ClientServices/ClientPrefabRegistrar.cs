@@ -5,26 +5,32 @@ using Infrastructure.Factory;
 using Mirror;
 using UnityEngine;
 
-namespace Networking
+namespace Networking.ClientServices
 {
     public class ClientPrefabRegistrar
     {
         private const string LootBoxContainer = "LootBoxContainer";
 
+        public HashSet<LootBox> LootBoxes
+        {
+            get => _lootBoxes;
+            set => _lootBoxes = value;
+        }
+
         private readonly IAssetProvider _assets;
         private readonly IPlayerFactory _playerFactory;
         private readonly IEntityFactory _entityFactory;
         private readonly Transform _lootBoxContainer;
-        private readonly HashSet<LootBox> _lootBoxes;
+        private HashSet<LootBox> _lootBoxes;
 
-        public ClientPrefabRegistrar(IClient client, IAssetProvider assets, IGameFactory gameFactory,
+        public ClientPrefabRegistrar(IAssetProvider assets, IGameFactory gameFactory,
             IPlayerFactory playerFactory,
             IEntityFactory entityFactory)
         {
             _assets = assets;
             _playerFactory = playerFactory;
             _entityFactory = entityFactory;
-            _lootBoxes = client.LootBoxes;
+            _lootBoxes = new HashSet<LootBox>();
             if (!NetworkClient.activeHost)
             {
                 _lootBoxContainer = gameFactory.CreateGameObjectContainer(LootBoxContainer);

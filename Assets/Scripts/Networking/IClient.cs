@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Data;
 using Entities;
 using MapLogic;
+using Networking.ClientServices;
 using PlayerLogic;
 
 namespace Networking
@@ -19,8 +20,8 @@ namespace Networking
         event Action<Player> PlayerCreated;
         MapProvider MapProvider { get; set; }
         VerticalMapProjector MapProjector { get; set; }
+        ClientPrefabRegistrar PrefabRegistrar { get; }
         string MapName { get; set; }
-        HashSet<LootBox> LootBoxes { get; set; }
         void Start();
         void Stop();
     }

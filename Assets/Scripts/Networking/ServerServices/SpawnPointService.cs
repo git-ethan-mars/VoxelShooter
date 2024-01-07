@@ -2,15 +2,15 @@ using System.Collections.Generic;
 using Entities;
 using Infrastructure.Factory;
 using MapLogic;
-using Networking.ServerServices;
 using UnityEngine;
 
-namespace Networking
+namespace Networking.ServerServices
 {
     public class SpawnPointService
     {
         private const string SpawnPointContainerName = "SpawnPointContainer";
 
+        private readonly IServer _server;
         private readonly List<SpawnPoint> _spawnPoints;
         private readonly MapProvider _mapProvider;
         private readonly IGameFactory _gameFactory;
@@ -18,13 +18,12 @@ namespace Networking
         private readonly EntityPositionValidator _entityPositionValidator;
         private int _spawnPointIndex;
 
-        public SpawnPointService(MapProvider mapProvider, IGameFactory gameFactory,
-            IEntityFactory entityFactory, EntityPositionValidator entityPositionValidator)
+        public SpawnPointService(IServer server, IGameFactory gameFactory, IEntityFactory entityFactory)
         {
-            _mapProvider = mapProvider;
+            _server = server;
+            _mapProvider = server.MapProvider;
             _gameFactory = gameFactory;
             _entityFactory = entityFactory;
-            _entityPositionValidator = entityPositionValidator;
             _spawnPoints = new List<SpawnPoint>();
         }
 
@@ -35,7 +34,7 @@ namespace Networking
             {
                 var spawnPoint = _entityFactory.CreateSpawnPoint(spawnPointData.ToVectorWithOffset(), parent);
                 spawnPoint.Construct(spawnPointData);
-                _entityPositionValidator.AddEntity(spawnPoint);
+                _server.EntityContainer.AddPushable(spawnPoint);
                 _spawnPoints.Add(spawnPoint);
             }
         }
@@ -51,7 +50,7 @@ namespace Networking
         {
             foreach (var spawnPoint in _spawnPoints)
             {
-                _entityPositionValidator.RemoveEntity(spawnPoint);
+                _server.EntityContainer.RemovePushable(spawnPoint);
             }
 
             _spawnPoints.Clear();

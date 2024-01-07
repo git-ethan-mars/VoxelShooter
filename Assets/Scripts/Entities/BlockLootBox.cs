@@ -9,7 +9,7 @@ namespace Entities
         private const int BlockBonus = 50;
         protected override void OnPickUp(NetworkConnectionToClient receiver)
         {
-            var result = Server.Data.TryGetPlayerData(receiver, out var playerData);
+            var result = Server.TryGetPlayerData(receiver, out var playerData);
             if (!result || !playerData.IsAlive)
             {
                 return;

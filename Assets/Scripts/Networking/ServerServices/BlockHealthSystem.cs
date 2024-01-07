@@ -18,12 +18,10 @@ namespace Networking.ServerServices
 
         private readonly int[] _healthByBlock;
         private readonly MapProvider _mapProvider;
-        private readonly MapUpdater _mapUpdater;
-
+        
         public BlockHealthSystem(IStaticDataService staticData, IServer server)
         {
             _mapProvider = server.MapProvider;
-            _mapUpdater = server.MapUpdater;
             var healthBalance = staticData.GetBlockHealthBalance();
             _blockFullHealth = healthBalance.BlockFullHealth;
             _damagedBlockHealthThreshold = healthBalance.DamagedBlockHealthThreshold;
@@ -46,8 +44,6 @@ namespace Networking.ServerServices
                 var blockIndex = GetBlockIndex(block.Position);
                 _healthByBlock[blockIndex] = _blockFullHealth;
             }
-
-            _mapUpdater.SetBlocksByGlobalPositions(blocks);
         }
 
         public BlockData DamageBlock(Vector3Int blockPosition, int damage)

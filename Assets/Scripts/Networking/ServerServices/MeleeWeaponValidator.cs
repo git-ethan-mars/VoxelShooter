@@ -31,7 +31,7 @@ namespace Networking.ServerServices
 
         public void Hit(NetworkConnectionToClient connection, Ray ray, bool isStrongHit)
         {
-            var playerData = _server.Data.GetPlayerData(connection);
+            var playerData = _server.GetPlayerData(connection);
             var meleeWeapon = (MeleeWeaponItem) playerData.SelectedItem;
             var meleeWeaponData = (MeleeWeaponItemData) playerData.SelectedItemData;
 

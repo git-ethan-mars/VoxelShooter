@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Data;
-using Entities;
 using MapLogic;
 using Mirror;
 using Networking.ServerServices;
@@ -12,9 +11,9 @@ namespace Networking
     {
         MapProvider MapProvider { get; }
         MapUpdater MapUpdater { get; }
-        ServerData Data { get; }
         BlockHealthSystem BlockHealthSystem { get; }
-        HashSet<LootBox> LootBoxes { get; }
+        EntityContainer EntityContainer { get; }
+        IEnumerable<NetworkConnectionToClient> ClientConnections { get; }
 
         void AddPlayer(NetworkConnectionToClient connection, CSteamID steamID,
             string nickname);
@@ -26,5 +25,7 @@ namespace Networking
         void SendCurrentServerState(NetworkConnectionToClient connection);
         void Start();
         void Stop();
+        bool TryGetPlayerData(NetworkConnectionToClient connection, out PlayerData playerData);
+        PlayerData GetPlayerData(NetworkConnectionToClient connectionToClient);
     }
 }

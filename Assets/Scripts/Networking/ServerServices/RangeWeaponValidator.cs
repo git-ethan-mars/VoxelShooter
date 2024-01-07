@@ -32,7 +32,7 @@ namespace Networking.ServerServices
 
         public void Shoot(NetworkConnectionToClient connection, Ray ray, bool requestIsButtonHolding)
         {
-            var playerData = _server.Data.GetPlayerData(connection);
+            var playerData = _server.GetPlayerData(connection);
             var rangeWeapon = (RangeWeaponItem) playerData.SelectedItem;
             var rangeWeaponData = (RangeWeaponItemData) playerData.SelectedItemData;
 
@@ -72,14 +72,14 @@ namespace Networking.ServerServices
 
         public void CancelShoot(NetworkConnectionToClient connection)
         {
-            var playerData = _server.Data.GetPlayerData(connection);
+            var playerData = _server.GetPlayerData(connection);
             _audioService.StopContinuousSound(connection.identity);
             playerData.HasContinuousSound = false;
         }
 
         public void Reload(NetworkConnectionToClient connection)
         {
-            var playerData = _server.Data.GetPlayerData(connection);
+            var playerData = _server.GetPlayerData(connection);
             var rangeWeapon = (RangeWeaponItem) playerData.SelectedItem;
             var rangeWeaponData = (RangeWeaponItemData) playerData.SelectedItemData;
             if (!CanReload(rangeWeapon, rangeWeaponData))
@@ -115,7 +115,7 @@ namespace Networking.ServerServices
                 itemData.BulletsInMagazine = configure.magazineSize;
             }
 
-            var playerData = _server.Data.GetPlayerData(connection);
+            var playerData = _server.GetPlayerData(connection);
             connection.Send(new ReloadResultResponse(playerData.SelectedSlotIndex, itemData.TotalBullets,
                 itemData.BulletsInMagazine));
         }

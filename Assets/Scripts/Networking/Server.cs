@@ -4,6 +4,7 @@ using System.Linq;
 using Data;
 using Entities;
 using Infrastructure.Factory;
+using Infrastructure.Services.StaticData;
 using MapLogic;
 using Mirror;
 using Networking.MessageHandlers.RequestHandlers;
@@ -19,13 +20,14 @@ namespace Networking
     {
         public MapProvider MapProvider { get; }
         public MapUpdater MapUpdater { get; }
-        public ServerData Data { get; }
+        public EntityContainer EntityContainer { get; }
+        public IEnumerable<NetworkConnectionToClient> ClientConnections => _dataByConnection.Keys;
         public BlockHealthSystem BlockHealthSystem { get; }
-        public HashSet<LootBox> LootBoxes => _boxDropService.LootBoxes;
 
         private readonly ServerSettings _serverSettings;
         private readonly IPlayerFactory _playerFactory;
         private readonly IEntityFactory _entityFactory;
+        private readonly IStaticDataService _staticData;
         private readonly EntityPositionValidator _entityPositionValidator;
         private readonly BoxDropService _boxDropService;
         private readonly SpawnPointService _spawnPointService;
@@ -44,22 +46,23 @@ namespace Networking
         private readonly HitHandler _hitHandler;
         private readonly AuthenticationHandler _authenticationHandler;
         private readonly FallDamageService _fallDamageService;
+        private readonly Dictionary<NetworkConnectionToClient, PlayerData> _dataByConnection;
 
         public Server(CustomNetworkManager networkManager, ServerSettings serverSettings)
         {
             _networkManager = networkManager;
             _entityFactory = networkManager.EntityFactory;
             _playerFactory = networkManager.PlayerFactory;
+            _staticData = networkManager.StaticData;
             _serverSettings = serverSettings;
             MapProvider = MapReader.ReadFromFile(serverSettings.MapName, networkManager.StaticData);
             MapUpdater = new MapUpdater(networkManager, MapProvider);
+            EntityContainer = new EntityContainer();
             _entityPositionValidator = new EntityPositionValidator(this);
             _spawnPointService =
-                new SpawnPointService(MapProvider, networkManager.GameFactory, networkManager.EntityFactory,
-                    _entityPositionValidator);
-            Data = new ServerData(networkManager.StaticData);
+                new SpawnPointService(this, networkManager.GameFactory, networkManager.EntityFactory);
             _serverTimer = new ServerTimer(networkManager, serverSettings.MaxDuration);
-            _boxDropService = new BoxDropService(this, networkManager, serverSettings, _entityPositionValidator);
+            _boxDropService = new BoxDropService(this, networkManager, serverSettings);
             BlockHealthSystem = new BlockHealthSystem(networkManager.StaticData, this);
             _fallDamageService = new FallDamageService(this, networkManager);
             var audioService = new AudioService(networkManager.StaticData);
@@ -79,6 +82,7 @@ namespace Networking
             _reloadHandler = new ReloadHandler(this, rangeWeaponValidator, rocketLauncherValidator);
             _hitHandler = new HitHandler(this, meleeWeaponValidator);
             _authenticationHandler = new AuthenticationHandler(this);
+            _dataByConnection = new Dictionary<NetworkConnectionToClient, PlayerData>();
         }
 
         public void Start()
@@ -94,12 +98,13 @@ namespace Networking
         public void AddPlayer(NetworkConnectionToClient connection, CSteamID steamID,
             string nickname)
         {
-            Data.AddPlayer(connection, steamID, nickname);
+            var playerData = new PlayerData(steamID, nickname, _staticData);
+            _dataByConnection[connection] = playerData;
         }
 
         public void ChangeClass(NetworkConnectionToClient connection, GameClass chosenClass)
         {
-            var playerData = Data.GetPlayerData(connection);
+            var playerData = GetPlayerData(connection);
             if (playerData.GameClass == GameClass.None)
             {
                 playerData.GameClass = chosenClass;
@@ -130,19 +135,19 @@ namespace Networking
                 respawnTimer.Start();
             }
 
-            NetworkServer.SendToReady(new ScoreboardResponse(Data.GetScoreData()));
+            NetworkServer.SendToReady(new ScoreboardResponse(GetScoreData()));
         }
 
         public void DeletePlayer(NetworkConnectionToClient connection)
         {
-            Data.DeletePlayer(connection);
-            NetworkServer.SendToReady(new ScoreboardResponse(Data.GetScoreData()));
+            _dataByConnection.Remove(connection);
+            NetworkServer.SendToReady(new ScoreboardResponse(GetScoreData()));
             NetworkServer.DestroyPlayerForConnection(connection);
         }
 
         public void Damage(NetworkConnectionToClient source, NetworkConnectionToClient receiver, int totalDamage)
         {
-            var result = Data.TryGetPlayerData(receiver, out var playerData);
+            var result = TryGetPlayerData(receiver, out var playerData);
             if (!result || !playerData.IsAlive) return;
             playerData.Health -= totalDamage;
             if (playerData.Health <= 0)
@@ -158,7 +163,7 @@ namespace Networking
 
         public void Heal(NetworkConnectionToClient receiver, int totalHeal)
         {
-            var result = Data.TryGetPlayerData(receiver, out var playerData);
+            var result = TryGetPlayerData(receiver, out var playerData);
             if (!result || !playerData.IsAlive) return;
             playerData.Health += totalHeal;
             if (playerData.Health >= playerData.Characteristic.maxHealth)
@@ -222,9 +227,13 @@ namespace Networking
                                     Constants.worldOffset;
             var tombstone = _entityFactory.CreateTombstone(tombstonePosition);
             NetworkServer.Spawn(tombstone);
-            _entityPositionValidator.AddEntity(tombstone.GetComponent<IPushable>());
-            Data.AddKill(killer, victim);
-            var playerData = Data.GetPlayerData(victim);
+            EntityContainer.AddPushable(tombstone.GetComponent<IPushable>());
+            if (killer is not null && killer != victim)
+            {
+                GetPlayerData(killer).Kills += 1;
+            }
+
+            var playerData = GetPlayerData(victim);
             playerData.PlayerStateMachine.Enter<DeathState>();
             var spectatorPlayer = _playerFactory.CreateSpectatorPlayer(tombstonePosition);
             ReplacePlayer(victim, spectatorPlayer);
@@ -232,7 +241,23 @@ namespace Networking
             var respawnTimer = new RespawnTimer(_networkManager, victim, _serverSettings.SpawnTime,
                 () => RespawnPlayer(victim));
             respawnTimer.Start();
-            NetworkServer.SendToReady(new ScoreboardResponse(Data.GetScoreData()));
+            NetworkServer.SendToReady(new ScoreboardResponse(GetScoreData()));
+        }
+
+        public bool TryGetPlayerData(NetworkConnectionToClient connection, out PlayerData playerData)
+        {
+            if (connection is null)
+            {
+                playerData = null;
+                return false;
+            }
+
+            return _dataByConnection.TryGetValue(connection, out playerData);
+        }
+
+        public PlayerData GetPlayerData(NetworkConnectionToClient connectionToClient)
+        {
+            return _dataByConnection[connectionToClient];
         }
 
         private void SendMap(NetworkConnectionToClient connection)
@@ -247,15 +272,15 @@ namespace Networking
 
         private void SendDataFromOtherPlayers(NetworkConnectionToClient connection)
         {
-            var playerData = Data.GetPlayerData(connection);
-            foreach (var anotherClient in Data.ClientConnections)
+            var playerData = GetPlayerData(connection);
+            foreach (var anotherClient in ClientConnections)
             {
                 if (anotherClient.identity == null)
                 {
                     continue;
                 }
 
-                if (Data.TryGetPlayerData(anotherClient, out var anotherPlayer) && playerData.IsAlive)
+                if (TryGetPlayerData(anotherClient, out var anotherPlayer) && playerData.IsAlive)
                 {
                     connection.Send(new ChangeItemModelResponse(anotherClient.identity,
                         anotherPlayer.SelectedItem.id));
@@ -266,7 +291,7 @@ namespace Networking
 
         private void RespawnPlayer(NetworkConnectionToClient connection)
         {
-            var result = Data.TryGetPlayerData(connection, out var playerData);
+            var result = TryGetPlayerData(connection, out var playerData);
             if (!result)
             {
                 return;
@@ -300,6 +325,18 @@ namespace Networking
             {
                 NetworkServer.Destroy(oldPlayer);
             }
+        }
+
+        private List<ScoreData> GetScoreData()
+        {
+            var scoreData = new SortedSet<ScoreData>();
+            foreach (var playerData in _dataByConnection.Values)
+            {
+                scoreData.Add(new ScoreData(playerData.SteamID, playerData.NickName, playerData.Kills,
+                    playerData.Deaths, playerData.GameClass));
+            }
+
+            return scoreData.ToList();
         }
     }
 }

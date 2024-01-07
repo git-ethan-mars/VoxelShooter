@@ -25,7 +25,7 @@ namespace Networking.ServerServices
 
         public void Shoot(NetworkConnectionToClient connection, Ray ray)
         {
-            var playerData = _server.Data.GetPlayerData(connection);
+            var playerData = _server.GetPlayerData(connection);
             var rocketLauncher = (RocketLauncherItem) playerData.SelectedItem;
             var rocketLauncherData = (RocketLauncherItemData) playerData.ItemData[playerData.SelectedSlotIndex];
 
@@ -44,7 +44,7 @@ namespace Networking.ServerServices
 
         public void Reload(NetworkConnectionToClient connection)
         {
-            var playerData = _server.Data.GetPlayerData(connection);
+            var playerData = _server.GetPlayerData(connection);
             var rocketLauncher = (RocketLauncherItem) playerData.SelectedItem;
             var rocketLauncherData = (RocketLauncherItemData) playerData.ItemData[playerData.SelectedSlotIndex];
 
@@ -73,7 +73,7 @@ namespace Networking.ServerServices
             itemData.CarriedRockets -= configure.rechargeableRocketsCount;
             itemData.ChargedRockets += configure.rechargeableRocketsCount;
 
-            var playerData = _server.Data.GetPlayerData(connection);
+            var playerData = _server.GetPlayerData(connection);
             connection.Send(new RocketReloadResponse(playerData.SelectedSlotIndex, itemData.ChargedRockets,
                 itemData.CarriedRockets));
         }

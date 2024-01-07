@@ -66,6 +66,7 @@ namespace Networking
         }
 
         public VerticalMapProjector MapProjector { get; set; }
+        public ClientPrefabRegistrar PrefabRegistrar { get; }
         public string MapName { get; set; }
         public HashSet<LootBox> LootBoxes { get; set; } = new();
 
@@ -88,7 +89,6 @@ namespace Networking
         private readonly StartContinuousSoundHandler _startContinuousSoundHandler;
         private readonly StopContinuousSoundHandler _stopContinuousSoundHandler;
         private readonly SurroundingSoundHandler _surroundingSoundHandler;
-        private readonly ClientPrefabRegistrar _clientPrefabRegistrar;
         private MapProvider _mapProvider;
 
 
@@ -118,7 +118,7 @@ namespace Networking
             _stopContinuousSoundHandler = new StopContinuousSoundHandler();
             _surroundingSoundHandler =
                 new SurroundingSoundHandler(networkManager, audioPool);
-            _clientPrefabRegistrar = new ClientPrefabRegistrar(this, networkManager.Assets, networkManager.GameFactory,
+            PrefabRegistrar = new ClientPrefabRegistrar(networkManager.Assets, networkManager.GameFactory,
                 networkManager.PlayerFactory, networkManager.EntityFactory);
         }
 
@@ -127,7 +127,7 @@ namespace Networking
             MapDownloaded += OnMapDownloaded;
             _storageService.DataSaved += OnDataSaved;
             RegisterHandlers();
-            _clientPrefabRegistrar.RegisterPrefabs();
+            PrefabRegistrar.RegisterPrefabs();
         }
 
 
@@ -136,7 +136,7 @@ namespace Networking
             MapDownloaded -= OnMapDownloaded;
             _storageService.DataSaved -= OnDataSaved;
             UnregisterHandlers();
-            _clientPrefabRegistrar.UnregisterPrefabs();
+            PrefabRegistrar.UnregisterPrefabs();
             GameFinished?.Invoke();
         }
 
