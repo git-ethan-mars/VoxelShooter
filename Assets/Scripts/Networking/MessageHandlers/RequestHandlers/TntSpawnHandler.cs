@@ -2,10 +2,12 @@
 using Entities;
 using Infrastructure;
 using Infrastructure.Factory;
+using Inventory.Tnt;
 using Mirror;
 using Networking.Messages.Requests;
 using Networking.Messages.Responses;
 using Networking.ServerServices;
+using UnityEngine;
 
 namespace Networking.MessageHandlers.RequestHandlers
 {
@@ -26,8 +28,8 @@ namespace Networking.MessageHandlers.RequestHandlers
 
         protected override void OnRequestReceived(NetworkConnectionToClient connection, TntSpawnRequest request)
         {
-            var result = _server.Data.TryGetPlayerData(connection, out var playerData);
-            if (!result || !playerData.IsAlive || playerData.SelectedItem is not TntItem tntItem)
+            var playerFound = _server.TryGetPlayerData(connection, out var playerData);
+            if (!playerFound || !playerData.IsAlive || playerData.SelectedItem is not TntItem tntItem)
             {
                 return;
             }
@@ -40,9 +42,21 @@ namespace Networking.MessageHandlers.RequestHandlers
 
             tntData.Amount -= 1;
             connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex, tntData.Amount));
-            var tnt = _entityFactory.CreateTnt(request.Position, request.Rotation, _server, connection, tntItem,
+            var raycastResult = Physics.Raycast(request.Ray, out var raycastHit,
+                playerData.Characteristic.placeDistance, Constants.buildMask);
+            if (!raycastResult)
+            {
+                return;
+            }
+
+            var tntPosition = Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2) +
+                              TntPlaceHelper.GetTntOffsetPosition(raycastHit.normal);
+            var tntRotation = TntPlaceHelper.GetTntRotation(raycastHit.normal);
+            var linkedPosition = Vector3Int.FloorToInt(raycastHit.point - raycastHit.normal / 2);
+            var tnt = _entityFactory.CreateTnt(tntPosition, tntRotation, linkedPosition, _server, connection, tntItem,
                 _audioService);
             NetworkServer.Spawn(tnt.gameObject);
+            _server.EntityContainer.AddExplosive(tnt);
             _coroutineRunner.StartCoroutine(Utils.DoActionAfterDelay(() => Explode(tnt), tntItem.delayInSeconds));
         }
 

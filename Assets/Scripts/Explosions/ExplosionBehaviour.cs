@@ -28,12 +28,21 @@ namespace Explosions
             _explosionCenter = explosionCenter;
             _blockDestructionBehaviour.DamageBlocks(Vector3Int.FloorToInt(explosionCenter), _damage);
 
-            foreach (var connection in _server.Data.ClientConnections)
+            foreach (var connection in _server.ClientConnections)
             {
-                if (_server.Data.TryGetPlayerData(connection, out var playerData) && playerData.IsAlive &&
+                if (_server.TryGetPlayerData(connection, out var playerData) && playerData.IsAlive &&
                     IsExplodingPosition(connection.identity.transform.position))
                 {
                     _server.Damage(_owner, connection, CalculateLinearDamage(connection.identity.transform.position));
+                }
+            }
+
+            var explosives = _server.EntityContainer.Explosives;
+            for (var i = 0; i < explosives.Count; i++)
+            {
+                if (IsExplodingPosition(explosives[i].Position))
+                {
+                    explosives[i].Explode();
                 }
             }
         }

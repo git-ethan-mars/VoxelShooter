@@ -10,7 +10,7 @@ namespace Infrastructure.Factory
 {
     public interface IEntityFactory : IService
     {
-        Tnt CreateTnt(Vector3 position, Quaternion rotation, IServer server,
+        Tnt CreateTnt(Vector3 position, Quaternion rotation, Vector3Int linkedPosition, IServer server,
             NetworkConnectionToClient owner, TntItem tntItem,
             AudioService audioService);
 

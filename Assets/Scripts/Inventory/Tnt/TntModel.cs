@@ -4,7 +4,6 @@ using Data;
 using Mirror;
 using Networking.Messages.Requests;
 using PlayerLogic;
-using UnityEngine;
 
 namespace Inventory.Tnt
 {
@@ -35,12 +34,13 @@ namespace Inventory.Tnt
 
         public void PlaceTnt()
         {
-            var raycastResult = _rayCaster.GetRayCastHit(out var raycastHit, _placeDistance, Constants.buildMask);
-            if (!raycastResult) return;
-            NetworkClient.Send(new TntSpawnRequest(Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2) +
-                                                   TntPlaceHelper.GetTntOffsetPosition(raycastHit.normal),
-                TntPlaceHelper.GetTntRotation(raycastHit.normal),
-                Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2)));
+            var raycastResult = _rayCaster.GetRayCastHit(out _, _placeDistance, Constants.buildMask);
+            if (!raycastResult)
+            {
+                return;
+            }
+
+            NetworkClient.Send(new TntSpawnRequest(_rayCaster.CentredRay));
         }
     }
 }

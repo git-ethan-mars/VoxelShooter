@@ -19,12 +19,12 @@ namespace Infrastructure.Factory
             _particleFactory = particleFactory;
         }
 
-        public Tnt CreateTnt(Vector3 position, Quaternion rotation, IServer server,
+        public Tnt CreateTnt(Vector3 position, Quaternion rotation, Vector3Int linkedPosition, IServer server,
             NetworkConnectionToClient owner, TntItem tntItem,
             AudioService audioService)
         {
             var tnt = _assets.Instantiate(EntityPath.TntPath, position, rotation).GetComponent<Tnt>();
-            tnt.Construct(server, owner, _particleFactory, audioService, tntItem);
+            tnt.Construct(server, owner, _particleFactory, audioService, tntItem, linkedPosition);
             return tnt;
         }
 
