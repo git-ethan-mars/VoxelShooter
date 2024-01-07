@@ -28,7 +28,7 @@ namespace Networking.MessageHandlers.RequestHandlers
 
         protected override void OnRequestReceived(NetworkConnectionToClient connection, GrenadeSpawnRequest request)
         {
-            var result = _server.Data.TryGetPlayerData(connection, out var playerData);
+            var result = _server.TryGetPlayerData(connection, out var playerData);
             if (!result || !playerData.IsAlive || playerData.SelectedItem is not GrenadeItem grenadeItem)
             {
                 return;
@@ -41,7 +41,7 @@ namespace Networking.MessageHandlers.RequestHandlers
             }
 
             grenadeData.Amount -= 1;
-            connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex, grenadeData.Amount - 1));
+            connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex, grenadeData.Amount));
             var force = request.Ray.direction * request.ThrowForce;
             var grenade = _entityFactory.CreateGrenade(request.Ray.origin, force, _server, connection, grenadeItem,
                 _audioService);
