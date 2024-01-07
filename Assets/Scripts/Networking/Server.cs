@@ -117,6 +117,7 @@ namespace Networking
                     playerData.Health));
                 SendDataFromOtherPlayers(connection);
                 NetworkServer.SendToReady(new NickNameResponse(connection.identity, playerData.NickName));
+                NetworkServer.SendToReady(new ScoreboardResponse(GetScoreData()));
             }
             else
             {
@@ -126,15 +127,24 @@ namespace Networking
                     return;
                 }
 
-                playerData.PlayerStateMachine.Enter<DeathState>();
-                var spectator = _playerFactory.CreateSpectatorPlayer(connection.identity.transform.position);
-                ReplacePlayer(connection, spectator);
-                connection.Send(new SpectatorConfigureResponse());
-                var respawnTimer = new RespawnTimer(_networkManager, connection, _serverSettings.SpawnTime,
-                    () => RespawnPlayer(connection));
-                respawnTimer.Start();
+                Kill(connection);
             }
+        }
 
+        private void Kill(NetworkConnectionToClient connection)
+        {
+            var tombstonePosition =
+                Vector3Int.FloorToInt(connection.identity.transform.position) + Constants.worldOffset;
+            var tombstone = _entityFactory.CreateTombstone(tombstonePosition, this, connection);
+            EntityContainer.AddPushable(tombstone.GetComponent<IPushable>());
+            var playerData = GetPlayerData(connection);
+            playerData.PlayerStateMachine.Enter<DeathState>();
+            var spectator = _playerFactory.CreateSpectatorPlayer(tombstonePosition);
+            ReplacePlayer(connection, spectator);
+            var respawnTimer = new RespawnTimer(_networkManager, connection, _serverSettings.SpawnTime,
+                () => RespawnPlayer(connection));
+            respawnTimer.Start();
+            connection.Send(new SpectatorConfigureResponse());
             NetworkServer.SendToReady(new ScoreboardResponse(GetScoreData()));
         }
 
@@ -154,6 +164,7 @@ namespace Networking
             {
                 playerData.Health = 0;
                 AddKill(source, receiver);
+                Kill(receiver);
             }
             else
             {
@@ -223,25 +234,10 @@ namespace Networking
 
         private void AddKill(NetworkConnectionToClient killer, NetworkConnectionToClient victim)
         {
-            var tombstonePosition = Vector3Int.FloorToInt(victim.identity.transform.position) +
-                                    Constants.worldOffset;
-            var tombstone = _entityFactory.CreateTombstone(tombstonePosition);
-            NetworkServer.Spawn(tombstone);
-            EntityContainer.AddPushable(tombstone.GetComponent<IPushable>());
             if (killer is not null && killer != victim)
             {
                 GetPlayerData(killer).Kills += 1;
             }
-
-            var playerData = GetPlayerData(victim);
-            playerData.PlayerStateMachine.Enter<DeathState>();
-            var spectatorPlayer = _playerFactory.CreateSpectatorPlayer(tombstonePosition);
-            ReplacePlayer(victim, spectatorPlayer);
-            victim.Send(new SpectatorConfigureResponse());
-            var respawnTimer = new RespawnTimer(_networkManager, victim, _serverSettings.SpawnTime,
-                () => RespawnPlayer(victim));
-            respawnTimer.Start();
-            NetworkServer.SendToReady(new ScoreboardResponse(GetScoreData()));
         }
 
         public bool TryGetPlayerData(NetworkConnectionToClient connection, out PlayerData playerData)
