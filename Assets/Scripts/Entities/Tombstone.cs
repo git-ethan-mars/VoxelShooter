@@ -57,6 +57,7 @@ namespace Entities
             var explosionBehaviour = new ExplosionBehaviour(_server, connectionToClient, radius, damage);
             explosionBehaviour.Explode(transform.position);
             _particleFactory.CreateRchParticle(transform.position, particleSpeed, particleCount);
+            _server.EntityContainer.RemovePushable(this);
             NetworkServer.Destroy(gameObject);
         }
 
@@ -64,12 +65,6 @@ namespace Entities
         {
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireCube(transform.position, Size);
-        }
-
-        [Server]
-        private void OnDestroy()
-        {
-            _server.EntityContainer.RemovePushable(this);
         }
     }
 }

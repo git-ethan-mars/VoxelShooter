@@ -20,7 +20,7 @@ namespace Entities
         private Vector3Int _linkedPosition;
 
 
-        public void Construct(IServer server, NetworkConnectionToClient owner,
+        public void Construct(IServer server,
             IParticleFactory particleFactory, AudioService audioService, TntItem tntItem, Vector3Int linkedPosition)
         {
             _server = server;
@@ -29,7 +29,8 @@ namespace Entities
             _particleFactory = particleFactory;
             _audioService = audioService;
             _linkedPosition = linkedPosition;
-            _explosionBehaviour = new ExplosionBehaviour(server, owner, tntItem.radius, tntItem.damage);
+            _explosionBehaviour = new ExplosionBehaviour(server, connectionToClient, tntItem.radius, tntItem.damage);
+            _audioService.SendAudio(tntItem.countdownSound, transform.position);
         }
 
         public void Explode()
@@ -54,14 +55,6 @@ namespace Entities
             if (!_server.MapProvider.GetBlockByGlobalPosition(_linkedPosition).IsSolid() && !_isExploded)
             {
                 Explode();
-            }
-        }
-
-        private void OnDestroy()
-        {
-            if (isServer)
-            {
-                _server.MapUpdater.MapUpdated -= OnMapUpdated;
             }
         }
     }
