@@ -34,10 +34,10 @@ namespace Networking.ServerServices
                 return;
             }
 
-            var rocket = _entityFactory.CreateRocket(ray.origin + ray.direction * 3,
-                Quaternion.LookRotation(ray.direction), _server, connection,
-                rocketLauncher, _audioService);
-            NetworkServer.Spawn(rocket);
+            var rocketPosition = ray.origin + ray.direction * 3;
+            var rocketRotation = Quaternion.LookRotation(ray.direction);
+            _entityFactory.CreateRocket(rocketPosition, rocketRotation, rocketLauncher, _server, connection,
+                _audioService);
             rocketLauncherData.ChargedRockets -= 1;
             connection.Send(new RocketSpawnResponse(playerData.SelectedSlotIndex, rocketLauncherData.ChargedRockets));
         }

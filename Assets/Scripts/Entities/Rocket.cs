@@ -10,21 +10,18 @@ namespace Entities
 {
     public class Rocket : NetworkBehaviour
     {
-        private NetworkConnectionToClient _owner;
         private bool _isExploded;
         private AudioService _audioService;
         private RocketLauncherItem _rocketData;
         private IParticleFactory _particleFactory;
         private ExplosionBehaviour _explosionBehaviour;
 
-        public void Construct(IServer server, RocketLauncherItem rocketData,
-            NetworkConnectionToClient owner, IParticleFactory particleFactory, AudioService audioService)
+        public void Construct(IServer server, RocketLauncherItem rocketData, IParticleFactory particleFactory, AudioService audioService)
         {
-            _owner = owner;
             _rocketData = rocketData;
             _particleFactory = particleFactory;
             _audioService = audioService;
-            _explosionBehaviour = new ExplosionBehaviour(server, owner, rocketData.radius, rocketData.damage);
+            _explosionBehaviour = new ExplosionBehaviour(server, connectionToClient, rocketData.radius, rocketData.damage);
         }
 
         public void Explode()
@@ -44,7 +41,7 @@ namespace Entities
                 return;
             }
 
-            if (collision.gameObject.GetComponentInParent<NetworkIdentity>()?.connectionToClient == _owner)
+            if (collision.gameObject.GetComponentInParent<NetworkIdentity>()?.connectionToClient == connectionToClient)
             {
                 return;
             }

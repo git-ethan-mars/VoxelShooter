@@ -43,9 +43,8 @@ namespace Networking.MessageHandlers.RequestHandlers
             grenadeData.Amount -= 1;
             connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex, grenadeData.Amount));
             var force = request.Ray.direction * request.ThrowForce;
-            var grenade = _entityFactory.CreateGrenade(request.Ray.origin, force, _server, connection, grenadeItem,
-                _audioService);
-            NetworkServer.Spawn(grenade.gameObject);
+            var grenade = _entityFactory.CreateGrenade(request.Ray.origin, force, grenadeItem,
+                _server, connection, _audioService);
             _coroutineRunner.StartCoroutine(Utils.DoActionAfterDelay(() => Explode(grenade),
                 grenadeItem.delayInSeconds));
         }

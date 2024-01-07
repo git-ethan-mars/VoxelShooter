@@ -14,13 +14,13 @@ namespace Entities
         private GrenadeItem _grenadeItem;
         private ExplosionBehaviour _explosionBehaviour;
 
-        public void Construct(IServer server, NetworkConnectionToClient owner,
+        public void Construct(IServer server,
             IParticleFactory particleFactory, AudioService audioService, GrenadeItem grenadeItem)
         {
             _particleFactory = particleFactory;
             _audioService = audioService;
             _grenadeItem = grenadeItem;
-            _explosionBehaviour = new ExplosionBehaviour(server, owner, grenadeItem.radius, grenadeItem.damage);
+            _explosionBehaviour = new ExplosionBehaviour(server, connectionToClient, grenadeItem.radius, grenadeItem.damage);
         }
 
         public void Explode()

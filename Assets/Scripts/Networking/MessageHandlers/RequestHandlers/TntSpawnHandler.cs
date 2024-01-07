@@ -53,9 +53,8 @@ namespace Networking.MessageHandlers.RequestHandlers
                               TntPlaceHelper.GetTntOffsetPosition(raycastHit.normal);
             var tntRotation = TntPlaceHelper.GetTntRotation(raycastHit.normal);
             var linkedPosition = Vector3Int.FloorToInt(raycastHit.point - raycastHit.normal / 2);
-            var tnt = _entityFactory.CreateTnt(tntPosition, tntRotation, linkedPosition, _server, connection, tntItem,
-                _audioService);
-            NetworkServer.Spawn(tnt.gameObject);
+            var tnt = _entityFactory.CreateTnt(tntPosition, tntRotation, tntItem,
+                _server, connection, _audioService, linkedPosition);
             _server.EntityContainer.AddExplosive(tnt);
             _coroutineRunner.StartCoroutine(Utils.DoActionAfterDelay(() => Explode(tnt), tntItem.delayInSeconds));
         }

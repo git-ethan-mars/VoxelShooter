@@ -19,40 +19,43 @@ namespace Infrastructure.Factory
             _particleFactory = particleFactory;
         }
 
-        public Tnt CreateTnt(Vector3 position, Quaternion rotation, Vector3Int linkedPosition, IServer server,
-            NetworkConnectionToClient owner, TntItem tntItem,
-            AudioService audioService)
+        public Tnt CreateTnt(Vector3 position, Quaternion rotation, TntItem tntItem,
+            IServer server,
+            NetworkConnectionToClient owner,
+            AudioService audioService, Vector3Int linkedPosition)
         {
             var tnt = _assets.Instantiate(EntityPath.TntPath, position, rotation).GetComponent<Tnt>();
-            tnt.Construct(server, owner, _particleFactory, audioService, tntItem, linkedPosition);
+            NetworkServer.Spawn(tnt.gameObject, owner);
+            tnt.Construct(server, _particleFactory, audioService, tntItem, linkedPosition);
             return tnt;
         }
 
-        public Grenade CreateGrenade(Vector3 position, Vector3 force, IServer server,
-            NetworkConnectionToClient owner, GrenadeItem grenadeItem,
-            AudioService audioService)
+        public Grenade CreateGrenade(Vector3 position, Vector3 force, GrenadeItem grenadeItem, IServer server,
+            NetworkConnectionToClient owner, AudioService audioService)
         {
             var grenade = _assets.Instantiate(EntityPath.GrenadePath, position, Quaternion.identity)
                 .GetComponent<Grenade>();
-            grenade.Construct(server, owner, _particleFactory, audioService, grenadeItem);
             grenade.GetComponent<Rigidbody>().AddForce(force);
+            NetworkServer.Spawn(grenade.gameObject, owner);
+            grenade.Construct(server, _particleFactory, audioService, grenadeItem);
             return grenade;
         }
 
-        public GameObject CreateTombstone(Vector3 position)
+        public GameObject CreateTombstone(Vector3 position, IServer server, NetworkConnectionToClient owner)
         {
             var tombstone = _assets.Instantiate(EntityPath.TombstonePath, position, Quaternion.identity);
+            NetworkServer.Spawn(tombstone, owner);
+            tombstone.GetComponent<Tombstone>().Construct(server, _particleFactory);
             return tombstone;
         }
 
-        public GameObject CreateRocket(Vector3 position, Quaternion rotation, IServer server,
-            NetworkConnectionToClient owner, RocketLauncherItem rocketData,
-            AudioService audioService)
+        public void CreateRocket(Vector3 position, Quaternion rotation, RocketLauncherItem rocketLauncher,
+            IServer server, NetworkConnectionToClient owner, AudioService audioService)
         {
-            var rocket = _assets.Instantiate(EntityPath.RocketPath, position, rotation);
-            rocket.GetComponent<Rocket>().Construct(server, rocketData, owner, _particleFactory, audioService);
-            rocket.GetComponent<Rigidbody>().velocity = rocket.transform.forward * rocketData.speed;
-            return rocket;
+            var rocket = _assets.Instantiate(EntityPath.RocketPath, position, rotation).GetComponent<Rocket>();
+            rocket.GetComponent<Rigidbody>().velocity = rocket.transform.forward * rocketLauncher.speed;
+            NetworkServer.Spawn(rocket.gameObject, owner);
+            rocket.Construct(server, rocketLauncher, _particleFactory, audioService);
         }
 
         public LootBox CreateAmmoBox(Vector3 position, Transform parent)
