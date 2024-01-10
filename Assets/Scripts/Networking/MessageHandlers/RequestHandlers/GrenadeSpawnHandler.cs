@@ -1,6 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Data;
+﻿using Data;
+using Entities;
 using Explosions;
 using Infrastructure;
 using Infrastructure.Factory;
@@ -8,7 +7,6 @@ using Mirror;
 using Networking.Messages.Requests;
 using Networking.Messages.Responses;
 using Networking.ServerServices;
-using UnityEngine;
 
 namespace Networking.MessageHandlers.RequestHandlers
 {
@@ -20,19 +18,17 @@ namespace Networking.MessageHandlers.RequestHandlers
         private readonly AudioService _audioService;
         private readonly ICoroutineRunner _coroutineRunner;
 
-        public GrenadeSpawnHandler(IServer server, CustomNetworkManager networkManager,
-            ExplosionBehaviour explosionBehaviour, AudioService audioService)
+        public GrenadeSpawnHandler(IServer server, CustomNetworkManager networkManager, AudioService audioService)
         {
             _server = server;
             _entityFactory = networkManager.EntityFactory;
-            _explosionBehaviour = explosionBehaviour;
             _audioService = audioService;
             _coroutineRunner = networkManager;
         }
 
         protected override void OnRequestReceived(NetworkConnectionToClient connection, GrenadeSpawnRequest request)
         {
-            var result = _server.Data.TryGetPlayerData(connection, out var playerData);
+            var result = _server.TryGetPlayerData(connection, out var playerData);
             if (!result || !playerData.IsAlive || playerData.SelectedItem is not GrenadeItem grenadeItem)
             {
                 return;
@@ -45,26 +41,20 @@ namespace Networking.MessageHandlers.RequestHandlers
             }
 
             grenadeData.Amount -= 1;
-            connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex, grenadeData.Amount - 1));
-            var grenade = _entityFactory.CreateGrenade(request.Ray.origin, Quaternion.identity,
-                request.Ray.direction * request.ThrowForce);
-            NetworkServer.Spawn(grenade);
-            _coroutineRunner.StartCoroutine(ExplodeGrenade(grenade, grenadeItem, connection));
+            connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex, grenadeData.Amount));
+            var force = request.Ray.direction * request.ThrowForce;
+            var grenade = _entityFactory.CreateGrenade(request.Ray.origin, force, grenadeItem,
+                _server, connection, _audioService);
+            _coroutineRunner.StartCoroutine(Utils.DoActionAfterDelay(() => Explode(grenade),
+                grenadeItem.delayInSeconds));
         }
 
-        private IEnumerator ExplodeGrenade(GameObject grenade, GrenadeItem configure,
-            NetworkConnectionToClient connection)
+        private void Explode(Grenade grenade)
         {
-            yield return new WaitForSeconds(configure.delayInSeconds);
-            if (!grenade) yield break;
-            var position = grenade.transform.position;
-            var grenadePosition = new Vector3Int((int) position.x,
-                (int) position.y, (int) position.z);
-
-            var explodedGrenades = new List<GameObject>();
-            _explosionBehaviour.Explode(grenadePosition, grenade, configure.radius, connection, configure.damage,
-                configure.particlesSpeed, configure.particlesCount, explodedGrenades, grenade.tag);
-            _audioService.SendAudio(configure.explosionSound, position);
+            if (grenade != null)
+            {
+                grenade.Explode();
+            }
         }
     }
 }

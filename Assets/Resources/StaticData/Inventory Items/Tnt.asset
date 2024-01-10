@@ -18,9 +18,10 @@ MonoBehaviour:
   prefab: {fileID: 8009858165730397543, guid: c2a01d48d01d91447b0e60f5a94e9e66, type: 3}
   countIcon: {fileID: 2038079468, guid: e7634cc0bf7762649a525e59875cd9d1, type: 3}
   count: 6
-  delayInSeconds: 3
+  delayInSeconds: 4
   radius: 5
   damage: 250
   particlesSpeed: 6
   particlesCount: 200
-  explosionSound: {fileID: 11400000, guid: 9eebc9c80e42edd4f94203f43574c8b4, type: 2}
+  explosionSound: {fileID: 11400000, guid: 48b740d2cb9a89246be31497ecbb7e40, type: 2}
+  countdownSound: {fileID: 11400000, guid: fb23717e0747a1d47a23bd82c4ddd847, type: 2}

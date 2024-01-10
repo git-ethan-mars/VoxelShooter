@@ -14,7 +14,7 @@ namespace Networking.MessageHandlers.RequestHandlers
 
         protected override void OnRequestReceived(NetworkConnectionToClient connection, ChangeClassRequest request)
         {
-            var result = _server.Data.TryGetPlayerData(connection, out var playerData);
+            var result = _server.TryGetPlayerData(connection, out var playerData);
             if (!result)
             {
                 return;

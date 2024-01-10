@@ -1,52 +1,60 @@
-using System;
-using System.Collections.Generic;
-using Infrastructure.Factory;
 using Mirror;
 using Networking;
 using UnityEngine;
 
 namespace Explosions
 {
-    public abstract class ExplosionBehaviour
+    public class ExplosionBehaviour
     {
         private readonly IServer _server;
-        private readonly IDamageArea _damageArea;
-        private readonly IParticleFactory _particleFactory;
+        private readonly NetworkConnectionToClient _owner;
+        private readonly int _radius;
+        private readonly int _damage;
+        private readonly BlockDestructionBehaviour _blockDestructionBehaviour;
+        private Vector3 _explosionCenter;
 
-        public abstract void Explode(Vector3Int explosionCenter, GameObject explosive, int radius,
-            NetworkConnectionToClient connection, int damage, int particlesSpeed,
-            int particlesCount, List<GameObject> exploded, string explosiveTag);
-
-        protected ExplosionBehaviour(IServer server, IParticleFactory particleFactory,
-            IDamageArea damageArea)
+        public ExplosionBehaviour(IServer server, NetworkConnectionToClient owner, int radius, int damage)
         {
             _server = server;
-            _damageArea = damageArea;
-            _particleFactory = particleFactory;
+            _owner = owner;
+            _radius = radius;
+            _damage = damage;
+            _blockDestructionBehaviour =
+                new BlockDestructionBehaviour(server, new SphereBlockArea(server.MapProvider, radius));
         }
 
-        protected void DamagePlayer(GameObject damagedPlayer, Vector3 explosionCenter, int radius, int damage,
-            NetworkConnectionToClient source)
+        public void Explode(Vector3 explosionCenter)
         {
-            var playerPosition = damagedPlayer.transform.position;
-            var distance = Math.Sqrt(
-                (explosionCenter.x - playerPosition.x) * (explosionCenter.x - playerPosition.x) +
-                (explosionCenter.y - playerPosition.y) * (explosionCenter.y - playerPosition.y) +
-                (explosionCenter.z - playerPosition.z) * (explosionCenter.z - playerPosition.z));
-            if (distance >= radius)
-                distance = radius;
-            var currentDamage = (int) (damage - damage * (distance / radius));
-            var receiver = damagedPlayer.GetComponentInParent<NetworkIdentity>().connectionToClient;
-            _server.Damage(source, receiver, currentDamage);
+            _explosionCenter = explosionCenter;
+            _blockDestructionBehaviour.DamageBlocks(Vector3Int.FloorToInt(explosionCenter), _damage);
+
+            foreach (var connection in _server.ClientConnections)
+            {
+                if (_server.TryGetPlayerData(connection, out var playerData) && playerData.IsAlive &&
+                    IsExplodingPosition(connection.identity.transform.position))
+                {
+                    _server.Damage(_owner, connection, CalculateLinearDamage(connection.identity.transform.position));
+                }
+            }
+
+            var explosives = _server.EntityContainer.Explosives;
+            for (var i = 0; i < explosives.Count; i++)
+            {
+                if (IsExplodingPosition(explosives[i].Position))
+                {
+                    explosives[i].Explode();
+                }
+            }
         }
 
-        protected void DestroyExplosiveWithBlocks(Vector3Int explosionCenter, GameObject explosive, int radius,
-            int particlesSpeed, int particlesCount, int damage)
+        private bool IsExplodingPosition(Vector3 entityPosition)
         {
-            var rchParticle = _particleFactory.CreateRchParticle(explosionCenter, particlesSpeed, particlesCount);
-            NetworkServer.Spawn(rchParticle);
-            NetworkServer.Destroy(explosive);
-            _server.BlockHealthSystem.DamageBlock(explosionCenter, radius, damage, _damageArea);
+            return Vector3.Distance(entityPosition, _explosionCenter) <= _radius;
+        }
+
+        private int CalculateLinearDamage(Vector3 entityPosition)
+        {
+            return (int) ((1 - Vector3.Distance(entityPosition, _explosionCenter) / _radius) * _damage);
         }
     }
 }

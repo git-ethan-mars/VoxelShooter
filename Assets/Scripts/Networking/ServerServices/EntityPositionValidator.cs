@@ -6,33 +6,20 @@ namespace Networking.ServerServices
 {
     public class EntityPositionValidator
     {
-        private readonly List<IPushable> _pushableEntities;
-
         private readonly MapProvider _mapProvider;
-
         private readonly MapUpdater _mapUpdater;
+        private readonly IEnumerable<IPushable> _pushableEntities;
 
-        public EntityPositionValidator(MapUpdater mapUpdater,
-            MapProvider mapProvider)
+        public EntityPositionValidator(IServer server)
         {
-            _pushableEntities = new List<IPushable>();
-            _mapProvider = mapProvider;
-            _mapUpdater = mapUpdater;
+            _pushableEntities = server.EntityContainer.PushableObjects;
+            _mapProvider = server.MapProvider;
+            _mapUpdater = server.MapUpdater;
         }
 
         public void Start()
         {
             _mapUpdater.MapUpdated += OnMapUpdate;
-        }
-
-        public void AddEntity(IPushable entity)
-        {
-            _pushableEntities.Add(entity);
-        }
-
-        public void RemoveEntity(IPushable entity)
-        {
-            _pushableEntities.Remove(entity);
         }
 
         public void Stop()
@@ -42,11 +29,11 @@ namespace Networking.ServerServices
 
         private void OnMapUpdate()
         {
-            foreach (var spawnPoint in _pushableEntities)
+            foreach (var pushable in _pushableEntities)
             {
-                if (IsFreeSpace(spawnPoint))
+                if (IsFreeSpace(pushable))
                 {
-                    spawnPoint.Fall();
+                    pushable.Fall();
                 }
             }
 

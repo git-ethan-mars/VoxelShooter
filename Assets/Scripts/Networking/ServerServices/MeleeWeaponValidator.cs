@@ -13,22 +13,25 @@ namespace Networking.ServerServices
         private readonly IServer _server;
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly IParticleFactory _particleFactory;
-        private readonly IDamageArea _lineDamageArea;
         private readonly AudioService _audioService;
+        private readonly BlockDestructionBehaviour _weakHitDestructionBehaviour;
+        private readonly BlockDestructionBehaviour _strongHitDestructionBehaviour;
 
-        public MeleeWeaponValidator(IServer server, CustomNetworkManager networkManager,
-            AudioService audioService)
+        public MeleeWeaponValidator(IServer server, CustomNetworkManager networkManager, AudioService audioService)
         {
             _server = server;
             _coroutineRunner = networkManager;
             _particleFactory = networkManager.ParticleFactory;
             _audioService = audioService;
-            _lineDamageArea = new LineDamageArea(_server.MapProvider);
+            var weakHitArea = new SingleBlockArea(server.MapProvider);
+            _weakHitDestructionBehaviour = new BlockDestructionBehaviour(server, weakHitArea);
+            var strongHitArea = new LineBlockArea(server.MapProvider);
+            _strongHitDestructionBehaviour = new BlockDestructionBehaviour(server, strongHitArea);
         }
 
         public void Hit(NetworkConnectionToClient connection, Ray ray, bool isStrongHit)
         {
-            var playerData = _server.Data.GetPlayerData(connection);
+            var playerData = _server.GetPlayerData(connection);
             var meleeWeapon = (MeleeWeaponItem) playerData.SelectedItem;
             var meleeWeaponData = (MeleeWeaponItemData) playerData.SelectedItemData;
 
@@ -36,10 +39,11 @@ namespace Networking.ServerServices
             {
                 return;
             }
-            
+
             var isSurface = ApplyRaycast(connection, ray, meleeWeapon, isStrongHit);
             _coroutineRunner.StartCoroutine(ResetHit(connection, meleeWeapon, meleeWeaponData));
-            _audioService.SendAudio(isSurface ? meleeWeapon.diggingAudio : meleeWeapon.hittingAudio, connection.identity);
+            _audioService.SendAudio(isSurface ? meleeWeapon.diggingAudio : meleeWeapon.hittingAudio,
+                connection.identity);
         }
 
         private IEnumerator ResetHit(NetworkConnectionToClient connection, MeleeWeaponItem configure,
@@ -54,6 +58,7 @@ namespace Networking.ServerServices
                 {
                     break;
                 }
+
                 waitForHitReset = new WaitWithoutSlotChange(_server, connection, configure.timeBetweenHit);
             }
 
@@ -93,11 +98,11 @@ namespace Networking.ServerServices
                 var targetBlock = Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2);
                 if (isStrongHit)
                 {
-                    _server.BlockHealthSystem.DamageBlock(targetBlock, 3, meleeWeapon.damageToBlock, _lineDamageArea);
+                    _strongHitDestructionBehaviour.DamageBlocks(targetBlock, meleeWeapon.damageToBlock);
                 }
                 else
                 {
-                    _server.BlockHealthSystem.DamageBlock(targetBlock, 1, meleeWeapon.damageToBlock, _lineDamageArea);
+                    _weakHitDestructionBehaviour.DamageBlocks(targetBlock, meleeWeapon.damageToBlock);
                 }
 
                 return true;

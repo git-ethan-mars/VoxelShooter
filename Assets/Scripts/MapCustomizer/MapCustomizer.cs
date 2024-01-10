@@ -199,9 +199,9 @@ namespace MapCustomizer
             var staticData = AllServices.Container.Single<IStaticDataService>();
             AllServices.Container.RegisterSingle<IInputService>(new StandaloneInputService());
             AllServices.Container.RegisterSingle<IStorageService>(new JsonToFileStorageService());
-            AllServices.Container.RegisterSingle<IEntityFactory>(
-                new EntityFactory(assets));
             AllServices.Container.RegisterSingle<IParticleFactory>(new ParticleFactory(assets, staticData, this));
+            AllServices.Container.RegisterSingle<IEntityFactory>(
+                new EntityFactory(assets, AllServices.Container.Single<IParticleFactory>()));
             AllServices.Container.RegisterSingle<IMeshFactory>(new MeshFactory(assets));
             AllServices.Container.RegisterSingle<IUIFactory>(new UIFactory(assets, staticData));
             AllServices.Container.RegisterSingle<IGameFactory>(new GameFactory(AllServices.Container));

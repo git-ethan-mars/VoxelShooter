@@ -13,26 +13,22 @@ namespace Networking.ServerServices
 {
     public class BoxDropService
     {
-        public readonly HashSet<LootBox> LootBoxes = new();
         private const string LootBoxContainer = "LootBoxContainer";
 
         private readonly ICoroutineRunner _coroutineRunner;
         private readonly IEntityFactory _entityFactory;
         private readonly IServer _server;
         private readonly int _spawnRate;
-        private readonly EntityPositionValidator _entityPositionValidator;
         private readonly Transform _parent;
         private IEnumerator _coroutine;
         private readonly List<Vector3Int> _lootBoxSpawnPositions;
 
-        public BoxDropService(IServer server, CustomNetworkManager networkManager, ServerSettings serverSettings,
-            EntityPositionValidator entityPositionValidator)
+        public BoxDropService(IServer server, CustomNetworkManager networkManager, ServerSettings serverSettings)
         {
             _coroutineRunner = networkManager;
             _spawnRate = serverSettings.BoxSpawnTime;
             _entityFactory = networkManager.EntityFactory;
             _server = server;
-            _entityPositionValidator = entityPositionValidator;
             _parent = networkManager.GameFactory.CreateGameObjectContainer(LootBoxContainer);
             _lootBoxSpawnPositions = GetLootBoxSpawnPositions();
         }
@@ -92,9 +88,9 @@ namespace Networking.ServerServices
                 }
 
                 lootBox.Construct(_server);
-                LootBoxes.Add(lootBox);
+                _server.EntityContainer.AddLootBox(lootBox);
+                _server.EntityContainer.AddPushable(lootBox);
                 NetworkServer.Spawn(lootBox.gameObject);
-                _entityPositionValidator.AddEntity(lootBox);
                 lootBox.PickedUp += OnPickedUp;
                 yield return new WaitForSeconds(_spawnRate);
             }
@@ -102,8 +98,8 @@ namespace Networking.ServerServices
 
         private void OnPickedUp(LootBox lootBox, NetworkConnectionToClient connection)
         {
-            LootBoxes.Remove(lootBox);
-            _entityPositionValidator.RemoveEntity(lootBox);
+            _server.EntityContainer.RemoveLootBox(lootBox);
+            _server.EntityContainer.RemovePushable(lootBox);
             lootBox.PickedUp -= OnPickedUp;
             NetworkServer.Destroy(lootBox.gameObject);
         }

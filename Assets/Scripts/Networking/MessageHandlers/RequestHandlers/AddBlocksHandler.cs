@@ -18,7 +18,7 @@ namespace Networking.MessageHandlers.RequestHandlers
 
         protected override void OnRequestReceived(NetworkConnectionToClient connection, AddBlocksRequest request)
         {
-            var result = _server.Data.TryGetPlayerData(connection, out var playerData);
+            var result = _server.TryGetPlayerData(connection, out var playerData);
             if (!result || !playerData.IsAlive || playerData.SelectedItem is not BlockItem)
             {
                 return;
@@ -30,9 +30,9 @@ namespace Networking.MessageHandlers.RequestHandlers
             for (var i = 0; i < blocksUsed; i++)
             {
                 var blockPosition = request.Blocks[i].Position;
-                foreach (var otherConnection in _server.Data.ClientConnections)
+                foreach (var otherConnection in _server.ClientConnections)
                 {
-                    result = _server.Data.TryGetPlayerData(otherConnection, out var otherPlayer);
+                    result = _server.TryGetPlayerData(otherConnection, out var otherPlayer);
                     if (!result || !otherPlayer.IsAlive)
                     {
                         continue;
@@ -66,6 +66,7 @@ namespace Networking.MessageHandlers.RequestHandlers
             connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex,
                 blockItemData.Amount));
             _server.BlockHealthSystem.InitializeBlocks(validBlocks);
+            _server.MapUpdater.SetBlocksByGlobalPositions(validBlocks);
         }
     }
 }

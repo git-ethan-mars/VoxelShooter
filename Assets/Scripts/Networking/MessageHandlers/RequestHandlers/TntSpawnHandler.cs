@@ -1,12 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Data;
-using Explosions;
+﻿using Data;
+using Entities;
 using Infrastructure;
 using Infrastructure.Factory;
+using Inventory.Tnt;
 using Mirror;
 using Networking.Messages.Requests;
 using Networking.Messages.Responses;
+using Networking.ServerServices;
 using UnityEngine;
 
 namespace Networking.MessageHandlers.RequestHandlers
@@ -15,22 +15,21 @@ namespace Networking.MessageHandlers.RequestHandlers
     {
         private readonly IServer _server;
         private readonly ICoroutineRunner _coroutineRunner;
+        private readonly AudioService _audioService;
         private readonly IEntityFactory _entityFactory;
-        private readonly ExplosionBehaviour _chainExplosionBehaviour;
 
-        public TntSpawnHandler(IServer server, CustomNetworkManager networkManager,
-            ExplosionBehaviour chainExplosionBehaviour)
+        public TntSpawnHandler(IServer server, CustomNetworkManager networkManager, AudioService audioService)
         {
             _server = server;
             _coroutineRunner = networkManager;
+            _audioService = audioService;
             _entityFactory = networkManager.EntityFactory;
-            _chainExplosionBehaviour = chainExplosionBehaviour;
         }
 
         protected override void OnRequestReceived(NetworkConnectionToClient connection, TntSpawnRequest request)
         {
-            var result = _server.Data.TryGetPlayerData(connection, out var playerData);
-            if (!result || !playerData.IsAlive || playerData.SelectedItem is not TntItem tntItem)
+            var playerFound = _server.TryGetPlayerData(connection, out var playerData);
+            if (!playerFound || !playerData.IsAlive || playerData.SelectedItem is not TntItem tntItem)
             {
                 return;
             }
@@ -43,22 +42,29 @@ namespace Networking.MessageHandlers.RequestHandlers
 
             tntData.Amount -= 1;
             connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex, tntData.Amount));
-            var tnt = _entityFactory.CreateTnt(request.Position, request.Rotation);
-            NetworkServer.Spawn(tnt);
-            _coroutineRunner.StartCoroutine(ExplodeTnt(Vector3Int.FloorToInt(request.ExplosionCenter), tnt,
-                tntItem.delayInSeconds,
-                tntItem.radius, connection, tntItem.damage, tntItem.particlesSpeed, tntItem.particlesCount));
+            var raycastResult = Physics.Raycast(request.Ray, out var raycastHit,
+                playerData.Characteristic.placeDistance, Constants.buildMask);
+            if (!raycastResult)
+            {
+                return;
+            }
+
+            var tntPosition = Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2) +
+                              TntPlaceHelper.GetTntOffsetPosition(raycastHit.normal);
+            var tntRotation = TntPlaceHelper.GetTntRotation(raycastHit.normal);
+            var linkedPosition = Vector3Int.FloorToInt(raycastHit.point - raycastHit.normal / 2);
+            var tnt = _entityFactory.CreateTnt(tntPosition, tntRotation, tntItem,
+                _server, connection, _audioService, linkedPosition);
+            _server.EntityContainer.AddExplosive(tnt);
+            _coroutineRunner.StartCoroutine(Utils.DoActionAfterDelay(() => Explode(tnt), tntItem.delayInSeconds));
         }
 
-        private IEnumerator ExplodeTnt(Vector3Int explosionCenter, GameObject tnt, float delayInSeconds,
-            int radius, NetworkConnectionToClient connection, int damage, int particlesSpeed, int particlesCount)
+        private void Explode(Tnt tnt)
         {
-            yield return new WaitForSeconds(delayInSeconds);
-            if (!tnt) yield break;
-
-            var explodedTnt = new List<GameObject>();
-            _chainExplosionBehaviour.Explode(explosionCenter, tnt, radius, connection, damage, particlesSpeed,
-                particlesCount, explodedTnt, tnt.tag);
+            if (tnt != null)
+            {
+                tnt.Explode();
+            }
         }
     }
 }

@@ -1,7 +1,5 @@
-using System.Collections.Generic;
 using System.Globalization;
 using Data;
-using Entities;
 using Infrastructure;
 using Infrastructure.AssetManagement;
 using Infrastructure.Factory;
@@ -70,7 +68,7 @@ namespace Networking
             {
                 Client.MapProvider = _server.MapProvider;
                 Client.MapName = _server.MapProvider.MapName;
-                Client.LootBoxes = _server.LootBoxes;
+                Client.PrefabRegistrar.LootBoxes = _server.EntityContainer.LootBoxes;
             }
             else
             {

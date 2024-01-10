@@ -17,7 +17,7 @@ namespace Networking.ServerServices
         {
             get
             {
-                var result = _server.Data.TryGetPlayerData(_connection, out var playerData);
+                var result = _server.TryGetPlayerData(_connection, out var playerData);
                 if (!result || !playerData.IsAlive)
                 {
                     IsAborted = true;
@@ -47,7 +47,7 @@ namespace Networking.ServerServices
             _server = server;
             _connection = connection;
             _waitingTime = waitingTime;
-            _slotIndex = _server.Data.GetPlayerData(connection).SelectedSlotIndex;
+            _slotIndex = _server.GetPlayerData(connection).SelectedSlotIndex;
         }
     }
 }

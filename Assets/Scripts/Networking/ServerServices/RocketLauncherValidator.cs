@@ -12,7 +12,6 @@ namespace Networking.ServerServices
     {
         private readonly IServer _server;
         private readonly ICoroutineRunner _coroutineRunner;
-        private readonly IParticleFactory _particleFactory;
         private readonly AudioService _audioService;
         private readonly IEntityFactory _entityFactory;
 
@@ -20,14 +19,13 @@ namespace Networking.ServerServices
         {
             _server = server;
             _coroutineRunner = networkManager;
-            _particleFactory = networkManager.ParticleFactory;
             _entityFactory = networkManager.EntityFactory;
             _audioService = audioService;
         }
 
         public void Shoot(NetworkConnectionToClient connection, Ray ray)
         {
-            var playerData = _server.Data.GetPlayerData(connection);
+            var playerData = _server.GetPlayerData(connection);
             var rocketLauncher = (RocketLauncherItem) playerData.SelectedItem;
             var rocketLauncherData = (RocketLauncherItemData) playerData.ItemData[playerData.SelectedSlotIndex];
 
@@ -36,17 +34,17 @@ namespace Networking.ServerServices
                 return;
             }
 
-            var rocket = _entityFactory.CreateRocket(ray.origin + ray.direction * 3,
-                Quaternion.LookRotation(ray.direction), _server, _particleFactory, rocketLauncher, connection,
+            var rocketPosition = ray.origin + ray.direction * 3;
+            var rocketRotation = Quaternion.LookRotation(ray.direction);
+            _entityFactory.CreateRocket(rocketPosition, rocketRotation, rocketLauncher, _server, connection,
                 _audioService);
-            NetworkServer.Spawn(rocket);
             rocketLauncherData.ChargedRockets -= 1;
             connection.Send(new RocketSpawnResponse(playerData.SelectedSlotIndex, rocketLauncherData.ChargedRockets));
         }
 
         public void Reload(NetworkConnectionToClient connection)
         {
-            var playerData = _server.Data.GetPlayerData(connection);
+            var playerData = _server.GetPlayerData(connection);
             var rocketLauncher = (RocketLauncherItem) playerData.SelectedItem;
             var rocketLauncherData = (RocketLauncherItemData) playerData.ItemData[playerData.SelectedSlotIndex];
 
@@ -75,7 +73,7 @@ namespace Networking.ServerServices
             itemData.CarriedRockets -= configure.rechargeableRocketsCount;
             itemData.ChargedRockets += configure.rechargeableRocketsCount;
 
-            var playerData = _server.Data.GetPlayerData(connection);
+            var playerData = _server.GetPlayerData(connection);
             connection.Send(new RocketReloadResponse(playerData.SelectedSlotIndex, itemData.ChargedRockets,
                 itemData.CarriedRockets));
         }

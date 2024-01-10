@@ -8,7 +8,7 @@ namespace Entities
     {
         protected override void OnPickUp(NetworkConnectionToClient receiver)
         {
-            var result = Server.Data.TryGetPlayerData(receiver, out var playerData);
+            var result = Server.TryGetPlayerData(receiver, out var playerData);
             if (!result || !playerData.IsAlive) return;
 
             for (var i = 0; i < playerData.Items.Count; i++)
