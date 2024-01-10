@@ -43,9 +43,9 @@ namespace Infrastructure.Factory
             return mainMenu;
         }
 
-        public void CreateLoadingWindow(IClient client)
+        public void CreateLoadingWindow(CustomNetworkManager networkManager)
         {
-            _assets.Instantiate(UIPath.LoadingWindowPath).GetComponent<LoadingWindow>().Construct(client);
+            _assets.Instantiate(UIPath.LoadingWindowPath).GetComponent<LoadingWindow>().Construct(networkManager);
         }
 
         public GameObject CreateMatchMenu(GameStateMachine gameStateMachine, IMapRepository mapRepository)

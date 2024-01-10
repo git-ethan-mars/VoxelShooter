@@ -12,12 +12,22 @@ namespace UI
         private List<Image> bullets;
 
         private float _previousProgress;
+        private CustomNetworkManager _networkManager;
         private IClient _client;
 
-        public void Construct(IClient client)
+        public void Construct(CustomNetworkManager networkManager)
         {
-            _client = client;
-            _client.MapLoadProgressed += UpdateLoadingBar;
+            _networkManager = networkManager;
+        }
+
+        private void Update()
+        {
+            if (_networkManager.Client != null)
+            {
+                _client = _networkManager.Client;
+                _client.MapLoadProgressed += UpdateLoadingBar;
+                enabled = false;
+            }
         }
 
         private void UpdateLoadingBar(float progress)

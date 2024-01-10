@@ -19,7 +19,7 @@ namespace Infrastructure.Factory
         GameObject CreateMainMenu(GameStateMachine gameStateMachine);
         GameObject CreateMatchMenu(GameStateMachine gameStateMachine, IMapRepository mapRepository);
         GameObject CreateSettingsMenu(IStorageService storageService, Action onBackButtonPressed);
-        void CreateLoadingWindow(IClient client);
+        void CreateLoadingWindow(CustomNetworkManager networkManager);
 
         void CreateInGameUI(GameStateMachine gameStateMachine, CustomNetworkManager networkManager,
             IInputService inputService, IStorageService storageService,
