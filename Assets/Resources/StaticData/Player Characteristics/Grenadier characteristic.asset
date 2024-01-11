@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Grenadier characteristic
   m_EditorClassIdentifier: 
   gameClass: 3
-  maxHealth: 100
+  maxHealth: 125
   speed: 9.5
   jumpHeight: 1.25
   placeDistance: 6

@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameClass: 1
   maxHealth: 100
-  speed: 10
+  speed: 9.5
   jumpHeight: 1.75
   placeDistance: 6

@@ -19,17 +19,17 @@ MonoBehaviour:
   ammoIcon: {fileID: 1304307358, guid: e7634cc0bf7762649a525e59875cd9d1, type: 3}
   isAutomatic: 1
   timeBetweenShooting: 0.06
-  baseRecoil: 0.015
+  baseRecoil: 0.04
   stepRecoil: 0.05
   resetTimeRecoil: 1
   range: 100
   reloadTime: 2
-  magazineSize: 20
+  magazineSize: 30
   bulletsPerTap: 1
-  totalBullets: 80
+  totalBullets: 90
   zoomMultiplier: 1.25
-  damage: 12
-  headMultiplier: 1.2
+  damage: 20
+  headMultiplier: 1.25
   chestMultiplier: 1
   legMultiplier: 0.8
   armMultiplier: 0.6
