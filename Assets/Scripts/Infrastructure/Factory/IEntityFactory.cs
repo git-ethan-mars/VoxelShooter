@@ -1,6 +1,7 @@
 ﻿using Data;
 using Entities;
 using Infrastructure.Services;
+using MapLogic;
 using Mirror;
 using Networking;
 using Networking.ServerServices;
@@ -29,5 +30,8 @@ namespace Infrastructure.Factory
         LootBox CreateBlockBox(Vector3 position, Transform parent);
 
         SpawnPoint CreateSpawnPoint(Vector3 position, Transform parent);
+        
+        GameObject CreateDrill(Vector3 position, Quaternion rotation, DrillItem drillData,
+            IServer server, NetworkConnectionToClient owner, AudioService audioService, Vector3 direction);
     }
 }

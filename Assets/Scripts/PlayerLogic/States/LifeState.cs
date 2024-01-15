@@ -61,6 +61,12 @@ namespace PlayerLogic.States
                         _playerData.ItemData.Add(new TntItemData(tnt));
                         break;
                     }
+                    case ItemType.Drill:
+                    {
+                        var drill = (DrillItem) item;
+                        _playerData.ItemData.Add(new DrillItemData(drill));
+                        break;
+                    }
                 }
             }
         }

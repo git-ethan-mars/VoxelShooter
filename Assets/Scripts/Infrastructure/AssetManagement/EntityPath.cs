@@ -10,5 +10,6 @@ namespace Infrastructure.AssetManagement
         public const string AmmoBoxPath = "Prefabs/Drops/AmmoBox";
         public const string HealthBoxPath = "Prefabs/Drops/HealthBox";
         public const string BlockBoxPath = "Prefabs/Drops/BlockBox";
+        public const string DrillPath = "Prefabs/Drill";
     }
 }

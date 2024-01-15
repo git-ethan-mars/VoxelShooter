@@ -1,6 +1,7 @@
 ﻿using Data;
 using Entities;
 using Infrastructure.AssetManagement;
+using MapLogic;
 using Mirror;
 using Networking;
 using Networking.ServerServices;
@@ -84,6 +85,16 @@ namespace Infrastructure.Factory
             var lootBox = _assets.Instantiate(prefabPath, position, Quaternion.identity, parent)
                 .GetComponent<LootBox>();
             return lootBox;
+        }
+        
+        public GameObject CreateDrill(Vector3 position, Quaternion rotation, DrillItem drillData,
+            IServer server, NetworkConnectionToClient owner, AudioService audioService, Vector3 direction)
+        {
+            var drill = _assets.Instantiate(EntityPath.DrillPath, position, rotation);
+            drill.GetComponent<Drill>().Construct(server, drillData, _particleFactory, audioService);
+            drill.GetComponent<Rigidbody>().velocity = direction * drillData.speed;
+            NetworkServer.Spawn(drill, owner);
+            return drill;
         }
     }
 }

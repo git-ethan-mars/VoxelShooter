@@ -11,12 +11,15 @@ namespace Networking.MessageHandlers.RequestHandlers
         private readonly IServer _server;
         private readonly RangeWeaponValidator _rangeWeaponValidator;
         private readonly RocketLauncherValidator _rocketLauncherValidator;
+        private readonly DrillValidator _drillValidator;
 
-        public ReloadHandler(IServer server, RangeWeaponValidator rangeWeaponValidator, RocketLauncherValidator rocketLauncherValidator)
+        public ReloadHandler(IServer server, RangeWeaponValidator rangeWeaponValidator,
+            RocketLauncherValidator rocketLauncherValidator, DrillValidator drillValidator)
         {
             _server = server;
             _rangeWeaponValidator = rangeWeaponValidator;
             _rocketLauncherValidator = rocketLauncherValidator;
+            _drillValidator = drillValidator;
         }
         protected override void OnRequestReceived(NetworkConnectionToClient connection, ReloadRequest request)
         {
@@ -31,6 +34,11 @@ namespace Networking.MessageHandlers.RequestHandlers
                 if (playerData.SelectedItem is RocketLauncherItem)
                 {
                     _rocketLauncherValidator.Reload(connection);
+                }
+                
+                if (playerData.SelectedItem is DrillItem)
+                {
+                    _drillValidator.Reload(connection);
                 }
             }
         }

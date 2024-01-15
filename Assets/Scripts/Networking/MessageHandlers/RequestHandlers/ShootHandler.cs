@@ -10,13 +10,15 @@ namespace Networking.MessageHandlers.RequestHandlers
         private readonly IServer _server;
         private readonly RangeWeaponValidator _weaponValidator;
         private readonly RocketLauncherValidator _rocketLauncherValidator;
+        private readonly DrillValidator _drillValidator;
 
         public ShootHandler(IServer server, RangeWeaponValidator weaponValidator,
-            RocketLauncherValidator rocketLauncherValidator)
+            RocketLauncherValidator rocketLauncherValidator, DrillValidator drillValidator)
         {
             _server = server;
             _weaponValidator = weaponValidator;
             _rocketLauncherValidator = rocketLauncherValidator;
+            _drillValidator = drillValidator;
         }
 
         protected override void OnRequestReceived(NetworkConnectionToClient connection, ShootRequest request)
@@ -32,6 +34,11 @@ namespace Networking.MessageHandlers.RequestHandlers
                 if (playerData.SelectedItem is RocketLauncherItem)
                 {
                     _rocketLauncherValidator.Shoot(connection, request.Ray);
+                }
+                
+                if (playerData.SelectedItem is DrillItem)
+                {
+                    _drillValidator.Shoot(connection, request.Ray);
                 }
             }
         }

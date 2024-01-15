@@ -7,6 +7,7 @@ namespace Data
         Tnt,
         Block,
         Grenade,
-        RocketLauncher
+        RocketLauncher,
+        Drill
     }
 }

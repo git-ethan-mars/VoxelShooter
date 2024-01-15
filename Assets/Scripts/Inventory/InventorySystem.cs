@@ -6,6 +6,7 @@ using Infrastructure.Factory;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
 using Inventory.Block;
+using Inventory.Drill;
 using Inventory.Grenade;
 using Inventory.MeleeWeapon;
 using Inventory.RangeWeapon;
@@ -29,10 +30,12 @@ namespace Inventory
         private readonly ShootResultHandler _shootHandler;
         private readonly RocketSpawnHandler _rocketSpawnHandler;
         private readonly RocketReloadHandler _rocketReloadHandler;
+        private readonly DrillReloadHandler _drillReloadHandler;
+        private readonly DrillSpawnHandler _drillSpawnHandler;
         private readonly InventoryInput _inventoryInput;
         private readonly Hud _hud;
         private int _index;
-
+        
         public InventorySystem(IInputService inputService, IStaticDataService staticData,
             IMeshFactory meshFactory, List<int> itemIds, Hud hud, Player player)
         {
@@ -84,6 +87,13 @@ namespace Inventory
                     _states.Add(new RocketLauncherState(_inventoryInput, rayCaster,
                         (RocketLauncherItem) item, hud, new RocketLauncherItemData(rocketLauncher)));
                 }
+                
+                if (item.itemType == ItemType.Drill)
+                {
+                    var drill = (DrillItem) item;
+                    _states.Add(new DrillState(_inventoryInput, rayCaster,
+                        (DrillItem) item, hud, new DrillItemData(drill)));
+                }
             }
 
             for (var i = 0; i < _states.Count; i++)
@@ -105,6 +115,10 @@ namespace Inventory
             _rocketSpawnHandler.Register();
             _rocketReloadHandler = new RocketReloadHandler(this);
             _rocketReloadHandler.Register();
+            _drillSpawnHandler = new DrillSpawnHandler(this);
+            _drillSpawnHandler.Register();
+            _drillReloadHandler = new DrillReloadHandler(this);
+            _drillReloadHandler.Register();
 
             ChangeSlotRequest(_index);
         }
@@ -132,6 +146,8 @@ namespace Inventory
             _shootHandler.Unregister();
             _rocketReloadHandler.Unregister();
             _rocketSpawnHandler.Unregister();
+            _drillReloadHandler.Unregister();
+            _drillSpawnHandler.Unregister();
         }
 
         public void SwitchActiveSlot(int slotIndex)

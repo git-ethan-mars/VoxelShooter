@@ -70,6 +70,7 @@ namespace Networking
             var rangeWeaponValidator = new RangeWeaponValidator(this, networkManager, audioService, muzzleFlashService);
             var meleeWeaponValidator = new MeleeWeaponValidator(this, networkManager, audioService);
             var rocketLauncherValidator = new RocketLauncherValidator(this, networkManager, audioService);
+            var drillValidator = new DrillValidator(this, networkManager, audioService);
             _addBlocksHandler = new AddBlocksHandler(this);
             _changeClassHandler = new ChangeClassHandler(this);
             _changeSlotHandler = new ChangeSlotHandler(this, audioService);
@@ -78,9 +79,9 @@ namespace Networking
             _grenadeSpawnHandler = new GrenadeSpawnHandler(this, networkManager, audioService);
             _tntSpawnHandler =
                 new TntSpawnHandler(this, networkManager, audioService);
-            _shootHandler = new ShootHandler(this, rangeWeaponValidator, rocketLauncherValidator);
+            _shootHandler = new ShootHandler(this, rangeWeaponValidator, rocketLauncherValidator, drillValidator);
             _cancelShootHandler = new CancelShootHandler(this, rangeWeaponValidator);
-            _reloadHandler = new ReloadHandler(this, rangeWeaponValidator, rocketLauncherValidator);
+            _reloadHandler = new ReloadHandler(this, rangeWeaponValidator, rocketLauncherValidator, drillValidator);
             _hitHandler = new HitHandler(this, meleeWeaponValidator);
             _authenticationHandler = new AuthenticationHandler(this);
             _dataByConnection = new Dictionary<NetworkConnectionToClient, PlayerData>();

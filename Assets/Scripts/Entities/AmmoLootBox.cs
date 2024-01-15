@@ -48,6 +48,14 @@ namespace Entities
                     receiver.Send(new RocketReloadResponse(i, rocketLauncherData.ChargedRockets,
                         rocketLauncherData.CarriedRockets));
                 }
+                
+                if (item.itemType == ItemType.Drill)
+                {
+                    var drillData = (DrillItemData) itemData;
+                    drillData.ChargedDrills += 1;
+                    receiver.Send(new DrillReloadResponse(i, drillData.ChargedDrills,
+                        drillData.Amount));
+                }
             }
         }
     }
