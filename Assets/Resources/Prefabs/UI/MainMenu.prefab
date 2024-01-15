@@ -181,7 +181,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -958,7 +958,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 6ff8bebd7037eb741bada9304b0c0b73, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 3048df9d33c823440aeb89c5fe3f2294, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
