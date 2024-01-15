@@ -1,4 +1,3 @@
-using System;
 using Data;
 using Explosions;
 using Infrastructure.Factory;
@@ -33,7 +32,7 @@ namespace Entities
             _rigidbody.AddForce(Vector3.down);
             var previousZAngle = _rigidbody.rotation.eulerAngles.z;
             _rigidbody.rotation = Quaternion.LookRotation(_rigidbody.velocity) 
-                                  * Quaternion.Euler(new Vector3(0, 0, _rotationSpeed + previousZAngle));
+                                  * Quaternion.Euler(new Vector3(0, -180, _rotationSpeed + previousZAngle));
         }
 
         public void Explode()
@@ -43,9 +42,9 @@ namespace Entities
             _audioService.SendAudio(_drillSound, rocketPosition);
         }
 
-        private void OnTriggerStay(Collider other)
+        private void OnTriggerEnter(Collider other)
         {
-            if (!isServer || _isExploded)
+            if (!isServer)
             {
                 return;
             }
@@ -56,7 +55,6 @@ namespace Entities
             }
 
             Explode();
-            _isExploded = true;
         }
     }
 }

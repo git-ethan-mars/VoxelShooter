@@ -14,16 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 13
   itemType: 6
-  inventoryIcon: {fileID: 21300000, guid: 833a6436ec3ce4b49b2e7fb2fa74b862, type: 3}
+  inventoryIcon: {fileID: 21300000, guid: 40cc6259cca09954585d891b066e341f, type: 3}
   prefab: {fileID: 5106030963746976738, guid: 16151daf92ba0b34ebb62a92aa9aa5df, type: 3}
-  countIcon: {fileID: -183867098, guid: e7634cc0bf7762649a525e59875cd9d1, type: 3}
+  countIcon: {fileID: 21300000, guid: 0b09eb0582cb7fa4b9fccb1d7e798c0c, type: 3}
   count: 100
-  radius: 3
+  radius: 2
   damage: 200
   speed: 5
-  chargedDrillsCapacity: 5
+  chargedDrillsCapacity: 1
   lifetime: 10
   rotationSpeed: 10
-  reloadTime: 1
-  impactSound: {fileID: 11400000, guid: 9cf5854dcf0822c46a1792981bdd7d68, type: 2}
-  reloadSound: {fileID: 11400000, guid: 41682c121f964f94ebe0b6eef4050a3a, type: 2}
+  reloadTime: 2
+  impactSound: {fileID: 11400000, guid: f8bd5d5e2ad0d6948b6ae45045bd1623, type: 2}
+  reloadSound: {fileID: 11400000, guid: d70fef782c0366f49a9d88c910bc7291, type: 2}

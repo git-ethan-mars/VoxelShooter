@@ -83,7 +83,7 @@ namespace Networking.ServerServices
 
         private bool CanReload(DrillItem configure, DrillItemData itemData)
         {
-            return itemData.Amount > 0 && !itemData.IsReloading;
+            return itemData.Amount > 0 && !itemData.IsReloading && itemData.ChargedDrills < 1;
         }
 
         private bool CanShoot(DrillItemData itemData)
