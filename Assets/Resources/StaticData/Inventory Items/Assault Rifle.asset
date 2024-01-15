@@ -24,7 +24,7 @@ MonoBehaviour:
   resetTimeRecoil: 0.5
   range: 200
   reloadTime: 1
-  magazineSize: 60
+  magazineSize: 45
   bulletsPerTap: 1
   totalBullets: 180
   zoomMultiplier: 1.8
