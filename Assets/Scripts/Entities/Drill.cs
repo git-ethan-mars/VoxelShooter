@@ -17,14 +17,19 @@ namespace Entities
         private AudioData _drillSound;
         private Rigidbody _rigidbody;
         private int _rotationSpeed;
+        private IParticleFactory _particleFactory;
+        private IServer _server;
+        [SerializeField] public ParticleSystem particleSystem;
 
         public void Construct(IServer server, DrillItem drillData, IParticleFactory particleFactory, AudioService audioService)
         {
             _drillSound = drillData.impactSound;
             _audioService = audioService;
+            _server = server;
             _explosionBehaviour = new ExplosionBehaviour(server, connectionToClient, drillData.radius, drillData.damage);
             _rigidbody = gameObject.GetComponent<Rigidbody>();
             _rotationSpeed = drillData.rotationSpeed;
+            _particleFactory = particleFactory;
         }
 
         void FixedUpdate()
@@ -38,6 +43,7 @@ namespace Entities
         public void Explode()
         {
             var rocketPosition = transform.position;
+            particleSystem.Play();
             _explosionBehaviour.Explode(rocketPosition);
             _audioService.SendAudio(_drillSound, rocketPosition);
         }
