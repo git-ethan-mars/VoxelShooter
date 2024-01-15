@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Data;
 using Entities;
+using Infrastructure.AssetManagement;
 using Infrastructure.Services.Storage;
 using Infrastructure.States;
 using MapLogic;
@@ -11,6 +12,7 @@ using Networking.MessageHandlers.ResponseHandler;
 using PlayerLogic;
 using PlayerLogic.Spectator;
 using UI.SettingsMenu;
+using UnityEngine;
 
 namespace Networking
 {
@@ -90,6 +92,9 @@ namespace Networking
         private readonly StopContinuousSoundHandler _stopContinuousSoundHandler;
         private readonly SurroundingSoundHandler _surroundingSoundHandler;
         private MapProvider _mapProvider;
+        private readonly StartMuzzleFlashHandler _startMuzzleFlashHandler;
+        private readonly StopMuzzleFlashHandler _stopMuzzleFlashHandler;
+        private readonly IAssetProvider _assets;
 
 
         public Client(GameStateMachine stateMachine, CustomNetworkManager networkManager)
@@ -120,6 +125,9 @@ namespace Networking
                 new SurroundingSoundHandler(networkManager, audioPool);
             PrefabRegistrar = new ClientPrefabRegistrar(networkManager.Assets, networkManager.GameFactory,
                 networkManager.PlayerFactory, networkManager.EntityFactory);
+            _startMuzzleFlashHandler = new StartMuzzleFlashHandler();
+            _stopMuzzleFlashHandler = new StopMuzzleFlashHandler();
+            _assets = networkManager.Assets;
         }
 
         public void Start()
@@ -158,6 +166,8 @@ namespace Networking
             _startContinuousSoundHandler.Register();
             _stopContinuousSoundHandler.Register();
             _surroundingSoundHandler.Register();
+            _startMuzzleFlashHandler.Register();
+            _stopMuzzleFlashHandler.Register();
         }
 
         private void UnregisterHandlers()
@@ -178,6 +188,8 @@ namespace Networking
             _startContinuousSoundHandler.Unregister();
             _stopContinuousSoundHandler.Unregister();
             _surroundingSoundHandler.Unregister();
+            _startMuzzleFlashHandler.Unregister();
+            _stopMuzzleFlashHandler.Unregister();
         }
 
         private void OnMapDownloaded()

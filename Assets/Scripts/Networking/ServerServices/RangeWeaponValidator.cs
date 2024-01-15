@@ -18,8 +18,10 @@ namespace Networking.ServerServices
         private readonly IParticleFactory _particleFactory;
         private readonly BlockDestructionBehaviour _blockDestructionBehaviour;
         private readonly AudioService _audioService;
+        private readonly MuzzleFlashService _muzzleFlashService;
 
-        public RangeWeaponValidator(IServer server, CustomNetworkManager networkManager, AudioService audioService)
+        public RangeWeaponValidator(IServer server, CustomNetworkManager networkManager, AudioService audioService,
+            MuzzleFlashService muzzleFlashService)
         {
             _server = server;
             _coroutineRunner = networkManager;
@@ -28,6 +30,7 @@ namespace Networking.ServerServices
             _blockDestructionBehaviour =
                 new BlockDestructionBehaviour(server, blockArea);
             _audioService = audioService;
+            _muzzleFlashService = muzzleFlashService;
         }
 
         public void Shoot(NetworkConnectionToClient connection, Ray ray, bool requestIsButtonHolding)
@@ -40,6 +43,7 @@ namespace Networking.ServerServices
             {
                 _audioService.StopContinuousSound(connection.identity);
                 playerData.HasContinuousSound = false;
+                _muzzleFlashService.StopMuzzleFlash(connection.identity);
             }
 
             if (!CanShoot(rangeWeaponData) || requestIsButtonHolding != rangeWeapon.isAutomatic)
@@ -58,7 +62,7 @@ namespace Networking.ServerServices
             connection.Send(new ShootResultResponse(playerData.SelectedSlotIndex, rangeWeaponData.BulletsInMagazine));
             _coroutineRunner.StartCoroutine(ResetShoot(connection, rangeWeapon, rangeWeaponData));
             _coroutineRunner.StartCoroutine(ResetRecoil(connection, rangeWeapon, rangeWeaponData));
-
+            
             if (rangeWeapon.isAutomatic)
             {
                 _audioService.StartContinuousAudio(rangeWeapon.shootingSound, connection.identity);
@@ -68,6 +72,7 @@ namespace Networking.ServerServices
             {
                 _audioService.SendAudio(rangeWeapon.shootingSound, connection.identity);
             }
+            _muzzleFlashService.StartMuzzleFlash(connection.identity);
         }
 
         public void CancelShoot(NetworkConnectionToClient connection)
@@ -75,6 +80,7 @@ namespace Networking.ServerServices
             var playerData = _server.GetPlayerData(connection);
             _audioService.StopContinuousSound(connection.identity);
             playerData.HasContinuousSound = false;
+            _muzzleFlashService.StopMuzzleFlash(connection.identity);
         }
 
         public void Reload(NetworkConnectionToClient connection)
@@ -89,6 +95,7 @@ namespace Networking.ServerServices
 
             _coroutineRunner.StartCoroutine(ReloadInternal(connection, rangeWeapon, rangeWeaponData));
             _audioService.SendAudio(rangeWeapon.reloadingSound, connection.identity);
+            _muzzleFlashService.StopMuzzleFlash(connection.identity);
         }
 
         private IEnumerator ReloadInternal(NetworkConnectionToClient connection, RangeWeaponItem configure,

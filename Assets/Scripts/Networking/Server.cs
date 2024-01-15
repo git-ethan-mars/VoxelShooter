@@ -66,7 +66,8 @@ namespace Networking
             BlockHealthSystem = new BlockHealthSystem(networkManager.StaticData, this);
             _fallDamageService = new FallDamageService(this, networkManager);
             var audioService = new AudioService(networkManager.StaticData);
-            var rangeWeaponValidator = new RangeWeaponValidator(this, networkManager, audioService);
+            var muzzleFlashService = new MuzzleFlashService();
+            var rangeWeaponValidator = new RangeWeaponValidator(this, networkManager, audioService, muzzleFlashService);
             var meleeWeaponValidator = new MeleeWeaponValidator(this, networkManager, audioService);
             var rocketLauncherValidator = new RocketLauncherValidator(this, networkManager, audioService);
             _addBlocksHandler = new AddBlocksHandler(this);
