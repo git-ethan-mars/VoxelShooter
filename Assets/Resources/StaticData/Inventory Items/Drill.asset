@@ -17,13 +17,13 @@ MonoBehaviour:
   inventoryIcon: {fileID: 21300000, guid: 40cc6259cca09954585d891b066e341f, type: 3}
   prefab: {fileID: 5106030963746976738, guid: 16151daf92ba0b34ebb62a92aa9aa5df, type: 3}
   countIcon: {fileID: 21300000, guid: 0b09eb0582cb7fa4b9fccb1d7e798c0c, type: 3}
-  count: 100
-  radius: 2
-  damage: 200
-  speed: 5
+  count: 5
+  radius: 3
+  damage: 150
+  speed: 10
   chargedDrillsCapacity: 1
-  lifetime: 10
-  rotationSpeed: 10
-  reloadTime: 2
+  lifetime: 5
+  rotationSpeed: 20
+  reloadTime: 1
   impactSound: {fileID: 11400000, guid: f8bd5d5e2ad0d6948b6ae45045bd1623, type: 2}
   reloadSound: {fileID: 11400000, guid: d70fef782c0366f49a9d88c910bc7291, type: 2}
