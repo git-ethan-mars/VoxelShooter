@@ -40,7 +40,7 @@ namespace Networking.ServerServices
                 return;
             }
 
-            var isSurface = ApplyRaycast(connection, ray, meleeWeapon, isStrongHit);
+            var isSurface = ApplyRaycast(connection, ray, meleeWeapon, isStrongHit && meleeWeapon.hasStrongHit);
             _coroutineRunner.StartCoroutine(ResetHit(connection, meleeWeapon, meleeWeaponData));
             _audioService.SendAudio(isSurface ? meleeWeapon.diggingAudio : meleeWeapon.hittingAudio,
                 connection.identity);
