@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boxSpawnTime: 10
   spawnTime: 7
-  minMatchDuration: 10
-  maxMatchDuration: 15
+  minMatchDuration: 9998
+  maxMatchDuration: 9999
