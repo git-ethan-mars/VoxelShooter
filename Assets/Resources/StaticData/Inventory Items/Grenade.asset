@@ -19,7 +19,7 @@ MonoBehaviour:
   countIcon: {fileID: 21300000, guid: 9721a1bd44132464cab96dd63e203df2, type: 3}
   count: 6
   delayInSeconds: 2
-  radius: 6
+  radius: 4
   damage: 200
   maxThrowDuration: 1
   throwForceModifier: 1800
