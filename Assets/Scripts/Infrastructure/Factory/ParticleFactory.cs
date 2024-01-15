@@ -29,6 +29,16 @@ namespace Infrastructure.Factory
                 bullet.GetComponent<ParticleSystem>().main.startLifetime.constant));
             return bullet;
         }
+        
+        public GameObject CreateBlockDestructionParticle(Vector3 position, Quaternion rotation, Color32 blockColor)
+        {
+            var bullet = _assets.Instantiate(ParticlePath.BlockDestructionParticlePath, position, rotation);
+            var particleColor = bullet.GetComponent<ParticleColor>();
+            particleColor.color = blockColor;
+            _coroutineRunner.StartCoroutine(DestroyParticle(bullet,
+                bullet.GetComponent<ParticleSystem>().main.startLifetime.constant));
+            return bullet;
+        }
 
         public GameObject CreateBlood(Vector3 position, Quaternion rotation)
         {

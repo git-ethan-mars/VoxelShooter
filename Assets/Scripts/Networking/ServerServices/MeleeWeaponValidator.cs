@@ -96,6 +96,9 @@ namespace Networking.ServerServices
             if (rayHit.collider.CompareTag("Chunk"))
             {
                 var targetBlock = Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2);
+                _particleFactory.CreateBlockDestructionParticle(targetBlock 
+                                                                + new Vector3(0.5f, 0.5f, 0.5f), Quaternion.identity,
+                    _server.MapProvider.GetBlockByGlobalPosition(targetBlock).Color);
                 if (isStrongHit)
                 {
                     _strongHitDestructionBehaviour.DamageBlocks(targetBlock, meleeWeapon.damageToBlock);
@@ -104,7 +107,6 @@ namespace Networking.ServerServices
                 {
                     _weakHitDestructionBehaviour.DamageBlocks(targetBlock, meleeWeapon.damageToBlock);
                 }
-
                 return true;
             }
 

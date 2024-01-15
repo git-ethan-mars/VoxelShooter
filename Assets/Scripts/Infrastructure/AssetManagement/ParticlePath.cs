@@ -6,5 +6,6 @@
         public const string BloodSprayPath = "Prefabs/Particles/BloodParticle";
         public const string RchParticlePath = "Prefabs/Particles/RCHParticle";
         public const string FallingMeshParticlePath = "Prefabs/Particles/FallingMeshParticle";
+        public const string BlockDestructionParticlePath = "Prefabs/Particles/BlockDestructionParticle";
     }
 }
