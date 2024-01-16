@@ -1248,6 +1248,7 @@ GameObject:
   - component: {fileID: 2291839090602957664}
   - component: {fileID: 7594348653312256416}
   - component: {fileID: 1669275410990531162}
+  - component: {fileID: 1089385491205529444}
   - component: {fileID: 5228900703733201309}
   - component: {fileID: 802977983435563558}
   - component: {fileID: 5716171750987044478}
@@ -1300,7 +1301,7 @@ MonoBehaviour:
   itemPosition: {fileID: 1590860181110431068}
   skin: {fileID: 4235148065202818238}
   nickNameCanvas: {fileID: 493181899365844507}
-  bodyOrientation: {fileID: 8214073703000477502}
+  bodyOrientation: {fileID: 6316331279552297313}
   headPivot: {fileID: 5151828858436341296}
   cameraMountPoint: {fileID: 3422491144569896833}
   hitBox: {fileID: 1434628957995934217}
@@ -1324,6 +1325,26 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 112
   m_CollisionDetection: 1
+--- !u!95 &1089385491205529444
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8073471595118213303}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 53159a22fd67d71499a19b6c8b7832cc, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
 --- !u!120 &5228900703733201309
 LineRenderer:
   m_ObjectHideFlags: 0
