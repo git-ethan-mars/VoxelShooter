@@ -1582,7 +1582,7 @@ MonoBehaviour:
   itemPosition: {fileID: 2782976443526908512}
   skin: {fileID: 4826447530946029402}
   nickNameCanvas: {fileID: 1450820302951618227}
-  bodyOrientation: {fileID: 4436890217686218564}
+  bodyOrientation: {fileID: 2816600301720284325}
   cameraMountPoint: {fileID: 4647412119890398737}
   hitBox: {fileID: 1920208550087210102}
   rigidbody: {fileID: 418850259563909874}
