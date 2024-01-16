@@ -34,7 +34,7 @@ namespace PlayerLogic
         public Transform ItemPosition => itemPosition;
 
         [SerializeField]
-        private MeshRenderer[] bodyParts;
+        private SkinnedMeshRenderer skin;
 
         [SerializeField]
         private GameObject nickNameCanvas;
@@ -176,10 +176,7 @@ namespace PlayerLogic
 
         private void TurnOffBodyRender()
         {
-            foreach (var bodyPart in bodyParts)
-            {
-                bodyPart.enabled = false;
-            }
+            skin.enabled = false;
         }
 
         private void TurnOffNickName()

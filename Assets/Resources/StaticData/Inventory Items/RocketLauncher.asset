@@ -15,7 +15,7 @@ MonoBehaviour:
   id: 12
   itemType: 5
   inventoryIcon: {fileID: 631782971, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
-  prefab: {fileID: 1374883755550458842, guid: ec400446b38d6744981b2c36ae5fc2f1, type: 3}
+  prefab: {fileID: 1374883755550458842, guid: 5a903469ac2556d40a9b97e33dd3c162, type: 3}
   countIcon: {fileID: 886209943, guid: e7634cc0bf7762649a525e59875cd9d1, type: 3}
   count: 5
   radius: 7

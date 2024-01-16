@@ -32,7 +32,8 @@ namespace Inventory.Block
             _blockCountText = hud.ItemCount;
             Icon = configure.inventoryIcon;
             _blockSprite = configure.itemSprite;
-            _transparentBlock = meshFactory.CreateTransparentGameObject(configure.prefab, initialColor);
+            _transparentBlock = meshFactory.CreatTransparentBlock();
+            ChangeTransparentBlockColor(initialColor);
             _transparentBlock.SetActive(false);
         }
 
@@ -66,7 +67,7 @@ namespace Inventory.Block
         public void ChangeTransparentBlockColor(Color32 color)
         {
             var floatColor = (Color) color;
-            var material = _transparentBlock.GetComponent<MeshRenderer>().material;
+            var material = _transparentBlock.GetComponentInChildren<MeshRenderer>().material;
             floatColor = new Color(floatColor.r, floatColor.g, floatColor.b, material.color.a);
             material.color = floatColor;
         }

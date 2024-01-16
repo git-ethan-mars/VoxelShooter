@@ -16,7 +16,6 @@ namespace Infrastructure.Factory
     {
         private readonly IAssetProvider _assets;
         private const int MaxVerticesForMeshCollider = 24000;
-        private const int Alpha = 100;
 
         public MeshFactory(IAssetProvider assets)
         {
@@ -76,22 +75,14 @@ namespace Infrastructure.Factory
             _assets.Instantiate(prefab, itemPosition);
         }
 
-        public GameObject CreateTransparentGameObject(GameObject prefab, Color32 color)
+        public GameObject CreateTransparentTnt()
         {
-            var transparentMaterial = _assets.Load<Material>(MeshPath.TransparentMaterialPath);
-            var transparentCopy = _assets.Instantiate(prefab, null);
-            transparentCopy.name = $"{prefab.name} - transparent";
-            color = new Color32(color.r, color.g, color.b, Alpha);
-            foreach (var meshRenderer in transparentCopy.GetComponentsInChildren<MeshRenderer>())
-            {
-                var material = new Material(transparentMaterial)
-                {
-                    color = color
-                };
-                meshRenderer.material = new Material(material);
-            }
+            return _assets.Instantiate(MeshPath.TransparentTntPath);
+        }
 
-            return transparentCopy;
+        public GameObject CreatTransparentBlock()
+        {
+            return _assets.Instantiate(MeshPath.TransparentBlockPath);
         }
 
         public void CreateWaterPlane(Vector3 position, Vector3 scale, Color32 waterColor)
