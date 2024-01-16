@@ -67,11 +67,13 @@ namespace Inventory.RangeWeapon
         public void ZoomIn()
         {
             _player.ZoomService.ZoomIn(_zoomMultiplier);
+            _player.ItemPosition.gameObject.SetActive(false);
         }
 
         public void ZoomOut()
         {
             _player.ZoomService.ZoomOut();
+            _player.ItemPosition.gameObject.SetActive(true);
         }
     }
 }
