@@ -4,6 +4,7 @@ using Data;
 using Mirror;
 using Networking.Messages.Requests;
 using PlayerLogic;
+using UnityEngine;
 
 namespace Inventory.RangeWeapon
 {
@@ -67,13 +68,19 @@ namespace Inventory.RangeWeapon
         public void ZoomIn()
         {
             _player.ZoomService.ZoomIn(_zoomMultiplier);
-            _player.ItemPosition.gameObject.SetActive(false);
+            foreach (var meshRenderer in _player.ItemPosition.GetComponentsInChildren<MeshRenderer>())
+            {
+                meshRenderer.enabled = false;
+            }
         }
 
         public void ZoomOut()
         {
             _player.ZoomService.ZoomOut();
-            _player.ItemPosition.gameObject.SetActive(true);
+            foreach (var meshRenderer in _player.ItemPosition.GetComponentsInChildren<MeshRenderer>())
+            {
+                meshRenderer.enabled = true;
+            }
         }
     }
 }
