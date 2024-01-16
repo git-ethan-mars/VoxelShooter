@@ -15,7 +15,7 @@ MonoBehaviour:
   id: 11
   itemType: 4
   inventoryIcon: {fileID: 21300000, guid: 9721a1bd44132464cab96dd63e203df2, type: 3}
-  prefab: {fileID: 7084881398813862784, guid: d4d627f48efc0ca49a8822c4cadd8c41, type: 3}
+  prefab: {fileID: 4245606585116657588, guid: 7ad44d29c785b7242974a6af01b5e2b8, type: 3}
   countIcon: {fileID: 21300000, guid: 9721a1bd44132464cab96dd63e203df2, type: 3}
   count: 6
   delayInSeconds: 2

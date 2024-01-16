@@ -15,7 +15,7 @@ MonoBehaviour:
   id: 5
   itemType: 0
   inventoryIcon: {fileID: -188179433, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
-  prefab: {fileID: 9083155961026743931, guid: 462a6032c614baf41836da3cb2513325, type: 3}
+  prefab: {fileID: 7081574551729364688, guid: f6577ffa0c8c3a14f9161e807e767241, type: 3}
   ammoIcon: {fileID: -465812234, guid: e7634cc0bf7762649a525e59875cd9d1, type: 3}
   isAutomatic: 0
   timeBetweenShooting: 0.8

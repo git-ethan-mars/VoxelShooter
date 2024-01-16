@@ -78,15 +78,20 @@ namespace Infrastructure.Factory
 
         public GameObject CreateTransparentGameObject(GameObject prefab, Color32 color)
         {
-            var transparentObject = _assets.Instantiate(MeshPath.TransparentSamplePath);
-            transparentObject.name = $"{prefab.name} - transparent";
-            transparentObject.GetComponent<MeshFilter>().mesh = prefab.GetComponent<MeshFilter>().sharedMesh;
-            var material = transparentObject.GetComponent<MeshRenderer>().material;
+            var transparentMaterial = _assets.Load<Material>(MeshPath.TransparentMaterialPath);
+            var transparentCopy = _assets.Instantiate(prefab, null);
+            transparentCopy.name = $"{prefab.name} - transparent";
             color = new Color32(color.r, color.g, color.b, Alpha);
-            material.color = color;
-            transparentObject.GetComponent<MeshRenderer>().material = new Material(material);
-            transparentObject.transform.localScale = prefab.transform.localScale;
-            return transparentObject;
+            foreach (var meshRenderer in transparentCopy.GetComponentsInChildren<MeshRenderer>())
+            {
+                var material = new Material(transparentMaterial)
+                {
+                    color = color
+                };
+                meshRenderer.material = new Material(material);
+            }
+
+            return transparentCopy;
         }
 
         public void CreateWaterPlane(Vector3 position, Vector3 scale, Color32 waterColor)

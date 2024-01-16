@@ -15,7 +15,7 @@ MonoBehaviour:
   id: 7
   itemType: 1
   inventoryIcon: {fileID: 21300000, guid: 7f8099d3ba88821449ae3fcf68f2e286, type: 3}
-  prefab: {fileID: 7922214257710745971, guid: 6a3125bea274d394bb39c24f7e77ae9d, type: 3}
+  prefab: {fileID: 7922214257710745971, guid: 210bed499898fd94ab9b5cb2589b65a1, type: 3}
   range: 5
   timeBetweenHit: 0.2
   damageToPlayer: 30
