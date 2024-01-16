@@ -73,6 +73,24 @@ namespace UI.Palette
             {
                 _pointerMover.MoveDown();
             }
+            
+            if (_inputService.IsSecondActionButtonDown())
+            {
+                if (_pointerMover.GetXPosition() == _pointerMover.PaletteSize - 1)
+                {
+                    _pointerMover.SetXPosition(0);
+                    _pointerMover.SetYPosition(_pointerMover.GetYPosition() + 1);
+                    if (_pointerMover.GetYPosition() == _pointerMover.PaletteSize)
+                    {
+                        _pointerMover.SetYPosition(0);
+                    }
+                    _pointerMover.MovePointer();
+                }
+                else
+                {
+                    _pointerMover.MoveRight();
+                }
+            }
         }
 
         private void OnDisable()

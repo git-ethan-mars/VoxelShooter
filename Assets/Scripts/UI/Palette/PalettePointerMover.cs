@@ -6,7 +6,7 @@ namespace UI.Palette
 {
     public class PalettePointerMover
     {
-        private const int PaletteSize = 8;
+        public readonly int PaletteSize = 8;
 
         public Action<int> PointerMoved;
 
@@ -65,7 +65,27 @@ namespace UI.Palette
             MovePointer();
         }
 
-        private void MovePointer()
+        public int GetXPosition()
+        {
+            return _indexX;
+        }
+        
+        public int GetYPosition()
+        {
+            return _indexY;
+        }
+        
+        public void SetXPosition(int x)
+        {
+            _indexX = x;
+        }
+        
+        public void SetYPosition(int y)
+        {
+            _indexY = y;
+        }
+
+        public void MovePointer()
         {
             _pointer.position = _blockImages[_indexX + _indexY * PaletteSize].transform.position;
             PointerMoved?.Invoke(_indexX + _indexY * PaletteSize);
