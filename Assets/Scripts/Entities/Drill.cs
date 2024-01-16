@@ -17,27 +17,26 @@ namespace Entities
         private AudioData _drillSound;
         private Rigidbody _rigidbody;
         private int _rotationSpeed;
-        private IParticleFactory _particleFactory;
-        private IServer _server;
         [SerializeField] public ParticleSystem particleSystem;
 
         public void Construct(IServer server, DrillItem drillData, IParticleFactory particleFactory, AudioService audioService)
         {
             _drillSound = drillData.impactSound;
             _audioService = audioService;
-            _server = server;
             _explosionBehaviour = new ExplosionBehaviour(server, connectionToClient, drillData.radius, drillData.damage);
             _rigidbody = gameObject.GetComponent<Rigidbody>();
             _rotationSpeed = drillData.rotationSpeed;
-            _particleFactory = particleFactory;
         }
 
         void FixedUpdate()
         {
-            _rigidbody.AddForce(Vector3.down);
-            var previousZAngle = _rigidbody.rotation.eulerAngles.z;
-            _rigidbody.rotation = Quaternion.LookRotation(_rigidbody.velocity) 
-                                  * Quaternion.Euler(new Vector3(0, -180, _rotationSpeed + previousZAngle));
+            if (isServer)
+            {
+                _rigidbody.AddForce(Vector3.down);
+                var previousZAngle = _rigidbody.rotation.eulerAngles.z;
+                _rigidbody.rotation = Quaternion.LookRotation(_rigidbody.velocity)
+                                      * Quaternion.Euler(new Vector3(0, -180, _rotationSpeed + previousZAngle));
+            }
         }
 
         public void Explode()
