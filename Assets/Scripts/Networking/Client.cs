@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Data;
 using Entities;
-using Infrastructure.AssetManagement;
 using Infrastructure.Services.Storage;
 using Infrastructure.States;
 using MapLogic;
@@ -12,7 +11,6 @@ using Networking.MessageHandlers.ResponseHandler;
 using PlayerLogic;
 using PlayerLogic.Spectator;
 using UI.SettingsMenu;
-using UnityEngine;
 
 namespace Networking
 {
@@ -94,7 +92,7 @@ namespace Networking
         private MapProvider _mapProvider;
         private readonly StartMuzzleFlashHandler _startMuzzleFlashHandler;
         private readonly StopMuzzleFlashHandler _stopMuzzleFlashHandler;
-        private readonly IAssetProvider _assets;
+        private readonly RchParticleHandler _rchParticleHandler;
 
 
         public Client(GameStateMachine stateMachine, CustomNetworkManager networkManager)
@@ -127,7 +125,7 @@ namespace Networking
                 networkManager.PlayerFactory, networkManager.EntityFactory);
             _startMuzzleFlashHandler = new StartMuzzleFlashHandler();
             _stopMuzzleFlashHandler = new StopMuzzleFlashHandler();
-            _assets = networkManager.Assets;
+            _rchParticleHandler = new RchParticleHandler(networkManager.ParticleFactory);
         }
 
         public void Start()
@@ -168,6 +166,7 @@ namespace Networking
             _surroundingSoundHandler.Register();
             _startMuzzleFlashHandler.Register();
             _stopMuzzleFlashHandler.Register();
+            _rchParticleHandler.Register();
         }
 
         private void UnregisterHandlers()
@@ -190,6 +189,7 @@ namespace Networking
             _surroundingSoundHandler.Unregister();
             _startMuzzleFlashHandler.Unregister();
             _stopMuzzleFlashHandler.Unregister();
+            _rchParticleHandler.Unregister();
         }
 
         private void OnMapDownloaded()

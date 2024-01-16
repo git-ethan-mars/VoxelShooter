@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Data
 {
@@ -7,6 +6,7 @@ namespace Data
     public class RangeWeaponItem : InventoryItem
     {
         public Sprite ammoIcon;
+        public Sprite scopeIcon;
 
         [Header("Configuration")]
         public bool isAutomatic;

@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using Entities;
 using Infrastructure.AssetManagement;
 using Infrastructure.Services.StaticData;
 using Mirror;

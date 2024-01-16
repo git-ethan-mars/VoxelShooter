@@ -1,6 +1,5 @@
 using Infrastructure;
 using Infrastructure.Services.StaticData;
-using Infrastructure.Services.Storage;
 using Mirror;
 using Networking.ClientServices;
 using Networking.Messages.Responses;

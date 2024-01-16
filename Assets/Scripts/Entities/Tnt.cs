@@ -45,6 +45,7 @@ namespace Entities
             _explosionBehaviour.Explode(tntPosition);
             _particleFactory.CreateRchParticle(tntPosition, _tntItem.particlesSpeed,
                 _tntItem.particlesCount);
+            NetworkServer.SendToReady(new RchParticleResponse(transform.position, _tntItem.particlesSpeed, _tntItem.particlesCount));
             _audioService.SendAudio(_tntItem.explosionSound, tntPosition);
             _server.EntityContainer.RemoveExplosive(this);
             NetworkServer.Destroy(gameObject);

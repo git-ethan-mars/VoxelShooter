@@ -17,6 +17,7 @@ MonoBehaviour:
   inventoryIcon: {fileID: 1027491563, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
   prefab: {fileID: 9030222180740480023, guid: bad7feca91d5cae45acf91b46eeac0d9, type: 3}
   ammoIcon: {fileID: -183867098, guid: e7634cc0bf7762649a525e59875cd9d1, type: 3}
+  scopeIcon: {fileID: 21300000, guid: 11564e991f4b71c47a7f75c7e8c163bd, type: 3}
   isAutomatic: 1
   timeBetweenShooting: 0.08
   baseRecoil: 0.03

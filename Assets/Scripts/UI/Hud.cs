@@ -32,7 +32,6 @@ namespace UI
 
         public Palette.Palette Palette => palette;
 
-
         [SerializeField]
         private GameObject ammoInfo;
 
@@ -73,5 +72,15 @@ namespace UI
         private HealthCounter healthCounter;
 
         public HealthCounter HealthCounter => healthCounter;
+
+        [SerializeField]
+        private Image crosshairImage;
+
+        public Image CrosshairImage => crosshairImage;
+
+        [SerializeField]
+        private Image scopeImage;
+
+        public Image ScopeImage => scopeImage;
     }
 }

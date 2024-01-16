@@ -13,6 +13,10 @@ namespace Inventory.RangeWeapon
         private readonly TextMeshProUGUI _ammoCount;
         private readonly Image _ammoType;
         private readonly Sprite _ammoTypeIcon;
+        private readonly Image _scopeImage;
+        private readonly Sprite _scopeIcon;
+        private readonly Image _crosshairImage;
+
 
         public RangeWeaponView(RangeWeaponItem configure, Hud hud)
         {
@@ -21,12 +25,28 @@ namespace Inventory.RangeWeapon
             _ammoInfo = hud.AmmoInfo;
             _ammoCount = hud.AmmoCount;
             _ammoType = hud.AmmoType;
+            _crosshairImage = hud.CrosshairImage;
+            _scopeImage = hud.ScopeImage;
+            _scopeIcon = configure.scopeIcon;
         }
 
         public void Enable()
         {
             _ammoInfo.SetActive(true);
             _ammoType.sprite = _ammoTypeIcon;
+        }
+
+        public void EnableScope()
+        {
+            _scopeImage.gameObject.SetActive(true);
+            _scopeImage.sprite = _scopeIcon;
+            _crosshairImage.enabled = false;
+        }
+
+        public void DisableScope()
+        {
+            _scopeImage.gameObject.SetActive(false);
+            _crosshairImage.enabled = true;
         }
 
         public void UpdateAmmoText(string ammoText)

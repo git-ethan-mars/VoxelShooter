@@ -57,6 +57,7 @@ namespace Entities
             var explosionBehaviour = new ExplosionBehaviour(_server, connectionToClient, radius, damage);
             explosionBehaviour.Explode(transform.position);
             _particleFactory.CreateRchParticle(transform.position, particleSpeed, particleCount);
+            NetworkServer.SendToReady(new RchParticleResponse(transform.position, particleSpeed, particleCount));
             _server.EntityContainer.RemovePushable(this);
             NetworkServer.Destroy(gameObject);
         }

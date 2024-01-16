@@ -29,6 +29,7 @@ namespace Entities
             _explosionBehaviour.Explode(grenadePosition);
             _particleFactory.CreateRchParticle(grenadePosition, _grenadeItem.particlesSpeed,
                 _grenadeItem.particlesCount);
+            NetworkServer.SendToReady(new RchParticleResponse(transform.position, _grenadeItem.particlesSpeed,_grenadeItem.particlesCount));
             _audioService.SendAudio(_grenadeItem.explosionSound, grenadePosition);
             NetworkServer.Destroy(gameObject);
         }

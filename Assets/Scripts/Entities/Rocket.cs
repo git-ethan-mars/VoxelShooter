@@ -16,12 +16,14 @@ namespace Entities
         private IParticleFactory _particleFactory;
         private ExplosionBehaviour _explosionBehaviour;
 
-        public void Construct(IServer server, RocketLauncherItem rocketData, IParticleFactory particleFactory, AudioService audioService)
+        public void Construct(IServer server, RocketLauncherItem rocketData, IParticleFactory particleFactory,
+            AudioService audioService)
         {
             _rocketData = rocketData;
             _particleFactory = particleFactory;
             _audioService = audioService;
-            _explosionBehaviour = new ExplosionBehaviour(server, connectionToClient, rocketData.radius, rocketData.damage);
+            _explosionBehaviour =
+                new ExplosionBehaviour(server, connectionToClient, rocketData.radius, rocketData.damage);
         }
 
         public void Explode()
@@ -30,6 +32,8 @@ namespace Entities
             _explosionBehaviour.Explode(rocketPosition);
             _particleFactory.CreateRchParticle(rocketPosition, _rocketData.particlesSpeed,
                 _rocketData.particlesCount);
+            NetworkServer.SendToReady(new RchParticleResponse(transform.position, _rocketData.particlesSpeed,
+                _rocketData.particlesCount));
             _audioService.SendAudio(_rocketData.explosionSound, rocketPosition);
             NetworkServer.Destroy(gameObject);
         }
