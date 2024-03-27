@@ -48,6 +48,7 @@ namespace Networking
             MeshFactory = meshFactory;
             ParticleFactory = particleFactory;
             PlayerFactory = new PlayerFactory(assets, inputService, storageService, staticData, uiFactory, meshFactory);
+            Client = new Client(_stateMachine, this);
         }
 
         public override void OnStartHost()
@@ -58,7 +59,6 @@ namespace Networking
 
         public override void OnStartClient()
         {
-            Client = new Client(_stateMachine, this);
             Client.Start();
         }
 
