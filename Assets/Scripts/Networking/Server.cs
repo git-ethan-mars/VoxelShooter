@@ -278,7 +278,7 @@ namespace Networking
                     continue;
                 }
 
-                if (TryGetPlayerData(anotherClient, out var anotherPlayer) && playerData.IsAlive)
+                if (TryGetPlayerData(anotherClient, out var anotherPlayer) && anotherPlayer.IsAlive)
                 {
                     connection.Send(new ChangeItemModelResponse(anotherClient.identity,
                         anotherPlayer.SelectedItem.id));
