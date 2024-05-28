@@ -1,5 +1,6 @@
 using Entities;
 using Infrastructure.Factory;
+using Networking.Messages.Responses;
 
 namespace Networking.MessageHandlers.ResponseHandler
 {

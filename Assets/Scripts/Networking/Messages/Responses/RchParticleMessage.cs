@@ -1,7 +1,7 @@
 using Mirror;
 using UnityEngine;
 
-namespace Entities
+namespace Networking.Messages.Responses
 {
     public struct RchParticleResponse : NetworkMessage
     {

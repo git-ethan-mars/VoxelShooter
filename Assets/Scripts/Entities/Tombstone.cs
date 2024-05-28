@@ -2,6 +2,7 @@
 using Infrastructure.Factory;
 using Mirror;
 using Networking;
+using Networking.Messages.Responses;
 using UnityEngine;
 
 namespace Entities
