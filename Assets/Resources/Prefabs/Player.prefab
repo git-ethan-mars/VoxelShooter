@@ -1709,6 +1709,7 @@ GameObject:
   m_Component:
   - component: {fileID: 951460950341307336}
   - component: {fileID: 8907822022040828168}
+  - component: {fileID: 4041658838438698864}
   - component: {fileID: 418850259563909874}
   - component: {fileID: 6515215865813608757}
   - component: {fileID: 1864132953276379790}
@@ -1773,11 +1774,28 @@ MonoBehaviour:
   bodyOrientation: {fileID: 3490630571108121316}
   headPivot: {fileID: 162809396587092744}
   cameraMountPoint: {fileID: 8664586988098286231}
-  hitBox: {fileID: 8903361373109355883}
   rigidbody: {fileID: 418850259563909874}
+  movement: {fileID: 4041658838438698864}
   continuousAudio: {fileID: 6654713111464155049}
   stepAudio: {fileID: 5355178766467641277}
   stepAudioData: {fileID: 11400000, guid: 1f30efbaba1619f4aa23847235519f49, type: 2}
+--- !u!114 &4041658838438698864
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7129409968729204767}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 342e70a3da6f4a6386588389d893d5a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0.1
+  hitBox: {fileID: 8903361373109355883}
+  rigidBody: {fileID: 418850259563909874}
 --- !u!54 &418850259563909874
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1903,7 +1921,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncDirection: 1
+  syncDirection: 0
   syncMode: 0
   syncInterval: 0
   target: {fileID: 951460950341307336}
@@ -1987,11 +2005,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83392ae5c1b731446909f252fd494ae4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncDirection: 1
+  syncDirection: 0
   syncMode: 0
   syncInterval: 0
   target: {fileID: 418850259563909874}
-  clientAuthority: 1
+  clientAuthority: 0
   syncVelocity: 1
   clearVelocity: 0
   velocitySensitivity: 0.1

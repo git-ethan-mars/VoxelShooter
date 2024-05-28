@@ -50,14 +50,14 @@ namespace PlayerLogic
         [SerializeField]
         private Transform cameraMountPoint;
 
-        [SerializeField]
-        private CapsuleCollider hitBox;
-
         public Rigidbody Rigidbody => rigidbody;
 
         [SerializeField]
         private new Rigidbody rigidbody;
 
+        [SerializeField]
+        private PlayerMovement movement;
+        
         [SerializeField]
         private AudioSource continuousAudio;
 
@@ -77,10 +77,6 @@ namespace PlayerLogic
         private Camera _mainCamera;
         private Hud _hud;
 
-        private PlayerMovement _movement;
-        private float _speed;
-        private float _jumpHeight;
-
         public void Construct(IInputService inputService, IStorageService storageService, IStaticDataService staticData,
             IUIFactory uiFactory,
             IMeshFactory meshFactory)
@@ -90,7 +86,6 @@ namespace PlayerLogic
             _inputService = inputService;
             _storageService = storageService;
             _staticData = staticData;
-            _movement = new PlayerMovement(hitBox, rigidbody, bodyOrientation);
             var volumeSettings = storageService.Load<VolumeSettingsData>(Constants.VolumeSettingsKey);
             Audio = new PlayerAudio(stepAudio, stepAudioData, continuousAudio);
             Audio.ChangeSoundMultiplier(volumeSettings.SoundVolume);
@@ -103,8 +98,6 @@ namespace PlayerLogic
         {
             PlaceDistance = placeDistance;
             Health = new ObservableVariable<int>(health);
-            _speed = speed;
-            _jumpHeight = jumpHeight;
             _mainCamera = Camera.main;
             ZoomService = new ZoomService(_mainCamera);
             Rotation = new PlayerRotation(_storageService, ZoomService, bodyOrientation, headPivot);
@@ -114,13 +107,14 @@ namespace PlayerLogic
             TurnOffBodyRender();
             MountCamera();
             IsInitialized = true;
+            movement.Construct(speed, jumpHeight);
         }
 
         private void Update()
         {
             if (!isLocalPlayer)
             {
-                if (_movement.GetHorizontalVelocity().magnitude > Constants.Epsilon && _movement.IsGrounded())
+                if (movement.GetHorizontalVelocity().magnitude > Constants.Epsilon && movement.IsGrounded())
                 {
                     Audio.EnableStepSound();
                 }
@@ -131,28 +125,18 @@ namespace PlayerLogic
             }
             else
             {
-                _movement.Move(_inputService.Axis, _speed);
+                /*movement.CmdMove(_inputService.Axis, bodyOrientation.forward, bodyOrientation.right);
 
                 if (_inputService.IsJumpButtonDown())
                 {
-                    _movement.Jump(_jumpHeight);
-                }
-
+                    movement.CmdJump();
+                }*/
+                
                 Rotation.Rotate(_inputService.MouseAxis);
                 _inventory.Update();
             }
         }
-
-        private void FixedUpdate()
-        {
-            if (!isLocalPlayer)
-            {
-                return;
-            }
-
-            _movement.FixedUpdate();
-        }
-
+        
         public void SetNickName(string nickName)
         {
             nickNameText.SetText(nickName);
