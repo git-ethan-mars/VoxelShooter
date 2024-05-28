@@ -7,14 +7,12 @@ namespace Networking.Prediction.Player
         public uint LastProcessedInputTick => lastProcessedInputTick;
 
         public readonly Vector3 Position;
-        public readonly Quaternion Rotation;
         public readonly Vector3 Velocity;
         public readonly uint lastProcessedInputTick;
 
-        public PlayerState(Vector3 position, Quaternion rotation, Vector3 velocity, uint lastProcessedInputTick)
+        public PlayerState(Vector3 position, Vector3 velocity, uint lastProcessedInputTick)
         {
             Position = position;
-            Rotation = rotation;
             Velocity = velocity;
             this.lastProcessedInputTick = lastProcessedInputTick;
         }
@@ -26,13 +24,13 @@ namespace Networking.Prediction.Player
 
         private bool Equals(PlayerState other)
         {
-            return Position.Equals(other.Position) && Velocity.Equals(other.Velocity) &&
-                   Rotation.Equals(other.Rotation);
+            return Mathf.Abs(Position.sqrMagnitude - other.Position.sqrMagnitude) < Constants.Epsilon &&
+                   Mathf.Abs(Velocity.sqrMagnitude - other.Velocity.sqrMagnitude) < Constants.Epsilon;
         }
 
         public override string ToString()
         {
-            return $"Pos: {Position} | Vel: {Velocity} | Rot: {Rotation} | LastProcessInput: {lastProcessedInputTick}";
+            return $"Pos: {Position} | Vel: {Velocity}  | LastProcessInput: {lastProcessedInputTick}";
         }
     }
 }
