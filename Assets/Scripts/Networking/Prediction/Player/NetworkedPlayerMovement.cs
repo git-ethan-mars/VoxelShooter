@@ -9,7 +9,7 @@ namespace Networking.Prediction.Player
     public class NetworkedPlayerMovement : NetworkedClient<PlayerInput, PlayerState>
     {
         [SerializeField]
-        private UnityEngine.Rigidbody rigidBody;
+        private Rigidbody rigidBody;
 
         [SerializeField]
         private CapsuleCollider hitBox;
@@ -110,17 +110,17 @@ namespace Networking.Prediction.Player
             MoveToScene(_idleScene);
         }
 
-        private Vector3 GetHorizontalVelocity()
-        {
-            return Vector3.Scale(HorizontalMask, rigidBody.velocity);
-        }
-
-        private bool IsGrounded()
+        public bool IsGrounded()
         {
             var isGrounded = Physics.CheckBox(rigidBody.position + hitBox.height / 2 * Vector3.down,
                 new Vector3(hitBox.radius / 2, Constants.Epsilon, hitBox.radius / 2),
                 Quaternion.identity, Constants.buildMask);
             return isGrounded;
+        }
+
+        public Vector3 GetHorizontalVelocity()
+        {
+            return Vector3.Scale(HorizontalMask, rigidBody.velocity);
         }
 
         private void GetOrCreateIdleScene()

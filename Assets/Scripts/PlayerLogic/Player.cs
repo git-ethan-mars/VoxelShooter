@@ -57,11 +57,8 @@ namespace PlayerLogic
         private new Rigidbody rigidbody;
 
         [SerializeField]
-        private PlayerMovement movement;
-
-        [SerializeField]
         private NetworkedPlayerMovement predictedMovement;
-        
+
         [SerializeField]
         private AudioSource continuousAudio;
 
@@ -111,7 +108,6 @@ namespace PlayerLogic
             TurnOffBodyRender();
             MountCamera();
             IsInitialized = true;
-            movement.Construct(speed, jumpHeight);
             predictedMovement.Construct(_inputService, speed, jumpHeight);
         }
 
@@ -119,7 +115,8 @@ namespace PlayerLogic
         {
             if (!isLocalPlayer)
             {
-                if (movement.GetHorizontalVelocity().magnitude > Constants.Epsilon && movement.IsGrounded())
+                if (predictedMovement.GetHorizontalVelocity().magnitude > Constants.Epsilon &&
+                    predictedMovement.IsGrounded())
                 {
                     Audio.EnableStepSound();
                 }
@@ -130,18 +127,11 @@ namespace PlayerLogic
             }
             else
             {
-                /*movement.CmdMove(_inputService.Axis, bodyOrientation.forward, bodyOrientation.right);
-
-                if (_inputService.IsJumpButtonDown())
-                {
-                    movement.CmdJump();
-                }*/
-                
                 Rotation.Rotate(_inputService.MouseAxis);
                 _inventory.Update();
             }
         }
-        
+
         public void SetNickName(string nickName)
         {
             nickNameText.SetText(nickName);
