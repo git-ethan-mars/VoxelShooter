@@ -9,6 +9,7 @@ using Infrastructure.Services.Storage;
 using Inventory;
 using Mirror;
 using Networking;
+using Networking.Prediction.Player;
 using TMPro;
 using UI;
 using UI.SettingsMenu;
@@ -57,6 +58,9 @@ namespace PlayerLogic
 
         [SerializeField]
         private PlayerMovement movement;
+
+        [SerializeField]
+        private NetworkedPlayerMovement predictedMovement;
         
         [SerializeField]
         private AudioSource continuousAudio;
@@ -108,6 +112,7 @@ namespace PlayerLogic
             MountCamera();
             IsInitialized = true;
             movement.Construct(speed, jumpHeight);
+            predictedMovement.Construct(_inputService, speed, jumpHeight);
         }
 
         private void Update()
