@@ -111,6 +111,6 @@ MonoBehaviour:
   jitter: 0.02
   jitterSpeed: 1
   reliableLatency: 200
-  unreliableLoss: 2
+  unreliableLoss: 0
   unreliableLatency: 200
-  unreliableScramble: 2
+  unreliableScramble: 0
