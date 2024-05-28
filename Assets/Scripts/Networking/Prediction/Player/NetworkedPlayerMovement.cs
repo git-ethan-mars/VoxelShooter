@@ -1,5 +1,6 @@
 using System;
 using Infrastructure.Services.Input;
+using Mirror;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -28,8 +29,8 @@ namespace Networking.Prediction.Player
         private float _jumpHeight;
         private bool _isJumpButtonPressed;
 
-        Scene _mainScene;
-        Scene _idleScene;
+        private Scene _mainScene;
+        private Scene _idleScene;
 
         PhysicsScene _physicsScene;
 
@@ -67,13 +68,12 @@ namespace Networking.Prediction.Player
 
         protected override PlayerState RecordState(uint lastProcessedInputTick)
         {
-            return new PlayerState(transform.position, transform.rotation, rigidBody.velocity, lastProcessedInputTick);
+            return new PlayerState(transform.position, rigidBody.velocity, lastProcessedInputTick);
         }
 
         protected override void SetState(PlayerState state)
         {
             transform.position = state.Position;
-            transform.rotation = state.Rotation;
             rigidBody.velocity = state.Velocity;
         }
 
@@ -96,17 +96,17 @@ namespace Networking.Prediction.Player
                 rigidBody.AddForce(GravityScale * Physics.gravity);
             }
 
-            rigidBody.AddForce(-GetHorizontalVelocity() / input.DeltaTime);
+            rigidBody.AddForce(-GetHorizontalVelocity() / NetworkServer.sendInterval);
 
             if (!shouldResetHorizontalVelocity)
             {
-                rigidBody.AddForce(_desiredDirection * GetHorizontalVelocity().magnitude / input.DeltaTime);
+                rigidBody.AddForce(_desiredDirection * GetHorizontalVelocity().magnitude / NetworkServer.sendInterval);
                 rigidBody.AddForce(
-                    Math.Min((_speed - GetHorizontalVelocity().magnitude) / input.DeltaTime,
+                    Math.Min((_speed - GetHorizontalVelocity().magnitude) / NetworkServer.sendInterval,
                         _speed / AccelerationTime) * _desiredDirection);
             }
 
-            _physicsScene.Simulate(input.DeltaTime);
+            _physicsScene.Simulate(NetworkServer.sendInterval);
             MoveToScene(_idleScene);
         }
 
