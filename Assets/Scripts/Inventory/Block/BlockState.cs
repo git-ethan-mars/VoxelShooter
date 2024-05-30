@@ -30,6 +30,8 @@ namespace Inventory.Block
         public void Enter()
         {
             _inventoryInput.FirstActionButtonDown += _blockModel.PlaceBlock;
+            _inventoryInput.SecondActionButtonDown += _blockModel.StartLine;
+            _inventoryInput.SecondActionButtonUp += _blockModel.EndLine;
             _blockModel.BlockColor.ValueChanged += _blockView.ChangeTransparentBlockColor;
             _hud.Palette.Color.ValueChanged += _blockModel.ChangeColor;
             _blockView.Enable();
@@ -45,6 +47,8 @@ namespace Inventory.Block
         public void Exit()
         {
             _inventoryInput.FirstActionButtonDown -= _blockModel.PlaceBlock;
+            _inventoryInput.SecondActionButtonDown -= _blockModel.StartLine;
+            _inventoryInput.SecondActionButtonUp -= _blockModel.EndLine;
             _blockModel.BlockColor.ValueChanged -= _blockView.ChangeTransparentBlockColor;
             _hud.Palette.Color.ValueChanged -= _blockModel.ChangeColor;
             _blockView.Disable();
