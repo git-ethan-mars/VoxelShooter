@@ -1,0 +1,85 @@
+﻿using System;
+using System.Buffers;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace DefaultNamespace
+{
+    public static class Bresenham3D
+    {
+        public static List<Vector3Int> Calculate(Vector3Int startPoint, Vector3Int endPoint)
+        {
+            var deltasX = ArrayPool<int>.Shared.Rent(2);
+            var deltasY = ArrayPool<int>.Shared.Rent(2);
+            var deltasZ = ArrayPool<int>.Shared.Rent(2);
+            UpdateDeltas(startPoint.x, endPoint.x, deltasX);
+            UpdateDeltas(startPoint.y, endPoint.y, deltasY);
+            UpdateDeltas(startPoint.z, endPoint.z, deltasZ);
+            var points = new List<Vector3Int>() {startPoint};
+            var currentPoint = startPoint;
+            var ray = new Ray(startPoint, endPoint - startPoint);
+            while (currentPoint != endPoint)
+            {
+                currentPoint = GetClosestPoint(currentPoint, ray, deltasX, deltasY, deltasZ);
+                points.Add(currentPoint);
+            }
+
+            ArrayPool<int>.Shared.Return(deltasX);
+            ArrayPool<int>.Shared.Return(deltasY);
+            ArrayPool<int>.Shared.Return(deltasZ);
+
+            return points;
+        }
+
+        private static Vector3Int GetClosestPoint(Vector3Int centralPoint, Ray ray, int[] deltasX,
+            int[] deltasY, int[] deltasZ)
+        {
+            var bestDistance = Mathf.Infinity;
+            var result = centralPoint;
+            for (var i = 0; i < 2; i++)
+            {
+                for (var j = 0; j < 2; j++)
+                {
+                    for (var k = 0; k < 2; k++)
+                    {
+                        var x = deltasX[i];
+                        var y = deltasY[j];
+                        var z = deltasZ[k];
+                        if (x == 0 && y == 0 && z == 0 || Math.Abs(x) + Math.Abs(y) + Math.Abs(z) != 1)
+                        {
+                            continue;
+                        }
+
+                        var point = centralPoint + new Vector3Int(x, y, z);
+                        var distance = Vector3.Cross(ray.direction, point - ray.origin).magnitude /
+                                       ray.direction.magnitude;
+                        if (distance < bestDistance)
+                        {
+                            bestDistance = distance;
+                            result = point;
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private static void UpdateDeltas(int startCoordinate, int endCoordinate, int[] deltas)
+        {
+            deltas[0] = 0;
+            if (startCoordinate < endCoordinate)
+            {
+                deltas[1] = 1;
+            }
+            else if (startCoordinate == endCoordinate)
+            {
+                deltas[1] = 0;
+            }
+            else
+            {
+                deltas[1] = -1;
+            }
+        }
+    }
+}
