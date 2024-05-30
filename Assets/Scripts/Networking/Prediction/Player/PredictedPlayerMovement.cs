@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 namespace Networking.Prediction.Player
 {
     [RequireComponent(typeof(NetworkedPlayerMessenger))]
-    public class NetworkedPlayerMovement : NetworkedClient<PlayerInput, PlayerState>
+    public class PredictedPlayerMovement : Prediction<PlayerInput, PlayerState>
     {
         [SerializeField]
         private Rigidbody rigidBody;

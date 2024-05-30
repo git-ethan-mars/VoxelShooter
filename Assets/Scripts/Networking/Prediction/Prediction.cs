@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Networking.Prediction
 {
-    public abstract class NetworkedClient<TClientInput, TClientState> : NetworkBehaviour, INetworkedClient
+    public abstract class Prediction<TClientInput, TClientState> : NetworkBehaviour, INetworkedClient
         where TClientInput : INetworkedClientInput
         where TClientState : INetworkedClientState
     {

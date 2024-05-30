@@ -116,7 +116,7 @@ namespace Networking
                 var player = _playerFactory.CreatePlayer(_spawnPointService.GetSpawnPosition());
                 player.GetComponent<PlayerMovement>().Construct(playerData.Characteristic.speed,
                     playerData.Characteristic.jumpHeight);
-                player.GetComponent<NetworkedPlayerMovement>().Construct(null, playerData.Characteristic.speed,
+                player.GetComponent<PredictedPlayerMovement>().Construct(null, playerData.Characteristic.speed,
                     playerData.Characteristic.jumpHeight);
                 NetworkServer.AddPlayerForConnection(connection, player);
                 connection.Send(new PlayerConfigureResponse(playerData.Characteristic.placeDistance,
@@ -305,7 +305,7 @@ namespace Networking
             var player = _playerFactory.CreatePlayer(_spawnPointService.GetSpawnPosition());
             player.GetComponent<PlayerMovement>().Construct(playerData.Characteristic.speed,
                 playerData.Characteristic.jumpHeight);
-            player.GetComponent<NetworkedPlayerMovement>().Construct(null, playerData.Characteristic.speed,
+            player.GetComponent<PredictedPlayerMovement>().Construct(null, playerData.Characteristic.speed,
                 playerData.Characteristic.jumpHeight);
             ReplacePlayer(connection, player);
             connection.Send(new PlayerConfigureResponse(playerData.Characteristic.placeDistance,

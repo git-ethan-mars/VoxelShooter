@@ -57,7 +57,7 @@ namespace PlayerLogic
         private new Rigidbody rigidbody;
 
         [SerializeField]
-        private NetworkedPlayerMovement predictedMovement;
+        private PredictedPlayerMovement predictedMovement;
 
         [SerializeField]
         private AudioSource continuousAudio;
