@@ -77,7 +77,7 @@ namespace Inventory.Block
             }
 
             var endLinePosition = Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2);
-            var positions = Bresenham3D.Calculate(_startLinePosition, endLinePosition)
+            var positions = Bresenham3D.Calculate(_startLinePosition, endLinePosition, Connectivity.Four)
                 .Select(position => new BlockDataWithPosition(position, new BlockData(BlockColor.Value))).ToArray();
             NetworkClient.Send(new AddBlocksRequest(positions));
         }

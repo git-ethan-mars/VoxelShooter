@@ -7,7 +7,7 @@ namespace DefaultNamespace
 {
     public static class Bresenham3D
     {
-        public static List<Vector3Int> Calculate(Vector3Int startPoint, Vector3Int endPoint)
+        public static List<Vector3Int> Calculate(Vector3Int startPoint, Vector3Int endPoint, Connectivity connectivity)
         {
             var deltasX = ArrayPool<int>.Shared.Rent(2);
             var deltasY = ArrayPool<int>.Shared.Rent(2);
@@ -20,7 +20,7 @@ namespace DefaultNamespace
             var ray = new Ray(startPoint, endPoint - startPoint);
             while (currentPoint != endPoint)
             {
-                currentPoint = GetClosestPoint(currentPoint, ray, deltasX, deltasY, deltasZ);
+                currentPoint = GetClosestPoint(currentPoint, ray, deltasX, deltasY, deltasZ, connectivity);
                 points.Add(currentPoint);
             }
 
@@ -32,7 +32,7 @@ namespace DefaultNamespace
         }
 
         private static Vector3Int GetClosestPoint(Vector3Int centralPoint, Ray ray, int[] deltasX,
-            int[] deltasY, int[] deltasZ)
+            int[] deltasY, int[] deltasZ, Connectivity connectivity)
         {
             var bestDistance = Mathf.Infinity;
             var result = centralPoint;
@@ -45,7 +45,12 @@ namespace DefaultNamespace
                         var x = deltasX[i];
                         var y = deltasY[j];
                         var z = deltasZ[k];
-                        if (x == 0 && y == 0 && z == 0 || Math.Abs(x) + Math.Abs(y) + Math.Abs(z) != 1)
+                        if (x == 0 && y == 0 && z == 0)
+                        {
+                            continue;
+                        }
+
+                        if (connectivity == Connectivity.Four && Math.Abs(x) + Math.Abs(y) + Math.Abs(z) != 1)
                         {
                             continue;
                         }
@@ -81,5 +86,11 @@ namespace DefaultNamespace
                 deltas[1] = -1;
             }
         }
+    }
+
+    public enum Connectivity
+    {
+        Four,
+        Eight
     }
 }
