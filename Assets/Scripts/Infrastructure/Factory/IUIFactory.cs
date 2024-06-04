@@ -10,6 +10,7 @@ using PlayerLogic;
 using UI;
 using UI.InGameUI;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Infrastructure.Factory
 {
@@ -29,5 +30,6 @@ namespace Infrastructure.Factory
         Scoreboard CreateScoreBoard(Transform parent, CustomNetworkManager networkManager, IAvatarLoader avatarLoader);
         TimeCounter CreateTimeCounter(Transform parent, CustomNetworkManager networkManager);
         InGameMenu CreateInGameMenu(Transform parent);
+        Image CreateLootBoxImage(Transform transform);
     }
 }

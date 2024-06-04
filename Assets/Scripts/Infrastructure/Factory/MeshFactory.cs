@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Data;
 using Entities;
+using Generators;
 using Infrastructure.AssetManagement;
 using MapLogic;
 using Networking.ClientServices;
-using Rendering;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -60,12 +60,12 @@ namespace Infrastructure.Factory
             return _assets.Instantiate(MeshPath.ChunkMeshRendererPath, position, rotation, parent);
         }
 
-        public void CreateWalls(MapProvider mapProvider, Transform parent)
+        public void CreateWalls(IMapProvider mapProvider, Transform parent)
         {
             var allFaces = Enum.GetValues(typeof(Faces)).Cast<Faces>().Where(face => face != Faces.None);
             foreach (var face in allFaces)
             {
-                _assets.Instantiate(MeshPath.WallPath, parent).GetComponent<WallRenderer>()
+                _assets.Instantiate(MeshPath.WallPath, parent).GetComponent<Wall>()
                     .Construct(mapProvider, face);
             }
         }

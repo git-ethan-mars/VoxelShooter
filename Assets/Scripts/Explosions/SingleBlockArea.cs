@@ -6,9 +6,9 @@ namespace Explosions
 {
     public class SingleBlockArea : IDamageBlockArea
     {
-        private readonly MapProvider _mapProvider;
+        private readonly IMapProvider _mapProvider;
 
-        public SingleBlockArea(MapProvider mapProvider)
+        public SingleBlockArea(IMapProvider mapProvider)
         {
             _mapProvider = mapProvider;
         }

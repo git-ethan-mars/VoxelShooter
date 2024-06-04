@@ -9,7 +9,7 @@ namespace MapLogic
 {
     public static class MapWriter
     {
-        public static void SaveMap(string fileName, MapProvider mapProvider)
+        public static void SaveMap(string fileName, IMapProvider mapProvider)
         {
             Directory.CreateDirectory(Constants.mapFolderPath);
             var filePath = Path.Combine(Constants.mapFolderPath, fileName);
@@ -17,8 +17,7 @@ namespace MapLogic
             WriteMap(mapProvider, file);
         }
 
-
-        public static void WriteMap(MapProvider mapProvider, Stream stream)
+        public static void WriteMap(IMapProvider mapProvider, Stream stream)
         {
             var result = new List<NativeList<byte>>(mapProvider.ChunkCount);
             var blocks = new List<NativeArray<BlockData>>(mapProvider.ChunkCount);

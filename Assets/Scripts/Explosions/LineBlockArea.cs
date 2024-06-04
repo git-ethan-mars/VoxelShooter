@@ -8,9 +8,9 @@ namespace Explosions
     {
         private const int LineLength = 3;
 
-        private readonly MapProvider _mapProvider;
+        private readonly IMapProvider _mapProvider;
 
-        public LineBlockArea(MapProvider mapProvider)
+        public LineBlockArea(IMapProvider mapProvider)
         {
             _mapProvider = mapProvider;
         }

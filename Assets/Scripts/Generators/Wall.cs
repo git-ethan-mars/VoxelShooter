@@ -2,16 +2,16 @@ using Data;
 using MapLogic;
 using UnityEngine;
 
-namespace Rendering
+namespace Generators
 {
-    public class WallRenderer : MonoBehaviour
+    public class Wall : MonoBehaviour
     {
         [SerializeField]
         private MeshFilter meshFilter;
 
         [SerializeField]
         private MeshCollider meshCollider;
-        public void Construct(MapProvider mapProvider, Faces face)
+        public void Construct(IMapProvider mapProvider, Faces face)
         {
             var mesh = new Mesh();
             mesh.vertices = new Vector3[4];

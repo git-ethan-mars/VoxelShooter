@@ -9,11 +9,12 @@ namespace Networking
 {
     public interface IServer
     {
-        MapProvider MapProvider { get; }
+        IMapProvider MapProvider { get; }
         MapUpdater MapUpdater { get; }
         BlockHealthSystem BlockHealthSystem { get; }
         EntityContainer EntityContainer { get; }
         IEnumerable<NetworkConnectionToClient> ClientConnections { get; }
+        string MapName { get; }
 
         void AddPlayer(NetworkConnectionToClient connection, CSteamID steamID,
             string nickname);

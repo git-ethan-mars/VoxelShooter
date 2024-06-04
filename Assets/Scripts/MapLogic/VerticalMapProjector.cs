@@ -29,7 +29,7 @@ namespace MapLogic
             {
                 for (var z = 0; z < _client.MapProvider.Depth; z++)
                 {
-                    projection[z * _client.MapProvider.Width + x] = _client.MapProvider.GetHighestBlock(x, z).Color;
+                    projection[z * _client.MapProvider.Width + x] = GetHighestBlock(x, z).Color;
                 }
             }
 
@@ -44,9 +44,25 @@ namespace MapLogic
                 if (visitedPositions.Add((block.Position.x, block.Position.z)))
                 {
                     Projection[block.Position.z * _client.MapProvider.Width + block.Position.x] =
-                        _client.MapProvider.GetHighestBlock(block.Position.x, block.Position.z).Color;
+                        GetHighestBlock(block.Position.x, block.Position.z).Color;
                 }
             }
+        }
+        
+        private BlockData GetHighestBlock(int x, int z)
+        {
+            for (var y = _client.MapProvider.Height - 1; y >= 0; y--)
+            {
+                var block = _client.MapProvider.GetBlockByGlobalPosition(x, y, z);
+                if (!block.IsSolid())
+                {
+                    continue;
+                }
+
+                return block;
+            }
+
+            return new BlockData(BlockColor.empty);
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Data;
-using Entities;
 using Infrastructure.Services.Storage;
 using Infrastructure.States;
 using MapLogic;
@@ -55,7 +54,7 @@ namespace Networking
             remove => _playerConfigureHandler.PlayerCreated += value;
         }
 
-        public MapProvider MapProvider
+        public IMapProvider MapProvider
         {
             get => _mapProvider;
             set
@@ -68,7 +67,7 @@ namespace Networking
         public VerticalMapProjector MapProjector { get; set; }
         public ClientPrefabRegistrar PrefabRegistrar { get; }
         public string MapName { get; set; }
-        public HashSet<LootBox> LootBoxes { get; set; } = new();
+        private IMapProvider _mapProvider;
 
         private readonly GameStateMachine _stateMachine;
         private readonly CustomNetworkManager _networkManager;
@@ -89,7 +88,6 @@ namespace Networking
         private readonly StartContinuousSoundHandler _startContinuousSoundHandler;
         private readonly StopContinuousSoundHandler _stopContinuousSoundHandler;
         private readonly SurroundingSoundHandler _surroundingSoundHandler;
-        private MapProvider _mapProvider;
         private readonly StartMuzzleFlashHandler _startMuzzleFlashHandler;
         private readonly StopMuzzleFlashHandler _stopMuzzleFlashHandler;
         private readonly RchParticleHandler _rchParticleHandler;

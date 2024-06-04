@@ -12,7 +12,7 @@ namespace MapLogic
         private static int _height;
         private const int Depth = 512;
 
-        public static MapProvider LoadVxl(string mapPath, MapConfigure mapConfigure)
+        public static IMapProvider LoadVxl(string mapPath, MapConfigure mapConfigure)
         {
             var data = File.ReadAllBytes(mapPath);
             _height = GetMapHeight(data);
@@ -94,7 +94,7 @@ namespace MapLogic
 
             var mapData = new MapData(chunks, Width, _height, Depth, mapConfigure.innerColor,
                 mapConfigure.waterColor);
-            var mapProvider = new MapProvider(mapData, mapConfigure);
+            var mapProvider = new MapProvider(mapData);
             for (var x = 0; x < Width; x++)
             {
                 for (var y = 0; y < _height - heightOffset; y++)

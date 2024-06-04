@@ -66,7 +66,7 @@ namespace Networking.MessageHandlers.RequestHandlers
             connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex,
                 blockItemData.Amount));
             _server.BlockHealthSystem.InitializeBlocks(validBlocks);
-            _server.MapUpdater.SetBlocksByGlobalPositions(validBlocks);
+            _server.MapUpdater.UpdateMap(validBlocks);
         }
     }
 }

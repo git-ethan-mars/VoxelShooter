@@ -28,7 +28,7 @@ namespace Networking.MessageHandlers.RequestHandlers
             {
                 if (playerData.SelectedItem is RangeWeaponItem)
                 {
-                    _weaponValidator.Shoot(connection, request.Ray, request.IsButtonHolding);
+                    _weaponValidator.Shoot(connection, request.Ray, request.IsButtonHolding, request.Tick);
                 }
 
                 if (playerData.SelectedItem is RocketLauncherItem)

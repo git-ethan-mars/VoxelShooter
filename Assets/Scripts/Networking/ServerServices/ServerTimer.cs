@@ -8,12 +8,12 @@ namespace Networking.ServerServices
 {
     public class ServerTimer
     {
-        private readonly NetworkManager _networkManager;
+        private readonly CustomNetworkManager _networkManager;
         private readonly int _timeInSeconds;
         private ServerTime _timeLeft;
         private IEnumerator coroutine;
 
-        public ServerTimer(NetworkManager networkManager, int timeInMinutes)
+        public ServerTimer(CustomNetworkManager networkManager, int timeInMinutes)
         {
             _networkManager = networkManager;
             _timeInSeconds = timeInMinutes * 60;
@@ -23,6 +23,11 @@ namespace Networking.ServerServices
         {
             coroutine = SendTime();
             _networkManager.StartCoroutine(coroutine);
+        }
+
+        public void Stop()
+        {
+            _networkManager.StopCoroutine(coroutine);
         }
 
         private IEnumerator SendTime()

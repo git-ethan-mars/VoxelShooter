@@ -66,9 +66,9 @@ namespace Networking
         {
             if (NetworkServer.localConnection == connection)
             {
-                Client.MapProvider = _server.MapProvider;
-                Client.MapName = _server.MapProvider.MapName;
+                Client.MapName = _server.MapName;
                 Client.PrefabRegistrar.LootBoxes = _server.EntityContainer.LootBoxes;
+                Client.MapProvider = _server.MapProvider;
             }
             else
             {

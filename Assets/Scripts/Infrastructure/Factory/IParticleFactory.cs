@@ -11,6 +11,6 @@ namespace Infrastructure.Factory
 
         ParticleSystem CreateFallingMeshParticle(Transform particleContainer);
         void CreateWeatherParticle(string mapName, Transform parent);
-        public GameObject CreateBlockDestructionParticle(Vector3 position, Quaternion rotation, Color32 blockColor);
+        GameObject CreateBlockDestructionParticle(Vector3 position, Quaternion rotation, Color32 blockColor);
     }
 }

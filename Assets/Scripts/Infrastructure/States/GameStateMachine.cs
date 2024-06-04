@@ -35,7 +35,7 @@ namespace Infrastructure.States
                 [typeof(JoinLocalMatchState)] = new JoinLocalMatchState(this, sceneLoader,
                     allServices.Single<IGameFactory>(), allServices.Single<IUIFactory>()),
                 [typeof(GameLoopState)] =
-                    new GameLoopState(this, allServices.Single<IGameFactory>(), allServices.Single<IUIFactory>(),
+                    new GameLoopState(this, allServices.Single<IStaticDataService>(), allServices.Single<IGameFactory>(), allServices.Single<IUIFactory>(),
                         allServices.Single<IMeshFactory>(), allServices.Single<IInputService>(),
                         allServices.Single<IStorageService>(),
                         allServices.Single<IAvatarLoader>())

@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Data;
-using Rendering;
 using UnityEngine;
 
 namespace Generators

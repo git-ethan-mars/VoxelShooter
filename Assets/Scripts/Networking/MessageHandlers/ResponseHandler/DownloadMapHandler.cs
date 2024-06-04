@@ -31,7 +31,7 @@ namespace Networking.MessageHandlers.ResponseHandler
 
             var mapConfigure = _staticData.GetMapConfigure(_client.MapName);
             var mapData = MapReader.ReadFromStream(new MemoryStream(_byteChunks.ToArray()), mapConfigure);
-            _client.MapProvider = new MapProvider(mapData, mapConfigure);
+            _client.MapProvider = new MapProvider(mapData);
         }
     }
 }

@@ -17,7 +17,7 @@ namespace Networking.ServerServices
         private readonly float _wreckedColorCoefficient;
 
         private readonly int[] _healthByBlock;
-        private readonly MapProvider _mapProvider;
+        private readonly IMapProvider _mapProvider;
         
         public BlockHealthSystem(IStaticDataService staticData, IServer server)
         {
@@ -30,7 +30,7 @@ namespace Networking.ServerServices
             _damagedColorCoefficient = healthBalance.DamagedColor;
             _wreckedColorCoefficient = healthBalance.WreckedColor;
 
-            _healthByBlock = new int[_mapProvider.BlockCount];
+            _healthByBlock = new int[_mapProvider.ChunkCount * ChunkData.ChunkSizeCubed];
             for (var i = 0; i < _healthByBlock.Length; i++)
             {
                 _healthByBlock[i] = _blockFullHealth;

@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace Rendering
+namespace Data
 {
     public class MeshData
     {

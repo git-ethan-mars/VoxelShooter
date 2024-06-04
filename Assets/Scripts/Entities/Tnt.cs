@@ -25,7 +25,7 @@ namespace Entities
             IParticleFactory particleFactory, AudioService audioService, TntItem tntItem, Vector3Int linkedPosition)
         {
             _server = server;
-            _server.MapUpdater.MapUpdated += OnMapUpdated;
+            _server.MapUpdater.MapUpdated += OnMapUpdated; // TODO : Unsubscribe
             _tntItem = tntItem;
             _particleFactory = particleFactory;
             _audioService = audioService;

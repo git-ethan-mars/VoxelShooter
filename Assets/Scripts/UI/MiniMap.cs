@@ -21,21 +21,20 @@ namespace UI
 
         private readonly List<Image> _lootBoxImages = new();
 
-        private MapProvider _mapProvider;
+        private IMapProvider _mapProvider;
         private Player _player;
-        private UIFactory _uiFactory;
+        private IUIFactory _uiFactory;
         private Color32[] _miniMapPixels;
         private Texture2D _miniMapTexture;
         private Color32[] _fullMapPixels;
         private HashSet<LootBox> _lootBoxes;
-
-        public void Construct(IClient client, Player player, UIFactory uiFactory)
+        public void Construct(IClient client, IUIFactory uiFactory, Player player)
         {
             _mapProvider = client.MapProvider;
             _fullMapPixels = client.MapProjector.Projection;
             _lootBoxes = client.PrefabRegistrar.LootBoxes;
-            _player = player;
             _uiFactory = uiFactory;
+            _player = player;
             _miniMapPixels = new Color32[MiniMapSize * MiniMapSize];
             _miniMapTexture = new Texture2D(MiniMapSize, MiniMapSize);
             _miniMapTexture.filterMode = FilterMode.Point;

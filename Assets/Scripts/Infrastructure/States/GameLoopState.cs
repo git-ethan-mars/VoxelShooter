@@ -2,6 +2,7 @@
 using Infrastructure.Factory;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.PlayerDataLoader;
+using Infrastructure.Services.StaticData;
 using Infrastructure.Services.Storage;
 using MapLogic;
 using Networking;
@@ -13,6 +14,7 @@ namespace Infrastructure.States
         private const string ChunkContainerName = "ChunkContainer";
 
         private readonly GameStateMachine _gameStateMachine;
+        private readonly IStaticDataService _staticData;
         private readonly IGameFactory _gameFactory;
         private readonly IUIFactory _uiFactory;
         private readonly IMeshFactory _meshFactory;
@@ -22,12 +24,13 @@ namespace Infrastructure.States
         private ChunkMeshUpdater _chunkMeshUpdater;
         private VerticalMapProjector _mapProjector;
 
-        public GameLoopState(GameStateMachine gameStateMachine, IGameFactory gameFactory, IUIFactory uiFactory,
+        public GameLoopState(GameStateMachine gameStateMachine, IStaticDataService staticData, IGameFactory gameFactory, IUIFactory uiFactory,
             IMeshFactory meshFactory, IInputService inputService,
             IStorageService storageService,
             IAvatarLoader avatarLoader)
         {
             _gameStateMachine = gameStateMachine;
+            _staticData = staticData;
             _gameFactory = gameFactory;
             _uiFactory = uiFactory;
             _meshFactory = meshFactory;
@@ -41,11 +44,12 @@ namespace Infrastructure.States
             var mapGenerator = new MapGenerator(networkManager.Client.MapProvider, _gameFactory, _meshFactory);
             var chunkMeshes = mapGenerator.GenerateMap(_gameFactory.CreateGameObjectContainer(ChunkContainerName));
             _chunkMeshUpdater = new ChunkMeshUpdater(networkManager.Client, chunkMeshes);
+            var mapConfigure = _staticData.GetMapConfigure(networkManager.Client.MapName);
             mapGenerator.GenerateWalls();
-            mapGenerator.GenerateWater();
-            mapGenerator.GenerateLight();
-            Environment.ApplyAmbientLighting(networkManager.Client.MapProvider.SceneData);
-            Environment.ApplyFog(networkManager.Client.MapProvider.SceneData);
+            mapGenerator.GenerateWater(mapConfigure.waterColor);
+            _gameFactory.CreateDirectionalLight(mapConfigure.lightData);
+            Environment.ApplyAmbientLighting(mapConfigure);
+            Environment.ApplyFog(mapConfigure);
             _mapProjector = new VerticalMapProjector(networkManager.Client);
             networkManager.Client.MapProjector = _mapProjector;
             _uiFactory.CreateInGameUI(_gameStateMachine, networkManager, _inputService, _storageService, _avatarLoader);

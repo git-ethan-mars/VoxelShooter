@@ -10,7 +10,7 @@ namespace Explosions
     public class BlockDestructionBehaviour
     {
         private readonly BlockHealthSystem _blockHealthSystem;
-        private readonly MapProvider _mapProvider;
+        private readonly IMapProvider _mapProvider;
         private readonly MapUpdater _mapUpdater;
         private readonly IDamageBlockArea _damageArea;
 
@@ -37,7 +37,7 @@ namespace Explosions
                 }
             }
 
-            _mapUpdater.SetBlocksByGlobalPositions(changedBlocks);
+            _mapUpdater.UpdateMap(changedBlocks);
         }
     }
 }

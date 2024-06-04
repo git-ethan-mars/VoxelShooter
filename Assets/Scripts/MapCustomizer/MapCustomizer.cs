@@ -40,7 +40,7 @@ namespace MapCustomizer
 
         private static MapCustomizer _instance;
         private MapConfigure _previousConfigure;
-        private MapProvider _mapProvider;
+        private IMapProvider _mapProvider;
 
         [UnityEditor.Callbacks.DidReloadScripts]
         private static void Init()

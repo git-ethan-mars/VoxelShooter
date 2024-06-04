@@ -18,7 +18,7 @@ namespace Networking
         event Action<List<ScoreData>> ScoreboardChanged;
         event Action GameFinished;
         event Action<Player> PlayerCreated;
-        MapProvider MapProvider { get; set; }
+        IMapProvider MapProvider { get; set; }
         VerticalMapProjector MapProjector { get; set; }
         ClientPrefabRegistrar PrefabRegistrar { get; }
         string MapName { get; set; }

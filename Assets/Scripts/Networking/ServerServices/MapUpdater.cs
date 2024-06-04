@@ -12,17 +12,19 @@ namespace Networking.ServerServices
     {
         public event Action MapUpdated;
         private readonly ICoroutineRunner _coroutineRunner;
-        private readonly MapProvider _mapProvider;
+        private readonly IMapProvider _mapProvider;
+        private readonly MapHistory _mapHistory;
         private readonly ColumnDestructionAlgorithm _destructionAlgorithm;
 
-        public MapUpdater(ICoroutineRunner coroutineRunner, MapProvider mapProvider)
+        public MapUpdater(ICoroutineRunner coroutineRunner, IMapProvider mapProvider, MapHistory mapHistory)
         {
             _coroutineRunner = coroutineRunner;
             _mapProvider = mapProvider;
+            _mapHistory = mapHistory;
             _destructionAlgorithm = new ColumnDestructionAlgorithm(mapProvider);
         }
 
-        public void SetBlocksByGlobalPositions(List<BlockDataWithPosition> blocks)
+        public void UpdateMap(List<BlockDataWithPosition> blocks)
         {
             var createdBlocks = new List<BlockDataWithPosition>();
             var removedBlocks = new List<BlockDataWithPosition>();
@@ -39,7 +41,8 @@ namespace Networking.ServerServices
                 {
                     removedBlocks.Add(blocks[i]);
                 }
-
+                
+                _mapHistory.UpdateHistory(blocks[i]);
                 _mapProvider.SetBlockByGlobalPosition(blocks[i].Position, blocks[i].BlockData);
             }
 
@@ -51,6 +54,7 @@ namespace Networking.ServerServices
 
             foreach (var fallingPosition in fallingPositions)
             {
+                _mapHistory.UpdateHistory(new BlockDataWithPosition(fallingPosition, new BlockData()));
                 _mapProvider.SetBlockByGlobalPosition(fallingPosition, new BlockData());
             }
 

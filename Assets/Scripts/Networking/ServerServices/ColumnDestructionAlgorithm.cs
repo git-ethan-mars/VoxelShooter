@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Data;
 using MapLogic;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ namespace Networking.ServerServices
 {
     public class ColumnDestructionAlgorithm
     {
-        private readonly MapProvider _mapProvider;
+        private readonly IMapProvider _mapProvider;
         private readonly List<Run>[] _columns;
         private readonly Dictionary<Run, HashSet<Run>> _neighboursByRun;
         private readonly List<Run> _runsToDelete;
@@ -16,7 +17,7 @@ namespace Networking.ServerServices
         private readonly HashSet<Vector3Int> _connectedNeighbours;
         private readonly List<Vector3Int> _neighbours;
 
-        public ColumnDestructionAlgorithm(MapProvider mapProvider)
+        public ColumnDestructionAlgorithm(IMapProvider mapProvider)
         {
             _mapProvider = mapProvider;
             _columns = new List<Run>[mapProvider.Width * mapProvider.Depth];

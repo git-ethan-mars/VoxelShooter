@@ -3,7 +3,6 @@ using Data;
 using Infrastructure.Factory;
 using Networking;
 using Networking.ClientServices;
-using Rendering;
 using UnityEngine;
 
 namespace Generators

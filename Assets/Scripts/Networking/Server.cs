@@ -20,7 +20,8 @@ namespace Networking
 {
     public class Server : IServer
     {
-        public MapProvider MapProvider { get; }
+        public string MapName => _serverSettings.MapName;
+        public IMapProvider MapProvider { get; }
         public MapUpdater MapUpdater { get; }
         public EntityContainer EntityContainer { get; }
         public IEnumerable<NetworkConnectionToClient> ClientConnections => _dataByConnection.Keys;
@@ -49,6 +50,7 @@ namespace Networking
         private readonly AuthenticationHandler _authenticationHandler;
         private readonly FallDamageService _fallDamageService;
         private readonly Dictionary<NetworkConnectionToClient, PlayerData> _dataByConnection;
+        private readonly MapHistory _mapHistory;
 
         public Server(CustomNetworkManager networkManager, ServerSettings serverSettings)
         {
@@ -58,18 +60,21 @@ namespace Networking
             _staticData = networkManager.StaticData;
             _serverSettings = serverSettings;
             MapProvider = MapReader.ReadFromFile(serverSettings.MapName, networkManager.StaticData);
-            MapUpdater = new MapUpdater(networkManager, MapProvider);
+            _mapHistory = new MapHistory(networkManager, MapProvider);
+            MapUpdater = new MapUpdater(networkManager, MapProvider, _mapHistory);
             EntityContainer = new EntityContainer();
             _entityPositionValidator = new EntityPositionValidator(this);
             _spawnPointService =
-                new SpawnPointService(this, networkManager.GameFactory, networkManager.EntityFactory);
+                new SpawnPointService(this, networkManager.StaticData, networkManager.GameFactory,
+                    networkManager.EntityFactory);
             _serverTimer = new ServerTimer(networkManager, serverSettings.MaxDuration);
             _boxDropService = new BoxDropService(this, networkManager, serverSettings);
             BlockHealthSystem = new BlockHealthSystem(networkManager.StaticData, this);
             _fallDamageService = new FallDamageService(this, networkManager);
             var audioService = new AudioService(networkManager.StaticData);
             var muzzleFlashService = new MuzzleFlashService();
-            var rangeWeaponValidator = new RangeWeaponValidator(this, networkManager, audioService, muzzleFlashService);
+            var rangeWeaponValidator = new RangeWeaponValidator(this, networkManager, audioService, muzzleFlashService,
+                MapProvider, _mapHistory);
             var meleeWeaponValidator = new MeleeWeaponValidator(this, networkManager, audioService);
             var rocketLauncherValidator = new RocketLauncherValidator(this, networkManager, audioService);
             var drillValidator = new DrillValidator(this, networkManager, audioService);
@@ -97,6 +102,7 @@ namespace Networking
             _boxDropService.Start();
             _spawnPointService.CreateSpawnPoints();
             _fallDamageService.Start();
+            _mapHistory.Start();
         }
 
         public void AddPlayer(NetworkConnectionToClient connection, CSteamID steamID,
@@ -195,16 +201,18 @@ namespace Networking
 
         public void SendCurrentServerState(NetworkConnectionToClient connection)
         {
-            connection.Send(new MapNameResponse(MapProvider.MapName));
+            connection.Send(new MapNameResponse(MapName));
             SendMap(connection);
         }
 
         public void Stop()
         {
+            _serverTimer.Stop();
             _entityPositionValidator.Stop();
             _boxDropService.Stop();
             _spawnPointService.RemoveSpawnPoints();
             _fallDamageService.Stop();
+            _mapHistory.Stop();
             UnregisterHandlers();
         }
 
@@ -276,7 +284,6 @@ namespace Networking
 
         private void SendDataFromOtherPlayers(NetworkConnectionToClient connection)
         {
-            var playerData = GetPlayerData(connection);
             foreach (var anotherClient in ClientConnections)
             {
                 if (anotherClient.identity == null)

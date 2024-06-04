@@ -5,7 +5,6 @@ using Data;
 using Infrastructure.Factory;
 using MapLogic;
 using Optimization;
-using Rendering;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
@@ -17,11 +16,11 @@ namespace Generators
         private const string WallContainerName = "WallContainer";
         private const float WaterScale = 2.0f;
 
-        private readonly MapProvider _mapProvider;
+        private readonly IMapProvider _mapProvider;
         private readonly IMeshFactory _meshFactory;
         private readonly IGameFactory _gameFactory;
 
-        public MapGenerator(MapProvider mapProvider, IGameFactory gameFactory, IMeshFactory meshFactory)
+        public MapGenerator(IMapProvider mapProvider, IGameFactory gameFactory, IMeshFactory meshFactory)
         {
             _mapProvider = mapProvider;
             _gameFactory = gameFactory;
@@ -60,18 +59,13 @@ namespace Generators
             _meshFactory.CreateWalls(_mapProvider, wallContainer);
         }
 
-        public void GenerateWater()
+        public void GenerateWater(Color32 waterColor)
         {
             _meshFactory.CreateWaterPlane(
                 new Vector3((float) _mapProvider.Width / 2, 0.5f, (float) _mapProvider.Width / 2) +
                 Constants.worldOffset,
                 new Vector3(_mapProvider.Width * WaterScale, 1, _mapProvider.Depth * WaterScale),
-                _mapProvider.WaterColor);
-        }
-
-        public void GenerateLight()
-        {
-            _gameFactory.CreateDirectionalLight(_mapProvider.SceneData.LightData);
+                waterColor);
         }
 
         private GameObject[] CreateChunkMeshObjects(Transform chunkContainer)
@@ -99,32 +93,32 @@ namespace Generators
         {
             for (var i = 0; i < meshes.Count; i++)
             {
-                if (_mapProvider.TryGetUpChunkNumber(i, out var upChunkNumber))
+                if (TryGetUpChunkNumber(i, out var upChunkNumber))
                 {
                     meshes[i].UpperNeighbour = meshes[upChunkNumber];
                 }
 
-                if (_mapProvider.TryGetDownChunkNumber(i, out var downChunkNumber))
+                if (TryGetDownChunkNumber(i, out var downChunkNumber))
                 {
                     meshes[i].LowerNeighbour = meshes[downChunkNumber];
                 }
 
-                if (_mapProvider.TryGetFrontChunkNumber(i, out var frontChunkNumber))
+                if (TryGetFrontChunkNumber(i, out var frontChunkNumber))
                 {
                     meshes[i].FrontNeighbour = meshes[frontChunkNumber];
                 }
 
-                if (_mapProvider.TryGetBackChunkNumber(i, out var backChunkNumber))
+                if (TryGetBackChunkNumber(i, out var backChunkNumber))
                 {
                     meshes[i].BackNeighbour = meshes[backChunkNumber];
                 }
 
-                if (_mapProvider.TryGetRightChunkNumber(i, out var rightChunkNumber))
+                if (TryGetRightChunkNumber(i, out var rightChunkNumber))
                 {
                     meshes[i].RightNeighbour = meshes[rightChunkNumber];
                 }
 
-                if (_mapProvider.TryGetLeftChunkNumber(i, out var leftChunkNumber))
+                if (TryGetLeftChunkNumber(i, out var leftChunkNumber))
                 {
                     meshes[i].LeftNeighbour = meshes[leftChunkNumber];
                 }
@@ -138,7 +132,7 @@ namespace Generators
             {
                 var addressByNeighbour = new NativeArray<IntPtr>(6, Allocator.TempJob);
                 // order: up = 0, down = 1, front = 2, back = 3, right = 4, left = 5.
-                if (_mapProvider.TryGetUpChunkNumber(i, out var upChunkNumber))
+                if (TryGetUpChunkNumber(i, out var upChunkNumber))
                 {
                     addressByNeighbour[0] = (IntPtr) blockAddresses[upChunkNumber];
                 }
@@ -147,7 +141,7 @@ namespace Generators
                     addressByNeighbour[0] = IntPtr.Zero;
                 }
 
-                if (_mapProvider.TryGetDownChunkNumber(i, out var downChunkNumber))
+                if (TryGetDownChunkNumber(i, out var downChunkNumber))
                 {
                     addressByNeighbour[1] =
                         (IntPtr) blockAddresses[downChunkNumber];
@@ -157,7 +151,7 @@ namespace Generators
                     addressByNeighbour[1] = IntPtr.Zero;
                 }
 
-                if (_mapProvider.TryGetFrontChunkNumber(i, out var frontChunkNumber))
+                if (TryGetFrontChunkNumber(i, out var frontChunkNumber))
                 {
                     addressByNeighbour[2] = (IntPtr) blockAddresses[frontChunkNumber];
                 }
@@ -166,7 +160,7 @@ namespace Generators
                     addressByNeighbour[2] = IntPtr.Zero;
                 }
 
-                if (_mapProvider.TryGetBackChunkNumber(i, out var backChunkNumber))
+                if (TryGetBackChunkNumber(i, out var backChunkNumber))
                 {
                     addressByNeighbour[3] = (IntPtr) blockAddresses[backChunkNumber];
                 }
@@ -175,7 +169,7 @@ namespace Generators
                     addressByNeighbour[3] = IntPtr.Zero;
                 }
 
-                if (_mapProvider.TryGetRightChunkNumber(i, out var rightChunkNumber))
+                if (TryGetRightChunkNumber(i, out var rightChunkNumber))
                 {
                     addressByNeighbour[4] = (IntPtr) blockAddresses[rightChunkNumber];
                 }
@@ -184,7 +178,7 @@ namespace Generators
                     addressByNeighbour[4] = IntPtr.Zero;
                 }
 
-                if (_mapProvider.TryGetLeftChunkNumber(i, out var leftChunkNumber))
+                if (TryGetLeftChunkNumber(i, out var leftChunkNumber))
                 {
                     addressByNeighbour[5] = (IntPtr) blockAddresses[leftChunkNumber];
                 }
@@ -261,6 +255,101 @@ namespace Generators
                 jobs[i].Colors.Dispose();
                 jobs[i].Normals.Dispose();
             }
+        }
+
+
+        private bool TryGetFrontChunkNumber(int chunkNumber, out int neighbourChunkNumber)
+        {
+            var notValidatedChunkNumber = chunkNumber + 1;
+            if (notValidatedChunkNumber < _mapProvider.ChunkCount &&
+                chunkNumber / (_mapProvider.Depth / ChunkData.ChunkSize) ==
+                notValidatedChunkNumber / (_mapProvider.Depth / ChunkData.ChunkSize))
+            {
+                neighbourChunkNumber = notValidatedChunkNumber;
+                return true;
+            }
+
+            neighbourChunkNumber = -1;
+            return false;
+        }
+
+        private bool TryGetBackChunkNumber(int chunkNumber, out int neighbourChunkNumber)
+        {
+            var notValidatedChunkNumber = chunkNumber - 1;
+            if (notValidatedChunkNumber >= 0 && chunkNumber / (_mapProvider.Depth / ChunkData.ChunkSize) ==
+                notValidatedChunkNumber / (_mapProvider.Depth / ChunkData.ChunkSize))
+            {
+                neighbourChunkNumber = notValidatedChunkNumber;
+                return true;
+            }
+
+            neighbourChunkNumber = -1;
+            return false;
+        }
+
+        private bool TryGetUpChunkNumber(int chunkNumber, out int neighbourChunkNumber)
+        {
+            var notValidatedChunkNumber = chunkNumber + _mapProvider.Depth / ChunkData.ChunkSize;
+            if (notValidatedChunkNumber < _mapProvider.ChunkCount &&
+                chunkNumber / (_mapProvider.Depth / ChunkData.ChunkSize * _mapProvider.Height /
+                               ChunkData.ChunkSize) ==
+                notValidatedChunkNumber /
+                (_mapProvider.Depth / ChunkData.ChunkSize * _mapProvider.Height /
+                 ChunkData.ChunkSize))
+            {
+                neighbourChunkNumber = notValidatedChunkNumber;
+                return true;
+            }
+
+            neighbourChunkNumber = -1;
+            return false;
+        }
+
+        private bool TryGetDownChunkNumber(int chunkNumber, out int neighbourChunkNumber)
+        {
+            var notValidatedChunkNumber = chunkNumber - _mapProvider.Depth / ChunkData.ChunkSize;
+            if (notValidatedChunkNumber >= 0 &&
+                chunkNumber / (_mapProvider.Depth / ChunkData.ChunkSize * _mapProvider.Height /
+                               ChunkData.ChunkSize) ==
+                notValidatedChunkNumber /
+                (_mapProvider.Depth / ChunkData.ChunkSize * _mapProvider.Height /
+                 ChunkData.ChunkSize))
+            {
+                neighbourChunkNumber = notValidatedChunkNumber;
+                return true;
+            }
+
+            neighbourChunkNumber = -1;
+            return false;
+        }
+
+        private bool TryGetRightChunkNumber(int chunkNumber, out int neighbourChunkNumber)
+        {
+            var notValidatedChunkNumber =
+                chunkNumber + _mapProvider.Height / ChunkData.ChunkSize * _mapProvider.Depth / ChunkData.ChunkSize;
+            if (notValidatedChunkNumber < _mapProvider.ChunkCount)
+            {
+                neighbourChunkNumber = notValidatedChunkNumber;
+                return true;
+            }
+
+            neighbourChunkNumber = -1;
+            return false;
+        }
+
+        private bool TryGetLeftChunkNumber(int chunkNumber, out int neighbourChunkNumber)
+        {
+            var notValidatedChunkNumber =
+                chunkNumber - _mapProvider.Height / ChunkData.ChunkSize * _mapProvider.Depth /
+                ChunkData.ChunkSize;
+            if (notValidatedChunkNumber >= 0)
+            {
+                neighbourChunkNumber = notValidatedChunkNumber;
+                return true;
+            }
+
+            neighbourChunkNumber = -1;
+            return false;
         }
     }
 }

@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using CameraLogic;
 using Data;
-using DefaultNamespace;
+using Geometry;
 using Infrastructure;
 using Mirror;
 using Networking.Messages.Requests;
@@ -77,8 +77,8 @@ namespace Inventory.Block
             }
 
             var endLinePosition = Vector3Int.FloorToInt(raycastHit.point + raycastHit.normal / 2);
-            var positions = Bresenham3D.Calculate(_startLinePosition, endLinePosition, Connectivity.Four)
-                .Select(position => new BlockDataWithPosition(position, new BlockData(BlockColor.Value))).ToArray();
+            var positions = VoxelLineDrawer.Calculate(_startLinePosition, endLinePosition, VoxelLineDrawer.Connectivity.Four)
+                .Select(position => new BlockDataWithPosition(Vector3Int.FloorToInt(position), new BlockData(BlockColor.Value))).ToArray();
             NetworkClient.Send(new AddBlocksRequest(positions));
         }
 

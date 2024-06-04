@@ -1,10 +1,11 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using Data;
 using Explosions;
+using Geometry;
 using Infrastructure;
 using Infrastructure.Factory;
+using MapLogic;
 using Mirror;
 using Networking.Messages.Responses;
 using UnityEngine;
@@ -19,9 +20,11 @@ namespace Networking.ServerServices
         private readonly BlockDestructionBehaviour _blockDestructionBehaviour;
         private readonly AudioService _audioService;
         private readonly MuzzleFlashService _muzzleFlashService;
+        private readonly IMapProvider _mapProvider;
+        private readonly MapHistory _mapHistory;
 
         public RangeWeaponValidator(IServer server, CustomNetworkManager networkManager, AudioService audioService,
-            MuzzleFlashService muzzleFlashService)
+            MuzzleFlashService muzzleFlashService, IMapProvider mapProvider, MapHistory mapHistory)
         {
             _server = server;
             _coroutineRunner = networkManager;
@@ -31,9 +34,11 @@ namespace Networking.ServerServices
                 new BlockDestructionBehaviour(server, blockArea);
             _audioService = audioService;
             _muzzleFlashService = muzzleFlashService;
+            _mapProvider = mapProvider;
+            _mapHistory = mapHistory;
         }
 
-        public void Shoot(NetworkConnectionToClient connection, Ray ray, bool requestIsButtonHolding)
+        public void Shoot(NetworkConnectionToClient connection, Ray ray, bool requestIsButtonHolding, int tick)
         {
             var playerData = _server.GetPlayerData(connection);
             var rangeWeapon = (RangeWeaponItem) playerData.SelectedItem;
@@ -51,10 +56,9 @@ namespace Networking.ServerServices
                 return;
             }
 
-            var bulletImpactColors = new Dictionary<Vector3Int, Color32>();
             for (var i = 0; i < rangeWeapon.bulletsPerTap; i++)
             {
-                ApplyRaycast(connection, ray, rangeWeapon, rangeWeaponData, bulletImpactColors);
+                ApplyRaycast(connection, ray, rangeWeapon, rangeWeaponData, tick);
                 rangeWeaponData.RecoilModifier += rangeWeapon.stepRecoil;
             }
 
@@ -62,7 +66,7 @@ namespace Networking.ServerServices
             connection.Send(new ShootResultResponse(playerData.SelectedSlotIndex, rangeWeaponData.BulletsInMagazine));
             _coroutineRunner.StartCoroutine(ResetShoot(connection, rangeWeapon, rangeWeaponData));
             _coroutineRunner.StartCoroutine(ResetRecoil(connection, rangeWeapon, rangeWeaponData));
-            
+
             if (rangeWeapon.isAutomatic)
             {
                 _audioService.StartContinuousAudio(rangeWeapon.shootingSound, connection.identity);
@@ -72,6 +76,7 @@ namespace Networking.ServerServices
             {
                 _audioService.SendAudio(rangeWeapon.shootingSound, connection.identity);
             }
+
             _muzzleFlashService.StartMuzzleFlash(connection.identity);
         }
 
@@ -171,22 +176,27 @@ namespace Networking.ServerServices
         }
 
         private void ApplyRaycast(NetworkConnectionToClient source, Ray ray,
-            RangeWeaponItem configure, RangeWeaponItemData itemData, Dictionary<Vector3Int, Color32> bulletImpactColors)
+            RangeWeaponItem configure, RangeWeaponItemData itemData, int tick)
         {
-            var x = Math.Abs(itemData.RecoilModifier) < Constants.Epsilon
-                ? 0
-                : UnityEngine.Random.Range(-configure.baseRecoil, configure.baseRecoil) *
-                  (itemData.RecoilModifier + 1);
-            var y = Math.Abs(itemData.RecoilModifier) < Constants.Epsilon
-                ? 0
-                : UnityEngine.Random.Range(-configure.baseRecoil, configure.baseRecoil) *
-                  (itemData.RecoilModifier + 1);
-            var z = Math.Abs(itemData.RecoilModifier) < Constants.Epsilon
-                ? 0
-                : UnityEngine.Random.Range(-configure.baseRecoil, configure.baseRecoil) *
-                  (itemData.RecoilModifier + 1);
-            ray = new Ray(ray.origin, ray.direction + new Vector3(x, y, z));
+            ray = new Ray(ray.origin, ray.direction);
             var raycastResult = Physics.Raycast(ray, out var rayHit, configure.range, Constants.attackMask);
+            var blockPosition = Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2);
+            Debug.Log($"Correct: {blockPosition}");
+            if (CheckCollisionWithBlock(ray, out var data, configure.range, tick))
+            {
+                _blockDestructionBehaviour.DamageBlocks(data.Position, configure.damage);
+                /*if (bulletImpactColors.TryGetValue(blockPosition, out var color))
+                {
+                    var bullet = _particleFactory.CreateBulletImpact(rayHit.point, Quaternion.Euler(
+                            rayHit.normal.y * -90,
+                            rayHit.normal.x * 90 + (rayHit.normal.z == -1 ? 180 : 0), 0),
+                        color);
+                    NetworkServer.Spawn(bullet);
+                }*/
+            }
+
+            ;
+
             if (!raycastResult)
             {
                 return;
@@ -211,27 +221,31 @@ namespace Networking.ServerServices
             {
                 ShootImpact(source, rayHit, (int) (configure.armMultiplier * configure.damage));
             }
+        }
 
-            if (rayHit.collider.CompareTag("Chunk"))
+        private bool CheckCollisionWithBlock(Ray ray, out BlockDataWithPosition data, float distance, int tick)
+        {
+            var startPoint = Vector3Int.FloorToInt(ray.origin);
+            var endPoint = Vector3Int.FloorToInt(ray.GetPoint(distance));
+            foreach (var blockPosition in DDA.Calculate(startPoint, endPoint))
             {
-                var blockPosition = Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2);
-                var block = _server.MapProvider.GetBlockByGlobalPosition(blockPosition);
-
-                if (block.IsSolid())
+                if (!_mapProvider.IsInsideMap(blockPosition.x, blockPosition.y, blockPosition.z))
                 {
-                    bulletImpactColors[blockPosition] = block.Color;
-                    _blockDestructionBehaviour.DamageBlocks(blockPosition, configure.damage);
+                    break;
                 }
 
-                if (bulletImpactColors.ContainsKey(blockPosition))
+                var blockFromPast = _mapHistory.GetBlockByGlobalPosition(blockPosition, tick);
+                if (blockFromPast.IsSolid())
                 {
-                    var bullet = _particleFactory.CreateBulletImpact(rayHit.point, Quaternion.Euler(
-                            rayHit.normal.y * -90,
-                            rayHit.normal.x * 90 + (rayHit.normal.z == -1 ? 180 : 0), 0),
-                        bulletImpactColors[blockPosition]);
-                    NetworkServer.Spawn(bullet);
+                    Debug.Log($"Calculated: {blockPosition}");
+                    data = new BlockDataWithPosition(blockPosition, blockFromPast);
+                    return true;
                 }
             }
+
+            data = new BlockDataWithPosition(Vector3Int.FloorToInt(ray.origin + Constants.worldOffset),
+                new BlockData());
+            return false;
         }
 
         private void ShootImpact(NetworkConnectionToClient source, RaycastHit rayHit, int damage)
@@ -254,6 +268,23 @@ namespace Networking.ServerServices
         {
             return itemData.BulletsInMagazine < configure.magazineSize &&
                    !itemData.IsReloading && itemData.TotalBullets > 0;
+        }
+
+        private Vector3 SimulateRecoil(RangeWeaponItem configure, RangeWeaponItemData itemData)
+        {
+            var x = Math.Abs(itemData.RecoilModifier) < Constants.Epsilon
+                ? 0
+                : UnityEngine.Random.Range(-configure.baseRecoil, configure.baseRecoil) *
+                  (itemData.RecoilModifier + 1);
+            var y = Math.Abs(itemData.RecoilModifier) < Constants.Epsilon
+                ? 0
+                : UnityEngine.Random.Range(-configure.baseRecoil, configure.baseRecoil) *
+                  (itemData.RecoilModifier + 1);
+            var z = Math.Abs(itemData.RecoilModifier) < Constants.Epsilon
+                ? 0
+                : UnityEngine.Random.Range(-configure.baseRecoil, configure.baseRecoil) *
+                  (itemData.RecoilModifier + 1);
+            return new Vector3(x, y, z);
         }
     }
 }

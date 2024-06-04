@@ -6,10 +6,10 @@ namespace Explosions
 {
     public class SphereBlockArea : IDamageBlockArea
     {
-        private readonly MapProvider _mapProvider;
+        private readonly IMapProvider _mapProvider;
         private readonly int _radius;
 
-        public SphereBlockArea(MapProvider mapProvider, int radius)
+        public SphereBlockArea(IMapProvider mapProvider, int radius)
         {
             _mapProvider = mapProvider;
             _radius = radius;
