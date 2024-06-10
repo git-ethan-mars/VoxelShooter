@@ -5,20 +5,67 @@ namespace Optimization
 {
     public static class SimpleBenchmark
     {
-        public static void Execute(Action action)
+        public static void Execute(Action action, int times = 1)
         {
             var stopwatch = Stopwatch.StartNew();
-            action.Invoke();
+            for (var time = 0; time < times; time++)
+            {
+                action.Invoke();
+                stopwatch.Stop();
+            }
+
+            UnityEngine.Debug.Log($"{action.Method.Name} | {stopwatch.ElapsedMilliseconds} ms");
+        }
+
+        public static void Execute<T1>(Action<T1> action, T1 argument, int times = 1)
+        {
+            var stopwatch = Stopwatch.StartNew();
+            for (var time = 0; time < times; time++)
+            {
+                action.Invoke(argument);
+            }
+
+            stopwatch.Stop();
+            UnityEngine.Debug.Log($"{action.Method.Name} | {stopwatch.ElapsedMilliseconds} ms | {times} iterations");
+        }
+
+        public static void Execute<T1, T2>(Action<T1, T2> action, T1 argument1, T2 argument2, int times = 1)
+        {
+            var stopwatch = Stopwatch.StartNew();
+            for (var time = 0; time < times; time++)
+            {
+                action.Invoke(argument1, argument2);
+            }
+
             stopwatch.Stop();
             UnityEngine.Debug.Log($"{action.Method.Name} | {stopwatch.ElapsedMilliseconds} ms");
         }
 
-        public static void Execute<T1>(Action<T1> action, T1 argument)
+        public static void Execute<T1, T2, T3>(Action<T1, T2, T3> action, T1 argument1, T2 argument2, T3 argument3,
+            int times = 1)
         {
             var stopwatch = Stopwatch.StartNew();
-            action.Invoke(argument);
+            for (var time = 0; time < times; time++)
+            {
+                action.Invoke(argument1, argument2, argument3);
+            }
+
             stopwatch.Stop();
-            UnityEngine.Debug.Log($"{action.Method.Name} | {stopwatch.ElapsedMilliseconds} ms");
+            UnityEngine.Debug.Log($"{action.Method.Name} | {stopwatch.ElapsedMilliseconds} ms | {times} iterations");
+        }
+
+        public static void Execute<T1, T2, T3, T4>(Action<T1, T2, T3, T4> action, T1 argument1, T2 argument2,
+            T3 argument3,
+            T4 argument4, int times = 1)
+        {
+            var stopwatch = Stopwatch.StartNew();
+            for (var time = 0; time < times; time++)
+            {
+                action.Invoke(argument1, argument2, argument3, argument4);
+            }
+
+            stopwatch.Stop();
+            UnityEngine.Debug.Log($"{action.Method.Name} | {stopwatch.ElapsedMilliseconds} ms | {times} iterations");
         }
 
         public static TResult Execute<TResult>(Func<TResult> function)
