@@ -25,7 +25,7 @@ namespace UI
             if (_networkManager.Client != null)
             {
                 _client = _networkManager.Client;
-                _client.MapLoadProgressed += UpdateLoadingBar;
+                _client.MapLoadingProgress.LoadProgress.ValueChanged += UpdateLoadingBar;
                 enabled = false;
             }
         }
@@ -50,7 +50,7 @@ namespace UI
 
         public void OnDestroy()
         {
-            _client.MapLoadProgressed -= UpdateLoadingBar;
+            _client.MapLoadingProgress.LoadProgress.ValueChanged -= UpdateLoadingBar;
         }
     }
 }

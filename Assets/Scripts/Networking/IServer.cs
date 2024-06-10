@@ -10,7 +10,7 @@ namespace Networking
     public interface IServer
     {
         IMapProvider MapProvider { get; }
-        MapUpdater MapUpdater { get; }
+        IMapUpdater MapUpdater { get; }
         BlockHealthSystem BlockHealthSystem { get; }
         EntityContainer EntityContainer { get; }
         IEnumerable<NetworkConnectionToClient> ClientConnections { get; }

@@ -13,7 +13,7 @@ namespace Networking.MessageHandlers.ResponseHandler
 
         protected override void OnResponseReceived(MapNameResponse response)
         {
-            _client.MapName = response.MapName;
+            _client.MapLoadingProgress.MapName = response.MapName;
         }
     }
 }

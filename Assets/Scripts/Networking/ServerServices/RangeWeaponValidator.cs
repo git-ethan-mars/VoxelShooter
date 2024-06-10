@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace Networking.ServerServices
 {
-    public class RangeWeaponValidator
+    public class RangeWeaponValidator : IRangeWeaponValidator
     {
         private readonly IServer _server;
         private readonly ICoroutineRunner _coroutineRunner;

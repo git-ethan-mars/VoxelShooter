@@ -19,9 +19,9 @@ namespace Networking.ServerServices
         private readonly int[] _healthByBlock;
         private readonly IMapProvider _mapProvider;
         
-        public BlockHealthSystem(IStaticDataService staticData, IServer server)
+        public BlockHealthSystem(IStaticDataService staticData, IMapProvider mapProvider)
         {
-            _mapProvider = server.MapProvider;
+            _mapProvider = mapProvider;
             var healthBalance = staticData.GetBlockHealthBalance();
             _blockFullHealth = healthBalance.BlockFullHealth;
             _damagedBlockHealthThreshold = healthBalance.DamagedBlockHealthThreshold;

@@ -9,29 +9,17 @@ namespace Networking.MessageHandlers.ResponseHandler
 {
     public class DownloadMapHandler : ResponseHandler<DownloadMapResponse>
     {
-        public event Action<float> MapLoadProgressed;
-        private readonly List<byte> _byteChunks = new();
-        private readonly IClient _client;
-        private readonly IStaticDataService _staticData;
+        private readonly MapLoadingProgress _mapLoadProgress;
 
-        public DownloadMapHandler(IClient client, IStaticDataService staticData)
+        public DownloadMapHandler(MapLoadingProgress mapLoadingProgress)
         {
-            _client = client;
-            _staticData = staticData;
+            _mapLoadProgress = mapLoadingProgress;
         }
 
         protected override void OnResponseReceived(DownloadMapResponse message)
         {
-            _byteChunks.AddRange(message.ByteChunk);
-            MapLoadProgressed?.Invoke(message.Progress);
-            if (message.Progress != 1)
-            {
-                return;
-            }
-
-            var mapConfigure = _staticData.GetMapConfigure(_client.MapName);
-            var mapData = MapReader.ReadFromStream(new MemoryStream(_byteChunks.ToArray()), mapConfigure);
-            _client.MapProvider = new MapProvider(mapData);
+            _mapLoadProgress.AddBytes(message.ByteChunk);
+            _mapLoadProgress.UpdateProgress(message.Progress);
         }
     }
 }

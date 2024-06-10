@@ -8,52 +8,46 @@ namespace MapLogic
     public class VerticalMapProjector
     {
         public readonly Color32[] Projection;
-        private readonly IClient _client;
-
-        public VerticalMapProjector(IClient client)
+        private readonly IMapProvider _mapProvider;
+        
+        public VerticalMapProjector(IMapProvider mapProvider)
         {
-            _client = client;
+            _mapProvider = mapProvider;
             Projection = GetVerticalMapProjection();
-            _client.MapUpdated += OnMapUpdated;
         }
 
-        public void Dispose()
-        {
-            _client.MapUpdated -= OnMapUpdated;
-        }
-
-        private Color32[] GetVerticalMapProjection()
-        {
-            var projection = new Color32[_client.MapProvider.Width * _client.MapProvider.Depth];
-            for (var x = 0; x < _client.MapProvider.Width; x++)
-            {
-                for (var z = 0; z < _client.MapProvider.Depth; z++)
-                {
-                    projection[z * _client.MapProvider.Width + x] = GetHighestBlock(x, z).Color;
-                }
-            }
-
-            return projection;
-        }
-
-        private void OnMapUpdated(BlockDataWithPosition[] blocks)
+        public void UpdateProjection(BlockDataWithPosition[] blocks)
         {
             var visitedPositions = new HashSet<(int, int)>();
             foreach (var block in blocks)
             {
                 if (visitedPositions.Add((block.Position.x, block.Position.z)))
                 {
-                    Projection[block.Position.z * _client.MapProvider.Width + block.Position.x] =
+                    Projection[block.Position.z * _mapProvider.Width + block.Position.x] =
                         GetHighestBlock(block.Position.x, block.Position.z).Color;
                 }
             }
         }
-        
+
+        private Color32[] GetVerticalMapProjection()
+        {
+            var projection = new Color32[_mapProvider.Width * _mapProvider.Depth];
+            for (var x = 0; x < _mapProvider.Width; x++)
+            {
+                for (var z = 0; z < _mapProvider.Depth; z++)
+                {
+                    projection[z * _mapProvider.Width + x] = GetHighestBlock(x, z).Color;
+                }
+            }
+
+            return projection;
+        }
+
         private BlockData GetHighestBlock(int x, int z)
         {
-            for (var y = _client.MapProvider.Height - 1; y >= 0; y--)
+            for (var y = _mapProvider.Height - 1; y >= 0; y--)
             {
-                var block = _client.MapProvider.GetBlockByGlobalPosition(x, y, z);
+                var block = _mapProvider.GetBlockByGlobalPosition(x, y, z);
                 if (!block.IsSolid())
                 {
                     continue;

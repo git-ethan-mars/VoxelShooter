@@ -5,7 +5,6 @@ using Infrastructure.Services.Input;
 using Infrastructure.Services.PlayerDataLoader;
 using Infrastructure.Services.StaticData;
 using Infrastructure.Services.Storage;
-using Infrastructure.States;
 using Networking;
 using Networking.ServerServices;
 using UnityEngine;
@@ -41,22 +40,20 @@ namespace Infrastructure.Factory
             _uiFactory = allServices.Single<IUIFactory>();
         }
 
-        public CustomNetworkManager CreateLocalNetworkManager(GameStateMachine stateMachine,
-            ServerSettings serverSettings)
+        public CustomNetworkManager CreateLocalNetworkManager(ServerSettings serverSettings)
         {
             var networkManager = _assets.Instantiate(NetworkManagerPath).GetComponent<CustomNetworkManager>();
-            networkManager.Construct(stateMachine, _inputService, _storageService, _staticData,
+            networkManager.Construct(_inputService, _storageService, _staticData,
                 _entityFactory,
                 _particleFactory, this, _meshFactory, _uiFactory, _assets, serverSettings);
             return networkManager;
         }
 
-        public CustomNetworkManager CreateSteamNetworkManager(GameStateMachine stateMachine,
-            ServerSettings serverSettings,
+        public CustomNetworkManager CreateSteamNetworkManager(ServerSettings serverSettings,
             bool isHost)
         {
             var networkManager = _assets.Instantiate(SteamNetworkManagerPath).GetComponent<CustomNetworkManager>();
-            networkManager.Construct(stateMachine, _inputService, _storageService, _staticData,
+            networkManager.Construct(_inputService, _storageService, _staticData,
                 _entityFactory,
                 _particleFactory, this, _meshFactory, _uiFactory, _assets, serverSettings);
             networkManager.GetComponent<SteamLobby>().Construct(isHost);

@@ -22,7 +22,7 @@ namespace Networking
     {
         public string MapName => _serverSettings.MapName;
         public IMapProvider MapProvider { get; }
-        public MapUpdater MapUpdater { get; }
+        public IMapUpdater MapUpdater { get; }
         public EntityContainer EntityContainer { get; }
         public IEnumerable<NetworkConnectionToClient> ClientConnections => _dataByConnection.Keys;
         public BlockHealthSystem BlockHealthSystem { get; }
@@ -69,7 +69,7 @@ namespace Networking
                     networkManager.EntityFactory);
             _serverTimer = new ServerTimer(networkManager, serverSettings.MaxDuration);
             _boxDropService = new BoxDropService(this, networkManager, serverSettings);
-            BlockHealthSystem = new BlockHealthSystem(networkManager.StaticData, this);
+            BlockHealthSystem = new BlockHealthSystem(networkManager.StaticData, MapProvider);
             _fallDamageService = new FallDamageService(this, networkManager);
             var audioService = new AudioService(networkManager.StaticData);
             var muzzleFlashService = new MuzzleFlashService();

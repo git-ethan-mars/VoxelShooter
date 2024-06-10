@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 using Data;
 using Infrastructure;
@@ -6,16 +7,17 @@ using Infrastructure.Factory;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
 using Infrastructure.Services.Storage;
-using Infrastructure.States;
+using MapLogic;
 using Mirror;
 using Networking.Messages.Requests;
 using Steamworks;
-using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Networking
 {
     public class CustomNetworkManager : NetworkManager, ICoroutineRunner
     {
+        public event Action<IMapProvider> MapLoaded;
         public IClient Client { get; private set; }
         public IAssetProvider Assets { get; private set; }
         public IStaticDataService StaticData { get; private set; }
@@ -27,17 +29,15 @@ namespace Networking
         public IParticleFactory ParticleFactory { get; private set; }
         public IPlayerFactory PlayerFactory { get; private set; }
         private ServerSettings _serverSettings;
-        private GameStateMachine _stateMachine;
         private IServer _server;
 
 
-        public void Construct(GameStateMachine stateMachine, IInputService inputService, IStorageService storageService,
+        public void Construct(IInputService inputService, IStorageService storageService,
             IStaticDataService staticData,
             IEntityFactory entityFactory, IParticleFactory particleFactory, IGameFactory gameFactory,
             IMeshFactory meshFactory, IUIFactory uiFactory, IAssetProvider assets,
             ServerSettings serverSettings)
         {
-            _stateMachine = stateMachine;
             _serverSettings = serverSettings;
             Assets = assets;
             StaticData = staticData;
@@ -49,6 +49,7 @@ namespace Networking
             ParticleFactory = particleFactory;
             PlayerFactory = new PlayerFactory(assets, inputService, storageService, staticData, uiFactory, meshFactory);
         }
+        
 
         public override void OnStartHost()
         {
@@ -58,17 +59,19 @@ namespace Networking
 
         public override void OnStartClient()
         {
-            Client = new Client(_stateMachine, this);
+            Client = new Client(this);
             Client.Start();
+            Client.MapLoadingProgress.MapLoaded += MapLoaded.Invoke;
         }
 
         public override void OnServerReady(NetworkConnectionToClient connection)
         {
             if (NetworkServer.localConnection == connection)
             {
-                Client.MapName = _server.MapName;
+                Client.MapLoadingProgress.MapName = _server.MapName;
                 Client.PrefabRegistrar.LootBoxes = _server.EntityContainer.LootBoxes;
                 Client.MapProvider = _server.MapProvider;
+                MapLoaded?.Invoke(Client.MapProvider);
             }
             else
             {
@@ -95,6 +98,7 @@ namespace Networking
         public override void OnStopClient()
         {
             Client.Stop();
+            Client.MapLoadingProgress.MapLoaded -= MapLoaded.Invoke;
         }
 
         public override void OnStopServer()

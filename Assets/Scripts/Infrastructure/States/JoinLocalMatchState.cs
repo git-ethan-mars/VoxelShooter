@@ -1,4 +1,5 @@
 ﻿using Infrastructure.Factory;
+using MapLogic;
 using Networking;
 
 namespace Infrastructure.States
@@ -9,6 +10,7 @@ namespace Infrastructure.States
         private readonly GameStateMachine _stateMachine;
         private readonly SceneLoader _sceneLoader;
         private readonly IUIFactory _uiFactory;
+        private CustomNetworkManager _networkManager;
         private const string Main = "Main";
 
 
@@ -29,10 +31,17 @@ namespace Infrastructure.States
 
         private void OnLoaded()
         {
-            var networkManager = _gameFactory.CreateLocalNetworkManager(_stateMachine, null)
+            _networkManager = _gameFactory.CreateLocalNetworkManager(null)
                 .GetComponent<CustomNetworkManager>();
-            networkManager.StartClient();
-            _uiFactory.CreateLoadingWindow(networkManager);
+            _networkManager.MapLoaded += OnMapLoaded;
+            _networkManager.StartClient();
+            _uiFactory.CreateLoadingWindow(_networkManager);
+        }
+
+        private void OnMapLoaded(IMapProvider mapProvider)
+        {
+            _networkManager.MapLoaded -= OnMapLoaded;
+            _stateMachine.Enter<GameLoopState, CustomNetworkManager>(_networkManager);
         }
 
         public void Exit()

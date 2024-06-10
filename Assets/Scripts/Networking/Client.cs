@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Data;
 using Infrastructure.Services.Storage;
-using Infrastructure.States;
 using MapLogic;
 using Mirror;
 using Networking.ClientServices;
@@ -16,18 +15,10 @@ namespace Networking
     public class Client : IClient
     {
         public event Action GameFinished;
-        public event Action MapDownloaded;
-
         public event Action<BlockDataWithPosition[]> MapUpdated
         {
             add => _updateMapHandler.MapUpdated += value;
             remove => _updateMapHandler.MapUpdated -= value;
-        }
-
-        public event Action<float> MapLoadProgressed
-        {
-            add => _downloadMapHandler.MapLoadProgressed += value;
-            remove => _downloadMapHandler.MapLoadProgressed -= value;
         }
 
         public event Action<ServerTime> GameTimeChanged
@@ -54,23 +45,14 @@ namespace Networking
             remove => _playerConfigureHandler.PlayerCreated += value;
         }
 
-        public IMapProvider MapProvider
-        {
-            get => _mapProvider;
-            set
-            {
-                _mapProvider = value;
-                MapDownloaded?.Invoke();
-            }
-        }
+        public MapLoadingProgress MapLoadingProgress { get; set; }
+
+        public IMapProvider MapProvider { get; set; }
 
         public VerticalMapProjector MapProjector { get; set; }
         public ClientPrefabRegistrar PrefabRegistrar { get; }
-        public string MapName { get; set; }
         private IMapProvider _mapProvider;
 
-        private readonly GameStateMachine _stateMachine;
-        private readonly CustomNetworkManager _networkManager;
         private readonly IStorageService _storageService;
         private readonly MapNameHandler _mapNameHandler;
         private readonly DownloadMapHandler _downloadMapHandler;
@@ -93,13 +75,12 @@ namespace Networking
         private readonly RchParticleHandler _rchParticleHandler;
 
 
-        public Client(GameStateMachine stateMachine, CustomNetworkManager networkManager)
+        public Client(CustomNetworkManager networkManager)
         {
-            _stateMachine = stateMachine;
-            _networkManager = networkManager;
+            MapLoadingProgress = new MapLoadingProgress(networkManager.StaticData);
             _storageService = networkManager.StorageService;
             _mapNameHandler = new MapNameHandler(this);
-            _downloadMapHandler = new DownloadMapHandler(this, networkManager.StaticData);
+            _downloadMapHandler = new DownloadMapHandler(MapLoadingProgress);
             _updateMapHandler = new UpdateMapHandler(this);
             _fallBlockHandler = new FallBlockHandler(networkManager);
             _gameTimeHandler = new GameTimeHandler();
@@ -128,7 +109,6 @@ namespace Networking
 
         public void Start()
         {
-            MapDownloaded += OnMapDownloaded;
             _storageService.DataSaved += OnDataSaved;
             RegisterHandlers();
             PrefabRegistrar.RegisterPrefabs();
@@ -137,7 +117,6 @@ namespace Networking
 
         public void Stop()
         {
-            MapDownloaded -= OnMapDownloaded;
             _storageService.DataSaved -= OnDataSaved;
             UnregisterHandlers();
             PrefabRegistrar.UnregisterPrefabs();
@@ -188,11 +167,6 @@ namespace Networking
             _startMuzzleFlashHandler.Unregister();
             _stopMuzzleFlashHandler.Unregister();
             _rchParticleHandler.Unregister();
-        }
-
-        private void OnMapDownloaded()
-        {
-            _stateMachine.Enter<GameLoopState, CustomNetworkManager>(_networkManager);
         }
 
         private void OnDataSaved(ISettingsData data)

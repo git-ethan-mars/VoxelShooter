@@ -32,7 +32,7 @@ namespace Networking.MessageHandlers.ResponseHandler
             var player = playerGameObject.GetComponent<Player>();
             player.ConstructLocalPlayer(_client, response.PlaceDistance, response.ItemIds, response.Speed, response.JumpHeight,
                 response.Health);
-            _particleFactory.CreateWeatherParticle(_client.MapName, player.BodyOrientation);
+            _particleFactory.CreateWeatherParticle(_client.MapLoadingProgress.MapName, player.BodyOrientation);
             PlayerCreated?.Invoke(player);
         }
     }

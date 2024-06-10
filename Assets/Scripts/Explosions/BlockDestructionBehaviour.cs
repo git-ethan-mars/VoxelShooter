@@ -11,7 +11,7 @@ namespace Explosions
     {
         private readonly BlockHealthSystem _blockHealthSystem;
         private readonly IMapProvider _mapProvider;
-        private readonly MapUpdater _mapUpdater;
+        private readonly IMapUpdater _mapUpdater;
         private readonly IDamageBlockArea _damageArea;
 
         public BlockDestructionBehaviour(IServer server, IDamageBlockArea damageArea)

@@ -1,4 +1,5 @@
-﻿using Generators;
+﻿using Data;
+using Generators;
 using Infrastructure.Factory;
 using Infrastructure.Services.Input;
 using Infrastructure.Services.PlayerDataLoader;
@@ -21,8 +22,9 @@ namespace Infrastructure.States
         private readonly IInputService _inputService;
         private readonly IStorageService _storageService;
         private readonly IAvatarLoader _avatarLoader;
-        private ChunkMeshUpdater _chunkMeshUpdater;
+        private MapMeshUpdater _mapMeshUpdater;
         private VerticalMapProjector _mapProjector;
+        private CustomNetworkManager _networkManager;
 
         public GameLoopState(GameStateMachine gameStateMachine, IStaticDataService staticData, IGameFactory gameFactory, IUIFactory uiFactory,
             IMeshFactory meshFactory, IInputService inputService,
@@ -41,24 +43,31 @@ namespace Infrastructure.States
 
         public void Enter(CustomNetworkManager networkManager)
         {
+            _networkManager = networkManager;
             var mapGenerator = new MapGenerator(networkManager.Client.MapProvider, _gameFactory, _meshFactory);
             var chunkMeshes = mapGenerator.GenerateMap(_gameFactory.CreateGameObjectContainer(ChunkContainerName));
-            _chunkMeshUpdater = new ChunkMeshUpdater(networkManager.Client, chunkMeshes);
-            var mapConfigure = _staticData.GetMapConfigure(networkManager.Client.MapName);
+            _mapMeshUpdater = new MapMeshUpdater(chunkMeshes, networkManager.Client.MapProvider);
+            var mapConfigure = _staticData.GetMapConfigure(networkManager.Client.MapLoadingProgress.MapName);
             mapGenerator.GenerateWalls();
             mapGenerator.GenerateWater(mapConfigure.waterColor);
             _gameFactory.CreateDirectionalLight(mapConfigure.lightData);
             Environment.ApplyAmbientLighting(mapConfigure);
             Environment.ApplyFog(mapConfigure);
-            _mapProjector = new VerticalMapProjector(networkManager.Client);
+            _mapProjector = new VerticalMapProjector(networkManager.Client.MapProvider);
+            networkManager.Client.MapUpdated += OnMapUpdated;
             networkManager.Client.MapProjector = _mapProjector;
             _uiFactory.CreateInGameUI(_gameStateMachine, networkManager, _inputService, _storageService, _avatarLoader);
         }
 
+        private void OnMapUpdated(BlockDataWithPosition[] updatedBlocks)
+        {
+            _mapMeshUpdater.UpdateMesh(updatedBlocks);
+            _mapProjector.UpdateProjection(updatedBlocks);
+        }
+
         public void Exit()
         {
-            _chunkMeshUpdater.Dispose();
-            _mapProjector.Dispose();
+            _networkManager.Client.MapUpdated -= OnMapUpdated;
         }
     }
 }

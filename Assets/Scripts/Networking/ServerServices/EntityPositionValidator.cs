@@ -7,7 +7,7 @@ namespace Networking.ServerServices
     public class EntityPositionValidator
     {
         private readonly IMapProvider _mapProvider;
-        private readonly MapUpdater _mapUpdater;
+        private readonly IMapUpdater _mapUpdater;
         private readonly IEnumerable<IPushable> _pushableEntities;
 
         public EntityPositionValidator(IServer server)

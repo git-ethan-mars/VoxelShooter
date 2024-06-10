@@ -1,5 +1,6 @@
 ﻿using Data;
 using Infrastructure.Factory;
+using MapLogic;
 using Networking;
 
 namespace Infrastructure.States
@@ -9,6 +10,7 @@ namespace Infrastructure.States
         private readonly GameStateMachine _stateMachine;
         private readonly SceneLoader _sceneLoader;
         private readonly IGameFactory _gameFactory;
+        private CustomNetworkManager _networkManager;
         private const string Main = "Main";
 
 
@@ -26,7 +28,14 @@ namespace Infrastructure.States
 
         private void CreateHost(ServerSettings serverSettings)
         {
-            _gameFactory.CreateSteamNetworkManager(_stateMachine, serverSettings, true);
+            _networkManager = _gameFactory.CreateSteamNetworkManager(serverSettings, true).GetComponent<CustomNetworkManager>();
+            _networkManager.MapLoaded += OnMapLoaded;
+        }
+
+        private void OnMapLoaded(IMapProvider mapProvider)
+        {
+            _networkManager.MapLoaded -= OnMapLoaded;
+            _stateMachine.Enter<GameLoopState, CustomNetworkManager>(_networkManager);
         }
 
         public void Exit()

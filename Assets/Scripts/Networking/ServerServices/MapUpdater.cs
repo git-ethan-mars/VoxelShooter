@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Networking.ServerServices
 {
-    public class MapUpdater
+    public class MapUpdater : IMapUpdater
     {
         public event Action MapUpdated;
         private readonly ICoroutineRunner _coroutineRunner;
