@@ -96,10 +96,10 @@ namespace MapLogic
 
         private void AssertTick(int tick)
         {
-            if (_serverTick - tick > HistorySize)
+            if (_serverTick - tick > _history.Count)
             {
                 throw new ArgumentException(
-                    $"Tick={tick} is out of range. History size = {HistorySize}, server tick = {_serverTick}");
+                    $"Tick={tick} is out of range. History size = {_history.Count}, server tick = {_serverTick}");
             }
         }
 
