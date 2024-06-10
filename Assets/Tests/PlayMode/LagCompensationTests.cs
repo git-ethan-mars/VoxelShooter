@@ -1,9 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using CameraLogic;
 using Data;
 using Explosions;
 using Generators;
@@ -15,25 +13,23 @@ using Infrastructure.Services;
 using Infrastructure.Services.StaticData;
 using MapLogic;
 using Mirror;
-using Networking;
-using Networking.ServerServices;
 using Optimization;
 using Steamworks;
 using Tests.EditMode;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
-using Debug = UnityEngine.Debug;
 
 public class LagCompensationTests
 {
     // A UnityTest behaves like a coroutine in Play Mode. In Edit Mode you can use
     // `yield return null;` to skip a frame.
+    private readonly Ray _ray = new Ray(new Vector3(511, 200, 511), Vector3.down);
+    private IMapProvider _mapProvider;
+
 
     [UnityTest]
-    public IEnumerator LagCompensationSample()
+    public IEnumerator LagCompensation()
     {
-        var raycaster = new RayCaster(SceneView.GetAllSceneCameras().First());
         RegisterDependencies();
         const string mapName = "Crossroads";
         var staticData = AllServices.Container.Single<IStaticDataService>();
@@ -56,69 +52,148 @@ public class LagCompensationTests
         var connection = new LocalConnectionToClient();
         server.AddPlayer(connection, CSteamID.Nil, "Test");
         server.ChangeClass(connection, GameClass.Combatant);
-        var rangeWeaponValidator = new MockShootValidator(server, mapProvider);
+
+
+        yield return new WaitForSeconds(NetworkServer.sendInterval);
+        SimpleBenchmark.Execute(MyRaycast, mapProvider, mapHistory, 1000);
+        SimpleBenchmark.Execute(MyRaycast, mapProvider, mapHistory, 2000);
+        SimpleBenchmark.Execute(MyRaycast, mapProvider, mapHistory, 5000);
+        SimpleBenchmark.Execute(MyRaycast, mapProvider, mapHistory, 10000);
+        SimpleBenchmark.Execute(MyRaycast, mapProvider, mapHistory, 20000);
+        SimpleBenchmark.Execute(UnityRaycast, 1000);
+        SimpleBenchmark.Execute(UnityRaycast, 2000);
+        SimpleBenchmark.Execute(UnityRaycast, 5000);
+        SimpleBenchmark.Execute(UnityRaycast, 10000);
+        SimpleBenchmark.Execute(UnityRaycast, 20000);
+        server.Stop();
+    }
+
+    [UnityTest]
+    public IEnumerator LagCompensationWithExplosions()
+    {
+        yield return new WaitForSeconds(5);
+        RegisterDependencies();
+        const string mapName = "Crossroads";
+        var staticData = AllServices.Container.Single<IStaticDataService>();
+        staticData.LoadMapConfigures();
+        staticData.LoadBlockHealthBalance();
+        staticData.LoadPlayerCharacteristics();
+        staticData.LoadInventories();
+        staticData.LoadItems();
+        var mapProvider = MapReader.ReadFromFile(mapName, staticData);
+        var gameFactory = AllServices.Container.Single<IGameFactory>();
+        var meshFactory = AllServices.Container.Single<IMeshFactory>();
+        var mapGenerator = new MapGenerator(mapProvider, gameFactory, meshFactory);
+        var coroutineRunner = new GameObject("Main");
+        coroutineRunner.gameObject.AddComponent<CoroutineRunner>();
+        var chunkMeshes = mapGenerator.GenerateMap(coroutineRunner.transform);
+        var chunkMeshUpdater = new MapMeshUpdater(chunkMeshes, mapProvider);
+        var mapHistory = new MapHistory(coroutineRunner.GetComponent<ICoroutineRunner>(), mapProvider);
+        var server = new MockServer(mapProvider, mapHistory, staticData, chunkMeshUpdater);
+        server.Start();
+        var connection = new LocalConnectionToClient();
+        server.AddPlayer(connection, CSteamID.Nil, "Test");
+        server.ChangeClass(connection, GameClass.Combatant);
         var explosionBehaviour = new ExplosionBehaviour(server, connection, 8, 250);
         var explosionPositions = new List<Vector3>()
         {
             new(120, 10, 133), new(133, 20, 146), new(147, 19, 190), new(215, 8, 168), new(261, 6, 204),
-            new(227, 11, 275),
             new(277, 9, 294), new(288, 8, 219), new(296, 16, 301), new(304, 23, 303), new(349, 20, 334),
             new(339, 26, 344), new(332, 15, 384), new(310, 13, 378), new(299, 31, 364), new(228, 51, 231),
             new(164, 16, 171), new(170, 5, 251), new(206, 5, 256), new(320, 5, 253), new(372, 9, 184)
         };
+        var sphereArea = new SphereBlockArea(mapProvider, 8);
+        var explodedPositions = explosionPositions
+            .SelectMany(position => sphereArea.GetOverlappedBlockPositions(Vector3Int.FloorToInt(position)))
+            .ToList();
         for (var i = 0; i < explosionPositions.Count; i++)
         {
             explosionBehaviour.Explode(explosionPositions[i]);
         }
 
         yield return new WaitForSeconds(NetworkServer.sendInterval);
-        var tick = (int) Math.Floor(NetworkTime.localTime * NetworkServer.tickRate);
-        var ray = new Ray(new Vector3(256, 128, 256), Vector3.down);
-        var stopWatch = new Stopwatch();
-        stopWatch.Start();
-        for (var i = 0; i < 10000; i++)
+        SimpleBenchmark.Execute(MyRaycast, mapProvider, mapHistory);
+        SimpleBenchmark.Execute(UnityRaycastWithChunkRollback, mapProvider, mapHistory, chunkMeshes, explodedPositions);
+        explosionPositions = new List<Vector3>()
         {
-            CheckCollisionWithBlock(mapProvider, mapHistory, ray,
-                out var blockData, 200, tick - 1);
-        }
-
-        stopWatch.Stop();
-        Debug.Log(stopWatch.ElapsedMilliseconds);
-        
-        stopWatch.Restart();
-        for (var i = 0; i < 10000; i++)
+            new(120, 10, 133), new(133, 20, 146), new(147, 19, 190), new(215, 8, 168), new(261, 6, 204),
+            new(277, 9, 294), new(288, 8, 219), new(296, 16, 301), new(304, 23, 303), new(349, 20, 334),
+        };
+        explodedPositions = explosionPositions
+            .SelectMany(position => sphereArea.GetOverlappedBlockPositions(Vector3Int.FloorToInt(position)))
+            .ToList();
+        SimpleBenchmark.Execute(UnityRaycastWithChunkRollback, mapProvider, mapHistory, chunkMeshes, explodedPositions);
+        explosionPositions = new List<Vector3>()
         {
-            Physics.Raycast(ray, out var raycastHit, 200, Constants.buildMask);
-        }
-
-        stopWatch.Stop();
-        Debug.Log(stopWatch.ElapsedMilliseconds);
+            new(120, 10, 133), new(133, 20, 146), new(147, 19, 190), new(215, 8, 168), new(261, 6, 204),
+        };
+        explodedPositions = explosionPositions
+            .SelectMany(position => sphereArea.GetOverlappedBlockPositions(Vector3Int.FloorToInt(position)))
+            .ToList();
+        SimpleBenchmark.Execute(UnityRaycastWithChunkRollback, mapProvider, mapHistory, chunkMeshes, explodedPositions);
+        explosionPositions = new List<Vector3>()
+        {
+            new(120, 10, 133), new(133, 20, 146)
+        };
+        explodedPositions = explosionPositions
+            .SelectMany(position => sphereArea.GetOverlappedBlockPositions(Vector3Int.FloorToInt(position)))
+            .ToList();
+        SimpleBenchmark.Execute(UnityRaycastWithChunkRollback, mapProvider, mapHistory, chunkMeshes, explodedPositions);
+        explosionPositions = new List<Vector3>()
+        {
+            new(120, 10, 133)
+        };
+        explodedPositions = explosionPositions
+            .SelectMany(position => sphereArea.GetOverlappedBlockPositions(Vector3Int.FloorToInt(position)))
+            .ToList();
+        SimpleBenchmark.Execute(UnityRaycastWithChunkRollback, mapProvider, mapHistory, chunkMeshes, explodedPositions);
 
         server.Stop();
     }
 
-    private void ShootUnitySolution(RayCaster raycaster, IRangeWeaponValidator rangeWeaponValidator,
-        NetworkConnectionToClient connection)
+    private void MyRaycast(IMapProvider mapProvider, MapHistory mapHistory)
     {
-        var result = Physics.Raycast(raycaster.CentredRay, out var hitInfo, 500,
-            Constants.attackMask);
-        if (result && hitInfo.collider.CompareTag("Chunk"))
-        {
-            rangeWeaponValidator.Shoot(connection,
-                raycaster.CentredRay, false, 0);
-        }
+        var tick = (int) Math.Floor(NetworkTime.localTime * NetworkServer.tickRate);
+        CheckCollisionWithBlock(mapProvider, mapHistory, _ray,
+            out _, 250, tick - 1);
     }
 
-    /*private void ShootMySolution(RayCaster raycaster, IRangeWeaponValidator rangeWeaponValidator,
-        NetworkConnectionToClient connection)
+    private void UnityRaycast()
     {
-        var result = CheckCollisionWithBlock(mapProvider);
-        if (result && hitInfo.collider.CompareTag("Chunk"))
+        Physics.Raycast(_ray, out _, 250, Constants.buildMask);
+    }
+
+    private void UnityRaycastWithChunkRollback(IMapProvider mapProvider, MapHistory mapHistory,
+        ChunkMesh[] chunkMeshes, List<Vector3Int> explodedPositions)
+    {
+        var tick = (int) Math.Floor(NetworkTime.localTime * NetworkServer.tickRate);
+        var blocksByChunkIndex = explodedPositions
+            .GroupBy(mapProvider.GetChunkNumberByGlobalPosition,
+                position =>
+                    new BlockDataWithPosition(mapProvider.GetLocalPositionByGlobal(position),
+                        mapHistory.GetBlockByGlobalPosition(position, tick)))
+            .ToDictionary(group => group.Key, group => group.ToList());
+
+        foreach (var (chunkIndex, blocks) in blocksByChunkIndex)
         {
-            rangeWeaponValidator.Shoot(connection,
-                raycaster.CentredRay, false, 0);
+            chunkMeshes[chunkIndex].SpawnBlocks(blocks);
         }
-    }*/
+
+        UnityRaycast();
+
+        blocksByChunkIndex = explodedPositions
+            .GroupBy(mapProvider.GetChunkNumberByGlobalPosition,
+                position =>
+                    new BlockDataWithPosition(mapProvider.GetLocalPositionByGlobal(position), new BlockData()))
+            .ToDictionary(group => group.Key, group => group.ToList());
+
+        foreach (var (chunkIndex, blocks) in blocksByChunkIndex)
+        {
+            chunkMeshes[chunkIndex].SpawnBlocks(blocks);
+        }
+        // Revert world
+    }
+
 
     private bool CheckCollisionWithBlock(IMapProvider mapProvider, MapHistory mapHistory, Ray ray,
         out BlockDataWithPosition data, float distance, int tick)
