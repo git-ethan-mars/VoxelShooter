@@ -2,6 +2,7 @@
   "dependencies": {
     "com.mirror.steamworks.net": "https://github.com/Chykary/FizzySteamworks.git?path=/com.mirror.steamworks.net",
     "com.rlabrecque.steamworks.net": "https://github.com/rlabrecque/Steamworks.NET.git?path=/com.rlabrecque.steamworks.net#20.1.0",
+    "com.unity.animation.rigging": "1.1.1",
     "com.unity.collections": "1.2.4",
     "com.unity.feature.2d": "2.0.1",
     "com.unity.feature.development": "1.0.1",
