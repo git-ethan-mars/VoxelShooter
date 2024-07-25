@@ -11,7 +11,6 @@ using Infrastructure.Services.Input;
 using Infrastructure.Services.StaticData;
 using Infrastructure.Services.Storage;
 using MapLogic;
-using Networking;
 using Optimization;
 using UnityEditor;
 using UnityEngine;
@@ -170,6 +169,7 @@ namespace MapCustomizer
                 new MapGenerator(_instance._mapProvider, AllServices.Container.Single<IGameFactory>(),
                     AllServices.Container.Single<IMeshFactory>());
             chunkContainer = AllServices.Container.Single<IGameFactory>().CreateGameObjectContainer(ChunkContainerName);
+            chunkContainer.SetParent(transform);
             SimpleBenchmark.Execute(mapGenerator.GenerateMap, chunkContainer);
             spawnPoints.Clear();
             spawnPointsContainer = AllServices.Container.Single<IGameFactory>()
@@ -229,8 +229,8 @@ namespace MapCustomizer
                 return;
             }
 
-            DestroyImmediate(chunkContainer);
-            DestroyImmediate(spawnPointsContainer);
+            DestroyImmediate(chunkContainer.gameObject);
+            DestroyImmediate(spawnPointsContainer.gameObject);
         }
 
         public void ShowAmbientLighting()
