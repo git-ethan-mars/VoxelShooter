@@ -1,0 +1,40 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel SaveTopVoxels
+#pragma kernel WriteTexture
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+
+struct VertexData
+{
+    float3 Position;
+    float3 Normal;
+    uint Color;
+};
+
+float4 MeshPositionOffset;
+StructuredBuffer<VertexData> VertexBuffer;
+RWStructuredBuffer<uint> Pixels;
+
+[numthreads(32,1,1)]
+void SaveTopVoxels(uint3 id : SV_DispatchThreadID)
+{
+    float3 position = VertexBuffer[id.x].Position + MeshPositionOffset.xyz;
+    float3 normal = VertexBuffer[id.x].Normal;
+    uint color = VertexBuffer[id.x].Color;
+    if (normal.y == 1)
+    {
+        Pixels[position.x * 512 + position.z] = color;
+    }
+}
+
+RWTexture2D<float4> Result;
+
+[numthreads(8,8,1)]
+void WriteTexture(uint3 id : SV_DispatchThreadID)
+{
+    const uint encodedColor = Pixels[id.y * 512 + id.x];
+    const float d = 1.0f / 256;
+    Result[id.xy] = float4((float)(encodedColor & 255) * d, (float)(encodedColor >> 8 & 255) * d,
+                           (float)(encodedColor >> 16 & 255) * d, (float)(encodedColor >> 24 & 255) * d);
+}
