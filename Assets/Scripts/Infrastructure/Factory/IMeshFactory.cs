@@ -14,6 +14,6 @@ namespace Infrastructure.Factory
         void CreateGameModel(GameObject prefab, Transform itemPosition);
         void CreateWaterPlane(Vector3 position, Vector3 scale, Color32 waterColor);
         GameObject CreateTransparentTnt();
-        GameObject CreatTransparentBlock();
+        GameObject CreateTransparentBlock();
     }
 }

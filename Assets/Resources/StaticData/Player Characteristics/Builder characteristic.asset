@@ -17,3 +17,4 @@ MonoBehaviour:
   speed: 9.5
   jumpHeight: 1.25
   placeDistance: 9
+  blockCount: 100

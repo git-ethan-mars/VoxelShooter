@@ -31,6 +31,7 @@ namespace Infrastructure.Factory
         {
             var hud = _assets.Instantiate(UIPath.HudPath).GetComponent<Hud>();
             hud.HealthCounter.Construct(player);
+            hud.BlockCounter.Construct(player);
             hud.Palette.Construct(inputService);
             hud.Minimap.Construct(client, player, this);
             return hud;

@@ -219,7 +219,7 @@ namespace Networking.ServerServices
 
                 if (block.IsSolid())
                 {
-                    bulletImpactColors[blockPosition] = block.Color;
+                    bulletImpactColors[blockPosition] = block.color;
                     _blockDestructionBehaviour.DamageBlocks(blockPosition, configure.damage);
                 }
 

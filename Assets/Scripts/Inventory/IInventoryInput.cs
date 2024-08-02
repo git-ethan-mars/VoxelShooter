@@ -4,6 +4,9 @@ namespace Inventory
 {
     public interface IInventoryInput
     {
+        event Action ZActionButtonDown;
+        event Action XActionButtonDown;
+        event Action CActionButtonDown;
         event Action MouseScrolledUp;
         event Action MouseScrolledDown;
         event Action FirstActionButtonDown;

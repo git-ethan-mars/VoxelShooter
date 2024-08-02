@@ -179,7 +179,7 @@ namespace Generators
                             continue;
                         }
 
-                        var color = _chunkData.GetBlock(x, y, z).Color;
+                        var color = _chunkData.GetBlock(x, y, z).color;
                         if (_chunkData.GetFaces(x, y, z).HasFlag(Faces.Top))
                         {
                             ChunkGeneratorHelper.GenerateTopSide(x, y, z, color, _meshData.Vertices, _meshData.Normals,

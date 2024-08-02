@@ -7,6 +7,9 @@ namespace Inventory
 {
     public class InventoryInput : IInventoryInput
     {
+        public event Action ZActionButtonDown;
+        public event Action XActionButtonDown;
+        public event Action CActionButtonDown;
         public event Action MouseScrolledUp;
         public event Action MouseScrolledDown;
         public event Action FirstActionButtonDown;
@@ -83,6 +86,21 @@ namespace Inventory
             if (_inputService.IsReloadingButtonDown())
             {
                 ReloadButtonDown?.Invoke();
+            }
+
+            if (_inputService.IsZActionButtonDown())
+            {
+                ZActionButtonDown?.Invoke();
+            }
+            
+            if (_inputService.IsXActionButtonDown())
+            {
+                XActionButtonDown?.Invoke();
+            }
+
+            if (_inputService.IsCActionButtonDown())
+            {
+                CActionButtonDown?.Invoke();
             }
         }
     }

@@ -31,7 +31,7 @@ namespace Networking.MessageHandlers.ResponseHandler
             var playerGameObject = NetworkClient.connection.identity;
             var player = playerGameObject.GetComponent<Player>();
             player.ConstructLocalPlayer(_client, response.PlaceDistance, response.ItemIds, response.Speed, response.JumpHeight,
-                response.Health);
+                response.Health, response.BlockCount);
             _particleFactory.CreateWeatherParticle(_client.MapName, player.BodyOrientation);
             PlayerCreated?.Invoke(player);
         }

@@ -14,6 +14,7 @@ namespace Data
         public PlayerCharacteristic Characteristic { get; set; }
         public bool IsAlive { get; set; }
         public int Health { get; set; }
+        public int BlockCount { get; set; }
         public int Kills { get; set; }
         public int Deaths { get; set; }
         public int SelectedSlotIndex { get; set; }

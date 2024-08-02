@@ -149,42 +149,42 @@ namespace Optimization
                 if (CheckTopFace(x, y, z, upperNeighbourBlocks, AddressByNeighbour[0]))
                 {
                     Faces[i] |= Data.Faces.Top;
-                    ChunkGeneratorHelper.GenerateTopSide(x, y, z, Blocks[i].Color, Vertices, Normals, Colors,
+                    ChunkGeneratorHelper.GenerateTopSide(x, y, z, Blocks[i].color, Vertices, Normals, Colors,
                         Triangles);
                 }
 
                 if (CheckBottomFace(x, y, z, lowerNeighboursBlocks, AddressByNeighbour[1]))
                 {
                     Faces[i] |= Data.Faces.Bottom;
-                    ChunkGeneratorHelper.GenerateBottomSide(x, y, z, Blocks[i].Color, Vertices, Normals, Colors,
+                    ChunkGeneratorHelper.GenerateBottomSide(x, y, z, Blocks[i].color, Vertices, Normals, Colors,
                         Triangles);
                 }
 
                 if (CheckFrontFace(x, y, z, frontNeighbourBlocks, AddressByNeighbour[2]))
                 {
                     Faces[i] |= Data.Faces.Front;
-                    ChunkGeneratorHelper.GenerateFrontSide(x, y, z, Blocks[i].Color, Vertices, Normals, Colors,
+                    ChunkGeneratorHelper.GenerateFrontSide(x, y, z, Blocks[i].color, Vertices, Normals, Colors,
                         Triangles);
                 }
 
                 if (CheckBackFace(x, y, z, backNeighbourBlocks, AddressByNeighbour[3]))
                 {
                     Faces[i] |= Data.Faces.Back;
-                    ChunkGeneratorHelper.GenerateBackSide(x, y, z, Blocks[i].Color, Vertices, Normals, Colors,
+                    ChunkGeneratorHelper.GenerateBackSide(x, y, z, Blocks[i].color, Vertices, Normals, Colors,
                         Triangles);
                 }
 
                 if (CheckRightFace(x, y, z, rightNeighbourBlocks, AddressByNeighbour[4]))
                 {
                     Faces[i] |= Data.Faces.Right;
-                    ChunkGeneratorHelper.GenerateRightSide(x, y, z, Blocks[i].Color, Vertices, Normals, Colors,
+                    ChunkGeneratorHelper.GenerateRightSide(x, y, z, Blocks[i].color, Vertices, Normals, Colors,
                         Triangles);
                 }
 
                 if (CheckLeftFace(x, y, z, leftNeighbourBlocks, AddressByNeighbour[5]))
                 {
                     Faces[i] |= Data.Faces.Left;
-                    ChunkGeneratorHelper.GenerateLeftSide(x, y, z, Blocks[i].Color, Vertices, Normals, Colors,
+                    ChunkGeneratorHelper.GenerateLeftSide(x, y, z, Blocks[i].color, Vertices, Normals, Colors,
                         Triangles);
                 }
             }

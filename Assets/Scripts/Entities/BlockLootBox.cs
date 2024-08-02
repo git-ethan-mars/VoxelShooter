@@ -15,15 +15,8 @@ namespace Entities
                 return;
             }
 
-            for (var i = 0; i < playerData.Items.Count; i++)
-            {
-                if (playerData.Items[i].itemType == ItemType.Block)
-                {
-                    var blockItemData = (BlockItemData) playerData.ItemData[i];
-                    blockItemData.Amount += BlockBonus;
-                    receiver.Send(new ItemUseResponse(i, blockItemData.Amount));
-                }
-            }
+            playerData.BlockCount += BlockBonus;
+            receiver.Send(new BlockUseResponse(playerData.BlockCount));
         }
     }
 }

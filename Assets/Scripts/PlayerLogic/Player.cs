@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Blueprints;
 using CameraLogic;
 using Data;
 using Infrastructure;
@@ -19,6 +20,7 @@ namespace PlayerLogic
     public class Player : NetworkBehaviour
     {
         public ObservableVariable<int> Health { get; private set; }
+        public ObservableVariable<int> BlockCount { get; set; }
         public float PlaceDistance { get; private set; }
         public PlayerRotation Rotation { get; private set; }
         public ZoomService ZoomService { get; private set; }
@@ -74,6 +76,7 @@ namespace PlayerLogic
         private IStaticDataService _staticData;
 
         private InventorySystem _inventory;
+        private BlueprintsSystem _blueprintsSystem;
         private Camera _mainCamera;
         private Hud _hud;
 
@@ -99,10 +102,11 @@ namespace PlayerLogic
 
         public void ConstructLocalPlayer(IClient client, float placeDistance, List<int> itemIds, float speed,
             float jumpHeight,
-            int health)
+            int health, int blockCount)
         {
             PlaceDistance = placeDistance;
             Health = new ObservableVariable<int>(health);
+            BlockCount = new ObservableVariable<int>(blockCount);
             _speed = speed;
             _jumpHeight = jumpHeight;
             _mainCamera = Camera.main;
@@ -110,6 +114,7 @@ namespace PlayerLogic
             Rotation = new PlayerRotation(_storageService, ZoomService, bodyOrientation, headPivot);
             _hud = _uiFactory.CreateHud(client, this, _inputService);
             _inventory = new InventorySystem(_inputService, _staticData, _meshFactory, itemIds, _hud, this);
+            _blueprintsSystem = new BlueprintsSystem(_inputService, _staticData, _meshFactory, _hud, client.MapProvider, this);
             TurnOffNickName();
             TurnOffBodyRender();
             MountCamera();
@@ -140,6 +145,7 @@ namespace PlayerLogic
 
                 Rotation.Rotate(_inputService.MouseAxis);
                 _inventory.Update();
+                _blueprintsSystem.Update();
             }
         }
 
@@ -203,6 +209,7 @@ namespace PlayerLogic
         {
             _mainCamera.transform.SetParent(null);
             _inventory.OnDestroy();
+            _blueprintsSystem.OnDestroy();
             Destroy(_hud.gameObject);
         }
 

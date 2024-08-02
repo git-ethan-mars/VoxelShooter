@@ -3,18 +3,19 @@ using UnityEngine;
 
 namespace Data
 {
-    public readonly struct BlockData : IEquatable<BlockData>
+    [Serializable]
+    public struct BlockData : IEquatable<BlockData>
     {
-        public readonly Color32 Color;
+        public Color32 color;
 
         public BlockData(Color32 color)
         {
-            Color = color;
+            this.color = color;
         }
 
         public bool Equals(BlockData other)
         {
-            return Color.Equals(other.Color);
+            return color.Equals(other.color);
         }
 
         public override bool Equals(object obj)
@@ -24,15 +25,15 @@ namespace Data
 
         public override int GetHashCode()
         {
-            return Color.GetHashCode();
+            return color.GetHashCode();
         }
         
         public bool IsSolid()
         {
-            return !(Color.a == BlockColor.empty.a &&
-                     Color.r == BlockColor.empty.r &&
-                     Color.g == BlockColor.empty.g &&
-                     Color.b == BlockColor.empty.b);
+            return !(color.a == BlockColor.empty.a &&
+                     color.r == BlockColor.empty.r &&
+                     color.g == BlockColor.empty.g &&
+                     color.b == BlockColor.empty.b);
         }
     }
 }

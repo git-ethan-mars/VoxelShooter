@@ -10,14 +10,16 @@ namespace Networking.Messages.Responses
         public readonly float JumpHeight;
         public readonly List<int> ItemIds;
         public readonly int Health;
+        public readonly int BlockCount;
 
-        public PlayerConfigureResponse(float placeDistance, float speed, float jumpHeight, List<int> itemIds, int health)
+        public PlayerConfigureResponse(float placeDistance, float speed, float jumpHeight, List<int> itemIds, int health, int blockCount)
         {
             PlaceDistance = placeDistance;
             Speed = speed;
             JumpHeight = jumpHeight;
             ItemIds = itemIds;
             Health = health;
+            BlockCount = blockCount;
         }
     }
 }

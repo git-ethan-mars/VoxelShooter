@@ -4,6 +4,7 @@ using Data;
 using Mirror;
 using Networking.Messages.Requests;
 using Networking.Messages.Responses;
+using UnityEngine;
 
 namespace Networking.MessageHandlers.RequestHandlers
 {
@@ -19,15 +20,18 @@ namespace Networking.MessageHandlers.RequestHandlers
         protected override void OnRequestReceived(NetworkConnectionToClient connection, AddBlocksRequest request)
         {
             var result = _server.TryGetPlayerData(connection, out var playerData);
-            if (!result || !playerData.IsAlive || playerData.SelectedItem is not BlockItem)
+            if (!result || !playerData.IsAlive)
             {
                 return;
             }
 
-            var blockItemData = (BlockItemData) playerData.SelectedItemData;
+            if (request.Blocks.Length > playerData.BlockCount)
+            {
+                return;
+            }
+            
             var validBlocks = new List<BlockDataWithPosition>();
-            var blocksUsed = Math.Min(blockItemData.Amount, request.Blocks.Length);
-            for (var i = 0; i < blocksUsed; i++)
+            for (var i = 0; i < request.Blocks.Length; i++)
             {
                 var blockPosition = request.Blocks[i].Position;
                 foreach (var otherConnection in _server.ClientConnections)
@@ -62,9 +66,8 @@ namespace Networking.MessageHandlers.RequestHandlers
                 validBlocks.Add(request.Blocks[i]);
             }
 
-            blockItemData.Amount -= blocksUsed;
-            connection.Send(new ItemUseResponse(playerData.SelectedSlotIndex,
-                blockItemData.Amount));
+            playerData.BlockCount -= request.Blocks.Length;
+            connection.Send(new BlockUseResponse(playerData.BlockCount));
             _server.BlockHealthSystem.InitializeBlocks(validBlocks);
             _server.MapUpdater.SetBlocksByGlobalPositions(validBlocks);
         }

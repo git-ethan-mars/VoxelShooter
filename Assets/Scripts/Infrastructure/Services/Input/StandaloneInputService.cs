@@ -29,6 +29,9 @@ namespace Infrastructure.Services.Input
         public bool IsRightArrowButtonDown() => UnityEngine.Input.GetKeyDown(KeyCode.RightArrow) && _isEnabled;
         public bool IsUpArrowButtonDown() => UnityEngine.Input.GetKeyDown(KeyCode.UpArrow) && _isEnabled;
         public bool IsDownArrowButtonDown() => UnityEngine.Input.GetKeyDown(KeyCode.DownArrow) && _isEnabled;
+        public bool IsZActionButtonDown() => UnityEngine.Input.GetKeyDown(KeyCode.Z);
+        public bool IsXActionButtonDown() => UnityEngine.Input.GetKeyDown(KeyCode.X);
+        public bool IsCActionButtonDown() => UnityEngine.Input.GetKeyDown(KeyCode.C);
 
         public void Enable()
         {

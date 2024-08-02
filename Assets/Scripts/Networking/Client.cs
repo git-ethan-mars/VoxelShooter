@@ -93,6 +93,7 @@ namespace Networking
         private readonly StartMuzzleFlashHandler _startMuzzleFlashHandler;
         private readonly StopMuzzleFlashHandler _stopMuzzleFlashHandler;
         private readonly RchParticleHandler _rchParticleHandler;
+        private readonly BlockUseHandler _blockUseHandler;
 
 
         public Client(GameStateMachine stateMachine, CustomNetworkManager networkManager)
@@ -126,6 +127,7 @@ namespace Networking
             _startMuzzleFlashHandler = new StartMuzzleFlashHandler();
             _stopMuzzleFlashHandler = new StopMuzzleFlashHandler();
             _rchParticleHandler = new RchParticleHandler(networkManager.ParticleFactory);
+            _blockUseHandler = new BlockUseHandler();
         }
 
         public void Start()
@@ -167,6 +169,7 @@ namespace Networking
             _startMuzzleFlashHandler.Register();
             _stopMuzzleFlashHandler.Register();
             _rchParticleHandler.Register();
+            _blockUseHandler.Register();
         }
 
         private void UnregisterHandlers()
@@ -190,6 +193,7 @@ namespace Networking
             _startMuzzleFlashHandler.Unregister();
             _stopMuzzleFlashHandler.Unregister();
             _rchParticleHandler.Unregister();
+            _blockUseHandler.Unregister();
         }
 
         private void OnMapDownloaded()

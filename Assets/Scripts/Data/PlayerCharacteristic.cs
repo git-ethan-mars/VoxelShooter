@@ -10,5 +10,6 @@ namespace Data
         public float speed;
         public float jumpHeight;
         public float placeDistance;
+        public int blockCount;
     }
 }

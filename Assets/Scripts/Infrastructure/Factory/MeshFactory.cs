@@ -80,7 +80,7 @@ namespace Infrastructure.Factory
             return _assets.Instantiate(MeshPath.TransparentTntPath);
         }
 
-        public GameObject CreatTransparentBlock()
+        public GameObject CreateTransparentBlock()
         {
             return _assets.Instantiate(MeshPath.TransparentBlockPath);
         }

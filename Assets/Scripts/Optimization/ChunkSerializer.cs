@@ -34,7 +34,7 @@ namespace Optimization
         {
             for (var i = 0; i < _blocks.Length; i++)
             {
-                if (_blocks[i].Color.IsEquals(_solidColor))
+                if (_blocks[i].color.IsEquals(_solidColor))
                 {
                     if (IsColoredRunStarted) WriteColoredRun();
                     if (!IsSolidRunStarted) _solidStart = i;
@@ -78,10 +78,10 @@ namespace Optimization
             for (var i = _coloredStart; i <= _coloredEnd; i++)
             {
                 var block = _blocks[i];
-                _serializedChunk.Add(block.Color.b);
-                _serializedChunk.Add(block.Color.g);
-                _serializedChunk.Add(block.Color.r);
-                _serializedChunk.Add(block.Color.a);
+                _serializedChunk.Add(block.color.b);
+                _serializedChunk.Add(block.color.g);
+                _serializedChunk.Add(block.color.r);
+                _serializedChunk.Add(block.color.a);
             }
 
             _coloredStart = -1;

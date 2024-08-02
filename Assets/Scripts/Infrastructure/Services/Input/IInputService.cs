@@ -22,6 +22,9 @@ namespace Infrastructure.Services.Input
         bool IsRightArrowButtonDown();
         bool IsUpArrowButtonDown();
         bool IsDownArrowButtonDown();
+        bool IsZActionButtonDown();
+        bool IsXActionButtonDown();
+        bool IsCActionButtonDown();
         void Enable();
         void Disable();
     }

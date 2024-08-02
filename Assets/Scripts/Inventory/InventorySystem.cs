@@ -44,6 +44,9 @@ namespace Inventory
             _inventoryInput.SlotButtonPressed += ChangeSlotRequest;
             _inventoryInput.MouseScrolledUp += SendIncrementSlotIndexRequest;
             _inventoryInput.MouseScrolledDown += SendDecrementSlotIndexRequest;
+            _inventoryInput.ZActionButtonDown += DisableSlot;
+            _inventoryInput.XActionButtonDown += DisableSlot;
+            _inventoryInput.CActionButtonDown += DisableSlot;
             _hud = hud;
             foreach (var item in itemIds.Select(staticData.GetItem))
             {
@@ -150,6 +153,12 @@ namespace Inventory
             _drillSpawnHandler.Unregister();
         }
 
+        private void DisableSlot()
+        {
+            _states[_index].Exit();
+            _hud.Boarders[_index].SetActive(false);
+        }
+        
         public void SwitchActiveSlot(int slotIndex)
         {
             _states[_index].Exit();

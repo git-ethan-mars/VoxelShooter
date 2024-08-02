@@ -16,6 +16,16 @@ namespace UI
 
         [SerializeField]
         private List<GameObject> boarders;
+        
+        public List<Image> BlueprintsSlots => blueprintsSlots;
+        
+        [SerializeField]
+        private List<Image> blueprintsSlots;
+        
+        [SerializeField]
+        private List<GameObject> blueprintsBoarders;
+
+        public List<GameObject> BlueprintsBoarders => blueprintsBoarders;
 
         public CanvasGroup CanvasGroup => canvasGroup;
 
@@ -70,8 +80,13 @@ namespace UI
 
         [SerializeField]
         private HealthCounter healthCounter;
+        
+        [SerializeField]
+        private BlockCounter blockCounter;
 
         public HealthCounter HealthCounter => healthCounter;
+
+        public BlockCounter BlockCounter => blockCounter;
 
         [SerializeField]
         private Image crosshairImage;

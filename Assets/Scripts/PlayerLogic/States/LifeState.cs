@@ -21,6 +21,7 @@ namespace PlayerLogic.States
             _playerData.IsAlive = true;
             _playerData.Characteristic = _staticData.GetPlayerCharacteristic(_playerData.GameClass);
             _playerData.Health = _playerData.Characteristic.maxHealth;
+            _playerData.BlockCount = _playerData.Characteristic.blockCount;
             _playerData.Items = _staticData.GetInventory(_playerData.GameClass).ToList();
             _playerData.ItemData = new List<IMutableItemData>();
             for (var i = 0; i < _playerData.Items.Count; i++)

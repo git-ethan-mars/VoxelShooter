@@ -60,12 +60,12 @@ namespace Networking.ServerServices
             var newBlockData = new BlockData(BlockColor.empty);
             if (_healthByBlock[blockIndex] >= _damagedBlockHealthThreshold)
             {
-                return new BlockData(Color32.Lerp(_destructedBlockColor, blockData.Color, _fullHealthColorCoefficient));
+                return new BlockData(Color32.Lerp(_destructedBlockColor, blockData.color, _fullHealthColorCoefficient));
             }
 
             if (_healthByBlock[blockIndex] >= _wreckedBlockHealthThreshold)
             {
-                return new BlockData(Color32.Lerp(_destructedBlockColor, blockData.Color,
+                return new BlockData(Color32.Lerp(_destructedBlockColor, blockData.color,
                     previousHealth >= _damagedBlockHealthThreshold
                         ? _damagedColorCoefficient
                         : _fullHealthColorCoefficient));
@@ -73,7 +73,7 @@ namespace Networking.ServerServices
 
             if (_healthByBlock[blockIndex] > 0)
             {
-                return new BlockData(Color32.Lerp(_destructedBlockColor, blockData.Color,
+                return new BlockData(Color32.Lerp(_destructedBlockColor, blockData.color,
                     previousHealth >= _wreckedBlockHealthThreshold
                         ? _wreckedColorCoefficient
                         : _fullHealthColorCoefficient));

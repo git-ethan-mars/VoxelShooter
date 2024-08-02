@@ -5,17 +5,13 @@ using PlayerLogic;
 using TMPro;
 using UI;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Inventory.Block
 {
     public class BlockView : IInventoryItemView
     {
         public Sprite Icon { get; }
-        private readonly GameObject _blockInfo;
         private readonly TextMeshProUGUI _blockCountText;
-        private readonly Image _blockImage;
-        private readonly Sprite _blockSprite;
         private readonly GameObject _palette;
         private readonly GameObject _transparentBlock;
         private readonly RayCaster _rayCaster;
@@ -27,12 +23,9 @@ namespace Inventory.Block
             _rayCaster = rayCaster;
             _placeDistance = player.PlaceDistance;
             _palette = hud.Palette.gameObject;
-            _blockInfo = hud.ItemInfo;
-            _blockImage = hud.ItemIcon;
             _blockCountText = hud.ItemCount;
             Icon = configure.inventoryIcon;
-            _blockSprite = configure.itemSprite;
-            _transparentBlock = meshFactory.CreatTransparentBlock();
+            _transparentBlock = meshFactory.CreateTransparentBlock();
             ChangeTransparentBlockColor(initialColor);
             _transparentBlock.SetActive(false);
         }
@@ -41,14 +34,11 @@ namespace Inventory.Block
         {
             _transparentBlock.SetActive(true);
             _palette.SetActive(true);
-            _blockInfo.SetActive(true);
-            _blockImage.sprite = _blockSprite;
         }
 
         public void Disable()
         {
             _palette.SetActive(false);
-            _blockInfo.SetActive(false);
             _transparentBlock.SetActive(false);
         }
 

@@ -31,17 +31,17 @@ namespace Generators
                 var x = blocks[i].Position.x;
                 var y = blocks[i].Position.y;
                 var z = blocks[i].Position.z;
-                ChunkGeneratorHelper.GenerateTopSide(x, y, z, blocks[i].BlockData.Color, _vertices, _normals, _colors,
+                ChunkGeneratorHelper.GenerateTopSide(x, y, z, blocks[i].BlockData.color, _vertices, _normals, _colors,
                     _triangles);
-                ChunkGeneratorHelper.GenerateBottomSide(x, y, z, blocks[i].BlockData.Color, _vertices, _normals,
+                ChunkGeneratorHelper.GenerateBottomSide(x, y, z, blocks[i].BlockData.color, _vertices, _normals,
                     _colors, _triangles);
-                ChunkGeneratorHelper.GenerateLeftSide(x, y, z, blocks[i].BlockData.Color, _vertices, _normals, _colors,
+                ChunkGeneratorHelper.GenerateLeftSide(x, y, z, blocks[i].BlockData.color, _vertices, _normals, _colors,
                     _triangles);
-                ChunkGeneratorHelper.GenerateRightSide(x, y, z, blocks[i].BlockData.Color, _vertices, _normals, _colors,
+                ChunkGeneratorHelper.GenerateRightSide(x, y, z, blocks[i].BlockData.color, _vertices, _normals, _colors,
                     _triangles);
-                ChunkGeneratorHelper.GenerateFrontSide(x, y, z, blocks[i].BlockData.Color, _vertices, _normals, _colors,
+                ChunkGeneratorHelper.GenerateFrontSide(x, y, z, blocks[i].BlockData.color, _vertices, _normals, _colors,
                     _triangles);
-                ChunkGeneratorHelper.GenerateBackSide(x, y, z, blocks[i].BlockData.Color, _vertices, _normals, _colors,
+                ChunkGeneratorHelper.GenerateBackSide(x, y, z, blocks[i].BlockData.color, _vertices, _normals, _colors,
                     _triangles);
             }
 

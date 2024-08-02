@@ -16,6 +16,7 @@ namespace Infrastructure.Services.StaticData
         private const string BlockHealthBalancePath = "StaticData/Block Health";
         private const string SoundPath = "StaticData/Audio Data";
         private const string FallDamageConfigPath = "StaticData/Fall damage configuration";
+        private const string BlueprintsPath = "StaticData/Blueprints";
         private readonly IAssetProvider _assets;
         private Dictionary<GameClass, PlayerCharacteristic> _playerCharacteristicByClass;
         private Dictionary<GameClass, GameInventory> _inventoryByClass;
@@ -61,6 +62,11 @@ namespace Infrastructure.Services.StaticData
         public PlayerCharacteristic GetPlayerCharacteristic(GameClass gameClass)
         {
             return _playerCharacteristicByClass.TryGetValue(gameClass, out var characteristic) ? characteristic : null;
+        }
+
+        public List<Blueprint> GetBlueprints()
+        {
+            return _assets.LoadAll<Blueprint>(BlueprintsPath).ToList();
         }
 
         public void LoadMapConfigures()

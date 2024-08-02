@@ -1,7 +1,9 @@
+using System;
 using UnityEngine;
 
 namespace Data
 {
+    [Serializable]
     public struct BlockDataWithPosition
     {
         public Vector3Int Position;

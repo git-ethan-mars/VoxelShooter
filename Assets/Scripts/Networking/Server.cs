@@ -116,7 +116,7 @@ namespace Networking
                 connection.Send(new PlayerConfigureResponse(playerData.Characteristic.placeDistance,
                     playerData.Characteristic.speed, playerData.Characteristic.jumpHeight,
                     playerData.Items.Select(item => item.id).ToList(),
-                    playerData.Health));
+                    playerData.Health, playerData.BlockCount));
                 SendDataFromOtherPlayers(connection);
                 NetworkServer.SendToReady(new NickNameResponse(connection.identity, playerData.NickName));
                 NetworkServer.SendToReady(new ScoreboardResponse(GetScoreData()));
@@ -301,7 +301,7 @@ namespace Networking
             connection.Send(new PlayerConfigureResponse(playerData.Characteristic.placeDistance,
                 playerData.Characteristic.speed, playerData.Characteristic.jumpHeight,
                 playerData.Items.Select(item => item.id).ToList(),
-                playerData.Health));
+                playerData.Health, playerData.BlockCount));
             NetworkServer.SendToReady(new NickNameResponse(connection.identity, playerData.NickName));
         }
 

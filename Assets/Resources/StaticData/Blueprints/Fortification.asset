@@ -1,0 +1,112 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a7b67eef6024a2ca26bbf49a33f7eff, type: 3}
+  m_Name: Fortification
+  m_EditorClassIdentifier: 
+  image: {fileID: 21300000, guid: 9dfbbae8f260b6b429641c3bba832080, type: 3}
+  prefab: {fileID: 8095424271465804933, guid: e7405952fd04e7d44882e05434800af4, type: 3}
+  blockDataWithPositions:
+  - Position: {x: 0, y: 0, z: 0}
+    BlockData:
+      color:
+        serializedVersion: 2
+        rgba: 6776679
+  - Position: {x: -1, y: 0, z: -1}
+    BlockData:
+      color:
+        serializedVersion: 2
+        rgba: 6776679
+  - Position: {x: 1, y: 0, z: -1}
+    BlockData:
+      color:
+        serializedVersion: 2
+        rgba: 6776679
+  - Position: {x: -1, y: 0, z: 0}
+    BlockData:
+      color:
+        serializedVersion: 2
+        rgba: 6776679
+  - Position: {x: 1, y: 0, z: 0}
+    BlockData:
+      color:
+        serializedVersion: 2
+        rgba: 6776679
+  - Position: {x: -1, y: 0, z: 1}
+    BlockData:
+      color:
+        serializedVersion: 2
+        rgba: 6776679
+  - Position: {x: 0, y: 0, z: 1}
+    BlockData:
+      color:
+        serializedVersion: 2
+        rgba: 6776679
+  - Position: {x: 1, y: 0, z: 1}
+    BlockData:
+      color:
+        serializedVersion: 2
+        rgba: 6776679
+  - Position: {x: -1, y: 1, z: -1}
+    BlockData:
+      color:
+        serializedVersion: 2
+        rgba: 6776679
+  - Position: {x: 1, y: 1, z: -1}
+    BlockData:
+      color:
+        serializedVersion: 2
+        rgba: 6776679
+  - Position: {x: -1, y: 1, z: 1}
+    BlockData:
+      color:
+        serializedVersion: 2
+        rgba: 6776679
+  - Position: {x: 1, y: 1, z: 1}
+    BlockData:
+      color:
+        serializedVersion: 2
+        rgba: 6776679
+  - Position: {x: -1, y: 2, z: -1}
+    BlockData:
+      color:
+        serializedVersion: 2
+        rgba: 6776679
+  - Position: {x: -1, y: 2, z: 0}
+    BlockData:
+      color:
+        serializedVersion: 2
+        rgba: 6776679
+  - Position: {x: -1, y: 2, z: 1}
+    BlockData:
+      color:
+        serializedVersion: 2
+        rgba: 6776679
+  - Position: {x: 0, y: 2, z: 1}
+    BlockData:
+      color:
+        serializedVersion: 2
+        rgba: 6776679
+  - Position: {x: 1, y: 2, z: 1}
+    BlockData:
+      color:
+        serializedVersion: 2
+        rgba: 6776679
+  - Position: {x: 1, y: 2, z: 0}
+    BlockData:
+      color:
+        serializedVersion: 2
+        rgba: 6776679
+  - Position: {x: 1, y: 2, z: -1}
+    BlockData:
+      color:
+        serializedVersion: 2
+        rgba: 6776679
