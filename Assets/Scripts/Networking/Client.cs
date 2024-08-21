@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Data;
 using Entities;
 using Infrastructure.Services.Storage;
@@ -8,9 +9,11 @@ using MapLogic;
 using Mirror;
 using Networking.ClientServices;
 using Networking.MessageHandlers.ResponseHandler;
+using Networking.ServerList;
 using PlayerLogic;
 using PlayerLogic.Spectator;
 using UI.SettingsMenu;
+using UnityEngine;
 
 namespace Networking
 {
@@ -94,10 +97,14 @@ namespace Networking
         private readonly StopMuzzleFlashHandler _stopMuzzleFlashHandler;
         private readonly RchParticleHandler _rchParticleHandler;
         private readonly BlockUseHandler _blockUseHandler;
+        private readonly IReadableServerList _serverListService;
 
 
         public Client(GameStateMachine stateMachine, CustomNetworkManager networkManager)
         {
+            _serverListService = new ServerListService();
+            // var task = Task.Run(() => _serverListService.GetServers());
+            // task.ContinueWith(OnServersInfoDownloaded);
             _stateMachine = stateMachine;
             _networkManager = networkManager;
             _storageService = networkManager.StorageService;
@@ -199,6 +206,14 @@ namespace Networking
         private void OnMapDownloaded()
         {
             _stateMachine.Enter<GameLoopState, CustomNetworkManager>(_networkManager);
+        }
+
+        private void OnServersInfoDownloaded(Task t)
+        {
+            foreach (var serverInfo in _serverListService.GetServersInfo())
+            {
+                Debug.Log(serverInfo.id);
+            }
         }
 
         private void OnDataSaved(ISettingsData data)
