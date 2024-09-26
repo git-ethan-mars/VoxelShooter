@@ -1,235 +1,236 @@
-﻿using UnityEditor;
+﻿using Common.StaticData;
+using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-[CustomEditor(typeof(MapCustomizer.MapCustomizer))]
-public class MapCustomizerEditor : UnityEditor.Editor
+namespace Editor
 {
-    private SerializedProperty _lightProperty;
-    private MapCustomizer.MapCustomizer _mapEditorScript;
-    private ReorderableList _spawnPoints;
-    private readonly string[] _ambientModes = {"Skybox", "Gradient", "Color"};
-    private readonly string[] _fogModes = {"Linear", "Exponential", "Exponential squared"};
-    private SerializedObject _configure;
+	[CustomEditor(typeof(MapCustomizer.MapCustomizer))]
+	public class MapCustomizerEditor : UnityEditor.Editor
+	{
+		private readonly string[] _ambientModes = { "Skybox", "Gradient", "Color" };
+		private readonly string[] _fogModes = { "Linear", "Exponential", "Exponential squared" };
+		private MapCustomizer.MapCustomizer _mapEditorScript;
+		private ReorderableList _spawnPoints;
+		private SerializedObject _configure;
 
-    private void OnEnable()
-    {
-        _mapEditorScript = (MapCustomizer.MapCustomizer) target;
-        _spawnPoints = new ReorderableList(serializedObject, serializedObject.FindProperty("spawnPoints"), false, true,
-            true, true)
-        {
-            drawHeaderCallback = DrawHeader,
-            drawElementCallback = DrawListItems,
-            onAddCallback = AddItem,
-            onRemoveCallback = RemoveItem
-        };
-        _lightProperty = serializedObject.FindProperty("lightSource");
-    }
+		private void OnEnable()
+		{
+			_mapEditorScript = (MapCustomizer.MapCustomizer) target;
+			_spawnPoints = new ReorderableList(serializedObject, serializedObject.FindProperty(nameof(MapCustomizer.MapCustomizer.spawnPoints)), false,
+				true,
+				true, true)
+			{
+				drawHeaderCallback = DrawHeader,
+				drawElementCallback = DrawListItems,
+				onAddCallback = AddItem,
+				onRemoveCallback = RemoveItem
+			};
+		}
 
-    public override void OnInspectorGUI()
-    {
-        serializedObject.Update();
-        DrawGUI();
-        serializedObject.ApplyModifiedProperties();
-    }
+		public override void OnInspectorGUI()
+		{
+			serializedObject.Update();
+			DrawGUI();
+			serializedObject.ApplyModifiedProperties();
+		}
 
-    private void DrawGUI()
-    {
-        var configureProperty = serializedObject.FindProperty("mapConfigure");
+		private void DrawGUI()
+		{
+			var configureProperty = serializedObject.FindProperty(nameof(MapCustomizer.MapCustomizer.mapConfigure));
 
-        EditorGUILayout.PropertyField(configureProperty);
-        if (configureProperty.objectReferenceValue == null)
-        {
-            EditorGUILayout.HelpBox("Create/choose map configure file", MessageType.Error);
-            return;
-        }
+			EditorGUILayout.PropertyField(configureProperty);
+			if (configureProperty.objectReferenceValue == null)
+			{
+				EditorGUILayout.HelpBox("Create/choose map configure file", MessageType.Error);
+				return;
+			}
 
-        _configure = new SerializedObject(configureProperty.objectReferenceValue);
-        var imageProperty = _configure.FindProperty("image");
-        EditorGUI.BeginChangeCheck();
-        EditorGUILayout.ObjectField(imageProperty, new GUIContent(imageProperty.displayName));
+			_configure = new SerializedObject(configureProperty.objectReferenceValue);
+			var imageProperty = _configure.FindProperty(nameof(MapConfigure.Image));
+			EditorGUI.BeginChangeCheck();
+			EditorGUILayout.ObjectField(imageProperty, new GUIContent(imageProperty.displayName));
 
-        if (EditorGUI.EndChangeCheck())
-        {
-            _configure.ApplyModifiedProperties();
-        }
+			if (EditorGUI.EndChangeCheck())
+			{
+				_configure.ApplyModifiedProperties();
+			}
 
-        if (GUILayout.Button("Generate map"))
-        {
-            _mapEditorScript.GenerateMap();
-        }
+			if (GUILayout.Button("Generate map"))
+			{
+				_mapEditorScript.GenerateMap();
+			}
 
-        if (!_mapEditorScript.IsMapGenerated)
-        {
-            return;
-        }
+			if (!_mapEditorScript.IsMapGenerated)
+			{
+				return;
+			}
 
-        EditorGUILayout.LabelField("Color blocks");
-        EditorGUI.indentLevel += 1;
-        var waterColorProperty = _configure.FindProperty("waterColor");
-        var innerColorProperty = _configure.FindProperty("innerColor");
-        var newWaterColor = EditorGUILayout.ColorField(new GUIContent(waterColorProperty.displayName),
-            waterColorProperty.colorValue);
-        var newInnerColor = EditorGUILayout.ColorField(innerColorProperty.displayName,
-            innerColorProperty.colorValue);
-        waterColorProperty.colorValue = newWaterColor;
-        innerColorProperty.colorValue = newInnerColor;
+			DrawColorBlocks();
 
-        EditorGUI.indentLevel -= 1;
-        EditorGUILayout.PropertyField(_lightProperty);
-        if (_lightProperty.objectReferenceValue == null)
-        {
-            EditorGUILayout.HelpBox("Choose light source in the scene", MessageType.Warning);
-        }
+			DrawAmbientProperties();
+			DrawFogProperties();
+			DrawWeatherProperty();
+			_spawnPoints.DoLayoutList();
+			_configure.ApplyModifiedProperties();
+			if (EditorUtility.IsDirty(_mapEditorScript.mapConfigure) && GUILayout.Button("Save configure"))
+			{
+				AssetDatabase.SaveAssets();
+			}
+		}
 
-        DrawAmbientProperties();
-        DrawFogProperties();
-        DrawWeatherProperty();
-        _spawnPoints.DoLayoutList();
-        _configure.ApplyModifiedProperties();
-        if (EditorUtility.IsDirty(_mapEditorScript.mapConfigure) && GUILayout.Button("Save configure"))
-        {
-            AssetDatabase.SaveAssets();
-        }
-    }
+		private void DrawColorBlocks()
+		{
+			EditorGUILayout.LabelField("Color blocks");
+			EditorGUI.indentLevel += 1;
+			var waterColorProperty = _configure.FindProperty(nameof(MapConfigure.WaterColor));
+			waterColorProperty.colorValue = EditorGUILayout.ColorField(waterColorProperty.displayName,
+				waterColorProperty.colorValue);
+			var innerColorProperty = _configure.FindProperty(nameof(MapConfigure.InnerColor));
+			innerColorProperty.colorValue = EditorGUILayout.ColorField(new GUIContent(innerColorProperty.displayName),
+				innerColorProperty.colorValue);
 
-    private void DrawWeatherProperty()
-    {
-        var weatherProperty = _configure.FindProperty("weather");
-        EditorGUI.BeginChangeCheck();
-        EditorGUILayout.ObjectField(weatherProperty, new GUIContent(weatherProperty.displayName));
-        if (EditorGUI.EndChangeCheck())
-        {
-            _configure.ApplyModifiedProperties();
-        }
-    }
+			EditorGUI.indentLevel -= 1;
+		}
 
-    private void DrawFogProperties()
-    {
-        var isFogActivatedProperty = _configure.FindProperty("isFogActivated");
-        EditorGUI.BeginChangeCheck();
-        var isFogActivated =
-            EditorGUILayout.Toggle("Fog", isFogActivatedProperty.boolValue);
-        isFogActivatedProperty.boolValue = isFogActivated;
-        EditorGUI.indentLevel += 1;
-        if (isFogActivatedProperty.boolValue)
-        {
-            var fogColorProperty = _configure.FindProperty("fogColor");
-            var newFogColor = EditorGUILayout.ColorField(fogColorProperty.displayName, fogColorProperty.colorValue);
-            fogColorProperty.colorValue = newFogColor;
-            var fogModeProperty = _configure.FindProperty("fogMode");
-            fogModeProperty.intValue = EditorGUILayout.IntPopup(fogModeProperty.displayName, fogModeProperty.intValue,
-                _fogModes, new[] {1, 2, 3});
-            if ((FogMode) fogModeProperty.intValue != FogMode.Linear)
-            {
-                var fogDensityProperty = _configure.FindProperty("fogDensity");
-                var newFogDensity =
-                    EditorGUILayout.FloatField(fogDensityProperty.displayName, fogDensityProperty.floatValue);
-                fogDensityProperty.floatValue = newFogDensity;
-            }
-            else
-            {
-                var fogStartDistanceProperty = _configure.FindProperty("fogStartDistance");
-                var fogEndDistanceProperty = _configure.FindProperty("fogEndDistance");
-                var newFogStartDistance = EditorGUILayout.FloatField(fogStartDistanceProperty.displayName,
-                    fogStartDistanceProperty.floatValue);
-                var newFogEndDistance = EditorGUILayout.FloatField(fogEndDistanceProperty.displayName,
-                    fogEndDistanceProperty.floatValue);
-                fogStartDistanceProperty.floatValue = newFogStartDistance;
-                fogEndDistanceProperty.floatValue = newFogEndDistance;
-            }
-        }
+		private void DrawWeatherProperty()
+		{
+			var weatherProperty = _configure.FindProperty(nameof(MapConfigure.Weather));
+			EditorGUI.BeginChangeCheck();
+			EditorGUILayout.ObjectField(weatherProperty, new GUIContent(weatherProperty.displayName));
+			if (EditorGUI.EndChangeCheck())
+			{
+				_configure.ApplyModifiedProperties();
+			}
+		}
 
-        EditorGUI.indentLevel -= 1;
-        _configure.ApplyModifiedProperties();
-        if (EditorGUI.EndChangeCheck())
-        {
-            _mapEditorScript.ShowFog();
-        }
-    }
+		private void DrawFogProperties()
+		{
+			var fogDataProperty = _configure.FindProperty(nameof(MapConfigure.FogData));
+			var fogActivatedProperty = fogDataProperty.FindPropertyRelative(nameof(MapConfigure.FogData.activated));
+			EditorGUI.BeginChangeCheck();
+			var isFogActivated =
+				EditorGUILayout.Toggle("Fog", fogActivatedProperty.boolValue);
+			fogActivatedProperty.boolValue = isFogActivated;
+			EditorGUI.indentLevel += 1;
+			if (isFogActivated)
+			{
+				var fogColorProperty = fogDataProperty.FindPropertyRelative(nameof(MapConfigure.FogData.color));
+				fogColorProperty.colorValue = EditorGUILayout.ColorField(fogColorProperty.displayName, fogColorProperty.colorValue);
 
-    private void DrawAmbientProperties()
-    {
-        EditorGUILayout.LabelField("Ambient settings");
-        EditorGUI.BeginChangeCheck();
-        EditorGUI.indentLevel += 1;
-        var skyboxMaterialProperty = _configure.FindProperty("skyboxMaterial");
-        EditorGUILayout.ObjectField(skyboxMaterialProperty, new GUIContent(skyboxMaterialProperty.displayName));
-        var ambientModeProperty = _configure.FindProperty("ambientMode");
-        ambientModeProperty.intValue =
-            EditorGUILayout.IntPopup("Source", ambientModeProperty.intValue, _ambientModes, new[] {0, 1, 3});
-        var skyColorProperty = _configure.FindProperty("skyColor");
-        var equatorColorProperty = _configure.FindProperty("equatorColor");
-        var groundColorProperty = _configure.FindProperty("groundColor");
-        if ((AmbientMode) ambientModeProperty.intValue == AmbientMode.Skybox)
-        {
-            if (skyboxMaterialProperty.objectReferenceValue == null)
-            {
-                var newSkyColor = EditorGUILayout.ColorField(skyColorProperty.displayName, skyColorProperty.colorValue);
-                skyColorProperty.colorValue = newSkyColor;
-            }
-            else
-            {
-                var ambientIntensityProperty = _configure.FindProperty("ambientIntensity");
-                ambientIntensityProperty.floatValue =
-                    EditorGUILayout.Slider("Intensity Multiplier",
-                        ambientIntensityProperty.floatValue, 0.0F, 8.0F);
-            }
-        }
-        else if ((AmbientMode) ambientModeProperty.intValue == AmbientMode.Trilight)
-        {
-            var newSkyColor = EditorGUILayout.ColorField(skyColorProperty.displayName, skyColorProperty.colorValue);
-            var newEquatorColor =
-                EditorGUILayout.ColorField(equatorColorProperty.displayName, equatorColorProperty.colorValue);
-            var newGroundColor =
-                EditorGUILayout.ColorField(groundColorProperty.displayName, groundColorProperty.colorValue);
-            skyColorProperty.colorValue = newSkyColor;
-            equatorColorProperty.colorValue = newEquatorColor;
-            groundColorProperty.colorValue = newGroundColor;
-        }
-        else if ((AmbientMode) ambientModeProperty.intValue == AmbientMode.Flat)
-        {
-            var newSkyColor = EditorGUILayout.ColorField(skyColorProperty.displayName, skyColorProperty.colorValue);
-            skyColorProperty.colorValue = newSkyColor;
-        }
+				var fogModeProperty = fogDataProperty.FindPropertyRelative(nameof(MapConfigure.FogData.mode));
+				fogModeProperty.intValue = EditorGUILayout.IntPopup(fogModeProperty.displayName, fogModeProperty.intValue,
+					_fogModes, new[] { 1, 2, 3 });
 
-        EditorGUI.indentLevel -= 1;
-        _configure.ApplyModifiedProperties();
-        if (EditorGUI.EndChangeCheck())
-        {
-            _mapEditorScript.ShowAmbientLighting();
-        }
-    }
+				if ((FogMode) fogModeProperty.intValue != FogMode.Linear)
+				{
+					var fogDensityProperty = fogDataProperty.FindPropertyRelative(nameof(MapConfigure.FogData.density));
+					fogDensityProperty.floatValue = EditorGUILayout.FloatField(fogDensityProperty.displayName,
+						fogDensityProperty.floatValue);
+				}
+				else
+				{
+					var fogStartDistanceProperty = fogDataProperty.FindPropertyRelative(nameof(MapConfigure.FogData.startDistance));
+					fogStartDistanceProperty.floatValue = EditorGUILayout.FloatField(fogStartDistanceProperty.displayName,
+						fogStartDistanceProperty.floatValue);
 
-    private void DrawHeader(Rect rect)
-    {
-        EditorGUI.LabelField(rect, "Spawn points");
-    }
+					var fogEndDistanceProperty = fogDataProperty.FindPropertyRelative(nameof(MapConfigure.FogData.endDistance));
+					fogEndDistanceProperty.floatValue = EditorGUILayout.FloatField(fogEndDistanceProperty.displayName,
+						fogEndDistanceProperty.floatValue);
+				}
+			}
 
-    private void AddItem(ReorderableList reorderableList)
-    {
-        reorderableList.serializedProperty.arraySize += 1;
-        reorderableList.serializedProperty.GetArrayElementAtIndex(reorderableList.index).objectReferenceValue =
-            _mapEditorScript.CreateSpawnPoint(
-                Vector3Int.FloorToInt(((SceneView) SceneView.sceneViews[0]).camera.transform.position));
-        var spawnPointsProperty = _configure.FindProperty("spawnPoints");
-        spawnPointsProperty.arraySize += 1;
-    }
+			EditorGUI.indentLevel -= 1;
+			_configure.ApplyModifiedProperties();
+			if (EditorGUI.EndChangeCheck())
+			{
+				_mapEditorScript.ShowFog();
+			}
+		}
 
-    private void RemoveItem(ReorderableList reorderableList)
-    {
-        DestroyImmediate(reorderableList.serializedProperty.GetArrayElementAtIndex(reorderableList.index)
-            .objectReferenceValue);
-        reorderableList.serializedProperty.DeleteArrayElementAtIndex(reorderableList.index);
-        var spawnPointsProperty = _configure.FindProperty("spawnPoints");
-        spawnPointsProperty.DeleteArrayElementAtIndex(spawnPointsProperty.arraySize - 1);
-    }
+		private void DrawAmbientProperties()
+		{
+			EditorGUILayout.LabelField("Ambient settings");
+			EditorGUI.BeginChangeCheck();
+			EditorGUI.indentLevel += 1;
+			var skyboxMaterialProperty = _configure.FindProperty(nameof(MapConfigure.SkyboxMaterial));
+			EditorGUILayout.ObjectField(skyboxMaterialProperty, new GUIContent(skyboxMaterialProperty.displayName));
+			var ambientDataProperty = _configure.FindProperty(nameof(MapConfigure.AmbientData));
 
-    private void DrawListItems(Rect rect, int index, bool isActive, bool isFocused)
-    {
-        var element = _spawnPoints.serializedProperty.GetArrayElementAtIndex(index);
-        EditorGUI.ObjectField(rect, element.displayName, element.objectReferenceValue, typeof(GameObject),
-            false);
-    }
+			var ambientModeProperty = ambientDataProperty.FindPropertyRelative(nameof(MapConfigure.AmbientData.mode));
+			ambientModeProperty.intValue =
+				EditorGUILayout.IntPopup("Source", ambientModeProperty.intValue, _ambientModes, new[] { 0, 1, 3 });
+
+			var skyColorProperty = ambientDataProperty.FindPropertyRelative(nameof(MapConfigure.AmbientData.skyColor));
+			var equatorColorProperty = ambientDataProperty.FindPropertyRelative(nameof(MapConfigure.AmbientData.equatorColor));
+			var groundColorProperty = ambientDataProperty.FindPropertyRelative(nameof(MapConfigure.AmbientData.groundColor));
+
+			if ((AmbientMode) ambientModeProperty.intValue == AmbientMode.Skybox)
+			{
+				if (skyboxMaterialProperty.objectReferenceValue == null)
+				{
+					skyColorProperty.colorValue = EditorGUILayout.ColorField(skyColorProperty.displayName, skyColorProperty.colorValue);
+				}
+				else
+				{
+					var ambientIntensityProperty = ambientDataProperty.FindPropertyRelative(nameof(MapConfigure.AmbientData.intensity));
+					ambientIntensityProperty.floatValue =
+						EditorGUILayout.Slider("Intensity Multiplier",
+							ambientIntensityProperty.floatValue, 0.0F, 8.0F);
+				}
+			}
+			else if ((AmbientMode) ambientModeProperty.intValue == AmbientMode.Trilight)
+			{
+				skyColorProperty.colorValue = EditorGUILayout.ColorField(skyColorProperty.displayName, skyColorProperty.colorValue);
+				equatorColorProperty.colorValue = EditorGUILayout.ColorField(equatorColorProperty.displayName,
+					equatorColorProperty.colorValue);
+				groundColorProperty.colorValue = EditorGUILayout.ColorField(groundColorProperty.displayName,
+					groundColorProperty.colorValue);
+			}
+			else if ((AmbientMode) ambientModeProperty.intValue == AmbientMode.Flat)
+			{
+				skyColorProperty.colorValue = EditorGUILayout.ColorField(skyColorProperty.displayName, skyColorProperty.colorValue);
+			}
+
+			EditorGUI.indentLevel -= 1;
+			_configure.ApplyModifiedProperties();
+			if (EditorGUI.EndChangeCheck())
+			{
+				_mapEditorScript.ShowAmbientLighting();
+			}
+		}
+
+		private void DrawHeader(Rect rect)
+		{
+			EditorGUI.LabelField(rect, "Spawn Points");
+		}
+
+		private void AddItem(ReorderableList reorderableList)
+		{
+			reorderableList.serializedProperty.arraySize += 1;
+			var cameraTransform = ((SceneView) SceneView.sceneViews[0]).camera.transform;
+			var spawnPointPosition = Vector3Int.FloorToInt(cameraTransform.position + cameraTransform.forward * 5);
+			reorderableList.serializedProperty.GetArrayElementAtIndex(reorderableList.index).objectReferenceValue =
+				_mapEditorScript.CreateSpawnPoint(spawnPointPosition);
+			var spawnPointsProperty = _configure.FindProperty(nameof(MapConfigure.spawnPoints));
+			spawnPointsProperty.arraySize += 1;
+		}
+
+		private void RemoveItem(ReorderableList reorderableList)
+		{
+			DestroyImmediate(reorderableList.serializedProperty.GetArrayElementAtIndex(reorderableList.index)
+				.objectReferenceValue);
+			reorderableList.serializedProperty.DeleteArrayElementAtIndex(reorderableList.index);
+			var spawnPointsProperty = _configure.FindProperty(nameof(MapConfigure.spawnPoints));
+			spawnPointsProperty.DeleteArrayElementAtIndex(spawnPointsProperty.arraySize - 1);
+		}
+
+		private void DrawListItems(Rect rect, int index, bool isActive, bool isFocused)
+		{
+			var element = _spawnPoints.serializedProperty.GetArrayElementAtIndex(index);
+			EditorGUI.ObjectField(rect, element.displayName, element.objectReferenceValue, typeof(GameObject),
+				false);
+		}
+	}
 }

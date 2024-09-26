@@ -1,5 +1,7 @@
-﻿using Infrastructure.Factory;
-using Infrastructure.Services.StaticData;
+﻿using Common.Services.StaticData;
+using Common.StaticData;
+using Infrastructure.Factory;
+using UI;
 using UnityEngine;
 
 namespace Infrastructure.States
@@ -9,7 +11,7 @@ namespace Infrastructure.States
         private readonly IUIFactory _uiFactory;
         private readonly GameStateMachine _stateMachine;
         private readonly IMapRepository _mapRepository;
-        private GameObject _matchMenu;
+        private MatchMenu _matchMenu;
 
         public CreateMatchState(GameStateMachine stateMachine, IMapRepository mapRepository, IUIFactory uiFactory)
         {
@@ -20,12 +22,32 @@ namespace Infrastructure.States
 
         public void Enter()
         {
-            _matchMenu = _uiFactory.CreateMatchMenu(_stateMachine, _mapRepository);
+            _matchMenu = _uiFactory.CreateMatchMenu(_mapRepository);
+            _matchMenu.BackButtonPressed += OnBackButton;
+            _matchMenu.ApplyButtonPressed += OnApplyButton;
+        }
+        
+        private void OnBackButton()
+        {
+            _stateMachine.Enter<MainMenuState>();
+        }
+        
+        private void OnApplyButton()
+        {
+            var serverSettings = new WorldSettings(mapName.text, _timeLimitation.CurrentValue.Value,
+                _lobbyBalance.spawnTime, _lobbyBalance.boxSpawnTime);
+# if LOCAL_BUILD
+            _stateMachine.Enter<StartMatchState, WorldSettings>(
+                serverSettings);
+# else
+            _stateMachine.Enter<StartSteamLobbyState, WorldSettings>(
+                serverSettings);
+# endif
         }
 
         public void Exit()
         {
-            Object.Destroy(_matchMenu);
+            Object.Destroy(_matchMenu.gameObject);
         }
     }
 }

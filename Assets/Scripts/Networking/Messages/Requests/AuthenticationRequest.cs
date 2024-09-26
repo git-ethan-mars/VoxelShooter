@@ -1,16 +1,13 @@
-using Mirror;
-using Steamworks;
-
 namespace Networking.Messages.Requests
 {
-    public struct AuthenticationRequest : NetworkMessage
+    public struct AuthenticationRequest : IMirrorRequest
     {
-        public readonly CSteamID SteamID;
+        public readonly ulong Id;
         public readonly string NickName;
 
-        public AuthenticationRequest(CSteamID steamID, string nickName)
+        public AuthenticationRequest(ulong id, string nickName)
         {
-            SteamID = steamID;
+            Id = id;
             NickName = nickName;
         }
     }

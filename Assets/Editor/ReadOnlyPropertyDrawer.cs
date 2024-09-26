@@ -1,4 +1,4 @@
-﻿using CustomAttributes;
+﻿using Common.CustomAttributes;
 using UnityEditor;
 using UnityEngine;
 

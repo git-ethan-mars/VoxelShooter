@@ -1,15 +1,14 @@
-﻿using Data;
-using Mirror;
+﻿using VoxelMap;
 
 namespace Networking.Messages.Requests
 {
-    public struct AddBlocksRequest : NetworkMessage
-    {
-        public readonly BlockDataWithPosition[] Blocks;
+	public struct AddBlocksRequest : IMirrorRequest
+	{
+		public readonly BlockDataWithPosition[] Blocks;
 
-        public AddBlocksRequest(BlockDataWithPosition[] blocks)
-        {
-            Blocks = blocks;
-        }
-    }
+		public AddBlocksRequest(BlockDataWithPosition[] blocks)
+		{
+			Blocks = blocks;
+		}
+	}
 }

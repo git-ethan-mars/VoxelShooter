@@ -1,8 +1,11 @@
 using System.IO;
-using Infrastructure.AssetManagement;
-using Infrastructure.Services.StaticData;
+using Common;
+using Common.AssetManagement;
+using Common.Services.StaticData;
+using Common.StaticData;
 using MapLogic;
 using UnityEditor;
+using VoxelMap;
 
 namespace Editor
 {
@@ -18,8 +21,8 @@ namespace Editor
             foreach (var vxlPath in vxlFilePaths)
             {
                 var fileName = Path.GetFileNameWithoutExtension(Path.GetFileName(vxlPath));
-                var mapProvider = Vxl2RchConverter.LoadVxl(vxlPath, staticData.GetMapConfigure(fileName));
-                MapWriter.SaveMap($"{fileName}{Constants.RchExtension}", mapProvider);
+                var mapData = Vxl2RchConverter.LoadVxl(vxlPath);
+                MapWriter.SaveMap($"{fileName}{Constants.RchExtension}", mapData);
             }
         }
     }

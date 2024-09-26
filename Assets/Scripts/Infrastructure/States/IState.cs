@@ -15,8 +15,8 @@
         void Exit();
     }
 
-    public interface IPayloadedState<TPayload1, TPayload2> : IExitableState
+    public interface IPayloadedState<TPayload1, TPayload2, TPayload3> : IExitableState
     {
-        void Enter(TPayload1 payload1, TPayload2 payload2);
+        void Enter(TPayload1 payload1, TPayload2 payload2, TPayload3 payload3);
     }
 }

@@ -26,18 +26,19 @@ MonoBehaviour:
     bias: 0.3
     normalBias: 0.5
   skyboxMaterial: {fileID: 2100000, guid: cdbb40e11399e4a17882ada20a1b896a, type: 2}
-  ambientMode: 0
-  skyColor: {r: 0.21176471, g: 0.22745098, b: 0.25882354, a: 1}
-  equatorColor: {r: 0.11372549, g: 0.1254902, b: 0.13333334, a: 1}
-  groundColor: {r: 0.047058824, g: 0.043137256, b: 0.03529412, a: 1}
-  ambientIntensity: 1
-  weather: {fileID: 0}
-  isFogActivated: 0
-  fogMode: 1
-  fogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  fogStartDistance: 0
-  fogEndDistance: 300
-  fogDensity: 0.01
+  ambientData:
+    mode: 0
+    skyColor: {r: 0.21176471, g: 0.22745098, b: 0.25882354, a: 1}
+    equatorColor: {r: 0.11372549, g: 0.1254902, b: 0.13333334, a: 1}
+    groundColor: {r: 0.047058824, g: 0.043137256, b: 0.03529412, a: 1}
+    intensity: 1
+  fogData:
+    activated: 0
+    mode: 1
+    color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    startDistance: 0
+    endDistance: 300
+    density: 0.01
   spawnPoints:
   - position: {x: 309, y: 37, z: 393}
   - position: {x: 317, y: 42, z: 476}
@@ -47,3 +48,4 @@ MonoBehaviour:
   - position: {x: 123, y: 56, z: 173}
   - position: {x: 151, y: 42, z: 33}
   - position: {x: 257, y: 46, z: 155}
+  weather: {fileID: 0}

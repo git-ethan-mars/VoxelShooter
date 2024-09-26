@@ -1,8 +1,6 @@
-using Mirror;
-
 namespace Networking.Messages.Requests
 {
-    public struct ReloadRequest : NetworkMessage
-    {
-    }
+	public struct ReloadRequest : IMirrorRequest
+	{
+	}
 }

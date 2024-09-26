@@ -1,15 +1,14 @@
-﻿using Data;
-using Mirror;
+﻿using Common.StaticData;
 
 namespace Networking.Messages.Responses
 {
-    public struct RespawnTimeResponse : NetworkMessage
-    {
-        public ServerTime TimeLeft;
+	public struct RespawnTimeResponse : IMirrorResponse
+	{
+		public ServerTime TimeLeft;
 
-        public RespawnTimeResponse(ServerTime timeLeft)
-        {
-            TimeLeft = timeLeft;
-        }
-    }
+		public RespawnTimeResponse(ServerTime timeLeft)
+		{
+			TimeLeft = timeLeft;
+		}
+	}
 }

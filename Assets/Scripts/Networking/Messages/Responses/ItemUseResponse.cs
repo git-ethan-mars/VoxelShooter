@@ -1,16 +1,14 @@
-﻿using Mirror;
-
-namespace Networking.Messages.Responses
+﻿namespace Networking.Messages.Responses
 {
-    public struct ItemUseResponse : NetworkMessage
-    {
-        public readonly int SlotIndex;
-        public readonly int Count;
+	public struct ItemUseResponse : IMirrorResponse
+	{
+		public readonly int SlotIndex;
+		public readonly int Count;
 
-        public ItemUseResponse(int slotIndex, int count)
-        {
-            SlotIndex = slotIndex;
-            Count = count;
-        }
-    }
+		public ItemUseResponse(int slotIndex, int count)
+		{
+			SlotIndex = slotIndex;
+			Count = count;
+		}
+	}
 }

@@ -1,4 +1,4 @@
-﻿using Data;
+﻿using Common.StaticData;
 using UnityEditor;
 using UnityEngine;
 
@@ -8,10 +8,12 @@ namespace Editor
     public class MapConfigureEditor : UnityEditor.Editor
     {
         private SerializedProperty _spawnPointList;
+        private string spawnPointsFieldName;
 
         private void OnEnable()
         {
-            _spawnPointList = serializedObject.FindProperty("spawnPoints");
+            spawnPointsFieldName = nameof(MapConfigure.spawnPoints);
+            _spawnPointList = serializedObject.FindProperty(spawnPointsFieldName);
         }
 
         public override void OnInspectorGUI()
@@ -20,7 +22,7 @@ namespace Editor
             var iterator = serializedObject.GetIterator();
             for (var enterChildren = true; iterator.NextVisible(enterChildren); enterChildren = false)
             {
-                if (iterator.name == "spawnPoints")
+                if (iterator.name == spawnPointsFieldName)
                 {
                     DrawSpawnPointList();
                     continue;

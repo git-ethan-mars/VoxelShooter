@@ -1,5 +1,6 @@
+using Common.Storage;
 using Infrastructure.Factory;
-using Infrastructure.Services.Storage;
+using UI;
 using UnityEngine;
 
 namespace Infrastructure.States
@@ -9,7 +10,7 @@ namespace Infrastructure.States
         private readonly GameStateMachine _stateMachine;
         private readonly IUIFactory _uiFactory;
         private readonly IStorageService _storageService;
-        private GameObject _settingsMenu;
+        private SettingsMenu _settingsMenu;
 
         public SettingsMenuState(GameStateMachine stateMachine, IUIFactory uiFactory, IStorageService storageService)
         {
@@ -20,12 +21,15 @@ namespace Infrastructure.States
 
         public void Enter()
         {
-            _settingsMenu = _uiFactory.CreateSettingsMenu(_storageService, _stateMachine.Enter<MainMenuState>);
+            _settingsMenu = _uiFactory.CreateSettingsMenu(_storageService, null);
+            _settingsMenu.CanvasGroup.alpha = 1.0f;
+            _settingsMenu.BackMousePressed += _stateMachine.Enter<MainMenuState>;
         }
 
         public void Exit()
         {
-            Object.Destroy(_settingsMenu);
+            _settingsMenu.BackMousePressed -= _stateMachine.Enter<MainMenuState>;
+            Object.Destroy(_settingsMenu.gameObject);
         }
     }
 }

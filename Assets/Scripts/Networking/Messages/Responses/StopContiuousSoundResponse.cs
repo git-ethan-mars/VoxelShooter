@@ -2,7 +2,7 @@ using Mirror;
 
 namespace Networking.Messages.Responses
 {
-    public struct StopContinuousSoundResponse : NetworkMessage
+    public struct StopContinuousSoundResponse : IMirrorResponse
     {
         public readonly NetworkIdentity Source;
 

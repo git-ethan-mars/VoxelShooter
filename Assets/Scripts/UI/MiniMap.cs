@@ -1,9 +1,5 @@
 using System.Collections.Generic;
-using Entities;
 using Infrastructure.Factory;
-using MapLogic;
-using Networking;
-using PlayerLogic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,18 +18,16 @@ namespace UI
         private readonly List<Image> _lootBoxImages = new();
 
         private MapProvider _mapProvider;
-        private Player _player;
+        private Character _player;
         private UIFactory _uiFactory;
         private Color32[] _miniMapPixels;
         private Texture2D _miniMapTexture;
         private Color32[] _fullMapPixels;
-        private HashSet<LootBox> _lootBoxes;
 
-        public void Construct(IClient client, Player player, UIFactory uiFactory)
+        public void Construct(MapProvider mapProvider, Character player, UIFactory uiFactory)
         {
-            _mapProvider = client.MapProvider;
-            _fullMapPixels = client.MapProjector.Projection;
-            _lootBoxes = client.PrefabRegistrar.LootBoxes;
+            _mapProvider = mapProvider;
+            _fullMapPixels = new VerticalMapProjector(_mapProvider).Projection;
             _player = player;
             _uiFactory = uiFactory;
             _miniMapPixels = new Color32[MiniMapSize * MiniMapSize];
@@ -55,6 +49,7 @@ namespace UI
 
         private void RedrawMinimap()
         {
+            var waterColor = _mapProvider.GetBlockByGlobalPosition(Vector3Int.zero).Color;
             var playerPosition = Vector3Int.FloorToInt(_player.transform.position);
             for (var x = 0; x < MiniMapSize; x++)
             {
@@ -69,7 +64,7 @@ namespace UI
                     }
                     else
                     {
-                        _miniMapPixels[z * MiniMapSize + x] = _mapProvider.WaterColor;
+                        _miniMapPixels[z * MiniMapSize + x] = waterColor;
                     }
                 }
             }
@@ -88,7 +83,7 @@ namespace UI
                 _lootBoxImages[i].gameObject.SetActive(false);
             }
 
-            foreach (var lootBox in _lootBoxes)
+            foreach (var lootBox in Entity.GetEntitiesByType<LootBox>())
             {
                 var lootBoxPosition = Vector3Int.FloorToInt(lootBox.transform.position);
                 if (IsLootBoxInsideMiniMap(lootBoxPosition) && lootBox.IsLanded)

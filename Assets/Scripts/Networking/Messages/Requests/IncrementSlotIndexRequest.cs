@@ -1,9 +1,6 @@
-using Mirror;
-
 namespace Networking.Messages.Requests
 {
-    public struct IncrementSlotIndexRequest : NetworkMessage
-    {
-        
-    }
+	public struct IncrementSlotIndexRequest : IMirrorRequest
+	{
+	}
 }

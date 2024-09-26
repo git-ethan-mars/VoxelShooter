@@ -1,8 +1,8 @@
-using Data;
-using Infrastructure.Services.StaticData;
-using Infrastructure.States;
+using System;
+using Common.StaticData;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace UI
@@ -41,26 +41,34 @@ namespace UI
         [SerializeField]
         private RawImage mapImage;
 
+        public event Action BackButtonPressed
+        {
+            add => backButton.onClick.AddListener(new UnityAction(value));
+            remove => backButton.onClick.RemoveListener(new UnityAction(value));
+        }
+        
+        public event Action ApplyButtonPressed
+        {
+            add => applyButton.onClick.AddListener(new UnityAction(value));
+            remove => applyButton.onClick.RemoveListener(new UnityAction(value));
+        }
+
         private Limitation _timeLimitation;
+
         private IMapRepository _mapRepository;
-        private GameStateMachine _stateMachine;
         private int _minGameTime;
         private int _maxGameTime;
         private LobbyBalance _lobbyBalance;
 
-        public void Construct(IMapRepository mapRepository, IStaticDataService staticData,
-            GameStateMachine stateMachine)
+        public void Construct(IMapRepository mapRepository, IStaticDataService staticData)
         {
             _mapRepository = mapRepository;
-            _stateMachine = stateMachine;
             _lobbyBalance = staticData.GetLobbyBalance();
             _minGameTime = _lobbyBalance.minMatchDuration;
             _maxGameTime = _lobbyBalance.maxMatchDuration;
             InitGameDuration();
             InitMapChoice();
             resetButton.onClick.AddListener(OnResetButton);
-            backButton.onClick.AddListener(OnBackButton);
-            applyButton.onClick.AddListener(OnApplyButton);
             nextMapButton.onClick.AddListener(OnNextMapButton);
             previousMapButton.onClick.AddListener(OnPreviousButton);
         }
@@ -71,15 +79,13 @@ namespace UI
             if (configure != null)
             {
                 mapName.SetText(configure.Item1);
-                mapImage.texture = configure.Item2.image;
+                mapImage.texture = configure.Item2.Image;
             }
         }
 
         private void OnDestroy()
         {
             resetButton.onClick.RemoveListener(OnResetButton);
-            backButton.onClick.RemoveListener(OnBackButton);
-            applyButton.onClick.RemoveListener(OnApplyButton);
             nextMapButton.onClick.RemoveListener(OnNextMapButton);
             previousMapButton.onClick.RemoveListener(OnPreviousButton);
         }
@@ -98,26 +104,7 @@ namespace UI
             _timeLimitation.Reset();
         }
 
-        private void OnBackButton()
-        {
-            _stateMachine.Enter<MainMenuState>();
-        }
-
-        private void OnApplyButton()
-        {
-            var serverSettings = new ServerSettings(mapName.text, _timeLimitation.CurrentValue.Value,
-                _lobbyBalance.spawnTime, _lobbyBalance.boxSpawnTime);
-            if (Constants.isLocalBuild)
-            {
-                _stateMachine.Enter<StartMatchState, ServerSettings>(
-                    serverSettings);
-            }
-            else
-            {
-                _stateMachine.Enter<StartSteamLobbyState, ServerSettings>(
-                    serverSettings);
-            }
-        }
+       
 
         private void OnNextMapButton()
         {
@@ -125,7 +112,7 @@ namespace UI
             if (configure != null)
             {
                 mapName.SetText(configure.Item1);
-                mapImage.texture = configure.Item2.image;
+                mapImage.texture = configure.Item2.Image;
             }
         }
 
@@ -135,7 +122,7 @@ namespace UI
             if (configure != null)
             {
                 mapName.SetText(configure.Item1);
-                mapImage.texture = configure.Item2.image;
+                mapImage.texture = configure.Item2.Image;
             }
         }
     }

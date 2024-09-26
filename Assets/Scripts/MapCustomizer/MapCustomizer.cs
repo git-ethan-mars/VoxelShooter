@@ -1,247 +1,192 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Data;
-using Generators;
+using Common;
+using Common.AssetManagement;
+using Common.Services.StaticData;
+using Common.StaticData;
 using Infrastructure;
-using Infrastructure.AssetManagement;
-using Infrastructure.Factory;
-using Infrastructure.Services;
-using Infrastructure.Services.Input;
-using Infrastructure.Services.StaticData;
-using Infrastructure.Services.Storage;
 using MapLogic;
-using Optimization;
 using UnityEditor;
 using UnityEngine;
-using Environment = MapLogic.Environment;
+using VoxelMap;
+using Environment = VoxelMap.Environment;
 
 namespace MapCustomizer
 {
-    [DisallowMultipleComponent]
-    [ExecuteAlways]
-    public class MapCustomizer : MonoBehaviour, ICoroutineRunner
-    {
+	[DisallowMultipleComponent]
+	[ExecuteAlways]
+	public class MapCustomizer : MonoBehaviour, ICoroutineRunner
+	{
 #if UNITY_EDITOR
-        private const string ChunkContainerName = "ChunkContainer";
-        private const string SpawnPointsContainer = "SpawnPointsContainer";
+		public bool IsMapGenerated => _map != null;
 
-        public bool IsMapGenerated => chunkContainer != null || spawnPointsContainer != null;
-        public MapConfigure mapConfigure;
-        public Light lightSource;
-        public List<GameObject> spawnPoints;
+		public MapConfigure mapConfigure;
+		public List<GameObject> spawnPoints;
+		private MapConfigure _previousConfigure;
 
-        [SerializeField]
-        private Transform chunkContainer;
+		private const string SpawnPointPath = "Prefabs/MapCustomizer/Spawnpoint";
 
-        [SerializeField]
-        private Transform spawnPointsContainer;
+		private static MapCustomizer _instance;
 
-        private static MapCustomizer _instance;
-        private MapConfigure _previousConfigure;
-        private MapProvider _mapProvider;
+		private Map _map;
 
-        [UnityEditor.Callbacks.DidReloadScripts]
-        private static void Init()
-        {
-            _instance = FindObjectOfType<MapCustomizer>();
-            if (_instance != null)
-            {
-                _instance.InitializeFactories();
-            }
-        }
+		[UnityEditor.Callbacks.DidReloadScripts]
+		private static void Init()
+		{
+			_instance = FindObjectOfType<MapCustomizer>();
+		}
 
-        private void Awake()
-        {
-            if (EditorApplication.isPlaying)
-            {
-                Destroy(gameObject);
-                return;
-            }
+		private void Awake()
+		{
+			if (EditorApplication.isPlaying)
+			{
+				Destroy(gameObject);
+				return;
+			}
 
-            if (_instance != null)
-            {
-                DestroyImmediate(gameObject);
-            }
-            else
-            {
-                _instance = this;
-                _instance.InitializeFactories();
-            }
-        }
+			if (_instance != null)
+			{
+				DestroyImmediate(gameObject);
+			}
+			else
+			{
+				_instance = this;
+			}
+		}
 
-        private void Update()
-        {
-            if (EditorApplication.isPlayingOrWillChangePlaymode && !EditorApplication.isPlaying)
-            {
-                DestroyChildren();
-                return;
-            }
+		private void Update()
+		{
+			if (IsMapGenerated)
+			{
+				if (EditorApplication.isPlayingOrWillChangePlaymode && !EditorApplication.isPlaying
+				                                                    || _previousConfigure != mapConfigure)
+				{
+					DestroyImmediate(_map.gameObject);
+					return;
+				}
 
-            if (_previousConfigure != mapConfigure)
-            {
-                DestroyChildren();
-            }
+				if (_map.DirectionalLight != null)
+				{
+					CheckDirectionLightSource();
+				}
 
-            _previousConfigure = mapConfigure;
+				UpdateSpawnPointGameObjects();
+			}
+			
+			_previousConfigure = mapConfigure;
+		}
 
-            if (mapConfigure == null)
-            {
-                return;
-            }
+		private void CheckDirectionLightSource()
+		{
+			var stateChanged = false;
 
-            if (!IsMapGenerated)
-            {
-                return;
-            }
+			if (mapConfigure.LightData.position != _map.DirectionalLight.transform.position)
+			{
+				mapConfigure.LightData.position = _map.DirectionalLight.transform.position;
+				stateChanged = true;
+			}
 
-            if (lightSource != null)
-            {
-                if (mapConfigure.lightData.position != lightSource.transform.position)
-                {
-                    mapConfigure.lightData.position = lightSource.transform.position;
-                    EditorUtility.SetDirty(mapConfigure);
-                }
+			if (mapConfigure.LightData.rotation != _map.DirectionalLight.transform.rotation)
+			{
+				mapConfigure.LightData.rotation = _map.DirectionalLight.transform.rotation;
+				stateChanged = true;
+			}
 
-                if (mapConfigure.lightData.rotation != lightSource.transform.rotation)
-                {
-                    mapConfigure.lightData.rotation = lightSource.transform.rotation;
-                    EditorUtility.SetDirty(mapConfigure);
-                }
+			if (mapConfigure.LightData.color != _map.DirectionalLight.color)
+			{
+				mapConfigure.LightData.color = _map.DirectionalLight.color;
+				stateChanged = true;
+			}
 
-                if (mapConfigure.lightData.color != lightSource.color)
-                {
-                    mapConfigure.lightData.color = lightSource.color;
-                    EditorUtility.SetDirty(mapConfigure);
-                }
+			if (Math.Abs(mapConfigure.LightData.bias - _map.DirectionalLight.shadowBias) > Constants.Epsilon)
+			{
+				mapConfigure.LightData.bias = _map.DirectionalLight.shadowBias;
+				stateChanged = true;
+			}
 
-                if (Math.Abs(mapConfigure.lightData.bias - lightSource.shadowBias) > Constants.Epsilon)
-                {
-                    mapConfigure.lightData.bias = lightSource.shadowBias;
-                    EditorUtility.SetDirty(mapConfigure);
-                }
+			if (Math.Abs(mapConfigure.LightData.normalBias - _map.DirectionalLight.shadowNormalBias) > Constants.Epsilon)
+			{
+				mapConfigure.LightData.normalBias = _map.DirectionalLight.shadowNormalBias;
+				stateChanged = true;
+			}
 
-                if (Math.Abs(mapConfigure.lightData.normalBias - lightSource.shadowNormalBias) > Constants.Epsilon)
-                {
-                    mapConfigure.lightData.normalBias = lightSource.shadowNormalBias;
-                    EditorUtility.SetDirty(mapConfigure);
-                }
-            }
+			if (stateChanged)
+			{
+				EditorUtility.SetDirty(mapConfigure);
+			}
+		}
 
-            UpdateSpawnPointGameObjects();
-        }
+		private void UpdateSpawnPointGameObjects()
+		{
+			if (spawnPoints.RemoveAll(obj => obj == null) > 0)
+			{
+				EditorUtility.SetDirty(mapConfigure);
+				mapConfigure.spawnPoints = spawnPoints.Select(obj =>
+					new SpawnPointData(Vector3Int.FloorToInt(obj.transform.localPosition)))
+					.ToList();
+			}
+			else
+			{
+				var newSpawnPoints =
+					spawnPoints
+						.Select(spawnPoint => 
+							new SpawnPointData(Vector3Int.FloorToInt(spawnPoint.transform.localPosition)))
+						.ToList();
+				var spawnPointChanged = false;
+				for (var i = 0; i < spawnPoints.Count; i++)
+				{
+					if (newSpawnPoints[i] != mapConfigure.spawnPoints[i])
+					{
+						spawnPointChanged = true;
+						break;
+					}
+				}
 
-        private void UpdateSpawnPointGameObjects()
-        {
-            if (spawnPoints.RemoveAll(obj => obj == null) > 0)
-            {
-                EditorUtility.SetDirty(mapConfigure);
-                mapConfigure.spawnPoints = spawnPoints.Select(obj =>
-                        new SpawnPointData(Vector3Int.FloorToInt(obj.transform.localPosition)))
-                    .ToList();
-            }
-            else
-            {
-                var newSpawnPoints = new List<SpawnPointData>(spawnPoints.Count);
-                for (var i = 0; i < spawnPoints.Count; i++)
-                {
-                    newSpawnPoints.Add(
-                        new SpawnPointData(Vector3Int.FloorToInt(spawnPoints[i].transform.localPosition)));
-                    if (!newSpawnPoints[i].Equals(mapConfigure.spawnPoints[i]))
-                    {
-                        EditorUtility.SetDirty(mapConfigure);
-                    }
-                }
+				if (spawnPointChanged)
+				{
+					EditorUtility.SetDirty(mapConfigure);
+				}
 
-                mapConfigure.spawnPoints = newSpawnPoints;
-            }
-        }
+				mapConfigure.spawnPoints = newSpawnPoints;
+			}
+		}
 
-        public void GenerateMap()
-        {
-            DestroyChildren();
-            LoadConfigure();
-            AllServices.Container.Single<IStaticDataService>().LoadMapConfigures();
-            _instance._mapProvider =
-                SimpleBenchmark.Execute(MapReader.ReadFromFile, mapConfigure.name,
-                    AllServices.Container.Single<IStaticDataService>());
-            var mapGenerator =
-                new MapGenerator(_instance._mapProvider, AllServices.Container.Single<IGameFactory>(),
-                    AllServices.Container.Single<IMeshFactory>());
-            chunkContainer = AllServices.Container.Single<IGameFactory>().CreateGameObjectContainer(ChunkContainerName);
-            chunkContainer.SetParent(transform);
-            SimpleBenchmark.Execute(mapGenerator.GenerateMap, chunkContainer);
-            spawnPoints.Clear();
-            spawnPointsContainer = AllServices.Container.Single<IGameFactory>()
-                .CreateGameObjectContainer(SpawnPointsContainer);
-            spawnPointsContainer.SetParent(transform);
+		public void GenerateMap()
+		{
+			var assets = new AssetProvider();
+			var staticData = new StaticDataService(assets);
+			staticData.LoadMapConfigures();
+			var mapBuilder = new MapBuilder(assets)
+				.WithDirectionalLight(mapConfigure.LightData)
+				.WithWaterColor(mapConfigure.WaterColor)
+				.WithFog(mapConfigure.FogData)
+				.WithSkybox(mapConfigure.SkyboxMaterial)
+				.WithAmbient(mapConfigure.AmbientData);
+			_map = mapBuilder.Build(MapReader.ReadFromFile(mapConfigure.name), transform);
+			spawnPoints = mapConfigure.spawnPoints.Select(spawnPoint => CreateSpawnPoint(spawnPoint.position))
+				.ToList();
+		}
+		
 
-            for (var i = 0; i < mapConfigure.spawnPoints.Count; i++)
-            {
-                spawnPoints.Add(CreateSpawnPoint(mapConfigure.spawnPoints[i].position));
-            }
-        }
+		public void ShowAmbientLighting()
+		{
+			Environment.ApplyAmbientLighting(mapConfigure.AmbientData);
+			Environment.ApplySkybox(mapConfigure.SkyboxMaterial);
+		}
 
-        public GameObject CreateSpawnPoint(Vector3Int position)
-        {
-            var spawnPoint = AllServices.Container.Single<IEntityFactory>()
-                .CreateSpawnPoint(position, spawnPointsContainer)
-                .gameObject;
-            spawnPoint.AddComponent<PositionAligner>();
-            return spawnPoint;
-        }
-
-        private void InitializeFactories()
-        {
-            AllServices.Container.RegisterSingle<IAssetProvider>(new AssetProvider());
-            var assets = AllServices.Container.Single<IAssetProvider>();
-            AllServices.Container.RegisterSingle<IStaticDataService>(new StaticDataService(assets));
-            var staticData = AllServices.Container.Single<IStaticDataService>();
-            AllServices.Container.RegisterSingle<IInputService>(new StandaloneInputService());
-            AllServices.Container.RegisterSingle<IStorageService>(new JsonToFileStorageService());
-            AllServices.Container.RegisterSingle<IParticleFactory>(new ParticleFactory(assets, staticData, this));
-            AllServices.Container.RegisterSingle<IEntityFactory>(
-                new EntityFactory(assets, AllServices.Container.Single<IParticleFactory>()));
-            AllServices.Container.RegisterSingle<IMeshFactory>(new MeshFactory(assets));
-            AllServices.Container.RegisterSingle<IUIFactory>(new UIFactory(assets, staticData));
-            AllServices.Container.RegisterSingle<IGameFactory>(new GameFactory(AllServices.Container));
-        }
-
-        private void LoadConfigure()
-        {
-            if (lightSource != null)
-            {
-                lightSource.transform.position = mapConfigure.lightData.position;
-                lightSource.transform.rotation = mapConfigure.lightData.rotation;
-                lightSource.color = mapConfigure.lightData.color;
-                lightSource.shadowBias = mapConfigure.lightData.bias;
-                lightSource.shadowNormalBias = mapConfigure.lightData.normalBias;
-            }
-
-            Environment.ApplyAmbientLighting(mapConfigure);
-            Environment.ApplyFog(mapConfigure);
-        }
-
-        private void DestroyChildren()
-        {
-            if (!IsMapGenerated)
-            {
-                return;
-            }
-
-            DestroyImmediate(chunkContainer.gameObject);
-            DestroyImmediate(spawnPointsContainer.gameObject);
-        }
-
-        public void ShowAmbientLighting()
-        {
-            Environment.ApplyAmbientLighting(mapConfigure);
-        }
-
-        public void ShowFog()
-        {
-            Environment.ApplyFog(mapConfigure);
-        }
+		public void ShowFog()
+		{
+			Environment.ApplyFog(mapConfigure.FogData);
+		}
 #endif
-    }
+
+		public GameObject CreateSpawnPoint(Vector3Int position)
+		{
+			var assets = new AssetProvider();
+			var spawnPoint = assets.Instantiate(SpawnPointPath, position,
+				Quaternion.identity, _map.transform);
+			return spawnPoint;
+		}
+	}
 }

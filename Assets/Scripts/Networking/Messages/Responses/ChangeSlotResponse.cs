@@ -1,14 +1,12 @@
-﻿using Mirror;
-
-namespace Networking.Messages.Responses
+﻿namespace Networking.Messages.Responses
 {
-    public struct ChangeSlotResponse : NetworkMessage
-    {
-        public readonly int Index;
+	public struct ChangeSlotResponse : IMirrorResponse
+	{
+		public readonly int Index;
 
-        public ChangeSlotResponse(int index)
-        {
-            Index = index;
-        }
-    }
+		public ChangeSlotResponse(int index)
+		{
+			Index = index;
+		}
+	}
 }

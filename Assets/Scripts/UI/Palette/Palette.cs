@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Linq;
+using Common.Input;
 using Infrastructure;
-using Infrastructure.Services.Input;
 using UnityEngine;
 using UnityEngine.UI;
 

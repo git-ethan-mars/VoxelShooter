@@ -1,16 +1,16 @@
-﻿using Mirror;
-
-namespace Networking.Messages.Responses
+﻿namespace Networking.Messages.Responses
 {
-    public struct DownloadMapResponse : NetworkMessage
-    {
-        public readonly byte[] ByteChunk;
-        public readonly float Progress;
+	public struct DownloadMapResponse : IMirrorResponse
+	{
+		public readonly byte[] ByteChunk;
+		public readonly int StartByte;
+		public readonly int TotalBytes;
 
-        public DownloadMapResponse(byte[] byteChunk, float progress)
-        {
-            ByteChunk = byteChunk;
-            Progress = progress;
-        }
-    }
+		public DownloadMapResponse(byte[] byteChunk, int totalBytes, int startByte)
+		{
+			ByteChunk = byteChunk;
+			TotalBytes = totalBytes;
+			StartByte = startByte;
+		}
+	}
 }

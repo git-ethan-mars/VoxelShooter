@@ -1,4 +1,3 @@
-using PlayerLogic;
 using TMPro;
 using UnityEngine;
 
@@ -9,23 +8,9 @@ namespace UI
         [SerializeField]
         private TextMeshProUGUI healthText;
 
-        private Player _player;
-
-        public void Construct(Player player)
+        public void SetHealthValue(int value)
         {
-            _player = player;
-            healthText.SetText(_player.Health.Value.ToString());
-            _player.Health.ValueChanged += OnHealthChanged;
-        }
-
-        private void OnHealthChanged(int currentHealth)
-        {
-            healthText.SetText(currentHealth.ToString());
-        }
-
-        private void OnDestroy()
-        {
-            _player.Health.ValueChanged -= OnHealthChanged;
+            healthText.SetText(value.ToString());
         }
     }
 }

@@ -4652,6 +4652,7 @@ GameObject:
   - component: {fileID: 5782180113882607017}
   - component: {fileID: 7535671651110322378}
   - component: {fileID: 6404616727488526172}
+  - component: {fileID: 1531494013063202757}
   m_Layer: 0
   m_Name: SettingsMenu
   m_TagString: Untagged
@@ -4698,6 +4699,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 25
   m_SortingLayerID: 0
   m_SortingOrder: 0
@@ -4774,6 +4776,19 @@ MonoBehaviour:
     decreaseButton: {fileID: 4182652162459425271}
     displayedValue: {fileID: 73096111122094444}
   backButton: {fileID: 2843711758504616371}
+  canvasGroup: {fileID: 1531494013063202757}
+--- !u!225 &1531494013063202757
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8022549195091908874}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &8096513971188715188
 GameObject:
   m_ObjectHideFlags: 0

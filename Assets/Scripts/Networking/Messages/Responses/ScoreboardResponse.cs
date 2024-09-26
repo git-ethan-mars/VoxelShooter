@@ -1,15 +1,15 @@
 ﻿using System.Collections.Generic;
-using Data;
-using Mirror;
+using Common.StaticData;
 
 namespace Networking.Messages.Responses
 {
-    public struct ScoreboardResponse : NetworkMessage
-    {
-        public readonly List<ScoreData> Scores;
-        public ScoreboardResponse(List<ScoreData> scores)
-        {
-            Scores = scores;
-        }
-    }
+	public struct ScoreboardResponse : IMirrorResponse
+	{
+		public readonly List<ScoreData> Scores;
+
+		public ScoreboardResponse(List<ScoreData> scores)
+		{
+			Scores = scores;
+		}
+	}
 }
