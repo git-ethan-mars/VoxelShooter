@@ -1,0 +1,22 @@
+﻿using UnityEngine;
+
+namespace Common.StaticData
+{
+    [CreateAssetMenu(fileName = "Tnt", menuName = "Inventory System/Inventory Items/Tnt")]
+    public class TntItem : InventoryItem
+    {
+        public Sprite countIcon;
+        public int count;
+        public float delayInSeconds;
+        public int radius;
+        public int damage;
+        public int particlesSpeed;
+        public int particlesCount;
+        public AudioData explosionSound;
+        public AudioData countdownSound;
+
+        public void Awake()
+        {
+        }
+    }
+}
