@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace VoxelMap
 {
@@ -38,7 +39,15 @@ namespace VoxelMap
 			AssertChunkIndex(chunkIndex);
 			return _chunks[chunkIndex];
 		}
-		
+
+		public byte[] Serialize()
+		{
+			using var memoryStream = new MemoryStream();
+			MapWriter.WriteMap(this, memoryStream);
+			var bytes = memoryStream.ToArray();
+			return bytes;
+		}
+
 		private void AssertChunkIndex(int chunkIndex)
 		{
 			if (chunkIndex < 0 || chunkIndex > _chunks.Length)

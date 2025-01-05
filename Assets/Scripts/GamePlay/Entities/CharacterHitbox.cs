@@ -1,10 +1,9 @@
-﻿using Common.Factory;
-using Common.StaticData;
-using Entities.PlayerLogic;
-using GamePlay.Destruction;
+﻿using GamePlay.Data;
+using GamePlay.Factory;
+using GamePlay.MapFeatures;
 using UnityEngine;
 
-namespace Entities
+namespace GamePlay.Entities
 {
 	[RequireComponent(typeof(Character))]
 	public class CharacterHitBox : MonoBehaviour, IDamageVisitor
@@ -30,9 +29,9 @@ namespace Entities
 			character.Damage(meleeWeapon.DamageToPlayer);
 		}
 
-		public void Visit(Explosion explosion)
+		public void Visit(Vector3 center, ExplosionData explosionData)
 		{
-			var damage = CalculateLinearDamage(explosion.transform.position, explosion.Radius, explosion.Damage);
+			var damage = CalculateLinearDamage(center, explosionData.radius, explosionData.damage);
 			character.Damage(damage);
 		}
 

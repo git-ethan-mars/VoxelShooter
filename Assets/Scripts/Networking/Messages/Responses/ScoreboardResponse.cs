@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Common.StaticData;
+using GamePlay.Data;
 
 namespace Networking.Messages.Responses
 {

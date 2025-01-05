@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Common;
+using GamePlay.MapFeatures;
 using Networking.Messages.Responses;
+using VoxelMap;
 
 namespace Networking.Client
 {
 	public partial class MirrorClient : IResponseHandler<MapNameResponse>, IResponseHandler<DownloadMapResponse>, IResponseHandler<UpdateMapResponse>, IResponseHandler<FallBlockResponse>
 	{
-		private readonly List<BlockDataWithPosition> _blockBuffer = new();
+		private readonly List<Voxel> _blockBuffer = new();
 		private byte[] _byteChunks;
 		
 		private string _mapName;
@@ -35,25 +36,23 @@ namespace Networking.Client
 
 			using var memoryStream = new MemoryStream(_byteChunks);
 			MapLoaded?.Invoke(_mapName, MapReader.ReadFromStream(memoryStream));
-			
-			_map.UpdateBlocks(_blockBuffer);
-			_blockBuffer.Clear();
 		}
 
 		public void OnResponseReceived(UpdateMapResponse message)
 		{
-			_blockBuffer.AddRange(message.Blocks);
-			if (_map != null)
+			_blockBuffer.AddRange(message.Voxels);
+			if (_mapProvider == null)
 			{
-				_map.UpdateBlocks(_blockBuffer);	
+				return;
 			}
 
+			_mapProvider.SetVoxelsByGlobalPositions(_blockBuffer);	
 			_blockBuffer.Clear();
 		}
 
 		public void OnResponseReceived(FallBlockResponse response)
 		{
-			_fallMeshGenerator.GenerateFallBlocks(response.Blocks);
+			_fallMeshGenerator.GenerateFallVoxels(response.Voxels);
 		}
 	}
 }

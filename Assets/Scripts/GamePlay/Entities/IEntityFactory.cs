@@ -1,28 +1,20 @@
-﻿using Common.StaticData;
-using GamePlay.Entities;
-using Infrastructure.Factory;
+﻿using Common;
+using GamePlay.Data;
 using UnityEngine;
+using VoxelMap;
 
-namespace Entities
+namespace GamePlay.Entities
 {
-	public interface IEntityFactory : IPlayerFactory
-	{
-		TntProp CreateTnt(Vector3 position, Quaternion rotation, TntData data);
-
-		Grenade CreateGrenade(Vector3 position, GrenadeData data);
-
-		Tombstone CreateTombstone(Vector3 position);
-
-		Rocket CreateRocket(Vector3 position, Quaternion rotation, RocketLauncherData data);
-
-		LootBox CreateAmmoBox(Vector3 position, Transform parent);
-
-		LootBox CreateHealthBox(Vector3 position, Transform parent);
-
-		LootBox CreateBlockBox(Vector3 position, Transform parent);
-
-		SpawnPoint CreateSpawnPoint(Vector3 position, Transform parent);
-
-		Drill CreateDrill(Vector3 position, Quaternion rotation, DrillLauncherData data);
-	}
+    public interface IEntityFactory : IService
+    {
+        SpawningTnt CreateSpawningTnt(Vector3 position, Quaternion rotation, TntData data);
+        SpawningGrenade CreateSpawningGrenade(Vector3 position);
+        Tombstone CreateTombstone(Vector3 position);
+        Rocket CreateRocket(Vector3 position, Quaternion rotation, RocketLauncherData data, MapProvider mapProvider);
+        LootBox CreateAmmoBox(Vector3 position, Transform parent);
+        LootBox CreateHealthBox(Vector3 position, Transform parent);
+        LootBox CreateBlockBox(Vector3 position, Transform parent);
+        SpawnPoint CreateSpawnPoint(SpawnPointData position, Transform parent);
+        Drill CreateDrill(Vector3 position, Quaternion rotation, DrillLauncherData data);
+    }
 }

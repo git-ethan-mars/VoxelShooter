@@ -1,5 +1,4 @@
-using Common;
-using Common.Storage;
+using GamePlay.Services;
 using UnityEngine;
 
 namespace UI.SettingsMenuStates
@@ -21,7 +20,7 @@ namespace UI.SettingsMenuStates
             _storageService = storageService;
             _sensitivity = sensitivity;
             _aimSensitivity = aimSensitivity;
-            var currentSettings = _storageService.Load<MouseSettingsData>(Constants.MouseSettingsKey);
+            var currentSettings = _storageService.Load<MouseSettingsData>(IStorageService.MouseSettingsKey);
             _sensitivity.Construct(currentSettings.GeneralSensitivity, MinSliderValue, MaxSliderValue);
             _aimSensitivity.Construct(currentSettings.AimSensitivity, MinSliderValue, MaxSliderValue);
         }
@@ -33,7 +32,7 @@ namespace UI.SettingsMenuStates
 
         public void Exit()
         {
-            _storageService.Save(Constants.MouseSettingsKey,
+            _storageService.Save(IStorageService.MouseSettingsKey,
                 new MouseSettingsData(_sensitivity.SliderValue.Value, _aimSensitivity.SliderValue.Value));
             _mouseSection.SetActive(false);
         }

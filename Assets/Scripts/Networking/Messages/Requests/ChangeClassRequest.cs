@@ -1,4 +1,4 @@
-﻿using Common.StaticData;
+﻿using GamePlay.Data;
 
 namespace Networking.Messages.Requests
 {

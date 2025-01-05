@@ -1,9 +1,11 @@
 using System;
-using Common.StaticData;
+using GamePlay.Data;
+using GamePlay.Services;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using VoxelMap;
 
 namespace UI
 {
@@ -46,18 +48,17 @@ namespace UI
             add => backButton.onClick.AddListener(new UnityAction(value));
             remove => backButton.onClick.RemoveListener(new UnityAction(value));
         }
-        
-        public event Action ApplyButtonPressed
-        {
-            add => applyButton.onClick.AddListener(new UnityAction(value));
-            remove => applyButton.onClick.RemoveListener(new UnityAction(value));
-        }
+
+        public event Action<WorldSettings> ApplyButtonPressed;
 
         private Limitation _timeLimitation;
 
         private IMapRepository _mapRepository;
+
         private int _minGameTime;
+
         private int _maxGameTime;
+
         private LobbyBalance _lobbyBalance;
 
         public void Construct(IMapRepository mapRepository, IStaticDataService staticData)
@@ -68,6 +69,7 @@ namespace UI
             _maxGameTime = _lobbyBalance.maxMatchDuration;
             InitGameDuration();
             InitMapChoice();
+            applyButton.onClick.AddListener(OnApplyButtonPressed);
             resetButton.onClick.AddListener(OnResetButton);
             nextMapButton.onClick.AddListener(OnNextMapButton);
             previousMapButton.onClick.AddListener(OnPreviousButton);
@@ -85,6 +87,7 @@ namespace UI
 
         private void OnDestroy()
         {
+            applyButton.onClick.RemoveListener(OnApplyButtonPressed);
             resetButton.onClick.RemoveListener(OnResetButton);
             nextMapButton.onClick.RemoveListener(OnNextMapButton);
             previousMapButton.onClick.RemoveListener(OnPreviousButton);
@@ -104,8 +107,6 @@ namespace UI
             _timeLimitation.Reset();
         }
 
-       
-
         private void OnNextMapButton()
         {
             var configure = _mapRepository.GetNextMap();
@@ -124,6 +125,13 @@ namespace UI
                 mapName.SetText(configure.Item1);
                 mapImage.texture = configure.Item2.Image;
             }
+        }
+
+        private void OnApplyButtonPressed()
+        {
+            var worldSettings = new WorldSettings(mapName.text, _timeLimitation.CurrentValue.Value,
+                _lobbyBalance.spawnTime, _lobbyBalance.spawnTime);
+            ApplyButtonPressed?.Invoke(worldSettings);
         }
     }
 }

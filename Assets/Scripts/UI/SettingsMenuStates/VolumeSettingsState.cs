@@ -1,5 +1,4 @@
-using Common;
-using Common.Storage;
+using GamePlay.Services;
 using UnityEngine;
 
 namespace UI.SettingsMenuStates
@@ -26,7 +25,7 @@ namespace UI.SettingsMenuStates
             _musicVolume = musicVolume;
             _soundVolume = soundVolume;
             _storageService = storageService;
-            var currentSettings = _storageService.Load<VolumeSettingsData>(Constants.VolumeSettingsKey);
+            var currentSettings = _storageService.Load<VolumeSettingsData>(IStorageService.VolumeSettingsKey);
             _masterVolume.Construct((int) currentSettings.MasterVolume * AudioListenerValueToSlider, MinSliderValue,
                 MaxSliderValue);
             _musicVolume.Construct((int) currentSettings.MusicVolume * AudioListenerValueToSlider, MinSliderValue,
@@ -43,7 +42,7 @@ namespace UI.SettingsMenuStates
 
         public void Exit()
         {
-            _storageService.Save(Constants.VolumeSettingsKey,
+            _storageService.Save(IStorageService.VolumeSettingsKey,
                 new VolumeSettingsData(_masterVolume.SliderValue.Value * SliderToAudioListenerValue,
                     _musicVolume.SliderValue.Value * SliderToAudioListenerValue,
                     _soundVolume.SliderValue.Value * SliderToAudioListenerValue));

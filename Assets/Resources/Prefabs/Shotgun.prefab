@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3892197645823841621}
+  - component: {fileID: -6976616144146117659}
   m_Layer: 0
   m_Name: Shotgun
   m_TagString: Untagged
@@ -35,6 +36,23 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-6976616144146117659
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1122000105119730127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d3dec042888742cebed06ecf6fd4f04f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  model:
+  - {fileID: 3560089931707798461}
+  - {fileID: 4854474515232672595}
+  - {fileID: 6278788740573198847}
+  shootingParticles: {fileID: 2313860091587279548}
 --- !u!1 &2601449849224054198
 GameObject:
   m_ObjectHideFlags: 0
@@ -373,6 +391,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 86c4b4d9b7fcb7b4fac1d0326719d385, type: 3}
+--- !u!198 &2313860091587279548 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 7346217845250167101, guid: 86c4b4d9b7fcb7b4fac1d0326719d385, type: 3}
+  m_PrefabInstance: {fileID: 5039379871747713921}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &2959892166987085880 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7853397544997442489, guid: 86c4b4d9b7fcb7b4fac1d0326719d385, type: 3}

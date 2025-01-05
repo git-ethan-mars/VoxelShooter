@@ -4,11 +4,11 @@ namespace Networking.Messages.Responses
 {
 	public struct UpdateMapResponse : IMirrorResponse
 	{
-		public readonly BlockDataWithPosition[] Blocks;
+		public readonly Voxel[] Voxels;
 
-		public UpdateMapResponse(BlockDataWithPosition[] blocks)
+		public UpdateMapResponse(Voxel[] voxels)
 		{
-			Blocks = blocks;
+			Voxels = voxels;
 		}
 	}
 }

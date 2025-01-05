@@ -12,33 +12,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e69f3dcd48464cac84150e2016cff25a, type: 3}
   m_Name: Trenches
   m_EditorClassIdentifier: 
-  image: {fileID: 2800000, guid: 45dcd6974e0160b4cbd699dfe3c0d0e9, type: 3}
-  waterColor:
+  <Image>k__BackingField: {fileID: 2800000, guid: 45dcd6974e0160b4cbd699dfe3c0d0e9, type: 3}
+  <WaterColor>k__BackingField:
     serializedVersion: 2
     rgba: 4294946816
-  innerColor:
+  <InnerColor>k__BackingField:
     serializedVersion: 2
     rgba: 4281283929
-  lightData:
+  <LightData>k__BackingField:
     position: {x: 0, y: 0, z: 0}
     rotation: {x: -0.056195486, y: 0.7858806, z: -0.6115711, w: -0.07221229}
     color: {r: 0.5671882, g: 0.5613208, b: 1, a: 1}
     bias: 0.3
     normalBias: 0.5
-  skyboxMaterial: {fileID: 2100000, guid: 01f4eb1c73693428d923f1520032e7f9, type: 2}
-  ambientMode: 0
-  skyColor: {r: 0.21176471, g: 0.22745098, b: 0.25882354, a: 1}
-  equatorColor: {r: 0.11372549, g: 0.1254902, b: 0.13333334, a: 1}
-  groundColor: {r: 0.047058824, g: 0.043137256, b: 0.03529412, a: 1}
-  ambientIntensity: 1
-  weather: {fileID: 0}
-  isFogActivated: 0
-  fogMode: 1
-  fogColor: {r: 0.254717, g: 0.254717, b: 0.254717, a: 1}
-  fogStartDistance: 0
-  fogEndDistance: 150
-  fogDensity: 0.01
-  spawnPoints:
+  <SkyboxMaterial>k__BackingField: {fileID: 2100000, guid: 01f4eb1c73693428d923f1520032e7f9, type: 2}
+  <AmbientData>k__BackingField:
+    mode: 0
+    skyColor: {r: 0.21176471, g: 0.22745098, b: 0.25882354, a: 1}
+    equatorColor: {r: 0.11372549, g: 0.1254902, b: 0.13333334, a: 1}
+    groundColor: {r: 0.047058824, g: 0.043137256, b: 0.03529412, a: 1}
+    intensity: 1
+  <FogData>k__BackingField:
+    activated: 0
+    mode: 1
+    color: {r: 0.254717, g: 0.254717, b: 0.254717, a: 1}
+    startDistance: 0
+    endDistance: 150
+    density: 0.01
+  <Weather>k__BackingField: {fileID: 0}
+  <SpawnPoints>k__BackingField:
   - position: {x: 105, y: 14, z: 53}
   - position: {x: 115, y: 14, z: 425}
   - position: {x: 128, y: 14, z: 302}

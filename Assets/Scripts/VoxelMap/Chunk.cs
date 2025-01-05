@@ -1,281 +1,238 @@
 using System;
 using System.Collections.Generic;
-using Common;
+using Unity.Jobs;
+using Unity.Collections;
 using UnityEngine;
 
 namespace VoxelMap
 {
-	public class Chunk
-	{
-		private readonly Dictionary<ChunkNeighbourType, Chunk> _neighbours = new();
-		private readonly Faces[] _faces;
-		private readonly Mesh _mesh;
-		private readonly MeshData _meshData;
-		private readonly ChunkData _chunkData;
-		private readonly MeshFilter _meshFilter;
-		private readonly MeshCollider _meshCollider;
-		
-		public Chunk(GameObject chunkMeshObject, ChunkData chunkData, MeshData meshData, Faces[] faces)
-		{
-			_chunkData = chunkData;
-			_meshData = meshData;
-			_faces = faces;
-			_mesh = new Mesh();
-			_meshFilter = chunkMeshObject.GetComponent<MeshFilter>();
-			_meshCollider = chunkMeshObject.GetComponent<MeshCollider>();
-			ApplyMesh();
-		}
+    public class Chunk : MonoBehaviour, IDisposable
+    {
+        [SerializeField]
+        private MeshFilter meshFilter;
+        [SerializeField]
+        private MeshCollider meshCollider;
 
-		public void SetNeighbour(ChunkNeighbourType neighbourType, Chunk chunk)
-		{
-			_neighbours[neighbourType] = chunk;
-		}
+        public Dictionary<ChunkNeighbourType, Chunk> Neighbours { get; set; } = new();
+        private Mesh _mesh;
+        private ChunkData _chunkData;
+        private NativeList<VertexData> _vertices;
+        private NativeList<int> _triangles;
+        private NativeArray<Face> _faces;
+        private bool _isDisposed;
 
-		public void SpawnBlocks(List<BlockDataWithPosition> blocks)
-		{
-			var neighbourChunksToRegenerate = Faces.None;
-			for (var i = 0; i < blocks.Count; i++)
-			{
-				var x = blocks[i].Position.x;
-				var y = blocks[i].Position.y;
-				var z = blocks[i].Position.z;
-				_chunkData.SetBlock(x, y, z, blocks[i].BlockData, PositionType.Local);
-				UpdateBlockFaces(x, y, z);
-				SetNeighboursFaces(blocks[i].Position);
-				if (z == ChunkData.ChunkSize - 1 && _neighbours.TryGetValue(ChunkNeighbourType.Front, out var frontNeighbour))
-				{
-					frontNeighbour.UpdateBlockFaces(x, y, 0);
-					neighbourChunksToRegenerate |= Faces.Front;
-				}
+        public void Construct(ChunkData chunkData, NativeArray<Face> faces)
+        {
+            _chunkData = chunkData;
+            _vertices = new NativeList<VertexData>(Allocator.Persistent);
+            _triangles = new NativeList<int>(Allocator.Persistent);
+            _faces = faces;
+            _mesh = new Mesh();
+            _mesh.bounds = new Bounds(Vector3.one * ChunkData.ChunkSize / 2, Vector3.one * ChunkData.ChunkSize);
+        }
 
-				if (z == 0 && _neighbours.TryGetValue(ChunkNeighbourType.Back, out var backNeighbour))
-				{
-					backNeighbour.UpdateBlockFaces(x, y, ChunkData.ChunkSize - 1);
-					neighbourChunksToRegenerate |= Faces.Back;
-				}
+        public void ChangeVoxels(List<Voxel> voxels)
+        {
+            var neighbourChunksToRegenerate = Face.None;
+            for (var i = 0; i < voxels.Count; i++)
+            {
+                var x = voxels[i].Position.x;
+                var y = voxels[i].Position.y;
+                var z = voxels[i].Position.z;
+                _chunkData.SetVoxel(x, y, z, voxels[i].Data, PositionType.Local);
+                UpdateVoxelFaces(x, y, z);
+                SetNeighboursFaces(voxels[i].Position);
+                if (z == ChunkData.ChunkSize - 1 && Neighbours.TryGetValue(ChunkNeighbourType.Front, out var frontNeighbour))
+                {
+                    frontNeighbour.UpdateVoxelFaces(x, y, 0);
+                    neighbourChunksToRegenerate |= Face.Front;
+                }
 
-				if (y == ChunkData.ChunkSize - 1)
-				{
-					if (_neighbours.TryGetValue(ChunkNeighbourType.Up, out var upperNeighbour))
-					{
-						upperNeighbour.UpdateBlockFaces(x, 0, z);
-					}
+                if (z == 0 && Neighbours.TryGetValue(ChunkNeighbourType.Back, out var backNeighbour))
+                {
+                    backNeighbour.UpdateVoxelFaces(x, y, ChunkData.ChunkSize - 1);
+                    neighbourChunksToRegenerate |= Face.Back;
+                }
 
-					neighbourChunksToRegenerate |= Faces.Top;
-				}
+                if (y == ChunkData.ChunkSize - 1)
+                {
+                    if (Neighbours.TryGetValue(ChunkNeighbourType.Up, out var upperNeighbour))
+                    {
+                        upperNeighbour.UpdateVoxelFaces(x, 0, z);
+                    }
 
-				if (y == 0 && _neighbours.TryGetValue(ChunkNeighbourType.Down, out var lowerNeighbour))
-				{
-					lowerNeighbour.UpdateBlockFaces(x, ChunkData.ChunkSize - 1, z);
-					neighbourChunksToRegenerate |= Faces.Bottom;
-				}
+                    neighbourChunksToRegenerate |= Face.Top;
+                }
 
-				if (x == ChunkData.ChunkSize - 1 && _neighbours.TryGetValue(ChunkNeighbourType.Right, out var rightNeighbour))
-				{
-					rightNeighbour.UpdateBlockFaces(0, y, z);
-					neighbourChunksToRegenerate |= Faces.Right;
-				}
-				else if (x == 0 && _neighbours.TryGetValue(ChunkNeighbourType.Left, out var leftNeighbour))
-				{
-					leftNeighbour.UpdateBlockFaces(ChunkData.ChunkSize - 1, y, z);
-					neighbourChunksToRegenerate |= Faces.Left;
-				}
-			}
+                if (y == 0 && Neighbours.TryGetValue(ChunkNeighbourType.Down, out var lowerNeighbour))
+                {
+                    lowerNeighbour.UpdateVoxelFaces(x, ChunkData.ChunkSize - 1, z);
+                    neighbourChunksToRegenerate |= Face.Bottom;
+                }
 
-			RegenerateMesh();
+                if (x == ChunkData.ChunkSize - 1 && Neighbours.TryGetValue(ChunkNeighbourType.Right, out var rightNeighbour))
+                {
+                    rightNeighbour.UpdateVoxelFaces(0, y, z);
+                    neighbourChunksToRegenerate |= Face.Right;
+                }
+                else if (x == 0 && Neighbours.TryGetValue(ChunkNeighbourType.Left, out var leftNeighbour))
+                {
+                    leftNeighbour.UpdateVoxelFaces(ChunkData.ChunkSize - 1, y, z);
+                    neighbourChunksToRegenerate |= Face.Left;
+                }
+            }
 
-			foreach (ChunkNeighbourType chunkNeighbour in Enum.GetValues(typeof(ChunkNeighbourType)))
-			{
-				if (neighbourChunksToRegenerate.HasFlag(chunkNeighbour))
-				{
-					_neighbours[chunkNeighbour].RegenerateMesh();
-				}
-			}
-		}
+            RegenerateMesh();
 
-		private void ApplyMesh()
-		{
-			_mesh.SetVertices(_meshData.Vertices);
-			_mesh.SetTriangles(_meshData.Triangles, 0);
-			_mesh.SetColors(_meshData.Colors);
-			_mesh.SetNormals(_meshData.Normals);
-			if (_meshData.Vertices.Count == 0)
-			{
-				_meshCollider.sharedMesh = null;
-			}
-			else
-			{
-				_meshFilter.mesh = _mesh;
-				_meshCollider.sharedMesh = _mesh;
-			}
-		}
+            foreach (ChunkNeighbourType chunkNeighbour in Enum.GetValues(typeof(ChunkNeighbourType)))
+            {
+                if (neighbourChunksToRegenerate.HasFlag(chunkNeighbour))
+                {
+                    Neighbours[chunkNeighbour].RegenerateMesh();
+                }
+            }
+        }
 
-		private void SetNeighboursFaces(Vector3Int blockPosition)
-		{
-			if (ChunkData.IsValidPosition(blockPosition.x + 1, blockPosition.y, blockPosition.z))
-			{
-				UpdateBlockFaces(blockPosition.x + 1, blockPosition.y, blockPosition.z);
-			}
+        private void SetNeighboursFaces(Vector3Int voxelPosition)
+        {
+            if (ChunkData.IsValidPosition(voxelPosition.x + 1, voxelPosition.y, voxelPosition.z))
+            {
+                UpdateVoxelFaces(voxelPosition.x + 1, voxelPosition.y, voxelPosition.z);
+            }
 
-			if (ChunkData.IsValidPosition(blockPosition.x - 1, blockPosition.y, blockPosition.z))
-			{
-				UpdateBlockFaces(blockPosition.x - 1, blockPosition.y, blockPosition.z);
-			}
+            if (ChunkData.IsValidPosition(voxelPosition.x - 1, voxelPosition.y, voxelPosition.z))
+            {
+                UpdateVoxelFaces(voxelPosition.x - 1, voxelPosition.y, voxelPosition.z);
+            }
 
-			if (ChunkData.IsValidPosition(blockPosition.x, blockPosition.y + 1, blockPosition.z))
-			{
-				UpdateBlockFaces(blockPosition.x, blockPosition.y + 1, blockPosition.z);
-			}
+            if (ChunkData.IsValidPosition(voxelPosition.x, voxelPosition.y + 1, voxelPosition.z))
+            {
+                UpdateVoxelFaces(voxelPosition.x, voxelPosition.y + 1, voxelPosition.z);
+            }
 
-			if (ChunkData.IsValidPosition(blockPosition.x, blockPosition.y - 1, blockPosition.z))
-			{
-				UpdateBlockFaces(blockPosition.x, blockPosition.y - 1, blockPosition.z);
-			}
+            if (ChunkData.IsValidPosition(voxelPosition.x, voxelPosition.y - 1, voxelPosition.z))
+            {
+                UpdateVoxelFaces(voxelPosition.x, voxelPosition.y - 1, voxelPosition.z);
+            }
 
-			if (ChunkData.IsValidPosition(blockPosition.x, blockPosition.y, blockPosition.z + 1))
-			{
-				UpdateBlockFaces(blockPosition.x, blockPosition.y, blockPosition.z + 1);
-			}
+            if (ChunkData.IsValidPosition(voxelPosition.x, voxelPosition.y, voxelPosition.z + 1))
+            {
+                UpdateVoxelFaces(voxelPosition.x, voxelPosition.y, voxelPosition.z + 1);
+            }
 
-			if (ChunkData.IsValidPosition(blockPosition.x, blockPosition.y, blockPosition.z - 1))
-			{
-				UpdateBlockFaces(blockPosition.x, blockPosition.y, blockPosition.z - 1);
-			}
-		}
+            if (ChunkData.IsValidPosition(voxelPosition.x, voxelPosition.y, voxelPosition.z - 1))
+            {
+                UpdateVoxelFaces(voxelPosition.x, voxelPosition.y, voxelPosition.z - 1);
+            }
+        }
 
-		private void RegenerateMesh()
-		{
-			_mesh.Clear();
-			_meshData.Vertices.Clear();
-			_meshData.Triangles.Clear();
-			_meshData.Colors.Clear();
-			_mesh.Clear();
-			_meshData.Normals.Clear();
-			for (var x = 0; x < ChunkData.ChunkSize; x++)
-			{
-				for (var y = 0; y < ChunkData.ChunkSize; y++)
-				{
-					for (var z = 0; z < ChunkData.ChunkSize; z++)
-					{
-						if (GetFaces(x, y, z) == Faces.None)
-						{
-							continue;
-						}
+        public void RegenerateMesh(JobHandle dependOn = default)
+        {
+            var regenerateMeshJob = new RegenerateMeshJob
+            {
+                Voxels = _chunkData.Voxels,
+                Vertices = _vertices,
+                Triangles = _triangles,
+                Faces = _faces
+            };
 
-						var color = _chunkData.GetBlock(x, y, z, PositionType.Local).Color;
-						if (GetFaces(x, y, z).HasFlag(Faces.Top))
-						{
-							ChunkGeneratorHelper.GenerateTopSide(x, y, z, color, _meshData.Vertices, _meshData.Normals,
-								_meshData.Colors, _meshData.Triangles);
-						}
+            var regenerateMeshHandle = regenerateMeshJob.Schedule(dependOn);
+            var meshArray = Mesh.AllocateWritableMeshData(1);
+            var mainMesh = meshArray[0];
+            var meshPreparationJob = new MeshPreparationJob()
+            {
+                MeshData = mainMesh, Vertices = _vertices, Triangles = _triangles
+            }; 
+            meshPreparationJob.Schedule(regenerateMeshHandle).Complete();
+            Mesh.ApplyAndDisposeWritableMeshData(meshArray, _mesh, meshPreparationJob.NoCalculations);
+            if (_vertices.Length == 0)
+            {
+                meshCollider.sharedMesh = null;
+            }
+            else
+            {
+                meshFilter.mesh = _mesh;
+                meshCollider.sharedMesh = _mesh;
+            }
+        }
 
-						if (GetFaces(x, y, z).HasFlag(Faces.Bottom))
-						{
-							ChunkGeneratorHelper.GenerateBottomSide(x, y, z, color, _meshData.Vertices,
-								_meshData.Normals,
-								_meshData.Colors, _meshData.Triangles);
-						}
+        private void UpdateVoxelFaces(int x, int y, int z)
+        {
+            var resultFaces = Face.None;
+            if (!_chunkData.GetVoxel(x, y, z, PositionType.Local).IsSolid())
+            {
+                SetFaces(x, y, z, resultFaces);
+                return;
+            }
 
-						if (GetFaces(x, y, z).HasFlag(Faces.Front))
-						{
-							ChunkGeneratorHelper.GenerateFrontSide(x, y, z, color, _meshData.Vertices,
-								_meshData.Normals,
-								_meshData.Colors, _meshData.Triangles);
-						}
+            var containsUpperChunk = Neighbours.TryGetValue(ChunkNeighbourType.Up, out var upperNeighbour);
+            if (!ChunkData.IsValidPosition(x, y + 1, z) &&
+                (!containsUpperChunk || !upperNeighbour._chunkData.GetVoxel(x, 0, z, PositionType.Local).IsSolid()) ||
+                ChunkData.IsValidPosition(x, y + 1, z) && !_chunkData.GetVoxel(x, y + 1, z, PositionType.Local).IsSolid())
+            {
+                resultFaces |= Face.Top;
+            }
 
-						if (GetFaces(x, y, z).HasFlag(Faces.Back))
-						{
-							ChunkGeneratorHelper.GenerateBackSide(x, y, z, color, _meshData.Vertices, _meshData.Normals,
-								_meshData.Colors, _meshData.Triangles);
-						}
+            var containsLowerChunk = Neighbours.TryGetValue(ChunkNeighbourType.Down, out var lowerNeighbour);
+            if (!ChunkData.IsValidPosition(x, y - 1, z) && containsLowerChunk &&
+                !lowerNeighbour._chunkData.GetVoxel(x, ChunkData.ChunkSize - 1, z, PositionType.Local).IsSolid() ||
+                ChunkData.IsValidPosition(x, y - 1, z) && !_chunkData.GetVoxel(x, y - 1, z, PositionType.Local).IsSolid())
+            {
+                resultFaces |= Face.Bottom;
+            }
 
-						if (GetFaces(x, y, z).HasFlag(Faces.Left))
-						{
-							ChunkGeneratorHelper.GenerateLeftSide(x, y, z, color, _meshData.Vertices, _meshData.Normals,
-								_meshData.Colors, _meshData.Triangles);
-						}
+            var containsFrontChunk = Neighbours.TryGetValue(ChunkNeighbourType.Front, out var frontNeighbour);
+            if (!ChunkData.IsValidPosition(x, y, z + 1) && containsFrontChunk &&
+                !frontNeighbour._chunkData.GetVoxel(x, y, 0, PositionType.Local).IsSolid() ||
+                ChunkData.IsValidPosition(x, y, z + 1) && !_chunkData.GetVoxel(x, y, z + 1, PositionType.Local).IsSolid())
+            {
+                resultFaces |= Face.Front;
+            }
 
-						if (GetFaces(x, y, z).HasFlag(Faces.Right))
-						{
-							ChunkGeneratorHelper.GenerateRightSide(x, y, z, color, _meshData.Vertices,
-								_meshData.Normals,
-								_meshData.Colors, _meshData.Triangles);
-						}
-					}
-				}
-			}
+            var containsBackChunk = Neighbours.TryGetValue(ChunkNeighbourType.Back, out var backNeighbour);
+            if (!ChunkData.IsValidPosition(x, y, z - 1) && containsBackChunk &&
+                !backNeighbour._chunkData.GetVoxel(x, y, ChunkData.ChunkSize - 1, PositionType.Local).IsSolid() ||
+                ChunkData.IsValidPosition(x, y, z - 1) && !_chunkData.GetVoxel(x, y, z - 1, PositionType.Local).IsSolid())
+            {
+                resultFaces |= Face.Back;
+            }
 
-			ApplyMesh();
-		}
+            var containsRightChunk = Neighbours.TryGetValue(ChunkNeighbourType.Right, out var rightNeighbour);
+            if (!ChunkData.IsValidPosition(x + 1, y, z) && containsRightChunk &&
+                !rightNeighbour._chunkData.GetVoxel(0, y, z, PositionType.Local).IsSolid() ||
+                ChunkData.IsValidPosition(x + 1, y, z) && !_chunkData.GetVoxel(x + 1, y, z, PositionType.Local).IsSolid())
+            {
+                resultFaces |= Face.Right;
+            }
 
-		private void UpdateBlockFaces(int x, int y, int z)
-		{
-			var resultFaces = Faces.None;
-			if (!_chunkData.GetBlock(x, y, z, PositionType.Local).IsSolid())
-			{
-				SetFaces(x, y, z, resultFaces);
-				return;
-			}
+            var containsLeftChunk = Neighbours.TryGetValue(ChunkNeighbourType.Left, out var leftNeighbour);
+            if (!ChunkData.IsValidPosition(x - 1, y, z) && containsLeftChunk &&
+                !leftNeighbour._chunkData.GetVoxel(ChunkData.ChunkSize - 1, y, z, PositionType.Local).IsSolid() ||
+                ChunkData.IsValidPosition(x - 1, y, z) && !_chunkData.GetVoxel(x - 1, y, z, PositionType.Local).IsSolid())
+            {
+                resultFaces |= Face.Left;
+            }
 
-			var containsUpperChunk = _neighbours.TryGetValue(ChunkNeighbourType.Up, out var upperNeighbour);
-			if (!ChunkData.IsValidPosition(x, y + 1, z) &&
-			    (!containsUpperChunk || !upperNeighbour._chunkData.GetBlock(x, 0, z, PositionType.Local).IsSolid()) ||
-			    ChunkData.IsValidPosition(x, y + 1, z) && !_chunkData.GetBlock(x, y + 1, z, PositionType.Local).IsSolid())
-			{
-				resultFaces |= Faces.Top;
-			}
+            SetFaces(x, y, z, resultFaces);
+        }
 
-			var containsLowerChunk = _neighbours.TryGetValue(ChunkNeighbourType.Down, out var lowerNeighbour);
-			if (!ChunkData.IsValidPosition(x, y - 1, z) && containsLowerChunk &&
-			    !lowerNeighbour._chunkData.GetBlock(x, ChunkData.ChunkSize - 1, z, PositionType.Local).IsSolid() ||
-			    ChunkData.IsValidPosition(x, y - 1, z) && !_chunkData.GetBlock(x, y - 1, z, PositionType.Local).IsSolid())
-			{
-				resultFaces |= Faces.Bottom;
-			}
+        private void SetFaces(int x, int y, int z, Face faces)
+        {
+            _faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] = faces;
+        }
 
-			var containsFrontChunk = _neighbours.TryGetValue(ChunkNeighbourType.Front, out var frontNeighbour);
-			if (!ChunkData.IsValidPosition(x, y, z + 1) && containsFrontChunk &&
-			    !frontNeighbour._chunkData.GetBlock(x, y, 0, PositionType.Local).IsSolid() ||
-			    ChunkData.IsValidPosition(x, y, z + 1) && !_chunkData.GetBlock(x, y, z + 1, PositionType.Local).IsSolid())
-			{
-				resultFaces |= Faces.Front;
-			}
+        public void Dispose()
+        {
+            if (_isDisposed)
+            {
+                return;
+            }
 
-			var containsBackChunk = _neighbours.TryGetValue(ChunkNeighbourType.Back, out var backNeighbour);
-			if (!ChunkData.IsValidPosition(x, y, z - 1) && containsBackChunk &&
-			    !backNeighbour._chunkData.GetBlock(x, y, ChunkData.ChunkSize - 1, PositionType.Local).IsSolid() ||
-			    ChunkData.IsValidPosition(x, y, z - 1) && !_chunkData.GetBlock(x, y, z - 1, PositionType.Local).IsSolid())
-			{
-				resultFaces |= Faces.Back;
-			}
-
-			var containsRightChunk = _neighbours.TryGetValue(ChunkNeighbourType.Right, out var rightNeighbour);
-			if (!ChunkData.IsValidPosition(x + 1, y, z) && containsRightChunk &&
-			    !rightNeighbour._chunkData.GetBlock(0, y, z, PositionType.Local).IsSolid() ||
-			    ChunkData.IsValidPosition(x + 1, y, z) && !_chunkData.GetBlock(x + 1, y, z, PositionType.Local).IsSolid())
-			{
-				resultFaces |= Faces.Right;
-			}
-
-			var containsLeftChunk = _neighbours.TryGetValue(ChunkNeighbourType.Left, out var leftNeighbour);
-			if (!ChunkData.IsValidPosition(x - 1, y, z) && containsLeftChunk &&
-			    !leftNeighbour._chunkData.GetBlock(ChunkData.ChunkSize - 1, y, z, PositionType.Local).IsSolid() ||
-			    ChunkData.IsValidPosition(x - 1, y, z) && !_chunkData.GetBlock(x - 1, y, z, PositionType.Local).IsSolid())
-			{
-				resultFaces |= Faces.Left;
-			}
-
-			SetFaces(x, y, z, resultFaces);
-		}
-
-		private Faces GetFaces(int x, int y, int z)
-		{
-			return _faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z];
-		}
-
-		private void SetFaces(int x, int y, int z, Faces faces)
-		{
-			_faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] = faces;
-		}
-	}
+            _vertices.Dispose();
+            _triangles.Dispose();
+            _faces.Dispose();
+            _chunkData.Dispose();
+            _isDisposed = true;
+        }
+    }
 }

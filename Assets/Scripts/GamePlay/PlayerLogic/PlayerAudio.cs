@@ -1,10 +1,9 @@
 using System;
-using Common;
-using Common.StaticData;
-using Common.Storage;
+using GamePlay.Data;
+using GamePlay.Services;
 using UnityEngine;
 
-namespace PlayerLogic
+namespace GamePlay
 {
     public class PlayerAudio : IDisposable
     {
@@ -20,7 +19,7 @@ namespace PlayerLogic
         {
             _storageService = storageService;
             _storageService.Subscribe<VolumeSettingsData>(OnVolumeSettingsChanged);
-            var volumeSettings = _storageService.Load<VolumeSettingsData>(Constants.VolumeSettingsKey);
+            var volumeSettings = _storageService.Load<VolumeSettingsData>(IStorageService.VolumeSettingsKey);
             ChangeSoundMultiplier(volumeSettings.SoundVolume);
             _stepAudio = stepAudio;
             _continuousAudio = continuousAudio;

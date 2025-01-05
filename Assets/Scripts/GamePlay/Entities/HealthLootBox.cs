@@ -1,5 +1,3 @@
-using Entities.PlayerLogic;
-
 namespace GamePlay.Entities
 {
     public class HealthLootBox : LootBox

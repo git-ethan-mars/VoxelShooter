@@ -1,155 +1,137 @@
-using Common.Input;
-using Common.StaticData;
-using Common.Storage;
+using GamePlay.Data;
 using GamePlay.Entities;
-using Infrastructure.Factory;
-using PlayerLogic;
-using PlayerLogic.Rotation;
+using GamePlay.Services;
 using TMPro;
 using UnityEngine;
+using VoxelMap;
 
-namespace Entities.PlayerLogic
+namespace GamePlay
 {
-	public class Character : Entity
-	{
-		[SerializeField]
-		private TextMeshProUGUI nickNameText;
+    public class Character : Entity
+    {
+        [SerializeField] private TextMeshProUGUI nickNameText;
 
-		[SerializeField]
-		private Transform itemPosition;
-		
-		public string NickName;
+        [SerializeField] private Transform itemPosition;
 
-		public PlayerCharacteristic Characteristic;
+        [SerializeField] private MeshRenderer[] bodyParts;
 
-		private PlayerCharacteristic _characteristic;
-		public float PlaceDistance { get; private set; }
-		public PlayerAudio Audio { get; private set; }
-		
-		public HealthSystem HealthSystem { get; private set; }
+        [SerializeField] private GameObject nickNameCanvas;
 
-		public Transform ItemPosition => itemPosition;
+        [SerializeField] private Transform bodyOrientation;
 
-		[SerializeField]
-		private MeshRenderer[] bodyParts;
+        [SerializeField] private Transform headPivot;
 
-		[SerializeField]
-		private GameObject nickNameCanvas;
-		
-		public Transform BodyOrientation => bodyOrientation;
+        [SerializeField] private Transform cameraMountPoint;
 
-		[SerializeField]
-		private Transform bodyOrientation;
+        [SerializeField] private CapsuleCollider hitBox;
 
-		[SerializeField]
-		private Transform headPivot;
+        [SerializeField] private new Rigidbody rigidbody;
 
-		[SerializeField]
-		private Transform cameraMountPoint;
+        [SerializeField] private AudioSource continuousAudio;
 
-		[SerializeField]
-		private CapsuleCollider hitBox;
+        [SerializeField] private AudioSource stepAudio;
+
+        [SerializeField] private AudioData stepAudioData;
+
+        public HealthSystem HealthSystem { get; private set; }
+        public InventorySystem Inventory { get; private set; }
+        public Rigidbody RigidBody => rigidbody;
+
+        private IInputService _inputService;
+        private IStorageService _storageService;
+        private IStaticDataService _staticData;
+        private MapProvider _mapProvider;
+
+        private Camera _mainCamera;
+        private IRotation _rotation;
+        private PlayerMovement _movement;
+        private float _speed;
+        private float _jumpHeight;
 
 
-		public Rigidbody Rigidbody => rigidbody;
+        public void Construct(IInputService inputService, IStorageService storageService, IStaticDataService staticData)
+        {
+            _inputService = inputService;
+            _storageService = storageService;
+            _staticData = staticData;
+            _mainCamera = Camera.main;
+        }
 
-		[SerializeField]
-		private new Rigidbody rigidbody;
+        public void Initialize(InventorySystem inventory)
+        {
+            var playerData = GetComponent<IPlayerData>();
+            _movement = new PlayerMovement(hitBox, rigidbody, bodyOrientation);
+            var characteristic = _staticData.GetPlayerCharacteristic(playerData.GameClass);
+            _speed = characteristic.speed;
+            _jumpHeight = characteristic.jumpHeight;
+            Inventory = inventory;
+            foreach (InventoryItem item in Inventory.Items)
+            {
+                item.transform.SetParent(transform, false);
+            }
+            
+            HealthSystem = new HealthSystem(characteristic.maxHealth);
+            HealthSystem.Increase(characteristic.maxHealth);
+            nickNameText.SetText(playerData.NickName);
+            TurnOffNickName();
+            TurnOffBodyRender();
+            MountCamera();
+            _rotation = new PlayerRotation(_storageService, bodyOrientation, headPivot);
 
-		[SerializeField]
-		private AudioSource continuousAudio;
+        }
 
-		[SerializeField]
-		private AudioSource stepAudio;
+        private void Update()
+        {
+            _movement.Move(_inputService.Axis, _speed);
 
-		[SerializeField]
-		private AudioData stepAudioData;
-		
-		private IInputService _inputService;
-		private IStorageService _storageService;
-		
-		private IRotation _rotation;
-		private Camera _mainCamera;
+            if (_inputService.IsJumpButtonDown())
+            {
+                _movement.Jump(_jumpHeight);
+            }
 
-		private PlayerMovement _movement;
-		private float _speed;
-		private float _jumpHeight;
-		public Inventory.Inventory Inventory => _inventory; 
-		private Inventory.Inventory _inventory;
+            _rotation.Rotate(_inputService.MouseAxis);
+        }
 
-		public void Construct(IInputService inputService, IStorageService storageService, IStaticDataService staticData)
-		{
-			_inventory = new Inventory.Inventory();
-			HealthSystem = new HealthSystem();
-			_inputService = inputService;
-			_storageService = storageService;
-			_movement = new PlayerMovement(hitBox, rigidbody, bodyOrientation);
-			Audio = new PlayerAudio(_storageService, stepAudio, stepAudioData, continuousAudio);
-		}
+        private void FixedUpdate()
+        {
+            _movement.FixedUpdate();
+        }
 
-		private void Start()
-		{
-			TurnOffNickName();
-			TurnOffBodyRender();
-			MountCamera();
-			_mainCamera = Camera.main;
-			_rotation = new PlayerRotation(_storageService, ZoomService, bodyOrientation, headPivot);
-		}
+        public void Heal(int heal)
+        {
+            HealthSystem.Increase(heal);
+        }
 
-		private void Update()
-		{
-			_movement.Move(_inputService.Axis, _speed);
+        public void Damage(int damage)
+        {
+            HealthSystem.Decrease(damage);
+        }
 
-			if (_inputService.IsJumpButtonDown())
-			{
-				_movement.Jump(_jumpHeight);
-			}
+        private void TurnOffBodyRender()
+        {
+            foreach (var part in bodyParts)
+            {
+                part.enabled = false;
+            }
+        }
 
-			_rotation.Rotate(_inputService.MouseAxis);
+        private void TurnOffNickName()
+        {
+            nickNameCanvas.SetActive(false);
+        }
 
-		}
+        private void MountCamera()
+        {
+            var cameraTransform = _mainCamera.transform;
+            cameraTransform.SetParent(cameraMountPoint.transform);
+            cameraTransform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+        }
 
-		private void FixedUpdate()
-		{
-			_movement.FixedUpdate();
-		}
-
-		public void Heal(int heal)
-		{
-			HealthSystem.Increase(heal);	
-		}
-
-		public void Damage(int damage)
-		{
-			HealthSystem.Decrease(damage);
-		}
-
-		private void TurnOffBodyRender()
-		{
-			foreach (var part in bodyParts)
-			{
-				part.enabled = false;
-			}
-		}
-
-		private void TurnOffNickName()
-		{
-			nickNameCanvas.SetActive(false);
-		}
-
-		private void MountCamera()
-		{
-			var cameraTransform = _mainCamera.transform;
-			cameraTransform.SetParent(cameraMountPoint.transform);
-			cameraTransform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-		}
-
-		protected override void OnDestroy()
-		{
-			_rotation.Dispose();
-			_mainCamera.transform.SetParent(null);
-			base.OnDestroy();
-			Audio.Dispose();
-		}
-	}
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+            _rotation.Dispose();
+            _mainCamera.transform.SetParent(null);
+        }
+    }
 }

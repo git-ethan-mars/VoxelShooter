@@ -1,5 +1,5 @@
 using System;
-using Common.StaticData;
+using GamePlay.Data;
 using UnityEngine;
 using UnityEngine.UI;
 

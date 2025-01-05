@@ -1,12 +1,13 @@
+using System;
+using Unity.Collections;
 namespace VoxelMap
 {
-    public class ChunkData
+    public class ChunkData : IDisposable
     {
         public const int ChunkSize = 32;
         public const int ChunkSizeSquared = 1024;
         public const int ChunkSizeCubed = 32768;
-
-        internal readonly BlockData[] Blocks = new BlockData[ChunkSizeCubed];
+        public NativeArray<VoxelData> Voxels = new NativeArray<VoxelData>(ChunkSizeCubed, Allocator.Persistent);
         
         public static bool IsValidPosition(int x, int y, int z)
         {
@@ -14,7 +15,7 @@ namespace VoxelMap
                    z is >= 0 and < ChunkSize;
         }
 
-        public BlockData GetBlock(int x, int y, int z, PositionType positionType)
+        public VoxelData GetVoxel(int x, int y, int z, PositionType positionType)
         {
             if (positionType == PositionType.Global)
             {
@@ -23,10 +24,10 @@ namespace VoxelMap
                 z %= ChunkSize;
             }
 
-            return Blocks[x * ChunkSizeSquared + y * ChunkSize + z];
+            return Voxels[x * ChunkSizeSquared + y * ChunkSize + z];
         }
 
-        public void SetBlock(int x, int y, int z, BlockData blockData, PositionType positionType)
+        public void SetVoxel(int x, int y, int z, VoxelData data, PositionType positionType)
         {
             if (positionType == PositionType.Global)
             {
@@ -34,8 +35,12 @@ namespace VoxelMap
                 y %= ChunkSize;
                 z %= ChunkSize;
             }
-            
-            Blocks[x * ChunkSizeSquared + y * ChunkSize + z] = blockData;
+
+            Voxels[x * ChunkSizeSquared + y * ChunkSize + z] = data;
+        }
+        public void Dispose()
+        {
+            Voxels.Dispose();
         }
     }
 }

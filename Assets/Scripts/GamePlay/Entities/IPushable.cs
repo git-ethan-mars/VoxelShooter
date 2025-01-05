@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Entities
+namespace GamePlay.Entities
 {
     public interface IPushable
     {

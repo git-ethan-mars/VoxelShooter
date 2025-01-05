@@ -6,7 +6,7 @@ using Unity.Jobs;
 
 namespace VoxelMap
 {
-	internal static class MapWriter
+	public static class MapWriter
 	{
 		public static void SaveMap(string filePath, MapData mapData)
 		{
@@ -21,24 +21,24 @@ namespace VoxelMap
 			WriteMap(mapData, file);
 		}
 
-		public static void WriteMap(MapData mapData, Stream stream)
+		internal static void WriteMap(MapData mapData, Stream stream)
 		{
 			var result = new List<NativeList<byte>>(mapData.ChunkCount);
-			var blocks = new List<NativeArray<BlockData>>(mapData.ChunkCount);
+			var voxels = new List<NativeArray<VoxelData>>(mapData.ChunkCount);
 			for (var i = 0; i < mapData.ChunkCount; i++)
 			{
 				result.Add(new NativeList<byte>(Allocator.TempJob));
-				blocks.Add(new NativeArray<BlockData>(mapData.GetChunkDataByIndex(i).Blocks, Allocator.TempJob));
+				voxels.Add(mapData.GetChunkDataByIndex(i).Voxels);
 			}
 
-			using var jobHandles = new NativeList<JobHandle>(Allocator.Temp);
+			var jobHandles = new NativeArray<JobHandle>(mapData.ChunkCount, Allocator.Temp);
 			for (var i = 0; i < mapData.ChunkCount; i++)
 			{
 				var job = new ChunkSerializer(result[i],
-					blocks[i],
-					BlockData.Inner.Color);
-				var jobHandle = job.Schedule();
-				jobHandles.Add(jobHandle);
+					voxels[i],
+					VoxelData.DefaultInner.Color);
+
+				jobHandles[i] = job.Schedule();
 			}
 
 			JobHandle.CompleteAll(jobHandles);
@@ -54,8 +54,10 @@ namespace VoxelMap
 				}
 
 				result[i].Dispose();
-				blocks[i].Dispose();
+				voxels[i].Dispose();
 			}
+
+			jobHandles.Dispose();
 		}
 	}
 }

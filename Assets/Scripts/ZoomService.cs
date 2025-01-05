@@ -1,28 +1,25 @@
 using UnityEngine;
 
-namespace CameraLogic
+public class ZoomService
 {
-    public class ZoomService
+    private const float DefaultFov = 60;
+    public bool IsZoomed { get; private set; }
+    private readonly Camera _camera;
+
+    public ZoomService(Camera camera)
     {
-        private const float DefaultFov = 60;
-        public bool IsZoomed { get; private set; }
-        private readonly Camera _camera;
+        _camera = camera;
+    }
 
-        public ZoomService(Camera camera)
-        {
-            _camera = camera;
-        }
+    public void ZoomIn(float zoomMultiplier)
+    {
+        _camera.fieldOfView = DefaultFov / zoomMultiplier;
+        IsZoomed = true;
+    }
 
-        public void ZoomIn(float zoomMultiplier)
-        {
-            _camera.fieldOfView = DefaultFov / zoomMultiplier;
-            IsZoomed = true;
-        }
-
-        public void ZoomOut()
-        {
-            _camera.fieldOfView = DefaultFov;
-            IsZoomed = false;
-        }
+    public void ZoomOut()
+    {
+        _camera.fieldOfView = DefaultFov;
+        IsZoomed = false;
     }
 }

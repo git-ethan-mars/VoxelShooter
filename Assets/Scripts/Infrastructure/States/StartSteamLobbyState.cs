@@ -1,6 +1,4 @@
-﻿using Common.StaticData;
-using Infrastructure.Factory;
-using Networking;
+﻿using GamePlay.Data;
 
 namespace Infrastructure.States
 {
@@ -22,7 +20,7 @@ namespace Infrastructure.States
 		private void CreateHost(WorldSettings worldSettings)
 		{
 		}
-
+		
 		public void Exit()
 		{
 		}

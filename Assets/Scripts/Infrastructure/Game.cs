@@ -1,6 +1,4 @@
 ﻿using Common;
-using Common.Services;
-using Infrastructure.Services;
 using Infrastructure.States;
 
 namespace Infrastructure
@@ -11,7 +9,7 @@ namespace Infrastructure
 
         public Game(ICoroutineRunner coroutineRunner, AllServices allServices)
         {
-            StateMachine = new GameStateMachine(new SceneLoader(coroutineRunner), coroutineRunner, allServices);
+            StateMachine = new GameStateMachine(new SceneLoader(coroutineRunner), allServices);
         }
     }
 }

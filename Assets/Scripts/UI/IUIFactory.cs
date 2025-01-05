@@ -1,10 +1,9 @@
 ﻿using Common;
-using Common.Input;
-using Common.Storage;
-using UI;
+using GamePlay.Services;
 using UnityEngine;
+using VoxelMap;
 
-namespace Infrastructure.Factory
+namespace UI
 {
 	public interface IUIFactory : IService
 	{
@@ -20,5 +19,6 @@ namespace Infrastructure.Factory
 		Scoreboard CreateScoreBoard(IAvatarLoader avatarLoader, Transform parent);
 		TimeCounter CreateTimeCounter(Transform parent);
 		InGameMenu CreateInGameMenu(Transform parent);
+		Hud CreateHud();
 	}
 }

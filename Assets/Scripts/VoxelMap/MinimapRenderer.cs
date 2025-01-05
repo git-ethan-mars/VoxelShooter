@@ -26,7 +26,7 @@ namespace VoxelMap
 			renderTexture.Create();
 			var saveTopVoxelsKernel = computeShader.FindKernel(SaveTopVoxels);
 			const int colorSize = sizeof(float) * 4;
-			var meshFilters = FindObjectsOfType<MeshFilter>();
+			var meshFilters = FindObjectsByType<MeshFilter>(FindObjectsSortMode.None);
 			using var pixels = new ComputeBuffer(renderTexture.width * renderTexture.height, colorSize);
 			for (var i = 0; i < meshFilters.Length; i++)
 			{

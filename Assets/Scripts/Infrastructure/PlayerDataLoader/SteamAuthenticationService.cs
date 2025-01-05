@@ -1,6 +1,6 @@
 ﻿using Steamworks;
 
-namespace Infrastructure.Services.PlayerDataLoader
+namespace Infrastructure.PlayerDataLoader
 {
 	public class SteamAuthenticationService : IAuthenticationService
 	{

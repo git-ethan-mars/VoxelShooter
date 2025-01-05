@@ -1,5 +1,6 @@
-﻿using Common.StaticData;
+﻿using System.Threading;
 using Cysharp.Threading.Tasks;
+using GamePlay.Data;
 using TMPro;
 using UnityEngine;
 
@@ -18,9 +19,12 @@ namespace UI
         [SerializeField]
         private CanvasGroup canvasGroup;
 
+        private CancellationToken _token;
+
         public void Construct()
         {
             canvasGroup.alpha = 0.0f;
+            _token = this.GetCancellationTokenOnDestroy();
         }
 
         public void ChangeGameTime(ServerTime timeLeft)
@@ -38,13 +42,17 @@ namespace UI
             respawnTimeText.SetText($"You will respawn in {timeLeft.TotalSecond}");
             if (timeLeft.TotalSecond == 0)
             {
-                EnableRespawnTimer();
+                EnableRespawnTimer().Forget();
             }
         }
 
         private async UniTaskVoid EnableRespawnTimer()
         {
-            await UniTask.WaitForSeconds(1);
+            if (await UniTask.WaitForSeconds(1, cancellationToken: _token).SuppressCancellationThrow())
+            {
+                return;
+            }
+            
             respawnTimeText.gameObject.SetActive(false);
         }
     }

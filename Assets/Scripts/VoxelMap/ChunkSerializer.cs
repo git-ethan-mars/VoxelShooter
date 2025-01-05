@@ -1,5 +1,4 @@
-﻿using Common.Extensions;
-using Unity.Burst;
+﻿using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
@@ -10,17 +9,17 @@ namespace VoxelMap
     public struct ChunkSerializer : IJob
     {
         private NativeList<byte> _serializedChunk;
-        private NativeArray<BlockData> _blocks;
+        private NativeArray<VoxelData> _voxels;
         private readonly Color32 _innerColor;
         private int _coloredStart;
         private int _coloredEnd;
         private int _solidStart;
         private int _solidEnd;
 
-        public ChunkSerializer(NativeList<byte> serializedChunk, NativeArray<BlockData> blocks, Color32 innerColor)
+        public ChunkSerializer(NativeList<byte> serializedChunk, NativeArray<VoxelData> voxels, Color32 innerColor)
         {
             _serializedChunk = serializedChunk;
-            _blocks = blocks;
+            _voxels = voxels;
             _innerColor = innerColor;
             _coloredStart = -1;
             _coloredEnd = -1;
@@ -30,9 +29,9 @@ namespace VoxelMap
 
         public void Execute()
         {
-            for (var i = 0; i < _blocks.Length; i++)
+            for (var i = 0; i < _voxels.Length; i++)
             {
-                if (_blocks[i].Color.IsEquals(_innerColor))
+                if (_voxels[i].Color.IsEqual(_innerColor))
                 {
                     if (IsColoredRunStarted) WriteColoredRun();
                     if (!IsSolidRunStarted) _solidStart = i;
@@ -40,7 +39,7 @@ namespace VoxelMap
                     continue;
                 }
 
-                if (_blocks[i].IsSolid())
+                if (_voxels[i].IsSolid())
                 {
                     if (IsSolidRunStarted) WriteSolidRun();
                     if (!IsColoredRunStarted) _coloredStart = i;
@@ -75,11 +74,11 @@ namespace VoxelMap
             AddInt(_coloredEnd);
             for (var i = _coloredStart; i <= _coloredEnd; i++)
             {
-                var block = _blocks[i];
-                _serializedChunk.Add(block.Color.b);
-                _serializedChunk.Add(block.Color.g);
-                _serializedChunk.Add(block.Color.r);
-                _serializedChunk.Add(block.Color.a);
+                var voxel = _voxels[i];
+                _serializedChunk.Add(voxel.Color.b);
+                _serializedChunk.Add(voxel.Color.g);
+                _serializedChunk.Add(voxel.Color.r);
+                _serializedChunk.Add(voxel.Color.a);
             }
 
             _coloredStart = -1;

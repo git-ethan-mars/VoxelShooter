@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using Common;
-using Common.Storage;
+using GamePlay.Services;
 using UI.Carousel;
 using UnityEngine;
 
@@ -41,7 +40,7 @@ namespace UI.SettingsMenuStates
             _screenModeView.IncreaseButtonPressed += _screenModeModel.MoveForward;
             _screenModeView.DecreaseButtonPressed += _screenModeModel.MoveBack;
 
-            var currentSettings = _storageService.Load<VideoSettingsData>(Constants.VideoSettingsKey);
+            var currentSettings = _storageService.Load<VideoSettingsData>(IStorageService.VideoSettingsKey);
             _resolutionModel.CurrentItem = currentSettings.Resolution;
             _screenModeModel.CurrentItem = currentSettings.ScreenMode;
         }
@@ -56,7 +55,7 @@ namespace UI.SettingsMenuStates
             _screenModeView.IncreaseButtonPressed -= _screenModeModel.MoveForward;
             _screenModeView.DecreaseButtonPressed -= _screenModeModel.MoveBack;
 
-            _storageService.Save(Constants.VideoSettingsKey,
+            _storageService.Save(IStorageService.VideoSettingsKey,
                 new VideoSettingsData(_resolutionModel.CurrentItem, _screenModeModel.CurrentItem));
         }
     }

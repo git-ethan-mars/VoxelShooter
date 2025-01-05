@@ -1,5 +1,4 @@
-using Common.Storage;
-using Infrastructure.Factory;
+using GamePlay.Services;
 using UI;
 using UnityEngine;
 
@@ -22,7 +21,6 @@ namespace Infrastructure.States
         public void Enter()
         {
             _settingsMenu = _uiFactory.CreateSettingsMenu(_storageService, null);
-            _settingsMenu.CanvasGroup.alpha = 1.0f;
             _settingsMenu.BackMousePressed += _stateMachine.Enter<MainMenuState>;
         }
 

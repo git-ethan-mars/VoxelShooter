@@ -1,12 +1,11 @@
-﻿using Common.AssetManagement;
-using Common.Input;
-using Common.StaticData;
-using Common.Storage;
-using UI;
+﻿using Common;
+using Common.AssetManagement;
+using GamePlay.Services;
 using UnityEngine;
 using UnityEngine.UI;
+using VoxelMap;
 
-namespace Infrastructure.Factory
+namespace UI
 {
     public class UIFactory : IUIFactory
     {
@@ -19,14 +18,11 @@ namespace Infrastructure.Factory
             _staticData = staticData;
         }
 
-        /*public Hud CreateHud(MapProvider mapProvider, Player player, IInputService inputService)
+        public Hud CreateHud()
         {
             var hud = _assets.Instantiate(UIPath.HudPath).GetComponent<Hud>();
-            hud.HealthCounter.Construct(player);
-            hud.Palette.Construct(inputService);
-            hud.Minimap.Construct(mapProvider, player, this);
             return hud;
-        }*/
+        }
 
         public MainMenu CreateMainMenu()
         {

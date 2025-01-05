@@ -1,9 +1,3 @@
-using Entities;
-using Entities.PlayerLogic;
-using GamePlay.PlayerLogic.Inventory.Tnt;
-using Inventory.RangeWeapon;
-using Inventory.RocketLauncher;
-
 namespace GamePlay.Entities
 {
 	public class AmmoLootBox : LootBox
@@ -15,7 +9,7 @@ namespace GamePlay.Entities
 			character.Inventory.ApplyEffectToItems<Tnt>(tnt => tnt.Data.Amount += 1);
 			character.Inventory.ApplyEffectToItems<Grenade>(grenade => grenade.Data.Amount += 1);
 			character.Inventory.ApplyEffectToItems<RocketLauncher>(rocketLauncher => rocketLauncher.Data.CarriedRockets += 1);
-			character.Inventory.ApplyEffectToItems<Drill>(drill=>drill.Data.ChargedDrills += 1);
+			character.Inventory.ApplyEffectToItems<DrillLauncher>(drill=>drill.Data.ChargedDrills += 1);
 		}
 	}
 }

@@ -8,7 +8,7 @@ namespace Networking
 {
 	public class SteamAuthenticator : NetworkAuthenticator
 	{
-		private IHost _host;
+		/*private IHost _host;
 
 		public void Construct(IHost host)
 		{
@@ -59,6 +59,6 @@ namespace Networking
 		private void OnSuccessAuthentication(AuthenticationResponse response)
 		{
 			ClientAccept();
-		}
+		}*/
 	}
 }

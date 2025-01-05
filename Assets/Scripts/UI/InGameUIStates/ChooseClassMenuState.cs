@@ -1,4 +1,4 @@
-using Common.StaticData;
+using GamePlay.Data;
 using UnityEngine;
 
 namespace UI.InGameUIStates

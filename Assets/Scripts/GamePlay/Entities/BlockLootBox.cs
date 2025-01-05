@@ -1,7 +1,3 @@
-using Entities;
-using Entities.PlayerLogic;
-using Inventory.Block;
-
 namespace GamePlay.Entities
 {
     public class BlockLootBox : LootBox

@@ -1,14 +1,15 @@
-﻿using VoxelMap;
+using Mirror;
+using VoxelMap;
 
 namespace Networking.Messages.Responses
 {
-	public struct FallBlockResponse : IMirrorResponse
-	{
-		public readonly BlockDataWithPosition[] Blocks;
+    public struct FallBlockResponse : IMirrorResponse
+    {
+        public readonly Voxel[] Voxels;
 
-		public FallBlockResponse(BlockDataWithPosition[] blocks)
-		{
-			Blocks = blocks;
-		}
-	}
+        public FallBlockResponse(Voxel[] voxels)
+        {
+            Voxels = voxels;
+        }
+    }
 }

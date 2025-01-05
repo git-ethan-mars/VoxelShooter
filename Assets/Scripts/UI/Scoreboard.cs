@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using Common.StaticData;
-using Infrastructure.Services.PlayerDataLoader;
+using Common;
+using GamePlay.Data;
 using UnityEngine;
 
 namespace UI
@@ -21,12 +21,6 @@ namespace UI
         {
             _avatarLoader = avatarLoader;
             canvasGroup.alpha = 0;
-        }
-
-        private void ShowFinalStatistics()
-        {
-            enabled = false;
-            canvasGroup.alpha = 1;
         }
 
         public void UpdateScoreboard(List<ScoreData> scoreboardData)

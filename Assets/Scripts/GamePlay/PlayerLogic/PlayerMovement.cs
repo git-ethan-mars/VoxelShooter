@@ -2,10 +2,11 @@ using System;
 using Common;
 using UnityEngine;
 
-namespace PlayerLogic
+namespace GamePlay
 {
     public class PlayerMovement
     {
+        private const float GroundDistanceThreshold = 1e-3f;
         private const float AccelerationTime = 0.3f;
         private const float GravityScale = 3;
 
@@ -50,7 +51,7 @@ namespace PlayerLogic
 
         public Vector3 GetHorizontalVelocity()
         {
-            return Vector3.Scale(HorizontalMask, _rigidbody.velocity);
+            return Vector3.Scale(HorizontalMask, _rigidbody.linearVelocity);
         }
 
         public void FixedUpdate()
@@ -85,8 +86,8 @@ namespace PlayerLogic
         public bool IsGrounded()
         {
             var isGrounded = Physics.CheckBox(_rigidbody.position + _hitBox.height / 2 * Vector3.down,
-                new Vector3(_hitBox.radius / 2, Constants.Epsilon, _hitBox.radius / 2),
-                Quaternion.identity, Constants.buildMask);
+                new Vector3(_hitBox.radius / 2, GroundDistanceThreshold, _hitBox.radius / 2),
+                Quaternion.identity, LayerMasks.BuildMask);
             return isGrounded;
         }
     }

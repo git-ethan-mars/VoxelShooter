@@ -1,11 +1,14 @@
-﻿using Common.Factory;
-using GamePlay.Entities;
+﻿using GamePlay.MapFeatures;
 using UnityEngine;
+using VoxelMap;
 
-namespace Entities
+namespace GamePlay.Entities
 {
 	public class Tombstone : Entity, IPushable
 	{
+		[SerializeField] 
+		private ExplosionData explosion;
+		
 		[SerializeField]
 		private new Collider collider;
 
@@ -24,6 +27,7 @@ namespace Entities
 
 		[SerializeField]
 		private int particleSpeed;
+		private MapProvider _mapProvider;
 
 		public Vector3Int Center => Vector3Int.FloorToInt(transform.position);
 		public Vector3Int Min => new(-Size.x / 2, -Size.y / 2, -Size.z / 2);
@@ -31,12 +35,11 @@ namespace Entities
 
 		private Vector3Int Size => Vector3Int.RoundToInt(collider.bounds.size);
 
-		public void Construct(IParticleFactory particleFactory)
+		public void Construct(MapProvider mapProvider)
 		{
-			_particleFactory = particleFactory;
-			StartCoroutine(Utils.DoActionAfterDelay(Explode, delayInSeconds));
+			_mapProvider = mapProvider;
 		}
-
+		
 		public void Push()
 		{
 			transform.position += Vector3.up;
@@ -44,15 +47,6 @@ namespace Entities
 
 		public void Fall()
 		{
-		}
-
-		private void Explode()
-		{
-			var explosionBehaviour = new ExplosionBehaviour(_host, connectionToClient, radius, damage);
-			explosionBehaviour.Explode(transform.position);
-			_particleFactory.CreateRchParticle(transform.position, particleSpeed, particleCount);
-			NetworkServer.SendToReady(new RchParticleResponse(transform.position, particleSpeed, particleCount));
-			NetworkServer.Destroy(gameObject);
 		}
 
 		private void OnDrawGizmosSelected()

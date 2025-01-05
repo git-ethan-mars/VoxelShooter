@@ -1,8 +1,7 @@
-﻿using Common.Services.StaticData;
-using Common.StaticData;
-using Infrastructure.Factory;
+﻿using GamePlay.Data;
 using UI;
 using UnityEngine;
+using VoxelMap;
 
 namespace Infrastructure.States
 {
@@ -32,21 +31,21 @@ namespace Infrastructure.States
             _stateMachine.Enter<MainMenuState>();
         }
         
-        private void OnApplyButton()
+        private void OnApplyButton(WorldSettings worldSettings)
         {
-            var serverSettings = new WorldSettings(mapName.text, _timeLimitation.CurrentValue.Value,
-                _lobbyBalance.spawnTime, _lobbyBalance.boxSpawnTime);
 # if LOCAL_BUILD
             _stateMachine.Enter<StartMatchState, WorldSettings>(
-                serverSettings);
+                worldSettings);
 # else
             _stateMachine.Enter<StartSteamLobbyState, WorldSettings>(
-                serverSettings);
+                worldSettings);
 # endif
         }
 
         public void Exit()
         {
+            _matchMenu.BackButtonPressed -= OnBackButton;
+            _matchMenu.ApplyButtonPressed -= OnApplyButton;
             Object.Destroy(_matchMenu.gameObject);
         }
     }

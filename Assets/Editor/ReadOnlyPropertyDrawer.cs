@@ -1,6 +1,6 @@
-﻿using Common.CustomAttributes;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
+using VoxelMap.CustomAttributes;
 
 namespace Editor
 {

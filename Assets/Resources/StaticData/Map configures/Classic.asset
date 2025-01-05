@@ -12,36 +12,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e69f3dcd48464cac84150e2016cff25a, type: 3}
   m_Name: Classic
   m_EditorClassIdentifier: 
-  image: {fileID: 2800000, guid: 15548c8a98fb7c848b05ad726a0b090f, type: 3}
-  waterColor:
+  <Image>k__BackingField: {fileID: 2800000, guid: 15548c8a98fb7c848b05ad726a0b090f, type: 3}
+  <WaterColor>k__BackingField:
     serializedVersion: 2
     rgba: 4287383296
-  innerColor:
+  <InnerColor>k__BackingField:
     serializedVersion: 2
     rgba: 4281283929
-  lightData:
+  <LightData>k__BackingField:
     position: {x: 0, y: 0, z: 0}
     rotation: {x: -0.957043, y: -0.04243583, z: 0.18603024, w: -0.21831352}
     color: {r: 1, g: 1, b: 1, a: 1}
     bias: 0.3
     normalBias: 0.7
-  skyboxMaterial: {fileID: 2100000, guid: 85cf0b004bc4a654b9e501efcce47902, type: 2}
-  ambientMode: 0
-  skyColor: {r: 0.21176471, g: 0.22745098, b: 0.25882354, a: 1}
-  equatorColor: {r: 0.11372549, g: 0.1254902, b: 0.13333334, a: 1}
-  groundColor: {r: 0.047058824, g: 0.043137256, b: 0.03529412, a: 1}
-  ambientIntensity: 1
-  weather: {fileID: 0}
-  isFogActivated: 0
-  fogMode: 1
-  fogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  fogStartDistance: 0
-  fogEndDistance: 300
-  fogDensity: 0.01
-  spawnPoints:
-  - position: {x: 483, y: 74, z: 172}
-  - position: {x: 260, y: 55, z: 122}
-  - position: {x: 76, y: 58, z: 92}
-  - position: {x: 112, y: 59, z: 245}
-  - position: {x: 180, y: 43, z: 481}
-  - position: {x: 346, y: 42, z: 468}
+  <SkyboxMaterial>k__BackingField: {fileID: 2100000, guid: 85cf0b004bc4a654b9e501efcce47902, type: 2}
+  <AmbientData>k__BackingField:
+    mode: 0
+    skyColor: {r: 0.21176471, g: 0.22745098, b: 0.25882354, a: 1}
+    equatorColor: {r: 0.11372549, g: 0.1254902, b: 0.13333334, a: 1}
+    groundColor: {r: 0.047058824, g: 0.043137256, b: 0.03529412, a: 1}
+    intensity: 1
+  <FogData>k__BackingField:
+    activated: 0
+    mode: 1
+    color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    startDistance: 0
+    endDistance: 300
+    density: 0.01
+  <Weather>k__BackingField: {fileID: 0}
+  <SpawnPoints>k__BackingField:
+  - position: {x: 485, y: 74, z: 172}
+  - position: {x: 262, y: 55, z: 122}
+  - position: {x: 78, y: 58, z: 92}
+  - position: {x: 114, y: 59, z: 245}
+  - position: {x: 182, y: 43, z: 481}
+  - position: {x: 348, y: 42, z: 468}

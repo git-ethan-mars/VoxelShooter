@@ -1,5 +1,4 @@
-﻿using Common.StaticData;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace VoxelMap
 {

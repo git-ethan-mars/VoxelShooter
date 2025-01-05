@@ -11,6 +11,7 @@
     SubShader
     {
         Cull Back
+        Offset -1, -1
         Pass
         {
             Tags
@@ -36,8 +37,8 @@
             {
                 float4 pos : SV_POSITION;
                 float4 color : COLOR0;
-                fixed3 diff : COLOR1;
-                fixed3 ambient : COLOR2;
+                float3 diff : COLOR1;
+                float3 ambient : COLOR2;
                 float2 uv : TEXCOORD0;
             };
 
@@ -46,8 +47,8 @@
             {
                 float4 pos : SV_POSITION;
                 float4 color : COLOR0;
-                fixed3 diff : COLOR1;
-                fixed3 ambient : COLOR2;
+                float3 diff : COLOR1;
+                float3 ambient : COLOR2;
                 float2 uv : TEXCOORD0;
                 float3 barycentric : TEXCOORD1;
                 SHADOW_COORDS(2)
@@ -132,7 +133,7 @@
                 triStream.Append(o);
             }
 
-            fixed4 frag(g2f i) : SV_Target
+            float4 frag(g2f i) : SV_Target
             {
                 // Calculate the unit width based on triangle size.
                 const float3 unitWidth = fwidth(i.barycentric);
@@ -141,11 +142,11 @@
                 // Use the coordinate closest to the edge.
                 float alpha = 1 - min(aliased.x, min(aliased.y, aliased.z));
                 // Set to our forwards facing wireframe colour.
-                fixed4 col = lerp(i.color, (1 - tex2D(_MainTex, i.uv)) * i.color, _NoiseVisibility);
+                float4 col = lerp(i.color, (1 - tex2D(_MainTex, i.uv)) * i.color, _NoiseVisibility);
                 // compute shadow attenuation (1.0 = fully lit, 0.0 = fully shadowed)
                 // darken light's illumination with shadow, keep ambient intact
-                const fixed shadow = SHADOW_ATTENUATION(i);
-                const fixed3 lighting = i.diff * shadow + i.ambient;
+                const float shadow = SHADOW_ATTENUATION(i);
+                const float3 lighting = i.diff * shadow + i.ambient;
                 col.rgb *= lighting;
                 UNITY_APPLY_FOG(i.fogCoord, col);
                 if (alpha != 0)

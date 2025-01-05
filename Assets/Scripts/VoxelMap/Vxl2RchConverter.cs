@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Common.Extensions;
 using UnityEngine;
 
 namespace VoxelMap
@@ -46,7 +45,7 @@ namespace VoxelMap
 						var colorPosition = currentPosition + 4;
 						for (; z < topColorStart; ++z)
 						{
-							colors[GetPosition(x, z, y)] = BlockData.Air.Color;
+							colors[GetPosition(x, z, y)] = VoxelData.Air.Color;
 						}
 
 						for (; z <= topColorEnd; z++)
@@ -98,9 +97,9 @@ namespace VoxelMap
 				{
 					for (var z = 0; z < Depth; z++)
 					{
-						mapData.GetChunkByGlobalPosition(Width - 1 - x, _height - heightOffset - 1 - y, z).SetBlock(
+						mapData.GetChunkByGlobalPosition(Width - 1 - x, _height - heightOffset - 1 - y, z).SetVoxel(
 							Width - 1 - x, _height - heightOffset - 1 - y,
-							z, new BlockData(colors[GetPosition(x, y, z)]), PositionType.Global);
+							z, new VoxelData(colors[GetPosition(x, y, z)]), PositionType.Global);
 					}
 				}
 			}

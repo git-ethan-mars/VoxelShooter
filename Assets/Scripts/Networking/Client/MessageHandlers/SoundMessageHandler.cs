@@ -1,4 +1,4 @@
-using Common.Audio;
+using GamePlay.Audio;
 using Mirror;
 using Networking.Messages.Responses;
 
@@ -47,7 +47,6 @@ namespace Networking.Client
 			audioSource.maxDistance = audio.maxDistance;
 			audioSource.spatialBlend = Sound3D;
 			audioSource.Play();
-			_coroutineRunner.StartCoroutine(_audioPool.ReleaseOnDelay(audioSource, audio.clip.length));
 		}
 
 		public void OnResponseReceived(PlayerSoundResponse response)
@@ -55,9 +54,9 @@ namespace Networking.Client
 			if (response.Source != null)
 			{
 				var audioSource = _audioPool.Get();
-				var transformFollower = audioSource.GetComponent<TransformFollower>();
+				/*var transformFollower = audioSource.GetComponent<TransformFollower>();
 				transformFollower.Target = response.Source.transform;
-				transformFollower.enabled = true;
+				transformFollower.enabled = true;*/
 				var audio = _staticData.GetAudio(response.SoundId);
 				audioSource.clip = audio.clip;
 				audioSource.volume = audio.volume * _soundMultiplier;
@@ -65,7 +64,6 @@ namespace Networking.Client
 				audioSource.maxDistance = audio.maxDistance;
 				audioSource.spatialBlend = response.Source == NetworkClient.localPlayer ? Sound2D : Sound3D;
 				audioSource.Play();
-				_coroutineRunner.StartCoroutine(_audioPool.ReleaseOnDelay(audioSource, audio.clip.length));
 			}
 		}
 	}

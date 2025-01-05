@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using UnityEngine;
 
-namespace Infrastructure.Services.PlayerDataLoader
+namespace Infrastructure.PlayerDataLoader
 {
 	public class LocalAuthenticationService : IAuthenticationService
 	{

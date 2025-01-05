@@ -1,104 +1,78 @@
 ﻿using Common.AssetManagement;
-using Common.Audio;
-using Common.Factory;
-using Common.Input;
-using Common.StaticData;
-using Common.Storage;
-using Entities;
-using Entities.PlayerLogic;
-using GamePlay.Entities;
-using PlayerLogic;
-using PlayerLogic.Spectator;
+using GamePlay.Data;
+using GamePlay.Factory;
 using UnityEngine;
+using VoxelMap;
 
-namespace Infrastructure.Factory
+namespace GamePlay.Entities
 {
 	public class EntityFactory : IEntityFactory
 	{
-		private readonly IAssetProvider _assets;
-		private readonly IStorageService _storageService;
-		private readonly IInputService _inputService;
-		private readonly IStaticDataService _staticData;
-		private readonly IMeshFactory _meshFactory;
-		private readonly IParticleFactory _particleFactory;
-		private readonly IAudioPlayer _audioPlayer;
+		private const string TntPath = "Prefabs/SpawningTnt";
+		private const string GrenadePath = "Prefabs/SpawningGrenade";
+		private const string RocketPath = "Prefabs/Rocket";
+		private const string TombstonePath = "Prefabs/Tombstone";
+		private const string SpawnPointPath = "Prefabs/Spawnpoint";
+		private const string AmmoBoxPath = "Prefabs/Drops/AmmoBox";
+		private const string HealthBoxPath = "Prefabs/Drops/HealthBox";
+		private const string BlockBoxPath = "Prefabs/Drops/BlockBox";
+		private const string DrillPath = "Prefabs/Drill";
 
-		public EntityFactory(IAssetProvider assets, IStorageService storageService,
-			IInputService inputService,
-			IStaticDataService staticData, IMeshFactory meshFactory, IParticleFactory particleFactory, IAudioPlayer audioPlayer)
+		private readonly IAssetProvider _assets;
+		private readonly IParticleFactory _particleFactory;
+
+		public EntityFactory(IAssetProvider assets, IParticleFactory particleFactory)
 		{
 			_assets = assets;
-			_storageService = storageService;
-			_inputService = inputService;
-			_staticData = staticData;
-			_meshFactory = meshFactory;
 			_particleFactory = particleFactory;
-			_audioPlayer = audioPlayer;
 		}
 
-		public Character CreateCharacter(Vector3 position)
+		public SpawningTnt CreateSpawningTnt(Vector3 position, Quaternion rotation, TntData data)
 		{
-			var character = _assets.Instantiate(EntityPath.MainPlayerPath, position, Quaternion.identity).GetComponent<Character>();
-			character.Construct(_inputService, _storageService, _staticData);
-			return character;
-		}
-
-		public SpectatorPlayer CreateSpectatorPlayer(Vector3 position)
-		{
-			var spectator =
-				_assets.Instantiate(EntityPath.SpectatorPlayerPath, position, Quaternion.identity).GetComponent<SpectatorPlayer>();
-			spectator.Construct(_inputService, _storageService);
-			return spectator;
-		}
-
-		public TntProp CreateTnt(Vector3 position, Quaternion rotation, TntData data)
-		{
-			var tnt = _assets.Instantiate(EntityPath.TntPath, position, rotation).GetComponent<TntProp>();
-			tnt.Construct(_particleFactory, _audioPlayer, data);
+			var tnt = _assets.Instantiate(TntPath, position, rotation).GetComponent<SpawningTnt>();
+			tnt.Construct(data);
 			return tnt;
 		}
 
-		public Grenade CreateGrenade(Vector3 position, GrenadeData grenadeData)
+		public SpawningGrenade CreateSpawningGrenade(Vector3 position)
 		{
-			var grenade = _assets.Instantiate(EntityPath.GrenadePath, position, Quaternion.identity)
-				.GetComponent<Grenade>();
-			grenade.Construct(_particleFactory, _audioPlayer, grenadeData);
+			var grenade = _assets.Instantiate(GrenadePath, position, Quaternion.identity)
+				.GetComponent<SpawningGrenade>();
 			return grenade;
 		}
 
 		public Tombstone CreateTombstone(Vector3 position)
 		{
 			var tombstone =
-				_assets.Instantiate(EntityPath.TombstonePath, position, Quaternion.identity).GetComponent<Tombstone>();
-			tombstone.Construct(_particleFactory);
+				_assets.Instantiate(TombstonePath, position, Quaternion.identity).GetComponent<Tombstone>();
 			return tombstone;
 		}
 
-		public Rocket CreateRocket(Vector3 position, Quaternion rotation, RocketLauncherData data)
+		public Rocket CreateRocket(Vector3 position, Quaternion rotation, RocketLauncherData data, MapProvider mapProvider)
 		{
-			var rocket = _assets.Instantiate(EntityPath.RocketPath, position, rotation).GetComponent<Rocket>();
-			rocket.Construct(_particleFactory, _audioPlayer, data);
+			var rocket = _assets.Instantiate(RocketPath, position, rotation).GetComponent<Rocket>();
+			rocket.Construct(mapProvider, _particleFactory, data);
 			return rocket;
 		}
 
 		public LootBox CreateAmmoBox(Vector3 position, Transform parent)
 		{
-			return CreateLootBox(position, parent, EntityPath.AmmoBoxPath);
+			return CreateLootBox(position, parent, AmmoBoxPath);
 		}
 
 		public LootBox CreateHealthBox(Vector3 position, Transform parent)
 		{
-			return CreateLootBox(position, parent, EntityPath.HealthBoxPath);
+			return CreateLootBox(position, parent, HealthBoxPath);
 		}
 
 		public LootBox CreateBlockBox(Vector3 position, Transform parent)
 		{
-			return CreateLootBox(position, parent, EntityPath.BlockBoxPath);
+			return CreateLootBox(position, parent, BlockBoxPath);
 		}
 
 		public SpawnPoint CreateSpawnPoint(SpawnPointData spawnPointData, Transform parent)
 		{
-			var spawnPoint = _assets.Instantiate(EntityPath.SpawnPointPath,
+			var spawnPoint = _assets.Instantiate(SpawnPointPath,
 				spawnPointData.ToVectorWithOffset(), Quaternion.identity, parent).GetComponent<SpawnPoint>();
 			spawnPoint.Construct(spawnPointData);
 			return spawnPoint;
@@ -113,8 +87,8 @@ namespace Infrastructure.Factory
 
 		public Drill CreateDrill(Vector3 position, Quaternion rotation, DrillLauncherData data)
 		{
-			var drill = _assets.Instantiate(EntityPath.DrillPath, position, rotation).GetComponent<Drill>();
-			drill.Construct(_audioPlayer, data);
+			var drill = _assets.Instantiate(DrillPath, position, rotation).GetComponent<Drill>();
+			drill.Construct(data);
 			return drill;
 		}
 	}

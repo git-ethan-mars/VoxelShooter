@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
+using Common;
 using Common.AssetManagement;
 using Steamworks;
 using UnityEngine;
 
-namespace Infrastructure.Services.PlayerDataLoader
+namespace Infrastructure.PlayerDataLoader
 {
     public class SteamAvatarLoader : IAvatarLoader
     {

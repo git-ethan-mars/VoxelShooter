@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
-using Common.Storage;
-using Cysharp.Threading.Tasks;
+using GamePlay.Services;
 using UI.Carousel;
 using UI.SettingsMenuStates;
 using UnityEngine;
@@ -62,16 +60,11 @@ namespace UI
 
         [SerializeField]
         private Button backButton;
-        public CanvasGroup CanvasGroup => canvasGroup;
-
-        [SerializeField]
-        private CanvasGroup canvasGroup;
 
         private SettingsMenuStateMachine _menuStateMachine;
 
         public void Construct(IStorageService storageService)
         {
-            canvasGroup.alpha = 0.0f;
             _menuStateMachine =
                 new SettingsMenuStateMachine(new MouseSettingsState(mouseSection,
                     generalSensitivity, aimSensitivity, storageService), new VolumeSettingsState(volumeSection,

@@ -10,7 +10,7 @@ namespace UI.Carousel
 
         public override void OnModelValueChanged(Resolution resolution)
         {
-            Control.DisplayedValue.SetText($"{resolution.width}X{resolution.height} {resolution.refreshRate}Hz");
+            Control.DisplayedValue.SetText($"{resolution.width}X{resolution.height} {resolution.refreshRateRatio}Hz");
             if (!Screen.currentResolution.Equals(resolution))
             {
                 Screen.SetResolution(resolution.width, resolution.height, Screen.fullScreenMode);

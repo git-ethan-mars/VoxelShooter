@@ -12,33 +12,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e69f3dcd48464cac84150e2016cff25a, type: 3}
   m_Name: Arctic Base
   m_EditorClassIdentifier: 
-  image: {fileID: 2800000, guid: c3640056552a7d24db7d6b173c836431, type: 3}
-  waterColor:
+  <Image>k__BackingField: {fileID: 2800000, guid: c3640056552a7d24db7d6b173c836431, type: 3}
+  <WaterColor>k__BackingField:
     serializedVersion: 2
     rgba: 4287052291
-  innerColor:
+  <InnerColor>k__BackingField:
     serializedVersion: 2
     rgba: 4293918629
-  lightData:
+  <LightData>k__BackingField:
     position: {x: 0, y: 0, z: 0}
     rotation: {x: -0.2691036, y: 0.5118723, z: -0.79732275, w: -0.17276148}
     color: {r: 0.8066038, g: 1, b: 0.9818691, a: 1}
     bias: 0.3
     normalBias: 0.5
-  skyboxMaterial: {fileID: 2100000, guid: 0657637449dfba34f84c2e4cf23683b6, type: 2}
-  ambientMode: 0
-  skyColor: {r: 0.21176471, g: 0.22745098, b: 0.25882354, a: 1}
-  equatorColor: {r: 0.11372549, g: 0.1254902, b: 0.13333334, a: 1}
-  groundColor: {r: 0.047058824, g: 0.043137256, b: 0.03529412, a: 1}
-  ambientIntensity: 1
-  weather: {fileID: 7346217845250167101, guid: 068e8acd749ac8b48b3722f62914b1c2, type: 3}
-  isFogActivated: 0
-  fogMode: 1
-  fogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  fogStartDistance: 0
-  fogEndDistance: 300
-  fogDensity: 0.01
-  spawnPoints:
+  <SkyboxMaterial>k__BackingField: {fileID: 2100000, guid: 0657637449dfba34f84c2e4cf23683b6, type: 2}
+  <AmbientData>k__BackingField:
+    mode: 0
+    skyColor: {r: 0.21176471, g: 0.22745098, b: 0.25882354, a: 1}
+    equatorColor: {r: 0.11372549, g: 0.1254902, b: 0.13333334, a: 1}
+    groundColor: {r: 0.047058824, g: 0.043137256, b: 0.03529412, a: 1}
+    intensity: 1
+  <FogData>k__BackingField:
+    activated: 0
+    mode: 1
+    color: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    startDistance: 0
+    endDistance: 300
+    density: 0.01
+  <Weather>k__BackingField: {fileID: 7346217845250167101, guid: 068e8acd749ac8b48b3722f62914b1c2, type: 3}
+  <SpawnPoints>k__BackingField:
   - position: {x: 288, y: 19, z: 128}
   - position: {x: 239, y: 46, z: 299}
   - position: {x: 271, y: 31, z: 354}

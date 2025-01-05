@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Common.Input;
+using GamePlay.Services;
 
 namespace UI.InGameUIStates
 {

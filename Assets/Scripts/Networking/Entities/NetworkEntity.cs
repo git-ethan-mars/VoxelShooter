@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Entities;
+using GamePlay.Entities;
 using Mirror;
 
 namespace Networking.Entities

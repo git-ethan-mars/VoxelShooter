@@ -1,6 +1,6 @@
 ﻿using Common;
 
-namespace Infrastructure.Services.PlayerDataLoader
+namespace Infrastructure.PlayerDataLoader
 {
 	public interface IAuthenticationService : IService
 	{

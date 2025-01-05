@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3322668320336600073}
   - component: {fileID: 3322668320336600084}
   - component: {fileID: 3322668320336600090}
+  - component: {fileID: -9030623587026046990}
   m_Layer: 0
   m_Name: LocalNetworkManager
   m_TagString: Untagged
@@ -59,7 +60,7 @@ MonoBehaviour:
   maxConnections: 100
   disconnectInactiveConnections: 0
   disconnectInactiveTimeout: 60
-  authenticator: {fileID: 0}
+  authenticator: {fileID: -9030623587026046990}
   playerPrefab: {fileID: 0}
   autoCreatePlayer: 0
   playerSpawnMethod: 0
@@ -111,3 +112,21 @@ MonoBehaviour:
   clientMaxReceivesPerTick: 520000
   clientSendQueueLimit: 10000
   clientReceiveQueueLimit: 10000
+--- !u!114 &-9030623587026046990
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3322668320336600069}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5cf71773331644448d62cfab19e80d91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OnServerAuthenticated:
+    m_PersistentCalls:
+      m_Calls: []
+  OnClientAuthenticated:
+    m_PersistentCalls:
+      m_Calls: []

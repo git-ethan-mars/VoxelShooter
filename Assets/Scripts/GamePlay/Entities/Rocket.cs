@@ -1,46 +1,39 @@
-using Infrastructure.Factory;
-using Mirror;
-using System;
-using Common.Factory;
-using Common.StaticData;
-using GamePlay.Entities;
-using Infrastructure.Services.Audio;
+using System.Linq;
+using GamePlay.Data;
+using GamePlay.Factory;
+using GamePlay.MapFeatures;
 using UnityEngine;
+using VoxelMap;
 
-namespace Entities
+namespace GamePlay.Entities
 {
     public class Rocket : Entity
     {
-        public event Action Collided;
-
+        [SerializeField]
+        private ExplosionData explosionData;
+        
         private IParticleFactory _particleFactory;
-        private IAudioPlayer _audioPlayer;
         private RocketLauncherData _rocketData;
+        private MapProvider _mapProvider;
 
-        public void Construct(IParticleFactory particleFactory, IAudioPlayer audioPlayer, RocketLauncherData rocketData)
+        public void Construct(MapProvider mapProvider, IParticleFactory particleFactory, RocketLauncherData rocketData)
         {
+            _mapProvider = mapProvider;
             _particleFactory = particleFactory;
-            _audioPlayer = audioPlayer;
             _rocketData = rocketData;
         }
 
-        [ServerCallback]
         private void OnCollisionEnter(Collision collision)
         {
-            if (collision.gameObject.GetComponentInParent<NetworkIdentity>()?.connectionToClient == connectionToClient)
+            if (_mapProvider.TryGetMapFeature<MapDestruction>(out var mapDestruction))
             {
-                return;
+                mapDestruction.Visit(transform.position, explosionData);
             }
-
-            Collided?.Invoke();
-        }
-
-        [ClientRpc]
-        public void RpcExplode()
-        {
-            _particleFactory.CreateRchParticle(transform.position, _rocketData.ParticlesSpeed,
-                _rocketData.ParticlesCount);
-            _audioPlayer.Play(transform.position, _rocketData.ExplosionSound);
+            
+            foreach (var visitor in GetEntitiesByType<IDamageVisitor>())
+            {
+                visitor.Visit(transform.position, explosionData);
+            }
         }
     }
 }

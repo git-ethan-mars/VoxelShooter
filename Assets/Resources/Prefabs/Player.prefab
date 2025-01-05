@@ -1698,6 +1698,7 @@ GameObject:
   - component: {fileID: 20795050865477212}
   - component: {fileID: 1832010673732612595}
   - component: {fileID: 7904891234105246127}
+  - component: {fileID: 8894695691076307287}
   m_Layer: 10
   m_Name: Player
   m_TagString: Player
@@ -1739,9 +1740,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7988b75de6ad4df498929a82e8d38dce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0.1
   nickNameText: {fileID: 5134682052967373561}
   itemPosition: {fileID: 1590860181110431068}
   bodyParts: []
@@ -2088,6 +2086,24 @@ MonoBehaviour:
   tripodSize: 1
   boneColor: {r: 0, g: 0, b: 1, a: 0.5}
   m_Transforms: []
+--- !u!114 &8894695691076307287
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8073471595118213303}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4454626b117411bbdf161195be72044, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  nickName: 
+  gameClass: 0
+  maxHealth: 0
 --- !u!1 &8481047260187605376
 GameObject:
   m_ObjectHideFlags: 0

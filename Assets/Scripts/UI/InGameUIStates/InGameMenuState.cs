@@ -1,4 +1,3 @@
-using Mirror;
 using UnityEngine;
 
 namespace UI.InGameUIStates

@@ -258,6 +258,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5597402856906449161}
+  - component: {fileID: 7905353633516343322}
   m_Layer: 0
   m_Name: Machine Gun
   m_TagString: Untagged
@@ -284,6 +285,23 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7905353633516343322
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2146935396539563154}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f741aa2e38f483ea7bdcd73bdd4658b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  model:
+  - {fileID: 7562413195994924234}
+  - {fileID: 8218578033382561338}
+  - {fileID: 9110823251175095261}
+  shootingParticles: {fileID: 3870164214181539067}
 --- !u!1 &5521393718763957357
 GameObject:
   m_ObjectHideFlags: 0
@@ -373,6 +391,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 43f02bfab6cb2c24881df00085a8bdbe, type: 3}
+--- !u!198 &3870164214181539067 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 7346217845250167101, guid: 43f02bfab6cb2c24881df00085a8bdbe, type: 3}
+  m_PrefabInstance: {fileID: 5784477812823801286}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &4375889810330676863 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7853397544997442489, guid: 43f02bfab6cb2c24881df00085a8bdbe, type: 3}

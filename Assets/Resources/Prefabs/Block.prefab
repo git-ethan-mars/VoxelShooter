@@ -92,6 +92,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7059622566407794938}
+  - component: {fileID: 3208775142261161138}
   m_Layer: 0
   m_Name: Block
   m_TagString: Untagged
@@ -115,3 +116,34 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3208775142261161138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8095424271465804933}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9610107ee4944cfebade866b10f71375, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  model:
+  - {fileID: 3638208229365927879}
+  gradients:
+  - start: {r: 0, g: 0, b: 0, a: 1}
+    end: {r: 1, g: 1, b: 1, a: 1}
+  - start: {r: 0.28235295, g: 0, b: 0, a: 1}
+    end: {r: 1, g: 0.8509804, b: 0.8509804, a: 1}
+  - start: {r: 0.2901961, g: 0.14509805, b: 0, a: 1}
+    end: {r: 1, g: 0.8745098, b: 0.7490196, a: 1}
+  - start: {r: 0.27450982, g: 0.27450982, b: 0, a: 1}
+    end: {r: 1, g: 1, b: 0.8235294, a: 1}
+  - start: {r: 0, g: 0.19607843, b: 0, a: 1}
+    end: {r: 0.7882353, g: 0.7254902, b: 0.53333336, a: 1}
+  - start: {r: 0.011764706, g: 0.32156864, b: 0.3372549, a: 1}
+    end: {r: 0.75686276, g: 0.98039216, b: 0.99215686, a: 1}
+  - start: {r: 0, g: 0, b: 0.27450982, a: 1}
+    end: {r: 0.84313726, g: 0.84313726, b: 1, a: 1}
+  - start: {r: 0.19607843, g: 0, b: 0.39215687, a: 1}
+    end: {r: 0.9372549, g: 0.8745098, b: 1, a: 1}

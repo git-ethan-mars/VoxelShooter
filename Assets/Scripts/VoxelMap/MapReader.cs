@@ -1,75 +1,80 @@
-﻿using System.IO;
-using Common.Extensions;
+﻿using System;
+using System.IO;
 
 namespace VoxelMap
 {
     public static class MapReader
     {
-        public const string VxlExtension = ".vxl";
-        public const string RchExtension = ".rch";
-        
-        public static MapData ReadFromFile(string filePath)
+        public static MapData ReadFromFile(string mapName)
         {
-            if (File.Exists(filePath))
+            var rchFilePath = Path.Combine(Constants.MapFolderPath, $"{mapName}{Constants.RchExtension}");
+            var vxlFilePath = Path.Combine(Constants.MapFolderPath, $"{mapName}{Constants.VxlExtension}");
+            if (File.Exists(rchFilePath))
             {
-                var extension = Path.GetExtension(filePath);
-                
-                switch (extension)
-                {
-                    case RchExtension:
-                    {
-                        using var file = File.OpenRead(filePath);
-                        return ReadFromStream(file);
-                    }
-                    case VxlExtension:
-                        return Vxl2RchConverter.LoadVxl(filePath);
-                }
+                using var file = File.OpenRead(rchFilePath);
+                return ReadFromStream(file);
             }
-            
+
+            if (File.Exists(vxlFilePath))
+            {
+                return Vxl2RchConverter.LoadVxl(vxlFilePath);
+            }
+
             return CreateNewMap();
         }
 
         public static MapData ReadFromStream(Stream stream)
         {
             stream.Seek(0, SeekOrigin.Begin);
-            using var binaryReader = new BinaryReader(stream);
-            var width = binaryReader.ReadInt32();
-            var height = binaryReader.ReadInt32();
-            var depth = binaryReader.ReadInt32();
+            using var ms = new MemoryStream();
+            stream.CopyTo(ms);
+            var bytes = ms.ToArray();
+            var width = BitConverter.ToInt32(bytes, 0);
+            var height = BitConverter.ToInt32(bytes, 4);
+            var depth = BitConverter.ToInt32(bytes, 8);
             var chunks = new ChunkData[width / ChunkData.ChunkSize * height / ChunkData.ChunkSize * depth /
                                        ChunkData.ChunkSize];
+
             for (var i = 0; i < chunks.Length; i++)
             {
                 chunks[i] = new ChunkData();
             }
 
+            var position = 12;
             for (var i = 0; i < chunks.Length; i++)
             {
-                var mapRun = (MapRun) binaryReader.ReadByte();
+                var mapRun = (MapRun)bytes[position];
+                position += 1;
                 while (mapRun != MapRun.End)
                 {
                     if (mapRun == MapRun.Solid)
                     {
-                        var solidStart = binaryReader.ReadInt32();
-                        var solidEnd = binaryReader.ReadInt32();
+                        var solidStart = BitConverter.ToInt32(bytes, position);
+                        position += 4;
+                        var solidEnd = BitConverter.ToInt32(bytes, position);
+                        position += 4;
                         for (int j = solidStart; j <= solidEnd; j++)
                         {
-                            chunks[i].Blocks[j] = BlockData.Inner;
+                            chunks[i].Voxels[j] = VoxelData.DefaultInner;
                         }
                     }
 
                     if (mapRun == MapRun.Colored)
                     {
-                        var coloredStart = binaryReader.ReadInt32();
-                        var coloredEnd = binaryReader.ReadInt32();
+                        var coloredStart = BitConverter.ToInt32(bytes, position);
+                        position += 4;
+                        var coloredEnd = BitConverter.ToInt32(bytes, position);
+                        position += 4;
                         for (int j = coloredStart; j <= coloredEnd; j++)
                         {
-                            var color = binaryReader.ReadUInt32().ToColor32();
-                            chunks[i].Blocks[j] = new BlockData(color);
+                            var color = BitConverter.ToUInt32(bytes, position).ToColor32();
+                            position += 4;
+                            chunks[i].Voxels[j] = new VoxelData(color);
                         }
                     }
 
-                    mapRun = (MapRun) binaryReader.ReadByte();
+                    mapRun = (MapRun)bytes[position];
+                    position += 1;
                 }
             }
 
@@ -82,11 +87,11 @@ namespace VoxelMap
         {
             var chunks = new ChunkData[width / ChunkData.ChunkSize * height / ChunkData.ChunkSize * depth /
                                        ChunkData.ChunkSize];
+
             for (var i = 0; i < chunks.Length; i++)
             {
                 chunks[i] = new ChunkData();
             }
-
             var mapData = new MapData(chunks, width, height, depth);
             return mapData;
         }

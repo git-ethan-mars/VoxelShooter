@@ -1,6 +1,4 @@
-﻿using Infrastructure;
-
-namespace UI
+﻿namespace UI
 {
     public class Limitation
     {

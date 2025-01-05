@@ -1,6 +1,4 @@
-﻿using Common;
-using Common.Storage;
-using Infrastructure.Factory;
+﻿using GamePlay.Services;
 using UI;
 using UnityEngine;
 
@@ -27,7 +25,7 @@ namespace Infrastructure.States
 		public void Enter()
 		{
 			Cursor.lockState = CursorLockMode.None;
-			AudioListener.volume = _storageService.Load<VolumeSettingsData>(Constants.VolumeSettingsKey).MasterVolume;
+			AudioListener.volume = _storageService.Load<VolumeSettingsData>(IStorageService.VolumeSettingsKey).MasterVolume;
 			_sceneLoader.Load(MainMenu, EnterLoadLevel);
 		}
 

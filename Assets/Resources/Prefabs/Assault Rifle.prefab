@@ -290,6 +290,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5977944069305943173}
+  - component: {fileID: 824231431545689291}
   m_Layer: 0
   m_Name: Assault Rifle
   m_TagString: Untagged
@@ -316,6 +317,23 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &824231431545689291
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9030222180740480023}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 937f74cc901d413d81f81fdc7bd0c2c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  model:
+  - {fileID: 7721664450987836587}
+  - {fileID: 8933552102566240532}
+  - {fileID: 3665479669250751415}
+  shootingParticles: {fileID: 5788705993261693164}
 --- !u!1001 &3865952543356758481
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -373,6 +391,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 86d8aed0dcf711c4c8bc75d0a6389ba4, type: 3}
+--- !u!198 &5788705993261693164 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 7346217845250167101, guid: 86d8aed0dcf711c4c8bc75d0a6389ba4, type: 3}
+  m_PrefabInstance: {fileID: 3865952543356758481}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &6438529184736442984 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7853397544997442489, guid: 86d8aed0dcf711c4c8bc75d0a6389ba4, type: 3}

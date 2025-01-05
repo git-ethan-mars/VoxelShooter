@@ -1,6 +1,6 @@
-﻿using Common.StaticData;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
+using VoxelMap;
 
 namespace Editor
 {
@@ -8,12 +8,12 @@ namespace Editor
     public class MapConfigureEditor : UnityEditor.Editor
     {
         private SerializedProperty _spawnPointList;
-        private string spawnPointsFieldName;
+        private string _spawnPointsFieldName;
 
         private void OnEnable()
         {
-            spawnPointsFieldName = nameof(MapConfigure.spawnPoints);
-            _spawnPointList = serializedObject.FindProperty(spawnPointsFieldName);
+            _spawnPointsFieldName = nameof(MapConfigure.SpawnPoints);
+            _spawnPointList = serializedObject.FindProperty(_spawnPointsFieldName);
         }
 
         public override void OnInspectorGUI()
@@ -22,7 +22,7 @@ namespace Editor
             var iterator = serializedObject.GetIterator();
             for (var enterChildren = true; iterator.NextVisible(enterChildren); enterChildren = false)
             {
-                if (iterator.name == spawnPointsFieldName)
+                if (iterator.name == _spawnPointsFieldName)
                 {
                     DrawSpawnPointList();
                     continue;

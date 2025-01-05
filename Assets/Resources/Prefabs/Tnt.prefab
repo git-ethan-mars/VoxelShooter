@@ -92,6 +92,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6689462194589353838}
+  - component: {fileID: -4525612421016996476}
   m_Layer: 0
   m_Name: Tnt
   m_TagString: TNT
@@ -115,3 +116,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-4525612421016996476
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8009858165730397543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94dc2129dc2a47d48977e64b5b15b634, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  model:
+  - {fileID: 5890438036483834268}
+  transparentTntPrefab: {fileID: 8009858165730397543, guid: 9827518e60c16c543a79e16f720aa7b6, type: 3}

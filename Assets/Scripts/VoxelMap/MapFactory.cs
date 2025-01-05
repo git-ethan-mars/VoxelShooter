@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using Common.AssetManagement;
-using Common.StaticData;
+using Unity.Collections;
 using UnityEngine;
 
 namespace VoxelMap
 {
-	public class MapFactory : IMapFactory
+	internal class MapFactory : IMapFactory
 	{
 		private const string DirectionalLightName = "Directional Light";
-		private const string WallContainerName = "WallContainer";
 		private const string SpawnPointPath = "Prefabs/MapCreation/Spawnpoint";
 		private const string MapPath = "Prefabs/MapCreation/Map";
 		private const float WaterScale = 1024;
@@ -22,21 +21,23 @@ namespace VoxelMap
 			_assets = assets;
 		}
 
-		public GameObject CreateChunk(Vector3 position, Quaternion rotation, Transform parent)
+		public Chunk CreateChunk(Vector3 position, Transform parent, ChunkData chunkData, NativeArray<Face> faces)
 		{
-			return _assets.Instantiate(MeshPath.ChunkMeshRendererPath, position, rotation, parent);
+			var chunk = _assets.Instantiate(MeshPath.ChunkMeshRendererPath, position, Quaternion.identity, parent).GetComponent<Chunk>();
+			chunk.Construct(chunkData, faces);
+			return chunk;
 		}
 
 		public GameObject[] CreateWalls(MapData mapData, Transform parent)
 		{
 			var walls = new GameObject[6];
-			var allFaces = Enum.GetValues(typeof(Faces)).Cast<Faces>().Where(face => face != Faces.None);
+			var allFaces = Enum.GetValues(typeof(Face)).Cast<Face>().Where(face => face != Face.None);
 			foreach (var face in allFaces)
 			{
 				var wall = _assets.Instantiate(MeshPath.WallPath, parent);
 				var mesh = new Mesh();
 				mesh.vertices = new Vector3[4];
-				if (face == Faces.Top)
+				if (face == Face.Top)
 				{
 					var startPoint = new Vector3(0, mapData.Height, 0);
 					var endPoint = new Vector3(mapData.Width, mapData.Height,
@@ -47,7 +48,7 @@ namespace VoxelMap
 					mesh.triangles = new[] { 0, 2, 1, 2, 3, 1 };
 				}
 
-				if (face == Faces.Bottom)
+				if (face == Face.Bottom)
 				{
 					var startPoint = new Vector3(0, 0, 0);
 					var endPoint = new Vector3(mapData.Width, 0, mapData.Depth);
@@ -57,7 +58,7 @@ namespace VoxelMap
 					mesh.triangles = new[] { 0, 1, 2, 3, 2, 1 };
 				}
 
-				if (face == Faces.Left)
+				if (face == Face.Left)
 				{
 					var startPoint = new Vector3(0, 0, 0);
 					var endPoint = new Vector3(0, mapData.Height, mapData.Depth);
@@ -67,7 +68,7 @@ namespace VoxelMap
 					mesh.triangles = new[] { 0, 2, 1, 2, 3, 1 };
 				}
 
-				if (face == Faces.Right)
+				if (face == Face.Right)
 				{
 					var startPoint = new Vector3(mapData.Width, 0, 0);
 					var endPoint = new Vector3(mapData.Width, mapData.Height,
@@ -78,7 +79,7 @@ namespace VoxelMap
 					mesh.triangles = new[] { 0, 1, 2, 3, 2, 1 };
 				}
 
-				if (face == Faces.Front)
+				if (face == Face.Front)
 				{
 					var startPoint = new Vector3(0, 0, mapData.Depth);
 					var endPoint = new Vector3(mapData.Width, mapData.Height,
@@ -89,7 +90,7 @@ namespace VoxelMap
 					mesh.triangles = new[] { 0, 2, 1, 2, 3, 1 };
 				}
 
-				if (face == Faces.Back)
+				if (face == Face.Back)
 				{
 					var startPoint = new Vector3(0, 0, 0);
 					var endPoint = new Vector3(mapData.Width, mapData.Height, 0);

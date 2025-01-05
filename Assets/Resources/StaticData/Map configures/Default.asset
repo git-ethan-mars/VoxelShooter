@@ -12,27 +12,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e69f3dcd48464cac84150e2016cff25a, type: 3}
   m_Name: Default
   m_EditorClassIdentifier: 
-  mapName: 
-  waterColor:
+  <Image>k__BackingField: {fileID: 0}
+  <WaterColor>k__BackingField:
     serializedVersion: 2
     rgba: 4287052291
-  innerColor:
+  <InnerColor>k__BackingField:
     serializedVersion: 2
     rgba: 4281283929
-  lightData:
+  <LightData>k__BackingField:
     position: {x: 0, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0, w: 1}
     color: {r: 1, g: 1, b: 1, a: 1}
-  skyboxMaterial: {fileID: 0}
-  ambientMode: 0
-  skyColor: {r: 0, g: 0, b: 0, a: 0}
-  equatorColor: {r: 0, g: 0, b: 0, a: 0}
-  groundColor: {r: 0, g: 0, b: 0, a: 0}
-  ambientIntensity: 0
-  isFogActivated: 0
-  fogMode: 0
-  fogColor: {r: 0, g: 0, b: 0, a: 0}
-  fogStartDistance: 0
-  fogEndDistance: 0
-  fogDensity: 1
-  spawnPoints: []
+    bias: 0
+    normalBias: 0
+  <SkyboxMaterial>k__BackingField: {fileID: 0}
+  <AmbientData>k__BackingField:
+    mode: 0
+    skyColor: {r: 0, g: 0, b: 0, a: 0}
+    equatorColor: {r: 0, g: 0, b: 0, a: 0}
+    groundColor: {r: 0, g: 0, b: 0, a: 0}
+    intensity: 1
+  <FogData>k__BackingField:
+    activated: 0
+    mode: 0
+    color: {r: 0, g: 0, b: 0, a: 0}
+    startDistance: 0
+    endDistance: 0
+    density: 1
+  <Weather>k__BackingField: {fileID: 0}
+  <SpawnPoints>k__BackingField: []

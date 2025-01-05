@@ -1,6 +1,4 @@
 using System;
-using Entities;
-using Entities.PlayerLogic;
 using UnityEngine;
 
 namespace GamePlay.Entities

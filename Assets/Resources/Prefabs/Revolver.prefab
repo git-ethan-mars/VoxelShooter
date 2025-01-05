@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 697211748399907208}
+  - component: {fileID: -9014670724251941767}
   m_Layer: 0
   m_Name: Revolver
   m_TagString: Untagged
@@ -34,6 +35,22 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-9014670724251941767
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 697211748399907209}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8542d8c6c8474e2d943f49d05240c912, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  model:
+  - {fileID: 4917033609352968289}
+  - {fileID: 4791449603226983604}
+  shootingParticles: {fileID: 4684460077356506606}
 --- !u!1 &2207620977406453341
 GameObject:
   m_ObjectHideFlags: 0
@@ -289,6 +306,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a0a0c478891cec44c91c704e55a05721, type: 3}
+--- !u!198 &4684460077356506606 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 7346217845250167101, guid: a0a0c478891cec44c91c704e55a05721, type: 3}
+  m_PrefabInstance: {fileID: 2662060225230589139}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &5191901460852350826 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7853397544997442489, guid: a0a0c478891cec44c91c704e55a05721, type: 3}

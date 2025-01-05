@@ -1,5 +1,5 @@
-﻿using Common;
-using UnityEngine;
+﻿using UnityEngine;
+using VoxelMap;
 
 namespace MapCustomizer
 {
@@ -8,7 +8,7 @@ namespace MapCustomizer
     {
         private void Update()
         {
-            transform.position = Vector3Int.FloorToInt(transform.position) + Constants.worldOffset;
+            transform.position = Vector3Int.FloorToInt(transform.position) + Map.WorldOffset;
         }
     }
 }

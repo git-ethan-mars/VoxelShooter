@@ -5,3 +5,10 @@ DefaultImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 129321
+  packageName: Mirror
+  packageVersion: 93.0.1
+  assetPath: Assets/Plugins/Mirror/Transports/Telepathy/Telepathy/LICENSE
+  uploadId: 698109

@@ -1,6 +1,5 @@
-using Common.Input;
-using Common.Storage;
-using Infrastructure.Factory;
+using Common;
+using GamePlay.Services;
 using UI.InGameUIStates;
 using UnityEngine;
 
@@ -28,6 +27,7 @@ namespace UI
             Scoreboard = uiFactory.CreateScoreBoard(avatarLoader, transform);
             _uiStateMachine = new InGameUIStateMachine(inputService,
                 TimeCounter, ChooseClassMenu, InGameMenu, Scoreboard);
+            InGameMenu.ResumeButtonPressed += _uiStateMachine.SwitchState<DefaultState>;
             _uiStateMachine.SwitchState<ChooseClassMenuState>();
         }
 
@@ -62,6 +62,7 @@ namespace UI
 
         private void OnDestroy()
         {
+            InGameMenu.ResumeButtonPressed -= _uiStateMachine.SwitchState<DefaultState>;
             _uiStateMachine.Destroy();
         }
     }

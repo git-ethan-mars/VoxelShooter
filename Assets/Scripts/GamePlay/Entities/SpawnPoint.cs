@@ -1,6 +1,5 @@
-﻿using Common.StaticData;
-using Entities;
-using UnityEngine;
+﻿using UnityEngine;
+using VoxelMap;
 
 namespace GamePlay.Entities
 {
@@ -9,7 +8,7 @@ namespace GamePlay.Entities
         [SerializeField]
         private new Collider collider;
 
-        public SpawnPointData Data { get; private set; }
+        private SpawnPointData Data { get; set; }
 
         private Vector3Int _size;
         public Vector3Int Center => Vector3Int.FloorToInt(transform.position);
