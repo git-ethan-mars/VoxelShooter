@@ -1,10 +1,10 @@
-﻿fileFormatVersion: 2
+fileFormatVersion: 2
 guid: 2585961bf7fe4c10a9143f4087efdf6f
 timeCreated: 1596486854
 AssetOrigin:
   serializedVersion: 1
   productId: 129321
   packageName: Mirror
-  packageVersion: 93.0.1
+  packageVersion: 96.0.1
   assetPath: Assets/Plugins/Mirror/Editor/Weaver/WeaverTypes.cs
-  uploadId: 698109
+  uploadId: 736421

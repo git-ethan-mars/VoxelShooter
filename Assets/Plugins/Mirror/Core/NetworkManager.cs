@@ -632,16 +632,12 @@ namespace Mirror
             //     NetworkClient.OnTransportDisconnect
             //   NetworkManager.OnClientDisconnect
             NetworkClient.Disconnect();
-
-            // UNET invoked OnDisconnected cleanup immediately.
-            // let's keep it for now, in case any projects depend on it.
-            // TODO simply remove this in the future.
-            OnClientDisconnectInternal();
         }
 
         // called when quitting the application by closing the window / pressing
         // stop in the editor. virtual so that inheriting classes'
         // OnApplicationQuit() can call base.OnApplicationQuit() too
+        // (this can't be in OnDestroy: https://github.com/MirrorNetworking/Mirror/issues/3952)
         public virtual void OnApplicationQuit()
         {
             // stop client first
@@ -1323,12 +1319,12 @@ namespace Mirror
 
         /// <summary>Called on the server when a client disconnects.</summary>
         // Called by NetworkServer.OnTransportDisconnect!
-        public virtual void OnServerDisconnect(NetworkConnectionToClient conn)
+        public virtual void OnServerDisconnect(NetworkConnectionToClient connection)
         {
             // by default, this function destroys the connection's player.
             // can be overwritten for cases like delayed logouts in MMOs to
             // avoid players escaping from PvP situations by logging out.
-            NetworkServer.DestroyPlayerForConnection(conn);
+            NetworkServer.DestroyPlayerForConnection(connection);
             //Debug.Log("OnServerDisconnect: Client disconnected.");
         }
 
@@ -1345,7 +1341,7 @@ namespace Mirror
 
         /// <summary>Called on server when a client requests to add the player. Adds playerPrefab by default. Can be overwritten.</summary>
         // The default implementation for this function creates a new player object from the playerPrefab.
-        public virtual void OnServerAddPlayer(NetworkConnectionToClient conn)
+        public virtual void OnServerAddPlayer(NetworkConnectionToClient connection)
         {
             Transform startPos = GetStartPosition();
             GameObject player = startPos != null
@@ -1354,8 +1350,8 @@ namespace Mirror
 
             // instantiating a "Player" prefab gives it the name "Player(clone)"
             // => appending the connectionId is WAY more useful for debugging!
-            player.name = $"{playerPrefab.name} [connId={conn.connectionId}]";
-            NetworkServer.AddPlayerForConnection(conn, player);
+            player.name = $"{playerPrefab.name} [connId={connection.connectionId}]";
+            NetworkServer.AddPlayerForConnection(connection, player);
         }
 
         /// <summary>Called on server when transport raises an exception. NetworkConnection may be null.</summary>

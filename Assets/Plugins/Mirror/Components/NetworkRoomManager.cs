@@ -219,17 +219,17 @@ namespace Mirror
         /// Called on the server when a client disconnects.
         /// <para>This is called on the Server when a Client disconnects from the Server. Use an override to decide what should happen when a disconnection is detected.</para>
         /// </summary>
-        /// <param name="conn">Connection from client.</param>
-        public override void OnServerDisconnect(NetworkConnectionToClient conn)
+        /// <param name="connection">Connection from client.</param>
+        public override void OnServerDisconnect(NetworkConnectionToClient connection)
         {
-            if (conn.identity != null)
+            if (connection.identity != null)
             {
-                NetworkRoomPlayer roomPlayer = conn.identity.GetComponent<NetworkRoomPlayer>();
+                NetworkRoomPlayer roomPlayer = connection.identity.GetComponent<NetworkRoomPlayer>();
 
                 if (roomPlayer != null)
                     roomSlots.Remove(roomPlayer);
 
-                foreach (NetworkIdentity clientOwnedObject in conn.owned)
+                foreach (NetworkIdentity clientOwnedObject in connection.owned)
                 {
                     roomPlayer = clientOwnedObject.GetComponent<NetworkRoomPlayer>();
                     if (roomPlayer != null)
@@ -248,8 +248,8 @@ namespace Mirror
             if (Utils.IsSceneActive(RoomScene))
                 RecalculateRoomPlayerIndices();
 
-            OnRoomServerDisconnect(conn);
-            base.OnServerDisconnect(conn);
+            OnRoomServerDisconnect(connection);
+            base.OnServerDisconnect(connection);
 
             // Restart the server if we're headless and no players are connected.
             // This will send server to offline scene, where auto-start will run.
@@ -284,8 +284,8 @@ namespace Mirror
         /// Called on the server when a client adds a new player with NetworkClient.AddPlayer.
         /// <para>The default implementation for this function creates a new player object from the playerPrefab.</para>
         /// </summary>
-        /// <param name="conn">Connection from client.</param>
-        public override void OnServerAddPlayer(NetworkConnectionToClient conn)
+        /// <param name="connection">Connection from client.</param>
+        public override void OnServerAddPlayer(NetworkConnectionToClient connection)
         {
             // increment the index before adding the player, so first player starts at 1
             clientIndex++;
@@ -296,17 +296,17 @@ namespace Mirror
 
                 //Debug.Log("NetworkRoomManager.OnServerAddPlayer playerPrefab: {roomPlayerPrefab.name}");
 
-                GameObject newRoomGameObject = OnRoomServerCreateRoomPlayer(conn);
+                GameObject newRoomGameObject = OnRoomServerCreateRoomPlayer(connection);
                 if (newRoomGameObject == null)
                     newRoomGameObject = Instantiate(roomPlayerPrefab.gameObject, Vector3.zero, Quaternion.identity);
 
-                NetworkServer.AddPlayerForConnection(conn, newRoomGameObject);
+                NetworkServer.AddPlayerForConnection(connection, newRoomGameObject);
             }
             else
             {
                 // Late joiners not supported...should've been kicked by OnServerDisconnect
-                Debug.Log($"Not in Room scene...disconnecting {conn}");
-                conn.Disconnect();
+                Debug.Log($"Not in Room scene...disconnecting {connection}");
+                connection.Disconnect();
             }
         }
 

@@ -1,4 +1,4 @@
-﻿fileFormatVersion: 2
+fileFormatVersion: 2
 guid: decf32fd053744d18f35712b7a6f5116
 MonoImporter:
   externalObjects: {}
@@ -13,6 +13,6 @@ AssetOrigin:
   serializedVersion: 1
   productId: 129321
   packageName: Mirror
-  packageVersion: 93.0.1
+  packageVersion: 96.0.1
   assetPath: Assets/Plugins/Mirror/Core/Tools/Extensions.cs
-  uploadId: 698109
+  uploadId: 736421
