@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0b9039a32544cd8a76b14179294f115, type: 3}
+  m_Name: Item Prefabs
+  m_EditorClassIdentifier: VoxelShooter.Data::Data.ItemPrefabCollection
+  <ItemPrefabByItemType>k__BackingField:
+    dictionaryList:
+    - Key: 0
+      Value: {fileID: 9030222180740480023, guid: bad7feca91d5cae45acf91b46eeac0d9, type: 3}
+      index: 0
+      isKeyDuplicated: 0
+    - Key: 1
+      Value: {fileID: 7081574551729364688, guid: f6577ffa0c8c3a14f9161e807e767241, type: 3}
+      index: 1
+      isKeyDuplicated: 0
+    - Key: 2
+      Value: {fileID: 1122000105119730127, guid: 3183c203f48e67f4bb94adb6efa2a5bd, type: 3}
+      index: 2
+      isKeyDuplicated: 0
+    - Key: 3
+      Value: {fileID: 2146935396539563154, guid: fd0130bc079d218439f0d345850455c0, type: 3}
+      index: 3
+      isKeyDuplicated: 0
+    - Key: 4
+      Value: {fileID: 697211748399907209, guid: 1c4296936330d494684804c1fb525ba0, type: 3}
+      index: 4
+      isKeyDuplicated: 0
+    - Key: 5
+      Value: {fileID: 8095424271465804933, guid: e7405952fd04e7d44882e05434800af4, type: 3}
+      index: 5
+      isKeyDuplicated: 0
+    - Key: 6
+      Value: {fileID: 1374883755550458842, guid: 5a903469ac2556d40a9b97e33dd3c162, type: 3}
+      index: 6
+      isKeyDuplicated: 0
+    - Key: 7
+      Value: {fileID: 5106030963746976738, guid: 16151daf92ba0b34ebb62a92aa9aa5df, type: 3}
+      index: 7
+      isKeyDuplicated: 0
+    - Key: 8
+      Value: {fileID: 7922214257710745971, guid: 210bed499898fd94ab9b5cb2589b65a1, type: 3}
+      index: 8
+      isKeyDuplicated: 0
+    - Key: 9
+      Value: {fileID: 9106257655567110729, guid: f659729cb3772da44b3692ae21197233, type: 3}
+      index: 9
+      isKeyDuplicated: 0
+    - Key: 10
+      Value: {fileID: 4245606585116657588, guid: 7ad44d29c785b7242974a6af01b5e2b8, type: 3}
+      index: 10
+      isKeyDuplicated: 0
+    - Key: 11
+      Value: {fileID: 8009858165730397543, guid: c2a01d48d01d91447b0e60f5a94e9e66, type: 3}
+      index: 11
+      isKeyDuplicated: 0

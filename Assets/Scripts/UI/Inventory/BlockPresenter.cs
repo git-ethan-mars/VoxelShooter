@@ -1,51 +1,52 @@
+using System;
 using GamePlay;
-
+using R3;
+using Services;
+using UnityEngine;
 namespace UI.Inventory
 {
-	public class BlockPresenter : SlotPresenter
+	public class BlockPresenter : SlotPresenter<Block>
 	{
-		private readonly Block _block;
-		private readonly PaletteView _paletteView;
 		private readonly Hud _hud;
-		
-		public BlockPresenter(Block block, SlotView slotView, Hud hud, PaletteView paletteView) : base(block, slotView)
+
+		private IDisposable _disposable;
+		private Sprite _projectileIcon;
+
+		public BlockPresenter(IStaticDataService staticData, UIProvider uiProvider, Block block, SlotView slotView)
+			: base(staticData, block, slotView)
 		{
-			_block = block;
-			_hud = hud;
-			_paletteView = paletteView;
+			_hud = uiProvider.InGameUI.Hud;
 		}
 
 		public override void Initialize()
 		{
 			base.Initialize();
-			_block.Selected += OnSelected;
-			_block.Deselected += OnDeselected;
-			_block.Data.AmountChanged += OnAmountChanged;
+
+			_disposable = InventoryItem.Amount.Subscribe(value => _hud.SetItemCount(value.ToString()));
+			_projectileIcon = StaticData.GetProjectileIcon(InventoryItem.Type);
 		}
 
 		public override void Dispose()
 		{
 			base.Dispose();
-			_block.Selected -= OnSelected;
-			_block.Deselected -= OnDeselected;
-			_block.Data.AmountChanged -= OnAmountChanged;
+			
+			_disposable.Dispose();
 		}
 
-		private void OnSelected()
+		protected override void OnSelected()
 		{
-			_paletteView.Show();
-			_hud.ShowItemInfo(_block.InventoryIcon, _block.Data.Amount.ToString());
+			base.OnSelected();
+			
+			_hud.ShowPalette();
+			_hud.ShowItemInfo(_projectileIcon, InventoryItem.Amount.ToString());
 		}
 
-		private void OnDeselected()
+		protected override void OnDeselected()
 		{
-			_paletteView.Hide();
+			base.OnDeselected();
+			
+			_hud.HidePalette();
 			_hud.HideItemInfo();
-		}
-
-		private void OnAmountChanged(int amount)
-		{
-			_hud.SetItemCount(amount.ToString());
 		}
 	}
 }

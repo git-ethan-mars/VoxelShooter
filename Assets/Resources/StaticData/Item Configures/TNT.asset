@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1e3934e220d437eb4fad4d4c1a11dee, type: 3}
+  m_Name: TNT
+  m_EditorClassIdentifier: 
+  <Type>k__BackingField: 11
+  <InventoryIcon>k__BackingField: {fileID: 21300000, guid: cdcc1eea4b5858c468c9bb86e248f34b, type: 3}
+  <CountIcon>k__BackingField: {fileID: 21300000, guid: cdcc1eea4b5858c468c9bb86e248f34b, type: 3}
+  <Amount>k__BackingField: 5
+  <DelayInSeconds>k__BackingField: 4
+  <ExplosionData>k__BackingField:
+    radius: 5
+    damage: 250
+  <ParticleSpeed>k__BackingField: 6
+  <ParticleCount>k__BackingField: 200

@@ -1,25 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Cysharp.Threading.Tasks;
+using Unity.Collections;
 using UnityEngine;
-
 namespace VoxelMap
 {
 	public static class Vxl2RchConverter
 	{
 		private const int Width = 512;
-		private static int _height;
 		private const int Depth = 512;
+		private static int _height;
+
+		public static async UniTask<MapData> LoadVxlAsync(string mapPath)
+		{
+			byte[] data = await File.ReadAllBytesAsync(mapPath);
+			var voxels = LoadVxlCore(data);
+			var mapData = new MapData(voxels, Width, _height, Depth);
+			return mapData;
+		}
 
 		public static MapData LoadVxl(string mapPath)
 		{
-			var data = File.ReadAllBytes(mapPath);
+			byte[] data = File.ReadAllBytes(mapPath);
+			var voxels = LoadVxlCore(data);
+			var mapData = new MapData(voxels, Width, _height, Depth);
+			return mapData;
+		}
+
+		private static NativeArray<VoxelData> LoadVxlCore(byte[] data)
+		{
+
 			_height = GetMapHeight(data);
 			var heightOffset = 0;
-			if (_height % ChunkData.ChunkSize != 0)
+			if (_height % Chunk.ChunkSize != 0)
 			{
 				heightOffset = -_height;
-				_height = _height / ChunkData.ChunkSize * ChunkData.ChunkSize + ChunkData.ChunkSize;
+				_height = _height / Chunk.ChunkSize * Chunk.ChunkSize + Chunk.ChunkSize;
 				heightOffset += _height;
 			}
 
@@ -42,7 +59,7 @@ namespace VoxelMap
 						int number4ByteChunks = data[currentPosition];
 						int topColorStart = data[currentPosition + 1];
 						int topColorEnd = data[currentPosition + 2];
-						var colorPosition = currentPosition + 4;
+						int colorPosition = currentPosition + 4;
 						for (; z < topColorStart; ++z)
 						{
 							colors[GetPosition(x, z, y)] = VoxelData.Air.Color;
@@ -55,7 +72,7 @@ namespace VoxelMap
 							colors[GetPosition(x, z, y)] = packedColor.ToColor32();
 						}
 
-						var bottomLength = topColorEnd - topColorStart + 1;
+						int bottomLength = topColorEnd - topColorStart + 1;
 
 						if (number4ByteChunks == 0)
 						{
@@ -63,12 +80,12 @@ namespace VoxelMap
 							break;
 						}
 
-						var topLength = number4ByteChunks - 1 - bottomLength;
+						int topLength = number4ByteChunks - 1 - bottomLength;
 
 						currentPosition += data[currentPosition] * 4;
 
 						int bottomColorEnd = data[currentPosition + 3];
-						var bottomColorStart = bottomColorEnd - topLength;
+						int bottomColorStart = bottomColorEnd - topLength;
 
 						for (z = bottomColorStart; z < bottomColorEnd; z++)
 						{
@@ -80,31 +97,19 @@ namespace VoxelMap
 				}
 			}
 
-			var chunks =
-				new ChunkData[Width / ChunkData.ChunkSize * _height / ChunkData.ChunkSize *
-				              Depth /
-				              ChunkData.ChunkSize];
-
-			for (var i = 0; i < chunks.Length; i++)
-			{
-				chunks[i] = new ChunkData();
-			}
-
-			var mapData = new MapData(chunks, Width, _height, Depth);
+			var voxels = new NativeArray<VoxelData>(Width * _height * Depth, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
 			for (var x = 0; x < Width; x++)
 			{
 				for (var y = 0; y < _height - heightOffset; y++)
 				{
 					for (var z = 0; z < Depth; z++)
 					{
-						mapData.GetChunkByGlobalPosition(Width - 1 - x, _height - heightOffset - 1 - y, z).SetVoxel(
-							Width - 1 - x, _height - heightOffset - 1 - y,
-							z, new VoxelData(colors[GetPosition(x, y, z)]), PositionType.Global);
+						int index = (Width - 1 - x) * _height * Depth + (_height - heightOffset - 1 - y) * Depth + z;
+						voxels[index] = new VoxelData(colors[GetPosition(x, y, z)]);
 					}
 				}
 			}
-
-			return mapData;
+			return voxels;
 		}
 
 
@@ -126,7 +131,7 @@ namespace VoxelMap
 						int topColorStart = data[position + 1];
 						int topColorEnd = data[position + 2];
 						height = Math.Max(height, topColorEnd + 1);
-						var lengthBottom = topColorEnd - topColorStart + 1;
+						int lengthBottom = topColorEnd - topColorStart + 1;
 						if (number4ByteChunks == 0)
 						{
 							position += 4 * (lengthBottom + 1);

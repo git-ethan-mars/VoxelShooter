@@ -1,80 +1,39 @@
-using System;
 using GamePlay;
-using GamePlay.Data;
+using R3;
+using Services;
 using UnityEngine;
-
 namespace UI.Inventory
 {
-	public class TntDataProxy : ITntData
+	public class TNTPresenter : SlotPresenter<TNT>
 	{
-		public int ID => _tntData.ID;
-
-		public Sprite InventoryIcon => _tntData.InventoryIcon;
-
-		public float DelayInSeconds => _tntData.DelayInSeconds;
-
-		public AudioData CountdownSound => _tntData.CountdownSound;
-
-		public int ParticlesSpeed => _tntData.ParticlesSpeed;
-
-		public int ParticlesCount => _tntData.ParticlesCount;
-
-		public AudioData ExplosionSound => _tntData.ExplosionSound;
-
-		public int Amount
-		{
-			get => _tntData.Amount;
-			set
-			{
-				_tntData.Amount = value;
-				AmountChanged?.Invoke(value);
-			}
-		}
-
-		public event Action<int> AmountChanged;
-
-		private readonly TntData _tntData;
-
-		public TntDataProxy(TntData tntData)
-		{
-			_tntData = tntData;
-		}
-	}
-
-	public class TntPresenter : SlotPresenter
-	{
-		private readonly Tnt _tnt;
 		private readonly Hud _hud;
-		private readonly TntDataProxy _proxy;
+		private Sprite _projectileIcon;
 
-		public TntPresenter(Tnt tnt, SlotView slotView, Hud hud) : base(tnt, slotView)
+		public TNTPresenter(IStaticDataService staticData, UIProvider uiProvider, TNT tnt, SlotView slotView) : base(staticData, tnt, 
+			slotView)
 		{
-			_tnt = tnt;
-			_hud = hud;
-			_proxy = new TntDataProxy(_tnt.Data);
+			_hud = uiProvider.InGameUI.Hud;
 		}
 
 		public override void Initialize()
 		{
 			base.Initialize();
-			_tnt.Selected += OnSelected;
-			_tnt.Deselected += OnDeselected;
-			_proxy.AmountChanged += OnAmountChanged;
+
+			_projectileIcon = StaticData.GetProjectileIcon(InventoryItem.Type);
+			InventoryItem.Amount.Subscribe(OnAmountChanged).AddTo(InventoryItem);
 		}
 
-		public override void Dispose()
+		protected override void OnSelected()
 		{
-			base.Dispose();
-			_proxy.AmountChanged -= OnAmountChanged;
+			base.OnSelected();
+
+			_hud.ShowItemInfo(_projectileIcon, InventoryItem.Amount.ToString());
 		}
 
-		private void OnSelected()
+		protected override void OnDeselected()
 		{
-			_hud.ShowItemInfo(_tnt.InventoryIcon, _tnt.Data.Amount.ToString());
-		}
+			base.OnDeselected();
 
-		private void OnDeselected()
-		{
 			_hud.HideItemInfo();
 		}
 

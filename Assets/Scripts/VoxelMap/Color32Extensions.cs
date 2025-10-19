@@ -1,6 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
 using UnityEngine;
-
 namespace VoxelMap
 {
 	public static class Color32Extensions

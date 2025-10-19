@@ -1,34 +1,89 @@
-using System;
-using GamePlay.Data;
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using Data;
+using GamePlay.Audio;
+using GamePlay.MapFeatures;
+using Mirror;
+using Reflex.Attributes;
+using Services;
 using UnityEngine;
-
-namespace GamePlay.Entities
+using VoxelMap;
+namespace GamePlay
 {
-	public class Drill : Entity
+	public class Drill : NetworkBehaviour, IEntity
 	{
-		public event Action Collided;
+		[SerializeField] private AudioData drillHit;
+		[SerializeField] private ParticleSystem particles;
+		[SerializeField] private Rigidbody rigidBody;
+		[SerializeField] private BoxCollider boxCollider;
 
+		private MapProvider _mapProvider;
+		private EntityContainerService _entityContainer;
+		private DrillLauncherConfigure _configure;
+		private AudioPlayer _audioPlayer;
 
-		[SerializeField]
-		private ParticleSystem particles;
-
-		[SerializeField]
-		private Rigidbody rigidBody;
-
-		public DrillLauncherData Data { get; private set; }
-
-
-		public void Construct(DrillLauncherData drillLauncherData)
+		[Inject]
+		private void Construct(MapProvider mapProvider, IStaticDataService staticData, EntityContainerService entityContainer,
+			AudioPlayer audioPlayer)
 		{
-			Data = drillLauncherData;
+			_mapProvider = mapProvider;
+			_entityContainer = entityContainer;
+			_configure = staticData.GetItemConfigure<DrillLauncherConfigure>(ItemType.DrillLauncher);
+			_audioPlayer = audioPlayer;
 		}
 
+		private void Start()
+		{
+			_entityContainer.Add(this);
+		}
+
+		private void OnDestroy()
+		{
+			_entityContainer.Remove(this);
+		}
+
+		[ServerCallback]
 		private void FixedUpdate()
 		{
 			rigidBody.AddForce(Vector3.down);
-			var previousZAngle = rigidBody.rotation.eulerAngles.z;
+			float previousZAngle = rigidBody.rotation.eulerAngles.z;
 			rigidBody.rotation = Quaternion.LookRotation(rigidBody.linearVelocity)
-			                     * Quaternion.Euler(new Vector3(0, -180, Data.RotationSpeed + previousZAngle));
+			                     * Quaternion.Euler(new Vector3(0, -180, _configure.RotationSpeed + previousZAngle));
+
+			if (rigidBody.position.y < 0)
+			{
+				Destroy(gameObject);
+			}
 		}
+		
+		[ServerCallback]
+		private void OnTriggerEnter(Collider other)
+		{
+			if (_mapProvider.Map.TryGetMapFeature(out MapDestruction mapDestruction))
+			{
+				mapDestruction.Visit(_configure.ExplosionData, transform.position);
+			}
+
+			foreach (IDamageVisitor visitor in _entityContainer.GetEntitiesByType<IDamageVisitor>())
+			{
+				visitor.Visit(_configure.ExplosionData, transform.position);
+			}
+			
+			_audioPlayer.Play(drillHit, transform.position);
+		}
+
+		public void Launch()
+		{
+			rigidBody.linearVelocity = transform.forward * _configure.Speed;
+			DestroyAsync(destroyCancellationToken).Forget();
+		}
+
+		private async UniTaskVoid DestroyAsync(CancellationToken token)
+		{
+			await UniTask.WaitForSeconds(_configure.LifeTime, cancellationToken: token);
+			Destroy(gameObject);
+		}
+
+		public Bounds Bounds => boxCollider.bounds;
 	}
 }

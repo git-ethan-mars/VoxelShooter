@@ -1,70 +1,117 @@
-using System;
+using Mirror;
+using R3;
+using Reflex.Attributes;
+using Services;
 using UnityEngine;
-
-namespace GamePlay.Entities
+using VoxelMap;
+namespace GamePlay
 {
-    public abstract class LootBox : Entity, IPushable
-    {
-        public event Action<LootBox, Character> PickedUp;
+	[SelectionBase]
+	public abstract class LootBox : NetworkBehaviour, IEntity
+	{
+		private const string LootBoxContainer = "LootBoxContainer";
 
-        public Vector3Int Center => Vector3Int.FloorToInt(transform.position);
+		private static Transform _lootBoxContainer;
 
-        public Vector3Int Min => new(-_size.x / 2, -_size.y / 2, -_size.z / 2);
+		[SerializeField] private Sprite miniMapImage;
+		[SerializeField] private new Collider collider;
+		[SerializeField] private GameObject parachute;
+		[SerializeField] private GameObject platformPrefab;
+		[SerializeField] private Bounds localBounds;
 
-        public Vector3Int Max => new(_size.x / 2, _size.y / 2, _size.z / 2);
+		private readonly Subject<Unit> _pickedUp = new Subject<Unit>();
+		private EntityContainerService _entityContainer;
+		private MapProvider _mapProvider;
+		private IAssetProvider _assets;
 
-        [SerializeField]
-        private Sprite miniMapImage;
+		private GameObject _platform;
 
-        public Sprite MiniMapImage => miniMapImage;
-        
-        public bool IsLanded { get; private set; }
+		[Inject]
+		private void Construct(EntityContainerService entityContainer, MapProvider mapProvider, IAssetProvider assets)
+		{
+			_entityContainer = entityContainer;
+			_mapProvider = mapProvider;
+			_assets = assets;
+		}
 
-        [SerializeField]
-        private new Collider collider;
+		private void Start()
+		{
+			_entityContainer.Add(this);
 
-        [SerializeField]
-        private GameObject parachute;
+			if (_lootBoxContainer == null)
+			{
+				_lootBoxContainer = new GameObject(LootBoxContainer).transform;
+			}
 
-        private Vector3Int _size;
+			transform.SetParent(_lootBoxContainer.transform);
 
-        public void Construct()
-        {
-            var bounds = collider.bounds;
-            _size = Vector3Int.RoundToInt(bounds.size);
-        }
+			int platformPositionX = Mathf.FloorToInt(transform.position.x);
+			int platformPositionZ = Mathf.FloorToInt(transform.position.z);
+			int platformPositionY = _mapProvider.Map.GetTopVoxelHeight(platformPositionX, platformPositionZ);
+			Vector3 platformPosition = new Vector3(platformPositionX, platformPositionY, platformPositionZ) + Map.WorldOffset + Vector3.up * 0.5f;
+			_platform = _assets.Instantiate(platformPrefab, _lootBoxContainer);
+			_platform.transform.position = platformPosition;
+		}
 
-        private void OnCollisionEnter(Collision other)
-        {
-            if (other.gameObject.CompareTag("Chunk"))
-            {
-                parachute.SetActive(false);
-                IsLanded = true;
-            }
+		private void OnDestroy()
+		{
+			_entityContainer.Remove(this);
 
-            if (other.gameObject.CompareTag("Player"))
-            {
-                var character = other.gameObject.GetComponentInParent<Character>();
-                OnPickUp(character);
-                PickedUp?.Invoke(this, character);
-            }
-        }
+			if (_platform != null)
+			{
+				Destroy(_platform);
+			}
+		}
 
-        public void Push()
-        {
-            transform.position += Vector3.up;
-        }
+		public override void OnStartServer()
+		{
+			base.OnStartServer();
 
-        public void Fall()
-        {
-        }
+			_mapProvider.Map.MapUpdated
+				.Subscribe(_ => ValidatePosition())
+				.AddTo(this);
+		}
 
-        protected abstract void OnPickUp(Character receiver);
+		private void OnCollisionEnter(Collision other)
+		{
+			var character = other.gameObject.GetComponent<Character>();
 
-        private void OnDrawGizmosSelected()
-        {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireCube(transform.position, _size);
-        }
-    }
+			if (character)
+			{
+				if (!isServer)
+				{
+					return;
+				}
+
+				OnPickUp(character);
+				_pickedUp.OnNext(Unit.Default);
+				NetworkServer.Destroy(gameObject);
+			}
+			else
+			{
+				parachute.SetActive(false);
+				IsLanded = true;
+			}
+		}
+
+		private void ValidatePosition()
+		{
+			while (_mapProvider.Map.HasIntersection(Bounds))
+			{
+				transform.position += Vector3.up;
+			}
+		}
+
+		private void OnDrawGizmosSelected()
+		{
+			Gizmos.color = Color.yellow;
+			Gizmos.DrawWireCube(Bounds.center, Bounds.size);
+		}
+
+		public Sprite MiniMapImage => miniMapImage;
+		public Bounds Bounds => new Bounds(localBounds.center + transform.position, localBounds.size);
+		public bool IsLanded { get; private set; }
+		public Observable<Unit> PickedUp => _pickedUp;
+		protected abstract void OnPickUp(Character receiver);
+	}
 }

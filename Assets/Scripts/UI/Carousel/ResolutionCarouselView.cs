@@ -1,20 +1,14 @@
+using TMPro;
 using UnityEngine;
-
 namespace UI.Carousel
 {
-    public class ResolutionCarouselView : CarouselView<Resolution>
-    {
-        public ResolutionCarouselView(CarouselControl control) : base(control)
-        {
-        }
+	public class ResolutionCarouselView : CarouselView<Resolution>
+	{
+		[SerializeField] private TextMeshProUGUI displayedText;
 
-        public override void OnModelValueChanged(Resolution resolution)
-        {
-            Control.DisplayedValue.SetText($"{resolution.width}X{resolution.height} {resolution.refreshRateRatio}Hz");
-            if (!Screen.currentResolution.Equals(resolution))
-            {
-                Screen.SetResolution(resolution.width, resolution.height, Screen.fullScreenMode);
-            }
-        }
-    }
+		public override void OnModelValueChanged(Resolution crosshairSprite)
+		{
+			displayedText.SetText($"{crosshairSprite.width}X{crosshairSprite.height} {crosshairSprite.refreshRateRatio}Hz");
+		}
+	}
 }

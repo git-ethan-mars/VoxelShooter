@@ -1,30 +1,25 @@
-using GamePlay.Services;
+using Services;
 using UnityEngine;
-
 namespace UI.InGameUIStates
 {
-    public class ScoreboardState : IInGameUIState
-    {
-        private readonly IInputService _inputService;
-        private readonly Scoreboard _scoreboard;
+	public class ScoreboardState : IInGameUIState
+	{
+		private readonly ScoreboardView _scoreboard;
 
-        public ScoreboardState(IInputService inputService, Scoreboard scoreboard)
-        {
-            _inputService = inputService;
-            _scoreboard = scoreboard;
-        }
+		public ScoreboardState(ScoreboardView scoreboard)
+		{
+			_scoreboard = scoreboard;
+		}
 
-        public void Enter()
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            _inputService.Enable();
-            _scoreboard.CanvasGroup.alpha = 1.0f;
-        }
+		public void Enter()
+		{
+			Cursor.lockState = CursorLockMode.Locked;
+			_scoreboard.CanvasGroup.alpha = 1.0f;
+		}
 
-        public void Exit()
-        {
-            _inputService.Disable();
-            _scoreboard.CanvasGroup.alpha = 0.0f;
-        }
-    }
+		public void Exit()
+		{
+			_scoreboard.CanvasGroup.alpha = 0.0f;
+		}
+	}
 }

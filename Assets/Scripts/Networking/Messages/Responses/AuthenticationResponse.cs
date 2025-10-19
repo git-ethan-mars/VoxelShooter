@@ -1,6 +1,6 @@
-﻿namespace Networking.Messages.Responses
+namespace Networking.Messages
 {
-	public struct AuthenticationResponse : IMirrorResponse
+	public struct AuthenticationResponse : IResponse
 	{
 	}
 }

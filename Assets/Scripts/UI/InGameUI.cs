@@ -1,69 +1,92 @@
-using Common;
-using GamePlay.Services;
+using Cysharp.Threading.Tasks;
+using GamePlay;
+using R3;
+using Reflex.Attributes;
+using Services;
 using UI.InGameUIStates;
 using UnityEngine;
-
 namespace UI
 {
-    public class InGameUI : MonoBehaviour
-    {
-        public Scoreboard Scoreboard { get; private set; }
-        public TimeCounter TimeCounter { get; private set; }
-        public ChooseClassMenu ChooseClassMenu { get; private set; }
-        public SettingsMenu SettingsMenu { get; private set; }
-        public InGameMenu InGameMenu { get; private set; }
-        private IInputService _inputService;
-        private InGameUIStateMachine _uiStateMachine;
+	public class InGameUI : MonoBehaviour
+	{
+		private const float FinalStatisticDuration = 10f;
+		
+		private IInputService _inputService;
+		private InGameUIStateMachine _uiStateMachine;
 
-        public void Construct(IUIFactory uiFactory, IStorageService storageService,
-            IInputService inputService,
-            IAvatarLoader avatarLoader)
-        {
-            _inputService = inputService;
-            TimeCounter = uiFactory.CreateTimeCounter(transform);
-            ChooseClassMenu = uiFactory.CreateChooseClassMenu(transform);
-            InGameMenu = uiFactory.CreateInGameMenu(transform);
-            SettingsMenu = uiFactory.CreateSettingsMenu(storageService, transform);
-            Scoreboard = uiFactory.CreateScoreBoard(avatarLoader, transform);
-            _uiStateMachine = new InGameUIStateMachine(inputService,
-                TimeCounter, ChooseClassMenu, InGameMenu, Scoreboard);
-            InGameMenu.ResumeButtonPressed += _uiStateMachine.SwitchState<DefaultState>;
-            _uiStateMachine.SwitchState<ChooseClassMenuState>();
-        }
+		[field: SerializeField] public TimeInfo TimeInfo { get; private set; }
+		[field: SerializeField] public ChooseClassMenu ChooseClassMenu { get; private set; }
+		[field: SerializeField] public InGameMenu InGameMenu { get; private set; }
+		[field: SerializeField] public ScoreboardView Scoreboard { get; private set; }
+		[field: SerializeField] public SettingsMenu SettingsMenu { get; private set; }
+		[field: SerializeField] public Hud Hud { get; private set; }
+		[field: SerializeField] public WorldMap WorldMap { get; private set; }
 
-        private void Update()
-        {
-            if (_inputService.IsScoreboardButtonUp())
-            {
-                _uiStateMachine.SwitchState<DefaultState>();
-            }
+		[Inject]
+		private void Construct(IInputService inputService, CharacterProvider characterProvider)
+		{
+			_inputService = inputService;
+			_uiStateMachine = new InGameUIStateMachine(inputService, characterProvider, this);
+		}
 
-            if (_inputService.IsScoreboardButtonDown())
-            {
-                _uiStateMachine.SwitchState<ScoreboardState>();
-            }
+		public void Initialize()
+		{
+			_uiStateMachine.SwitchState<ChooseClassMenuState>();
+			
+			DisposableBuilder disposableBuilder = Disposable.CreateBuilder();
+			Observable.EveryUpdate()
+				.Where(_ => _inputService.IsScoreboardButtonUp())
+				.Subscribe(_ => _uiStateMachine.SwitchState<DefaultState>())
+				.AddTo(ref disposableBuilder);
+			Observable.EveryUpdate()
+				.Where(_ => _inputService.IsScoreboardButtonDown())
+				.Subscribe(_ => _uiStateMachine.SwitchState<ScoreboardState>())
+				.AddTo(ref disposableBuilder);
+			Observable.EveryUpdate()
+				.Where(_ => _inputService.IsChooseClassButtonDown())
+				.Subscribe(_ => _uiStateMachine.SwitchState<ChooseClassMenuState>())
+				.AddTo(ref disposableBuilder);
+			Observable.EveryUpdate()
+				.Where(_ => _inputService.IsInGameMenuButtonDown())
+				.Subscribe(_ => _uiStateMachine.SwitchState<InGameMenuState>())
+				.AddTo(ref disposableBuilder);
+			Observable.EveryUpdate()
+				.Where(_ => _inputService.IsMapButtonUp())
+				.Subscribe(_ => _uiStateMachine.SwitchState<DefaultState>())
+				.AddTo(ref disposableBuilder);
+			Observable.EveryUpdate()
+				.Where(_ => _inputService.IsMapButtonDown())
+				.Subscribe(_ => _uiStateMachine.SwitchState<WorldMapState>())
+				.AddTo(ref disposableBuilder);
+			ChooseClassMenu.ChangeClassButtonPressed
+				.Subscribe(_ => _uiStateMachine.SwitchState<DefaultState>())
+				.AddTo(ref disposableBuilder);
+			ChooseClassMenu.ExitButtonPressed
+				.Subscribe(_ => _uiStateMachine.SwitchState<DefaultState>())
+				.AddTo(ref disposableBuilder);
+			SettingsMenu.BackButtonPressed
+				.Subscribe(_ => _uiStateMachine.SwitchState<DefaultState>())
+				.AddTo(ref disposableBuilder);
+			InGameMenu.ResumeButtonPressed
+				.Subscribe(_ => _uiStateMachine.SwitchState<DefaultState>())
+				.AddTo(ref disposableBuilder);
+			InGameMenu.SettingsButtonPressed
+				.Subscribe(_ => _uiStateMachine.SwitchState<SettingsMenuState>())
+				.AddTo(ref disposableBuilder);
 
-            if (_inputService.IsChooseClassButtonDown())
-            {
-                _uiStateMachine.SwitchState<ChooseClassMenuState>();
-            }
+			disposableBuilder.Build().AddTo(this);
+		}
 
-            if (_inputService.IsInGameMenuButtonDown())
-            {
-                _uiStateMachine.SwitchState<InGameMenuState>();
-            }
-        }
+		private void OnDestroy()
+		{
+			_uiStateMachine.Destroy();
+		}
 
-        public void ShowFinalStatistic()
-        {
-            enabled = false;
-            _uiStateMachine.SwitchState<ScoreboardState>();
-        }
-
-        private void OnDestroy()
-        {
-            InGameMenu.ResumeButtonPressed -= _uiStateMachine.SwitchState<DefaultState>;
-            _uiStateMachine.Destroy();
-        }
-    }
+		public async UniTask ShowFinalStatisticAsync()
+		{
+			enabled = false;
+			_uiStateMachine.SwitchState<ScoreboardState>();
+			await UniTask.WaitForSeconds(FinalStatisticDuration);
+		}
+	}
 }

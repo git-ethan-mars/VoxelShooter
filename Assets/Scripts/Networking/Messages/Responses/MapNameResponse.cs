@@ -1,6 +1,6 @@
-﻿namespace Networking.Messages.Responses
+﻿namespace Networking.Messages
 {
-	public struct MapNameResponse : IMirrorResponse
+	public struct MapNameResponse : IResponse
 	{
 		public readonly string MapName;
 

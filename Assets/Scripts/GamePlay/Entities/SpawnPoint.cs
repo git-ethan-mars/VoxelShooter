@@ -1,41 +1,47 @@
-﻿using UnityEngine;
+﻿using R3;
+using Reflex.Attributes;
+using UnityEngine;
 using VoxelMap;
-
-namespace GamePlay.Entities
+namespace GamePlay
 {
-    public class SpawnPoint : MonoBehaviour, IPushable
-    {
-        [SerializeField]
-        private new Collider collider;
+	public class SpawnPoint : MonoBehaviour
+	{
+		[SerializeField] private Bounds localBounds;
 
-        private SpawnPointData Data { get; set; }
+		private MapProvider _mapProvider;
 
-        private Vector3Int _size;
-        public Vector3Int Center => Vector3Int.FloorToInt(transform.position);
-        public Vector3Int Min => new(-_size.x / 2, -_size.y / 2, -_size.z / 2);
-        public Vector3Int Max => new(_size.x / 2, _size.y / 2, _size.z / 2);
+		[Inject]
+		private void Construct(MapProvider mapProvider)
+		{
+			_mapProvider = mapProvider;
+		}
 
-        public void Construct(SpawnPointData data)
-        {
-            Data = data;
-            _size = Vector3Int.RoundToInt(collider.bounds.size);
-        }
+		private void Start()
+		{
+			_mapProvider.Map.MapUpdated
+				.Subscribe(_ => ValidatePosition())
+				.AddTo(this);
+		}
 
-        public void Push()
-        {
-            transform.position += Vector3.up;
-            Data.position = Center;
-        }
+		private void ValidatePosition()
+		{
+			while (!_mapProvider.Map.HasIntersection(Bounds))
+			{
+				transform.position += Vector3.down;
+			}
 
-        public void Fall()
-        {
-            transform.position += Vector3.down;
-        }
+			while (_mapProvider.Map.HasIntersection(Bounds))
+			{
+				transform.position += Vector3.up;
+			}
+		}
 
-        private void OnDrawGizmosSelected()
-        {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireCube(transform.position, _size);
-        }
-    }
+		private void OnDrawGizmosSelected()
+		{
+			Gizmos.color = Color.yellow;
+			Gizmos.DrawWireCube(Bounds.center, Bounds.size);
+		}
+
+		public Bounds Bounds => new Bounds(localBounds.center + transform.position, localBounds.size);
+	}
 }

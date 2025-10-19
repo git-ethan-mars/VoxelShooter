@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 285b4a900c7a4edb9d7a5c6d6172ded8, type: 3}
+  m_Name: Revolver
+  m_EditorClassIdentifier: 
+  <IsAutomatic>k__BackingField: 0
+  <TimeBetweenShooting>k__BackingField: 0.4
+  <BaseRecoil>k__BackingField: 0.01
+  <StepRecoil>k__BackingField: 0.03
+  <ResetTimeRecoil>k__BackingField: 0.5
+  <Range>k__BackingField: 200
+  <ReloadTime>k__BackingField: 1.5
+  <MagazineSize>k__BackingField: 6
+  <BulletsPerTap>k__BackingField: 1
+  <TotalBullets>k__BackingField: 18
+  <ZoomMultiplier>k__BackingField: 1.8
+  <Damage>k__BackingField: 60
+  <HeadMultiplier>k__BackingField: 1.5
+  <ChestMultiplier>k__BackingField: 1.25
+  <LegMultiplier>k__BackingField: 0.8
+  <ArmMultiplier>k__BackingField: 0.6

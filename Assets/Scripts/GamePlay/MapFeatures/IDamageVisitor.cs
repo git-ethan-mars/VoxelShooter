@@ -1,12 +1,11 @@
-﻿using GamePlay.Data;
+﻿using Data;
 using UnityEngine;
-
 namespace GamePlay.MapFeatures
 {
 	public interface IDamageVisitor
 	{
-		void Visit(RangeWeaponData rangeWeapon, RaycastHit hit);
-		void Visit(MeleeWeaponData meleeWeapon, bool isStrongHit, RaycastHit hit);
-		void Visit(Vector3 center, ExplosionData explosionData);
+		void Visit(RangeWeapon rangeWeapon, RaycastHit hit);
+		void Visit(MeleeWeapon meleeWeapon, bool isStrongHit, RaycastHit hit);
+		void Visit(ExplosionData explosionData, Vector3 center);
 	}
 }

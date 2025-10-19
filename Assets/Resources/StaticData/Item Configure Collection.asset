@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e972e1a6ab1416fbe4a1a6a743545a6, type: 3}
+  m_Name: Item Configure Collection
+  m_EditorClassIdentifier: 
+  <ConfigureByItemType>k__BackingField:
+    dictionaryList:
+    - Key: 0
+      Value: {fileID: 11400000, guid: 1f260ffd911f9334d8092e3a1be80267, type: 2}
+      index: 0
+      isKeyDuplicated: 0
+    - Key: 1
+      Value: {fileID: 11400000, guid: 66452d35f250a4242895d22fa6b1b49e, type: 2}
+      index: 1
+      isKeyDuplicated: 0
+    - Key: 2
+      Value: {fileID: 11400000, guid: 9e8ce76138b901742970aabce2643555, type: 2}
+      index: 2
+      isKeyDuplicated: 0
+    - Key: 3
+      Value: {fileID: 11400000, guid: 112d583368f146844a3a9e461c017066, type: 2}
+      index: 3
+      isKeyDuplicated: 0
+    - Key: 4
+      Value: {fileID: 11400000, guid: 710f561a068d1d644971ad77f629c179, type: 2}
+      index: 4
+      isKeyDuplicated: 0
+    - Key: 5
+      Value: {fileID: 11400000, guid: 4ef1e8d29bc49d94db075d9b8610d96e, type: 2}
+      index: 5
+      isKeyDuplicated: 0
+    - Key: 6
+      Value: {fileID: 11400000, guid: b61c6f0fd6918a143841566391ff977b, type: 2}
+      index: 6
+      isKeyDuplicated: 0
+    - Key: 7
+      Value: {fileID: 11400000, guid: 20edc2428b5d82a48997630d810198ef, type: 2}
+      index: 7
+      isKeyDuplicated: 0
+    - Key: 8
+      Value: {fileID: 11400000, guid: bcadaf7f26063a54aa5810092d788aa3, type: 2}
+      index: 8
+      isKeyDuplicated: 0
+    - Key: 9
+      Value: {fileID: 11400000, guid: ec82849f82952694ea0c857a48951ad1, type: 2}
+      index: 9
+      isKeyDuplicated: 0
+    - Key: 10
+      Value: {fileID: 11400000, guid: 9f28b191bc6446741bc12856bc13a46f, type: 2}
+      index: 10
+      isKeyDuplicated: 0
+    - Key: 11
+      Value: {fileID: 11400000, guid: 2c671b33c454fa24e9a0cc09c4dccb16, type: 2}
+      index: 11
+      isKeyDuplicated: 0

@@ -1,8 +1,7 @@
 ﻿using Mirror;
-
-namespace Networking.Messages.Requests
+namespace Networking.Messages
 {
-	public interface IMirrorRequest : NetworkMessage
+	public interface IRequest : NetworkMessage
 	{
 	}
 }

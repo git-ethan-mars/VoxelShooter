@@ -1,163 +1,252 @@
-﻿using Common.AssetManagement;
+﻿using System;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Data;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
-
 namespace VoxelMap
 {
-    public class MapBuilder
-    {
-        private readonly IMapFactory _mapFactory;
+	public class MapBuilder
+	{
+		private const string ChunksContainerName = "Chunks";
 
-        private Color32 _waterColor = VoxelData.Air.Color;
-        private Color32 _innerColor;
-        private bool _waterColorChanging;
-        private bool _innerColorChanging;
-        private bool _enableWalls;
-        private FogData _fog;
-        private LightData _light;
-        private Material _skybox;
-        private AmbientData _ambient;
+		private readonly IMapFactory _mapFactory;
+		private readonly MapData _mapData;
 
-        public MapBuilder(IAssetProvider assets)
-        {
-            _mapFactory = new MapFactory(assets);
-        }
+		private bool _waterColorChanging;
+		private Color32 _waterColor = VoxelData.Air.Color;
 
-        public MapBuilder WithWaterColor(Color32 color)
-        {
-            _waterColorChanging = true;
-            _waterColor = color;
-            return this;
-        }
+		private bool _innerColorChanging;
+		private Color32 _innerColor;
 
-        public MapBuilder WithInnerColor(Color32 color)
-        {
-            _innerColorChanging = true;
-            _innerColor = color;
-            return this;
-        }
+		private bool _enableWalls;
+		private List<SpawnPointData> _spawnPoints;
 
-        public MapBuilder WithDirectionalLight(LightData lightData)
-        {
-            _light = lightData;
-            return this;
-        }
-        public MapBuilder WithFog(FogData fogData)
-        {
-            _fog = fogData;
-            return this;
-        }
+		private AmbientData _ambient;
+		private FogData _fog;
+		private LightData _light;
+		private Material _skybox;
 
-        public MapBuilder WithSkybox(Material skybox)
-        {
-            _skybox = skybox;
-            return this;
-        }
+		public MapBuilder(IMapFactory mapFactory, MapData mapData)
+		{
+			_mapData = mapData;
+			_mapFactory = mapFactory;
+		}
 
-        public MapBuilder WithAmbient(AmbientData ambient)
-        {
-            _ambient = ambient;
-            return this;
-        }
-        public MapBuilder WithWalls()
-        {
-            _enableWalls = true;
-            return this;
-        }
+		public MapBuilder WithWaterColor(Color32 color)
+		{
+			_waterColorChanging = true;
+			_waterColor = color;
+			return this;
+		}
 
-        public async UniTask<Map> BuildAsync(MapData mapData, Transform container = null)
-        {
-            var map = _mapFactory.CreateMap(mapData, container);
-            var mapGenerator = new MapGenerator(_mapFactory, mapData);
-            if (_innerColorChanging)
-            {
-                SetInnerColor(mapData);
-            }
+		public MapBuilder WithInnerColor(Color32 color)
+		{
+			_innerColorChanging = true;
+			_innerColor = color;
+			return this;
+		}
 
-            if (_waterColorChanging)
-            {
-                SetWaterColor(mapData);
-                var mapCenter = new Vector3((float)mapData.Width / 2, 1, (float)mapData.Depth / 2);
-                var waterPlane = _mapFactory.CreateWaterPlane(mapCenter, _waterColor, map.transform);
-                waterPlane.GetComponent<MeshRenderer>().sharedMaterial.color = _waterColor;
-            }
+		public MapBuilder WithDirectionalLight(LightData lightData)
+		{
+			_light = lightData;
+			return this;
+		}
 
-            await UniTask.Yield();
+		public MapBuilder WithFog(FogData fogData)
+		{
+			_fog = fogData;
+			return this;
+		}
 
-            var chunks = mapGenerator.GenerateChunks(map.transform);
-            map.SetChunks(chunks);
-            if (_light is not null)
-            {
-                var directionalLight = _mapFactory.CreateDirectionalLight(_light, map.transform);
-                map.SetDirectionalLight(directionalLight);
-            }
+		public MapBuilder WithSkybox(Material skybox)
+		{
+			_skybox = skybox;
+			return this;
+		}
 
-            if (_enableWalls)
-            {
-                _mapFactory.CreateWalls(mapData, map.transform);
-            }
+		public MapBuilder WithAmbient(AmbientData ambient)
+		{
+			_ambient = ambient;
+			return this;
+		}
 
-            if (_fog != null)
-            {
-                Environment.ApplyFog(_fog);
-            }
+		public MapBuilder WithWalls()
+		{
+			_enableWalls = true;
+			return this;
+		}
 
-            if (_skybox != null)
-            {
-                Environment.ApplySkybox(_skybox);
-            }
+		public MapBuilder FromConfigure(MapConfigure mapConfigure)
+		{
+			return WithWaterColor(mapConfigure.WaterColor)
+				.WithInnerColor(mapConfigure.InnerColor)
+				.WithAmbient(mapConfigure.AmbientData)
+				.WithDirectionalLight(mapConfigure.LightData)
+				.WithFog(mapConfigure.FogData)
+				.WithSkybox(mapConfigure.SkyboxMaterial)
+				.WithWalls();
+		}
 
-            if (_ambient != null)
-            {
-                Environment.ApplyAmbientLighting(_ambient);
-            }
+		public MapBuilder WithSpawnPoints(List<SpawnPointData> spawnPoints)
+		{
+			_spawnPoints = spawnPoints;
+			return this;
+		}
 
-            return map;
-        }
+		public Map Build(Transform container = null)
+		{
+			Map map = _mapFactory.CreateEmptyMap();
+			map.transform.SetParent(container);
 
-        private void SetWaterColor(MapData data)
-        {
-            var lowerChunks = new ChunkData[data.Width * data.Depth / ChunkData.ChunkSizeSquared];
-            for (var i = 0; i < data.Width / ChunkData.ChunkSize; i++)
-            {
-                for (var j = 0; j < data.Depth / ChunkData.ChunkSize; j++)
-                {
-                    lowerChunks[i * data.Depth / ChunkData.ChunkSize + j] = data.GetChunkDataByIndex(data.Depth * data.Height / ChunkData
-                        .ChunkSizeSquared * i + j);
-                }
-            }
+			if (_innerColorChanging)
+			{
+				var job = new InnerColorChangeJob(_mapData, _innerColor);
+				job.ScheduleParallel(_mapData.ChunkCount, 32, default).Complete();
+			}
 
-            var jobHandles = new NativeArray<JobHandle>(lowerChunks.Length, Allocator.TempJob);
-            
-            for (var i = 0; i < lowerChunks.Length; i++)
-            {
-                jobHandles[i] = new WaterColorChangeJob()
-                {
-                    Voxels = lowerChunks[i].Voxels,
-                    WaterColor = _waterColor
-                }.Schedule();
-            }
-            
-            JobHandle.CompleteAll(jobHandles);
-            jobHandles.Dispose();
-        }
+			if (_waterColorChanging)
+			{
+				var waterColorJob = new WaterColorChangeJob(_mapData, _waterColor);
+				waterColorJob.ScheduleParallel(_mapData.Width * _mapData.Depth, 32, default).Complete();
+				var mapCenter = new Vector3((float)_mapData.Width / 2, 1, (float)_mapData.Depth / 2);
+				_mapFactory.CreateWaterPlane(mapCenter, _waterColor, map.transform);
+			}
 
-        private void SetInnerColor(MapData mapData)
-        {
-            var jobHandles = new NativeArray<JobHandle>(mapData.ChunkCount, Allocator.TempJob);
-            for (var i = 0; i < mapData.ChunkCount; i++)
-            {
-                jobHandles[i] = new InnerColorChangeJob()
-                {
-                    Voxels = mapData.GetChunkDataByIndex(i).Voxels,
-                    NewInnerColor = _innerColor,
-                }.Schedule();
-            }
+			using var faceCountPerChunk = new NativeArray<int>(_mapData.ChunkCount, Allocator.TempJob);
+			var calculateFacesJob = new CalculateFacesJob(_mapData, faceCountPerChunk);
+			calculateFacesJob.Schedule(_mapData.ChunkCount, default).Complete();
 
-            JobHandle.CompleteAll(jobHandles);
-            jobHandles.Dispose();
-        }
-    }
+			Chunk[] chunks = GenerateChunks(_mapData, map.transform, faceCountPerChunk);
+
+			SetupEnvironment(_mapData, map);
+
+			map.Construct(_mapData, chunks);
+			return map;
+		}
+
+		public async UniTask<Map> BuildAsync(IProgress<float> progress, Transform container = null)
+		{
+			Map map = _mapFactory.CreateEmptyMap();
+			map.transform.SetParent(container);
+
+			if (_innerColorChanging)
+			{
+				var job = new InnerColorChangeJob(_mapData, _innerColor);
+				await job.ScheduleParallel(_mapData.ChunkCount, 32, default)
+					.ToUniTask(PlayerLoopTiming.Update);
+			}
+
+			if (_waterColorChanging)
+			{
+				var waterColorJob = new WaterColorChangeJob(_mapData, _waterColor);
+				await waterColorJob.ScheduleParallel(_mapData.Width * _mapData.Depth, 32, default)
+					.ToUniTask(PlayerLoopTiming.Update);
+				var mapCenter = new Vector3((float)_mapData.Width / 2, 1, (float)_mapData.Depth / 2);
+				_mapFactory.CreateWaterPlane(mapCenter, _waterColor, map.transform);
+			}
+
+			using var faceCountPerChunk = new NativeArray<int>(_mapData.ChunkCount, Allocator.Persistent);
+			var calculateFacesJob = new CalculateFacesJob(_mapData, faceCountPerChunk);
+			await calculateFacesJob.Schedule(_mapData.ChunkCount, default)
+				.ToUniTask(PlayerLoopTiming.Update);
+
+			Chunk[] chunks = await GenerateChunksAsync(_mapData, progress, map.transform, faceCountPerChunk);
+
+			SetupEnvironment(_mapData, map);
+
+			map.Construct(_mapData, chunks);
+			return map;
+		}
+
+		private Chunk[] GenerateChunks(MapData mapData, Transform container, NativeArray<int> faceCountPerChunk)
+		{
+			var chunksContainer = new GameObject(ChunksContainerName).transform;
+			chunksContainer.SetParent(container);
+			var chunks = new Chunk[mapData.ChunkCount];
+			for (var i = 0; i < mapData.ChunkCount; i++)
+			{
+				Vector3 chunkPosition = ChunkIndexToPosition(i, mapData);
+				GameObject chunkView = _mapFactory.CreateChunkView(chunkPosition, chunksContainer);
+				chunkView.name = $"Chunk {i}";
+				var meshFilter = chunkView.GetComponent<MeshFilter>();
+				var meshCollider = chunkView.GetComponent<MeshCollider>();
+				chunks[i] = new Chunk(i, mapData, meshFilter, meshCollider, faceCountPerChunk[i]);
+				chunks[i].Regenerate();
+			}
+
+			return chunks;
+		}
+
+		private void SetupEnvironment(MapData mapData, Map map)
+		{
+			if (_enableWalls)
+			{
+				_mapFactory.CreateWalls(mapData, map.transform);
+			}
+
+			if (_spawnPoints != null)
+			{
+				_mapFactory.CreateSpawnPoints(_spawnPoints, map.transform);
+			}
+
+			if (_skybox != null)
+			{
+				Environment.ApplySkybox(_skybox);
+			}
+
+			if (!_light.Equals(default))
+			{
+				_mapFactory.CreateDirectionalLight(_light, map.transform);
+			}
+
+			if (!_fog.Equals(default))
+			{
+				Environment.ApplyFog(_fog);
+			}
+
+			if (!_ambient.Equals(default))
+			{
+				Environment.ApplyAmbientLighting(_ambient);
+			}
+		}
+
+		private async UniTask<Chunk[]> GenerateChunksAsync(MapData mapData, IProgress<float> progress, Transform container,
+			NativeArray<int> faceCountPerChunk)
+		{
+			var chunks = new Chunk[mapData.ChunkCount];
+			var tasks = new UniTask[mapData.ChunkCount];
+			var completedChunks = 0;
+			var chunksContainer = new GameObject(ChunksContainerName).transform;
+			chunksContainer.SetParent(container);
+
+			for (var i = 0; i < mapData.ChunkCount; i++)
+			{
+				Vector3 chunkPosition = ChunkIndexToPosition(i, mapData);
+				GameObject chunkView = _mapFactory.CreateChunkView(chunkPosition, chunksContainer);
+				chunkView.name = $"Chunk {i}";
+				var meshFilter = chunkView.GetComponent<MeshFilter>();
+				var meshCollider = chunkView.GetComponent<MeshCollider>();
+				chunks[i] = new Chunk(i, mapData, meshFilter, meshCollider, faceCountPerChunk[i]);
+				tasks[i] = chunks[i].RegenerateAsync().ContinueWith(() =>
+				{
+					completedChunks++;
+					progress.Report(completedChunks / (float)mapData.ChunkCount);
+				});
+			}
+
+			await UniTask.WhenAll(tasks);
+
+			return chunks;
+		}
+
+		private Vector3 ChunkIndexToPosition(int index, MapData mapData)
+		{
+			int z = index % (mapData.Depth / Chunk.ChunkSize) * Chunk.ChunkSize;
+			int y = index / (mapData.Depth / Chunk.ChunkSize) % (mapData.Height / Chunk.ChunkSize) * Chunk.ChunkSize;
+			int x = index / (mapData.Depth * mapData.Height / Chunk.ChunkSizeSquared) * Chunk.ChunkSize;
+			return new Vector3(x, y, z);
+		}
+	}
 }

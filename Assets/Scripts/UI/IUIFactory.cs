@@ -1,24 +1,9 @@
-﻿using Common;
-using GamePlay.Services;
-using UnityEngine;
-using VoxelMap;
-
-namespace UI
+﻿namespace UI
 {
-	public interface IUIFactory : IService
+	public interface IUIFactory
 	{
-		MainMenu CreateMainMenu();
-		MatchMenu CreateMatchMenu(IMapRepository mapRepository);
-		SettingsMenu CreateSettingsMenu(IStorageService storageService, Transform parent);
+		GameMenu CreateGameMenu();
+		InGameUI CreateInGameUI();
 		LoadingWindow CreateLoadingWindow();
-
-		InGameUI CreateInGameUI(IInputService inputService, IStorageService storageService,
-			IAvatarLoader avatarLoader);
-
-		ChooseClassMenu CreateChooseClassMenu(Transform parent);
-		Scoreboard CreateScoreBoard(IAvatarLoader avatarLoader, Transform parent);
-		TimeCounter CreateTimeCounter(Transform parent);
-		InGameMenu CreateInGameMenu(Transform parent);
-		Hud CreateHud();
 	}
 }

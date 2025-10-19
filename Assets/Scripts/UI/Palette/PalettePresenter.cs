@@ -1,77 +1,78 @@
-using GamePlay.Palette;
-using GamePlay.Services;
+using System;
+using GamePlay;
+using R3;
+using Reflex.Attributes;
+using Services;
 using UnityEngine;
 using UnityEngine.UI;
-
 namespace UI
 {
-    public class PalettePresenter : MonoBehaviour
-    {
-        [SerializeField] private GridLayoutGroup grid;
-        [SerializeField] private RectTransform rectTransform;
-        [SerializeField] private PaletteView paletteView;
+	public class PalettePresenter : MonoBehaviour
+	{
+		[SerializeField] private GridLayoutGroup grid;
+		[SerializeField] private RectTransform rectTransform;
+		[SerializeField] private PaletteView paletteView;
 
-        private IInputService _inputService;
-        private RectPalette _palette;
+		private CharacterProvider _characterProvider;
+		private IInputService _inputService;
+		private RectPalette _palette;
 
-        public void Construct(IStaticDataService staticData, IInputService inputService)
-        {
-            _inputService = inputService;
-            _palette = new RectPalette(staticData);
-        }
+		[Inject]
+		private void Construct(IInputService inputService, IStaticDataService staticData, CharacterProvider characterProvider)
+		{
+			_inputService = inputService;
+			_characterProvider = characterProvider;
+			_palette = new RectPalette(staticData);
+		}
 
-        public void Initialize()
-        {
-            var width = (rectTransform.rect.width - (grid.padding.left + grid.padding.right) -
-                         (_palette.ColumnCount - 1) * grid.spacing.x) / _palette.ColumnCount;
-            var height = (rectTransform.rect.height - (grid.padding.top + grid.padding.bottom) -
-                          (_palette.RowCount - 1) * grid.spacing.x) / _palette.RowCount;
-            var elementSize = new Vector2(width, height);
-            grid.cellSize = elementSize;
-            for (var i = 0; i < _palette.RowCount; i++)
-            {
-                for (var j = 0; j < _palette.ColumnCount; j++)
-                {
-                    var element = paletteView.SpawnElement();
-                    element.Construct(_palette[i, j], elementSize);
-                }
-            }
-            
-            _palette.SelectedElementChanged += OnElementSelected;
-        }
+		public void Initialize()
+		{
+			grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+			grid.constraintCount = _palette.ColumnCount;
+			for (var i = 0; i < _palette.RowCount; i++)
+			{
+				for (var j = 0; j < _palette.ColumnCount; j++)
+				{
+					PaletteElementView element = paletteView.SpawnElement();
+					element.Construct(_palette[i, j]);
+				}
+			}
 
-        private void Update()
-        {
-            if (_inputService.IsUpArrowButtonDown())
-            {
-                _palette.MovePointerUp();
-            }
+			DisposableBuilder d = Disposable.CreateBuilder();
+			_palette.SelectedCell.Subscribe(t => OnElementSelectedAsync(t.row, t.column)).AddTo(ref d);
+			_palette.SelectedColor.Subscribe(OnColorChanged).AddTo(ref d);
+			_characterProvider.Character
+				.Where(character => character != null)
+				.Subscribe(character => character.Inventory.ApplyEffectToItems<Block>(block => block.SelectedColor = _palette.SelectedColor
+					.CurrentValue)).AddTo(ref d);
+			Observable.EveryUpdate().Where(_ => _inputService.IsUpArrowButtonDown()).Subscribe(_ => _palette.MovePointerUp()).AddTo(ref d);
+			Observable.EveryUpdate().Where(_ => _inputService.IsDownArrowButtonDown()).Subscribe(_ => _palette.MovePointerDown()).AddTo(ref d);
+			Observable.EveryUpdate().Where(_ => _inputService.IsRightArrowButtonDown()).Subscribe(_ => _palette.MovePointerRight()).AddTo(ref d);
+			Observable.EveryUpdate().Where(_ => _inputService.IsLeftArrowButtonDown()).Subscribe(_ => _palette.MovePointerLeft()).AddTo(ref d);
+			d.RegisterTo(destroyCancellationToken);
+		}
 
-            if (_inputService.IsUpArrowButtonDown())
-            {
-                _palette.MovePointerDown();
-            }
+		private async void OnElementSelectedAsync(int row, int column)
+		{
+			try
+			{
+				int index = column * _palette.RowCount + row;
+				await paletteView.SelectElementAsync(index);
+			}
+			catch (Exception e)
+			{
+				Debug.LogException(e);
+			}
+		}
 
-            if (_inputService.IsRightArrowButtonDown())
-            {
-                _palette.MovePointerRight();
-            }
-
-            if (_inputService.IsLeftArrowButtonDown())
-            {
-                _palette.MovePointerLeft();
-            }
-        }
-
-        private void OnElementSelected(int row, int column)
-        {
-            var index = row * _palette.ColumnCount + column;
-            paletteView.SelectElement(index);
-        }
-
-        private void OnDestroy()
-        {
-            _palette.SelectedElementChanged -= OnElementSelected;
-        }
-    }
+		private void OnColorChanged(Color32 color)
+		{
+			Character character = _characterProvider.Character.Value;
+			
+			if (character != null)
+			{
+				character.Inventory.ApplyEffectToItems<Block>(block => block.SelectedColor = color);
+			}
+		}
+	}
 }

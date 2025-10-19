@@ -1,0 +1,128 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52a0da59419a4e6ba5c9191d26e3e18a, type: 3}
+  m_Name: Item Icons
+  m_EditorClassIdentifier: 
+  <SlotIconByItemType>k__BackingField:
+    dictionaryList:
+    - Key: 0
+      Value: {fileID: 1027491563, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
+      index: 0
+      isKeyDuplicated: 0
+    - Key: 1
+      Value: {fileID: -188179433, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
+      index: 1
+      isKeyDuplicated: 0
+    - Key: 2
+      Value: {fileID: 1629097733, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
+      index: 2
+      isKeyDuplicated: 0
+    - Key: 3
+      Value: {fileID: 1387272548, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
+      index: 3
+      isKeyDuplicated: 0
+    - Key: 4
+      Value: {fileID: -510781377, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
+      index: 4
+      isKeyDuplicated: 0
+    - Key: 5
+      Value: {fileID: 21300000, guid: ede331431870261449d4d10f4a679bfe, type: 3}
+      index: 5
+      isKeyDuplicated: 0
+    - Key: 6
+      Value: {fileID: 631782971, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
+      index: 6
+      isKeyDuplicated: 0
+    - Key: 7
+      Value: {fileID: 21300000, guid: 40cc6259cca09954585d891b066e341f, type: 3}
+      index: 7
+      isKeyDuplicated: 0
+    - Key: 8
+      Value: {fileID: 21300000, guid: 7f8099d3ba88821449ae3fcf68f2e286, type: 3}
+      index: 8
+      isKeyDuplicated: 0
+    - Key: 9
+      Value: {fileID: 1150218188, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
+      index: 9
+      isKeyDuplicated: 0
+    - Key: 10
+      Value: {fileID: 21300000, guid: 9721a1bd44132464cab96dd63e203df2, type: 3}
+      index: 10
+      isKeyDuplicated: 0
+    - Key: 11
+      Value: {fileID: -74087829, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
+      index: 11
+      isKeyDuplicated: 0
+  <ProjectileIconByItemType>k__BackingField:
+    dictionaryList:
+    - Key: 0
+      Value: {fileID: -183867098, guid: e7634cc0bf7762649a525e59875cd9d1, type: 3}
+      index: 0
+      isKeyDuplicated: 0
+    - Key: 1
+      Value: {fileID: -465812234, guid: e7634cc0bf7762649a525e59875cd9d1, type: 3}
+      index: 1
+      isKeyDuplicated: 0
+    - Key: 2
+      Value: {fileID: 2005296590, guid: e7634cc0bf7762649a525e59875cd9d1, type: 3}
+      index: 2
+      isKeyDuplicated: 0
+    - Key: 3
+      Value: {fileID: -129081338, guid: e7634cc0bf7762649a525e59875cd9d1, type: 3}
+      index: 3
+      isKeyDuplicated: 0
+    - Key: 4
+      Value: {fileID: 1304307358, guid: e7634cc0bf7762649a525e59875cd9d1, type: 3}
+      index: 4
+      isKeyDuplicated: 0
+    - Key: 5
+      Value: {fileID: 21300000, guid: bdba8651c9955fe46ab98523b5600518, type: 3}
+      index: 5
+      isKeyDuplicated: 0
+    - Key: 6
+      Value: {fileID: 886209943, guid: e7634cc0bf7762649a525e59875cd9d1, type: 3}
+      index: 6
+      isKeyDuplicated: 0
+    - Key: 7
+      Value: {fileID: 21300000, guid: 0b09eb0582cb7fa4b9fccb1d7e798c0c, type: 3}
+      index: 7
+      isKeyDuplicated: 0
+    - Key: 10
+      Value: {fileID: 21300000, guid: 9721a1bd44132464cab96dd63e203df2, type: 3}
+      index: 8
+      isKeyDuplicated: 0
+    - Key: 11
+      Value: {fileID: 21300000, guid: cdcc1eea4b5858c468c9bb86e248f34b, type: 3}
+      index: 9
+      isKeyDuplicated: 0
+  <ScopeIconByItemType>k__BackingField:
+    dictionaryList:
+    - Key: 0
+      Value: {fileID: 21300000, guid: 11564e991f4b71c47a7f75c7e8c163bd, type: 3}
+      index: 0
+      isKeyDuplicated: 0
+    - Key: 1
+      Value: {fileID: 21300000, guid: 11564e991f4b71c47a7f75c7e8c163bd, type: 3}
+      index: 1
+      isKeyDuplicated: 0
+    - Key: 2
+      Value: {fileID: 21300000, guid: de847489d62d7fe4c94ff17d8eea789a, type: 3}
+      index: 2
+      isKeyDuplicated: 0
+    - Key: 3
+      Value: {fileID: 21300000, guid: 38dfb30fefedb5a4481d91c196fe7372, type: 3}
+      index: 3
+      isKeyDuplicated: 0
+    - Key: 4
+      Value: {fileID: 21300000, guid: fc92d0fbcb969fd4d8f6dbec556c83c5, type: 3}
+      index: 4
+      isKeyDuplicated: 0

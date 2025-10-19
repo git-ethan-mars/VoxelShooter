@@ -1,260 +1,162 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
-
 namespace VoxelMap
 {
-    [BurstCompile]
-    [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct CalculateFacesJob : IJob
-    {
-        [NativeDisableUnsafePtrRestriction]
-        public IntPtr UpNeighbourPointer;
+	[BurstCompile]
+	[StructLayout(LayoutKind.Sequential)]
+	public struct CalculateFacesJob : IJobFor
+	{
+		[NativeDisableContainerSafetyRestriction]
+		private NativeArray<Face> _faces;
+		[NativeDisableContainerSafetyRestriction]
+		private readonly NativeArray<VoxelData> _voxels;
 
-        [NativeDisableUnsafePtrRestriction]
-        public IntPtr DownNeighbourPointer;
+		private readonly int _width;
+		private readonly int _height;
+		private readonly int _death;
 
-        [NativeDisableUnsafePtrRestriction]
-        public IntPtr FrontNeighbourPointer;
+		private NativeArray<int> _facesCountPerChunk;
 
-        [NativeDisableUnsafePtrRestriction]
-        public IntPtr BackNeighbourPointer;
+		public CalculateFacesJob(MapData mapData, NativeArray<int> facesCountPerChunk)
+		{
+			_voxels = mapData.Voxels;
+			_faces = mapData.Faces;
+			_width = mapData.Width;
+			_height = mapData.Height;
+			_death = mapData.Depth;
+			_facesCountPerChunk = facesCountPerChunk;
+		}
 
-        [NativeDisableUnsafePtrRestriction]
-        public IntPtr RightNeighbourPointer;
+		public void Execute(int chunkIndex)
+		{
+			for (var i = 0; i < Chunk.ChunkSizeCubed; i++)
+			{
+				int voxelIndex = chunkIndex * Chunk.ChunkSizeCubed + i;
+				_faces[voxelIndex] = Face.None;
 
-        [NativeDisableUnsafePtrRestriction]
-        public IntPtr LeftNeighbourPointer;
+				if (!_voxels[voxelIndex].IsSolid())
+				{
+					continue;
+				}
 
-        [ReadOnly]
-        public NativeArray<VoxelData> Voxels;
-        public NativeArray<Face> Faces;
+				int chunkOffsetX = chunkIndex % (_death / Chunk.ChunkSize) * Chunk.ChunkSize;
+				int chunkOffsetY = chunkIndex / (_death / Chunk.ChunkSize) % (_height / Chunk.ChunkSize) * Chunk.ChunkSize;
+				int chunkOffsetZ = chunkIndex / (_death * _height / Chunk.ChunkSizeSquared) * Chunk.ChunkSize;
+				int z = i % Chunk.ChunkSize + chunkOffsetX;
+				int y = i / Chunk.ChunkSize % Chunk.ChunkSize + chunkOffsetY;
+				int x = i / Chunk.ChunkSizeSquared + chunkOffsetZ;
 
-        public void Execute()
-        {
-            var upperNeighbourVoxels = new NativeArray<VoxelData>(0, Allocator.Temp);
-            if (UpNeighbourPointer != IntPtr.Zero)
-            {
-                upperNeighbourVoxels.Dispose();
-                upperNeighbourVoxels = new NativeArray<VoxelData>(ChunkData.ChunkSizeSquared, Allocator.Temp,
-                    NativeArrayOptions.UninitializedMemory);
+				if (CheckTopFace(x, y, z))
+				{
+					_faces[voxelIndex] |= Face.Top;
+					_facesCountPerChunk[chunkIndex]++;
+				}
 
-                for (var x = 0; x < ChunkData.ChunkSize; x++)
-                {
-                    for (var z = 0; z < ChunkData.ChunkSize; z++)
-                    {
-                        upperNeighbourVoxels[x * ChunkData.ChunkSize + z] =
-                            UnsafeUtility.ReadArrayElement<VoxelData>(UpNeighbourPointer.ToPointer(),
-                                x * ChunkData.ChunkSizeSquared + z);
-                    }
-                }
-            }
+				if (CheckBottomFace(x, y, z))
+				{
+					_faces[voxelIndex] |= Face.Bottom;
+					_facesCountPerChunk[chunkIndex]++;
+				}
 
-            var lowerNeighboursVoxels = new NativeArray<VoxelData>(0, Allocator.Temp);
-            if (DownNeighbourPointer != IntPtr.Zero)
-            {
-                lowerNeighboursVoxels.Dispose();
-                lowerNeighboursVoxels =
-                    new NativeArray<VoxelData>(ChunkData.ChunkSizeSquared, Allocator.Temp,
-                        NativeArrayOptions.UninitializedMemory);
+				if (CheckFrontFace(x, y, z))
+				{
+					_faces[voxelIndex] |= Face.Front;
+					_facesCountPerChunk[chunkIndex]++;
+				}
 
-                for (var x = 0; x < ChunkData.ChunkSize; x++)
-                {
-                    for (var z = 0; z < ChunkData.ChunkSize; z++)
-                    {
-                        lowerNeighboursVoxels[x * ChunkData.ChunkSize + z] = UnsafeUtility.ReadArrayElement<VoxelData>(
-                            DownNeighbourPointer.ToPointer(), x * ChunkData.ChunkSizeSquared +
-                                                              (ChunkData.ChunkSize - 1) * ChunkData.ChunkSize + z);
-                    }
-                }
-            }
+				if (CheckBackFace(x, y, z))
+				{
+					_faces[voxelIndex] |= Face.Back;
+					_facesCountPerChunk[chunkIndex]++;
+				}
 
-            var frontNeighbourVoxels = new NativeArray<VoxelData>(0, Allocator.Temp);
-            if (FrontNeighbourPointer != IntPtr.Zero)
-            {
-                frontNeighbourVoxels.Dispose();
-                frontNeighbourVoxels =
-                    new NativeArray<VoxelData>(ChunkData.ChunkSizeSquared, Allocator.Temp,
-                        NativeArrayOptions.UninitializedMemory);
+				if (CheckRightFace(x, y, z))
+				{
+					_faces[voxelIndex] |= Face.Right;
+					_facesCountPerChunk[chunkIndex]++;
+				}
 
-                for (var x = 0; x < ChunkData.ChunkSize; x++)
-                {
-                    for (var y = 0; y < ChunkData.ChunkSize; y++)
-                    {
-                        frontNeighbourVoxels[x * ChunkData.ChunkSize + y] =
-                            UnsafeUtility.ReadArrayElement<VoxelData>(FrontNeighbourPointer.ToPointer(),
-                                x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize);
-                    }
-                }
-            }
-
-            var backNeighbourVoxels = new NativeArray<VoxelData>(0, Allocator.Temp);
-            if (BackNeighbourPointer != IntPtr.Zero)
-            {
-                backNeighbourVoxels.Dispose();
-                backNeighbourVoxels =
-                    new NativeArray<VoxelData>(ChunkData.ChunkSizeSquared, Allocator.Temp,
-                        NativeArrayOptions.UninitializedMemory);
-
-                for (var x = 0; x < ChunkData.ChunkSize; x++)
-                {
-                    for (var y = 0; y < ChunkData.ChunkSize; y++)
-                    {
-                        backNeighbourVoxels[x * ChunkData.ChunkSize + y] =
-                            UnsafeUtility.ReadArrayElement<VoxelData>(BackNeighbourPointer.ToPointer(),
-                                x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + ChunkData.ChunkSize - 1);
-                    }
-                }
-            }
+				if (CheckLeftFace(x, y, z))
+				{
+					_faces[voxelIndex] |= Face.Left; 
+					_facesCountPerChunk[chunkIndex]++;
+				}
+			}
+		}
 
 
-            var rightNeighbourVoxels = new NativeArray<VoxelData>(0, Allocator.Temp);
-            if (RightNeighbourPointer != IntPtr.Zero)
-            {
-                rightNeighbourVoxels.Dispose();
-                rightNeighbourVoxels =
-                    new NativeArray<VoxelData>(ChunkData.ChunkSizeSquared, Allocator.Temp,
-                        NativeArrayOptions.UninitializedMemory);
+		private bool CheckTopFace(int x, int y, int z)
+		{
+			return !IsValidPosition(x, y + 1, z) || !_voxels[GetIndex(x, y + 1, z)].IsSolid();
+		}
 
-                for (var y = 0; y < ChunkData.ChunkSize; y++)
-                {
-                    for (var z = 0; z < ChunkData.ChunkSize; z++)
-                    {
-                        rightNeighbourVoxels[y * ChunkData.ChunkSize + z] =
-                            UnsafeUtility.ReadArrayElement<VoxelData>(RightNeighbourPointer.ToPointer(),
-                                y * ChunkData.ChunkSize + z);
-                    }
-                }
-            }
+		private bool CheckBottomFace(int x, int y, int z)
+		{
+			if (!IsValidPosition(x, y - 1, z))
+			{
+				return false;
+			}
 
-            var leftNeighbourVoxels = new NativeArray<VoxelData>(0, Allocator.Temp);
-            if (LeftNeighbourPointer != IntPtr.Zero)
-            {
-                leftNeighbourVoxels.Dispose();
-                leftNeighbourVoxels =
-                    new NativeArray<VoxelData>(ChunkData.ChunkSizeSquared, Allocator.Temp,
-                        NativeArrayOptions.UninitializedMemory);
+			return !_voxels[GetIndex(x, y - 1, z)].IsSolid();
+		}
 
-                for (var y = 0; y < ChunkData.ChunkSize; y++)
-                {
-                    for (var z = 0; z < ChunkData.ChunkSize; z++)
-                    {
-                        leftNeighbourVoxels[y * ChunkData.ChunkSize + z] = UnsafeUtility.ReadArrayElement<VoxelData>(
-                            LeftNeighbourPointer.ToPointer(),
-                            (ChunkData.ChunkSize - 1) * ChunkData.ChunkSizeSquared +
-                            y * ChunkData.ChunkSize + z);
-                    }
-                }
-            }
+		private bool CheckFrontFace(int x, int y, int z)
+		{
+			if (!IsValidPosition(x, y, z + 1))
+			{
+				return false;
+			}
 
-            for (var i = 0; i < ChunkData.ChunkSizeCubed; i++)
-            {
-                Faces[i] = Face.None;
-                if (!Voxels[i].IsSolid())
-                {
-                    continue;
-                }
+			return !_voxels[GetIndex(x, y, z + 1)].IsSolid();
+		}
 
-                var x = i / ChunkData.ChunkSizeSquared;
-                var y = (i - x * ChunkData.ChunkSizeSquared) / ChunkData.ChunkSize;
-                var z = i - x * ChunkData.ChunkSizeSquared - y * ChunkData.ChunkSize;
-                if (CheckTopFace(x, y, z, upperNeighbourVoxels, UpNeighbourPointer))
-                {
-                    Faces[i] |= Face.Top;
-                }
+		private bool CheckBackFace(int x, int y, int z)
+		{
+			if (!IsValidPosition(x, y, z - 1))
+			{
+				return false;
+			}
 
-                if (CheckBottomFace(x, y, z, lowerNeighboursVoxels, DownNeighbourPointer))
-                {
-                    Faces[i] |= Face.Bottom;
-                }
+			return !_voxels[GetIndex(x, y, z - 1)].IsSolid();
+		}
 
-                if (CheckFrontFace(x, y, z, frontNeighbourVoxels, FrontNeighbourPointer))
-                {
-                    Faces[i] |= Face.Front;
-                }
+		private bool CheckRightFace(int x, int y, int z)
+		{
+			if (!IsValidPosition(x + 1, y, z))
+			{
+				return false;
+			}
 
-                if (CheckBackFace(x, y, z, backNeighbourVoxels, BackNeighbourPointer))
-                {
-                    Faces[i] |= Face.Back;
-                }
+			return !_voxels[GetIndex(x + 1, y, z)].IsSolid();
+		}
 
-                if (CheckRightFace(x, y, z, rightNeighbourVoxels, RightNeighbourPointer))
-                {
-                    Faces[i] |= Face.Right;
-                }
+		private bool CheckLeftFace(int x, int y, int z)
+		{
+			if (!IsValidPosition(x - 1, y, z))
+			{
+				return false;
+			}
 
-                if (CheckLeftFace(x, y, z, leftNeighbourVoxels, LeftNeighbourPointer))
-                {
-                    Faces[i] |= Face.Left;
-                }
-            }
+			return !_voxels[GetIndex(x - 1, y, z)].IsSolid();
+		}
 
-            upperNeighbourVoxels.Dispose();
-            lowerNeighboursVoxels.Dispose();
-            frontNeighbourVoxels.Dispose();
-            backNeighbourVoxels.Dispose();
-            rightNeighbourVoxels.Dispose();
-            leftNeighbourVoxels.Dispose();
-        }
+		private bool IsValidPosition(int x, int y, int z)
+		{
+			return 0 <= x && x < _width && 0 <= y && y < _height && 0 <= z && z < _death;
+		}
 
-        private bool CheckTopFace(int x, int y, int z, NativeArray<VoxelData> upperNeighbourVoxels,
-            IntPtr upperNeighbourAddress)
-        {
-            return !ChunkData.IsValidPosition(x, y + 1, z) &&
-                   (upperNeighbourAddress == IntPtr.Zero ||
-                    upperNeighbourAddress != IntPtr.Zero &&
-                    !upperNeighbourVoxels[x * ChunkData.ChunkSize + z].IsSolid()) ||
-                   ChunkData.IsValidPosition(x, y + 1, z) &&
-                   !Voxels[x * ChunkData.ChunkSizeSquared + (y + 1) * ChunkData.ChunkSize + z].IsSolid();
-        }
-
-        private bool CheckBottomFace(int x, int y, int z, NativeArray<VoxelData> lowerNeighboursVoxels,
-            IntPtr lowerNeighbourAddress)
-        {
-            return !ChunkData.IsValidPosition(x, y - 1, z) && lowerNeighbourAddress != IntPtr.Zero &&
-                   !lowerNeighboursVoxels[x * ChunkData.ChunkSize + z].IsSolid() ||
-                   ChunkData.IsValidPosition(x, y - 1, z) &&
-                   !Voxels[x * ChunkData.ChunkSizeSquared + (y - 1) * ChunkData.ChunkSize + z].IsSolid();
-        }
-
-        private bool CheckFrontFace(int x, int y, int z, NativeArray<VoxelData> frontNeighbourVoxels,
-            IntPtr frontNeighbourAddress)
-        {
-            return !ChunkData.IsValidPosition(x, y, z + 1) && frontNeighbourAddress != IntPtr.Zero &&
-                   !frontNeighbourVoxels[x * ChunkData.ChunkSize + y].IsSolid() ||
-                   ChunkData.IsValidPosition(x, y, z + 1) &&
-                   !Voxels[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z + 1].IsSolid();
-        }
-
-        private bool CheckBackFace(int x, int y, int z, NativeArray<VoxelData> backNeighbourVoxels,
-            IntPtr backNeighbourAddress)
-        {
-            return !ChunkData.IsValidPosition(x, y, z - 1) && backNeighbourAddress != IntPtr.Zero &&
-                   !backNeighbourVoxels[x * ChunkData.ChunkSize + y].IsSolid() ||
-                   ChunkData.IsValidPosition(x, y, z - 1) &&
-                   !Voxels[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z - 1].IsSolid();
-        }
-
-
-        private bool CheckRightFace(int x, int y, int z, NativeArray<VoxelData> rightNeighbourVoxels,
-            IntPtr rightNeighbourAddress)
-        {
-            return !ChunkData.IsValidPosition(x + 1, y, z) && rightNeighbourAddress != IntPtr.Zero &&
-                   !rightNeighbourVoxels[y * ChunkData.ChunkSize + z].IsSolid() ||
-                   ChunkData.IsValidPosition(x + 1, y, z) &&
-                   !Voxels[(x + 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].IsSolid();
-        }
-
-        private bool CheckLeftFace(int x, int y, int z, NativeArray<VoxelData> leftNeighbourVoxels,
-            IntPtr leftNeighbourAddress)
-        {
-            return !ChunkData.IsValidPosition(x - 1, y, z) && leftNeighbourAddress != IntPtr.Zero &&
-                   !leftNeighbourVoxels[y * ChunkData.ChunkSize + z].IsSolid() ||
-                   ChunkData.IsValidPosition(x - 1, y, z) &&
-                   !Voxels[(x - 1) * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z].IsSolid();
-        }
-    }
+		private int GetIndex(int x, int y, int z)
+		{
+			int chunkStartX = x / Chunk.ChunkSize;
+			int chunkStartY = y / Chunk.ChunkSize;
+			int chunkStartZ = z / Chunk.ChunkSize;
+			int startChunkIndex = (chunkStartZ + chunkStartY * _death / Chunk.ChunkSize +
+			                       chunkStartX * (_death * _height / Chunk.ChunkSizeSquared)) * Chunk.ChunkSizeCubed;
+			int localIndex = x % Chunk.ChunkSize * Chunk.ChunkSizeSquared + y % Chunk.ChunkSize * Chunk.ChunkSize + z % Chunk.ChunkSize;
+			return startChunkIndex + localIndex;
+		}
+	}
 }

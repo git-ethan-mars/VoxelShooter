@@ -1,58 +1,46 @@
 using System;
 using System.Globalization;
+using R3;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-
 namespace UI
 {
-    public class SliderWithDisplayedValue : MonoBehaviour
-    {
-        [SerializeField]
-        private TextMeshProUGUI displayedValue;
+	public class SliderWithDisplayedValue : MonoBehaviour
+	{
+		[SerializeField]
+		private TextMeshProUGUI displayedValue;
+		[SerializeField]
+		private Slider slider;
 
-        [SerializeField]
-        private Slider slider;
+		public void Construct(int initializedValue, int minValue, int maxValue)
+		{
+			slider.wholeNumbers = true;
+			slider.maxValue = maxValue;
+			slider.minValue = minValue;
+			slider.value = initializedValue;
+			Slider = slider.OnValueChangedAsObservable().ToReadOnlyReactiveProperty().AddTo(this);
+			Slider.Subscribe(value =>
+			{
+				displayedValue.SetText(value.ToString(CultureInfo.InvariantCulture));
+			}).AddTo(this);
+		}
 
-        public ObservableVariable<float> SliderValue { get; private set; }
+		public void Construct(float initializedValue, float minValue, float maxValue)
+		{
+			slider.wholeNumbers = false;
+			slider.maxValue = maxValue;
+			slider.minValue = minValue;
+			slider.value = initializedValue;
+			Slider = slider.OnValueChangedAsObservable().ToReadOnlyReactiveProperty().AddTo(this);
+			Slider
+				.Select(value => (float)Math.Round(value, 1))
+				.Subscribe(value =>
+				{
+					displayedValue.SetText(value.ToString(CultureInfo.InvariantCulture));
+				}).AddTo(this);
+		}
 
-        public void Construct(int initializedValue, int minValue, int maxValue)
-        {
-            SliderValue = new ObservableVariable<float>(initializedValue);
-            slider.wholeNumbers = true;
-            slider.onValueChanged.AddListener(UpdateDisplayedValue);
-            slider.maxValue = maxValue;
-            slider.minValue = minValue;
-            slider.value = initializedValue;
-        }
-
-        public void Construct(float initializedValue, float minValue, float maxValue)
-        {
-            SliderValue = new ObservableVariable<float>(initializedValue);
-            slider.wholeNumbers = false;
-            slider.onValueChanged.AddListener(UpdateDisplayedValue);
-            slider.maxValue = maxValue;
-            slider.minValue = minValue;
-            slider.value = initializedValue;
-        }
-
-        private void UpdateDisplayedValue(float value)
-        {
-            if (!slider.wholeNumbers)
-            {
-                SliderValue.Value = (float) Math.Round(value, 1);
-            }
-            else
-            {
-                SliderValue.Value = value;
-            }
-
-            displayedValue.SetText(SliderValue.Value.ToString(CultureInfo.InvariantCulture));
-        }
-
-        private void OnDestroy()
-        {
-            slider.onValueChanged.RemoveListener(UpdateDisplayedValue);
-        }
-    }
+		public ReadOnlyReactiveProperty<float> Slider { get; private set; }
+	}
 }

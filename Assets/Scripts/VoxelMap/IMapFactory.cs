@@ -1,16 +1,15 @@
 ﻿using System.Collections.Generic;
-using Unity.Collections;
+using Data;
 using UnityEngine;
-
 namespace VoxelMap
 {
 	public interface IMapFactory
 	{
-		Chunk CreateChunk(Vector3 position, Transform parent, ChunkData chunkData, NativeArray<Face> faces);
-		GameObject[] CreateWalls(MapData mapData, Transform parent);
-		GameObject CreateWaterPlane(Vector3 position, Color32 waterColor, Transform parent);
-		Light CreateDirectionalLight(LightData lightData, Transform parent);
-		Map CreateMap(MapData mapData, Transform container);
-		GameObject[] CreateSpawnPoints(List<SpawnPointData> data, Transform container);
+		GameObject CreateChunkView(Vector3 position, Transform parent);
+		void CreateWalls(MapData mapData, Transform parent);
+		void CreateWaterPlane(Vector3 position, Color32 waterColor, Transform parent);
+		void CreateDirectionalLight(LightData lightData, Transform parent);
+		void CreateSpawnPoints(List<SpawnPointData> data, Transform parent);
+		Map CreateEmptyMap();
 	}
 }

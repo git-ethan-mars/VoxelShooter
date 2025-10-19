@@ -1,39 +1,63 @@
-using System.Linq;
-using GamePlay.Data;
-using GamePlay.Factory;
+using Data;
 using GamePlay.MapFeatures;
+using Mirror;
+using Reflex.Attributes;
+using Services;
 using UnityEngine;
 using VoxelMap;
-
-namespace GamePlay.Entities
+namespace GamePlay
 {
-    public class Rocket : Entity
-    {
-        [SerializeField]
-        private ExplosionData explosionData;
-        
-        private IParticleFactory _particleFactory;
-        private RocketLauncherData _rocketData;
-        private MapProvider _mapProvider;
+	public class Rocket : NetworkBehaviour, IEntity
+	{
+		[SerializeField] private Rigidbody rigidBody;
+		[SerializeField] private BoxCollider boxCollider;
 
-        public void Construct(MapProvider mapProvider, IParticleFactory particleFactory, RocketLauncherData rocketData)
-        {
-            _mapProvider = mapProvider;
-            _particleFactory = particleFactory;
-            _rocketData = rocketData;
-        }
+		private MapProvider _mapProvider;
+		private IParticleFactory _particleFactory;
+		private EntityContainerService _entityContainer;
+		private RocketLauncherConfigure _configure;
 
-        private void OnCollisionEnter(Collision collision)
-        {
-            if (_mapProvider.TryGetMapFeature<MapDestruction>(out var mapDestruction))
-            {
-                mapDestruction.Visit(transform.position, explosionData);
-            }
-            
-            foreach (var visitor in GetEntitiesByType<IDamageVisitor>())
-            {
-                visitor.Visit(transform.position, explosionData);
-            }
-        }
-    }
+		[Inject]
+		private void Construct(MapProvider mapProvider, IParticleFactory particleFactory, IStaticDataService staticData,
+			EntityContainerService entityContainer)
+		{
+			_mapProvider = mapProvider;
+			_particleFactory = particleFactory;
+			_entityContainer = entityContainer;
+			_configure = staticData.GetItemConfigure<RocketLauncherConfigure>(ItemType.RocketLauncher);
+		}
+
+		private void Start()
+		{
+			_entityContainer.Add(this);
+		}
+
+		private void OnDestroy()
+		{
+			_entityContainer.Remove(this);
+		}
+
+		public void Launch()
+		{
+			rigidBody.linearVelocity = transform.forward * _configure.Speed;
+		}
+
+		private void OnCollisionEnter(Collision collision)
+		{
+			if (_mapProvider.Map.TryGetMapFeature(out MapDestruction mapDestruction))
+			{
+				mapDestruction.Visit(_configure.ExplosionData, transform.position);
+			}
+
+			foreach (IDamageVisitor visitor in _entityContainer.GetEntitiesByType<IDamageVisitor>())
+			{
+				visitor.Visit(_configure.ExplosionData, transform.position);
+			}
+
+			_particleFactory.CreateRchParticle(transform.position, _configure.ParticleSpeed, _configure.ParticleCount, _configure.ExplosionData.radius);
+			Destroy(gameObject);
+		}
+
+		public Bounds Bounds => boxCollider.bounds;
+	}
 }

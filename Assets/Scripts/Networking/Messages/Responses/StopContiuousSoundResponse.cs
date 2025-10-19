@@ -1,14 +1,13 @@
 using Mirror;
-
-namespace Networking.Messages.Responses
+namespace Networking.Messages
 {
-    public struct StopContinuousSoundResponse : IMirrorResponse
-    {
-        public readonly NetworkIdentity Source;
+	public struct StopContinuousSoundResponse : NetworkMessage
+	{
+		public readonly NetworkIdentity Source;
 
-        public StopContinuousSoundResponse(NetworkIdentity source)
-        {
-            Source = source;
-        }
-    }
+		public StopContinuousSoundResponse(NetworkIdentity source)
+		{
+			Source = source;
+		}
+	}
 }

@@ -1,65 +1,45 @@
 using System.Collections.Generic;
 using GamePlay;
-using GamePlay.Services;
+using GamePlay.Core;
+using R3;
+using Reflex.Attributes;
+using Services;
 using UnityEngine;
-
 namespace UI.Inventory
 {
 	public sealed class InventoryPresenter : MonoBehaviour
 	{
-		[SerializeField] 
-		private Hud hud;
+		[SerializeField] private Hud hud;
+		[SerializeField] private PaletteView paletteView;
+		[SerializeField] private InventoryView inventoryView;
 
-		[SerializeField] 
-		private PaletteView paletteView;
-
-		[SerializeField]
-		private InventoryView inventoryView;
-
-
-		private readonly List<SlotPresenter> _presenters = new();
+		private readonly List<SlotPresenter> _presenters = new List<SlotPresenter>();
 		private IInputService _inputService;
-		private SlotPresenterFactory _presenterFactory;
-		private InventorySystem _inventorySystem;
+		private CharacterProvider _characterProvider;
+		private ISlotPresenterFactory _presenterFactory;
 
-		public void Construct(IInputService inputService)
+		private GamePlay.Core.Inventory _inventory;
+
+		[Inject]
+		private void Construct(IInputService inputService, CameraService cameraService, CharacterProvider characterProvider,
+			IStaticDataService staticData, ISlotPresenterFactory slotPresenterFactory)
 		{
 			_inputService = inputService;
-	   		_presenterFactory = new SlotPresenterFactory(hud, paletteView);
+			_characterProvider = characterProvider;
+			_presenterFactory = slotPresenterFactory;
 		}
 
-		public void Initialize(InventorySystem inventory)
+		public void Initialize()
 		{
-			_inventorySystem = inventory;
-			for (var i = 0; i < inventory.Items.Count; i++)
-			{
-				inventory.Items[i].enabled = false;
-				inventory.Items[i].HideModel();
-				var slotView = inventoryView.SpawnElement();
-				var itemPresenter = _presenterFactory.CreatePresenter(inventory.Items[i], slotView);
-				itemPresenter.Initialize();
-				_presenters.Add(itemPresenter);
-			}
-			
-			_inventorySystem.ChangeSlot(0);
-		}
-
-		public void ResetInventory()
-		{
-			_inventorySystem.Reset();
-			
-			for (var i = 0; i < _presenters.Count; i++)
-			{
-				_presenters[i].Dispose();
-			}
-			
-			_presenters.Clear();
-			inventoryView.Clear();
+			_characterProvider.Character
+				.Subscribe(OnCharacterChanged)
+				.AddTo(this);
 		}
 
 		private void Update()
 		{
-			var scrollSpeed = _inputService.GetScrollSpeed();
+			float scrollSpeed = _inputService.GetScrollSpeed();
+
 			if (scrollSpeed < 0)
 			{
 				ChangeToPreviousInventorySlot();
@@ -69,20 +49,91 @@ namespace UI.Inventory
 			{
 				ChangeToNextInventorySlot();
 			}
+
+			if (_inputService.IsFirstSlotButtonPressed())
+			{
+				_inventory.SelectSlot(0);
+			}
+
+			if (_inputService.IsSecondSlotButtonPressed())
+			{
+				_inventory.SelectSlot(1);
+			}
+
+			if (_inputService.IsThirdSlotButtonPressed())
+			{
+				_inventory.SelectSlot(2);
+			}
+
+			if (_inputService.IsFourthSlotButtonPressed())
+			{
+				_inventory.SelectSlot(3);
+			}
+
+			if (_inputService.IsFifthSlotButtonPressed())
+			{
+				_inventory.SelectSlot(4);
+			}
+		}
+
+		private void OnCharacterChanged(Character character)
+		{
+			if (character != null)
+			{
+				_inventory = character.Inventory;
+
+				for (var i = 0; i < _inventory.Items.Count; i++)
+				{
+					OnItemAdded(i);
+				}
+				
+				_inventory.ItemAdded.Subscribe(OnItemAdded).AddTo(_inventory);
+			}
+			else
+			{
+				ResetView();
+			}
+		}
+
+		private void OnItemAdded(int index)
+		{
+			InventoryItem item = _inventory.Items[index];
+			item.enabled = false;
+			item.HideModel();
+			SlotView slotView = inventoryView.SpawnElement();
+			SlotPresenter itemPresenter = _presenterFactory.CreatePresenter(item, slotView);
+			itemPresenter.Initialize();
+			_presenters.Add(itemPresenter);
+
+			if (!_inventory.ActiveSlotIndex.HasValue)
+			{
+				_inventory.SelectSlot(0);
+			}
+		}
+
+		private void ResetView()
+		{
+			for (var i = 0; i < _presenters.Count; i++)
+			{
+				_presenters[i].Dispose();
+			}
+
+			_presenters.Clear();
+			inventoryView.Clear();
 		}
 
 		private void ChangeToNextInventorySlot()
 		{
-			var inventorySize = _inventorySystem.Items.Count;
-			var currentSlot = (_inventorySystem.ActiveSlotIndex!.Value + 1 + inventorySize) % inventorySize;
-			_inventorySystem.ChangeSlot(currentSlot);
+			int inventorySize = _inventory.Items.Count;
+			int currentSlot = (_inventory.ActiveSlotIndex!.Value + 1 + inventorySize) % inventorySize;
+			_inventory.SelectSlot(currentSlot);
 		}
 
 		private void ChangeToPreviousInventorySlot()
 		{
-			var inventorySize = _inventorySystem.Items.Count;
-			var currentSlot = (_inventorySystem.ActiveSlotIndex!.Value - 1 + inventorySize) % inventorySize;
-			_inventorySystem.ChangeSlot(currentSlot);
+			int inventorySize = _inventory.Items.Count;
+			int currentSlot = (_inventory.ActiveSlotIndex!.Value - 1 + inventorySize) % inventorySize;
+			_inventory.SelectSlot(currentSlot);
 		}
 	}
 }

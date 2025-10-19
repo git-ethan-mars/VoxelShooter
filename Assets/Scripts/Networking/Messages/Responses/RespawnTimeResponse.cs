@@ -1,12 +1,12 @@
-﻿using GamePlay.Data;
-
-namespace Networking.Messages.Responses
+﻿using System;
+using Mirror;
+namespace Networking.Messages
 {
-	public struct RespawnTimeResponse : IMirrorResponse
+	public struct RespawnTimeResponse : NetworkMessage
 	{
-		public ServerTime TimeLeft;
+		public TimeSpan TimeLeft;
 
-		public RespawnTimeResponse(ServerTime timeLeft)
+		public RespawnTimeResponse(TimeSpan timeLeft)
 		{
 			TimeLeft = timeLeft;
 		}

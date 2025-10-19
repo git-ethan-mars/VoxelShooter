@@ -1,0 +1,80 @@
+#pragma kernel ClearHeight
+#pragma kernel UpdateHeight
+#pragma kernel UpdateChunk
+
+struct VertexData
+{
+    float3 Position;
+    float3 Normal;
+    uint Color;
+    float2 UV;
+};
+
+StructuredBuffer<VertexData> VertexBuffer;
+RWStructuredBuffer<uint> HeightBuffer;
+float ChunkSize;
+float3 MeshPositionOffset;
+RWTexture2D<float4> MapTexture;
+
+bool IsValidQuad(uint3 quadId)
+{
+    uint length;
+    uint stride;
+    VertexBuffer.GetDimensions(length, stride);
+    
+    if (4 * quadId.x >= length)
+    {
+        return false;
+    }
+    
+    float3 normal = VertexBuffer[4 * quadId.x].Normal;
+
+    if (normal.y != 1)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+[numthreads(8,8,1)]
+void ClearHeight(uint3 id : SV_DispatchThreadID)
+{
+    HeightBuffer[id.x * ChunkSize + id.y] = 0;
+}
+
+[numthreads(16,1,1)]
+void UpdateHeight(uint3 quadId : SV_DispatchThreadID)
+{
+    return;
+    if (!IsValidQuad(quadId))
+    {
+        return;
+    }
+    
+    float3 quadCenter = min(VertexBuffer[4 * quadId.x].Position, min(VertexBuffer[4 * quadId.x + 1].Position,
+        min(VertexBuffer[4 * quadId.x + 2].Position, VertexBuffer[4 * quadId.x + 3].Position)));
+    float3 worldPosition = quadCenter + MeshPositionOffset;
+    HeightBuffer[quadCenter.x * ChunkSize + quadCenter.z] = max(HeightBuffer[quadCenter.x * ChunkSize + quadCenter.z], (uint)worldPosition.y);
+    //InterlockedMax(HeightBuffer[quadCenter.x * ChunkSize + quadCenter.z], (uint)worldPosition.y);
+}
+
+[numthreads(16,1,1)]
+void UpdateChunk(uint3 quadId : SV_DispatchThreadID)
+{
+    if (!IsValidQuad(quadId))
+    {
+        return;
+    }
+    
+    float3 quadCenter = min(VertexBuffer[4 * quadId.x].Position, min(VertexBuffer[4 * quadId.x + 1].Position,
+        min(VertexBuffer[4 * quadId.x + 2].Position, VertexBuffer[4 * quadId.x + 3].Position)));
+    float3 worldPosition = quadCenter + MeshPositionOffset;
+
+    if (HeightBuffer[quadCenter.x * ChunkSize + quadCenter.z] == (uint)worldPosition.y)
+    {
+        const uint encodedColor = VertexBuffer[4 * quadId.x].Color;
+        MapTexture[worldPosition.xz] = float4((float)(encodedColor & 255), (float)(encodedColor >> 8 & 255), (float)(encodedColor >> 16 & 255), 256)
+            * 1.0f / 256;
+    }
+}

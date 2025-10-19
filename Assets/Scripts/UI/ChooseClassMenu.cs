@@ -1,70 +1,83 @@
-using System;
-using GamePlay.Data;
+using System.Collections.Generic;
+using Data;
+using R3;
+using Reflex.Attributes;
+using Services;
 using UnityEngine;
 using UnityEngine.UI;
-
 namespace UI
 {
 	[RequireComponent(typeof(CanvasGroup))]
 	public class ChooseClassMenu : MonoBehaviour
 	{
-		public event Action<GameClass> ChangeClassButtonPressed;
+		[SerializeField] private Button exitButton;
+		[SerializeField] private List<GameClassInfo> gameClassesInfo;
+		[field: SerializeField] public CanvasGroup CanvasGroup { get; private set; }
+		public Observable<GameClass> ChangeClassButtonPressed { get; private set; }
+		public Observable<Unit> ExitButtonPressed { get; private set; }
 
-		[SerializeField]
-		private CanvasGroup canvasGroup;
+		private IStaticDataService _staticData;
 
-		public CanvasGroup CanvasGroup => canvasGroup;
-
-		[SerializeField]
-		private Button builderButton;
-
-		[SerializeField]
-		private Button sniperButton;
-
-		[SerializeField]
-		private Button combatantButton;
-
-		[SerializeField]
-		private Button grenadierButton;
-
-		[SerializeField]
-		private Button exitButton;
-
-		public void Construct()
+		[Inject]
+		private void Construct(IStaticDataService staticData)
 		{
-			builderButton.onClick.AddListener(ChooseBuilder);
-			sniperButton.onClick.AddListener(ChooseSniper);
-			combatantButton.onClick.AddListener(ChooseCombatant);
-			grenadierButton.onClick.AddListener(ChooseGrenadier);
-			canvasGroup.alpha = 0.0f;
+			_staticData = staticData;
 		}
 
-		private void ChooseBuilder()
+		public void Initialize()
 		{
-			ChangeClassButtonPressed?.Invoke(GameClass.Builder);
+			GameClass[] playableGameClasses = {
+				GameClass.Builder,
+				GameClass.Sniper,
+				GameClass.Grenadier,
+				GameClass.Combatant
+			};
+
+			ExitButtonPressed = exitButton.onClick.AsObservable();
+			ChangeClassButtonPressed = Observable.Empty<GameClass>();
+			
+			for (var i = 0; i < playableGameClasses.Length; i++)
+			{
+				GameClass gameClass = playableGameClasses[i];
+				gameClassesInfo[i].SetClassName(gameClass);
+
+				Characteristics characteristics = _staticData.GetCharacteristics(gameClass);
+				var itemTypes = _staticData.GetItems(gameClass);
+				gameClassesInfo[i].SetHealthValue(characteristics.MaxHealth);
+
+				SetupWeapon(gameClassesInfo[i], itemTypes[0], true);
+				SetupWeapon(gameClassesInfo[i], itemTypes[1], false);
+
+				gameClassesInfo[i].SetMeleeWeaponIcon(_staticData.GetSlotIcon(itemTypes[2]));
+
+				ChangeClassButtonPressed = Observable.Merge(ChangeClassButtonPressed,
+					gameClassesInfo[i].ChooseClassButton.onClick
+						.AsObservable()
+						.Select(_ => gameClass));
+			}
 		}
 
-		private void ChooseSniper()
+		private void SetupWeapon(GameClassInfo info, ItemType itemType, bool isMain)
 		{
-			ChangeClassButtonPressed?.Invoke(GameClass.Sniper);
-		}
+			var itemConfigure = _staticData.GetItemConfigure<InventoryItemConfigure>(itemType);
 
-		private void ChooseCombatant()
-		{
-			ChangeClassButtonPressed?.Invoke(GameClass.Combatant);
-		}
+			if (itemConfigure is RangeWeaponConfigure rangeWeaponConfigure)
+			{
+				info.SetMainWeapon(_staticData.GetSlotIcon(itemType), _staticData.GetProjectileIcon(itemType),
+					$"{rangeWeaponConfigure.MagazineSize}/{rangeWeaponConfigure.TotalBullets}", isMain);
+			}
 
-		private void ChooseGrenadier()
-		{
-			ChangeClassButtonPressed?.Invoke(GameClass.Grenadier);
-		}
+			if (itemConfigure is DrillLauncherConfigure drillLauncherConfigure)
+			{
+				info.SetMainWeapon(_staticData.GetSlotIcon(itemType), _staticData.GetProjectileIcon(itemType),
+					drillLauncherConfigure.Amount.ToString(), isMain);
+			}
 
-		private void OnDestroy()
-		{
-			builderButton.onClick.RemoveListener(ChooseBuilder);
-			sniperButton.onClick.RemoveListener(ChooseSniper);
-			combatantButton.onClick.RemoveListener(ChooseCombatant);
-			grenadierButton.onClick.RemoveListener(ChooseGrenadier);
+			if (itemConfigure is RocketLauncherConfigure rocketLauncherConfigure)
+			{
+				info.SetMainWeapon(_staticData.GetSlotIcon(itemType), _staticData.GetProjectileIcon(itemType),
+					rocketLauncherConfigure.Amount.ToString(), isMain);
+			}
 		}
 	}
 }

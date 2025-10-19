@@ -1,45 +1,30 @@
-﻿namespace UI
+﻿using System.Collections.Generic;
+using R3;
+using UnityEngine;
+namespace UI
 {
-    public class Limitation
-    {
-        public ObservableVariable<int> CurrentValue { get; }
-        private readonly int _minValue;
-        private readonly int _maxValue;
+	public sealed class Limitation : ReactiveProperty<int>
+	{
+		private readonly int _maxValue;
+		private readonly int _minValue;
 
-        public Limitation(int minValue, int maxValue)
-        {
-            _minValue = minValue;
-            CurrentValue = new ObservableVariable<int>(minValue);
-            _maxValue = maxValue;
-        }
+		public Limitation(int minValue, int maxValue) : base(minValue, EqualityComparer<int>.Default, false)
+		{
+			_minValue = minValue;
+			_maxValue = maxValue;
 
-        public void Increment()
-        {
-            if (CurrentValue.Value + 1 > _maxValue)
-            {
-                CurrentValue.Value = _maxValue;
-            }
-            else
-            {
-                CurrentValue.Value += 1;
-            }
-        }
+			OnValueChanging(ref GetValueRef());
+		}
 
-        public void Decrement()
-        {
-            if (CurrentValue.Value - 1 < _minValue)
-            {
-                CurrentValue.Value = _minValue;
-            }
-            else
-            {
-                CurrentValue.Value -= 1;
-            }
-        }
+		protected override void OnValueChanging(ref int value)
+		{
+			base.OnValueChanging(ref value);
+			value = Mathf.Clamp(value, _minValue, _maxValue);
+		}
 
-        public void Reset()
-        {
-            CurrentValue.Value = _minValue;
-        }
-    }
+		public void Reset()
+		{
+			Value = _minValue;
+		}
+	}
 }

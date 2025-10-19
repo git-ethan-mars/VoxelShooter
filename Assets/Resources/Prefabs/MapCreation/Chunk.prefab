@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4659098196728068263}
-  - component: {fileID: 8320372794917464019}
   - component: {fileID: 4659098196728068262}
   - component: {fileID: 6126872290204476689}
   - component: {fileID: 1225497277944002609}
@@ -35,20 +34,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8320372794917464019
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4659098196728068443}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 740795a85b20fe3468634acf7d351b3c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  meshFilter: {fileID: 4659098196728068262}
-  meshCollider: {fileID: 1225497277944002609}
 --- !u!33 &4659098196728068262
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -80,7 +65,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 940859ed725ba884795f6dcacc5764a4, type: 2}
+  - {fileID: 2100000, guid: d05bd0cdad479164aa5ad0dbccf4e10d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -122,5 +107,5 @@ MeshCollider:
   m_Enabled: 1
   serializedVersion: 5
   m_Convex: 0
-  m_CookingOptions: 4
+  m_CookingOptions: 30
   m_Mesh: {fileID: 0}

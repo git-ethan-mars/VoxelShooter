@@ -1,8 +1,7 @@
 using Mirror;
-
-namespace Networking.Messages.Responses
+namespace Networking.Messages
 {
-	public struct PlayerSoundResponse : IMirrorResponse
+	public struct PlayerSoundResponse : NetworkMessage
 	{
 		public readonly int SoundId;
 		public readonly NetworkIdentity Source;

@@ -1,24 +1,27 @@
-using Unity.Burst;
-using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 namespace VoxelMap
 {
-    [BurstCompile]
-    public struct WaterColorChangeJob : IJob
-    {
-        public NativeArray<VoxelData> Voxels;
-        public Color32 WaterColor;
-        public void Execute()
-        {
-            for (var x = 0; x < ChunkData.ChunkSize; x++)
-            {
-                for (var z = 0; z < ChunkData.ChunkSize; z++)
-                {
-                    var index =  x * ChunkData.ChunkSizeSquared + z;
-                    Voxels[index] = new VoxelData(WaterColor);
-                }
-            }
-        }
-    }
+	public struct WaterColorChangeJob : IJobFor
+	{
+		private MapData _mapData;
+		private readonly Color32 _waterColor;
+
+		public WaterColorChangeJob(MapData mapData, Color32 waterColor)
+		{
+			_mapData = mapData;
+			_waterColor = waterColor;
+		}
+
+		public void Execute(int index)
+		{
+			int x = index / _mapData.Depth;
+			int z = index % _mapData.Depth;
+
+			if (!_mapData[x, 0, z].IsSolid())
+			{
+				_mapData[x, 0, z] = new VoxelData(_waterColor);
+			}
+		}
+	}
 }

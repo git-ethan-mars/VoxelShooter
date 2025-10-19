@@ -1,65 +1,67 @@
 using System.Collections.Generic;
-using GamePlay.Data;
-using GamePlay.Entities;
 using UnityEngine;
 using VoxelMap;
-
 namespace GamePlay.MapFeatures
 {
-    public class MapBuilding : IMapFeature, IBuildVisitor
-    {
-        private readonly MapProvider _mapProvider;
-        private readonly VoxelHealthSystem _voxelHealthSystem;
-        private readonly ColumnDestructionAlgorithm _destructionAlgorithm;
+	public class MapBuilding : IMapFeature, IBuildVisitor
+	{
+		private readonly ColumnDestructionAlgorithm _destructionAlgorithm;
+		private readonly EntityContainerService _entityContainerService;
+		private readonly Map _map;
+		private readonly VoxelHealthSystem _voxelHealthSystem;
 
-        public MapBuilding(MapProvider mapProvider, VoxelHealthSystem voxelHealthSystem = null, ColumnDestructionAlgorithm destructionAlgorithm = null)
-        {
-            _mapProvider = mapProvider;
-            _voxelHealthSystem = voxelHealthSystem;
-            _destructionAlgorithm = destructionAlgorithm;
-        }
+		public MapBuilding(EntityContainerService entityContainerService, Map map, VoxelHealthSystem voxelHealthSystem = null,
+			ColumnDestructionAlgorithm destructionAlgorithm = null)
+		{
+			_entityContainerService = entityContainerService;
+			_map = map;
+			_voxelHealthSystem = voxelHealthSystem;
+			_destructionAlgorithm = destructionAlgorithm;
+		}
 
-        public void Visit(BlockData blockData, RaycastHit rayCastHit)
-        {
-            var voxelPosition = Vector3Int.FloorToInt(rayCastHit.point + rayCastHit.normal / 2);
-            var voxel = new Voxel(voxelPosition, new VoxelData(blockData.SelectedColor));
-            var voxels = new List<Voxel> { voxel };
-            if (!CanBuild(voxels))
-            {
-                return;
-            }
+		public void Visit(Block block, RaycastHit rayCastHit)
+		{
+			if (block.Amount.Value <= 0)
+			{
+				return;
+			}
 
-            _voxelHealthSystem?.RestoreVoxels(voxels);
-            _destructionAlgorithm?.Add(voxels);
-            _mapProvider.SetVoxelsByGlobalPositions(voxels);
-        }
+			Vector3Int voxelPosition = Vector3Int.FloorToInt(rayCastHit.point + rayCastHit.normal / 2);
+			var voxel = new Voxel(voxelPosition, new VoxelData(block.SelectedColor));
+			var voxels = new List<Voxel> { voxel };
+			if (!CanBuild(voxels))
+			{
+				return;
+			}
 
-        private bool CanBuild(List<Voxel> voxels)
-        {
-            foreach (var character in Entity.GetEntitiesByType<Character>())
-            {
-                for (var i = 0; i < voxels.Count; i++)
-                {
-                    if (_mapProvider.GetVoxelByGlobalPosition(voxels[i].Position).IsSolid() &&
-                        IsVoxelOverlapCharacter(voxels[i], character))
-                    {
-                        return false;
-                    }
-                }
-            }
+			_voxelHealthSystem?.RestoreVoxels(voxels);
+			_destructionAlgorithm?.Add(voxels);
+			_map.SetVoxelsByGlobalPositions(voxels);
+			block.Amount.Value -= 1;
+		}
 
-            return true;
-        }
+		public void OnAdd()
+		{
+			var buildVisitorWrapper = _map.gameObject.AddComponent<BuildVisitorWrapper>();
+			buildVisitorWrapper.Construct(this);
+		}
 
-        private bool IsVoxelOverlapCharacter(Voxel voxel, Character character)
-        {
-            var characterPosition = character.transform.position;
-            return characterPosition.x > voxel.Position.x
-                   && characterPosition.x < voxel.Position.x + 1
-                   && characterPosition.z > voxel.Position.z
-                   && characterPosition.z < voxel.Position.z + 1
-                   && characterPosition.y > voxel.Position.y - 2
-                   && characterPosition.y < voxel.Position.y + 2;
-        }
-    }
+		private bool CanBuild(List<Voxel> voxels)
+		{
+			foreach (IEntity entity in _entityContainerService.GetEntitiesByType<IEntity>())
+			{
+				for (var i = 0; i < voxels.Count; i++)
+				{
+					if (entity.Bounds.min.x < voxels[i].Position.x + 1 && entity.Bounds.max.x > voxels[i].Position.x &&
+					    entity.Bounds.min.y < voxels[i].Position.y + 1 && entity.Bounds.max.y > voxels[i].Position.y &&
+					    entity.Bounds.min.z < voxels[i].Position.z + 1 && entity.Bounds.max.z > voxels[i].Position.z)
+					{
+						return false;
+					}
+				}
+			}
+
+			return true;
+		}
+	}
 }

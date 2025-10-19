@@ -1,0 +1,50 @@
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using Data;
+using R3;
+using UnityEngine;
+using VoxelMap;
+using Random = UnityEngine.Random;
+
+namespace GamePlay
+{
+	public class LootBoxDropper
+	{ 
+		private readonly IEntityFactory _entityFactory;
+		private readonly MapProvider _mapProvider;
+
+		private readonly HashSet<Vector2Int> _busyPositions = new HashSet<Vector2Int>();
+
+		public LootBoxDropper(IEntityFactory entityFactory, MapProvider mapProvider)
+		{
+			_entityFactory = entityFactory;
+			_mapProvider = mapProvider;
+		}
+
+		public async UniTask StartDropping(TimeSpan spawnInterval, CancellationToken token)
+		{
+			return;
+			while (!token.IsCancellationRequested)
+			{
+				if (!_mapProvider.Map.TryGetRandomTopVoxelPosition(out Vector3Int topVoxelPosition)
+				    || _busyPositions.Contains(new Vector2Int(topVoxelPosition.x, topVoxelPosition.z)))
+				{
+					await UniTask.Yield(token);
+				}
+				else
+				{
+					Vector2Int gridPosition = new Vector2Int(topVoxelPosition.x, topVoxelPosition.z);
+					_busyPositions.Add(gridPosition);
+					Vector3 boxPosition = new Vector3(topVoxelPosition.x + Map.WorldOffset.x, _mapProvider.Map.Height - 1, topVoxelPosition.z +
+						Map.WorldOffset.z);
+					LootBoxType lootBoxType = (LootBoxType)Random.Range(0, Enum.GetNames(typeof(LootBoxType)).Length);
+					LootBox lootBox = _entityFactory.CreateLootBox(lootBoxType, boxPosition);
+					lootBox.PickedUp.Subscribe(_ => _busyPositions.Remove(gridPosition)).AddTo(lootBox);
+					await UniTask.Delay(spawnInterval, cancellationToken: token);
+				}
+			}
+		}
+	}
+}

@@ -1,41 +1,48 @@
+using System;
 using GamePlay;
-
+using R3;
+using Services;
+using UnityEngine;
 namespace UI.Inventory
 {
-	public class GrenadePresenter : SlotPresenter
+	public class GrenadePresenter : SlotPresenter<Grenade>
 	{
-		private readonly Grenade _grenade;
 		private readonly Hud _hud;
+		private IDisposable _disposable;
+		private Sprite _projectileIcon;
 
-		public GrenadePresenter(Grenade grenade, SlotView slotView, Hud hud) : base(grenade, slotView)
+		public GrenadePresenter(IStaticDataService staticData, UIProvider uiProvider, Grenade grenade, SlotView slotView)
+			: base(staticData, grenade, slotView)
 		{
-			_grenade = grenade;
-			_hud = hud;
+			_hud = uiProvider.InGameUI.Hud;
 		}
 
 		public override void Initialize()
 		{
 			base.Initialize();
-			_grenade.Selected += OnSelected;
-			_grenade.Deselected += OnDeselected;
-			_grenade.Data.AmountChanged += OnAmountChanged;
+
+			_disposable = InventoryItem.Amount.Subscribe(OnAmountChanged);
+			_projectileIcon = StaticData.GetProjectileIcon(InventoryItem.Type);
 		}
 
 		public override void Dispose()
 		{
 			base.Dispose();
-			_grenade.Selected -= OnSelected;
-			_grenade.Deselected -= OnDeselected;
-			_grenade.Data.AmountChanged -= OnAmountChanged;
+
+			_disposable.Dispose();
 		}
 
-		private void OnSelected()
+		protected override void OnSelected()
 		{
-			_hud.ShowItemInfo(_grenade.InventoryIcon, _grenade.Data.Amount.ToString());
+			base.OnSelected();
+
+			_hud.ShowItemInfo(_projectileIcon, InventoryItem.Amount.ToString());
 		}
 
-		private void OnDeselected()
+		protected override void OnDeselected()
 		{
+			base.OnDeselected();
+
 			_hud.HideItemInfo();
 		}
 

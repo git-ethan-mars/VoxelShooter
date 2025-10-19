@@ -1,23 +1,31 @@
 using Unity.Burst;
-using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 namespace VoxelMap
 {
-    [BurstCompile]
-    public struct InnerColorChangeJob : IJob
-    {
-        public NativeArray<VoxelData> Voxels;
-        public Color32 NewInnerColor;
-        public void Execute()
-        {
-            for (var i = 0; i < ChunkData.ChunkSizeCubed; i++)
-            {
-                if (Voxels[i] == VoxelData.DefaultInner)
-                {
-                    Voxels[i] = new VoxelData(NewInnerColor);
-                }
-            }
-        }
-    }
+	[BurstCompile]
+	public struct InnerColorChangeJob : IJobFor
+	{
+		private MapData _mapData;
+		private readonly Color32 _newInnerColor;
+
+		public InnerColorChangeJob(MapData mapData, Color32 newInnerColor)
+		{
+			_mapData = mapData;
+			_newInnerColor = newInnerColor;
+		}
+
+		public void Execute(int chunkIndex)
+		{
+			for (var i = 0; i < Chunk.ChunkSizeCubed; i++)
+			{
+				int voxelIndex = chunkIndex * Chunk.ChunkSizeCubed + i;
+
+				if (_mapData[voxelIndex] == VoxelData.DefaultInner)
+				{
+					_mapData[voxelIndex] = new VoxelData(_newInnerColor);
+				}
+			}
+		}
+	}
 }

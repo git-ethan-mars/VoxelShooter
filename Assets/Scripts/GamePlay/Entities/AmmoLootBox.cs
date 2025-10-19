@@ -1,15 +1,15 @@
-namespace GamePlay.Entities
+namespace GamePlay
 {
 	public class AmmoLootBox : LootBox
 	{
 		protected override void OnPickUp(Character character)
 		{
 			character.Inventory.ApplyEffectToItems<RangeWeapon>(
-				rangeWeapon => rangeWeapon.Data.TotalBullets += rangeWeapon.Data.MagazineSize * 2);
-			character.Inventory.ApplyEffectToItems<Tnt>(tnt => tnt.Data.Amount += 1);
-			character.Inventory.ApplyEffectToItems<Grenade>(grenade => grenade.Data.Amount += 1);
-			character.Inventory.ApplyEffectToItems<RocketLauncher>(rocketLauncher => rocketLauncher.Data.CarriedRockets += 1);
-			character.Inventory.ApplyEffectToItems<DrillLauncher>(drill=>drill.Data.ChargedDrills += 1);
+				rangeWeapon => rangeWeapon.TotalBullets.Value += rangeWeapon.Configure.MagazineSize * 2);
+			character.Inventory.ApplyEffectToItems<TNT>(tnt => tnt.Amount.Value += 1);
+			character.Inventory.ApplyEffectToItems<Grenade>(grenade => grenade.Amount.Value += 1);
+			character.Inventory.ApplyEffectToItems<RocketLauncher>(rocketLauncher => rocketLauncher.Amount.Value += 1);
+			character.Inventory.ApplyEffectToItems<DrillLauncher>(drill => drill.Amount.Value += 1);
 		}
 	}
 }

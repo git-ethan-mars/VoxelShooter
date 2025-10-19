@@ -1,28 +1,22 @@
-using UnityEngine.Events;
-
+using R3;
+using UnityEngine;
+using UnityEngine.UI;
 namespace UI.Carousel
 {
-    public abstract class CarouselView<T>
-    {
-        public event UnityAction IncreaseButtonPressed
-        {
-            add => Control.IncreaseButton.onClick.AddListener(value);
-            remove => Control.IncreaseButton.onClick.RemoveListener(value);
-        }
+	public abstract class CarouselView<T> : MonoBehaviour
+	{
+		[SerializeField] protected Button increaseButton;
+		[SerializeField] protected Button decreaseButton;
 
-        public event UnityAction DecreaseButtonPressed
-        {
-            add => Control.DecreaseButton.onClick.AddListener(value);
-            remove => Control.DecreaseButton.onClick.RemoveListener(value);
-        }
+		private void Awake()
+		{
+			IncreaseButtonPressed = increaseButton.onClick.AsObservable();
+			DecreaseButtonPressed = decreaseButton.onClick.AsObservable();
+		}
 
-        public abstract void OnModelValueChanged(T value);
+		public Observable<Unit> IncreaseButtonPressed;
+		public Observable<Unit> DecreaseButtonPressed;
 
-        protected readonly CarouselControl Control;
-
-        protected CarouselView(CarouselControl control)
-        {
-            Control = control;
-        }
-    }
+		public abstract void OnModelValueChanged(T value);
+	}
 }

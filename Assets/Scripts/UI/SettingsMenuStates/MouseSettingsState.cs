@@ -1,40 +1,58 @@
-using GamePlay.Services;
+using System;
+using System.Linq;
+using Data;
+using R3;
+using Services;
+using UI.Carousel;
 using UnityEngine;
-
 namespace UI.SettingsMenuStates
 {
-    public class MouseSettingsState : ISettingsMenuState
-    {
-        private const float MinSliderValue = 1.0f;
-        private const float MaxSliderValue = 5.0f;
+	public class MouseSettingsState : ISettingsMenuState
+	{
+		private const float MinSliderValue = 1.0f;
+		private const float MaxSliderValue = 5.0f;
+		private readonly SliderWithDisplayedValue _aimSensitivity;
+		private readonly CarouselModel<CrosshairSprite> _crosshairModel;
+		private readonly CarouselPresenter<CrosshairSprite> _crosshairPresenter;
 
-        private readonly GameObject _mouseSection;
-        private readonly IStorageService _storageService;
-        private readonly SliderWithDisplayedValue _sensitivity;
-        private readonly SliderWithDisplayedValue _aimSensitivity;
+		private readonly GameObject _mouseSection;
+		private readonly SliderWithDisplayedValue _sensitivity;
+		private readonly IStorageService _storageService;
 
-        public MouseSettingsState(GameObject mouseSection, SliderWithDisplayedValue sensitivity,
-            SliderWithDisplayedValue aimSensitivity, IStorageService storageService)
-        {
-            _mouseSection = mouseSection;
-            _storageService = storageService;
-            _sensitivity = sensitivity;
-            _aimSensitivity = aimSensitivity;
-            var currentSettings = _storageService.Load<MouseSettingsData>(IStorageService.MouseSettingsKey);
-            _sensitivity.Construct(currentSettings.GeneralSensitivity, MinSliderValue, MaxSliderValue);
-            _aimSensitivity.Construct(currentSettings.AimSensitivity, MinSliderValue, MaxSliderValue);
-        }
+		private IDisposable _saveSettingsSubscription;
 
-        public void Enter()
-        {
-            _mouseSection.SetActive(true);
-        }
+		public MouseSettingsState(IStorageService storageService, IStaticDataService staticData, GameObject mouseSection,
+			SliderWithDisplayedValue sensitivity, SliderWithDisplayedValue aimSensitivity, CrosshairCarouselView crosshairView)
+		{
+			_storageService = storageService;
+			_mouseSection = mouseSection;
+			_sensitivity = sensitivity;
+			_aimSensitivity = aimSensitivity;
+			var currentSettings = _storageService.Load<MouseSettingsData>(IStorageService.MouseSettingsKey);
+			_sensitivity.Construct(currentSettings.GeneralSensitivity, MinSliderValue, MaxSliderValue);
+			_aimSensitivity.Construct(currentSettings.AimSensitivity, MinSliderValue, MaxSliderValue);
+			_crosshairModel = new CarouselModel<CrosshairSprite>(staticData.GetCrosshairSprite(currentSettings.CrosshairId),
+				staticData.GetCrosshairSprites().ToArray());
+			_crosshairPresenter = new CarouselPresenter<CrosshairSprite>(_crosshairModel, crosshairView);
+		}
 
-        public void Exit()
-        {
-            _storageService.Save(IStorageService.MouseSettingsKey,
-                new MouseSettingsData(_sensitivity.SliderValue.Value, _aimSensitivity.SliderValue.Value));
-            _mouseSection.SetActive(false);
-        }
-    }
+		public void Enter()
+		{
+			_mouseSection.SetActive(true);
+
+			_crosshairPresenter.Initialize();
+			_saveSettingsSubscription = Observable.Merge(_sensitivity.Slider.Select(_ => Unit.Default), _aimSensitivity.Slider.Select(_ => Unit
+				.Default), _crosshairModel.CurrentItem.Select(_ => Unit.Default)).Subscribe(_ =>
+				_storageService.Set(new MouseSettingsData(_sensitivity.Slider.CurrentValue, _aimSensitivity.Slider.CurrentValue,
+						_crosshairModel.CurrentItem.CurrentValue.ID)));
+		}
+
+		public void Exit()
+		{
+			_crosshairPresenter.Dispose();
+			_saveSettingsSubscription.Dispose();
+
+			_mouseSection.SetActive(false);
+		}
+	}
 }

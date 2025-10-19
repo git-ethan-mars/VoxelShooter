@@ -3,23 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using VoxelMap;
-
 namespace GamePlay.MapFeatures
 {
 	public class ColumnDestructionAlgorithm
 	{
-		private readonly MapProvider _mapProvider;
 		private readonly List<Run>[] _columns;
-		private readonly Dictionary<Run, HashSet<Run>> _neighboursByRun;
-		private readonly List<Run> _runsToDelete;
-		private readonly Stack<Run> _pathStack;
 		private readonly HashSet<Vector3Int> _connectedNeighbours;
+		private readonly Map _map;
 		private readonly List<Vector3Int> _neighbours;
+		private readonly Dictionary<Run, HashSet<Run>> _neighboursByRun;
+		private readonly Stack<Run> _pathStack;
+		private readonly List<Run> _runsToDelete;
 
-		public ColumnDestructionAlgorithm(MapProvider mapProvider)
+		public ColumnDestructionAlgorithm(Map map)
 		{
-			_mapProvider = mapProvider;
-			_columns = new List<Run>[mapProvider.Width * mapProvider.Depth];
+			_map = map;
+			_columns = new List<Run>[map.Width * map.Depth];
 			_runsToDelete = new List<Run>();
 			_pathStack = new Stack<Run>();
 			_connectedNeighbours = new HashSet<Vector3Int>();
@@ -41,7 +40,7 @@ namespace GamePlay.MapFeatures
 			{
 				var singleVoxelRun = new Run(voxels[i].Position.x, voxels[i].Position.z, voxels[i].Position.y, 1, true);
 				if (!TryMergeRuns(singleVoxelRun,
-					_columns[voxels[i].Position.x * _mapProvider.Depth + voxels[i].Position.z]))
+					    _columns[voxels[i].Position.x * _map.Depth + voxels[i].Position.z]))
 				{
 					AddRun(singleVoxelRun);
 				}
@@ -55,7 +54,7 @@ namespace GamePlay.MapFeatures
 			_connectedNeighbours.Clear();
 			for (var i = 0; i < removingVoxels.Count; i++)
 			{
-				var run = FindRunInColumn(removingVoxels[i].Position.x, removingVoxels[i].Position.z, removingVoxels[i].Position.y);
+				Run run = FindRunInColumn(removingVoxels[i].Position.x, removingVoxels[i].Position.z, removingVoxels[i].Position.y);
 				if (removingVoxels[i].Position.y == run.Begin || removingVoxels[i].Position.y == run.Begin + run.Length - 1)
 				{
 					var newRun = new Run(run.X, run.Z, run.Begin, run.Length, run.IsCreatedByPlayer);
@@ -70,7 +69,7 @@ namespace GamePlay.MapFeatures
 				}
 				else
 				{
-					SplitRun(run, removingVoxels[i].Position.y, out var firstRun, out var secondRun);
+					SplitRun(run, removingVoxels[i].Position.y, out Run firstRun, out Run secondRun);
 					RemoveRun(run);
 					AddRun(firstRun);
 					AddRun(secondRun);
@@ -92,7 +91,7 @@ namespace GamePlay.MapFeatures
 			while (neighbourRuns.Count > 0)
 			{
 				var visited = new HashSet<Run>();
-				var neighbourRun = neighbourRuns.First();
+				Run neighbourRun = neighbourRuns.First();
 				_pathStack.Push(neighbourRun);
 				var isSeparatedComponent = true;
 				while (_pathStack.Count > 0)
@@ -103,14 +102,14 @@ namespace GamePlay.MapFeatures
 						continue;
 					}
 
-					var element = _pathStack.Pop();
+					Run element = _pathStack.Pop();
 					visited.Add(element);
 					if (neighbourRuns.Contains(element))
 					{
 						neighbourRuns.Remove(element);
 					}
 
-					foreach (var nextRun in _neighboursByRun[element])
+					foreach (Run nextRun in _neighboursByRun[element])
 					{
 						if (visited.Contains(nextRun))
 						{
@@ -137,12 +136,12 @@ namespace GamePlay.MapFeatures
 			var fallingVoxels = new List<Voxel>();
 			for (var i = 0; i < _runsToDelete.Count; i++)
 			{
-				for (var height = _runsToDelete[i].Begin;
-					height < _runsToDelete[i].Begin + _runsToDelete[i].Length;
-					height++)
+				for (int height = _runsToDelete[i].Begin;
+				     height < _runsToDelete[i].Begin + _runsToDelete[i].Length;
+				     height++)
 				{
 					var voxelPosition = new Vector3Int(_runsToDelete[i].X, height, _runsToDelete[i].Z);
-					var blockData = _mapProvider.GetVoxelByGlobalPosition(voxelPosition); 
+					VoxelData blockData = _map.GetVoxelByGlobalPosition(voxelPosition);
 					fallingVoxels.Add(new Voxel(voxelPosition, blockData));
 				}
 			}
@@ -152,9 +151,9 @@ namespace GamePlay.MapFeatures
 
 		private void AddRun(Run run)
 		{
-			_columns[run.X * _mapProvider.Depth + run.Z].Add(run);
+			_columns[run.X * _map.Depth + run.Z].Add(run);
 			_neighboursByRun[run] = new HashSet<Run>();
-			for (var y = run.Begin; y < run.Begin + run.Length; y++)
+			for (int y = run.Begin; y < run.Begin + run.Length; y++)
 			{
 				if (run.IsCreatedByPlayer)
 				{
@@ -167,7 +166,7 @@ namespace GamePlay.MapFeatures
 
 				for (var i = 0; i < _neighbours.Count; i++)
 				{
-					var neighbourRun =
+					Run neighbourRun =
 						FindRunInColumn(_neighbours[i].x, _neighbours[i].z,
 							_neighbours[i].y);
 					if (neighbourRun != null && run != neighbourRun)
@@ -181,8 +180,8 @@ namespace GamePlay.MapFeatures
 
 		private void RemoveRun(Run run)
 		{
-			_columns[run.X * _mapProvider.Depth + run.Z].Remove(run);
-			foreach (var adjacentRun in _neighboursByRun[run])
+			_columns[run.X * _map.Depth + run.Z].Remove(run);
+			foreach (Run adjacentRun in _neighboursByRun[run])
 			{
 				_neighboursByRun[adjacentRun].Remove(run);
 			}
@@ -192,16 +191,16 @@ namespace GamePlay.MapFeatures
 
 		private void PreProcessColumns()
 		{
-			for (var x = 0; x < _mapProvider.Width; x++)
+			for (var x = 0; x < _map.Width; x++)
 			{
-				for (var z = 0; z < _mapProvider.Depth; z++)
+				for (var z = 0; z < _map.Depth; z++)
 				{
 					var runs = new List<Run>();
 					var startRun = 0;
 					var length = 0;
-					for (var y = 0; y < _mapProvider.Height; y++)
+					for (var y = 0; y < _map.Height; y++)
 					{
-						var isSolid = _mapProvider.GetVoxelByGlobalPosition(x, y, z).IsSolid();
+						bool isSolid = _map.GetVoxelByGlobalPosition(x, y, z).IsSolid();
 						if (isSolid)
 						{
 							if (length == 0)
@@ -212,7 +211,7 @@ namespace GamePlay.MapFeatures
 							length += 1;
 						}
 
-						if (!isSolid || y == _mapProvider.Height - 1)
+						if (!isSolid || y == _map.Height - 1)
 						{
 							if (length > 0)
 							{
@@ -223,7 +222,7 @@ namespace GamePlay.MapFeatures
 						}
 					}
 
-					_columns[x * _mapProvider.Depth + z] = runs;
+					_columns[x * _map.Depth + z] = runs;
 				}
 			}
 		}
@@ -238,22 +237,22 @@ namespace GamePlay.MapFeatures
 				}
 			}
 
-			for (var x = 0; x < _mapProvider.Width; x++)
+			for (var x = 0; x < _map.Width; x++)
 			{
-				for (var z = 0; z < _mapProvider.Depth; z++)
+				for (var z = 0; z < _map.Depth; z++)
 				{
-					for (var y = 0; y < _mapProvider.Height; y++)
+					for (var y = 0; y < _map.Height; y++)
 					{
-						if (!_mapProvider.GetVoxelByGlobalPosition(x, y, z).IsSolid())
+						if (!_map.GetVoxelByGlobalPosition(x, y, z).IsSolid())
 						{
 							continue;
 						}
 
-						var currentRun = FindRunInColumn(x, z, y);
+						Run currentRun = FindRunInColumn(x, z, y);
 						GetConnectedNeighbours(x, y, z);
 						for (var i = 0; i < _neighbours.Count; i++)
 						{
-							var neighbourRun = FindRunInColumn(
+							Run neighbourRun = FindRunInColumn(
 								_neighbours[i].x, _neighbours[i].z,
 								_neighbours[i].y);
 							if (currentRun != neighbourRun)
@@ -302,7 +301,7 @@ namespace GamePlay.MapFeatures
 
 		private Run FindRunInColumn(int columnX, int columnZ, int height)
 		{
-			var column = _columns[columnX * _mapProvider.Depth + columnZ];
+			var column = _columns[columnX * _map.Depth + columnZ];
 			for (var i = 0; i < column.Count; i++)
 			{
 				if (column[i].Begin <= height && height < column[i].Begin + column[i].Length)
@@ -317,19 +316,19 @@ namespace GamePlay.MapFeatures
 		private void GetConnectedNeighbours(int x, int y, int z)
 		{
 			_neighbours.Clear();
-			for (var xOffset = -1; xOffset <= 1; xOffset++)
+			for (int xOffset = -1; xOffset <= 1; xOffset++)
 			{
-				for (var yOffset = -1; yOffset <= 1; yOffset++)
+				for (int yOffset = -1; yOffset <= 1; yOffset++)
 				{
-					for (var zOffset = -1; zOffset <= 1; zOffset++)
+					for (int zOffset = -1; zOffset <= 1; zOffset++)
 					{
 						if (xOffset == 0 && yOffset == 0 && zOffset == 0)
 						{
 							continue;
 						}
 
-						if (_mapProvider.IsInsideMap(x + xOffset, y + yOffset, z + zOffset) && _mapProvider
-							.GetVoxelByGlobalPosition(x + xOffset, y + yOffset, z + zOffset).IsSolid())
+						if (_map.IsInsideMap(x + xOffset, y + yOffset, z + zOffset) && _map
+							    .GetVoxelByGlobalPosition(x + xOffset, y + yOffset, z + zOffset).IsSolid())
 						{
 							_neighbours.Add(new Vector3Int(x + xOffset, y + yOffset, z + zOffset));
 						}
@@ -341,19 +340,19 @@ namespace GamePlay.MapFeatures
 		private void GetConnectedNeighboursWithoutDiagonals(int x, int y, int z)
 		{
 			_neighbours.Clear();
-			for (var xOffset = -1; xOffset <= 1; xOffset++)
+			for (int xOffset = -1; xOffset <= 1; xOffset++)
 			{
-				for (var yOffset = -1; yOffset <= 1; yOffset++)
+				for (int yOffset = -1; yOffset <= 1; yOffset++)
 				{
-					for (var zOffset = -1; zOffset <= 1; zOffset++)
+					for (int zOffset = -1; zOffset <= 1; zOffset++)
 					{
 						if (Math.Abs(xOffset) + Math.Abs(yOffset) + Math.Abs(zOffset) != 1)
 						{
 							continue;
 						}
 
-						if (_mapProvider.IsInsideMap(x + xOffset, y + yOffset, z + zOffset) && _mapProvider
-							.GetVoxelByGlobalPosition(x + xOffset, y + yOffset, z + zOffset).IsSolid())
+						if (_map.IsInsideMap(x + xOffset, y + yOffset, z + zOffset) && _map
+							    .GetVoxelByGlobalPosition(x + xOffset, y + yOffset, z + zOffset).IsSolid())
 						{
 							_neighbours.Add(new Vector3Int(x + xOffset, y + yOffset, z + zOffset));
 						}
@@ -364,11 +363,11 @@ namespace GamePlay.MapFeatures
 
 		private class Run
 		{
+			public readonly bool IsCreatedByPlayer;
 			public readonly int X;
 			public readonly int Z;
 			public int Begin;
 			public int Length;
-			public readonly bool IsCreatedByPlayer;
 
 			public Run(int x, int z, int begin, int length, bool isCreatedByPlayer)
 			{

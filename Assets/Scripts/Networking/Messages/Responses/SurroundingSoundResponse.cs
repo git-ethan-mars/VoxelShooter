@@ -1,8 +1,8 @@
+using Mirror;
 using UnityEngine;
-
-namespace Networking.Messages.Responses
+namespace Networking.Messages
 {
-	public struct SurroundingSoundResponse : IMirrorResponse
+	public struct SurroundingSoundResponse : NetworkMessage
 	{
 		public readonly int SoundId;
 		public readonly Vector3 Position;

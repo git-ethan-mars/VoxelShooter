@@ -1,6 +1,7 @@
 namespace VoxelMap
 {
-    public interface IMapFeature
-    {
-    }
+	public interface IMapFeature
+	{
+		void OnAdd();
+	}
 }

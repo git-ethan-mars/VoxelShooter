@@ -1,0 +1,29 @@
+#pragma kernel DrawMiniMap
+
+float2 CharacterPosition;
+float4 FallbackColor;
+RWTexture2D<float4> MiniMapTexture;
+RWTexture2D<float4> MapTexture;
+
+[numthreads(8,8,1)]
+void DrawMiniMap(uint3 id : SV_DispatchThreadID)
+{
+    uint miniMapWidth;
+    uint miniMapHeight;
+    MiniMapTexture.GetDimensions(miniMapWidth, miniMapHeight);
+
+    uint mapWidth;
+    uint mapHeight;
+    MapTexture.GetDimensions(mapWidth, mapHeight);
+
+    uint2 mapPosition = uint2(CharacterPosition.x - miniMapWidth / 2 + id.x, CharacterPosition.y - miniMapHeight / 2 + id.y);
+    
+    if (mapPosition.x < 0 || mapPosition.x >= mapWidth || mapPosition.y < 0 || mapPosition.y >= mapHeight)
+    {
+        MiniMapTexture[id.xy] = FallbackColor;
+    }
+    else
+    {
+        MiniMapTexture[id.xy] = MapTexture[mapPosition];
+    }
+}

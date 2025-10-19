@@ -1,58 +1,89 @@
-﻿using GamePlay.MapFeatures;
+﻿using System;
+using Cysharp.Threading.Tasks;
+using Data;
+using GamePlay.MapFeatures;
+using Mirror;
+using R3;
+using Reflex.Attributes;
 using UnityEngine;
 using VoxelMap;
-
-namespace GamePlay.Entities
+namespace GamePlay
 {
-	public class Tombstone : Entity, IPushable
+	[SelectionBase]
+	public class Tombstone : NetworkBehaviour, IEntity
 	{
-		[SerializeField] 
-		private ExplosionData explosion;
-		
-		[SerializeField]
-		private new Collider collider;
+		[SerializeField] private new Collider collider;
+		[SerializeField] private Bounds localBounds;
 
 		[Header("Explosion settings")]
-		[SerializeField]
-		private int radius;
+		[SerializeField] private ExplosionData explosionData;
+		[SerializeField] private int particleCount;
+		[SerializeField] private int particleSpeed;
 
-		[SerializeField]
-		private int damage;
-
-		[SerializeField]
-		private float delayInSeconds;
-
-		[SerializeField]
-		private int particleCount;
-
-		[SerializeField]
-		private int particleSpeed;
 		private MapProvider _mapProvider;
+		private EntityContainerService _entityContainer;
+		private IParticleFactory _particleFactory;
 
-		public Vector3Int Center => Vector3Int.FloorToInt(transform.position);
-		public Vector3Int Min => new(-Size.x / 2, -Size.y / 2, -Size.z / 2);
-		public Vector3Int Max => new(Size.x / 2, Size.y / 2, Size.z / 2);
-
-		private Vector3Int Size => Vector3Int.RoundToInt(collider.bounds.size);
-
-		public void Construct(MapProvider mapProvider)
+		[Inject]
+		private void Construct(MapProvider mapProvider, EntityContainerService entityContainer, IParticleFactory particleFactory)
 		{
 			_mapProvider = mapProvider;
-		}
-		
-		public void Push()
-		{
-			transform.position += Vector3.up;
+			_entityContainer = entityContainer;
+			_particleFactory = particleFactory;
 		}
 
-		public void Fall()
+		private void Start()
 		{
+			_entityContainer.Add(this);
+		}
+
+		private void OnDestroy()
+		{
+			_entityContainer.Remove(this);
+		}
+
+		public override void OnStartServer()
+		{
+			base.OnStartServer();
+
+			_mapProvider.Map.MapUpdated
+				.Subscribe(_ => ValidatePosition())
+				.AddTo(this);
+		}
+
+		public async UniTask ExplodeWithDelay(TimeSpan delay)
+		{
+			await UniTask.Delay(delay, cancellationToken: destroyCancellationToken);
+
+			_particleFactory.CreateRchParticle(transform.position, particleSpeed, particleCount, explosionData.radius);
+
+			if (_mapProvider.Map.TryGetMapFeature(out MapDestruction mapDestruction))
+			{
+				mapDestruction.Visit(explosionData, transform.position);
+			}
+
+			foreach (IDamageVisitor visitor in _entityContainer.GetEntitiesByType<IDamageVisitor>())
+			{
+				visitor.Visit(explosionData, transform.position);
+			}
+
+			Destroy(gameObject);
+		}
+
+		private void ValidatePosition()
+		{
+			while (_mapProvider.Map.HasIntersection(Bounds))
+			{
+				transform.position += Vector3.up;
+			}
 		}
 
 		private void OnDrawGizmosSelected()
 		{
 			Gizmos.color = Color.yellow;
-			Gizmos.DrawWireCube(transform.position, Size);
+			Gizmos.DrawWireCube(Bounds.center, Bounds.size);
 		}
+
+		public Bounds Bounds => new Bounds(localBounds.center + transform.position, localBounds.size);
 	}
 }

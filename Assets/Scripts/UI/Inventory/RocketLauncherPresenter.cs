@@ -1,55 +1,55 @@
+using System;
 using GamePlay;
-
+using R3;
+using Services;
+using UnityEngine;
 namespace UI.Inventory
 {
-	public class RocketLauncherPresenter : SlotPresenter
+	public class RocketLauncherPresenter : SlotPresenter<RocketLauncher>
 	{
-		private readonly RocketLauncher _inventoryItem;
 		private readonly Hud _hud;
+		private IDisposable _disposable;
+		private Sprite _projectileIcon;
 
-		public RocketLauncherPresenter(RocketLauncher inventoryItem, SlotView slotView, Hud hud) : base(inventoryItem,
-			slotView)
+		public RocketLauncherPresenter(IStaticDataService staticData, UIProvider uiProvider, RocketLauncher rocketLauncher, SlotView slotView) :
+			base(staticData, rocketLauncher, slotView)
 		{
-			_inventoryItem = inventoryItem;
-			_hud = hud;
+			_hud = uiProvider.InGameUI.Hud;
 		}
 
 		public override void Initialize()
 		{
 			base.Initialize();
-			_inventoryItem.Selected += OnSelected;
-			_inventoryItem.Deselected += OnDeselected;
-			_inventoryItem.Data.ChargedRocketsChanged += OnChargedRocketsChanged;
-			_inventoryItem.Data.CarriedRocketsChanged += OnCarriedRocketsChanged;
+
+			_disposable = Observable.Merge(InventoryItem.ChargedRockets, InventoryItem.ChargedRockets)
+				.Subscribe(_ => OnRocketsValueChanged());
+			_projectileIcon = StaticData.GetProjectileIcon(InventoryItem.Type);
+		}
+
+		protected override void OnSelected()
+		{
+			base.OnSelected();
+
+			_hud.ShowAmmoInfo(_projectileIcon, $"{InventoryItem.ChargedRockets} / {InventoryItem.Amount}");
+		}
+
+		protected override void OnDeselected()
+		{
+			base.OnDeselected();
+
+			_hud.HideAmmoInfo();
 		}
 
 		public override void Dispose()
 		{
 			base.Dispose();
-			_inventoryItem.Selected -= OnSelected;
-			_inventoryItem.Deselected -= OnDeselected;
-			_inventoryItem.Data.ChargedRocketsChanged -= OnChargedRocketsChanged;
-			_inventoryItem.Data.CarriedRocketsChanged -= OnCarriedRocketsChanged;
+
+			_disposable.Dispose();
 		}
 
-		private void OnSelected()
+		private void OnRocketsValueChanged()
 		{
-			_hud.ShowAmmoInfo(_inventoryItem.InventoryIcon, $"{_inventoryItem.Data.ChargedRockets} / {_inventoryItem.Data.CarriedRockets}");
-		}
-
-		private void OnDeselected()
-		{
-			_hud.HideAmmoInfo();
-		}
-
-		private void OnChargedRocketsChanged(int chargedRockets)
-		{
-			_hud.SetAmmoCount($"{chargedRockets} / {_inventoryItem.Data.CarriedRockets}");
-		}
-
-		private void OnCarriedRocketsChanged(int carriedRockets)
-		{
-			_hud.SetAmmoCount($"{_inventoryItem.Data.ChargedRockets} / {carriedRockets}");
+			_hud.SetAmmoCount($"{InventoryItem.ChargedRockets} / {InventoryItem.Amount}");
 		}
 	}
 }

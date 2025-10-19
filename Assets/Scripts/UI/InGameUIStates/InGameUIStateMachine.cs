@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
-using GamePlay.Services;
-
+using GamePlay;
+using Services;
+using UnityEngine;
 namespace UI.InGameUIStates
 {
 	public class InGameUIStateMachine
@@ -9,19 +10,16 @@ namespace UI.InGameUIStates
 		private readonly Dictionary<Type, IInGameUIState> _states;
 		private IInGameUIState _currentState;
 
-		public InGameUIStateMachine(IInputService inputService, TimeCounter timeCounter,
-			ChooseClassMenu chooseClassMenu, InGameMenu inGameMenu, Scoreboard scoreboard)
+		public InGameUIStateMachine(IInputService inputService, CharacterProvider characterProvider, InGameUI inGameUI)
 		{
 			_states = new Dictionary<Type, IInGameUIState>
 			{
-				[typeof(DefaultState)] =
-					new DefaultState(inputService, timeCounter),
-				[typeof(ChooseClassMenuState)] =
-					new ChooseClassMenuState(this, chooseClassMenu),
-				[typeof(InGameMenuState)] =
-					new InGameMenuState(inGameMenu),
-				[typeof(ScoreboardState)] =
-					new ScoreboardState(inputService, scoreboard)
+				[typeof(DefaultState)] = new DefaultState(characterProvider, inGameUI.TimeInfo, inGameUI.Hud),
+				[typeof(ChooseClassMenuState)] = new ChooseClassMenuState(inputService, inGameUI.ChooseClassMenu),
+				[typeof(InGameMenuState)] = new InGameMenuState(inputService, inGameUI.InGameMenu),
+				[typeof(ScoreboardState)] = new ScoreboardState(inGameUI.Scoreboard),
+				[typeof(SettingsMenuState)] = new SettingsMenuState(inputService, inGameUI.SettingsMenu),
+				[typeof(WorldMapState)] = new WorldMapState(inGameUI.WorldMap)
 			};
 		}
 

@@ -26,13 +26,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3322668320336600069}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3322668320336600084
 MonoBehaviour:
@@ -51,10 +51,9 @@ MonoBehaviour:
   headlessStartMode: 1
   editorAutoStart: 0
   sendRate: 60
-  autoStartServerBuild: 0
-  autoConnectClientBuild: 0
   offlineScene: 
   onlineScene: 
+  offlineSceneLoadDelay: 0
   transport: {fileID: 1682307205549550633}
   networkAddress: localhost
   maxConnections: 100
@@ -65,15 +64,39 @@ MonoBehaviour:
   autoCreatePlayer: 0
   playerSpawnMethod: 0
   spawnPrefabs:
+  - {fileID: 3783366468306986140, guid: e150b3aebe210d54bb8b21b922da3858, type: 3}
+  - {fileID: 9030222180740480023, guid: bad7feca91d5cae45acf91b46eeac0d9, type: 3}
+  - {fileID: 8095424271465804933, guid: e7405952fd04e7d44882e05434800af4, type: 3}
+  - {fileID: 6794632857203204427, guid: 79a94a9476f5a8c43a47623b1527785b, type: 3}
+  - {fileID: 6697332420508056661, guid: 9860fafbb48c93645810fd16cbff451c, type: 3}
+  - {fileID: 6697332420508056661, guid: f70e4119561657e4389b45408ec672df, type: 3}
+  - {fileID: 299248182084932945, guid: d31302436a0173f479a552b9b2347283, type: 3}
+  - {fileID: 6697332420508056661, guid: d340b8afdd997e14581feeb6fc595aa5, type: 3}
+  - {fileID: 8073471595118213303, guid: 92b0505206f2409479089fbcb3bde1eb, type: 3}
+  - {fileID: 129111282786975514, guid: 1f1c2edca7e5de44f9fee7f0048dc596, type: 3}
+  - {fileID: 644977718003732743, guid: b79deccf9ef77524e89790849cb5ebff, type: 3}
+  - {fileID: 5106030963746976738, guid: 16151daf92ba0b34ebb62a92aa9aa5df, type: 3}
+  - {fileID: 4245606585116657588, guid: 7ad44d29c785b7242974a6af01b5e2b8, type: 3}
+  - {fileID: 3330510825012040844, guid: 66d679d148b0b48448a1209266acec6c, type: 3}
+  - {fileID: 2527921387854626459, guid: 37151c374a3d1a446877a3bdb22eefe0, type: 3}
+  - {fileID: 9106257655567110729, guid: f659729cb3772da44b3692ae21197233, type: 3}
+  - {fileID: 2146935396539563154, guid: fd0130bc079d218439f0d345850455c0, type: 3}
+  - {fileID: 6697332420508056661, guid: 5fa74d23fe9bb41468d965a510dbd2a7, type: 3}
+  - {fileID: 6697332420508056661, guid: 07a6f573c80b48e4f980c2e0b2e9b6fb, type: 3}
+  - {fileID: 697211748399907209, guid: 1c4296936330d494684804c1fb525ba0, type: 3}
+  - {fileID: 7081574551729364688, guid: f6577ffa0c8c3a14f9161e807e767241, type: 3}
+  - {fileID: 1446763424621890894, guid: 6f67f5702f9d32a4793842c1e5215d79, type: 3}
+  - {fileID: 1374883755550458842, guid: 5a903469ac2556d40a9b97e33dd3c162, type: 3}
+  - {fileID: 6697332420508056661, guid: 532fdf926f93d8444899b177407fddaf, type: 3}
+  - {fileID: 1122000105119730127, guid: 3183c203f48e67f4bb94adb6efa2a5bd, type: 3}
+  - {fileID: 6516128613530972978, guid: 40c47f63e02fc5f41b1bdf8159a7aa42, type: 3}
+  - {fileID: 6697332420508056661, guid: 068e8acd749ac8b48b3722f62914b1c2, type: 3}
+  - {fileID: 7922214257710745971, guid: 210bed499898fd94ab9b5cb2589b65a1, type: 3}
+  - {fileID: 7084881398813862784, guid: 92084cda6074de54a811b7f455e35a62, type: 3}
   - {fileID: 8009858165730397543, guid: 906d10a161728b24bb6c0e575987dc75, type: 3}
   - {fileID: 7261819779245193037, guid: ec009f7e9e33c6a4bb14607b8d6e5942, type: 3}
-  - {fileID: 7084881398813862784, guid: 92084cda6074de54a811b7f455e35a62, type: 3}
-  - {fileID: 1446763424621890894, guid: 6f67f5702f9d32a4793842c1e5215d79, type: 3}
-  - {fileID: 6697332420508056661, guid: 07a6f573c80b48e4f980c2e0b2e9b6fb, type: 3}
-  - {fileID: 6697332420508056661, guid: f70e4119561657e4389b45408ec672df, type: 3}
-  - {fileID: 6697332420508056661, guid: d340b8afdd997e14581feeb6fc595aa5, type: 3}
+  - {fileID: 8009858165730397543, guid: c2a01d48d01d91447b0e60f5a94e9e66, type: 3}
   - {fileID: 5146989472639942367, guid: b1f18aed07c91974aaee3745ec4cbd2e, type: 3}
-  - {fileID: 644977718003732743, guid: b79deccf9ef77524e89790849cb5ebff, type: 3}
   exceptionsDisconnect: 1
   snapshotSettings:
     bufferTimeMultiplier: 2

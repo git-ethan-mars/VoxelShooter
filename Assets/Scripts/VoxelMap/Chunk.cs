@@ -1,238 +1,116 @@
-using System;
-using System.Collections.Generic;
-using Unity.Jobs;
+using Cysharp.Threading.Tasks;
 using Unity.Collections;
+using Unity.Jobs;
 using UnityEngine;
-
+using UnityEngine.Rendering;
 namespace VoxelMap
 {
-    public class Chunk : MonoBehaviour, IDisposable
-    {
-        [SerializeField]
-        private MeshFilter meshFilter;
-        [SerializeField]
-        private MeshCollider meshCollider;
+	public class Chunk
+	{
+		public const int ChunkSize = 32;
+		public const int ChunkSizeSquared = 1024;
+		public const int ChunkSizeCubed = 32768;
 
-        public Dictionary<ChunkNeighbourType, Chunk> Neighbours { get; set; } = new();
-        private Mesh _mesh;
-        private ChunkData _chunkData;
-        private NativeList<VertexData> _vertices;
-        private NativeList<int> _triangles;
-        private NativeArray<Face> _faces;
-        private bool _isDisposed;
+		public Mesh Mesh { get; }
+		public Vector3Int Position => Vector3Int.FloorToInt(_meshFilter.gameObject.transform.position);
+		public int FaceCount { get; set; }
 
-        public void Construct(ChunkData chunkData, NativeArray<Face> faces)
-        {
-            _chunkData = chunkData;
-            _vertices = new NativeList<VertexData>(Allocator.Persistent);
-            _triangles = new NativeList<int>(Allocator.Persistent);
-            _faces = faces;
-            _mesh = new Mesh();
-            _mesh.bounds = new Bounds(Vector3.one * ChunkData.ChunkSize / 2, Vector3.one * ChunkData.ChunkSize);
-        }
+		private readonly int _chunkIndex;
+		private readonly MeshCollider _collider;
+		private readonly MapData _mapData;
+		private readonly MeshFilter _meshFilter;
+		private int VertexCount => 4 * FaceCount;
+		private int IndexCount => 6 * FaceCount;
+		private Bounds Bounds => new Bounds((float)ChunkSize / 2 * Vector3.one, ChunkSize * Vector3.one);
 
-        public void ChangeVoxels(List<Voxel> voxels)
-        {
-            var neighbourChunksToRegenerate = Face.None;
-            for (var i = 0; i < voxels.Count; i++)
-            {
-                var x = voxels[i].Position.x;
-                var y = voxels[i].Position.y;
-                var z = voxels[i].Position.z;
-                _chunkData.SetVoxel(x, y, z, voxels[i].Data, PositionType.Local);
-                UpdateVoxelFaces(x, y, z);
-                SetNeighboursFaces(voxels[i].Position);
-                if (z == ChunkData.ChunkSize - 1 && Neighbours.TryGetValue(ChunkNeighbourType.Front, out var frontNeighbour))
-                {
-                    frontNeighbour.UpdateVoxelFaces(x, y, 0);
-                    neighbourChunksToRegenerate |= Face.Front;
-                }
+		public Chunk(int chunkIndex, MapData mapData, MeshFilter meshFilter, MeshCollider collider, int faceCount)
+		{
+			_chunkIndex = chunkIndex;
+			_mapData = mapData;
+			_meshFilter = meshFilter;
+			_collider = collider;
+			FaceCount = faceCount;
+			Mesh = new Mesh();
+			Mesh.bounds = Bounds;
+		}
 
-                if (z == 0 && Neighbours.TryGetValue(ChunkNeighbourType.Back, out var backNeighbour))
-                {
-                    backNeighbour.UpdateVoxelFaces(x, y, ChunkData.ChunkSize - 1);
-                    neighbourChunksToRegenerate |= Face.Back;
-                }
+		public void Regenerate()
+		{
+			Mesh.MeshDataArray meshArray = Mesh.AllocateWritableMeshData(1);
+			Mesh.MeshData meshData = meshArray[0];
 
-                if (y == ChunkData.ChunkSize - 1)
-                {
-                    if (Neighbours.TryGetValue(ChunkNeighbourType.Up, out var upperNeighbour))
-                    {
-                        upperNeighbour.UpdateVoxelFaces(x, 0, z);
-                    }
+			SetupMeshData(meshData);
 
-                    neighbourChunksToRegenerate |= Face.Top;
-                }
+			var vertices = meshData.GetVertexData<VertexData>();
+			var indexes = meshData.GetIndexData<int>();
 
-                if (y == 0 && Neighbours.TryGetValue(ChunkNeighbourType.Down, out var lowerNeighbour))
-                {
-                    lowerNeighbour.UpdateVoxelFaces(x, ChunkData.ChunkSize - 1, z);
-                    neighbourChunksToRegenerate |= Face.Bottom;
-                }
+			var regenerateJob = new RegenerateChunkJob(_mapData, _chunkIndex, vertices, indexes);
+			regenerateJob.Schedule().Complete();
+			
+			ApplyMeshData(meshData, meshArray);
 
-                if (x == ChunkData.ChunkSize - 1 && Neighbours.TryGetValue(ChunkNeighbourType.Right, out var rightNeighbour))
-                {
-                    rightNeighbour.UpdateVoxelFaces(0, y, z);
-                    neighbourChunksToRegenerate |= Face.Right;
-                }
-                else if (x == 0 && Neighbours.TryGetValue(ChunkNeighbourType.Left, out var leftNeighbour))
-                {
-                    leftNeighbour.UpdateVoxelFaces(ChunkData.ChunkSize - 1, y, z);
-                    neighbourChunksToRegenerate |= Face.Left;
-                }
-            }
+			var bakeJob = new BakeChunkColliderJob(Mesh.GetInstanceID());
+			bakeJob.Schedule().Complete();
 
-            RegenerateMesh();
+			ApplyMeshCollider();
+		}
 
-            foreach (ChunkNeighbourType chunkNeighbour in Enum.GetValues(typeof(ChunkNeighbourType)))
-            {
-                if (neighbourChunksToRegenerate.HasFlag(chunkNeighbour))
-                {
-                    Neighbours[chunkNeighbour].RegenerateMesh();
-                }
-            }
-        }
+		public async UniTask RegenerateAsync()
+		{
+			Mesh.MeshDataArray meshArray = Mesh.AllocateWritableMeshData(1);
+			Mesh.MeshData meshData = meshArray[0];
 
-        private void SetNeighboursFaces(Vector3Int voxelPosition)
-        {
-            if (ChunkData.IsValidPosition(voxelPosition.x + 1, voxelPosition.y, voxelPosition.z))
-            {
-                UpdateVoxelFaces(voxelPosition.x + 1, voxelPosition.y, voxelPosition.z);
-            }
+			SetupMeshData(meshData);
 
-            if (ChunkData.IsValidPosition(voxelPosition.x - 1, voxelPosition.y, voxelPosition.z))
-            {
-                UpdateVoxelFaces(voxelPosition.x - 1, voxelPosition.y, voxelPosition.z);
-            }
+			var vertices = meshData.GetVertexData<VertexData>();
+			var indexes = meshData.GetIndexData<int>();
 
-            if (ChunkData.IsValidPosition(voxelPosition.x, voxelPosition.y + 1, voxelPosition.z))
-            {
-                UpdateVoxelFaces(voxelPosition.x, voxelPosition.y + 1, voxelPosition.z);
-            }
+			var regenerateChunkJob = new RegenerateChunkJob(_mapData, _chunkIndex, vertices, indexes);
+			await regenerateChunkJob.Schedule().ToUniTask(PlayerLoopTiming.Update);
 
-            if (ChunkData.IsValidPosition(voxelPosition.x, voxelPosition.y - 1, voxelPosition.z))
-            {
-                UpdateVoxelFaces(voxelPosition.x, voxelPosition.y - 1, voxelPosition.z);
-            }
+			ApplyMeshData(meshData, meshArray);
 
-            if (ChunkData.IsValidPosition(voxelPosition.x, voxelPosition.y, voxelPosition.z + 1))
-            {
-                UpdateVoxelFaces(voxelPosition.x, voxelPosition.y, voxelPosition.z + 1);
-            }
+			var bakeJob = new BakeChunkColliderJob(Mesh.GetInstanceID());
+			await bakeJob.Schedule().ToUniTask(PlayerLoopTiming.Update);
 
-            if (ChunkData.IsValidPosition(voxelPosition.x, voxelPosition.y, voxelPosition.z - 1))
-            {
-                UpdateVoxelFaces(voxelPosition.x, voxelPosition.y, voxelPosition.z - 1);
-            }
-        }
+			ApplyMeshCollider();
+		}
 
-        public void RegenerateMesh(JobHandle dependOn = default)
-        {
-            var regenerateMeshJob = new RegenerateMeshJob
-            {
-                Voxels = _chunkData.Voxels,
-                Vertices = _vertices,
-                Triangles = _triangles,
-                Faces = _faces
-            };
+		private void SetupMeshData(Mesh.MeshData meshData)
+		{
+			var attributes = new NativeArray<VertexAttributeDescriptor>(4, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+			attributes[0] = new VertexAttributeDescriptor(VertexAttribute.Position, dimension:3);
+			attributes[1] = new VertexAttributeDescriptor(VertexAttribute.Normal, dimension:3);
+			attributes[2] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.UNorm8, dimension: 4);
+			attributes[3] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, dimension: 2);
 
-            var regenerateMeshHandle = regenerateMeshJob.Schedule(dependOn);
-            var meshArray = Mesh.AllocateWritableMeshData(1);
-            var mainMesh = meshArray[0];
-            var meshPreparationJob = new MeshPreparationJob()
-            {
-                MeshData = mainMesh, Vertices = _vertices, Triangles = _triangles
-            }; 
-            meshPreparationJob.Schedule(regenerateMeshHandle).Complete();
-            Mesh.ApplyAndDisposeWritableMeshData(meshArray, _mesh, meshPreparationJob.NoCalculations);
-            if (_vertices.Length == 0)
-            {
-                meshCollider.sharedMesh = null;
-            }
-            else
-            {
-                meshFilter.mesh = _mesh;
-                meshCollider.sharedMesh = _mesh;
-            }
-        }
+			meshData.SetVertexBufferParams(VertexCount, attributes);
+			meshData.SetIndexBufferParams(IndexCount, IndexFormat.UInt32);
 
-        private void UpdateVoxelFaces(int x, int y, int z)
-        {
-            var resultFaces = Face.None;
-            if (!_chunkData.GetVoxel(x, y, z, PositionType.Local).IsSolid())
-            {
-                SetFaces(x, y, z, resultFaces);
-                return;
-            }
+			attributes.Dispose();
+		}
 
-            var containsUpperChunk = Neighbours.TryGetValue(ChunkNeighbourType.Up, out var upperNeighbour);
-            if (!ChunkData.IsValidPosition(x, y + 1, z) &&
-                (!containsUpperChunk || !upperNeighbour._chunkData.GetVoxel(x, 0, z, PositionType.Local).IsSolid()) ||
-                ChunkData.IsValidPosition(x, y + 1, z) && !_chunkData.GetVoxel(x, y + 1, z, PositionType.Local).IsSolid())
-            {
-                resultFaces |= Face.Top;
-            }
+		private void ApplyMeshData(Mesh.MeshData meshData, Mesh.MeshDataArray meshArray)
+		{
+			meshData.subMeshCount = 1;
+			meshData.SetSubMesh(0, new SubMeshDescriptor(0, IndexCount)
+			{
+				bounds = Bounds,
+				vertexCount = VertexCount,
+			}, MeshUpdateFlags.DontValidateIndices | MeshUpdateFlags.DontRecalculateBounds | MeshUpdateFlags.DontNotifyMeshUsers);
 
-            var containsLowerChunk = Neighbours.TryGetValue(ChunkNeighbourType.Down, out var lowerNeighbour);
-            if (!ChunkData.IsValidPosition(x, y - 1, z) && containsLowerChunk &&
-                !lowerNeighbour._chunkData.GetVoxel(x, ChunkData.ChunkSize - 1, z, PositionType.Local).IsSolid() ||
-                ChunkData.IsValidPosition(x, y - 1, z) && !_chunkData.GetVoxel(x, y - 1, z, PositionType.Local).IsSolid())
-            {
-                resultFaces |= Face.Bottom;
-            }
+			Mesh.ApplyAndDisposeWritableMeshData(meshArray, Mesh);
+		}
 
-            var containsFrontChunk = Neighbours.TryGetValue(ChunkNeighbourType.Front, out var frontNeighbour);
-            if (!ChunkData.IsValidPosition(x, y, z + 1) && containsFrontChunk &&
-                !frontNeighbour._chunkData.GetVoxel(x, y, 0, PositionType.Local).IsSolid() ||
-                ChunkData.IsValidPosition(x, y, z + 1) && !_chunkData.GetVoxel(x, y, z + 1, PositionType.Local).IsSolid())
-            {
-                resultFaces |= Face.Front;
-            }
+		private void ApplyMeshCollider()
+		{
+			_collider.sharedMesh = null;
 
-            var containsBackChunk = Neighbours.TryGetValue(ChunkNeighbourType.Back, out var backNeighbour);
-            if (!ChunkData.IsValidPosition(x, y, z - 1) && containsBackChunk &&
-                !backNeighbour._chunkData.GetVoxel(x, y, ChunkData.ChunkSize - 1, PositionType.Local).IsSolid() ||
-                ChunkData.IsValidPosition(x, y, z - 1) && !_chunkData.GetVoxel(x, y, z - 1, PositionType.Local).IsSolid())
-            {
-                resultFaces |= Face.Back;
-            }
-
-            var containsRightChunk = Neighbours.TryGetValue(ChunkNeighbourType.Right, out var rightNeighbour);
-            if (!ChunkData.IsValidPosition(x + 1, y, z) && containsRightChunk &&
-                !rightNeighbour._chunkData.GetVoxel(0, y, z, PositionType.Local).IsSolid() ||
-                ChunkData.IsValidPosition(x + 1, y, z) && !_chunkData.GetVoxel(x + 1, y, z, PositionType.Local).IsSolid())
-            {
-                resultFaces |= Face.Right;
-            }
-
-            var containsLeftChunk = Neighbours.TryGetValue(ChunkNeighbourType.Left, out var leftNeighbour);
-            if (!ChunkData.IsValidPosition(x - 1, y, z) && containsLeftChunk &&
-                !leftNeighbour._chunkData.GetVoxel(ChunkData.ChunkSize - 1, y, z, PositionType.Local).IsSolid() ||
-                ChunkData.IsValidPosition(x - 1, y, z) && !_chunkData.GetVoxel(x - 1, y, z, PositionType.Local).IsSolid())
-            {
-                resultFaces |= Face.Left;
-            }
-
-            SetFaces(x, y, z, resultFaces);
-        }
-
-        private void SetFaces(int x, int y, int z, Face faces)
-        {
-            _faces[x * ChunkData.ChunkSizeSquared + y * ChunkData.ChunkSize + z] = faces;
-        }
-
-        public void Dispose()
-        {
-            if (_isDisposed)
-            {
-                return;
-            }
-
-            _vertices.Dispose();
-            _triangles.Dispose();
-            _faces.Dispose();
-            _chunkData.Dispose();
-            _isDisposed = true;
-        }
-    }
+			if (VertexCount > 0)
+			{
+				_meshFilter.mesh = Mesh;
+				_collider.sharedMesh = Mesh;
+			}
+		}
+	}
 }

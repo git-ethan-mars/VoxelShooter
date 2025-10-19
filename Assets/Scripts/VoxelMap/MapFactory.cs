@@ -1,17 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Common.AssetManagement;
-using Unity.Collections;
+using System.Numerics;
+using Data;
+using Services;
 using UnityEngine;
-
+using Quaternion = UnityEngine.Quaternion;
+using Vector3 = UnityEngine.Vector3;
 namespace VoxelMap
 {
-	internal class MapFactory : IMapFactory
+	public class MapFactory : IMapFactory
 	{
+		private const string WallContainerName = "Walls";
+		private const string SpawnPointContainerName = "Spawnpoints";
+
 		private const string DirectionalLightName = "Directional Light";
 		private const string SpawnPointPath = "Prefabs/MapCreation/Spawnpoint";
-		private const string MapPath = "Prefabs/MapCreation/Map";
+		private const string WaterPlane = "Prefabs/MapCreation/WaterPlane";
+		private const string ChunkMeshRendererPath = "Prefabs/MapCreation/Chunk";
+		private const string WallPath = "Prefabs/MapCreation/Wall";
+		private const string MapProviderPath = "Prefabs/MapCreation/VoxelMap";
 		private const float WaterScale = 1024;
 
 		private readonly IAssetProvider _assets;
@@ -21,20 +29,20 @@ namespace VoxelMap
 			_assets = assets;
 		}
 
-		public Chunk CreateChunk(Vector3 position, Transform parent, ChunkData chunkData, NativeArray<Face> faces)
+		public GameObject CreateChunkView(Vector3 position, Transform parent)
 		{
-			var chunk = _assets.Instantiate(MeshPath.ChunkMeshRendererPath, position, Quaternion.identity, parent).GetComponent<Chunk>();
-			chunk.Construct(chunkData, faces);
-			return chunk;
+			GameObject chunkView = _assets.Instantiate(ChunkMeshRendererPath, position, Quaternion.identity, parent);
+			return chunkView;
 		}
 
-		public GameObject[] CreateWalls(MapData mapData, Transform parent)
+		public void CreateWalls(MapData mapData, Transform parent)
 		{
-			var walls = new GameObject[6];
+			Transform wallContainer = new GameObject(WallContainerName).transform;
+			wallContainer.SetParent(parent);
 			var allFaces = Enum.GetValues(typeof(Face)).Cast<Face>().Where(face => face != Face.None);
-			foreach (var face in allFaces)
+			foreach (Face face in allFaces)
 			{
-				var wall = _assets.Instantiate(MeshPath.WallPath, parent);
+				GameObject wall = _assets.Instantiate(WallPath, wallContainer);
 				var mesh = new Mesh();
 				mesh.vertices = new Vector3[4];
 				if (face == Face.Top)
@@ -103,26 +111,26 @@ namespace VoxelMap
 				wall.GetComponent<MeshFilter>().mesh = mesh;
 				wall.GetComponent<MeshCollider>().sharedMesh = mesh;
 			}
-
-			return walls;
 		}
 
-		public GameObject CreateWaterPlane(Vector3 position, Color32 waterColor, Transform parent)
+		public void CreateWaterPlane(Vector3 position, Color32 waterColor, Transform parent)
 		{
-			var waterPlane = _assets.Instantiate(MeshPath.WaterPlane, position, Quaternion.identity);
+			GameObject waterPlane = _assets.Instantiate(WaterPlane, position - Vector3.up * 0.001f, Quaternion.identity);
 			waterPlane.transform.SetParent(parent);
 			waterPlane.transform.localScale *= WaterScale;
 			var mesh = new Mesh();
-			mesh.SetVertices(new List<Vector3>()
-			{ new(-0.5f, 0, -0.5f), new(-0.5f, 0, 0.5f), new(0.5f, 0, -0.5f), new(0.5f, 0, 0.5f) });
+			mesh.SetVertices(new List<Vector3>
+				{ new Vector3(-0.5f, 0, -0.5f), new Vector3(-0.5f, 0, 0.5f), new Vector3(0.5f, 0, -0.5f), new Vector3(0.5f, 0, 0.5f) });
 			mesh.SetTriangles(new[] { 0, 1, 2, 1, 3, 2 }, 0);
-			mesh.SetColors(Enumerable.Range(0, mesh.vertexCount).Select(_ => waterColor).ToList());
 			mesh.SetNormals(Enumerable.Range(0, mesh.vertexCount).Select(_ => Vector3.up).ToList());
 			waterPlane.GetComponent<MeshFilter>().sharedMesh = mesh;
-			return waterPlane;
+			var meshRenderer = waterPlane.GetComponent<MeshRenderer>();
+			var material = new Material(meshRenderer.sharedMaterial);
+			material.color = waterColor;
+			meshRenderer.sharedMaterial = material;
 		}
 
-		public Light CreateDirectionalLight(LightData lightData, Transform parent)
+		public void CreateDirectionalLight(LightData lightData, Transform parent)
 		{
 			var light = new GameObject(DirectionalLightName).AddComponent<Light>();
 			light.transform.position = lightData.position;
@@ -133,29 +141,23 @@ namespace VoxelMap
 			light.shadowBias = lightData.bias;
 			light.shadowNormalBias = lightData.normalBias;
 			light.transform.SetParent(parent);
-			return light;
 		}
 
-		public GameObject[] CreateSpawnPoints(List<SpawnPointData> data, Transform container)
+		public void CreateSpawnPoints(List<SpawnPointData> data, Transform parent)
 		{
-			var spawnPoints = new GameObject[data.Count];
+			Transform spawnPointContainer = new GameObject(SpawnPointContainerName).transform;
+			spawnPointContainer.SetParent(parent);
+
 			for (var i = 0; i < data.Count; i++)
 			{
-				var spawnPoint = _assets.Instantiate(SpawnPointPath, data[i].position,
-					Quaternion.identity, container);
-				spawnPoints[i] = spawnPoint;
+				_assets.Instantiate(SpawnPointPath, data[i].position,
+					Quaternion.identity, spawnPointContainer);
 			}
-
-			return spawnPoints;
 		}
 
-		public Map CreateMap(MapData mapData, Transform container)
+		public Map CreateEmptyMap()
 		{
-			var mapObject = _assets.Instantiate(MapPath);
-			mapObject.transform.SetParent(container);
-			var map = mapObject.GetComponent<Map>();
-			map.Construct(mapData);
-			return map;
+			return _assets.Instantiate(MapProviderPath).GetComponent<Map>();
 		}
 	}
 }

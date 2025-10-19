@@ -1,44 +1,36 @@
-using System;
+using R3;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
-
 namespace UI
 {
-	public class MainMenu : MonoBehaviour
+	[RequireComponent(typeof(CanvasGroup))]
+	public class MainMenu : MonoBehaviour, IBaseMenu
 	{
-		public event Action JoinButtonPressed
+		[field: SerializeField] public Button CreateMatchButton { get; private set; }
+		[field: SerializeField] public Button JoinMatchButton { get; private set; }
+		[field: SerializeField] public Button SettingsButton { get; private set; }
+		[field: SerializeField] public CanvasGroup CanvasGroup { get; private set; }
+		[SerializeField] private Button exitButton;
+
+		private void OnEnable()
 		{
-			add => joinMatchButton.onClick.AddListener(new UnityAction(value));
-			remove => joinMatchButton.onClick.RemoveListener(new UnityAction(value));
-		}
-		
-		public event Action CreateMatchButtonPressed
-		{
-			add => createMatchButton.onClick.AddListener(new UnityAction(value));
-			remove => createMatchButton.onClick.RemoveListener(new UnityAction(value));
-		}
-		public event Action SettingButtonPressed
-		{
-			add => settingButton.onClick.AddListener(new UnityAction(value));
-			remove => settingButton.onClick.RemoveListener(new UnityAction(value));
-		}
-		public event Action ExitButtonPressed
-		{
-			add => exitButton.onClick.AddListener(new UnityAction(value));
-			remove => exitButton.onClick.RemoveListener(new UnityAction(value));
+			CreateMatchButtonPressed = CreateMatchButton.onClick.AsObservable();
+			JoinButtonPressed = JoinMatchButton.onClick.AsObservable();
+			SettingsButtonPressed = SettingsButton.onClick.AsObservable();
+			ExitButtonPressed = exitButton.onClick.AsObservable();
 		}
 
-		[SerializeField]
-		private Button joinMatchButton;
+		public Observable<Unit> CreateMatchButtonPressed { get; private set; }
+		public Observable<Unit> JoinButtonPressed { get; private set; }
+		public Observable<Unit> SettingsButtonPressed { get; private set; }
+		public Observable<Unit> ExitButtonPressed { get; private set; }
 
-		[SerializeField]
-		private Button createMatchButton;
+		public void Show()
+		{
+		}
 
-		[SerializeField]
-		private Button settingButton;
-
-		[SerializeField]
-		private Button exitButton;
+		public void Hide()
+		{
+		}
 	}
 }

@@ -1,19 +1,22 @@
 {
-    "name": "VoxelShooter.Map",
-    "rootNamespace": "",
-    "references": [
-        "GUID:2665a8d13d1b3f18800f46e256720795",
-        "GUID:e0cd26848372d4e5c891c569017e11f1",
-        "GUID:b9edab0e478070f44b0726907d16a2c4",
-        "GUID:f51ebe6a0ceec4240a699833d6309b23"
-    ],
-    "includePlatforms": [],
-    "excludePlatforms": [],
-    "allowUnsafeCode": true,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+  "name": "VoxelShooter.Map",
+  "rootNamespace": "",
+  "references": [
+    "GUID:2665a8d13d1b3f18800f46e256720795",
+    "GUID:e0cd26848372d4e5c891c569017e11f1",
+    "GUID:b9edab0e478070f44b0726907d16a2c4",
+    "GUID:f51ebe6a0ceec4240a699833d6309b23",
+    "VoxelShooter.Infrastructure",
+    "VoxelShooter.Data",
+    "VoxelShooter.Services"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": true,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
 }

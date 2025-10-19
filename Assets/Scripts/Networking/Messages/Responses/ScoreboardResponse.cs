@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
-using GamePlay.Data;
-
-namespace Networking.Messages.Responses
+using Data;
+using Mirror;
+namespace Networking.Messages
 {
-	public struct ScoreboardResponse : IMirrorResponse
+	public struct ScoreboardResponse : NetworkMessage
 	{
-		public readonly List<ScoreData> Scores;
+		public readonly List<PlayerData> Scores;
 
-		public ScoreboardResponse(List<ScoreData> scores)
+		public ScoreboardResponse(List<PlayerData> scores)
 		{
 			Scores = scores;
 		}

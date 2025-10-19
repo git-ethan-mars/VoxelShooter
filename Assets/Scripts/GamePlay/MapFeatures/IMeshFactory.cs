@@ -1,10 +1,8 @@
-﻿using Common;
-using VoxelMap;
-
+﻿using VoxelMap;
 namespace GamePlay.MapFeatures
 {
-    public interface IMeshFactory : IService
-    {
-        void CreateFallingMesh(MeshData meshData, FallingMeshParticlePool fallingMeshParticlePool);
-    }
+	public interface IMeshFactory
+	{
+		void CreateFallingMesh(MeshData meshData, FallingMeshParticlePool fallingMeshParticlePool);
+	}
 }

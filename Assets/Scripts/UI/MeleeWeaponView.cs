@@ -1,11 +1,7 @@
 using UnityEngine;
-
 namespace UI
 {
-    public class MeleeWeaponView : MonoBehaviour
-    {
-        public MeleeWeaponView()
-        {
-        }
-    }
+	public class MeleeWeaponView : MonoBehaviour
+	{
+	}
 }

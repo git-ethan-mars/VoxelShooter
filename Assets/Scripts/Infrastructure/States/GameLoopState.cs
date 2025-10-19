@@ -1,109 +1,107 @@
-﻿using Common;
-using Common.AssetManagement;
-using Cysharp.Threading.Tasks;
-using GamePlay;
-using GamePlay.Audio;
-using GamePlay.Services;
-using Networking.Client;
+using System;
+using Data;
+using Mirror;
+using Networking;
+using Networking.Messages;
+using R3;
+using Services;
 using UI;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using VoxelMap;
-
 namespace Infrastructure.States
 {
-	public class GameLoopState : IPayloadedState<(IClient client, MapProvider mapProvider)>
+	public class GameLoopState : IState
 	{
-		private const float FinalStatisticDuration = 10f;
-
 		private readonly GameStateMachine _gameStateMachine;
 		private readonly IStaticDataService _staticData;
-		private readonly IAssetProvider _assets;
-		private readonly IUIFactory _uiFactory;
-		private readonly IInputService _inputService;
 		private readonly IStorageService _storageService;
-		private readonly IAvatarLoader _avatarLoader;
-		private InGameUI _inGameUi;
-		private IClient _client;
-		private Character _character;
-		private Hud _hud;
+		private readonly VoxelShooterNetworkManager _networkManager;
+		private readonly UIProvider _uiProvider;
+		private readonly IUIFactory _uiFactory;
 
-		public GameLoopState(GameStateMachine gameStateMachine, IStaticDataService staticData, IAssetProvider assets,
-			IUIFactory uiFactory,
-			IInputService inputService,
-			IStorageService storageService,
-			IAvatarLoader avatarLoader)
+		private IDisposable _disposable;
+
+		public GameLoopState(GameStateMachine gameStateMachine, IStaticDataService staticData, IStorageService storageService,
+			VoxelShooterNetworkManager networkManager, UIProvider uiProvider, IUIFactory uiFactory)
 		{
 			_gameStateMachine = gameStateMachine;
 			_staticData = staticData;
-			_assets = assets;
-			_uiFactory = uiFactory;
-			_inputService = inputService;
 			_storageService = storageService;
-			_avatarLoader = avatarLoader;
+			_networkManager = networkManager;
+			_uiProvider = uiProvider;
+			_uiFactory = uiFactory;
 		}
 
-		public void Enter((IClient client, MapProvider mapProvider) payload)
+		public void Enter()
 		{
-			AudioPlayer.Initialize(_assets);
-			_client = payload.client;
-			_inGameUi = _uiFactory.CreateInGameUI(_inputService, _storageService, _avatarLoader);
-			_client.ScoreboardChanged += _inGameUi.Scoreboard.UpdateScoreboard;
-			_client.GameTimeChanged += _inGameUi.TimeCounter.ChangeGameTime;
-			_client.RespawnTimeChanged += _inGameUi.TimeCounter.ChangeRespawnTime;
-			_client.GameFinished += OnGameFinished;
-			_client.CharacterSpawned += OnCharacterSpawned;
-			_client.CharacterDespawned += OnCharacterDespawned;
-			_inGameUi.ChooseClassMenu.ChangeClassButtonPressed += _client.ChangeClass;
-			_inGameUi.InGameMenu.ExitButtonPressed += OnExitButtonPressed;
-			_hud = _uiFactory.CreateHud();
-			_hud.gameObject.SetActive(false);
-			_hud.InventoryPresenter.Construct(_inputService);
-			_hud.PalettePresenter.Construct(_staticData, _inputService);
-			_hud.PalettePresenter.Initialize();
-		}
-		
-		private void OnCharacterSpawned(Character character)
-		{
-			_character = character;
-			_character.HealthSystem.HealthChanged += _hud.HealthCounter.SetHealthValue;
-			_hud.gameObject.SetActive(true);
-			_hud.PalettePresenter.gameObject.SetActive(false);
-			_hud.InventoryPresenter.Initialize(character.Inventory);
-			_hud.InventoryPresenter.gameObject.SetActive(true);
-		}
-
-		private void OnCharacterDespawned(Character character)
-		{
-			_character.HealthSystem.HealthChanged -= _hud.HealthCounter.SetHealthValue;
-			_hud.InventoryPresenter.gameObject.SetActive(false);
-			_hud.InventoryPresenter.ResetInventory();
-		}
-
-		private async UniTask OnGameFinished()
-		{
-			_inGameUi.ShowFinalStatistic();
-			await UniTask.WaitForSeconds(FinalStatisticDuration);
-			_gameStateMachine.Enter<MainMenuState>();
-		}
-
-		private void OnExitButtonPressed()
-		{
-			_client.Stop();
-			_gameStateMachine.Enter<MainMenuState>();
+			_uiProvider.InGameUI = _uiFactory.CreateInGameUI();
+			_uiProvider.InGameUI.InGameMenu.ExitButtonPressed
+				.Subscribe(_ => OnExitButtonPressed())
+				.AddTo(_uiProvider.InGameUI);
+			_uiProvider.InGameUI.ChooseClassMenu.ChangeClassButtonPressed
+				.Subscribe(OnChangeClassButtonPressed)
+				.AddTo(_uiProvider.InGameUI);
+			_disposable = _storageService.Subscribe<MouseSettingsData>(OnMouseSettingsChanged);
 		}
 
 		public void Exit()
 		{
-			_client.ScoreboardChanged -= _inGameUi.Scoreboard.UpdateScoreboard;
-			_client.GameTimeChanged -= _inGameUi.TimeCounter.ChangeGameTime;
-			_client.RespawnTimeChanged -= _inGameUi.TimeCounter.ChangeRespawnTime;
-			_client.GameFinished -= OnGameFinished;
-			_client.CharacterSpawned -= OnCharacterSpawned;
-			_client.CharacterDespawned -= OnCharacterDespawned;
-			_inGameUi.ChooseClassMenu.ChangeClassButtonPressed -= _client.ChangeClass;
-			_inGameUi.InGameMenu.ExitButtonPressed -= OnExitButtonPressed;
-			Object.Destroy(_inGameUi.gameObject);
+			_disposable.Dispose();
+		}
+
+		private void StartGameTimer(WorldSettings worldSettings)
+		{
+			TimeSpan gameDuration = TimeSpan.Zero;
+			Observable.Interval(TimeSpan.FromSeconds(1), _networkManager.HostStopped)
+				.TakeWhile(_ => gameDuration < worldSettings.GameDuration)
+				.Subscribe(_ =>
+				{
+					_uiProvider.InGameUI.TimeInfo.ChangeGameTime(worldSettings.GameDuration - gameDuration);
+					gameDuration += TimeSpan.FromSeconds(1);
+				}, _ => OnGameFinished());
+		}
+
+		private void OnMouseSettingsChanged(MouseSettingsData mouseSettingsData)
+		{
+			CrosshairSprite crosshairSprite = _staticData.GetCrosshairSprite(mouseSettingsData.CrosshairId);
+			_uiProvider.InGameUI.Hud.SetCrosshairIcon(crosshairSprite.Sprite);
+		}
+
+		private void OnChangeClassButtonPressed(GameClass chosenClass)
+		{
+			var request = new ChangeClassRequest(chosenClass);
+			_networkManager.SendRequest(request);
+		}
+
+		private void OnExitButtonPressed()
+		{
+			StopNetwork();
+			_gameStateMachine.Enter<GameMenuState>();
+		}
+
+		private async void OnGameFinished()
+		{
+			try
+			{
+				StopNetwork();
+				await _uiProvider.InGameUI.ShowFinalStatisticAsync();
+				_gameStateMachine.Enter<GameMenuState>();
+			}
+			catch (Exception e)
+			{
+				Debug.LogException(e);
+			}
+		}
+
+		private void StopNetwork()
+		{
+			if (_networkManager.mode == NetworkManagerMode.Host)
+			{
+				_networkManager.StopHost();
+			}
+			else
+			{
+				_networkManager.StopClient();
+			}
 		}
 	}
 }

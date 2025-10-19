@@ -1,139 +1,155 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using GamePlay.Data;
+using Data;
 using UnityEngine;
+using UnityEngine.Pool;
 using VoxelMap;
-
 namespace GamePlay.MapFeatures
 {
-    public class MapDestruction : IMapFeature, IDamageVisitor
-    {
-        private readonly MapProvider _mapProvider;
-        private readonly VoxelHealthSystem _voxelHealthSystem;
-        private readonly ColumnDestructionAlgorithm _destructionAlgorithm;
+	public class MapDestruction : IMapFeature, IDamageVisitor
+	{
+		private readonly ColumnDestructionAlgorithm _destructionAlgorithm;
+		private readonly Map _map;
+		private readonly VoxelHealthSystem _voxelHealthSystem;
 
-        public MapDestruction(MapProvider mapProvider, VoxelHealthSystem voxelHealthSystem = null,
-            ColumnDestructionAlgorithm destructionAlgorithm = null)
-        {
-            _mapProvider = mapProvider;
-            _voxelHealthSystem = voxelHealthSystem;
-            _destructionAlgorithm = destructionAlgorithm;
-        }
+		public MapDestruction(Map map, VoxelHealthSystem voxelHealthSystem = null,
+			ColumnDestructionAlgorithm destructionAlgorithm = null)
+		{
+			_map = map;
+			_voxelHealthSystem = voxelHealthSystem;
+			_destructionAlgorithm = destructionAlgorithm;
+		}
 
-        public void Visit(RangeWeaponData rangeWeapon, RaycastHit hit)
-        {
-            var position = Vector3Int.FloorToInt(hit.point - hit.normal / 2);
-            var voxel = new Voxel(position, _mapProvider.GetVoxelByGlobalPosition(position));
-            if (IsDestructible(voxel))
-            {
-                var constantDamageCalculator = new ConstantDamageCalculator(rangeWeapon.Damage);
-                var voxels = new List<Voxel>(1) { voxel };
-                HandleVoxels(voxels, constantDamageCalculator);
-            }
-        }
+		public void Visit(RangeWeapon rangeWeapon, RaycastHit hit)
+		{
+			Vector3Int position = Vector3Int.FloorToInt(hit.point - hit.normal / 2);
+			var voxel = new Voxel(position, _map.GetVoxelByGlobalPosition(position));
+			if (IsDestructible(voxel))
+			{
+				var constantDamageCalculator = new ConstantDamageCalculator(rangeWeapon.Configure.Damage);
+				ListPool<Voxel>.Get(out var voxels);
+				voxels.Add(voxel);
+				HandleVoxels(voxels, constantDamageCalculator);
+				ListPool<Voxel>.Release(voxels);
+			}
+		}
 
-        public void Visit(MeleeWeaponData meleeWeapon, bool isStrongHit, RaycastHit hit)
-        {
-            var hitPosition = Vector3Int.FloorToInt(hit.point - hit.normal / 2);
-            var constantDamageCalculator = new ConstantDamageCalculator(meleeWeapon.DamageToBlock);
-            List<Voxel> voxels = new List<Voxel>();
-            if (isStrongHit)
-            {
-                const int length = 3;
-                for (var i = -length / 2; i <= length / 2; i++)
-                {
-                    var offset = new Vector3Int(0, i, 0);
-                    var blockPosition = hitPosition + offset;
-                    var voxel = new Voxel(blockPosition, _mapProvider.GetVoxelByGlobalPosition(blockPosition));
-                    if (IsDestructible(voxel))
-                    {
-                        voxels.Add(voxel);
-                    }
-                }
-            }
-            else
-            {
-                var centeredBlock = new Voxel(hitPosition, _mapProvider.GetVoxelByGlobalPosition(hitPosition));
-                voxels.Add(centeredBlock);
-            }
+		public void Visit(MeleeWeapon meleeWeapon, bool isStrongHit, RaycastHit hit)
+		{
+			Vector3Int hitPosition = Vector3Int.FloorToInt(hit.point - hit.normal / 2);
+			var constantDamageCalculator = new ConstantDamageCalculator(meleeWeapon.Configure.DamageToVoxel);
+			ListPool<Voxel>.Get(out var voxels);
+			if (isStrongHit)
+			{
+				const int length = 3;
+				for (int i = -length / 2; i <= length / 2; i++)
+				{
+					var offset = new Vector3Int(0, i, 0);
+					Vector3Int blockPosition = hitPosition + offset;
+					var voxel = new Voxel(blockPosition, _map.GetVoxelByGlobalPosition(blockPosition));
+					if (IsDestructible(voxel))
+					{
+						voxels.Add(voxel);
+					}
+				}
+			}
+			else
+			{
+				var centeredBlock = new Voxel(hitPosition, _map.GetVoxelByGlobalPosition(hitPosition));
+				voxels.Add(centeredBlock);
+			}
 
-            HandleVoxels(voxels, constantDamageCalculator);
-        }
+			HandleVoxels(voxels, constantDamageCalculator);
+			ListPool<Voxel>.Release(voxels);
+		}
 
-        public void Visit(Vector3 center, ExplosionData explosionData)
-        {
-            var explosionCenter = Vector3Int.FloorToInt(center);
-            if (!_mapProvider.IsInsideMap(explosionCenter.x, explosionCenter.y, explosionCenter.z))
-            {
-                return;
-            }
+		public void Visit(ExplosionData explosionData, Vector3 center)
+		{
+			Vector3Int explosionCenter = Vector3Int.FloorToInt(center);
+			if (!_map.IsInsideMap(explosionCenter.x, explosionCenter.y, explosionCenter.z))
+			{
+				return;
+			}
 
-            var voxels = new List<Voxel>();
-            for (var x = -explosionData.radius; x <= explosionData.radius; x++)
-            {
-                for (var y = -explosionData.radius; y <= explosionData.radius; y++)
-                {
-                    for (var z = -explosionData.radius; z <= explosionData.radius; z++)
-                    {
-                        var offset = new Vector3Int(x, y, z);
-                        var blockPosition = explosionCenter + offset;
-                        if (!_mapProvider.IsInsideMap(explosionCenter.x + x, explosionCenter.y + y, explosionCenter.z + z))
-                        {
-                            continue;
-                        }
+			ListPool<Voxel>.Get(out var voxels);
+			var damageCalculator = new SphereDamageCalculator(explosionCenter, explosionData.radius, explosionData.damage);
 
-                        var blockData = _mapProvider.GetVoxelByGlobalPosition(blockPosition);
-                        var block = new Voxel(blockPosition, blockData);
-                        if (IsDestructible(block) && Vector3.Distance(explosionCenter, explosionCenter) <= explosionData.radius)
-                        {
-                            voxels.Add(block);
-                        }
-                    }
-                }
-            }
+			for (int x = -explosionData.radius; x <= explosionData.radius; x++)
+			{
+				for (int y = -explosionData.radius; y <= explosionData.radius; y++)
+				{
+					for (int z = -explosionData.radius; z <= explosionData.radius; z++)
+					{
+						var offset = new Vector3Int(x, y, z);
+						Vector3Int blockPosition = explosionCenter + offset;
+						if (!_map.IsInsideMap(blockPosition.x, blockPosition.y, blockPosition.z))
+						{
+							continue;
+						}
 
-            var explosionCenterBlock = new Voxel(explosionCenter,
-                _mapProvider.GetVoxelByGlobalPosition(explosionCenter));
-            var sphereDamageCalculator = new SphereDamageCalculator(explosionCenterBlock, explosionData.radius, explosionData.damage);
-            HandleVoxels(voxels, sphereDamageCalculator);
-        }
-        private void HandleVoxels(List<Voxel> voxels, IVoxelDamageCalculator voxelDamageCalculator)
-        {
-            List<Voxel> damagedVoxels;
-            if (_voxelHealthSystem != null)
-            {
-                damagedVoxels = _voxelHealthSystem.DamageVoxels(voxels, voxelDamageCalculator);
-            }
-            else
-            {
-                damagedVoxels = voxels;
-            }
+						VoxelData blockData = _map.GetVoxelByGlobalPosition(blockPosition);
+						var voxel = new Voxel(blockPosition, blockData);
+						if (IsDestructible(voxel) && Vector3.Distance(explosionCenter, blockPosition) < explosionData.radius)
+						{
+							voxels.Add(voxel);
+						}
+					}
+				}
+			}
 
-            if (damagedVoxels.Count == 0)
-            {
-                return;
-            }
+			HandleVoxels(voxels, damageCalculator);
+			ListPool<Voxel>.Release(voxels);
+		}
 
-            if (_destructionAlgorithm != null)
-            {
-                var destroyedVoxels = damagedVoxels.Where(damagedVoxel => !damagedVoxel.Data.IsSolid()).ToList();
-                var fallingVoxels = _destructionAlgorithm.Remove(destroyedVoxels);
-                var result = new List<Voxel>();
-                result.AddRange(damagedVoxels);
-                result.AddRange(fallingVoxels);
-                _mapProvider.SetVoxelsByGlobalPositions(result);
-            }
-            else
-            {
-                _mapProvider.SetVoxelsByGlobalPositions(damagedVoxels);
-            }
-        }
+		public void OnAdd()
+		{
+			var damageVisitorWrapper = _map.gameObject.AddComponent<DamageVisitorWrapper>();
+			damageVisitorWrapper.Construct(this);
+		}
 
-        private bool IsDestructible(Voxel voxel)
-        {
-            return voxel.Data.IsSolid() && voxel.Position.x >= 0 && voxel.Position.x < _mapProvider.Width &&
-                   voxel.Position.y > 0 && voxel.Position.y < _mapProvider.Height &&
-                   voxel.Position.z >= 0 && voxel.Position.z < _mapProvider.Depth;
-        }
-    }
+		private void HandleVoxels(List<Voxel> voxels, IVoxelDamageCalculator voxelDamageCalculator)
+		{
+			List<Voxel> damagedVoxels;
+			if (_voxelHealthSystem != null)
+			{
+				damagedVoxels = _voxelHealthSystem.DamageVoxels(voxels, voxelDamageCalculator);
+			}
+			else
+			{
+				damagedVoxels = voxels;
+
+				for (var i = 0; i < damagedVoxels.Count; i++)
+				{
+					damagedVoxels[i] = new Voxel(damagedVoxels[i].Position, VoxelData.Air);
+				}
+			}
+
+			if (damagedVoxels.Count == 0)
+			{
+				return;
+			}
+
+			if (_destructionAlgorithm != null)
+			{
+				var destroyedVoxels = damagedVoxels.Where(damagedVoxel => !damagedVoxel.Data.IsSolid()).ToList();
+				var fallingVoxels = _destructionAlgorithm.Remove(destroyedVoxels);
+				ListPool<Voxel>.Get(out var result);
+				result.AddRange(damagedVoxels);
+				result.AddRange(fallingVoxels);
+				_map.SetVoxelsByGlobalPositions(result);
+				ListPool<Voxel>.Release(result);
+			}
+			else
+			{
+				_map.SetVoxelsByGlobalPositions(damagedVoxels);
+			}
+		}
+
+		private bool IsDestructible(Voxel voxel)
+		{
+			return voxel.Data.IsSolid() && voxel.Position.x >= 0 && voxel.Position.x < _map.Width &&
+			       voxel.Position.y > 0 && voxel.Position.y < _map.Height &&
+			       voxel.Position.z >= 0 && voxel.Position.z < _map.Depth;
+		}
+	}
 }

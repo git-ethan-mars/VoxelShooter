@@ -1,23 +1,23 @@
-using UI.Inventory;
-using UnityEngine;
-
+using System.Threading;
+using Cysharp.Threading.Tasks;
 namespace UI
 {
 	public class PaletteView : ListView<PaletteElementView>
 	{
-		public void Show()
-		{	
-			gameObject.SetActive(true);
-		}
+		private CancellationTokenSource _cts;
+		private PaletteElementView _selectedElement;
 
-		public void Hide()
+		public async UniTask SelectElementAsync(int index)
 		{
-			gameObject.SetActive(false);
-		}
+			if (_selectedElement != null)
+			{
+				_cts.Cancel();
+				_cts.Dispose();
+			}
 
-		public void SelectElement(int index)
-		{
-			Debug.Log($"Selected Element {index}");
+			_cts = new CancellationTokenSource();
+			_selectedElement = Items[index];
+			await _selectedElement.RunAnimationAsync(_cts.Token);
 		}
 	}
 }

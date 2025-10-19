@@ -1,31 +1,65 @@
 using System;
-using GamePlay;
-
+using GamePlay.Core;
+using R3;
+using Services;
+using UnityEngine;
 namespace UI.Inventory
 {
-	public class SlotPresenter : IDisposable
+	public class SlotPresenter<TItem> : SlotPresenter where TItem : InventoryItem
 	{
+		protected readonly TItem InventoryItem;
 		private readonly SlotView _slotView;
-		private readonly InventoryItem _inventoryItem;
+		private IDisposable _disposable;
 
-		protected SlotPresenter(InventoryItem inventoryItem, SlotView slotView)
+		protected readonly IStaticDataService StaticData;
+		private Sprite _slotIcon;
+
+		protected SlotPresenter(IStaticDataService staticData, TItem inventoryItem, SlotView slotView)
 		{
-			_inventoryItem = inventoryItem;
+			StaticData = staticData;
+			InventoryItem = inventoryItem;
 			_slotView = slotView;
 		}
 
-		public virtual void Initialize()
+		public override void Initialize()
 		{
-			_inventoryItem.Selected += _slotView.Select;
-			_inventoryItem.Deselected += _slotView.Deselect;
-			
-			_slotView.SetSlotIcon(_inventoryItem.InventoryIcon);
+			_disposable = InventoryItem.OnSelectStateChanged.Subscribe(OnItemSelected);
+
+			_slotIcon = StaticData.GetSlotIcon(InventoryItem.Type);
+			_slotView.SetSlotIcon(_slotIcon);
 		}
 
-		public virtual void Dispose()
+		public override void Dispose()
 		{
-			_inventoryItem.Selected -= _slotView.Select;
-			_inventoryItem.Deselected -= _slotView.Deselect;
+			_disposable?.Dispose();
 		}
+
+		protected virtual void OnSelected()
+		{
+			_slotView.Select();
+		}
+
+		protected virtual void OnDeselected()
+		{
+			_slotView.Deselect();
+		}
+
+		private void OnItemSelected(bool isSelected)
+		{
+			if (isSelected)
+			{
+				OnSelected();
+			}
+			else
+			{
+				OnDeselected();
+			}
+		}
+	}
+
+	public abstract class SlotPresenter : IDisposable
+	{
+		public abstract void Initialize();
+		public abstract void Dispose();
 	}
 }

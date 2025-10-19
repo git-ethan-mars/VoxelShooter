@@ -1,5 +1,4 @@
 ﻿using VoxelMap;
-
 namespace GamePlay.MapFeatures
 {
 	public interface IVoxelDamageCalculator

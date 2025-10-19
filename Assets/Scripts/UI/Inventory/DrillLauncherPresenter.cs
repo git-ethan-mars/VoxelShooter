@@ -1,47 +1,54 @@
+using System;
 using GamePlay;
-
+using R3;
+using Services;
+using UnityEngine;
 namespace UI.Inventory
 {
-	public class DrillLauncherPresenter : SlotPresenter
+	public class DrillLauncherPresenter : SlotPresenter<DrillLauncher>
 	{
-		private readonly DrillLauncher _inventoryItem;
 		private readonly Hud _hud;
+		private IDisposable _disposable;
+		private Sprite _projectileIcon;
 
-		public DrillLauncherPresenter(DrillLauncher inventoryItem, SlotView slotView, Hud hud) : base(inventoryItem, slotView)
+		public DrillLauncherPresenter(IStaticDataService staticData, UIProvider uiProvider,
+			DrillLauncher drillLauncher, SlotView slotView) : base(staticData, drillLauncher, slotView)
 		{
-			_inventoryItem = inventoryItem;
-			_hud = hud;
+			_hud = uiProvider.InGameUI.Hud;
 		}
 
 		public override void Initialize()
 		{
 			base.Initialize();
-			_inventoryItem.Selected += OnSelected;
-			_inventoryItem.Deselected += OnDeselected;
-			_inventoryItem.Data.AmountChanged += OnAmountChanged;
+
+			_disposable = InventoryItem.Amount.Subscribe(OnAmountChanged);
+			_projectileIcon = StaticData.GetProjectileIcon(InventoryItem.Type);
 		}
 
-		private void OnSelected()
+		public override void Dispose()
 		{
-			_hud.ShowItemInfo(_inventoryItem.InventoryIcon, _inventoryItem.Data.Amount.ToString());
+			base.Dispose();
+
+			_disposable.Dispose();
 		}
 
-		private void OnDeselected()
+		protected override void OnSelected()
 		{
+			base.OnSelected();
+
+			_hud.ShowItemInfo(_projectileIcon, InventoryItem.Amount.ToString());
+		}
+
+		protected override void OnDeselected()
+		{
+			base.OnDeselected();
+
 			_hud.HideItemInfo();
 		}
 
 		private void OnAmountChanged(int amount)
 		{
 			_hud.SetItemCount(amount.ToString());
-		}
-
-		public override void Dispose()
-		{
-			base.Dispose();
-			_inventoryItem.Selected -= OnSelected;
-			_inventoryItem.Deselected -= OnDeselected;
-			_inventoryItem.Data.AmountChanged -= OnAmountChanged;
 		}
 	}
 }

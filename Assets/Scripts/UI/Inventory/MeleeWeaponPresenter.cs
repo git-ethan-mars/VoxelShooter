@@ -1,10 +1,11 @@
 using GamePlay;
-
+using Services;
 namespace UI.Inventory
 {
-	public class MeleeWeaponPresenter : SlotPresenter
+	public class MeleeWeaponPresenter : SlotPresenter<MeleeWeapon>
 	{
-		public MeleeWeaponPresenter(MeleeWeapon meleeWeapon, SlotView slotView) : base(meleeWeapon, slotView)
+		public MeleeWeaponPresenter(IStaticDataService staticData, MeleeWeapon meleeWeapon, SlotView slotView) :
+			base(staticData, meleeWeapon, slotView)
 		{
 		}
 	}

@@ -1,8 +1,8 @@
-﻿using VoxelMap;
-
-namespace Networking.Messages.Responses
+﻿using Mirror;
+using VoxelMap;
+namespace Networking.Messages
 {
-	public struct UpdateMapResponse : IMirrorResponse
+	public struct UpdateMapResponse : NetworkMessage
 	{
 		public readonly Voxel[] Voxels;
 

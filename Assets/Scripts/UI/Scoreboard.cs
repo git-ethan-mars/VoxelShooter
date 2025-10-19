@@ -1,44 +1,38 @@
 using System.Collections.Generic;
-using Common;
-using GamePlay.Data;
+using Data;
 using UnityEngine;
-
 namespace UI
 {
-    public class Scoreboard : MonoBehaviour
-    {
-        public CanvasGroup CanvasGroup => canvasGroup;
+	public class ScoreboardView : ListView<ScoreboardRecord>
+	{
+		[field:SerializeField] public CanvasGroup CanvasGroup { get; private set; }
 
-        [SerializeField]
-        private CanvasGroup canvasGroup;
+		public void UpdateScoreboard(List<PlayerData> scoreboardData)
+		{
+			if (Items.Count < scoreboardData.Count)
+			{
+				int difference = scoreboardData.Count - Items.Count;
+				for (var i = 0; i < difference; i++)
+				{
+					SpawnElement();
+				}
+			}
+			else
+			{
+				for (int i = scoreboardData.Count; i < Items.Count; i++)
+				{
+					DespawnElement(Items[i]);
+				}
+			}
 
-        [SerializeField]
-        private List<ScoreUI> scores;
-
-        private IAvatarLoader _avatarLoader;
-        
-        public void Construct(IAvatarLoader avatarLoader)
-        {
-            _avatarLoader = avatarLoader;
-            canvasGroup.alpha = 0;
-        }
-
-        public void UpdateScoreboard(List<ScoreData> scoreboardData)
-        {
-            for (var i = 0; i < scores.Count; i++)
-            {
-                scores[i].gameObject.SetActive(false);
-            }
-
-            for (var i = 0; i < scoreboardData.Count; i++)
-            {
-                scores[i].NickName.SetText(scoreboardData[i].NickName);
-                scores[i].Kills.SetText(scoreboardData[i].Kills.ToString());
-                scores[i].Deaths.SetText(scoreboardData[i].Deaths.ToString());
-                scores[i].ClassText.SetText(scoreboardData[i].GameClass.ToString());
-                scores[i].Avatar.texture = _avatarLoader.RequestAvatar(scoreboardData[i].SteamID);
-                scores[i].gameObject.SetActive(true);
-            }
-        }
-    }
+			for (var i = 0; i < scoreboardData.Count; i++)
+			{
+				Items[i].NickName.SetText(scoreboardData[i].NickName);
+				Items[i].KillCount.SetText(scoreboardData[i].Kills.ToString());
+				Items[i].DeathCount.SetText(scoreboardData[i].Deaths.ToString());
+				Items[i].ClassName.SetText(scoreboardData[i].GameClass.ToString());
+				Items[i].Avatar.texture = scoreboardData[i].Avatar;
+			}
+		}
+	}
 }

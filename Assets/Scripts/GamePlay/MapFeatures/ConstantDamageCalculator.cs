@@ -1,5 +1,4 @@
 ﻿using VoxelMap;
-
 namespace GamePlay.MapFeatures
 {
 	public class ConstantDamageCalculator : IVoxelDamageCalculator
@@ -10,7 +9,7 @@ namespace GamePlay.MapFeatures
 		{
 			_damage = damage;
 		}
-		
+
 		public int CalculateDamage(Voxel voxel)
 		{
 			return _damage;

@@ -1,8 +1,7 @@
-﻿using GamePlay.Data;
-
-namespace Networking.Messages.Requests
+using Data;
+namespace Networking.Messages
 {
-	public struct ChangeClassRequest : IMirrorRequest
+	public struct ChangeClassRequest : IRequest
 	{
 		public readonly GameClass GameClass;
 

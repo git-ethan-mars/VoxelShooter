@@ -1,14 +1,15 @@
-namespace Networking.Messages.Requests
+using UnityEngine;
+namespace Networking.Messages
 {
-    public struct AuthenticationRequest : IMirrorRequest
-    {
-        public readonly ulong Id;
-        public readonly string NickName;
+	public struct AuthenticationRequest : IRequest
+	{
+		public readonly string NickName;
+		public readonly Texture2D Avatar;
 
-        public AuthenticationRequest(ulong id, string nickName)
-        {
-            Id = id;
-            NickName = nickName;
-        }
-    }
+		public AuthenticationRequest(string nickName, Texture2D avatar)
+		{
+			NickName = nickName;
+			Avatar = avatar;
+		}
+	}
 }

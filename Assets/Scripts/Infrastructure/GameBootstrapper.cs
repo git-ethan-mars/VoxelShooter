@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using Common;
 using Infrastructure.States;
+using Reflex.Attributes;
 using UnityEngine;
-using UnityEngine.Rendering;
 # if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.Build;
@@ -12,19 +11,34 @@ using UnityEditor.Build;
 
 namespace Infrastructure
 {
-	public class GameBootstrapper : MonoBehaviour, ICoroutineRunner
+	public class GameBootstrapper : MonoBehaviour
 	{
+		private const string LocalBuild = "LOCAL_BUILD";
 		[SerializeField]
 		private bool isLocalBuild;
 
-		private const string LocalBuild = "LOCAL_BUILD";
+		private GameStateMachine _gameStateMachine;
 
-		private Game _game;
+		[Inject]
+		private void Construct(GameStateMachine gameStateMachine)
+		{
+			_gameStateMachine = gameStateMachine;
+		}
+
+		private void Awake()
+		{
+			DontDestroyOnLoad(this);
+		}
+
+		private void Start()
+		{
+			_gameStateMachine.Enter<BootstrapState>();
+		}
 
 #if UNITY_EDITOR
 		private void OnValidate()
 		{
-			PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.Standalone, out var initialSymbols);
+			PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.Standalone, out string[] initialSymbols);
 			var symbols = new List<string>(initialSymbols);
 			if (isLocalBuild && !initialSymbols.Contains(LocalBuild))
 			{
@@ -38,12 +52,5 @@ namespace Infrastructure
 			}
 		}
 #endif
-
-		private void Awake()
-		{
-			_game = new Game(this, AllServices.Container);
-			_game.StateMachine.Enter<BootstrapState>();
-			DontDestroyOnLoad(this);
-		}
 	}
 }

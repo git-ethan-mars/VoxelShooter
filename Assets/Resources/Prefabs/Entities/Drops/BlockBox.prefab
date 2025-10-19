@@ -1,0 +1,111 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &7669493481566936532
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3360081450419894654, guid: 487c11d6b4e7cef43b71b550ad71b8e4, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3360081450419894654, guid: 487c11d6b4e7cef43b71b550ad71b8e4, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3360081450419894654, guid: 487c11d6b4e7cef43b71b550ad71b8e4, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3360081450419894654, guid: 487c11d6b4e7cef43b71b550ad71b8e4, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3360081450419894654, guid: 487c11d6b4e7cef43b71b550ad71b8e4, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3360081450419894654, guid: 487c11d6b4e7cef43b71b550ad71b8e4, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3360081450419894654, guid: 487c11d6b4e7cef43b71b550ad71b8e4, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3360081450419894654, guid: 487c11d6b4e7cef43b71b550ad71b8e4, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3360081450419894654, guid: 487c11d6b4e7cef43b71b550ad71b8e4, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3360081450419894654, guid: 487c11d6b4e7cef43b71b550ad71b8e4, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3757375629552778399, guid: 487c11d6b4e7cef43b71b550ad71b8e4, type: 3}
+      propertyPath: m_Name
+      value: BlockBox
+      objectReference: {fileID: 0}
+    - target: {fileID: 5558965601909318591, guid: 487c11d6b4e7cef43b71b550ad71b8e4, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 793dca9c070eca44abebec35d8994395, type: 2}
+    - target: {fileID: 6464533200681777329, guid: 487c11d6b4e7cef43b71b550ad71b8e4, type: 3}
+      propertyPath: _assetId
+      value: 2977389646
+      objectReference: {fileID: 0}
+    - target: {fileID: 8574959002991754334, guid: 487c11d6b4e7cef43b71b550ad71b8e4, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 4300000, guid: cbd87c837fbb0f54f92446652967c62b, type: 2}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3757375629552778399, guid: 487c11d6b4e7cef43b71b550ad71b8e4, type: 3}
+      insertIndex: 1
+      addedObject: {fileID: 4936036515858752922}
+  m_SourcePrefab: {fileID: 100100000, guid: 487c11d6b4e7cef43b71b550ad71b8e4, type: 3}
+--- !u!65 &3312886051892193629 stripped
+BoxCollider:
+  m_CorrespondingSourceObject: {fileID: 5158380655034889353, guid: 487c11d6b4e7cef43b71b550ad71b8e4, type: 3}
+  m_PrefabInstance: {fileID: 7669493481566936532}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &4291857041833401256 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5899784309895956092, guid: 487c11d6b4e7cef43b71b550ad71b8e4, type: 3}
+  m_PrefabInstance: {fileID: 7669493481566936532}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &6794632857203204427 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3757375629552778399, guid: 487c11d6b4e7cef43b71b550ad71b8e4, type: 3}
+  m_PrefabInstance: {fileID: 7669493481566936532}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4936036515858752922
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6794632857203204427}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb9bff688f24fde9c8969d416029086, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: VoxelShooter.GamePlay::GamePlay.BlockLootBox
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  miniMapImage: {fileID: 21300000, guid: 385a556be3efdf646b71eb75e5fad618, type: 3}
+  collider: {fileID: 3312886051892193629}
+  parachute: {fileID: 4291857041833401256}
+  platformPrefab: {fileID: 1860990585157332521, guid: d440957adc7d97a41873781bb8f97699, type: 3}
+  localBounds:
+    m_Center: {x: 0, y: 0, z: 0}
+    m_Extent: {x: 0.5, y: 0.5, z: 0.5}

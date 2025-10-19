@@ -1,47 +1,24 @@
-using System;
+using R3;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
-
 namespace UI
 {
 	public class InGameMenu : MonoBehaviour
 	{
-		public event Action ResumeButtonPressed
+		[SerializeField] private Button resumeButton;
+		[SerializeField] private Button settingsButton;
+		[SerializeField] private Button exitButton;
+
+		private void Awake()
 		{
-			add => resumeButton.onClick.AddListener(new UnityAction(value));
-			remove => resumeButton.onClick.RemoveListener(new UnityAction(value));
+			ResumeButtonPressed = resumeButton.onClick.AsObservable();
+			SettingsButtonPressed = settingsButton.onClick.AsObservable();
+			ExitButtonPressed = exitButton.onClick.AsObservable();
 		}
 
-		public event Action SettingsButtonPressed
-		{
-			add => settingsButton.onClick.AddListener(new UnityAction(value));
-			remove => settingsButton.onClick.RemoveListener(new UnityAction(value));
-		}
-
-		public event Action ExitButtonPressed
-		{
-			add => exitButton.onClick.AddListener(new UnityAction(value));
-			remove => exitButton.onClick.RemoveListener(new UnityAction(value));
-		}
-
-		[SerializeField]
-		private CanvasGroup canvasGroup;
-
-		public CanvasGroup CanvasGroup => canvasGroup;
-
-		[SerializeField]
-		private Button resumeButton;
-
-		[SerializeField]
-		private Button settingsButton;
-
-		[SerializeField]
-		private Button exitButton;
-
-		public void Construct()
-		{
-			canvasGroup.alpha = 0.0f;
-		}
+		[field: SerializeField] public CanvasGroup CanvasGroup { get; private set; }
+		public Observable<Unit> ResumeButtonPressed { get; private set; }
+		public Observable<Unit> SettingsButtonPressed { get; private set; }
+		public Observable<Unit> ExitButtonPressed { get; private set; }
 	}
 }

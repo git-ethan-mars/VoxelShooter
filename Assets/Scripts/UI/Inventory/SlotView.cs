@@ -1,14 +1,13 @@
 using UnityEngine;
 using UnityEngine.UI;
-
 namespace UI.Inventory
 {
 	public sealed class SlotView : MonoBehaviour
 	{
-		[SerializeField] 
+		[SerializeField]
 		private Image icon;
 
-		[SerializeField] 
+		[SerializeField]
 		private Image boarder;
 
 		public void SetSlotIcon(Sprite sprite)
