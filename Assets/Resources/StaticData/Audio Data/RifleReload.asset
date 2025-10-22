@@ -12,7 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e252e319c61c4beba81ce941dd9260e5, type: 3}
   m_Name: RifleReload
   m_EditorClassIdentifier: 
+  <Clip>k__BackingField: {fileID: 8300000, guid: 27795beba10a55e4da2b4c1210e0080a, type: 3}
   clip: {fileID: 8300000, guid: 27795beba10a55e4da2b4c1210e0080a, type: 3}
+  <Volume>k__BackingField: 1
   volume: 1
+  <MinDistance>k__BackingField: 0
   minDistance: 0
+  <MaxDistance>k__BackingField: 10
   maxDistance: 10

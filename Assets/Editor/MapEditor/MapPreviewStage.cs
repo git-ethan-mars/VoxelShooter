@@ -38,7 +38,11 @@ namespace Editor
 		{
 			base.OnCloseStage();
 
-			_map?.Dispose();
+			if (_map != null)
+			{
+				DestroyImmediate(_map.gameObject);
+			}
+			
 			_editorWindow?.Close();
 		}
 	}

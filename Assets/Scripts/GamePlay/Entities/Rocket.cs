@@ -1,13 +1,12 @@
 using Data;
 using GamePlay.MapFeatures;
-using Mirror;
 using Reflex.Attributes;
 using Services;
 using UnityEngine;
 using VoxelMap;
 namespace GamePlay
 {
-	public class Rocket : NetworkBehaviour, IEntity
+	public class Rocket : Entity
 	{
 		[SerializeField] private Rigidbody rigidBody;
 		[SerializeField] private BoxCollider boxCollider;
@@ -58,6 +57,6 @@ namespace GamePlay
 			Destroy(gameObject);
 		}
 
-		public Bounds Bounds => boxCollider.bounds;
+		public override Bounds Bounds => boxCollider.bounds;
 	}
 }

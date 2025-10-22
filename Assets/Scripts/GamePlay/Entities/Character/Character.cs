@@ -7,7 +7,7 @@ using Services;
 using UnityEngine;
 namespace GamePlay
 {
-	public class Character : NetworkBehaviour, IDamageaeble, IEntity, IDamageVisitor
+	public class Character : Entity, IDamageaeble, IDamageVisitor
 	{
 		[SerializeField] private CharacterMovement movement;
 		[SerializeField] private CharacterVisual visual;
@@ -158,6 +158,6 @@ namespace GamePlay
 			Gizmos.DrawWireCube(Bounds.center, Bounds.size);
 		}
 
-		public Bounds Bounds => new Bounds(transform.position + localBounds.center, localBounds.size);
+		public override Bounds Bounds => new Bounds(transform.position + localBounds.center, localBounds.size);
 	}
 }

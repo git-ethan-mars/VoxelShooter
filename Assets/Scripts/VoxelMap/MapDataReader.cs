@@ -1,13 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Unity.Collections;
-using UnityEngine;
 namespace VoxelMap
 {
 	public static class MapDataReader
 	{
+		public static IEnumerable<string> GetExistedMaps()
+		{
+			return Directory.GetFiles(Constants.MapFolderPath, $"*{Constants.RchExtension}")
+				.Union(Directory.GetFiles(Constants.MapFolderPath, $"*{Constants.VxlExtension}"))
+				.Select(Path.GetFileNameWithoutExtension).ToList();
+		}
+		
 		public static MapData ReadFromFile(string mapName)
 		{
 			string rchFilePath = Path.Combine(Constants.MapFolderPath, $"{mapName}{Constants.RchExtension}");
@@ -28,19 +36,19 @@ namespace VoxelMap
 			return mapData; 
 		}
 		
-		public static async UniTask<MapData> ReadFromFileAsync(string mapName)
+		public static async UniTask<MapData> ReadFromFileAsync(string mapName, CancellationToken token = default)
 		{
 			string rchFilePath = Path.Combine(Constants.MapFolderPath, $"{mapName}{Constants.RchExtension}");
 			string vxlFilePath = Path.Combine(Constants.MapFolderPath, $"{mapName}{Constants.VxlExtension}");
 			if (File.Exists(rchFilePath))
 			{
 				await using FileStream file = File.OpenRead(rchFilePath);
-				return await ReadFromStreamAsync(file);
+				return await ReadFromStreamAsync(file, token);
 			}
 
 			if (File.Exists(vxlFilePath))
 			{
-				return await Vxl2RchConverter.LoadVxlAsync(vxlFilePath);
+				return await Vxl2RchConverter.LoadVxlAsync(vxlFilePath, token);
 			}
 
 			var voxels = new NativeArray<VoxelData>(16777216, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);

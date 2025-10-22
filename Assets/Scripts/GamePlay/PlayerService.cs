@@ -25,5 +25,16 @@ namespace GamePlay
 		{
 			return _playerDataById.TryGetValue(playerId, out playerData);
 		}
+
+		public void ResetData()
+		{
+			foreach (PlayerData playerData in _playerDataById.Values)
+			{
+				playerData.GameClass = GameClass.None;
+				playerData.IsAlive = false;
+				playerData.Kills = 0;
+				playerData.Deaths = 0;
+			}
+		}
 	}
 }

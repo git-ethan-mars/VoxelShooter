@@ -7,7 +7,7 @@ using VoxelMap;
 namespace GamePlay
 {
 	[SelectionBase]
-	public abstract class LootBox : NetworkBehaviour, IEntity
+	public abstract class LootBox : Entity
 	{
 		private const string LootBoxContainer = "LootBoxContainer";
 
@@ -109,7 +109,7 @@ namespace GamePlay
 		}
 
 		public Sprite MiniMapImage => miniMapImage;
-		public Bounds Bounds => new Bounds(localBounds.center + transform.position, localBounds.size);
+		public override Bounds Bounds => new Bounds(localBounds.center + transform.position, localBounds.size);
 		public bool IsLanded { get; private set; }
 		public Observable<Unit> PickedUp => _pickedUp;
 		protected abstract void OnPickUp(Character receiver);

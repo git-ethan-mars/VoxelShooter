@@ -3,57 +3,63 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Mirror;
-using Networking.Core;
 using Networking.Messages;
-using R3;
+using UnityEngine;
 using VoxelMap;
 
 namespace Networking
 {
-	public class MapSender
+	public class GameStateSender
 	{
 		private const int MessageSize = 500 * 1024;
 		private const float SendInterval = 0.01f;
 
-		private readonly MapProvider _mapProvider;
 		private readonly VoxelShooterNetworkManager _networkManager;
+		private readonly MapProvider _mapProvider;
 
-		public MapSender(MapProvider mapProvider, VoxelShooterNetworkManager networkManager)
+		public GameStateSender(VoxelShooterNetworkManager networkManager, MapProvider mapProvider)
 		{
-			_mapProvider = mapProvider;
 			_networkManager = networkManager;
+			_mapProvider = mapProvider;
 		}
 
-		public void Initialize()
-		{
-			_networkManager.MessageReceived
-				.OfMessageType<MapNameRequest>()
-				.Subscribe(directedMessage => SendMapName(directedMessage.Connection))
-				.AddTo(_networkManager.HostStopped);
-			_networkManager.MessageReceived
-				.OfMessageType<MapDownloadRequest>()
-				.Subscribe(directedMessage => SendMapAsync(directedMessage.Connection, _networkManager.HostStopped).Forget())
-				.AddTo(_networkManager.HostStopped);
-		}
-
-		private void SendMapName(NetworkConnectionToClient connection)
+		public void SendMapName(NetworkConnectionToClient connection)
 		{
 			var response = new MapNameResponse(_mapProvider.MapName);
 			_networkManager.SendResponse(connection, response);
 		}
 
-		private async UniTask SendMapAsync(NetworkConnectionToClient connection, CancellationToken cancellationToken)
+		public async UniTask SendMapAsync(NetworkConnectionToClient connection, CancellationToken cancellationToken = default)
 		{
-			using var snapshot = await _mapProvider.Map.SerializeAsync();
-			var messages = SplitBytesIntoMessages(snapshot.ToArray());
+			if (_mapProvider.Map == null)
+			{
+				Debug.Log("Map is not available for send");	
+				return;
+			}
+			
+			Debug.Log($"Start sending game state to {connection}");
+
+			byte[] snapshot = await _mapProvider.Map.MapData.SerializeAsync();
+			
+			var messages = SplitBytesIntoMessages(snapshot);
 			await SendMessagesAsync(connection, messages, cancellationToken);
+			Debug.Log($"Sending finished successfully to {connection}");
 		}
 
-		private async UniTask SendMessagesAsync(NetworkConnectionToClient connection, IEnumerable<MapDownloadResponse> messages, CancellationToken cancellationToken)
+		public void SendGameTime(NetworkConnectionToClient connection, TimeSpan timeLeft)
 		{
+			var response = new GameTimeResponse(timeLeft);
+			_networkManager.SendResponse(connection, response);
+		}
+
+		private async UniTask SendMessagesAsync(NetworkConnectionToClient connection, IEnumerable<MapDownloadResponse> messages, 
+			CancellationToken cancellationToken)
+		{
+			string currentMapName = _mapProvider.MapName;
+			
 			foreach (MapDownloadResponse message in messages)
 			{
-				if (connection == null)
+				if (connection == null || currentMapName != _mapProvider.MapName)
 				{
 					return;
 				}
@@ -73,5 +79,6 @@ namespace Networking
 				yield return new MapDownloadResponse(chunk, offset, bytes.Length);
 			}
 		}
+
 	}
 }

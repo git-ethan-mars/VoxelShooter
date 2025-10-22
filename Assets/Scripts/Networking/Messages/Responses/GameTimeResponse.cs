@@ -1,8 +1,7 @@
 ﻿using System;
-using Mirror;
 namespace Networking.Messages
 {
-	public struct GameTimeResponse : NetworkMessage
+	public struct GameTimeResponse : IResponse
 	{
 		public readonly TimeSpan TimeLeft;
 

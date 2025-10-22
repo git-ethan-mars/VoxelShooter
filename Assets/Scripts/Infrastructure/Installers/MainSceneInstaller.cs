@@ -46,23 +46,23 @@ namespace Infrastructure.Installers
 		{
 			containerBuilder.AddSingleton(typeof(PlayerService), typeof(IPlayerService));
 			containerBuilder.AddSingleton(typeof(SpawnPointService), typeof(ISpawnPointService));
-			containerBuilder.AddSingleton(typeof(MapSender));
 			containerBuilder.AddSingleton(typeof(GameClassChanger));
 			containerBuilder.AddSingleton(typeof(LootBoxDropper));
 		}
 
 		private void BindClientServices(ContainerBuilder containerBuilder)
 		{
-			containerBuilder.AddSingleton(typeof(MapDownloader));
+			containerBuilder.AddSingleton(typeof(GameStateDownloader));
 		}
 
 		private void BindCommonServices(ContainerBuilder containerBuilder)
 		{
+			containerBuilder.AddSingleton(typeof(UIProvider));
+			containerBuilder.AddSingleton(typeof(GameSessionCreator));
 			containerBuilder.AddSingleton(typeof(CharacterProvider));
 			containerBuilder.AddSingleton(typeof(MapProvider));
 			containerBuilder.AddSingleton(typeof(CameraService));
 			containerBuilder.AddSingleton(typeof(EntityContainerService));
-			containerBuilder.AddSingleton(typeof(UIProvider));
 # if LOCAL_BUILD
 			containerBuilder.AddSingleton(typeof(LocalPlayerDataLoader), typeof(IPlayerDataLoader));
 #else

@@ -39,6 +39,7 @@ namespace UI
 		[Inject]
 		private void Construct(MapProvider mapProvider)
 		{
+			return;
 			_mapProvider = mapProvider;
 
 			MainTexture = new RenderTexture(_mapProvider.Map.Width, _mapProvider.Map.Depth, 0, RenderTextureFormat.ARGB32)
@@ -52,6 +53,7 @@ namespace UI
 
 		private void Start()
 		{
+			return;
 			MainTexture.Create();
 			mapImage.texture = MainTexture;
 

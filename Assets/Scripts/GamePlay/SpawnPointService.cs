@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using System.Linq;
 using Data;
+using Services;
 using UnityEngine;
 using VoxelMap;
 namespace GamePlay
@@ -11,18 +11,25 @@ namespace GamePlay
 
 		private readonly IEntityFactory _entityFactory;
 		private readonly MapProvider _mapProvider;
+		private readonly IMapConfigureLoader _mapConfigureLoader;
 
 		private int _spawnPointIndex;
 
-		public SpawnPointService(IEntityFactory entityFactory, MapProvider mapProvider)
+		public SpawnPointService(IEntityFactory entityFactory, MapProvider mapProvider, IMapConfigureLoader mapConfigureLoader)
 		{
 			_entityFactory = entityFactory;
 			_mapProvider = mapProvider;
+			_mapConfigureLoader = mapConfigureLoader;
 		}
 
 		public void CreateSpawnPoints()
 		{
-			foreach (SpawnPointData spawnPointData in _mapProvider.Confgure.SpawnPoints)
+			_spawnPointIndex = 0;
+			_spawnPoints.Clear();
+
+			MapConfigure mapConfigure = _mapConfigureLoader.GetMapConfigure(_mapProvider.MapName);
+			
+			foreach (SpawnPointData spawnPointData in mapConfigure.SpawnPoints)
 			{
 				SpawnPoint spawnPoint = _entityFactory.CreateSpawnPoint(spawnPointData, _mapProvider.Map.transform);
 				_spawnPoints.Add(spawnPoint);

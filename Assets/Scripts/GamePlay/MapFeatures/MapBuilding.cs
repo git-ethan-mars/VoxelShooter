@@ -48,7 +48,7 @@ namespace GamePlay.MapFeatures
 
 		private bool CanBuild(List<Voxel> voxels)
 		{
-			foreach (IEntity entity in _entityContainerService.GetEntitiesByType<IEntity>())
+			foreach (Entity entity in _entityContainerService.GetEntitiesByType<Entity>())
 			{
 				for (var i = 0; i < voxels.Count; i++)
 				{

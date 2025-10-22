@@ -13,7 +13,7 @@ using UnityEngine;
 using VoxelMap;
 namespace GamePlay
 {
-	public class SpawningTNT : NetworkBehaviour, IEntity
+	public class SpawningTNT : Entity
 	{
 		[SerializeField] private Bounds localBounds;
 		
@@ -119,6 +119,6 @@ namespace GamePlay
 			Gizmos.DrawWireCube(Bounds.center, Bounds.size);
 		}
 
-		public Bounds Bounds => new Bounds(transform.position + localBounds.center, localBounds.size);
+		public override Bounds Bounds => new Bounds(transform.position + localBounds.center, localBounds.size);
 	}
 }

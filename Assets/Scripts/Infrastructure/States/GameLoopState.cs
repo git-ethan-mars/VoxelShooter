@@ -1,6 +1,6 @@
 using System;
 using Data;
-using Mirror;
+using GamePlay;
 using Networking;
 using Networking.Messages;
 using R3;
@@ -9,7 +9,7 @@ using UI;
 using UnityEngine;
 namespace Infrastructure.States
 {
-	public class GameLoopState : IState
+	public class GameLoopState : IPayloadedState<GameSession>
 	{
 		private readonly GameStateMachine _gameStateMachine;
 		private readonly IStaticDataService _staticData;
@@ -18,7 +18,8 @@ namespace Infrastructure.States
 		private readonly UIProvider _uiProvider;
 		private readonly IUIFactory _uiFactory;
 
-		private IDisposable _disposable;
+		private GameSession _gameSession;
+		private LoadingWindow _loadingWindow;
 
 		public GameLoopState(GameStateMachine gameStateMachine, IStaticDataService staticData, IStorageService storageService,
 			VoxelShooterNetworkManager networkManager, UIProvider uiProvider, IUIFactory uiFactory)
@@ -31,33 +32,46 @@ namespace Infrastructure.States
 			_uiFactory = uiFactory;
 		}
 
-		public void Enter()
+		public async void Enter(GameSession gameSession)
 		{
+			_gameSession = gameSession;
+			_loadingWindow = _uiFactory.CreateLoadingWindow();
+
+			var progress = new Progress<float>(_loadingWindow.UpdateLoadingBar);
+			
+			await _gameSession.RunAsync(progress);
+			
 			_uiProvider.InGameUI = _uiFactory.CreateInGameUI();
+
+			_networkManager.ClientDisconnected
+				.Subscribe(_ => OnClientDisconnected())
+				.AddTo(_networkManager);
+			
+			_gameSession.State
+				.Subscribe(OnGameSessionStateChanged)
+				.AddTo(_uiProvider.InGameUI);
+			_gameSession.TimeLeft
+				.Subscribe(_uiProvider.InGameUI.TimeInfo.ChangeGameTime)
+				.AddTo(_uiProvider.InGameUI);
 			_uiProvider.InGameUI.InGameMenu.ExitButtonPressed
 				.Subscribe(_ => OnExitButtonPressed())
 				.AddTo(_uiProvider.InGameUI);
 			_uiProvider.InGameUI.ChooseClassMenu.ChangeClassButtonPressed
 				.Subscribe(OnChangeClassButtonPressed)
 				.AddTo(_uiProvider.InGameUI);
-			_disposable = _storageService.Subscribe<MouseSettingsData>(OnMouseSettingsChanged);
+			
+			_storageService.Subscribe<MouseSettingsData>(OnMouseSettingsChanged)
+				.AddTo(_uiProvider.InGameUI);
 		}
 
 		public void Exit()
 		{
-			_disposable.Dispose();
+			_gameSession.Dispose();
 		}
 
-		private void StartGameTimer(WorldSettings worldSettings)
+		private void OnClientDisconnected()
 		{
-			TimeSpan gameDuration = TimeSpan.Zero;
-			Observable.Interval(TimeSpan.FromSeconds(1), _networkManager.HostStopped)
-				.TakeWhile(_ => gameDuration < worldSettings.GameDuration)
-				.Subscribe(_ =>
-				{
-					_uiProvider.InGameUI.TimeInfo.ChangeGameTime(worldSettings.GameDuration - gameDuration);
-					gameDuration += TimeSpan.FromSeconds(1);
-				}, _ => OnGameFinished());
+			Debug.Log("Client disconnected");
 		}
 
 		private void OnMouseSettingsChanged(MouseSettingsData mouseSettingsData)
@@ -74,33 +88,21 @@ namespace Infrastructure.States
 
 		private void OnExitButtonPressed()
 		{
-			StopNetwork();
 			_gameStateMachine.Enter<GameMenuState>();
 		}
 
-		private async void OnGameFinished()
+		private void OnGameSessionStateChanged(GameSessionState state)
 		{
-			try
+			switch (state)
 			{
-				StopNetwork();
-				await _uiProvider.InGameUI.ShowFinalStatisticAsync();
-				_gameStateMachine.Enter<GameMenuState>();
-			}
-			catch (Exception e)
-			{
-				Debug.LogException(e);
-			}
-		}
-
-		private void StopNetwork()
-		{
-			if (_networkManager.mode == NetworkManagerMode.Host)
-			{
-				_networkManager.StopHost();
-			}
-			else
-			{
-				_networkManager.StopClient();
+				case GameSessionState.Playing:
+					_uiProvider.InGameUI.Show();
+					_loadingWindow.Hide();
+					break;
+				case GameSessionState.Waiting:
+					_loadingWindow.Show();
+					_uiProvider.InGameUI.Hide();
+					break;
 			}
 		}
 	}

@@ -9,7 +9,7 @@ namespace Infrastructure
 		{
 			if (SceneManager.GetActiveScene().name != name)
 			{
-				await SceneManager.LoadSceneAsync(name);	
+				await SceneManager.LoadSceneAsync(name);
 			}
 		}
 	}

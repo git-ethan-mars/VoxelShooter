@@ -1,5 +1,7 @@
+using Data;
 using GamePlay;
 using Reflex.Attributes;
+using Services;
 using UnityEngine;
 using UnityEngine.UI;
 using VoxelMap;
@@ -23,13 +25,17 @@ namespace UI
 		private MapProvider _mapProvider;
 		private CharacterProvider _characterProvider;
 		private EntityContainerService _entityContainer;
-		
+		private IMapConfigureLoader _mapConfigureLoader;
+
+		private MapConfigure _mapConfigure;
 		private RenderTexture _minimapTexture;
-		
+
 		[Inject]
-		private void Construct(MapProvider mapProvider, CharacterProvider characterProvider, EntityContainerService entityContainer)
+		private void Construct(MapProvider mapProvider, IMapConfigureLoader mapConfigureLoader, 
+			CharacterProvider characterProvider, EntityContainerService entityContainer)
 		{
 			_mapProvider = mapProvider;
+			_mapConfigureLoader = mapConfigureLoader;
 			_characterProvider = characterProvider;
 			_entityContainer = entityContainer;
 
@@ -45,6 +51,7 @@ namespace UI
 		{
 			_minimapTexture.Create();
 			minimapImage.texture = _minimapTexture;
+			_mapConfigure = _mapConfigureLoader.GetMapConfigure(_mapProvider.MapName);
 		}
 
 		private void Update()
@@ -66,7 +73,7 @@ namespace UI
 			computeShader.SetTexture(drawMiniMap, MiniMapTexture, _minimapTexture);
 			var characterPosition = _characterProvider.Character.Value.transform.position;
 			computeShader.SetFloats(CharacterPosition, characterPosition.x, characterPosition.z);
-			Color waterColor = _mapProvider.Confgure.WaterColor;
+			Color waterColor = _mapConfigure.WaterColor;
 			computeShader.SetFloats(FallbackColor, waterColor.r, waterColor.g, waterColor.b, waterColor.a);
 			computeShader.Dispatch(drawMiniMap,
 				Mathf.CeilToInt((float)_minimapTexture.width / 8), Mathf.CeilToInt((float)_minimapTexture.height / 8),

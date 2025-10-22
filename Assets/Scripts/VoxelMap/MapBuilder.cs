@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Data;
 using Unity.Collections;
@@ -126,16 +127,16 @@ namespace VoxelMap
 			return map;
 		}
 
-		public async UniTask<Map> BuildAsync(IProgress<float> progress, Transform container = null)
+		public async UniTask<Map> BuildAsync(IProgress<float> progress = null, CancellationToken token = default)
 		{
 			Map map = _mapFactory.CreateEmptyMap();
-			map.transform.SetParent(container);
 
 			if (_innerColorChanging)
 			{
 				var job = new InnerColorChangeJob(_mapData, _innerColor);
 				await job.ScheduleParallel(_mapData.ChunkCount, 32, default)
 					.ToUniTask(PlayerLoopTiming.Update);
+				token.ThrowIfCancellationRequested();
 			}
 
 			if (_waterColorChanging)
@@ -143,6 +144,7 @@ namespace VoxelMap
 				var waterColorJob = new WaterColorChangeJob(_mapData, _waterColor);
 				await waterColorJob.ScheduleParallel(_mapData.Width * _mapData.Depth, 32, default)
 					.ToUniTask(PlayerLoopTiming.Update);
+				token.ThrowIfCancellationRequested();
 				var mapCenter = new Vector3((float)_mapData.Width / 2, 1, (float)_mapData.Depth / 2);
 				_mapFactory.CreateWaterPlane(mapCenter, _waterColor, map.transform);
 			}
@@ -151,9 +153,11 @@ namespace VoxelMap
 			var calculateFacesJob = new CalculateFacesJob(_mapData, faceCountPerChunk);
 			await calculateFacesJob.Schedule(_mapData.ChunkCount, default)
 				.ToUniTask(PlayerLoopTiming.Update);
-
-			Chunk[] chunks = await GenerateChunksAsync(_mapData, progress, map.transform, faceCountPerChunk);
-
+			
+			token.ThrowIfCancellationRequested();
+			
+			Chunk[] chunks = await GenerateChunksAsync(_mapData, map.transform, faceCountPerChunk, progress, token);
+			
 			SetupEnvironment(_mapData, map);
 
 			map.Construct(_mapData, chunks);
@@ -212,8 +216,8 @@ namespace VoxelMap
 			}
 		}
 
-		private async UniTask<Chunk[]> GenerateChunksAsync(MapData mapData, IProgress<float> progress, Transform container,
-			NativeArray<int> faceCountPerChunk)
+		private async UniTask<Chunk[]> GenerateChunksAsync(MapData mapData, Transform container, NativeArray<int> faceCountPerChunk,
+			IProgress<float> progress = null, CancellationToken token = default)
 		{
 			var chunks = new Chunk[mapData.ChunkCount];
 			var tasks = new UniTask[mapData.ChunkCount];
@@ -229,10 +233,10 @@ namespace VoxelMap
 				var meshFilter = chunkView.GetComponent<MeshFilter>();
 				var meshCollider = chunkView.GetComponent<MeshCollider>();
 				chunks[i] = new Chunk(i, mapData, meshFilter, meshCollider, faceCountPerChunk[i]);
-				tasks[i] = chunks[i].RegenerateAsync().ContinueWith(() =>
+				tasks[i] = chunks[i].RegenerateAsync(token).ContinueWith(() =>
 				{
 					completedChunks++;
-					progress.Report(completedChunks / (float)mapData.ChunkCount);
+					progress?.Report(completedChunks / (float)mapData.ChunkCount);
 				});
 			}
 

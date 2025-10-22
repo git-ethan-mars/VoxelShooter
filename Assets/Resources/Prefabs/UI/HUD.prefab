@@ -1641,14 +1641,14 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 5192710069341901612}
+  - {fileID: 89795883985749768}
   - {fileID: 6924771821622126789}
   - {fileID: 5912939448006961105}
   - {fileID: 4022509040717860434}
   - {fileID: 565317670909390298}
   - {fileID: 5931000695046598191}
   - {fileID: 8871060865613572078}
-  - {fileID: 5192710069341901612}
-  - {fileID: 89795883985749768}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1704,7 +1704,6 @@ GameObject:
   - component: {fileID: 8871060865613572078}
   - component: {fileID: 8992116442062904474}
   - component: {fileID: 2137231028610750272}
-  - component: {fileID: 2954006870208760593}
   m_Layer: 0
   m_Name: MiniMap
   m_TagString: Untagged
@@ -1768,21 +1767,3 @@ MonoBehaviour:
     y: 0
     width: 1
     height: 1
---- !u!114 &2954006870208760593
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8851741324931207248}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 93e44ffca88ab3e44ba71d8026df98fc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemPrefab: {fileID: 4280087998353516469, guid: c926c4bc41772c64698ba3e09e3f3b79, type: 3}
-  container: {fileID: 8871060865613572078}
-  computeShader: {fileID: 7200000, guid: 8f83b7f8f4060d14482966bf992818cd, type: 3}
-  worldMap: {fileID: 0}
-  minimapImage: {fileID: 2137231028610750272}
-  minimapCursor: {fileID: 4891180932978453680}

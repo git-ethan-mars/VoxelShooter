@@ -1,3 +1,4 @@
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Unity.Collections;
 using Unity.Jobs;
@@ -55,7 +56,7 @@ namespace VoxelMap
 			ApplyMeshCollider();
 		}
 
-		public async UniTask RegenerateAsync()
+		public async UniTask RegenerateAsync(CancellationToken cancellationToken = default)
 		{
 			Mesh.MeshDataArray meshArray = Mesh.AllocateWritableMeshData(1);
 			Mesh.MeshData meshData = meshArray[0];
@@ -67,11 +68,15 @@ namespace VoxelMap
 
 			var regenerateChunkJob = new RegenerateChunkJob(_mapData, _chunkIndex, vertices, indexes);
 			await regenerateChunkJob.Schedule().ToUniTask(PlayerLoopTiming.Update);
+			
+			cancellationToken.ThrowIfCancellationRequested();
 
 			ApplyMeshData(meshData, meshArray);
 
 			var bakeJob = new BakeChunkColliderJob(Mesh.GetInstanceID());
 			await bakeJob.Schedule().ToUniTask(PlayerLoopTiming.Update);
+			
+			cancellationToken.ThrowIfCancellationRequested();
 
 			ApplyMeshCollider();
 		}

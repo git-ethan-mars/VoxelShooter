@@ -1,9 +1,8 @@
-using Mirror;
 using Reflex.Attributes;
 using UnityEngine;
 namespace GamePlay
 {
-	public class SpawningGrenade : NetworkBehaviour, IEntity
+	public class SpawningGrenade : Entity
 	{
 		[SerializeField] private Rigidbody rigidBody;
 		[SerializeField] private BoxCollider boxCollider;
@@ -75,6 +74,6 @@ namespace GamePlay
 			Destroy(gameObject);
 		}*/
 
-		public Bounds Bounds => boxCollider.bounds;
+		public override Bounds Bounds => boxCollider.bounds;
 	}
 }

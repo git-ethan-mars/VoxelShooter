@@ -9,19 +9,16 @@ namespace Infrastructure.States
 	public class GameMenuState : IState
 	{
 		private readonly SceneLoader _sceneLoader;
-		private readonly GameStateMachine _stateMachine;
+		private readonly GameStateMachine _gameStateMachine;
 		private readonly IStorageService _storageService;
 		private readonly IUIFactory _uiFactory;
-		private readonly IMapConfigureLoader _mapConfigureLoader;
 
-		public GameMenuState(GameStateMachine stateMachine, SceneLoader sceneLoader, IUIFactory uiFactory, IStorageService storageService, 
-			IMapConfigureLoader mapConfigureLoader)
+		public GameMenuState(GameStateMachine gameStateMachine, SceneLoader sceneLoader, IUIFactory uiFactory, IStorageService storageService)
 		{
 			_sceneLoader = sceneLoader;
 			_uiFactory = uiFactory;
 			_storageService = storageService;
-			_stateMachine = stateMachine;
-			_mapConfigureLoader = mapConfigureLoader;
+			_gameStateMachine = gameStateMachine;
 		}
 
 		public async void Enter()
@@ -33,10 +30,10 @@ namespace Infrastructure.States
 
 			GameMenu gameMenu = _uiFactory.CreateGameMenu();
 			gameMenu.CreateGameRequested.Subscribe(OnCreateGameRequested).AddTo(gameMenu);
-			if (!ClonesManager.IsClone())
+			if (ClonesManager.IsClone())
 			{
 				//OnCreateGameRequested(new WorldSettings("Test", _mapConfigureLoader.GetMapConfigure("Test"), 10, 10, 10));
-				OnCreateGameRequested(new WorldSettings("Crossroads", _mapConfigureLoader.GetMapConfigure("Crossroads"), 10, 10, 10));
+				OnCreateGameRequested(new GameSettings("Crossroads", 10, 10, 10));
 			}
 			else
 			{
@@ -51,17 +48,17 @@ namespace Infrastructure.States
 		{
 		}
 
-		private async void OnCreateGameRequested(WorldSettings worldSettings)
+		private async void OnCreateGameRequested(GameSettings gameSettings)
 		{
 			await _sceneLoader.LoadAsync(Scenes.Main);
-			_stateMachine.Enter<InitializeHostState, WorldSettings>(worldSettings);
+			_gameStateMachine.Enter<InitializeHostState, GameSettings>(gameSettings);
 		}
 
 #if LOCAL_BUILD
 		private async void OnJoinButtonPressed()
 		{
 			await _sceneLoader.LoadAsync(Scenes.Main);
-			_stateMachine.Enter<InitializeClientState>();
+			_gameStateMachine.Enter<InitializeClientState>();
 		}
 #endif
 	}

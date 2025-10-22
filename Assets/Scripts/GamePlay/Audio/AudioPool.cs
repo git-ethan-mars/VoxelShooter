@@ -13,15 +13,14 @@ namespace GamePlay.Audio
 		private const int PoolSize = 50;
 
 		private readonly Stack<AudioSource> _stack;
-		private readonly Transform _container;
 
 		public AudioPool(IAssetProvider assets)
 		{
 			_stack = new Stack<AudioSource>(PoolSize);
-			_container = new GameObject(ContainerName).transform;
+			Transform container = new GameObject(ContainerName).transform;
 			for (var i = 0; i < PoolSize; i++)
 			{
-				var audioSource = assets.Instantiate(AudioSourcePath, _container).GetComponent<AudioSource>();
+				var audioSource = assets.Instantiate(AudioSourcePath, container).GetComponent<AudioSource>();
 				audioSource.gameObject.SetActive(false);
 				_stack.Push(audioSource);
 			}
@@ -43,7 +42,6 @@ namespace GamePlay.Audio
 		private void Release(AudioSource audioSource)
 		{
 			audioSource.gameObject.SetActive(false);
-			audioSource.transform.SetParent(_container);
 			audioSource.transform.position = Vector3.zero;
 			_stack.Push(audioSource);
 		}

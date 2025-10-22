@@ -101,63 +101,202 @@ namespace VoxelMap
 			return chunkX * Height * Depth / Chunk.ChunkSizeSquared + chunkY * Depth / Chunk.ChunkSize + chunkZ;
 		}
 
-		public async UniTask<NativeArray<byte>> SerializeAsync()
+		public byte[] Serialize()
 		{
-			const int chunksPerFrame = 8;
-			var buffer = new NativeList<byte>(Allocator.Persistent);
-			buffer.AddInt(Width);
-			buffer.AddInt(Height);
-			buffer.AddInt(Depth);
-			var snapshotChunks = new NativeArray<NativeArray<VoxelData>>(chunksPerFrame, Allocator.Persistent);
+			var chunkBuffers = new NativeList<byte>[ChunkCount];
+			var jobHandles = new NativeArray<JobHandle>(ChunkCount, Allocator.TempJob);
 
-			for (int i = 0; i < snapshotChunks.Length; i++)
+			for (int i = 0; i < ChunkCount; i++)
 			{
-				snapshotChunks[i] = new NativeArray<VoxelData>(Chunk.ChunkSizeCubed, Allocator.Persistent);
+				chunkBuffers[i] = new NativeList<byte>(Allocator.TempJob);
+				var job = new SerializeChunkJob(chunkBuffers[i], Voxels.AsReadOnly(), i, VoxelData.DefaultInner.Color);
+				jobHandles[i] = job.Schedule();
 			}
 
-			for (int i = 0; i < ChunkCount; i += chunksPerFrame)
+			JobHandle.CompleteAll(jobHandles);
+
+			jobHandles.Dispose();
+
+			using var finalBuffer = new NativeList<byte>(Allocator.Temp);
+			finalBuffer.AddInt(Width);
+			finalBuffer.AddInt(Height);
+			finalBuffer.AddInt(Depth);
+
+			foreach (var chunkBuffer in chunkBuffers)
 			{
-				int end = Math.Min(i + chunksPerFrame, ChunkCount);
-				for (int j = i; j < end; j++)
-				{
-					CopyChunk(snapshotChunks[j % chunksPerFrame], j);
-				}
-				
-				for (int j = i; j < end; j++)
-				{
-					await WriteSerializedChunk(buffer, snapshotChunks[j % chunksPerFrame]);
-				}
+				finalBuffer.AddRange(chunkBuffer.AsArray());
+				chunkBuffer.Dispose();
 			}
 
-			for (var i = 0; i < snapshotChunks.Length; i++)
-			{
-				snapshotChunks[i].Dispose();
-			}
-
-			snapshotChunks.Dispose();
-			
-			return buffer.AsArray();
+			byte[] result = finalBuffer.AsArray().ToArray();
+			return result;
 		}
 
-		private UniTask WriteSerializedChunk(NativeList<byte> buffer, NativeArray<VoxelData> voxels)
+		public async UniTask<byte[]> SerializeAsync()
 		{
-			var jobHandle = new SerializeChunkJob(buffer, voxels, VoxelData.DefaultInner.Color);
-			return jobHandle.Schedule().ToUniTask(PlayerLoopTiming.Update);
-		}
+			var chunkBuffers = new NativeList<byte>[ChunkCount];
+			var tasks = new UniTask[ChunkCount];
 
-		private void CopyChunk(NativeArray<VoxelData> chunkVoxels, int chunkIndex)
-		{
-			for (var i = 0; i < Chunk.ChunkSizeCubed; i++)
+			for (int i = 0; i < ChunkCount; i++)
 			{
-				var voxelIndex = chunkIndex * Chunk.ChunkSizeCubed + i;
-				chunkVoxels[i] = Voxels[voxelIndex];
+				chunkBuffers[i] = new NativeList<byte>(Allocator.Persistent);
+				var job = new SerializeChunkJob(chunkBuffers[i], Voxels.AsReadOnly(), i, VoxelData.DefaultInner.Color);
+				tasks[i] = job.Schedule().ToUniTask(PlayerLoopTiming.Update);
 			}
+
+			await UniTask.WhenAll(tasks);
+
+			using var finalBuffer = new NativeList<byte>(Allocator.Temp);
+			finalBuffer.AddInt(Width);
+			finalBuffer.AddInt(Height);
+			finalBuffer.AddInt(Depth);
+
+			foreach (var chunkBuffer in chunkBuffers)
+			{
+				finalBuffer.AddRange(chunkBuffer.AsArray());
+				chunkBuffer.Dispose();
+			}
+
+			byte[] result = finalBuffer.AsArray().ToArray();
+			return result;
 		}
 
 		public void Dispose()
 		{
 			Voxels.Dispose();
 			Faces.Dispose();
+		}
+
+		public struct Readonly
+		{
+			public int ChunkCount => Width * Depth * Height / Chunk.ChunkSizeCubed;
+			public readonly int Width;
+			public readonly int Depth;
+			public readonly int Height;
+			[NativeDisableContainerSafetyRestriction]
+			internal NativeArray<Face>.ReadOnly Faces;
+			[NativeDisableContainerSafetyRestriction]
+			internal NativeArray<VoxelData>.ReadOnly Voxels;
+			
+			public Readonly(MapData mapData)
+			{
+				Width = mapData.Width;
+				Depth = mapData.Depth;
+				Height = mapData.Height;
+				Faces = mapData.Faces.AsReadOnly();
+				Voxels = mapData.Voxels.AsReadOnly();
+			}
+
+			public VoxelData this[int x, int y, int z]
+			{
+				get
+				{
+					if (!IsValidPosition(x, y, z))
+					{
+						throw new IndexOutOfRangeException($"{x}, {y}, {z} is not a valid position.");
+					}
+
+					return Voxels[GetVoxelIndex(x, y, z)];
+				}
+			}
+
+			public VoxelData this[int index] => Voxels[index];
+
+			public Face GetFace(int x, int y, int z)
+			{
+				var faceIndex = GetVoxelIndex(x, y, z);
+
+				if (!IsValidPosition(x, y, z))
+				{
+					throw new IndexOutOfRangeException($"{x}, {y}, {z} is not a valid position.");
+				}
+
+				return Faces[faceIndex];
+			}
+
+			public readonly bool IsValidPosition(int x, int y, int z)
+			{
+				return 0 <= x && x < Width && 0 <= y && y < Height && 0 <= z && z < Depth;
+			}
+
+			public int GetVoxelIndex(int x, int y, int z)
+			{
+				int chunkStartX = x / Chunk.ChunkSize;
+				int chunkStartY = y / Chunk.ChunkSize;
+				int chunkStartZ = z / Chunk.ChunkSize;
+				int startChunkIndex = (chunkStartZ + chunkStartY * Depth / Chunk.ChunkSize +
+				                       chunkStartX * (Depth * Height / Chunk.ChunkSizeSquared)) * Chunk.ChunkSizeCubed;
+				int localIndex = x % Chunk.ChunkSize * Chunk.ChunkSizeSquared + y % Chunk.ChunkSize * Chunk.ChunkSize + z % Chunk.ChunkSize;
+				return startChunkIndex + localIndex;
+			}
+
+			public int GetChunkIndex(int x, int y, int z)
+			{
+				int chunkX = x / Chunk.ChunkSize;
+				int chunkY = y / Chunk.ChunkSize;
+				int chunkZ = z / Chunk.ChunkSize;
+				return chunkX * Height * Depth / Chunk.ChunkSizeSquared + chunkY * Depth / Chunk.ChunkSize + chunkZ;
+			}
+
+			public byte[] Serialize()
+			{
+				var chunkBuffers = new NativeList<byte>[ChunkCount];
+				var jobHandles = new NativeArray<JobHandle>(ChunkCount, Allocator.TempJob);
+
+				for (int i = 0; i < ChunkCount; i++)
+				{
+					chunkBuffers[i] = new NativeList<byte>(Allocator.TempJob);
+					var job = new SerializeChunkJob(chunkBuffers[i], Voxels, i, VoxelData.DefaultInner.Color);
+					jobHandles[i] = job.Schedule();
+				}
+
+				JobHandle.CompleteAll(jobHandles);
+
+				jobHandles.Dispose();
+
+				using var finalBuffer = new NativeList<byte>(Allocator.Temp);
+				finalBuffer.AddInt(Width);
+				finalBuffer.AddInt(Height);
+				finalBuffer.AddInt(Depth);
+
+				foreach (var chunkBuffer in chunkBuffers)
+				{
+					finalBuffer.AddRange(chunkBuffer.AsArray());
+					chunkBuffer.Dispose();
+				}
+
+				byte[] result = finalBuffer.AsArray().ToArray();
+				return result;
+			}
+
+			public async UniTask<byte[]> SerializeAsync()
+			{
+				var chunkBuffers = new NativeList<byte>[ChunkCount];
+				var tasks = new UniTask[ChunkCount];
+
+				for (int i = 0; i < ChunkCount; i++)
+				{
+					chunkBuffers[i] = new NativeList<byte>(Allocator.Persistent);
+					var job = new SerializeChunkJob(chunkBuffers[i], Voxels, i, VoxelData.DefaultInner.Color);
+					tasks[i] = job.Schedule().ToUniTask(PlayerLoopTiming.Update);
+				}
+
+				await UniTask.WhenAll(tasks);
+
+				using var finalBuffer = new NativeList<byte>(Allocator.Temp);
+				finalBuffer.AddInt(Width);
+				finalBuffer.AddInt(Height);
+				finalBuffer.AddInt(Depth);
+
+				foreach (var chunkBuffer in chunkBuffers)
+				{
+					finalBuffer.AddRange(chunkBuffer.AsArray());
+					chunkBuffer.Dispose();
+				}
+
+				byte[] result = finalBuffer.AsArray().ToArray();
+				return result;
+			}
 		}
 	}
 }

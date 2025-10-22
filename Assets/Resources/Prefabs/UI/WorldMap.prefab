@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 8571721631625997593}
   - component: {fileID: 8441789411303656705}
   - component: {fileID: 7581558025949496129}
-  - component: {fileID: 6577157450657128246}
   - component: {fileID: 4289654228408589818}
   m_Layer: 5
   m_Name: WorldMap
@@ -74,21 +73,6 @@ MonoBehaviour:
     y: 0
     width: 1
     height: 1
---- !u!114 &6577157450657128246
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 132931712858528329}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8bd4ff603dcb4603bbd7399181240983, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  computeShader: {fileID: 7200000, guid: 28b91d1e07db4e5ca93e5821e565601d, type: 3}
-  mapImage: {fileID: 7581558025949496129}
-  <CanvasGroup>k__BackingField: {fileID: 4289654228408589818}
 --- !u!225 &4289654228408589818
 CanvasGroup:
   m_ObjectHideFlags: 0

@@ -12,7 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e252e319c61c4beba81ce941dd9260e5, type: 3}
   m_Name: ShotgunShoot
   m_EditorClassIdentifier: 
+  <Clip>k__BackingField: {fileID: 8300000, guid: 6fccd7e7c2e3f15418aa226445563722, type: 3}
   clip: {fileID: 8300000, guid: 6fccd7e7c2e3f15418aa226445563722, type: 3}
+  <Volume>k__BackingField: 0.8
   volume: 0.8
+  <MinDistance>k__BackingField: 0
   minDistance: 0
+  <MaxDistance>k__BackingField: 80
   maxDistance: 80

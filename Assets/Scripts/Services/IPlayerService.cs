@@ -6,5 +6,6 @@ namespace Services
 		void AddPlayer(int playerId, PlayerData playerData);
 		void RemovePlayer(int playerId);
 		bool TryGetPlayerData(int playerId, out PlayerData playerData);
+		void ResetData();
 	}
 }

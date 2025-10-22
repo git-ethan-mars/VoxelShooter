@@ -10,7 +10,7 @@ using UnityEngine;
 using VoxelMap;
 namespace GamePlay
 {
-	public class Drill : NetworkBehaviour, IEntity
+	public class Drill : Entity
 	{
 		[SerializeField] private AudioData drillHit;
 		[SerializeField] private ParticleSystem particles;
@@ -84,6 +84,6 @@ namespace GamePlay
 			Destroy(gameObject);
 		}
 
-		public Bounds Bounds => boxCollider.bounds;
+		public override Bounds Bounds => boxCollider.bounds;
 	}
 }

@@ -12,7 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e252e319c61c4beba81ce941dd9260e5, type: 3}
   m_Name: AssaultRifleShoot
   m_EditorClassIdentifier: 
+  <Clip>k__BackingField: {fileID: 8300000, guid: 3765d92c4c9b5534d8b5f82a49dd8dc6, type: 3}
   clip: {fileID: 8300000, guid: 3765d92c4c9b5534d8b5f82a49dd8dc6, type: 3}
+  <Volume>k__BackingField: 0.5
   volume: 0.5
+  <MinDistance>k__BackingField: 0
   minDistance: 0
+  <MaxDistance>k__BackingField: 200
   maxDistance: 200

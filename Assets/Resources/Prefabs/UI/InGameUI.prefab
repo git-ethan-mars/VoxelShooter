@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 893652179862288476}
   - component: {fileID: 6341654717988075625}
   - component: {fileID: 7883918768342886507}
+  - component: {fileID: 1027526292100179895}
   m_Layer: 5
   m_Name: InGameUI
   m_TagString: Untagged
@@ -65,6 +66,7 @@ MonoBehaviour:
   <SettingsMenu>k__BackingField: {fileID: 4746634793245235211}
   <Hud>k__BackingField: {fileID: 3030755137032057536}
   <WorldMap>k__BackingField: {fileID: 3192393743615382325}
+  canvasGroup: {fileID: 1027526292100179895}
 --- !u!223 &893652179862288476
 Canvas:
   m_ObjectHideFlags: 0
@@ -128,6 +130,18 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!225 &1027526292100179895
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5022907797549701239}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1001 &125424993589409077
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -136,6 +150,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4221933473088551936}
     m_Modifications:
+    - target: {fileID: 2677944262777997980, guid: 80dddd7157195394eb9642ecb6ebf6a9, type: 3}
+      propertyPath: m_Alpha
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3589440109418679928, guid: 80dddd7157195394eb9642ecb6ebf6a9, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using R3;
 using System.Linq;
-using System.Threading;
-using Cysharp.Threading.Tasks;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Pool;
 namespace VoxelMap
 {
-	public class Map : MonoBehaviour, IDisposable
+	public class Map : MonoBehaviour
 	{
 		public static readonly Vector3 WorldOffset = new Vector3(0.5f, 0.5f, 0.5f);
 
@@ -24,22 +22,27 @@ namespace VoxelMap
 		{
 			_mapData = mapData;
 			_chunks = chunks;
+			MapData = new MapData.Readonly(mapData);
 		}
 
 		public int Width => _mapData.Width;
 		public int Height => _mapData.Height;
 		public int Depth => _mapData.Depth;
 		public IReadOnlyList<Chunk> Chunks => _chunks;
-		public NativeArray<VoxelData>.ReadOnly Voxels => _mapData.Voxels.AsReadOnly();
 		public Observable<Chunk> ChunkUpdated => _chunkUpdated;
 		public Observable<Unit> MapUpdated => _mapUpdated;
+		public MapData.Readonly MapData { get; private set; }
 		private readonly Subject<Chunk> _chunkUpdated = new Subject<Chunk>();
 		private readonly Subject<Unit> _mapUpdated = new Subject<Unit>();
-		
 
 		private void Update()
 		{
 			RegenerateChunks();
+		}
+
+		private void OnDestroy()
+		{
+			_mapData.Dispose();
 		}
 
 		private void RegenerateChunks()
@@ -110,11 +113,6 @@ namespace VoxelMap
 				RefreshFaces(chunkNumber, changes, _regeneratingChunks);
 				changes.Dispose();
 			}
-		}
-		
-		public UniTask<NativeArray<byte>> SerializeAsync()
-		{
-			return _mapData.SerializeAsync();
 		}
 
 		public bool IsInsideMap(int x, int y, int z)
@@ -317,11 +315,6 @@ namespace VoxelMap
 			}
 
 			return false;
-		}
-
-		public void Dispose()
-		{
-			_mapData.Dispose();
 		}
 	}
 }

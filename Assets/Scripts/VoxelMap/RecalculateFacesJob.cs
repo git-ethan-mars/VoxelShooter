@@ -193,14 +193,6 @@ namespace VoxelMap
 			}
 		}
 
-		private void ResetFaceCountIfNeeded(int chunkIndex)
-		{
-			if (!_faceCountChangesByChunk.ContainsKey(chunkIndex))
-			{
-				_faceCountChangesByChunk[chunkIndex] = 0;
-			}
-		}
-
 		private bool HasTopFace(int x, int y, int z)
 		{
 			return !_mapData.IsValidPosition(x, y + 1, z) || !_mapData[x, y + 1, z].IsSolid();

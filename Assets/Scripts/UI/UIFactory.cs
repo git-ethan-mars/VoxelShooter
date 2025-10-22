@@ -27,7 +27,6 @@ namespace UI
 			inGameUI.Hud.InventoryPresenter.Initialize();
 			inGameUI.Hud.PalettePresenter.Initialize();
 			inGameUI.ChooseClassMenu.Initialize();
-			inGameUI.Initialize();
 			return inGameUI;
 		}
 

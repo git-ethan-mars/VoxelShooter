@@ -70,7 +70,7 @@ namespace UI
 		}
 
 		public Observable<Unit> BackButtonPressed => backButton.onClick.AsObservable();
-		public Observable<WorldSettings> ApplyButtonPressed => applyButton.onClick.AsObservable().Select(_ => GetWorldSettings());
+		public Observable<GameSettings> ApplyButtonPressed => applyButton.onClick.AsObservable().Select(_ => GetWorldSettings());
 
 		public void Show()
 		{
@@ -112,20 +112,16 @@ namespace UI
 				Directory.CreateDirectory(Constants.MapFolderPath);
 			}
 
-			var mapNames = Directory.GetFiles(Constants.MapFolderPath, $"*{Constants.RchExtension}")
-				.Union(Directory.GetFiles(Constants.MapFolderPath, $"*{Constants.VxlExtension}"))
-				.Select(Path.GetFileNameWithoutExtension)
+			var mapNames = MapDataReader.GetExistedMaps()
 				.Select(fileName => new MapView(fileName, _mapConfigureLoader.GetMapConfigure(fileName).Image))
 				.ToArray();
 			return mapNames;
 		}
 
-		private WorldSettings GetWorldSettings()
+		private GameSettings GetWorldSettings()
 		{
 			string mapName = _mapCarouselModel.CurrentItem.CurrentValue.MapName;
-			return new WorldSettings(mapName, _mapConfigureLoader.GetMapConfigure(mapName),
-				_timeLimitation.Value,
-				_lobbyBalance.spawnTime, _lobbyBalance.spawnTime);
+			return new GameSettings(mapName, _timeLimitation.Value, _lobbyBalance.spawnTime, _lobbyBalance.spawnTime);
 		}
 	}
 }

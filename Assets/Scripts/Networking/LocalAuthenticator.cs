@@ -10,8 +10,6 @@ namespace Networking
 	{
 		private VoxelShooterNetworkManager _networkManager;
 		private IPlayerService _playerService;
-		private MapSender _mapSender;
-		private MapDownloader _mapDownloader;
 		private IPlayerDataLoader _playerDataLoader;
 
 		[Inject]
@@ -49,6 +47,11 @@ namespace Networking
 			var response = new AuthenticationResponse();
 			connection.Send(response);
 			ServerAccept(connection);
+
+			if (_networkManager.mode == NetworkManagerMode.Host)
+			{
+				ClientAccept();
+			}
 		}
 	}
 }

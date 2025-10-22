@@ -4,14 +4,14 @@ namespace GamePlay
 {
 	public class EntityContainerService
 	{
-		private readonly HashSet<IEntity> _entities = new HashSet<IEntity>();
+		private readonly HashSet<Entity> _entities = new HashSet<Entity>();
 
-		public void Add(IEntity entity)
+		public void Add(Entity entity)
 		{
 			_entities.Add(entity);
 		}
 
-		public void Remove(IEntity entity)
+		public void Remove(Entity entity)
 		{
 			_entities.Remove(entity);
 		}

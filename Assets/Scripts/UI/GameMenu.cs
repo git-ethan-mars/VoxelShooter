@@ -26,7 +26,7 @@ namespace UI
 
 		private EventSystem _eventSystem;
 
-		public Observable<WorldSettings> CreateGameRequested => matchMenu.ApplyButtonPressed.AsObservable();
+		public Observable<GameSettings> CreateGameRequested => matchMenu.ApplyButtonPressed.AsObservable();
 
 #if LOCAL_BUILD
 		public Observable<Unit> JoinButtonPressed => mainMenu.JoinButtonPressed.AsObservable();

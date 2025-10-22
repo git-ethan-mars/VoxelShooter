@@ -4,15 +4,15 @@ namespace Data
 	[CreateAssetMenu(fileName = "Audio data")]
 	public class AudioData : ScriptableObject
 	{
-		public AudioClip clip;
+		[field: SerializeField] public AudioClip Clip { get; private set; }
 
-		[Range(0.0f, 1.0f)]
-		public float volume;
+		[field: Range(0.0f, 1.0f)]
+		[field: SerializeField] public float Volume { get; private set; }
 
-		[Min(0.0f)]
-		public float minDistance;
+		[field: Min(0.0f)]
+		[field: SerializeField] public float MinDistance { get; private set; }
 
-		[Min(0.0f)]
-		public float maxDistance;
+		[field: Min(0.0f)]
+		[field: SerializeField] public float MaxDistance { get; private set; }
 	}
 }

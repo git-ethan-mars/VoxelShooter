@@ -2,7 +2,6 @@
 using Cysharp.Threading.Tasks;
 using Data;
 using GamePlay.MapFeatures;
-using Mirror;
 using R3;
 using Reflex.Attributes;
 using UnityEngine;
@@ -10,7 +9,7 @@ using VoxelMap;
 namespace GamePlay
 {
 	[SelectionBase]
-	public class Tombstone : NetworkBehaviour, IEntity
+	public class Tombstone : Entity
 	{
 		[SerializeField] private new Collider collider;
 		[SerializeField] private Bounds localBounds;
@@ -84,6 +83,6 @@ namespace GamePlay
 			Gizmos.DrawWireCube(Bounds.center, Bounds.size);
 		}
 
-		public Bounds Bounds => new Bounds(localBounds.center + transform.position, localBounds.size);
+		public override Bounds Bounds => new Bounds(localBounds.center + transform.position, localBounds.size);
 	}
 }

@@ -1,4 +1,3 @@
-using System.Threading;
 using Cysharp.Threading.Tasks;
 using Mirror;
 using Networking.Core;
@@ -14,17 +13,15 @@ namespace Networking
 	public class VoxelShooterNetworkManager : NetworkManager
 	{
 		private readonly Subject<DirectedMessage> _messageReceived = new Subject<DirectedMessage>();
-		private readonly CancellationTokenSource _hostStoppedCts = new CancellationTokenSource();
-		private readonly Subject<Unit> _clientStopped = new Subject<Unit>();
-		
+
 		private IServerListService _serverList;
 		private IPlayerService _playerService;
 		private MapProvider _mapProvider;
 		private ServerInfo _serverInfo;
+		private readonly Subject<Unit> _clientDisconnected = new Subject<Unit>();
 
 		public Observable<DirectedMessage> MessageReceived => _messageReceived;
-		public CancellationToken HostStopped => _hostStoppedCts.Token;
-		public Observable<Unit> ClientStopped => _clientStopped;
+		public Observable<Unit> ClientDisconnected => _clientDisconnected;
 
 		[Inject]
 		private void Construct(IServerListService serverList, IPlayerService playerService, MapProvider mapProvider)
@@ -38,54 +35,58 @@ namespace Networking
 		{
 			base.OnStartHost();
 
-			RegisterRequest<MapNameRequest>(false);
-			RegisterRequest<MapDownloadRequest>(false);
+			RegisterRequest<MapNameRequest>();
+			RegisterRequest<MapDownloadRequest>();
+			RegisterRequest<GameTimeRequest>();
 			RegisterRequest<ChangeClassRequest>();
-			
+
 			await AddToServerList();
 		}
 
 		public override void OnServerDisconnect(NetworkConnectionToClient connection)
 		{
 			base.OnServerDisconnect(connection);
-			
+
 			_playerService.RemovePlayer(connection.connectionId);
 		}
 
 		public override async void OnStopHost()
 		{
 			base.OnStopHost();
-			
+
 			UnregisterRequest<MapNameRequest>();
 			UnregisterRequest<MapDownloadRequest>();
+			UnregisterRequest<GameTimeRequest>();
 			UnregisterRequest<ChangeClassRequest>();
 
 			if (_serverInfo != null)
 			{
 				await _serverList.RemoveServerAsync(_serverInfo, Application.exitCancellationToken);
 			}
-			
-			_hostStoppedCts.Cancel();
 		}
 
 		public override void OnStartClient()
 		{
 			base.OnStartClient();
-			
+
 			RegisterResponse<AuthenticationResponse>(false);
-			RegisterResponse<MapNameResponse>(false);
-			RegisterResponse<MapDownloadResponse>(false);
+			RegisterResponse<MapNameResponse>();
+			RegisterResponse<MapDownloadResponse>();
+			RegisterResponse<GameTimeResponse>();
+			RegisterResponse<MapChangeResponse>();
 		}
 
 		public override void OnStopClient()
 		{
 			base.OnStopClient();
-			
+
 			UnregisterResponse<AuthenticationResponse>();
 			UnregisterResponse<MapNameResponse>();
 			UnregisterResponse<MapDownloadResponse>();
-			
-			_clientStopped.OnNext(Unit.Default);
+			UnregisterResponse<GameTimeResponse>();
+			UnregisterResponse<MapChangeResponse>();
+
+			_clientDisconnected.OnNext(Unit.Default);
 		}
 
 		public void SendRequest<TRequest>(TRequest request) where TRequest : struct, IRequest
@@ -111,7 +112,7 @@ namespace Networking
 
 			void OnRequestReceived(NetworkConnectionToClient connection, TRequest request)
 			{
-				_messageReceived.OnNext(new DirectedMessage(connection, request));	
+				_messageReceived.OnNext(new DirectedMessage(connection, request));
 			}
 		}
 
@@ -119,7 +120,7 @@ namespace Networking
 		{
 			NetworkServer.UnregisterHandler<TRequest>();
 		}
-		
+
 		private void RegisterResponse<TResponse>(bool requireAuthentication = true) where TResponse : struct, IResponse
 		{
 			NetworkClient.RegisterHandler<TResponse>(OnResponseReceived, requireAuthentication);
@@ -127,7 +128,7 @@ namespace Networking
 
 			void OnResponseReceived(TResponse response)
 			{
-				_messageReceived.OnNext(new DirectedMessage(response));	
+				_messageReceived.OnNext(new DirectedMessage(response));
 			}
 		}
 

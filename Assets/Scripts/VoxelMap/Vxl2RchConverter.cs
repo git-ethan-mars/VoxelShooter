@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Unity.Collections;
 using UnityEngine;
@@ -12,9 +13,9 @@ namespace VoxelMap
 		private const int Depth = 512;
 		private static int _height;
 
-		public static async UniTask<MapData> LoadVxlAsync(string mapPath)
+		public static async UniTask<MapData> LoadVxlAsync(string mapPath, CancellationToken cancellationToken = default)
 		{
-			byte[] data = await File.ReadAllBytesAsync(mapPath);
+			byte[] data = await File.ReadAllBytesAsync(mapPath, cancellationToken);
 			var voxels = LoadVxlCore(data);
 			var mapData = new MapData(voxels, Width, _height, Depth);
 			return mapData;
@@ -30,7 +31,6 @@ namespace VoxelMap
 
 		private static NativeArray<VoxelData> LoadVxlCore(byte[] data)
 		{
-
 			_height = GetMapHeight(data);
 			var heightOffset = 0;
 			if (_height % Chunk.ChunkSize != 0)

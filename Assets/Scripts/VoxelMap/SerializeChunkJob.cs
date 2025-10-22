@@ -1,5 +1,6 @@
 ﻿using Unity.Burst;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
 namespace VoxelMap
@@ -7,18 +8,23 @@ namespace VoxelMap
 	[BurstCompile]
 	public struct SerializeChunkJob : IJob
 	{
+		[WriteOnly]
 		private NativeList<byte> _buffer;
-		private NativeArray<VoxelData> _chunkVoxels;
+		[ReadOnly] 
+		[NativeDisableContainerSafetyRestriction] 
+		private NativeArray<VoxelData>.ReadOnly _voxels;
+		private readonly int _chunkIndex;
 		private readonly Color32 _innerColor;
 		private int _coloredStart;
 		private int _coloredEnd;
 		private int _solidStart;
 		private int _solidEnd;
 
-		public SerializeChunkJob(NativeList<byte> buffer, NativeArray<VoxelData> chunkVoxels, Color32 innerColor)
+		public SerializeChunkJob(NativeList<byte> buffer, NativeArray<VoxelData>.ReadOnly voxels, int chunkIndex, Color32 innerColor)
 		{
 			_buffer = buffer;
-			_chunkVoxels = chunkVoxels;
+			_voxels = voxels;
+			_chunkIndex = chunkIndex;
 			_innerColor = innerColor;
 			_coloredStart = -1;
 			_coloredEnd = -1;
@@ -28,9 +34,11 @@ namespace VoxelMap
 
 		public void Execute()
 		{
-			for (var i = 0; i < _chunkVoxels.Length; i++)
+			for (var i = 0; i < Chunk.ChunkSizeCubed; i++)
 			{
-				if (_chunkVoxels[i].Color.IsEqual(_innerColor))
+				int voxelIndex = _chunkIndex * Chunk.ChunkSizeCubed + i;
+
+				if (_voxels[voxelIndex].Color.IsEqual(_innerColor))
 				{
 					if (IsColoredRunStarted)
 					{
@@ -43,7 +51,7 @@ namespace VoxelMap
 					_solidEnd = i;
 				}
 
-				else if (_chunkVoxels[i].IsSolid())
+				else if (_voxels[voxelIndex].IsSolid())
 				{
 					if (IsSolidRunStarted)
 					{
@@ -54,7 +62,7 @@ namespace VoxelMap
 					{
 						_coloredStart = i;
 					}
-					
+
 					_coloredEnd = i;
 				}
 				else
@@ -97,9 +105,11 @@ namespace VoxelMap
 			_buffer.Add((byte)MapRun.Colored);
 			_buffer.AddInt(_coloredStart);
 			_buffer.AddInt(_coloredEnd);
+			
 			for (int i = _coloredStart; i <= _coloredEnd; i++)
 			{
-				VoxelData voxel = _chunkVoxels[i];
+				int voxelIndex = _chunkIndex * Chunk.ChunkSizeCubed + i;
+				VoxelData voxel = _voxels[voxelIndex];
 				_buffer.Add(voxel.Color.b);
 				_buffer.Add(voxel.Color.g);
 				_buffer.Add(voxel.Color.r);

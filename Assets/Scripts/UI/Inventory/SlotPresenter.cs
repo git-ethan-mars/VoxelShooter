@@ -31,6 +31,7 @@ namespace UI.Inventory
 
 		public override void Dispose()
 		{
+			OnDeselected();
 			_disposable?.Dispose();
 		}
 

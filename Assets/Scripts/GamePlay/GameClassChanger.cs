@@ -3,9 +3,6 @@ using Cysharp.Threading.Tasks;
 using Data;
 using GamePlay.Core;
 using Mirror;
-using Networking;
-using Networking.Core;
-using Networking.Messages;
 using R3;
 using Services;
 using UnityEngine;
@@ -18,31 +15,25 @@ namespace GamePlay
 		private readonly IEntityFactory _entityFactory;
 		private readonly IStaticDataService _staticData;
 		private readonly IItemFactory _itemFactory;
-		private readonly VoxelShooterNetworkManager _networkManager;
 
-		private WorldSettings _worldSettings;
+		private GameSettings _gameSettings;
 
 		public GameClassChanger(IPlayerService playerService, ISpawnPointService spawnPointService, IEntityFactory entityFactory, 
-			IStaticDataService staticData, IItemFactory itemFactory, VoxelShooterNetworkManager networkManager)
+			IStaticDataService staticData, IItemFactory itemFactory)
 		{
 			_playerService = playerService;
 			_spawnPointService = spawnPointService;
 			_entityFactory = entityFactory;
 			_staticData = staticData;
 			_itemFactory = itemFactory;
-			_networkManager = networkManager;
 		}
 
-		public void Initialize(WorldSettings worldSettings)
+		public void Initialize(GameSettings gameSettings)
 		{
-			_worldSettings = worldSettings;
-			_networkManager.MessageReceived
-				.OfMessageType<ChangeClassRequest>()
-				.Subscribe(directedMessage => ChangeClass(directedMessage.Connection, directedMessage.Message.GameClass))
-				.AddTo(_networkManager);
+			_gameSettings = gameSettings;
 		}
 
-		private void ChangeClass(NetworkConnectionToClient connection, GameClass chosenClass)
+		public void ChangeClass(NetworkConnectionToClient connection, GameClass chosenClass)
 		{
 			if (!_playerService.TryGetPlayerData(connection.connectionId, out PlayerData playerData))
 			{
@@ -101,7 +92,7 @@ namespace GamePlay
 			Spectator spectator = _entityFactory.CreateSpectator(oldCharacter.transform.position);
 			NetworkServer.ReplacePlayerForConnection(connection, spectator.gameObject, ReplacePlayerOptions.Destroy);
 			Tombstone tombStone = _entityFactory.CreateTombstone(oldCharacter.transform.position);
-			await tombStone.ExplodeWithDelay(_worldSettings.SpawnTime - TimeSpan.FromSeconds(1)).SuppressCancellationThrow();
+			await tombStone.ExplodeWithDelay(_gameSettings.SpawnTime - TimeSpan.FromSeconds(1)).SuppressCancellationThrow();
 			await UniTask.Delay(TimeSpan.FromSeconds(1));
 
 			if (connection.isReady)

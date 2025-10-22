@@ -15,8 +15,8 @@ namespace VoxelMap
 
 			Directory.CreateDirectory(folderPath);
 			await using FileStream file = File.OpenWrite(filePath);
-			using var bytes = await mapData.SerializeAsync();
-			await file.WriteAsync(bytes.ToArray());
+			byte[] bytes = await mapData.SerializeAsync();
+			await file.WriteAsync(bytes);
 		}
 	}
 }
