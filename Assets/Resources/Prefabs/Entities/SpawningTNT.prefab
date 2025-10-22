@@ -366,8 +366,8 @@ MonoBehaviour:
     m_Extent: {x: 0.5, y: 0.5, z: 0.5}
   canvas: {fileID: 8379580092094507939}
   timerText: {fileID: 2645569852548358579}
-  explosionAudio: {fileID: 11400000, guid: 48b740d2cb9a89246be31497ecbb7e40, type: 2}
-  countdownAudio: {fileID: 11400000, guid: fb23717e0747a1d47a23bd82c4ddd847, type: 2}
+  explosionAudio: 22
+  countdownAudio: 21
 --- !u!65 &1274707429556553451
 BoxCollider:
   m_ObjectHideFlags: 0

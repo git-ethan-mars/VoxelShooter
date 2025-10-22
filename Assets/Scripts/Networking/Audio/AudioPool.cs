@@ -1,9 +1,7 @@
-using System;
 using System.Collections.Generic;
-using Cysharp.Threading.Tasks;
 using Services;
 using UnityEngine;
-namespace GamePlay.Audio
+namespace Networking.Audio
 {
 	public class AudioPool
 	{
@@ -33,13 +31,7 @@ namespace GamePlay.Audio
 			return audioSource;
 		}
 
-		public async UniTaskVoid ReleaseOnDelayAsync(AudioSource audioSource, TimeSpan timeSpan)
-		{
-			await UniTask.Delay(timeSpan);
-			Release(audioSource);
-		}
-
-		private void Release(AudioSource audioSource)
+		public void Release(AudioSource audioSource)
 		{
 			audioSource.gameObject.SetActive(false);
 			audioSource.transform.position = Vector3.zero;

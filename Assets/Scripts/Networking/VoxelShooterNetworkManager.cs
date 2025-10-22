@@ -74,6 +74,8 @@ namespace Networking
 			RegisterResponse<MapDownloadResponse>();
 			RegisterResponse<GameTimeResponse>();
 			RegisterResponse<MapChangeResponse>();
+			RegisterResponse<StaticAudioResponse>();
+			RegisterResponse<DynamicAudioResponse>();
 		}
 
 		public override void OnStopClient()
@@ -85,7 +87,14 @@ namespace Networking
 			UnregisterResponse<MapDownloadResponse>();
 			UnregisterResponse<GameTimeResponse>();
 			UnregisterResponse<MapChangeResponse>();
+			UnregisterResponse<StaticAudioResponse>();
+			UnregisterResponse<DynamicAudioResponse>();
+		}
 
+		public override void OnClientDisconnect()
+		{
+			base.OnClientDisconnect();
+			
 			_clientDisconnected.OnNext(Unit.Default);
 		}
 
@@ -97,6 +106,11 @@ namespace Networking
 		public void SendResponse<TResponse>(NetworkConnectionToClient connection, TResponse response) where TResponse : struct, IResponse
 		{
 			connection.Send(response);
+		}
+
+		public void SendResponseToAll<TResponse>(TResponse response, bool sendToReadyOnly = false) where TResponse : struct, IResponse
+		{
+			NetworkServer.SendToAll(response, sendToReadyOnly: sendToReadyOnly);
 		}
 
 		private async UniTask AddToServerList()

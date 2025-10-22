@@ -1,8 +1,7 @@
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-
-namespace Project.Tools.DictionaryHelp
+namespace Data.SerializableDictionary
 {
     [System.Serializable]
     public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializationCallbackReceiver

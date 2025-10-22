@@ -2,14 +2,14 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Data;
-using GamePlay.Audio;
 using GamePlay.Core;
 using GamePlay.MapFeatures;
-using Mirror;
+using Networking.Audio;
 using Networking.Core;
 using R3;
 using Services;
 using UnityEngine;
+using AudioType = Data.AudioType;
 using Random = UnityEngine.Random;
 namespace GamePlay
 {
@@ -17,12 +17,12 @@ namespace GamePlay
 	{
 		private const float SpreadThreshold = 1e-3f;
 
-		[SerializeField] private AudioData shootSound;
-		[SerializeField] private AudioData reloadSound;
+		[SerializeField] private AudioType shootSound;
+		[SerializeField] private AudioType reloadSound;
 		[SerializeField] private ParticleSystem shootingParticles;
 
 		protected IInputService InputService;
-		protected AudioPlayer AudioPlayer;
+		protected NetworkAudioPlayer AudioPlayer;
 		protected CameraService CameraService;
 
 		private CancellationTokenSource _onChangeSlot;
@@ -141,7 +141,7 @@ namespace GamePlay
 
 			_isReady = false;
 			_bulletsInMagazine.Value -= 1;
-			AudioPlayer.Play(shootSound, transform, false);
+			AudioPlayer.SendAudio(shootSound, netIdentity, false);
 			shootingParticles.Play();
 			await ResetShoot();
 		}
@@ -149,7 +149,7 @@ namespace GamePlay
 		private async UniTask Reload()
 		{
 			_isReloading = true;
-			AudioPlayer.Play(reloadSound, transform, false);
+			AudioPlayer.SendAudio(reloadSound, netIdentity, false);
 
 			bool isCanceled =
 				await UniTask.Delay(TimeSpan.FromSeconds(Configure.ReloadTime), cancellationToken: _onChangeSlot.Token)

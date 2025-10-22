@@ -143,8 +143,8 @@ MonoBehaviour:
   - {fileID: 4975925562638396929}
   wireframeMaterial: {fileID: 2100000, guid: c79e2cccda412094c920cf69114c22e9, type: 2}
   wireframeCube: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
-  digSound: {fileID: 11400000, guid: d7aaa8d3a8b1e0e4b9aaaa6559cbf986, type: 2}
-  hitSound: {fileID: 11400000, guid: 9cf5854dcf0822c46a1792981bdd7d68, type: 2}
+  digSound: 5
+  hitSound: 6
 --- !u!114 &9023813768525976248
 MonoBehaviour:
   m_ObjectHideFlags: 0

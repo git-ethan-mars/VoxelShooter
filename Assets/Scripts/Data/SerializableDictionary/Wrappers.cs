@@ -1,6 +1,5 @@
 using UnityEngine;
-
-namespace Project.Tools.Help
+namespace Data.SerializableDictionary
 {
     [System.Serializable]
     public class UnityObjectWrapper<T> where T : class

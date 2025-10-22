@@ -1,7 +1,7 @@
 using UnityEngine;
 namespace Data
 {
-	[CreateAssetMenu(fileName = "Audio data")]
+	[CreateAssetMenu(fileName = "Audio Data", menuName = "Project Audio/Audio Data")]
 	public class AudioData : ScriptableObject
 	{
 		[field: SerializeField] public AudioClip Clip { get; private set; }

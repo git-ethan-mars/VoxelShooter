@@ -1,0 +1,29 @@
+namespace Data
+{
+	public enum AudioType
+	{
+		AssaultRifleReload,	
+		AssaultRifleShoot,
+		DrillHit,
+		DrillLauncherReload,
+		GrenadeExplosion,
+		KnifeDig,
+		KnifeHit,
+		MachineGunReload,
+		MachineGunShoot,
+		PlayerHurt,
+		PlayerStep,
+		RevolverReload,
+		RevolverShoot,
+		RifleReload,
+		RifleShoot,
+		RocketLauncherExplosion,
+		RocketLauncherShoot,
+		ShotgunReload,
+		ShotgunShoot,
+		SpadeDig,
+		SpadeHit,
+		TNTCountdown,
+		TNTExplosion
+	}
+}

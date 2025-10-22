@@ -1,5 +1,5 @@
 using Data;
-using GamePlay.Audio;
+using Networking.Audio;
 using Reflex.Attributes;
 using Services;
 namespace GamePlay
@@ -7,7 +7,7 @@ namespace GamePlay
 	public class Rifle : RangeWeapon
 	{
 		[Inject]
-		private void Construct(IInputService inputService, CameraService cameraService, AudioPlayer audioPlayer, IStaticDataService staticData)
+		private void Construct(IInputService inputService, CameraService cameraService, NetworkAudioPlayer audioPlayer, IStaticDataService staticData)
 		{
 			InputService = inputService;
 			CameraService = cameraService;

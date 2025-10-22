@@ -2,27 +2,28 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Data;
-using GamePlay.Audio;
 using GamePlay.Core;
 using GamePlay.MapFeatures;
 using Mirror;
+using Networking.Audio;
 using Services;
 using UnityEngine;
 using VoxelMap;
+using AudioType = Data.AudioType;
 namespace GamePlay
 {
 	public abstract class MeleeWeapon : InventoryItem
 	{
 		[SerializeField] protected Material wireframeMaterial;
 		[SerializeField] protected Mesh wireframeCube;
-		[SerializeField] private AudioData digSound;
-		[SerializeField] protected AudioData hitSound;
+		[SerializeField] private AudioType digSound;
+		[SerializeField] protected AudioType hitSound;
 		
 		private CancellationTokenSource _onChangeSlot;
 
 		protected IInputService InputService { get; set; }
 		protected CameraService CameraService { get; set; }
-		protected AudioPlayer AudioPlayer { get; set; }
+		protected NetworkAudioPlayer AudioPlayer { get; set; }
 		public new MeleeWeaponConfigure Configure => base.Configure as MeleeWeaponConfigure;
 
 		private bool _isReady = true;
@@ -89,11 +90,11 @@ namespace GamePlay
 
 			if (rayHit.collider.GetComponent<IDamageaeble>() != null)
 			{
-				AudioPlayer.Play(hitSound, rayHit.point);
+				AudioPlayer.SendAudio(hitSound, rayHit.point);
 			}
 			else
 			{
-				AudioPlayer.Play(digSound, rayHit.point);
+				AudioPlayer.SendAudio(digSound, rayHit.point);
 			}
 			
 			damageVisitor?.Visit(this, isStrongHit, rayHit);

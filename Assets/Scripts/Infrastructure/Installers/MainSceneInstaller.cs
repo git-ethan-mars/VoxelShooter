@@ -1,9 +1,9 @@
 using GamePlay;
-using GamePlay.Audio;
 using GamePlay.Core;
 using GamePlay.MapFeatures;
 using Infrastructure.States;
 using Networking;
+using Networking.Audio;
 using R3;
 using Reflex.Core;
 using Services;
@@ -23,7 +23,7 @@ namespace Infrastructure.Installers
 			BindFactories(containerBuilder);
 			BindGameObjects(containerBuilder);
 			BindRegistry(containerBuilder);
-			containerBuilder.AddSingleton(typeof(AudioPlayer));
+			containerBuilder.AddSingleton(typeof(NetworkAudioPlayer));
 
 			Observable.FromEvent<Container>(
 					handler => containerBuilder.OnContainerBuilt += handler,

@@ -1,5 +1,4 @@
-using Networking.Messages;
-namespace Networking
+namespace Networking.Messages
 {
 	public struct MapChangeResponse : IResponse
 	{

@@ -7,6 +7,7 @@ using GamePlay.MapFeatures;
 using Mirror;
 using Networking;
 using Networking.Core;
+using Networking.Messages;
 using R3;
 using Services;
 using UnityEngine;
@@ -223,7 +224,7 @@ namespace GamePlay
 					return;
 				}
 
-				NetworkServer.SendToAll(new MapChangeResponse());
+				_networkManager.SendResponseToAll(new MapChangeResponse());
 				Debug.Log("Change map message send");
 
 				StartGame();

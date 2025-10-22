@@ -42,10 +42,6 @@ namespace Infrastructure.States
 			await _gameSession.RunAsync(progress);
 			
 			_uiProvider.InGameUI = _uiFactory.CreateInGameUI();
-
-			_networkManager.ClientDisconnected
-				.Subscribe(_ => OnClientDisconnected())
-				.AddTo(_networkManager);
 			
 			_gameSession.State
 				.Subscribe(OnGameSessionStateChanged)

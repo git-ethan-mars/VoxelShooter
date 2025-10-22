@@ -1,9 +1,8 @@
-﻿#if UNITY_EDITOR
+﻿
 using UnityEditor;
-#endif
 using UnityEngine;
 
-namespace Project.Tools.InterfaceHelp
+namespace Data.SerializableDictionary
 {
     [System.Serializable]
     public class InterfaceHolder<T> where T : class

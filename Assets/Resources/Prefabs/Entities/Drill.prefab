@@ -55,7 +55,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  drillHit: {fileID: 11400000, guid: f8bd5d5e2ad0d6948b6ae45045bd1623, type: 2}
+  drillHit: 2
   particles: {fileID: 796040190074194916}
   rigidBody: {fileID: 6081013060560421041}
   boxCollider: {fileID: 3428673413064696427}

@@ -356,8 +356,8 @@ MonoBehaviour:
   - {fileID: 7721664450987836587}
   - {fileID: 8933552102566240532}
   - {fileID: 3665479669250751415}
-  shootSound: {fileID: 11400000, guid: 99fef55f8818002438ca06dd3cbef51f, type: 2}
-  reloadSound: {fileID: 11400000, guid: 1afb59dd54d474c46b08dbf548e0ae83, type: 2}
+  shootSound: 1
+  reloadSound: 0
   shootingParticles: {fileID: 5788705993261693164}
 --- !u!114 &7918345567907447830
 MonoBehaviour:

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Data;
 using UnityEngine;
+using AudioType = Data.AudioType;
 namespace Services
 {
 	public class StaticDataService : IStaticDataService
@@ -14,11 +15,10 @@ namespace Services
 		private const string PlayerCharacteristicsPath = "StaticData/Characteristics Collection";
 		private const string LobbyBalancePath = "StaticData/Lobby Balance";
 		private const string VoxelHealthBalancePath = "StaticData/Block Health";
-		private const string SoundPath = "StaticData/Audio Data";
+		private const string AudioCollectionPath = "StaticData/Audio Collection";
 		private const string RectPaletteDataPath = "StaticData/Rect Palette Data";
 		private const string ItemIconsPath = "StaticData/Item Icons";
 		private readonly IAssetProvider _assets;
-		private List<AudioData> _audios;
 		private IReadOnlyList<Sprite> _crosshairSprites;
 		private Dictionary<ItemType, InventoryItemConfigure> _itemConfigures;
 		private Dictionary<ItemType, Sprite> _slotIconByItemType;
@@ -27,6 +27,7 @@ namespace Services
 		private Dictionary<GameClass, List<ItemType>> _inventoryByGameClass;
 		private Dictionary<GameClass, Characteristics> _characteristicByGameClass;
 		private Dictionary<ItemType, GameObject> _itemPrefabByItemType;
+		private Dictionary<AudioType, AudioData> _audioDataByAudioType;
 		private LobbyBalance _lobbyBalance;
 		private RectPaletteData _rectPaletteData;
 		private VoxelHealthBalance _voxelHealthBalance;
@@ -44,7 +45,7 @@ namespace Services
 			LoadCrosshairSprites();
 			LoadLobbyBalance();
 			LoadVoxelHealthBalance();
-			LoadSounds();
+			LoadAudio();
 			LoadRectPaletteData();
 		}
 
@@ -106,9 +107,9 @@ namespace Services
 			return _voxelHealthBalance;
 		}
 
-		public AudioData GetAudio(int soundId)
+		public AudioData GetAudioData(AudioType audioType)
 		{
-			return _audios[soundId];
+			return _audioDataByAudioType[audioType];
 		}
 
 		public RectPaletteData GetRectPaletteData()
@@ -165,9 +166,9 @@ namespace Services
 			_voxelHealthBalance = _assets.Load<VoxelHealthBalance>(VoxelHealthBalancePath);
 		}
 
-		private void LoadSounds()
+		private void LoadAudio()
 		{
-			_audios = _assets.LoadAll<AudioData>(SoundPath).ToList();
+			_audioDataByAudioType = _assets.Load<AudioCollection>(AudioCollectionPath).AudioDataByType;
 		}
 
 		private void LoadRectPaletteData()

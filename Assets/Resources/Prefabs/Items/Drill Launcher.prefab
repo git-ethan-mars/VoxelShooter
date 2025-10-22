@@ -141,7 +141,7 @@ MonoBehaviour:
   syncInterval: 0
   model:
   - {fileID: 1129938077308624044}
-  reloadSound: {fileID: 11400000, guid: d70fef782c0366f49a9d88c910bc7291, type: 2}
+  reloadSound: 3
 --- !u!114 &-534871451779756994
 MonoBehaviour:
   m_ObjectHideFlags: 0

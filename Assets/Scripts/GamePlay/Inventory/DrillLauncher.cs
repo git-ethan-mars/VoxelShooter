@@ -1,30 +1,31 @@
 using Cysharp.Threading.Tasks;
 using Data;
-using GamePlay.Audio;
 using GamePlay.Core;
 using Mirror;
+using Networking.Audio;
 using Networking.Core;
 using R3;
 using Reflex.Attributes;
 using Services;
 using UnityEngine;
+using AudioType = Data.AudioType;
 namespace GamePlay
 {
 	public class DrillLauncher : InventoryItem
 	{
-		[SerializeField] private AudioData reloadSound;
+		[SerializeField] private AudioType reloadSound;
 		
 		private IInputService _inputService;
 		private IEntityFactory _entityFactory;
 		private CameraService _cameraService;
-		private AudioPlayer _audioPlayer;
+		private NetworkAudioPlayer _audioPlayer;
 
 		private readonly SyncReactiveProperty<int> _amount = new SyncReactiveProperty<int>();
 		private bool _isReloading;
 
 		[Inject]
 		private void Construct(IInputService inputService, IEntityFactory entityFactory, CameraService cameraService,
-			IStaticDataService staticData, AudioPlayer audioPlayer)
+			IStaticDataService staticData, NetworkAudioPlayer audioPlayer)
 		{
 			_inputService = inputService;
 			_entityFactory = entityFactory;
@@ -84,7 +85,7 @@ namespace GamePlay
 				return;
 			}
 			
-			_audioPlayer.Play(reloadSound, transform, false);
+			_audioPlayer.SendAudio(reloadSound, netIdentity, false);
 			
 			_isReloading = true;
 			await UniTask.WaitForSeconds(Configure.ReloadTime, cancellationToken: destroyCancellationToken);

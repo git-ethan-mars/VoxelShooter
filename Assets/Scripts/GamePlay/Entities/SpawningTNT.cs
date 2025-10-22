@@ -2,15 +2,16 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Data;
-using GamePlay.Audio;
 using GamePlay.MapFeatures;
 using Mirror;
+using Networking.Audio;
 using R3;
 using Reflex.Attributes;
 using Services;
 using TMPro;
 using UnityEngine;
 using VoxelMap;
+using AudioType = Data.AudioType;
 namespace GamePlay
 {
 	public class SpawningTNT : Entity
@@ -20,12 +21,12 @@ namespace GamePlay
 		[SerializeField] private Canvas canvas;
 		[SerializeField] private TextMeshProUGUI timerText;
 
-		[SerializeField] private AudioData explosionAudio;
-		[SerializeField] private AudioData countdownAudio;
+		[SerializeField] private AudioType explosionAudio;
+		[SerializeField] private AudioType countdownAudio;
 
 		private MapProvider _mapProvider;
 		private EntityContainerService _entityContainer;
-		private AudioPlayer _audioPlayer;
+		private NetworkAudioPlayer _audioPlayer;
 		private IParticleFactory _particleFactory;
 		private TNTConfigure _configure;
 
@@ -33,7 +34,7 @@ namespace GamePlay
 
 		[Inject]
 		private void Construct(IStaticDataService staticData, MapProvider mapProvider, EntityContainerService entityContainer,
-			AudioPlayer audioPlayer, IParticleFactory particleFactory)
+			NetworkAudioPlayer audioPlayer, IParticleFactory particleFactory)
 		{
 			_configure = staticData.GetItemConfigure<TNTConfigure>(ItemType.TNT);
 			_mapProvider = mapProvider;
@@ -106,7 +107,7 @@ namespace GamePlay
 
 			_particleFactory.CreateRchParticle(transform.position, _configure.ParticleSpeed, _configure.ParticleCount,
 				_configure.ExplosionData.radius);
-			_audioPlayer.Play(explosionAudio, transform.position);
+			_audioPlayer.SendAudio(explosionAudio, transform.position);
 			
 			_disposable?.Dispose();
 

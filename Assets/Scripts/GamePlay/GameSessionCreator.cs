@@ -2,11 +2,11 @@ using Cysharp.Threading.Tasks;
 using Data;
 using Mirror;
 using Networking;
+using Networking.Audio;
 using Networking.Core;
 using Networking.Messages;
 using R3;
 using Services;
-using UnityEngine;
 using VoxelMap;
 namespace GamePlay
 {
@@ -24,11 +24,12 @@ namespace GamePlay
 		private readonly EntityContainerService _entityContainer;
 		private readonly ISpawnPointService _spawnPointService;
 		private readonly IStaticDataService _staticData;
+		private readonly NetworkAudioPlayer _audioPlayer;
 
 		public GameSessionCreator(EntityContainerService entityContainer, IMapFactory mapFactory,
 			IMapConfigureLoader mapConfigureLoader, VoxelShooterNetworkManager networkManager, GameStateDownloader gameDownloader,
 			GameClassChanger gameClassChanger, LootBoxDropper lootBoxDropper, ISpawnPointService spawnPointService, MapProvider mapProvider,
-			IPlayerService playerService, IStaticDataService staticData)
+			IPlayerService playerService, IStaticDataService staticData, NetworkAudioPlayer audioPlayer)
 		{
 			_entityContainer = entityContainer;
 			_mapFactory = mapFactory;
@@ -42,6 +43,7 @@ namespace GamePlay
 			_mapProvider = mapProvider;
 			_playerService = playerService;
 			_staticData = staticData;
+			_audioPlayer = audioPlayer;
 		}
 
 		public GameSession Create(GameSettings gameSettings)
@@ -65,16 +67,16 @@ namespace GamePlay
 				.OfMessageType<GameTimeRequest>()
 				.Subscribe(directedMessage => _gameStateSender.SendGameTime(directedMessage.Connection, gameSession.TimeLeft.CurrentValue))
 				.AddTo(_networkManager);
-			Observable.EveryUpdate()
-				.Where(_ => Input.GetKeyDown(KeyCode.X))
-				.Subscribe(_ =>
-				{
-					_gameStateSender.SendMapAsync(NetworkServer.localConnection, gameSession.MapChangeToken).Forget();
-				})
-				.AddTo(_networkManager);
 			_networkManager.MessageReceived
 				.OfMessageType<ChangeClassRequest>()
 				.Subscribe(directedMessage => _gameClassChanger.ChangeClass(directedMessage.Connection, directedMessage.Message.GameClass))
+				.AddTo(_networkManager);
+			_networkManager.MessageReceived.OfMessageType<StaticAudioResponse>()
+				.Subscribe(directedMessage => _audioPlayer.Play(directedMessage.Message.AudioType, directedMessage.Message.Position))
+				.AddTo(_networkManager);
+			_networkManager.MessageReceived.OfMessageType<DynamicAudioResponse>()
+				.Subscribe(directedMessage => _audioPlayer.Play(directedMessage.Message.AudioType, directedMessage.Message.NetworkIdentity,
+					directedMessage.Message.IsSpatial))
 				.AddTo(_networkManager);
 
 			return gameSession;
@@ -85,6 +87,14 @@ namespace GamePlay
 			_networkManager.StartClient();
 			await _networkManager.MessageReceived.FirstAsync<AuthenticationResponse>();
 			NetworkClient.connection.isAuthenticated = true;
+
+			_networkManager.MessageReceived.OfMessageType<StaticAudioResponse>()
+				.Subscribe(directedMessage => _audioPlayer.Play(directedMessage.Message.AudioType, directedMessage.Message.Position))
+				.AddTo(_networkManager);
+			_networkManager.MessageReceived.OfMessageType<DynamicAudioResponse>()
+				.Subscribe(directedMessage => _audioPlayer.Play(directedMessage.Message.AudioType, directedMessage.Message.NetworkIdentity,
+					directedMessage.Message.IsSpatial))
+				.AddTo(_networkManager);
 
 			var gameSession = new GameSession(_mapProvider, _networkManager, _gameDownloader);
 

@@ -1,18 +1,19 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Data;
-using GamePlay.Audio;
 using GamePlay.MapFeatures;
 using Mirror;
+using Networking.Audio;
 using Reflex.Attributes;
 using Services;
 using UnityEngine;
 using VoxelMap;
+using AudioType = Data.AudioType;
 namespace GamePlay
 {
 	public class Drill : Entity
 	{
-		[SerializeField] private AudioData drillHit;
+		[SerializeField] private AudioType drillHit;
 		[SerializeField] private ParticleSystem particles;
 		[SerializeField] private Rigidbody rigidBody;
 		[SerializeField] private BoxCollider boxCollider;
@@ -20,11 +21,11 @@ namespace GamePlay
 		private MapProvider _mapProvider;
 		private EntityContainerService _entityContainer;
 		private DrillLauncherConfigure _configure;
-		private AudioPlayer _audioPlayer;
+		private NetworkAudioPlayer _audioPlayer;
 
 		[Inject]
 		private void Construct(MapProvider mapProvider, IStaticDataService staticData, EntityContainerService entityContainer,
-			AudioPlayer audioPlayer)
+			NetworkAudioPlayer audioPlayer)
 		{
 			_mapProvider = mapProvider;
 			_entityContainer = entityContainer;
@@ -69,7 +70,7 @@ namespace GamePlay
 				visitor.Visit(_configure.ExplosionData, transform.position);
 			}
 			
-			_audioPlayer.Play(drillHit, transform.position);
+			_audioPlayer.SendAudio(drillHit, transform.position);
 		}
 
 		public void Launch()

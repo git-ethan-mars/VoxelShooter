@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Data;
 using UnityEngine;
+using AudioType = Data.AudioType;
 namespace Services
 {
 	public interface IStaticDataService
@@ -12,7 +13,7 @@ namespace Services
 		Characteristics GetCharacteristics(GameClass gameClass);
 		LobbyBalance GetLobbyBalance();
 		VoxelHealthBalance GetVoxelHealthBalance();
-		AudioData GetAudio(int soundId);
+		AudioData GetAudioData(AudioType audioType);
 		RectPaletteData GetRectPaletteData();
 		Sprite GetSlotIcon(ItemType type);
 		Sprite GetProjectileIcon(ItemType type);

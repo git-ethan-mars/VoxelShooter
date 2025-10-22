@@ -1,10 +1,9 @@
 #if UNITY_EDITOR
-using UnityEngine;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditorInternal;
-
-namespace Project.Tools.DictionaryHelp
+using UnityEngine;
+namespace Data.SerializableDictionary
 {
     [CustomPropertyDrawer(typeof(SerializableDictionary<,>), true)]
     public class SerializableDictionaryDrawer : PropertyDrawer

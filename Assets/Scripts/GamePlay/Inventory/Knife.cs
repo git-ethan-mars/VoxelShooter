@@ -1,5 +1,5 @@
 using Data;
-using GamePlay.Audio;
+using Networking.Audio;
 using Reflex.Attributes;
 using Services;
 namespace GamePlay
@@ -8,7 +8,7 @@ namespace GamePlay
 	{
 		[Inject]
 		private void Construct(IInputService inputService, CameraService cameraService,
-			IStaticDataService staticData, CharacterProvider characterProvider, AudioPlayer audioPlayer)
+			IStaticDataService staticData, CharacterProvider characterProvider, NetworkAudioPlayer audioPlayer)
 		{
 			InputService = inputService;
 			CameraService = cameraService;
