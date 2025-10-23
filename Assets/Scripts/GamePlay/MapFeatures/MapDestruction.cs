@@ -56,7 +56,11 @@ namespace GamePlay.MapFeatures
 			else
 			{
 				var centeredBlock = new Voxel(hitPosition, _map.GetVoxelByGlobalPosition(hitPosition));
-				voxels.Add(centeredBlock);
+
+				if (IsDestructible(centeredBlock))
+				{
+					voxels.Add(centeredBlock);
+				}
 			}
 
 			HandleVoxels(voxels, constantDamageCalculator);
