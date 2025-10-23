@@ -1,6 +1,6 @@
+using System;
 using Mirror;
 using R3;
-using UnityEngine;
 namespace Networking.Core
 {
 	public class SyncReactiveProperty<T> : SyncObject
@@ -8,7 +8,15 @@ namespace Networking.Core
 		public T Value
 		{
 			get => _reactiveProperty.Value;
-			set => _reactiveProperty.Value = value;
+			set
+			{
+				if (!IsWritable())
+				{
+					throw new InvalidOperationException("SyncReactiveProperty can only be modified by the owner.");	
+				}
+				_reactiveProperty.Value = value;
+				OnDirty?.Invoke();
+			}
 		}
 
 		private readonly ReactiveProperty<T> _reactiveProperty = new ReactiveProperty<T>();

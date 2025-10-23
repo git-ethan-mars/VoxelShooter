@@ -52,18 +52,19 @@ namespace GamePlay
 			}
 		}
 
-		internal override void Select()
+		
+		public override void Select()
 		{
 			base.Select();
 			_onChangeSlot = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
-			ResetHit(_onChangeSlot.Token).Forget();
+			ResetHit(_onChangeSlot.Token);
 		}
 
-		internal override void Deselect()
+		public override void Deselect()
 		{
 			base.Deselect();
-			_onChangeSlot.Cancel();
-			_onChangeSlot.Dispose();
+			_onChangeSlot?.Cancel();
+			_onChangeSlot?.Dispose();
 		}
 
 		[Command]
@@ -100,11 +101,12 @@ namespace GamePlay
 			damageVisitor?.Visit(this, isStrongHit, rayHit);
 		}
 
-		private async UniTask ResetHit(CancellationToken token)
+		[Server]
+		private async void ResetHit(CancellationToken token)
 		{
 			while (!token.IsCancellationRequested)
 			{
-				await UniTask.Delay(TimeSpan.FromSeconds(Configure.TimeBetweenHit), cancellationToken: token);
+				await UniTask.Delay(TimeSpan.FromSeconds(Configure.TimeBetweenHit), cancellationToken: token).SuppressCancellationThrow();
 				_isReady = true;
 			}
 		}

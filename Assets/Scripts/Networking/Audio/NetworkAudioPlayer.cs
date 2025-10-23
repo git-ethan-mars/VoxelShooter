@@ -62,7 +62,7 @@ namespace Networking.Audio
 			audioSource.spatialBlend = isSpatial ? 1.0f : 0.0f;
 			audioSource.Play();
 
-			Transform target = identity.transform;
+			Transform target = identity?.transform;
 			float endTime = Time.time + audioData.Clip.length;
 
 			while (endTime > Time.time)

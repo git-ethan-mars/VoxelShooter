@@ -171,7 +171,7 @@ namespace GamePlay
 
 			_spawnPointService.CreateSpawnPoints();
 
-			_timeLeft.Value = TimeSpan.FromSeconds(30);
+			_timeLeft.Value = _gameSettings.GameDuration;
 		}
 
 		private async UniTask DownloadGameStateAsync(IProgress<float> progress, CancellationToken cancellationToken = default)

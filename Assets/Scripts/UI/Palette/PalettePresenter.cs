@@ -1,8 +1,7 @@
-using System;
+using System.Linq;
 using GamePlay;
 using R3;
 using Reflex.Attributes;
-using Services;
 using UnityEngine;
 using UnityEngine.UI;
 namespace UI
@@ -10,69 +9,50 @@ namespace UI
 	public class PalettePresenter : MonoBehaviour
 	{
 		[SerializeField] private GridLayoutGroup grid;
-		[SerializeField] private RectTransform rectTransform;
 		[SerializeField] private PaletteView paletteView;
 
 		private CharacterProvider _characterProvider;
-		private IInputService _inputService;
-		private RectPalette _palette;
 
 		[Inject]
-		private void Construct(IInputService inputService, IStaticDataService staticData, CharacterProvider characterProvider)
+		private void Construct(CharacterProvider characterProvider)
 		{
-			_inputService = inputService;
 			_characterProvider = characterProvider;
-			_palette = new RectPalette(staticData);
 		}
 
 		public void Initialize()
 		{
-			grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-			grid.constraintCount = _palette.ColumnCount;
-			for (var i = 0; i < _palette.RowCount; i++)
+			_characterProvider.Character.Where(character => character != null).Subscribe(OnCharacterCreated)
+				.AddTo(this);
+		}
+
+		private void OnCharacterCreated(Character character)
+		{
+			Block block = character.Inventory.Items.OfType<Block>().FirstOrDefault();
+
+			if (block == null)
 			{
-				for (var j = 0; j < _palette.ColumnCount; j++)
+				return;
+			}
+
+			grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+			grid.constraintCount = block.RectPalette.ColumnCount;
+			for (var i = 0; i < block.RectPalette.RowCount; i++)
+			{
+				for (var j = 0; j < block.RectPalette.ColumnCount; j++)
 				{
 					PaletteElementView element = paletteView.SpawnElement();
-					element.Construct(_palette[i, j]);
+					element.Construct(block.RectPalette[i, j]);
 				}
 			}
 
-			DisposableBuilder d = Disposable.CreateBuilder();
-			_palette.SelectedCell.Subscribe(t => OnElementSelectedAsync(t.row, t.column)).AddTo(ref d);
-			_palette.SelectedColor.Subscribe(OnColorChanged).AddTo(ref d);
-			_characterProvider.Character
-				.Where(character => character != null)
-				.Subscribe(character => character.Inventory.ApplyEffectToItems<Block>(block => block.SelectedColor = _palette.SelectedColor
-					.CurrentValue)).AddTo(ref d);
-			Observable.EveryUpdate().Where(_ => _inputService.IsUpArrowButtonDown()).Subscribe(_ => _palette.MovePointerUp()).AddTo(ref d);
-			Observable.EveryUpdate().Where(_ => _inputService.IsDownArrowButtonDown()).Subscribe(_ => _palette.MovePointerDown()).AddTo(ref d);
-			Observable.EveryUpdate().Where(_ => _inputService.IsRightArrowButtonDown()).Subscribe(_ => _palette.MovePointerRight()).AddTo(ref d);
-			Observable.EveryUpdate().Where(_ => _inputService.IsLeftArrowButtonDown()).Subscribe(_ => _palette.MovePointerLeft()).AddTo(ref d);
-			d.RegisterTo(destroyCancellationToken);
+			block.RectPalette.SelectedCell.Subscribe(t => OnElementSelectedAsync(t.row, t.column, block.RectPalette))
+				.AddTo(character);
 		}
 
-		private async void OnElementSelectedAsync(int row, int column)
+		private async void OnElementSelectedAsync(int row, int column, RectPalette rectPalette)
 		{
-			try
-			{
-				int index = column * _palette.RowCount + row;
-				await paletteView.SelectElementAsync(index);
-			}
-			catch (Exception e)
-			{
-				Debug.LogException(e);
-			}
-		}
-
-		private void OnColorChanged(Color32 color)
-		{
-			Character character = _characterProvider.Character.Value;
-			
-			if (character != null)
-			{
-				character.Inventory.ApplyEffectToItems<Block>(block => block.SelectedColor = color);
-			}
+			int index = column * rectPalette.RowCount + row;
+			await paletteView.SelectElementAsync(index);
 		}
 	}
 }

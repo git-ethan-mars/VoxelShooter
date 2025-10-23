@@ -4,6 +4,7 @@ using Cysharp.Threading.Tasks;
 using Data;
 using GamePlay.Core;
 using GamePlay.MapFeatures;
+using Mirror;
 using Networking.Audio;
 using Networking.Core;
 using R3;
@@ -37,17 +38,14 @@ namespace GamePlay
 		public Observable<bool> IsZoomed => _isZoomed;
 		public new RangeWeaponConfigure Configure => base.Configure as RangeWeaponConfigure;
 
-		private void Start()
-		{
-			ResetRecoil(destroyCancellationToken).Forget();
-		}
-
 		public override void OnStartServer()
 		{
 			base.OnStartServer();
 
 			_totalBullets.Value = Configure.TotalBullets;
 			_bulletsInMagazine.Value = Configure.MagazineSize;
+			
+			ResetRecoil(destroyCancellationToken).Forget();
 		}
 		
 		protected void Update()
@@ -59,13 +57,13 @@ namespace GamePlay
 
 			if (InputService.IsFirstActionButtonDown())
 			{
-				Shoot(CameraService.CentredRay).Forget();
+				Shoot(CameraService.CentredRay);
 			}
 			else if (Configure.IsAutomatic)
 			{
 				if (InputService.IsFirstActionButtonHold())
 				{
-					Shoot(CameraService.CentredRay).Forget();
+					Shoot(CameraService.CentredRay);
 
 					if (_bulletsInMagazine.Value <= 0)
 					{
@@ -83,11 +81,11 @@ namespace GamePlay
 			}
 			if (InputService.IsReloadingButtonDown() && CanReload())
 			{
-				Reload().Forget();
+				Reload();
 			}
 		}
 
-		internal override void Select()
+		public override void Select()
 		{
 			base.Select();
 
@@ -95,36 +93,25 @@ namespace GamePlay
 
 			if (_isReloading)
 			{
-				Reload().Forget();
+				Reload();
 			}
 			if (!_isReady)
 			{
-				ResetShoot().Forget();
+				ResetShoot();
 			}
 		}
 
-		internal override void Deselect()
+		public override void Deselect()
 		{
 			base.Deselect();
-			_onChangeSlot.Cancel();
-			_onChangeSlot.Dispose();
+			_onChangeSlot?.Cancel();
+			_onChangeSlot?.Dispose();
 
 			_isZoomed.Value = false;
 		}
 
-		private void ScanHit(Ray ray)
-		{
-			bool raycastResult = Physics.Raycast(ray, out RaycastHit rayHit, Configure.Range, LayerMasks.AttackMask);
-			if (!raycastResult)
-			{
-				return;
-			}
-
-			var damageVisitor = rayHit.collider.GetComponentInParent<IDamageVisitor>();
-			damageVisitor?.Visit(this, rayHit);
-		}
-
-		private async UniTaskVoid Shoot(Ray ray)
+		[Command]
+		private async void Shoot(Ray ray)
 		{
 			if (!CanShoot())
 			{
@@ -143,10 +130,11 @@ namespace GamePlay
 			_bulletsInMagazine.Value -= 1;
 			AudioPlayer.SendAudio(shootSound, netIdentity, false);
 			shootingParticles.Play();
-			await ResetShoot();
+			ResetShoot();
 		}
 
-		private async UniTask Reload()
+		[Command]
+		private async void Reload()
 		{
 			_isReloading = true;
 			AudioPlayer.SendAudio(reloadSound, netIdentity, false);
@@ -183,7 +171,8 @@ namespace GamePlay
 			}
 		}
 
-		private async UniTask ResetShoot()
+		[Command]
+		private async void ResetShoot()
 		{
 			bool isCanceled =
 				await UniTask.Delay(TimeSpan.FromSeconds(Configure.TimeBetweenShooting),
@@ -196,6 +185,18 @@ namespace GamePlay
 			}
 
 			_isReady = true;
+		}
+
+		private void ScanHit(Ray ray)
+		{
+			bool raycastResult = Physics.Raycast(ray, out RaycastHit rayHit, Configure.Range, LayerMasks.AttackMask);
+			if (!raycastResult)
+			{
+				return;
+			}
+
+			var damageVisitor = rayHit.collider.GetComponentInParent<IDamageVisitor>();
+			damageVisitor?.Visit(this, rayHit);
 		}
 
 		private Vector3 GetRandomSpreadDirection()

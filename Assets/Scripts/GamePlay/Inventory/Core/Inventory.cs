@@ -41,7 +41,8 @@ namespace GamePlay.Core
 			ItemAdded.Subscribe(OnItemAdded).AddTo(this);
 		}
 
-		public void SelectSlot(int slot)
+		[Command]
+		public void CmdSelectSlot(int slot)
 		{
 			if (slot < 0 || slot >= _items.Count)
 			{
@@ -59,22 +60,12 @@ namespace GamePlay.Core
 			ActiveSlotIndex = slot;
 		}
 
-		public void Reset()
+		[Command]
+		public void CmdReset()
 		{
 			ActiveSlotIndex = null;
 			_selectedItem?.Deselect();
 			_selectedItem = null;
-		}
-
-		public void ApplyEffectToItems<T>(Action<T> effect) where T : InventoryItem
-		{
-			for (var i = 0; i < _items.Count; i++)
-			{
-				if (_items[i] as T)
-				{
-					effect((T)_items[i]);
-				}
-			}
 		}
 
 		private void OnItemAdded(int index)

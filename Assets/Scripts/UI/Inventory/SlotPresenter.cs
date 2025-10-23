@@ -23,7 +23,7 @@ namespace UI.Inventory
 
 		public override void Initialize()
 		{
-			_disposable = InventoryItem.OnSelectStateChanged.Subscribe(OnItemSelected);
+			_disposable = InventoryItem.IsSelected.Subscribe(OnItemSelected);
 
 			_slotIcon = StaticData.GetSlotIcon(InventoryItem.Type);
 			_slotView.SetSlotIcon(_slotIcon);

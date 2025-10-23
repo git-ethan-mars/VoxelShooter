@@ -27,7 +27,7 @@ namespace GamePlay.MapFeatures
 			}
 
 			Vector3Int voxelPosition = Vector3Int.FloorToInt(rayCastHit.point + rayCastHit.normal / 2);
-			var voxel = new Voxel(voxelPosition, new VoxelData(block.SelectedColor));
+			var voxel = new Voxel(voxelPosition, new VoxelData(block.Color));
 			var voxels = new List<Voxel> { voxel };
 			if (!CanBuild(voxels))
 			{

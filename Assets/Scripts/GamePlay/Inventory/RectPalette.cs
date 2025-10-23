@@ -1,16 +1,13 @@
-using System.Collections.Generic;
 using Data;
 using R3;
 using Services;
 using UnityEngine;
-using Gradient = Data.Gradient;
-namespace UI
+namespace GamePlay
 {
 	public class RectPalette
 	{
 		private readonly Color[,] _colors;
 		private readonly ReactiveProperty<(int row, int column)> _selectedCell;
-		private readonly ReactiveProperty<Color32> _selectedColor;
 
 		private int _pointerX;
 		private int _pointerY;
@@ -32,12 +29,11 @@ namespace UI
 				}
 			}
 
-			_selectedColor = new ReactiveProperty<Color32>(_colors[_pointerX, _pointerY]);
 			_selectedCell = new ReactiveProperty<(int row, int column)>((_pointerX, _pointerY));
 		}
 
 		public Observable<(int row, int column)> SelectedCell => _selectedCell;
-		public ReadOnlyReactiveProperty<Color32> SelectedColor => _selectedColor;
+		public Color32 SelectedColor => _colors[_pointerY, _pointerX];
 		public Color this[int x, int y] => _colors[x, y];
 		public int RowCount => _colors.GetLength(0);
 		public int ColumnCount => _colors.GetLength(1);
@@ -52,7 +48,6 @@ namespace UI
 			_pointerX--;
 
 			_selectedCell.Value = (_pointerX, _pointerY);
-			_selectedColor.Value = _colors[_pointerY, _pointerX];
 		}
 
 		public void MovePointerRight()
@@ -65,7 +60,6 @@ namespace UI
 			_pointerX++;
 
 			_selectedCell.Value = (_pointerX, _pointerY);
-			_selectedColor.Value = _colors[_pointerY, _pointerX];
 		}
 
 		public void MovePointerUp()
@@ -78,7 +72,6 @@ namespace UI
 			_pointerY--;
 
 			_selectedCell.Value = (_pointerX, _pointerY);
-			_selectedColor.Value = _colors[_pointerY, _pointerX];
 		}
 
 		public void MovePointerDown()
@@ -91,7 +84,6 @@ namespace UI
 			_pointerY++;
 
 			_selectedCell.Value = (_pointerX, _pointerY);
-			_selectedColor.Value = _colors[_pointerY, _pointerX];
 		}
 	}
 }

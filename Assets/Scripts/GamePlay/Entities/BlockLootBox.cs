@@ -1,3 +1,4 @@
+using System.Linq;
 namespace GamePlay
 {
 	public class BlockLootBox : LootBox
@@ -6,7 +7,12 @@ namespace GamePlay
 
 		protected override void OnPickUp(Character character)
 		{
-			character.Inventory.ApplyEffectToItems<Block>(block => block.Amount.Value += BlockBonus);
+			Block block = character.Inventory.Items.OfType<Block>().FirstOrDefault();
+
+			if (block != null)
+			{
+				block.Amount.Value += BlockBonus;
+			}
 		}
 	}
 }

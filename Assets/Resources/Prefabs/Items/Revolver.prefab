@@ -55,8 +55,8 @@ MonoBehaviour:
   model:
   - {fileID: 4917033609352968289}
   - {fileID: 4791449603226983604}
-  shootSound: 11
-  reloadSound: 12
+  shootSound: 12
+  reloadSound: 11
   shootingParticles: {fileID: 4684460077356506606}
 --- !u!114 &-4228766548165345128
 MonoBehaviour:

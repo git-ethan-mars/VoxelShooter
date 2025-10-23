@@ -52,27 +52,27 @@ namespace UI.Inventory
 
 			if (_inputService.IsFirstSlotButtonPressed())
 			{
-				_inventory.SelectSlot(0);
+				_inventory.CmdSelectSlot(0);
 			}
 
 			if (_inputService.IsSecondSlotButtonPressed())
 			{
-				_inventory.SelectSlot(1);
+				_inventory.CmdSelectSlot(1);
 			}
 
 			if (_inputService.IsThirdSlotButtonPressed())
 			{
-				_inventory.SelectSlot(2);
+				_inventory.CmdSelectSlot(2);
 			}
 
 			if (_inputService.IsFourthSlotButtonPressed())
 			{
-				_inventory.SelectSlot(3);
+				_inventory.CmdSelectSlot(3);
 			}
 
 			if (_inputService.IsFifthSlotButtonPressed())
 			{
-				_inventory.SelectSlot(4);
+				_inventory.CmdSelectSlot(4);
 			}
 		}
 
@@ -98,8 +98,6 @@ namespace UI.Inventory
 		private void OnItemAdded(int index)
 		{
 			InventoryItem item = _inventory.Items[index];
-			item.enabled = false;
-			item.HideModel();
 			SlotView slotView = inventoryView.SpawnElement();
 			SlotPresenter itemPresenter = _presenterFactory.CreatePresenter(item, slotView);
 			itemPresenter.Initialize();
@@ -107,7 +105,7 @@ namespace UI.Inventory
 
 			if (!_inventory.ActiveSlotIndex.HasValue)
 			{
-				_inventory.SelectSlot(0);
+				_inventory.CmdSelectSlot(0);
 			}
 		}
 
@@ -126,14 +124,14 @@ namespace UI.Inventory
 		{
 			int inventorySize = _inventory.Items.Count;
 			int currentSlot = (_inventory.ActiveSlotIndex!.Value + 1 + inventorySize) % inventorySize;
-			_inventory.SelectSlot(currentSlot);
+			_inventory.CmdSelectSlot(currentSlot);
 		}
 
 		private void ChangeToPreviousInventorySlot()
 		{
 			int inventorySize = _inventory.Items.Count;
 			int currentSlot = (_inventory.ActiveSlotIndex!.Value - 1 + inventorySize) % inventorySize;
-			_inventory.SelectSlot(currentSlot);
+			_inventory.CmdSelectSlot(currentSlot);
 		}
 	}
 }

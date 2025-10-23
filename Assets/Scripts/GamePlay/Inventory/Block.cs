@@ -21,6 +21,7 @@ namespace GamePlay
 		private IPlayerService _playerService;
 		private CameraService _cameraService;
 		private CharacterProvider _characterProvider;
+		public RectPalette RectPalette { get; private set; }
 
 		[Inject]
 		private void Construct(IInputService inputService, CameraService cameraService, IStaticDataService staticData,
@@ -31,6 +32,7 @@ namespace GamePlay
 			_staticData = staticData;
 			_characterProvider = characterProvider;
 			_playerService = playerService;
+			RectPalette = new RectPalette(staticData);
 		}
 
 		public override void OnStartServer()
@@ -38,13 +40,15 @@ namespace GamePlay
 			base.OnStartServer();
 
 			_amount.Value = Configure.Amount;
+			_color.Value = RectPalette.SelectedColor;
 		}
 
 		public ReactiveProperty<int> Amount => _amount;
-		public Color32 SelectedColor { get; set; }
+		public Color32 Color => _color.Value;
 		public override ItemType Type => ItemType.Block;
 		private new BlockConfigure Configure => base.Configure as BlockConfigure;
 		private readonly SyncReactiveProperty<int> _amount = new SyncReactiveProperty<int>();
+		private readonly SyncReactiveProperty<Color32> _color = new SyncReactiveProperty<Color32>();
 
 		private void Update()
 		{
@@ -57,7 +61,7 @@ namespace GamePlay
 			
 			if (_inputService.IsFirstActionButtonDown())
 			{
-				Build(_cameraService.CentredRay);
+				CmdBuild(_cameraService.CentredRay);
 			}
 
 			if (_cameraService.GetBuildRayCastHit(out RaycastHit hit, placeDistance))
@@ -66,10 +70,37 @@ namespace GamePlay
 				Graphics.DrawMesh(wireframeCube, Matrix4x4.TRS(voxelPosition, Quaternion.identity, Vector3.one * 1.001f),
 					wireframeMaterial, 0);
 			}
+			
+			if (_inputService.IsUpArrowButtonDown())
+			{
+				RectPalette.MovePointerUp();
+			}
+			if (_inputService.IsDownArrowButtonDown())
+			{
+				RectPalette.MovePointerDown();
+			}
+			if (_inputService.IsRightArrowButtonDown())
+			{
+				RectPalette.MovePointerRight();
+			}
+			if (_inputService.IsLeftArrowButtonDown())
+			{
+				RectPalette.MovePointerLeft();
+			}
+
+			if (!RectPalette.SelectedColor.Equals(_color.Value))
+			{
+				for (var i = 0; i < model.Length; i++)
+				{
+					model[i].material.color = RectPalette.SelectedColor;
+				}
+				
+				CmdChangeColor(RectPalette.SelectedColor);	
+			}
 		}
 
 		[Command]
-		private void Build(Ray ray, NetworkConnectionToClient connection = null)
+		private void CmdBuild(Ray ray, NetworkConnectionToClient connection = null)
 		{
 			if (connection == null || !_playerService.TryGetPlayerData(connection.connectionId, out PlayerData playerData))
 			{
@@ -87,6 +118,12 @@ namespace GamePlay
 
 			var buildVisitor = rayHit.collider.GetComponentInParent<IBuildVisitor>();
 			buildVisitor?.Visit(this, rayHit);
+		}
+
+		[Command]
+		private void CmdChangeColor(Color32 color)
+		{
+			_color.Value = color;
 		}
 	}
 }
