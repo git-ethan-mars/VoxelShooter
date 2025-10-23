@@ -1,3 +1,4 @@
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Data;
 using GamePlay.Core;
@@ -22,6 +23,7 @@ namespace GamePlay
 
 		private readonly SyncReactiveProperty<int> _amount = new SyncReactiveProperty<int>();
 		private bool _isReloading;
+		private CancellationTokenSource _onChangeSlot;
 
 		[Inject]
 		private void Construct(IInputService inputService, IEntityFactory entityFactory, CameraService cameraService,
@@ -55,11 +57,26 @@ namespace GamePlay
 			{
 				Shoot(_cameraService.CentredRay);
 			}
+		}
 
-			if (_inputService.IsReloadingButtonDown())
+		public override void Select()
+		{
+			base.Select();
+			
+			_onChangeSlot = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+
+			if (_isReloading)
 			{
 				Reload();
 			}
+		}
+
+		public override void Deselect()
+		{
+			base.Deselect();
+			
+			_onChangeSlot?.Cancel();
+			_onChangeSlot?.Dispose();
 		}
 
 		[Command]
@@ -75,26 +92,27 @@ namespace GamePlay
 			Drill drill = _entityFactory.CreateDrill(drillPosition, drillRotation);
 			drill.Launch();
 			_amount.Value -= 1;
+
+			if (_amount.Value > 0)
+			{
+				Reload();
+			}
 		}
 
-		[Command]
+		[Server]
 		private async void Reload()
 		{
-			if (!CanReload())
+			_audioPlayer.SendAudio(reloadSound, netIdentity, false);
+			
+			_isReloading = true;
+			bool isCanceled = await UniTask.WaitForSeconds(Configure.ReloadTime, cancellationToken: _onChangeSlot.Token).SuppressCancellationThrow();
+
+			if (isCanceled)
 			{
 				return;
 			}
 			
-			_audioPlayer.SendAudio(reloadSound, netIdentity, false);
-			
-			_isReloading = true;
-			await UniTask.WaitForSeconds(Configure.ReloadTime, cancellationToken: destroyCancellationToken);
 			_isReloading = false;
-		}
-
-		private bool CanReload()
-		{
-			return _amount.Value > 0 && !_isReloading;
 		}
 
 		private bool CanShoot()
