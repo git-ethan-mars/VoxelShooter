@@ -1,8 +1,11 @@
+using System;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
+using Vector2 = UnityEngine.Vector2;
+using Vector3 = UnityEngine.Vector3;
 namespace VoxelMap
 {
 	[BurstCompile]
@@ -84,40 +87,34 @@ namespace VoxelMap
 			{
 				Position = new Vector3(x, y + 1, z), Normal = Vector3.up, Red = color.r, Green = color.g, Blue =
 					color.b,
-				AmbientOcclusion = GetVertexAO(x, y, z, 0, 1, 0),
+				AmbientOcclusion = GetVertexAO(x, y, z, -1, 1, -1, Vector3.up),
 				UV = new Vector2(1, 1)
 			};
 			_vertices[_vertexCount + 1] = new VertexData
 			{
 				Position = new Vector3(x, y + 1, z + 1), Normal = Vector3.up, Red = color.r, Green = color.g, Blue =
 					color.b,
-				AmbientOcclusion = GetVertexAO(x, y, z, 0, 1, 1),
+				AmbientOcclusion = GetVertexAO(x, y, z, -1, 1, 1, Vector3.up),
 				UV = new Vector2(1, 0)
 			};
 			_vertices[_vertexCount + 2] = new VertexData
 			{
 				Position = new Vector3(x + 1, y + 1, z), Normal = Vector3.up, Red = color.r, Green = color.g, Blue =
 					color.b,
-				AmbientOcclusion = GetVertexAO(x, y, z, 1, 1, 0),
+				AmbientOcclusion = GetVertexAO(x, y, z, 1, 1, -1, Vector3.up),
 				UV = new Vector2(0, 1)
 			};
 			_vertices[_vertexCount + 3] = new VertexData
 			{
 				Position = new Vector3(x + 1, y + 1, z + 1), Normal = Vector3.up, Red = color.r, Green = color.g, Blue
 					= color.b,
-				AmbientOcclusion = GetVertexAO(x, y, z, 1, 1, 1),
+				AmbientOcclusion = GetVertexAO(x, y, z, 1, 1, 1, Vector3.up),
 				UV = new Vector2(0, 0)
 			};
 
 			_vertexCount += 4;
 
-			if (_vertices[_vertexCount - 4].AmbientOcclusion + _vertices[_vertexCount - 1].AmbientOcclusion >
-			    _vertices[_vertexCount - 3].AmbientOcclusion
-			    + _vertices[_vertexCount - 2].AmbientOcclusion)
-			{
-				(_vertices[_vertexCount - 4], _vertices[_vertexCount - 3], _vertices[_vertexCount - 2], _vertices[_vertexCount - 1]) =
-					(_vertices[_vertexCount - 2], _vertices[_vertexCount - 4], _vertices[_vertexCount - 1], _vertices[_vertexCount - 3]);
-			}
+			SwapAmbientOcclusionIfNeeded();
 
 			AddTriangles();
 		}
@@ -127,36 +124,31 @@ namespace VoxelMap
 			_vertices[_vertexCount] = new VertexData
 			{
 				Position = new Vector3(x, y, z), Normal = Vector3.down, Red = color.r, Green = color.g, Blue = color.b, AmbientOcclusion =
-					GetVertexAO(x, y, z, 0, 0, 0),
+					GetVertexAO(x, y, z, -1, -1, -1, Vector3.down),
 				UV = new Vector2(1, 0)
 			};
 			_vertices[_vertexCount + 1] = new VertexData
 			{
 				Position = new Vector3(x + 1, y, z), Normal = Vector3.down, Red = color.r, Green = color.g, Blue = color.b, AmbientOcclusion =
-					GetVertexAO(x, y, z, 1, 0, 0),
+					GetVertexAO(x, y, z, 1, -1, -1, Vector3.down),
 				UV = new Vector2(0, 0)
 			};
 			_vertices[_vertexCount + 2] = new VertexData
 			{
 				Position = new Vector3(x, y, z + 1), Normal = Vector3.down, Red = color.r, Green = color.g, Blue = color.b, AmbientOcclusion =
-					GetVertexAO(x, y, z, 0, 0, 1),
+					GetVertexAO(x, y, z, -1, -1, 1, Vector3.down),
 				UV = new Vector2(1, 1)
 			};
 			_vertices[_vertexCount + 3] = new VertexData
 			{
 				Position = new Vector3(x + 1, y, z + 1), Normal = Vector3.down, Red = color.r, Green = color.g, Blue = color.b, AmbientOcclusion =
-					GetVertexAO(x, y, z, 1, 0, 1),
+					GetVertexAO(x, y, z, 1, -1, 1, Vector3.down),
 				UV = new Vector2(0, 1)
 			};
 
 			_vertexCount += 4;
 
-			if (_vertices[_vertexCount - 4].AmbientOcclusion + _vertices[_vertexCount - 1].AmbientOcclusion >
-			    _vertices[_vertexCount - 3].AmbientOcclusion + _vertices[_vertexCount - 2].AmbientOcclusion)
-			{
-				(_vertices[_vertexCount - 4], _vertices[_vertexCount - 3], _vertices[_vertexCount - 2], _vertices[_vertexCount - 1]) =
-					(_vertices[_vertexCount - 2], _vertices[_vertexCount - 4], _vertices[_vertexCount - 1], _vertices[_vertexCount - 3]);
-			}
+			SwapAmbientOcclusionIfNeeded();
 
 			AddTriangles();
 		}
@@ -166,36 +158,31 @@ namespace VoxelMap
 			_vertices[_vertexCount] = new VertexData
 			{
 				Position = new Vector3(x, y, z + 1), Normal = Vector3.forward, Red = color.r, Green = color.g, Blue = color.b, AmbientOcclusion =
-					GetVertexAO(x, y, z, 0, 0, 1),
+					GetVertexAO(x, y, z, -1, -1, 1, Vector3.forward),
 				UV = new Vector2(1, 0)
 			};
 			_vertices[_vertexCount + 1] = new VertexData
 			{
 				Position = new Vector3(x + 1, y, z + 1), Normal = Vector3.forward, Red = color.r, Green = color.g, Blue = color.b, AmbientOcclusion =
-					GetVertexAO(x, y, z, 1, 0, 1),
+					GetVertexAO(x, y, z, 1, -1, 1, Vector3.forward),
 				UV = new Vector2(0, 0)
 			};
 			_vertices[_vertexCount + 2] = new VertexData
 			{
 				Position = new Vector3(x, y + 1, z + 1), Normal = Vector3.forward, Red = color.r, Green = color.g, Blue = color.b, AmbientOcclusion =
-					GetVertexAO(x, y, z, 0, 1, 1),
+					GetVertexAO(x, y, z, -1, 1, 1, Vector3.forward),
 				UV = new Vector2(1, 1)
 			};
 			_vertices[_vertexCount + 3] = new VertexData
 			{
 				Position = new Vector3(x + 1, y + 1, z + 1), Normal = Vector3.forward, Red = color.r, Green = color.g, Blue = color.b,
-				AmbientOcclusion = GetVertexAO(x, y, z, 1, 1, 1),
+				AmbientOcclusion = GetVertexAO(x, y, z, 1, 1, 1, Vector3.forward),
 				UV = new Vector2(0, 1)
 			};
 
 			_vertexCount += 4;
 
-			if (_vertices[_vertexCount - 4].AmbientOcclusion + _vertices[_vertexCount - 1].AmbientOcclusion >
-			    _vertices[_vertexCount - 3].AmbientOcclusion + _vertices[_vertexCount - 2].AmbientOcclusion)
-			{
-				(_vertices[_vertexCount - 4], _vertices[_vertexCount - 3], _vertices[_vertexCount - 2], _vertices[_vertexCount - 1]) =
-					(_vertices[_vertexCount - 2], _vertices[_vertexCount - 4], _vertices[_vertexCount - 1], _vertices[_vertexCount - 3]);
-			}
+			SwapAmbientOcclusionIfNeeded();
 
 			AddTriangles();
 		}
@@ -205,36 +192,31 @@ namespace VoxelMap
 			_vertices[_vertexCount] = new VertexData
 			{
 				Position = new Vector3(x, y, z), Normal = Vector3.back, Red = color.r, Green = color.g, Blue = color.b, AmbientOcclusion =
-					GetVertexAO(x, y, z, 0, 0, 0),
+					GetVertexAO(x, y, z, -1, -1, -1, Vector3.back),
 				UV = new Vector2(1, 1)
 			};
 			_vertices[_vertexCount + 1] = new VertexData
 			{
 				Position = new Vector3(x, y + 1, z), Normal = Vector3.back, Red = color.r, Green = color.g, Blue = color.b, AmbientOcclusion =
-					GetVertexAO(x, y, z, 0, 1, 0),
+					GetVertexAO(x, y, z, -1, 1, -1, Vector3.back),
 				UV = new Vector2(1, 0)
 			};
 			_vertices[_vertexCount + 2] = new VertexData
 			{
 				Position = new Vector3(x + 1, y, z), Normal = Vector3.back, Red = color.r, Green = color.g, Blue = color.b, AmbientOcclusion =
-					GetVertexAO(x, y, z, 1, 0, 0),
+					GetVertexAO(x, y, z, 1, -1, -1, Vector3.back),
 				UV = new Vector2(0, 1)
 			};
 			_vertices[_vertexCount + 3] = new VertexData
 			{
 				Position = new Vector3(x + 1, y + 1, z), Normal = Vector3.back, Red = color.r, Green = color.g, Blue = color.b, AmbientOcclusion =
-					GetVertexAO(x, y, z, 1, 1, 0),
+					GetVertexAO(x, y, z, 1, 1, -1, Vector3.back),
 				UV = new Vector2(0, 0)
 			};
 
 			_vertexCount += 4;
 
-			if (_vertices[_vertexCount - 4].AmbientOcclusion + _vertices[_vertexCount - 1].AmbientOcclusion >
-			    _vertices[_vertexCount - 3].AmbientOcclusion + _vertices[_vertexCount - 2].AmbientOcclusion)
-			{
-				(_vertices[_vertexCount - 4], _vertices[_vertexCount - 3], _vertices[_vertexCount - 2], _vertices[_vertexCount - 1]) =
-					(_vertices[_vertexCount - 2], _vertices[_vertexCount - 4], _vertices[_vertexCount - 1], _vertices[_vertexCount - 3]);
-			}
+			SwapAmbientOcclusionIfNeeded();
 
 			AddTriangles();
 		}
@@ -244,37 +226,31 @@ namespace VoxelMap
 			_vertices[_vertexCount] = new VertexData
 			{
 				Position = new Vector3(x + 1, y, z), Normal = Vector3.right, Red = color.r, Green = color.g, Blue = color.b, AmbientOcclusion =
-					GetVertexAO(x, y, z, 1, 0, 0),
+					GetVertexAO(x, y, z, 1, -1, -1, Vector3.right),
 				UV = new Vector2(0, 0)
 			};
 			_vertices[_vertexCount + 1] = new VertexData
 			{
 				Position = new Vector3(x + 1, y + 1, z), Normal = Vector3.right, Red = color.r, Green = color.g, Blue = color.b, AmbientOcclusion =
-					GetVertexAO(x, y, z, 1, 1, 0),
+					GetVertexAO(x, y, z, 1, 1, -1, Vector3.right),
 				UV = new Vector2(0, 1)
 			};
 			_vertices[_vertexCount + 2] = new VertexData
 			{
 				Position = new Vector3(x + 1, y, z + 1), Normal = Vector3.right, Red = color.r, Green = color.g, Blue = color.b, AmbientOcclusion =
-					GetVertexAO(x, y, z, 1, 0, 1),
+					GetVertexAO(x, y, z, 1, -1, 1, Vector3.right),
 				UV = new Vector2(1, 0)
 			};
 			_vertices[_vertexCount + 3] = new VertexData
 			{
 				Position = new Vector3(x + 1, y + 1, z + 1), Normal = Vector3.right, Red = color.r, Green = color.g, Blue = color.b,
-				AmbientOcclusion = GetVertexAO(x, y, z, 1, 1, 1),
+				AmbientOcclusion = GetVertexAO(x, y, z, 1, 1, 1, Vector3.right),
 				UV = new Vector2(1, 1)
 			};
 
 			_vertexCount += 4;
 
-			if (_vertices[_vertexCount - 4].AmbientOcclusion + _vertices[_vertexCount - 1].AmbientOcclusion >
-			    _vertices[_vertexCount - 3].AmbientOcclusion
-			    + _vertices[_vertexCount - 2].AmbientOcclusion)
-			{
-				(_vertices[_vertexCount - 4], _vertices[_vertexCount - 3], _vertices[_vertexCount - 2], _vertices[_vertexCount - 1]) =
-					(_vertices[_vertexCount - 2], _vertices[_vertexCount - 4], _vertices[_vertexCount - 1], _vertices[_vertexCount - 3]);
-			}
+			SwapAmbientOcclusionIfNeeded();
 
 			AddTriangles();
 		}
@@ -284,38 +260,43 @@ namespace VoxelMap
 			_vertices[_vertexCount] = new VertexData
 			{
 				Position = new Vector3(x, y, z), Normal = Vector3.left, Red = color.r, Green = color.g, Blue = color.b, AmbientOcclusion =
-					GetVertexAO(x, y, z, 0, 0, 0),
+					GetVertexAO(x, y, z, -1, -1, -1, Vector3.left),
 				UV = new Vector2(1, 0)
 			};
 			_vertices[_vertexCount + 1] = new VertexData
 			{
 				Position = new Vector3(x, y, z + 1), Normal = Vector3.left, Red = color.r, Green = color.g, Blue = color.b, AmbientOcclusion =
-					GetVertexAO(x, y, z, 0, 0, 1),
+					GetVertexAO(x, y, z, -1, -1, 1, Vector3.left),
 				UV = new Vector2(0, 0)
 			};
 			_vertices[_vertexCount + 2] = new VertexData
 			{
 				Position = new Vector3(x, y + 1, z), Normal = Vector3.left, Red = color.r, Green = color.g, Blue = color.b, AmbientOcclusion =
-					GetVertexAO(x, y, z, 0, 1, 0),
+					GetVertexAO(x, y, z, -1, 1, -1, Vector3.left),
 				UV = new Vector2(1, 1)
 			};
 			_vertices[_vertexCount + 3] = new VertexData
 			{
 				Position = new Vector3(x, y + 1, z + 1), Normal = Vector3.left, Red = color.r, Green = color.g, Blue = color.b, AmbientOcclusion =
-					GetVertexAO(x, y, z, 0, 1, 1),
+					GetVertexAO(x, y, z, -1, 1, 1, Vector3.left),
 				UV = new Vector2(0, 1)
 			};
 
 			_vertexCount += 4;
 
-			if (_vertices[_vertexCount - 4].AmbientOcclusion + _vertices[_vertexCount - 1].AmbientOcclusion
-			    > _vertices[_vertexCount - 3].AmbientOcclusion + _vertices[_vertexCount - 2].AmbientOcclusion)
+			SwapAmbientOcclusionIfNeeded();
+
+			AddTriangles();
+		}
+
+		private void SwapAmbientOcclusionIfNeeded()
+		{
+			if (_vertices[_vertexCount - 4].AmbientOcclusion + _vertices[_vertexCount - 1].AmbientOcclusion >
+			    _vertices[_vertexCount - 3].AmbientOcclusion + _vertices[_vertexCount - 2].AmbientOcclusion)
 			{
 				(_vertices[_vertexCount - 4], _vertices[_vertexCount - 3], _vertices[_vertexCount - 2], _vertices[_vertexCount - 1]) =
 					(_vertices[_vertexCount - 2], _vertices[_vertexCount - 4], _vertices[_vertexCount - 1], _vertices[_vertexCount - 3]);
 			}
-
-			AddTriangles();
 		}
 
 		private void AddTriangles()
@@ -334,32 +315,43 @@ namespace VoxelMap
 			return _mapData.IsValidPosition(x, y, z) && _mapData[index].IsSolid();
 		}
 
-		private byte GetVertexAO(int x, int y, int z, int xOffset, int yOffset, int zOffset)
+		private byte GetVertexAO(int x, int y, int z, int xOffset, int yOffset, int zOffset, Vector3 normal)
 		{
-			var xDirection = (int)Mathf.Sign(xOffset - Map.WorldOffset.x);
-			var yDirection = (int)Mathf.Sign(yOffset - Map.WorldOffset.y);
-			var zDirection = (int)Mathf.Sign(zOffset - Map.WorldOffset.z);
 			int chunkOffsetX = _chunkIndex / (_mapData.Depth * _mapData.Height / Chunk.ChunkSizeSquared) * Chunk.ChunkSize;
 			int chunkOffsetY = _chunkIndex / (_mapData.Depth / Chunk.ChunkSize) % (_mapData.Height / Chunk.ChunkSize) * Chunk.ChunkSize;
 			int chunkOffsetZ = _chunkIndex % (_mapData.Depth / Chunk.ChunkSize) * Chunk.ChunkSize;
-			var worldX = x + chunkOffsetX;
-			var worldY = y + chunkOffsetY;
-			var worldZ = z + chunkOffsetZ;
-			bool side1 = IsVisibleBlock(worldX + xDirection, worldY + yDirection, worldZ);
-			bool side2 = IsVisibleBlock(worldX, worldY + yDirection, worldZ + zDirection);
-			bool corner = IsVisibleBlock(worldX + xDirection, worldY + yDirection, worldZ + zDirection);
+			int worldX = x + chunkOffsetX;
+			int worldY = y + chunkOffsetY;
+			int worldZ = z + chunkOffsetZ;
+
+			bool side1;
+			bool side2;
+
+			if (normal == Vector3.up || normal == Vector3.down)
+			{
+				side1 = IsVisibleBlock(worldX, worldY + yOffset, worldZ + zOffset);
+				side2 = IsVisibleBlock(worldX + xOffset, worldY + yOffset, worldZ);
+			}
+			else if (normal == Vector3.right || normal == Vector3.left)
+			{
+				side1 = IsVisibleBlock(worldX + xOffset, worldY, worldZ + zOffset);
+				side2 = IsVisibleBlock(worldX + xOffset, worldY + yOffset, worldZ);
+			}
+			else
+			{
+				side1 = IsVisibleBlock(worldX, worldY + yOffset, worldZ + zOffset);
+				side2 = IsVisibleBlock(worldX + xOffset, worldY, worldZ + zOffset);
+			}
+			
+			bool corner = IsVisibleBlock(worldX + xOffset, worldY + yOffset, worldZ + zOffset);
+
 
 			if (side1 && side2)
 			{
 				return 0;
 			}
-
-			return (byte)(3 - (BoolToByte(side1) + BoolToByte(side2) + BoolToByte(corner)));
-		}
-
-		private byte BoolToByte(bool value)
-		{
-			return value ? (byte)1 : (byte)0;
+			
+			return (byte)(3 - (Convert.ToByte(side1) + Convert.ToByte(side2) + Convert.ToByte(corner)));
 		}
 	}
 }
