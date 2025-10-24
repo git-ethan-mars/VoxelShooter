@@ -83,11 +83,12 @@ namespace VoxelMap
 
 		private void SetupMeshData(Mesh.MeshData meshData)
 		{
-			var attributes = new NativeArray<VertexAttributeDescriptor>(4, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
+			var attributes = new NativeArray<VertexAttributeDescriptor>(5, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
 			attributes[0] = new VertexAttributeDescriptor(VertexAttribute.Position, dimension:3);
 			attributes[1] = new VertexAttributeDescriptor(VertexAttribute.Normal, dimension:3);
 			attributes[2] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.UNorm8, dimension: 4);
 			attributes[3] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, dimension: 2);
+			attributes[4] = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, dimension: 1);
 
 			meshData.SetVertexBufferParams(VertexCount, attributes);
 			meshData.SetIndexBufferParams(IndexCount, IndexFormat.UInt32);

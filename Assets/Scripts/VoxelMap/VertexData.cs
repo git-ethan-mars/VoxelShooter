@@ -12,5 +12,6 @@ namespace VoxelMap
 		public byte Blue;
 		public byte AmbientOcclusion;
 		public Vector2 UV;
+		public float Neighbours;
 	}
 }

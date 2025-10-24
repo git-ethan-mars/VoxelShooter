@@ -32,7 +32,6 @@ namespace Infrastructure.States
 			gameMenu.CreateGameRequested.Subscribe(OnCreateGameRequested).AddTo(gameMenu);
 			if (!ClonesManager.IsClone())
 			{
-				//OnCreateGameRequested(new WorldSettings("Test", _mapConfigureLoader.GetMapConfigure("Test"), 10, 10, 10));
 				OnCreateGameRequested(new GameSettings("Crossroads", 10, 10, 10));
 			}
 			else

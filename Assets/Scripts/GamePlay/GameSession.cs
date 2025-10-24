@@ -163,6 +163,7 @@ namespace GamePlay
 			var voxelHealthSystem = new VoxelHealthSystem(map, _staticData);
 			var mapBuilding = new MapBuilding(_entityContainer, map, voxelHealthSystem);
 			map.AddMapFeature(mapBuilding);
+			//var columnDestructionAlgorithm = new ColumnDestructionAlgorithm(map);
 			var mapDestruction = new MapDestruction(map, voxelHealthSystem);
 			map.AddMapFeature(mapDestruction);
 
