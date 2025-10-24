@@ -27,7 +27,7 @@ namespace GamePlay
 			
 			while (!token.IsCancellationRequested)
 			{
-				if (!_mapProvider.Map.TryGetRandomTopVoxelPosition(out Vector3Int topVoxelPosition)
+				if (_mapProvider.Map == null || !_mapProvider.Map.TryGetRandomTopVoxelPosition(out Vector3Int topVoxelPosition)
 				    || busyPositions.Contains(new Vector2Int(topVoxelPosition.x, topVoxelPosition.z)))
 				{
 					await UniTask.Yield(token);
