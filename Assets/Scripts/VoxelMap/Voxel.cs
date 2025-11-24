@@ -1,12 +1,11 @@
-using UnityEngine;
 namespace VoxelMap
 {
 	public struct Voxel
 	{
-		public Vector3Int Position;
+		public Vector3Ushort Position;
 		public VoxelData Data;
 
-		public Voxel(Vector3Int position, VoxelData data)
+		public Voxel(Vector3Ushort position, VoxelData data)
 		{
 			Position = position;
 			Data = data;

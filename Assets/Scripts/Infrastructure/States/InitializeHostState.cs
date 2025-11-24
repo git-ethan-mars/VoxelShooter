@@ -19,7 +19,7 @@ namespace Infrastructure.States
 		public void Enter(GameSettings gameSettings)
 		{
 			GameSession gameSession = _gameSessionCreator.Create(gameSettings);
-			
+
 			_gameStateMachine.Enter<GameLoopState, GameSession>(gameSession);
 		}
 

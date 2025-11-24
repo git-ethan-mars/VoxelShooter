@@ -7,10 +7,10 @@ namespace GamePlay
 	public class Shotgun : RangeWeapon
 	{
 		[Inject]
-		private void Construct(IInputService inputService, CameraService cameraService, NetworkAudioPlayer audioPlayer, IStaticDataService staticData)
+		private void Construct(IInputService inputService, CameraProvider cameraProvider, NetworkAudioPlayer audioPlayer, IStaticDataService staticData)
 		{
 			InputService = inputService;
-			CameraService = cameraService;
+			CameraProvider = cameraProvider;
 			AudioPlayer = audioPlayer;
 		}
 

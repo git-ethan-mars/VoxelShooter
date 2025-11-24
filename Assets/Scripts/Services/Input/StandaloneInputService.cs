@@ -47,6 +47,11 @@ namespace Services
 			return Input.GetKeyDown(KeyCode.Space) && _isEnabled;
 		}
 
+		public bool IsSprintButtonHold()
+		{
+			return Input.GetKey(KeyCode.LeftShift) && _isEnabled;
+		}
+
 		public float GetScrollSpeed()
 		{
 			return _isEnabled ? Input.GetAxis("Mouse ScrollWheel") : 0.0f;

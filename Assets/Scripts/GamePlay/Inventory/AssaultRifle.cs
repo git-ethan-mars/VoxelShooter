@@ -9,11 +9,11 @@ namespace GamePlay
 		public override ItemType Type => ItemType.AssaultRifle;
 
 		[Inject]
-		private void Construct(IInputService inputService, CameraService cameraService, NetworkAudioPlayer audioPlayer, 
+		private void Construct(IInputService inputService, CameraProvider cameraProvider, NetworkAudioPlayer audioPlayer, 
 			IStaticDataService staticData)
 		{
 			InputService = inputService;
-			CameraService = cameraService;
+			CameraProvider = cameraProvider;
 			AudioPlayer = audioPlayer;
 		}
 	}

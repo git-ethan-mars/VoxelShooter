@@ -1524,7 +1524,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &5931000695046598191
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1595,7 +1595,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   grid: {fileID: 3491363414912399468}
-  rectTransform: {fileID: 5931000695046598191}
   paletteView: {fileID: 3813445664685436292}
 --- !u!114 &8054269137389239146
 MonoBehaviour:
@@ -1679,6 +1678,7 @@ MonoBehaviour:
   <InventoryPresenter>k__BackingField: {fileID: 3165396993160759862}
   <PalettePresenter>k__BackingField: {fileID: 832363636471880148}
   <PaletteView>k__BackingField: {fileID: 3813445664685436292}
+  <MiniMap>k__BackingField: {fileID: 7941335691948174233}
   <ScopeImage>k__BackingField: {fileID: 2529819349037555895}
   <CrosshairImage>k__BackingField: {fileID: 5953905413798159158}
 --- !u!225 &7702219936672589729
@@ -1703,6 +1703,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8871060865613572078}
   - component: {fileID: 8992116442062904474}
+  - component: {fileID: 7941335691948174233}
   - component: {fileID: 2137231028610750272}
   m_Layer: 0
   m_Name: MiniMap
@@ -1740,6 +1741,24 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8851741324931207248}
   m_CullTransparentMesh: 1
+--- !u!114 &7941335691948174233
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8851741324931207248}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93e44ffca88ab3e44ba71d8026df98fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: VoxelShooter.UI::UI.MiniMap
+  itemPrefab: {fileID: 4280087998353516469, guid: c926c4bc41772c64698ba3e09e3f3b79, type: 3}
+  container: {fileID: 8871060865613572078}
+  computeShader: {fileID: 7200000, guid: 8f83b7f8f4060d14482966bf992818cd, type: 3}
+  worldMap: {fileID: 0}
+  minimapImage: {fileID: 2137231028610750272}
+  minimapCursor: {fileID: 4891180932978453680}
 --- !u!114 &2137231028610750272
 MonoBehaviour:
   m_ObjectHideFlags: 0

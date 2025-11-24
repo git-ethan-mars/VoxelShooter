@@ -6,7 +6,7 @@ namespace VoxelMap
 	[BurstCompile]
 	public struct RecalculateFacesJob : IJob
 	{
-		private NativeArray<Face> _neighboursToRegenerate;
+		private NativeReference<Face> _regeneratingRegeneratingNeighbours;
 		private NativeHashMap<int, int> _faceCountChangesByChunk;
 
 		[ReadOnly]
@@ -15,13 +15,13 @@ namespace VoxelMap
 		private MapData _mapData;
 		private readonly int _chunkIndex;
 
-		public RecalculateFacesJob(NativeList<Voxel> voxels, MapData mapData, int chunkIndex, NativeArray<Face> neighboursToRegenerate,
+		public RecalculateFacesJob(NativeList<Voxel> voxels, MapData mapData, int chunkIndex, NativeReference<Face> regeneratingNeighbours,
 			NativeHashMap<int, int> faceCountChangesByChunk)
 		{
 			_voxels = voxels;
 			_mapData = mapData;
 			_chunkIndex = chunkIndex;
-			_neighboursToRegenerate = neighboursToRegenerate;
+			_regeneratingRegeneratingNeighbours = regeneratingNeighbours;
 			_faceCountChangesByChunk = faceCountChangesByChunk;
 		}
 
@@ -31,9 +31,9 @@ namespace VoxelMap
 
 			for (var i = 0; i < _voxels.Length; i++)
 			{
-				int x = _voxels[i].Position.x;
-				int y = _voxels[i].Position.y;
-				int z = _voxels[i].Position.z;
+				ushort x = _voxels[i].Position.x;
+				ushort y = _voxels[i].Position.y;
+				ushort z = _voxels[i].Position.z;
 
 				_mapData[x, y, z] = _voxels[i].Data;
 
@@ -51,7 +51,7 @@ namespace VoxelMap
 			}
 		}
 
-		private Face CalculateFaces(int x, int y, int z)
+		private Face CalculateFaces(ushort x, ushort y, ushort z)
 		{
 			var face = Face.None;
 
@@ -127,41 +127,41 @@ namespace VoxelMap
 		{
 			if (x % Chunk.ChunkSize == 0)
 			{
-				_neighboursToRegenerate[0] |= Face.Left;
+				_regeneratingRegeneratingNeighbours.Value |= Face.Left;
 			}
 			if (x % Chunk.ChunkSize == Chunk.ChunkSize - 1)
 			{
-				_neighboursToRegenerate[0] |= Face.Right;
+				_regeneratingRegeneratingNeighbours.Value |= Face.Right;
 			}
 			if (y % Chunk.ChunkSize == 0)
 			{
-				_neighboursToRegenerate[0] |= Face.Bottom;
+				_regeneratingRegeneratingNeighbours.Value |= Face.Bottom;
 			}
 			if (y % Chunk.ChunkSize == Chunk.ChunkSize - 1)
 			{
-				_neighboursToRegenerate[0] |= Face.Top;
+				_regeneratingRegeneratingNeighbours.Value |= Face.Top;
 			}
 			if (z % Chunk.ChunkSize == 0)
 			{
-				_neighboursToRegenerate[0] |= Face.Back;
+				_regeneratingRegeneratingNeighbours.Value |= Face.Back;
 			}
 			if (z % Chunk.ChunkSize == Chunk.ChunkSize - 1)
 			{
-				_neighboursToRegenerate[0] |= Face.Front;
+				_regeneratingRegeneratingNeighbours.Value |= Face.Front;
 			}
 		}
 
-		private void UpdateNeighbourFaces(int x, int y, int z)
+		private void UpdateNeighbourFaces(ushort x, ushort y, ushort z)
 		{
-			UpdateSingleNeighbour(x, y + 1, z, Face.Bottom, HasBottomFace(x, y + 1, z));
-			UpdateSingleNeighbour(x, y - 1, z, Face.Top, HasTopFace(x, y - 1, z));
-			UpdateSingleNeighbour(x, y, z + 1, Face.Back, HasBackFace(x, y, z + 1));
-			UpdateSingleNeighbour(x, y, z - 1, Face.Front, HasFrontFace(x, y, z - 1));
-			UpdateSingleNeighbour(x + 1, y, z, Face.Left, HasLeftFace(x + 1, y, z));
-			UpdateSingleNeighbour(x - 1, y, z, Face.Right, HasRightFace(x - 1, y, z));
+			UpdateSingleNeighbour(x, (ushort)(y + 1), z, Face.Bottom, HasBottomFace(x, (ushort)(y + 1), z));
+			UpdateSingleNeighbour(x, (ushort)(y - 1), z, Face.Top, HasTopFace(x, (ushort)(y - 1), z));
+			UpdateSingleNeighbour(x, y, (ushort)(z + 1), Face.Back, HasBackFace(x, y, (ushort)(z + 1)));
+			UpdateSingleNeighbour(x, y, (ushort)(z - 1), Face.Front, HasFrontFace(x, y, (ushort)(z - 1)));
+			UpdateSingleNeighbour((ushort)(x + 1), y, z, Face.Left, HasLeftFace((ushort)(x + 1), y, z));
+			UpdateSingleNeighbour((ushort)(x - 1), y, z, Face.Right, HasRightFace((ushort)(x - 1), y, z));
 		}
 
-		private void UpdateSingleNeighbour(int nx, int ny, int nz, Face faceFlag, bool shouldHaveFace)
+		private void UpdateSingleNeighbour(ushort nx, ushort ny, ushort nz, Face faceFlag, bool shouldHaveFace)
 		{
 			if (!_mapData.IsValidPosition(nx, ny, nz) || !_mapData[nx, ny, nz].IsSolid())
 				return;
@@ -193,59 +193,59 @@ namespace VoxelMap
 			}
 		}
 
-		private bool HasTopFace(int x, int y, int z)
+		private bool HasTopFace(ushort x, ushort y, ushort z)
 		{
-			return !_mapData.IsValidPosition(x, y + 1, z) || !_mapData[x, y + 1, z].IsSolid();
+			return !_mapData.IsValidPosition(x, (ushort)(y + 1), z) || !_mapData[x, (ushort)(y + 1), z].IsSolid();
 		}
 
-		private bool HasBottomFace(int x, int y, int z)
+		private bool HasBottomFace(ushort x, ushort y, ushort z)
 		{
-			if (!_mapData.IsValidPosition(x, y - 1, z))
+			if (!_mapData.IsValidPosition(x, (ushort)(y - 1), z))
 			{
 				return false;
 			}
 
-			return !_mapData[x, y - 1, z].IsSolid();
+			return !_mapData[x, (ushort)(y - 1), z].IsSolid();
 		}
 
-		private bool HasFrontFace(int x, int y, int z)
+		private bool HasFrontFace(ushort x, ushort y, ushort z)
 		{
-			if (!_mapData.IsValidPosition(x, y, z + 1))
+			if (!_mapData.IsValidPosition(x, y, (ushort)(z + 1)))
 			{
 				return false;
 			}
 
-			return !_mapData[x, y, z + 1].IsSolid();
+			return !_mapData[x, y, (ushort)(z + 1)].IsSolid();
 		}
 
-		private bool HasBackFace(int x, int y, int z)
+		private bool HasBackFace(ushort x, ushort y, ushort z)
 		{
-			if (!_mapData.IsValidPosition(x, y, z - 1))
+			if (!_mapData.IsValidPosition(x, y, (ushort)(z - 1)))
 			{
 				return false;
 			}
 
-			return !_mapData[x, y, z - 1].IsSolid();
+			return !_mapData[x, y, (ushort)(z - 1)].IsSolid();
 		}
 
-		private bool HasRightFace(int x, int y, int z)
+		private bool HasRightFace(ushort x, ushort y, ushort z)
 		{
-			if (!_mapData.IsValidPosition(x + 1, y, z))
+			if (!_mapData.IsValidPosition((ushort)(x + 1), y, z))
 			{
 				return false;
 			}
 
-			return !_mapData[x + 1, y, z].IsSolid();
+			return !_mapData[(ushort)(x + 1), y, z].IsSolid();
 		}
 
-		private bool HasLeftFace(int x, int y, int z)
+		private bool HasLeftFace(ushort x, ushort y, ushort z)
 		{
-			if (!_mapData.IsValidPosition(x - 1, y, z))
+			if (!_mapData.IsValidPosition((ushort)(x - 1), y, z))
 			{
 				return false;
 			}
 
-			return !_mapData[x - 1, y, z].IsSolid();
+			return !_mapData[(ushort)(x - 1), y, z].IsSolid();
 		}
 	}
 }

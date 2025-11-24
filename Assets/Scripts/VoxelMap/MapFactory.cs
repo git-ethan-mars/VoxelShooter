@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
-using Data;
-using Services;
 using UnityEngine;
+using VoxelMap.Data;
+using Object = UnityEngine.Object;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
 namespace VoxelMap
@@ -16,22 +15,13 @@ namespace VoxelMap
 
 		private const string DirectionalLightName = "Directional Light";
 		private const string SpawnPointPath = "Prefabs/MapCreation/Spawnpoint";
-		private const string WaterPlane = "Prefabs/MapCreation/WaterPlane";
 		private const string ChunkMeshRendererPath = "Prefabs/MapCreation/Chunk";
 		private const string WallPath = "Prefabs/MapCreation/Wall";
 		private const string MapProviderPath = "Prefabs/MapCreation/VoxelMap";
-		private const float WaterScale = 1024;
-
-		private readonly IAssetProvider _assets;
-
-		public MapFactory(IAssetProvider assets)
-		{
-			_assets = assets;
-		}
 
 		public GameObject CreateChunkView(Vector3 position, Transform parent)
 		{
-			GameObject chunkView = _assets.Instantiate(ChunkMeshRendererPath, position, Quaternion.identity, parent);
+			GameObject chunkView = Object.Instantiate(Resources.Load<GameObject>(ChunkMeshRendererPath), position, Quaternion.identity, parent);
 			return chunkView;
 		}
 
@@ -42,7 +32,7 @@ namespace VoxelMap
 			var allFaces = Enum.GetValues(typeof(Face)).Cast<Face>().Where(face => face != Face.None);
 			foreach (Face face in allFaces)
 			{
-				GameObject wall = _assets.Instantiate(WallPath, wallContainer);
+				GameObject wall = Object.Instantiate(Resources.Load<GameObject>(WallPath), wallContainer);
 				var mesh = new Mesh();
 				mesh.vertices = new Vector3[4];
 				if (face == Face.Top)
@@ -113,33 +103,16 @@ namespace VoxelMap
 			}
 		}
 
-		public void CreateWaterPlane(Vector3 position, Color32 waterColor, Transform parent)
-		{
-			GameObject waterPlane = _assets.Instantiate(WaterPlane, position - Vector3.up * 0.001f, Quaternion.identity);
-			waterPlane.transform.SetParent(parent);
-			waterPlane.transform.localScale *= WaterScale;
-			var mesh = new Mesh();
-			mesh.SetVertices(new List<Vector3>
-				{ new Vector3(-0.5f, 0, -0.5f), new Vector3(-0.5f, 0, 0.5f), new Vector3(0.5f, 0, -0.5f), new Vector3(0.5f, 0, 0.5f) });
-			mesh.SetTriangles(new[] { 0, 1, 2, 1, 3, 2 }, 0);
-			mesh.SetNormals(Enumerable.Range(0, mesh.vertexCount).Select(_ => Vector3.up).ToList());
-			waterPlane.GetComponent<MeshFilter>().sharedMesh = mesh;
-			var meshRenderer = waterPlane.GetComponent<MeshRenderer>();
-			var material = new Material(meshRenderer.sharedMaterial);
-			material.color = waterColor;
-			meshRenderer.sharedMaterial = material;
-		}
-
-		public void CreateDirectionalLight(LightData lightData, Transform parent)
+		public void CreateDirectionalLight(DirectionalLightData directionalLightData, Transform parent)
 		{
 			var light = new GameObject(DirectionalLightName).AddComponent<Light>();
-			light.transform.position = lightData.position;
-			light.transform.rotation = lightData.rotation;
-			light.color = lightData.color;
+			light.transform.position = directionalLightData.position;
+			light.transform.rotation = directionalLightData.rotation;
+			light.color = directionalLightData.color;
 			light.type = LightType.Directional;
 			light.shadows = LightShadows.Soft;
-			light.shadowBias = lightData.bias;
-			light.shadowNormalBias = lightData.normalBias;
+			light.shadowBias = directionalLightData.bias;
+			light.shadowNormalBias = directionalLightData.normalBias;
 			light.transform.SetParent(parent);
 		}
 
@@ -150,14 +123,14 @@ namespace VoxelMap
 
 			for (var i = 0; i < data.Count; i++)
 			{
-				_assets.Instantiate(SpawnPointPath, data[i].position,
+				Object.Instantiate(Resources.Load<GameObject>(SpawnPointPath), data[i].position,
 					Quaternion.identity, spawnPointContainer);
 			}
 		}
 
 		public Map CreateEmptyMap()
 		{
-			return _assets.Instantiate(MapProviderPath).GetComponent<Map>();
+			return Object.Instantiate(Resources.Load<GameObject>(MapProviderPath)).GetComponent<Map>();
 		}
 	}
 }

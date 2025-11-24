@@ -7,11 +7,11 @@ namespace GamePlay
 	public sealed class Knife : MeleeWeapon
 	{
 		[Inject]
-		private void Construct(IInputService inputService, CameraService cameraService,
+		private void Construct(IInputService inputService, CameraProvider cameraProvider,
 			IStaticDataService staticData, CharacterProvider characterProvider, NetworkAudioPlayer audioPlayer)
 		{
 			InputService = inputService;
-			CameraService = cameraService;
+			CameraProvider = cameraProvider;
 			AudioPlayer = audioPlayer;
 		}
 

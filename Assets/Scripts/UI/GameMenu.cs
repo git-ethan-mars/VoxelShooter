@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
 using Data;
+using DG.Tweening;
 using R3;
 using Reflex.Attributes;
+using Services;
+using Services.ServerList;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -27,9 +29,10 @@ namespace UI
 		private EventSystem _eventSystem;
 
 		public Observable<GameSettings> CreateGameRequested => matchMenu.ApplyButtonPressed.AsObservable();
-
 #if LOCAL_BUILD
 		public Observable<Unit> JoinButtonPressed => mainMenu.JoinButtonPressed.AsObservable();
+#else
+		public Observable<Server> JoinServerButtonPressed => joinMatchMenu.JoinServerButtonPressed;
 #endif
 
 		[Inject]
@@ -48,7 +51,9 @@ namespace UI
 			EventSystem.current.firstSelectedGameObject = mainMenu.CreateMatchButton.gameObject;
 
 			mainMenu.CreateMatchButtonPressed.Subscribe(_ => OnCreateMatchButtonPressed()).AddTo(mainMenu);
+#if !LOCAL_BUILD
 			mainMenu.JoinButtonPressed.Subscribe(_ => OnJoinMatchButtonPressed()).AddTo(mainMenu);
+#endif
 			joinMatchMenu.BackButtonPressed.Subscribe(_ => OnJoinMatchMenuBackButtonPressed()).AddTo(joinMatchMenu);
 			mainMenu.SettingsButtonPressed.Subscribe(_ => OnSettingsButtonPressed()).AddTo(mainMenu);
 			mainMenu.ExitButtonPressed.Subscribe(_ => Application.Quit()).AddTo(mainMenu);
@@ -63,9 +68,7 @@ namespace UI
 
 		private void OnJoinMatchButtonPressed()
 		{
-#if !LOCAL_BUILD
 			SwapWindowsLeftward(joinMatchMenu, mainMenu).Forget();
-#endif
 		}
 
 		private void OnJoinMatchMenuBackButtonPressed()
@@ -90,46 +93,42 @@ namespace UI
 			_eventSystem.SetSelectedGameObject(mainMenu.CreateMatchButton.gameObject);
 		}
 
-		private async UniTaskVoid SwapWindowsLeftward(IBaseMenu nextWindow, IBaseMenu previousWindow)
+		private async UniTaskVoid SwapWindowsLeftward(BaseMenu nextWindow, BaseMenu previousWindow)
 		{
-			nextWindow.transform.localPosition = new Vector3(canvas.renderingDisplaySize.x, 0, 0);
-			nextWindow.CanvasGroup.interactable = true;
+			nextWindow.transform.localPosition = new Vector3(canvas.renderingDisplaySize.x + ((RectTransform)nextWindow.transform).rect.width / 2,
+				0, 0);
 			nextWindow.CanvasGroup.blocksRaycasts = true;
-			UniTask nextWindowAnimation = DOTween.Sequence()
-				.Append(nextWindow.transform.DOLocalMoveX(0, AnimationDuration))
-				.Insert(0, nextWindow.CanvasGroup.DOFade(1, AnimationDuration))
-				.ToUniTask();
+			nextWindow.CanvasGroup.interactable = true;
+			nextWindow.CanvasGroup.alpha = 1;
+			previousWindow.CanvasGroup.blocksRaycasts = false;
 			nextWindow.Show();
 
-			previousWindow.CanvasGroup.interactable = false;
-			previousWindow.CanvasGroup.blocksRaycasts = false;
-			UniTask previousWindowAnimation = DOTween.Sequence()
-				.Append(previousWindow.transform.DOLocalMoveX(-canvas.renderingDisplaySize.x, AnimationDuration))
-				.Insert(0, previousWindow.CanvasGroup.DOFade(0, AnimationDuration))
+			var nextWindowAnimation = nextWindow.transform.DOLocalMoveX(0, AnimationDuration).ToUniTask();
+			var previousWindowAnimation = previousWindow.transform.DOLocalMoveX(
+					-canvas.renderingDisplaySize.x - ((RectTransform)previousWindow.transform).rect.width,
+					AnimationDuration)
 				.ToUniTask();
-			previousWindow.Hide();
 			await UniTask.WhenAll(nextWindowAnimation, previousWindowAnimation);
+
+			previousWindow.Hide();
 		}
 
-		private async UniTaskVoid SwapWindowsRightward(IBaseMenu nextWindow, IBaseMenu previousWindow)
+		private async UniTaskVoid SwapWindowsRightward(BaseMenu nextWindow, BaseMenu previousWindow)
 		{
-			nextWindow.transform.localPosition = new Vector3(-canvas.renderingDisplaySize.x, 0, 0);
-			nextWindow.CanvasGroup.interactable = true;
+			nextWindow.transform.localPosition = new Vector3(-canvas.renderingDisplaySize.x - ((RectTransform)nextWindow.transform).rect.width / 2, 0, 0);
 			nextWindow.CanvasGroup.blocksRaycasts = true;
-			UniTask nextWindowAnimation = DOTween.Sequence()
-				.Append(nextWindow.transform.DOLocalMoveX(0, AnimationDuration))
-				.Insert(0, nextWindow.CanvasGroup.DOFade(1, AnimationDuration))
-				.ToUniTask();
+			nextWindow.CanvasGroup.interactable = true;
+			nextWindow.CanvasGroup.alpha = 1;
+			previousWindow.CanvasGroup.blocksRaycasts = false;
 			nextWindow.Show();
 
-			previousWindow.CanvasGroup.interactable = false;
-			previousWindow.CanvasGroup.blocksRaycasts = false;
-			UniTask previousWindowAnimation = DOTween.Sequence()
-				.Append(previousWindow.transform.DOLocalMoveX(canvas.renderingDisplaySize.x, AnimationDuration))
-				.Insert(0, previousWindow.CanvasGroup.DOFade(0, AnimationDuration))
-				.ToUniTask();
-			previousWindow.Hide();
+			var nextWindowAnimation = nextWindow.transform.DOLocalMoveX(0, AnimationDuration).ToUniTask();
+			var previousWindowAnimation = previousWindow.transform.DOLocalMoveX(canvas.renderingDisplaySize.x + ((RectTransform)previousWindow
+				.transform).rect.width / 2, 
+					AnimationDuration).ToUniTask();
 			await UniTask.WhenAll(nextWindowAnimation, previousWindowAnimation);
+
+			previousWindow.Hide();
 		}
 	}
 }

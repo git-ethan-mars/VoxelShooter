@@ -12,9 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1e3934e220d437eb4fad4d4c1a11dee, type: 3}
   m_Name: TNT
   m_EditorClassIdentifier: 
-  <Type>k__BackingField: 11
-  <InventoryIcon>k__BackingField: {fileID: 21300000, guid: cdcc1eea4b5858c468c9bb86e248f34b, type: 3}
-  <CountIcon>k__BackingField: {fileID: 21300000, guid: cdcc1eea4b5858c468c9bb86e248f34b, type: 3}
   <Amount>k__BackingField: 5
   <DelayInSeconds>k__BackingField: 4
   <ExplosionData>k__BackingField:

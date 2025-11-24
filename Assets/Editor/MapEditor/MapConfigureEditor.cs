@@ -1,6 +1,7 @@
 ﻿using Data;
 using UnityEditor;
 using UnityEngine;
+using VoxelMap.Data;
 
 namespace Editor
 {

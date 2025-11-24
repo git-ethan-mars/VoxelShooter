@@ -62,9 +62,9 @@ namespace VoxelMap
 			using var ms = new MemoryStream();
 			stream.CopyTo(ms);
 			byte[] bytes = ms.ToArray();
-			var width = BitConverter.ToInt32(bytes, 0);
-			var height = BitConverter.ToInt32(bytes, 4);
-			var depth = BitConverter.ToInt32(bytes, 8);
+			var width = BitConverter.ToUInt16(bytes, 0);
+			var height = BitConverter.ToUInt16(bytes, 4);
+			var depth = BitConverter.ToUInt16(bytes, 8);
 			var voxels = new NativeArray<VoxelData>(width * height * depth, Allocator.Persistent);
 			var position = 12;
 			int chunksCount = width * height * depth / Chunk.ChunkSizeCubed;
@@ -115,9 +115,9 @@ namespace VoxelMap
 			using var ms = new MemoryStream();
 			await stream.CopyToAsync(ms, token);
 			byte[] bytes = ms.ToArray();
-			var width = BitConverter.ToInt32(bytes, 0);
-			var height = BitConverter.ToInt32(bytes, 4);
-			var depth = BitConverter.ToInt32(bytes, 8);
+			var width = BitConverter.ToUInt16(bytes, 0);
+			var height = BitConverter.ToUInt16(bytes, 4);
+			var depth = BitConverter.ToUInt16(bytes, 8);
 			var voxels = new NativeArray<VoxelData>(width * height * depth, Allocator.Persistent);
 			var position = 12;
 			int chunksCount = width * height * depth / Chunk.ChunkSizeCubed;

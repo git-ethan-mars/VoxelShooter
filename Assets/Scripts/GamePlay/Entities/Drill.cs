@@ -13,7 +13,6 @@ namespace GamePlay
 {
 	public class Drill : Entity
 	{
-		[SerializeField] private AudioType drillHit;
 		[SerializeField] private ParticleSystem particles;
 		[SerializeField] private Rigidbody rigidBody;
 		[SerializeField] private BoxCollider boxCollider;
@@ -60,7 +59,7 @@ namespace GamePlay
 		[ServerCallback]
 		private void OnTriggerEnter(Collider other)
 		{
-			if (_mapProvider.Map.TryGetMapFeature(out MapDestruction mapDestruction))
+			if (_mapProvider.Map.TryGetFeature(out MapDestruction mapDestruction))
 			{
 				mapDestruction.Visit(_configure.ExplosionData, transform.position);
 			}
@@ -70,7 +69,7 @@ namespace GamePlay
 				visitor.Visit(_configure.ExplosionData, transform.position);
 			}
 			
-			_audioPlayer.SendAudio(drillHit, transform.position);
+			_audioPlayer.SendAudio(AudioType.DrillHit, transform.position);
 		}
 
 		public void Launch()

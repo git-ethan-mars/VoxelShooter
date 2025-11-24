@@ -33,6 +33,8 @@ namespace UI
 		{
 			canvasGroup.alpha = 1;
 			Initialize();
+			WorldMap.Initialize();
+			Hud.MiniMap.Initialize();
 		}
 
 		public void Hide()
@@ -67,10 +69,10 @@ namespace UI
 				.Where(_ => _inputService.IsMapButtonUp())
 				.Subscribe(_ => _uiStateMachine.SwitchState<DefaultState>())
 				.AddTo(_disposable);
-			/*Observable.EveryUpdate()
+			Observable.EveryUpdate()
 				.Where(_ => _inputService.IsMapButtonDown())
 				.Subscribe(_ => _uiStateMachine.SwitchState<WorldMapState>())
-				.AddTo(_disposable);*/
+				.AddTo(_disposable);
 			ChooseClassMenu.ChangeClassButtonPressed
 				.Subscribe(_ => _uiStateMachine.SwitchState<DefaultState>())
 				.AddTo(_disposable);

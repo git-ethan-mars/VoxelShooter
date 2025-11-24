@@ -24,6 +24,7 @@ namespace Data
 		SpadeDig,
 		SpadeHit,
 		TNTCountdown,
-		TNTExplosion
+		TNTExplosion,
+		LootBoxPickUp
 	}
 }

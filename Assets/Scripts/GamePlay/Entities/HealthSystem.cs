@@ -15,7 +15,7 @@ namespace GamePlay
 		public void Initialize(int maxHealth)
 		{
 			_maxHealth = maxHealth;
-			Health.Value = maxHealth;
+			_health.Value = maxHealth;
 		}
 
 		[Server]
@@ -26,7 +26,7 @@ namespace GamePlay
 				throw new ArgumentException("Heal value should be positive", nameof(healValue));
 			}
 
-			Health.Value = Math.Min(Health.Value + healValue, _maxHealth);
+			_health.Value = Math.Min(_health.Value + healValue, _maxHealth);
 		}
 
 		[Server]
@@ -37,7 +37,7 @@ namespace GamePlay
 				throw new ArgumentException("Damage value should be positive", nameof(damageValue));
 			}
 
-			Health.Value = Math.Max(Health.Value - damageValue, 0);
+			_health.Value = Math.Max(_health.Value - damageValue, 0);
 		}
 	}
 }

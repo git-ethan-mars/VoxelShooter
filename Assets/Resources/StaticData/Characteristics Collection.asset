@@ -17,7 +17,7 @@ MonoBehaviour:
     - Key: 0
       Value:
         <MaxHealth>k__BackingField: 125
-        <Speed>k__BackingField: 9.5
+        <Speed>k__BackingField: 6
         <JumpHeight>k__BackingField: 1.25
         <PlaceDistance>k__BackingField: 8
       index: 0
@@ -25,7 +25,7 @@ MonoBehaviour:
     - Key: 2
       Value:
         <MaxHealth>k__BackingField: 125
-        <Speed>k__BackingField: 9.5
+        <Speed>k__BackingField: 6
         <JumpHeight>k__BackingField: 1.25
         <PlaceDistance>k__BackingField: 6
       index: 1
@@ -33,7 +33,7 @@ MonoBehaviour:
     - Key: 3
       Value:
         <MaxHealth>k__BackingField: 100
-        <Speed>k__BackingField: 9.5
+        <Speed>k__BackingField: 6
         <JumpHeight>k__BackingField: 1.25
         <PlaceDistance>k__BackingField: 6
       index: 2
@@ -41,7 +41,7 @@ MonoBehaviour:
     - Key: 1
       Value:
         <MaxHealth>k__BackingField: 100
-        <Speed>k__BackingField: 10
+        <Speed>k__BackingField: 6.5
         <JumpHeight>k__BackingField: 1.75
         <PlaceDistance>k__BackingField: 6
       index: 3

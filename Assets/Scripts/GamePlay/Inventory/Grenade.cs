@@ -13,19 +13,19 @@ namespace GamePlay
 	{
 		private IInputService _inputService;
 		private IEntityFactory _entityFactory;
-		private CameraService _cameraService;
+		private CameraProvider _cameraProvider;
 
 		private float _holdDownStartTime;
 		private readonly SyncReactiveProperty<int> _amount = new SyncReactiveProperty<int>();
 		public ReactiveProperty<int> Amount => _amount;
 		
 		[Inject]
-		private void Construct(IInputService inputService, IEntityFactory entityFactory, CameraService cameraService,
+		private void Construct(IInputService inputService, IEntityFactory entityFactory, CameraProvider cameraProvider,
 			IStaticDataService staticData)
 		{
 			_inputService = inputService;
 			_entityFactory = entityFactory;
-			_cameraService = cameraService;
+			_cameraProvider = cameraProvider;
 		}
 		
 		public override void OnStartServer()
@@ -52,7 +52,7 @@ namespace GamePlay
 
 			if (_inputService.IsFirstActionButtonUp())
 			{
-				Throw(_cameraService.CentredRay);
+				Throw(_cameraProvider.CentredRay);
 			}
 		}
 

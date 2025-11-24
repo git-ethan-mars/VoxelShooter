@@ -1,9 +1,6 @@
-using System.Text;
 using GamePlay;
 using R3;
 using Reflex.Attributes;
-using UnityEditor;
-using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.UI;
 using VoxelMap;
@@ -14,23 +11,27 @@ namespace UI
 		private const string ClearHeight = "ClearHeight";
 		private const string UpdateHeight = "UpdateHeight";
 		private const string UpdateChunk = "UpdateChunk";
-		
+
 		private static readonly int HeightBuffer = Shader.PropertyToID("HeightBuffer");
 		private static readonly int VertexBuffer = Shader.PropertyToID("VertexBuffer");
 		private static readonly int MapTexture = Shader.PropertyToID("MapTexture");
-		private static readonly int MeshPositionOffset = Shader.PropertyToID("MeshPositionOffset");
+		private static readonly int ChunkPosition = Shader.PropertyToID("ChunkPosition");
 		private static readonly int ChunkSize = Shader.PropertyToID("ChunkSize");
+		private static readonly int BufferSize = Shader.PropertyToID("BufferSize");
+		private static readonly int GridColor = Shader.PropertyToID("GridColor");
 
 		[SerializeField] private ComputeShader computeShader;
 		[SerializeField] private RawImage mapImage;
+		[SerializeField] private Color gridColor;
 
 		private MapProvider _mapProvider;
 		private EntityContainerService _entityContainer;
 
 		private ComputeBuffer _heightBuffer;
+		private int _clearHeightKernel;
 		private int _updateHeightKernel;
 		private int _updateChunkKernel;
-		private int _clearHeightKernel;
+		private int _drawGridKernel;
 
 		[field: SerializeField] public CanvasGroup CanvasGroup { get; private set; }
 		public RenderTexture MainTexture { get; private set; }
@@ -39,8 +40,23 @@ namespace UI
 		[Inject]
 		private void Construct(MapProvider mapProvider)
 		{
-			return;
 			_mapProvider = mapProvider;
+
+			_heightBuffer = new ComputeBuffer(Chunk.ChunkSizeSquared, sizeof(float));
+			_clearHeightKernel = computeShader.FindKernel(ClearHeight);
+			_updateHeightKernel = computeShader.FindKernel(UpdateHeight);
+			_updateChunkKernel = computeShader.FindKernel(UpdateChunk);
+			
+			computeShader.SetInt(ChunkSize, Chunk.ChunkSize);
+			computeShader.SetVector(GridColor, gridColor);
+		}
+
+		public void Initialize()
+		{
+			if (MainTexture != null)
+			{
+				MainTexture.Release();
+			}
 
 			MainTexture = new RenderTexture(_mapProvider.Map.Width, _mapProvider.Map.Depth, 0, RenderTextureFormat.ARGB32)
 			{
@@ -48,101 +64,78 @@ namespace UI
 				filterMode = FilterMode.Point
 			};
 
-			_heightBuffer = new ComputeBuffer(Chunk.ChunkSizeSquared, sizeof(uint));
-		}
-
-		private void Start()
-		{
-			return;
 			MainTexture.Create();
 			mapImage.texture = MainTexture;
+
+			_mapProvider.Map.ChunkUpdated.Subscribe(OnChunkUpdated).AddTo(_mapProvider.Map);
 
 			for (int x = 0; x < _mapProvider.Map.Width / Chunk.ChunkSize; x++)
 			{
 				for (var z = 0; z < _mapProvider.Map.Depth / Chunk.ChunkSize; z++)
-				{ 
-					//RefreshColumn(x, z);
+				{
+					RefreshChunkColumn(x, z);
 				}
 			}
 
-			_mapProvider.Map.ChunkUpdated.Subscribe(OnChunkUpdated).AddTo(this);
+			/*int threadGroupX = Mathf.CeilToInt((float)Mathf.Max(_mapProvider.Map.Width / Chunk.ChunkSize,
+				                                   _mapProvider.Map.Depth / Chunk.ChunkSize) / 16);
+			computeShader.SetTexture(_drawGridKernel, MapTexture, MainTexture);
+			computeShader.Dispatch(_drawGridKernel,threadGroupX, 1, 1);*/
+		}
 
+		private void RefreshChunkColumn(int x, int z)
+		{
+			computeShader.SetBuffer(_clearHeightKernel, HeightBuffer, _heightBuffer);
+			computeShader.Dispatch(_clearHeightKernel, Chunk.ChunkSize / 8, Chunk.ChunkSize / 8, 1);
 
-			_clearHeightKernel = computeShader.FindKernel(ClearHeight);
-			_updateHeightKernel = computeShader.FindKernel(UpdateHeight);
-			_updateChunkKernel = computeShader.FindKernel(UpdateChunk);
+			for (var y = 0; y < _mapProvider.Map.Height / Chunk.ChunkSize; y++)
+			{
+				int chunkIndex = GetChunkIndex(x, y, z);
+				ProcessChunk(chunkIndex);
+			}
+		}
 
-			computeShader.SetFloat(ChunkSize, Chunk.ChunkSize);
+		private void ProcessChunk(int chunkIndex)
+		{
+			Chunk chunk = _mapProvider.Map.Chunks[chunkIndex];
+
+			if (chunk.Mesh.vertexCount == 0)
+			{
+				return;
+			}
+
+			chunk.Mesh.vertexBufferTarget |= GraphicsBuffer.Target.Raw;
+			using var vertexBuffer = chunk.Mesh.GetVertexBuffer(0);
+
+			computeShader.SetBuffer(_updateHeightKernel, VertexBuffer, vertexBuffer);
+			computeShader.SetBuffer(_updateHeightKernel, HeightBuffer, _heightBuffer);
+			computeShader.SetFloats(ChunkPosition, chunk.Position.x, chunk.Position.y, chunk.Position.z);
+			computeShader.SetInt(BufferSize, vertexBuffer.count);
+			computeShader.Dispatch(_updateHeightKernel, Mathf.CeilToInt((float)vertexBuffer.count / 4 / 16), 1, 1);
+
+			computeShader.SetBuffer(_updateChunkKernel, VertexBuffer, vertexBuffer);
+			computeShader.SetBuffer(_updateChunkKernel, HeightBuffer, _heightBuffer);
+			computeShader.SetFloats(ChunkPosition, chunk.Position.x, chunk.Position.y, chunk.Position.z);
+			computeShader.SetInt(BufferSize, vertexBuffer.count);
+			computeShader.SetTexture(_updateChunkKernel, MapTexture, MainTexture);
+			computeShader.Dispatch(_updateChunkKernel, Mathf.CeilToInt((float)vertexBuffer.count / 4 / 16), 1, 1);
 		}
 
 		private void OnChunkUpdated(Chunk chunk)
 		{
-			RefreshColumn(chunk.Position.x / Chunk.ChunkSize, chunk.Position.z / Chunk.ChunkSize);
+			RefreshChunkColumn(chunk.Position.x / Chunk.ChunkSize, chunk.Position.z / Chunk.ChunkSize);
 		}
 
-		private void RefreshColumn(int x, int z)
+		private int GetChunkIndex(int x, int y, int z)
 		{
-			computeShader.SetBuffer(_clearHeightKernel, HeightBuffer, _heightBuffer);
-			
-			//RenderDoc.BeginCaptureRenderDoc(SceneView.lastActiveSceneView);
-			computeShader.Dispatch(_clearHeightKernel, Chunk.ChunkSize / 8, Chunk.ChunkSize / 8, 1);
-			//RenderDoc.EndCaptureRenderDoc(SceneView.lastActiveSceneView);
-			int maxYChunkIndex = _mapProvider.Map.Height / Chunk.ChunkSize;
-			int maxZChunkIndex = _mapProvider.Map.Depth / Chunk.ChunkSize;
-			int chunkIndex = x * maxYChunkIndex * maxZChunkIndex + z;
-
-			int blockStartIndex = chunkIndex / (maxYChunkIndex * maxZChunkIndex) * maxYChunkIndex * maxZChunkIndex;
-			int chunkIndexOffset = (chunkIndex - blockStartIndex) % maxZChunkIndex;
-
-			for (var i = blockStartIndex + chunkIndexOffset;
-			     i < blockStartIndex + chunkIndexOffset + maxYChunkIndex * maxZChunkIndex;
-			     i += maxZChunkIndex)
-			{
-				Chunk chunk = _mapProvider.Map.Chunks[i];
-
-				if (chunk.Mesh.vertexCount == 0)
-				{
-					continue;
-				}
-
-				chunk.Mesh.vertexBufferTarget |= GraphicsBuffer.Target.Raw;
-				using GraphicsBuffer vertexBuffer = chunk.Mesh.GetVertexBuffer(0);
-				computeShader.SetBuffer(_updateHeightKernel, VertexBuffer, vertexBuffer);
-				computeShader.SetBuffer(_updateHeightKernel, HeightBuffer, _heightBuffer);
-				computeShader.SetFloats(MeshPositionOffset, chunk.Position.x, chunk.Position.y, chunk.Position.z);
-				computeShader.Dispatch(_updateHeightKernel, // 0-3 = 0, 4-7 = 1; 8-11 = 2;
-					Mathf.CeilToInt((float)vertexBuffer.count / 4 / 16), 1, 1);
-			}
-
-			/*for (var i = blockStartIndex + chunkIndexOffset;
-			     i < blockStartIndex + chunkIndexOffset + maxYChunkIndex * maxZChunkIndex;
-			     i += maxZChunkIndex)
-			{
-				Chunk chunk = _mapProvider.Map.Chunks[i];
-
-				if (chunk.Mesh.vertexCount == 0)
-				{
-					continue;
-				}
-
-				using GraphicsBuffer vertexBuffer = chunk.Mesh.GetVertexBuffer(0);
-				computeShader.SetBuffer(updateChunk, VertexBuffer, vertexBuffer);
-				computeShader.SetBuffer(updateChunk, HeightBuffer, _heightBuffer);
-				computeShader.SetTexture(updateChunk, MapTexture, MainTexture);
-				computeShader.SetFloats(MeshPositionOffset, chunk.Position.x, chunk.Position.y, chunk.Position.z);
-				//RenderDoc.BeginCaptureRenderDoc(SceneView.lastActiveSceneView);
-				computeShader.Dispatch(updateChunk,
-					Mathf.CeilToInt((float)vertexBuffer.count / 16 / 4), 1, 1);
-				//RenderDoc.EndCaptureRenderDoc(SceneView.lastActiveSceneView);
-				Debug.Log($"{x} {z}");
-
-			}*/
+			return x * (_mapProvider.Map.Height * _mapProvider.Map.Depth / Chunk.ChunkSizeSquared)
+			       + y * (_mapProvider.Map.Depth / Chunk.ChunkSize) + z;
 		}
 
 		private void OnDestroy()
 		{
 			_heightBuffer.Release();
-			MainTexture.Release();
+			MainTexture?.Release();
 		}
 	}
 }

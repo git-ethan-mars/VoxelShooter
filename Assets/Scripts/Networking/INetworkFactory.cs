@@ -2,6 +2,6 @@ namespace Networking
 {
 	public interface INetworkFactory
 	{
-		VoxelShooterNetworkManager CreateNetworkManager();
+		VSNetworkManager CreateNetworkManager();
 	}
 }

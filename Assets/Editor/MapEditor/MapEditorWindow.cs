@@ -4,6 +4,7 @@ using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.Rendering;
 using VoxelMap;
+using VoxelMap.Data;
 using Environment = VoxelMap.Environment;
 namespace Editor
 {

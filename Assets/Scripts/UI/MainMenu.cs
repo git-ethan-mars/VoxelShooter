@@ -3,13 +3,11 @@ using UnityEngine;
 using UnityEngine.UI;
 namespace UI
 {
-	[RequireComponent(typeof(CanvasGroup))]
-	public class MainMenu : MonoBehaviour, IBaseMenu
+	public class MainMenu : BaseMenu
 	{
 		[field: SerializeField] public Button CreateMatchButton { get; private set; }
 		[field: SerializeField] public Button JoinMatchButton { get; private set; }
 		[field: SerializeField] public Button SettingsButton { get; private set; }
-		[field: SerializeField] public CanvasGroup CanvasGroup { get; private set; }
 		[SerializeField] private Button exitButton;
 
 		private void OnEnable()
@@ -25,11 +23,11 @@ namespace UI
 		public Observable<Unit> SettingsButtonPressed { get; private set; }
 		public Observable<Unit> ExitButtonPressed { get; private set; }
 
-		public void Show()
+		public override void Show()
 		{
 		}
 
-		public void Hide()
+		public override void Hide()
 		{
 		}
 	}

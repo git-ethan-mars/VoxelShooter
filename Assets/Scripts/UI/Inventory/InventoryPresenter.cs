@@ -5,6 +5,7 @@ using R3;
 using Reflex.Attributes;
 using Services;
 using UnityEngine;
+using UnityEngine.Audio;
 namespace UI.Inventory
 {
 	public sealed class InventoryPresenter : MonoBehaviour
@@ -21,7 +22,7 @@ namespace UI.Inventory
 		private GamePlay.Core.Inventory _inventory;
 
 		[Inject]
-		private void Construct(IInputService inputService, CameraService cameraService, CharacterProvider characterProvider,
+		private void Construct(IInputService inputService, CameraProvider cameraProvider, CharacterProvider characterProvider,
 			IStaticDataService staticData, ISlotPresenterFactory slotPresenterFactory)
 		{
 			_inputService = inputService;
@@ -42,12 +43,12 @@ namespace UI.Inventory
 
 			if (scrollSpeed < 0)
 			{
-				ChangeToPreviousInventorySlot();
+				_inventory.CmdChangeToPreviousInventorySlot();
 			}
 
 			if (scrollSpeed > 0)
 			{
-				ChangeToNextInventorySlot();
+				_inventory.CmdChangeToNextInventorySlot();
 			}
 
 			if (_inputService.IsFirstSlotButtonPressed())
@@ -88,6 +89,7 @@ namespace UI.Inventory
 				}
 				
 				_inventory.ItemAdded.Subscribe(OnItemAdded).AddTo(_inventory);
+				_inventory.SlotSelected.Subscribe(OnItemSelected).AddTo(_inventory);
 			}
 			else
 			{
@@ -103,9 +105,9 @@ namespace UI.Inventory
 			itemPresenter.Initialize();
 			_presenters.Add(itemPresenter);
 
-			if (!_inventory.ActiveSlotIndex.HasValue)
+			if (index == 0)
 			{
-				_inventory.CmdSelectSlot(0);
+				_presenters[0].Select();
 			}
 		}
 
@@ -120,18 +122,10 @@ namespace UI.Inventory
 			inventoryView.Clear();
 		}
 
-		private void ChangeToNextInventorySlot()
+		private void OnItemSelected((int oldSlotIndex, int slotIndex) value)
 		{
-			int inventorySize = _inventory.Items.Count;
-			int currentSlot = (_inventory.ActiveSlotIndex!.Value + 1 + inventorySize) % inventorySize;
-			_inventory.CmdSelectSlot(currentSlot);
-		}
-
-		private void ChangeToPreviousInventorySlot()
-		{
-			int inventorySize = _inventory.Items.Count;
-			int currentSlot = (_inventory.ActiveSlotIndex!.Value - 1 + inventorySize) % inventorySize;
-			_inventory.CmdSelectSlot(currentSlot);
+			_presenters[value.oldSlotIndex].Deselect();
+			_presenters[value.slotIndex].Select();
 		}
 	}
 }

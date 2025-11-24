@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using VoxelMap;
+using VoxelMap.Data;
 
 namespace Editor
 {

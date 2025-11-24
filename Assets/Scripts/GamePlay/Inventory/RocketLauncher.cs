@@ -13,7 +13,7 @@ namespace GamePlay
 	{
 		private IInputService _inputService;
 		private IEntityFactory _entityFactory;
-		private CameraService _cameraService;
+		private CameraProvider _cameraProvider;
 
 		private bool _isReloading;
 		private readonly SyncReactiveProperty<int> _amount = new SyncReactiveProperty<int>();
@@ -22,12 +22,12 @@ namespace GamePlay
 		public ReactiveProperty<int> ChargedRockets => _chargedRockets;
 
 		[Inject]
-		private void Construct(IInputService inputService, IEntityFactory entityFactory, CameraService cameraService,
+		private void Construct(IInputService inputService, IEntityFactory entityFactory, CameraProvider cameraProvider,
 			IStaticDataService staticData)
 		{
 			_inputService = inputService;
 			_entityFactory = entityFactory;
-			_cameraService = cameraService;
+			_cameraProvider = cameraProvider;
 		}
 
 		public override ItemType Type => ItemType.RocketLauncher;
@@ -50,7 +50,7 @@ namespace GamePlay
 
 			if (_inputService.IsFirstActionButtonDown())
 			{
-				Shoot(_cameraService.CentredRay);
+				Shoot(_cameraProvider.CentredRay);
 			}
 
 			if (_inputService.IsReloadingButtonDown())

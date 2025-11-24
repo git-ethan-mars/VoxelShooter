@@ -7,23 +7,29 @@ namespace Networking.Core
 	{
 		public T Value
 		{
-			get => _reactiveProperty.Value;
+			get => _reactivePropertyWrapper.Value;
 			set
 			{
 				if (!IsWritable())
 				{
-					throw new InvalidOperationException("SyncReactiveProperty can only be modified by the owner.");	
+					throw new InvalidOperationException("SyncReactiveProperty can only be modified by the owner.");
 				}
-				_reactiveProperty.Value = value;
+
+				_reactivePropertyWrapper.SetValueWithoutNotify(value);
 				OnDirty?.Invoke();
 			}
 		}
 
-		private readonly ReactiveProperty<T> _reactiveProperty = new ReactiveProperty<T>();
-			
+		private readonly ReactivePropertyWrapper _reactivePropertyWrapper;
+
+		public SyncReactiveProperty()
+		{
+			_reactivePropertyWrapper = new ReactivePropertyWrapper(OnInnerReactivePropertyChanged);
+		}
+
 		public override void OnSerializeAll(NetworkWriter writer)
 		{
-			writer.Write(_reactiveProperty.Value);
+			writer.Write(_reactivePropertyWrapper.Value);
 		}
 
 		public override void OnSerializeDelta(NetworkWriter writer)
@@ -31,9 +37,9 @@ namespace Networking.Core
 			OnSerializeAll(writer);
 		}
 
-		public override void OnDeserializeAll(NetworkReader reader)	
+		public override void OnDeserializeAll(NetworkReader reader)
 		{
-			_reactiveProperty.Value = reader.Read<T>();
+			_reactivePropertyWrapper.SetValueWithoutNotify(reader.Read<T>());
 		}
 
 		public override void OnDeserializeDelta(NetworkReader reader)
@@ -43,16 +49,46 @@ namespace Networking.Core
 
 		public override void Reset()
 		{
-			_reactiveProperty.Value = default;
+			_reactivePropertyWrapper.Value = default;
 		}
 
 		public override void ClearChanges()
 		{
 		}
-		
+
 		public static implicit operator ReactiveProperty<T>(SyncReactiveProperty<T> source)
 		{
-			return source._reactiveProperty;
+			return source._reactivePropertyWrapper;
+		}
+
+		private void OnInnerReactivePropertyChanged(T value)
+		{
+			Value = value;
+		}
+
+		private class ReactivePropertyWrapper : ReactiveProperty<T>
+		{
+			private readonly Action<T> _onValueChanged;
+
+			public ReactivePropertyWrapper(Action<T> onValueChanged)
+			{
+				_onValueChanged = onValueChanged;
+			}
+
+			public override T Value
+			{
+				get => base.Value;
+				set
+				{
+					base.Value = value;
+					_onValueChanged?.Invoke(value);
+				}
+			}
+
+			public void SetValueWithoutNotify(T value)
+			{
+				base.Value = value;
+			}
 		}
 	}
 }

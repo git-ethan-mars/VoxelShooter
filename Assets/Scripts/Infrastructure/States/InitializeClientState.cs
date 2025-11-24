@@ -8,12 +8,12 @@ namespace Infrastructure.States
 	{
 		private readonly GameStateMachine _gameStateMachine;
 		private readonly GameSessionCreator _gameSessionCreator;
-		private readonly VoxelShooterNetworkManager _networkManager;
+		private readonly VSNetworkManager _networkManager;
 
 		private LoadingWindow _loadingWindow;
 
 		public InitializeClientState(GameStateMachine gameStateMachine, GameSessionCreator gameSessionCreator,
-			VoxelShooterNetworkManager networkManager)
+			VSNetworkManager networkManager)
 		{
 			_gameStateMachine = gameStateMachine;
 			_gameSessionCreator = gameSessionCreator;

@@ -789,6 +789,7 @@ GameObject:
   - component: {fileID: 8958753238736327792}
   - component: {fileID: 4628420457150030392}
   - component: {fileID: 4625289048429854272}
+  - component: {fileID: 1556769679626221075}
   m_Layer: 0
   m_Name: JoinMatchMenu
   m_TagString: Untagged
@@ -828,10 +829,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68df34e86b124e3e9032126a9d2bf960, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemPrefab: {fileID: 4278426263537248932, guid: a2b2c5a679c2f3646839d9099ca9aa99, type: 3}
-  container: {fileID: 6353260390804011606}
+  serverListView: {fileID: 1556769679626221075}
   backButton: {fileID: 1873817417014080535}
-  <CanvasGroup>k__BackingField: {fileID: 4625289048429854272}
 --- !u!225 &4625289048429854272
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -844,6 +843,20 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &1556769679626221075
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4216049094434936136}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7fae81c51d94f24b6f6d11e378f221f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: VoxelShooter.UI::UI.ServerListView
+  itemPrefab: {fileID: 4278426263537248932, guid: a2b2c5a679c2f3646839d9099ca9aa99, type: 3}
+  container: {fileID: 6353260390804011606}
 --- !u!1 &5595405423911205771
 GameObject:
   m_ObjectHideFlags: 0

@@ -21,13 +21,9 @@ namespace UI
 
 		public void Initialize()
 		{
-			_characterProvider.Character.Where(character => character != null).Subscribe(OnCharacterCreated)
-				.AddTo(this);
-		}
-
-		private void OnCharacterCreated(Character character)
-		{
-			Block block = character.Inventory.Items.OfType<Block>().FirstOrDefault();
+			Character character = _characterProvider.Character.Value;
+			
+			Block block = character.Inventory.GetItem<Block>();
 
 			if (block == null)
 			{

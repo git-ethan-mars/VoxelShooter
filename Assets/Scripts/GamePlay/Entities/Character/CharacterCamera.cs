@@ -1,47 +1,72 @@
+using System;
 using Mirror;
+using R3;
 using Reflex.Attributes;
+using Services;
 using UnityEngine;
-using UnityEngine.Animations;
 namespace GamePlay
 {
 	public class CharacterCamera : NetworkBehaviour
 	{
-		[SerializeField] private Transform headTrackingObject;
-		[SerializeField] private Transform headPosition;
+		private const float RotationLimit = 89.9f;
+		private const float SensitivityMultiplier = 50.0f;
 
-		private CameraService _cameraService;
-		private LookAtConstraint _cameraConstraint;
+		[SerializeField] private Transform head;
+		
+		private IInputService _inputService;
+		private IStorageService _storageService;
+		private CameraProvider _cameraProvider;
+
+		private float _xRotation;
+		private float _yRotation;
+		private float _mouseSensitivity;
+		private float _aimSensitivity;
 
 		[Inject]
-		private void Construct(CameraService cameraService)
+		private void Construct(IInputService inputService, IStorageService storageService, CameraProvider cameraProvider)
 		{
-			_cameraService = cameraService;
-			_cameraConstraint = _cameraService.MainCamera.GetComponent<LookAtConstraint>();
+			_inputService = inputService;
+			_storageService = storageService;
+			_cameraProvider = cameraProvider;
 		}
 
 		public override void OnStartLocalPlayer()
 		{
 			base.OnStartLocalPlayer();
 
-			SetupCamera();
+			var mouseSettings = _storageService.Load<MouseSettingsData>(IStorageService.MouseSettingsKey);
+			_mouseSensitivity = mouseSettings.GeneralSensitivity;
+			_aimSensitivity = mouseSettings.AimSensitivity;
+			
+			_storageService.Subscribe<MouseSettingsData>(OnMouseSettingsChanged)
+				.AddTo(this);
 		}
 
-		public override void OnStopLocalPlayer()
+		private void Update()
 		{
-			base.OnStopLocalPlayer();
-			
-			if (_cameraService.MainCamera.transform.parent == transform)
+			if (isLocalPlayer)
 			{
-				_cameraService.MainCamera.transform.SetParent(null);
+				_cameraProvider.MainCamera.transform.position = head.position;
+				Rotate(_inputService.MouseAxis);
 			}
 		}
 
-		private void SetupCamera()
+		private void Rotate(Vector2 direction)
 		{
-			Transform cameraTransform = _cameraService.MainCamera.transform;
-			cameraTransform.SetParent(transform);
-			cameraTransform.transform.position = headPosition.position;
-			_cameraConstraint.AddSource(new ConstraintSource { sourceTransform = headTrackingObject, weight = 1 });
+			float sensitivity = _cameraProvider.IsZoomed ? _aimSensitivity : _mouseSensitivity;
+			float mouseX = direction.x * SensitivityMultiplier * sensitivity * Time.deltaTime;
+			float mouseY = direction.y * SensitivityMultiplier * sensitivity * Time.deltaTime;
+			_yRotation += mouseX;
+			_xRotation -= mouseY;
+			_xRotation = Math.Clamp(_xRotation, -RotationLimit, RotationLimit);
+			
+			_cameraProvider.MainCamera.transform.rotation = Quaternion.Euler(_xRotation, _yRotation, 0.0f);
+		}
+		
+		private void OnMouseSettingsChanged(MouseSettingsData mouseSettings)
+		{
+			_mouseSensitivity = mouseSettings.GeneralSensitivity;
+			_aimSensitivity = mouseSettings.AimSensitivity;
 		}
 	}
 }

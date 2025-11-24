@@ -828,6 +828,10 @@ PrefabInstance:
       propertyPath: _assetId
       value: 2596796809
       objectReference: {fileID: 0}
+    - target: {fileID: 85951645958622081, guid: 92b0505206f2409479089fbcb3bde1eb, type: 3}
+      propertyPath: m_Data.m_ConstrainedObject
+      value: 
+      objectReference: {fileID: 1837007794823172114}
     - target: {fileID: 232802179513926134, guid: 92b0505206f2409479089fbcb3bde1eb, type: 3}
       propertyPath: m_Transforms.Array.size
       value: 31
@@ -836,6 +840,10 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2245012279666688116, guid: 92b0505206f2409479089fbcb3bde1eb, type: 3}
+      propertyPath: head
+      value: 
+      objectReference: {fileID: 3670983867132004492}
     - target: {fileID: 2245012279666688116, guid: 92b0505206f2409479089fbcb3bde1eb, type: 3}
       propertyPath: headPosition
       value: 
@@ -960,6 +968,10 @@ PrefabInstance:
       propertyPath: head
       value: 
       objectReference: {fileID: 3670983867132004492}
+    - target: {fileID: 6638822043700395874, guid: 92b0505206f2409479089fbcb3bde1eb, type: 3}
+      propertyPath: spine
+      value: 
+      objectReference: {fileID: 1837007794823172114}
     - target: {fileID: 6638822043700395874, guid: 92b0505206f2409479089fbcb3bde1eb, type: 3}
       propertyPath: bodyOrientation
       value: 

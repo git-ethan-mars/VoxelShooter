@@ -8,15 +8,15 @@ using Services;
 using UnityEngine;
 namespace GamePlay.Core
 {
+	[SelectionBase]
 	public abstract class InventoryItem : NetworkBehaviour
 	{
 		[SerializeField] protected MeshRenderer[] model;
-		
 		public abstract ItemType Type { get; }
 		protected InventoryItemConfigure Configure { get; private set; }
-		public Observable<bool> IsSelected => _isSelected;
 		protected bool IsLocalItem => isOwned;
 		private readonly SyncReactiveProperty<bool> _isSelected = new SyncReactiveProperty<bool>();
+		public bool IsSelected => _isSelected.Value;
 
 		[Inject]
 		private void Construct(CharacterProvider characterProvider, IStaticDataService staticData)

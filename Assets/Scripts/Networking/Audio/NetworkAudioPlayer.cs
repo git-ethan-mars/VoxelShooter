@@ -11,10 +11,10 @@ namespace Networking.Audio
 	public class NetworkAudioPlayer
 	{
 		private readonly IStaticDataService _staticData;
-		private readonly VoxelShooterNetworkManager _networkManager;
+		private readonly VSNetworkManager _networkManager;
 		private readonly AudioPool _audioPool;
 
-		public NetworkAudioPlayer(IAssetProvider assetProvider, IStaticDataService staticData, VoxelShooterNetworkManager networkManager)
+		public NetworkAudioPlayer(IAssetProvider assetProvider, IStaticDataService staticData, VSNetworkManager networkManager)
 		{
 			_staticData = staticData;
 			_networkManager = networkManager;
@@ -33,16 +33,17 @@ namespace Networking.Audio
 			_networkManager.SendResponseToAll(audioResponse, true);
 		}
 
-		public async void Play(AudioType audioType, Vector3 position)
+		public async UniTaskVoid Play(AudioType audioType, Vector3 position)
 		{
 			AudioData audioData = _staticData.GetAudioData(audioType);
 			AudioSource audioSource = _audioPool.Get();
 			audioSource.transform.position = position;
-			audioSource.clip = audioData.Clip;
+			audioSource.resource = audioData.Clip;
 			audioSource.minDistance = audioData.MinDistance;
 			audioSource.maxDistance = audioData.MaxDistance;
 			audioSource.spatialBlend = 1.0f;
 			audioSource.Play();
+			
 			await UniTask.Delay(TimeSpan.FromSeconds(audioData.Clip.length));
 
 			if (audioSource != null)
@@ -51,11 +52,11 @@ namespace Networking.Audio
 			}
 		}
 		
-		public async void Play(AudioType audioType, NetworkIdentity identity, bool isSpatial)
+		public async UniTaskVoid Play(AudioType audioType, NetworkIdentity identity, bool isSpatial)
 		{
 			AudioData audioData = _staticData.GetAudioData(audioType);
 			AudioSource audioSource = _audioPool.Get();
-			audioSource.clip = audioData.Clip;
+			audioSource.resource = audioData.Clip;
 			audioSource.volume = audioData.Volume;
 			audioSource.minDistance = audioData.MinDistance;
 			audioSource.maxDistance = audioData.MaxDistance;

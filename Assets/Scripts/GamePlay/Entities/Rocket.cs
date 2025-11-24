@@ -43,7 +43,7 @@ namespace GamePlay
 
 		private void OnCollisionEnter(Collision collision)
 		{
-			if (_mapProvider.Map.TryGetMapFeature(out MapDestruction mapDestruction))
+			if (_mapProvider.Map.TryGetFeature(out MapDestruction mapDestruction))
 			{
 				mapDestruction.Visit(_configure.ExplosionData, transform.position);
 			}

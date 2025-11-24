@@ -11,7 +11,7 @@ namespace VoxelMap
 	{
 		private const int Width = 512;
 		private const int Depth = 512;
-		private static int _height;
+		private static ushort _height;
 
 		public static async UniTask<MapData> LoadVxlAsync(string mapPath, CancellationToken cancellationToken = default)
 		{
@@ -36,7 +36,7 @@ namespace VoxelMap
 			if (_height % Chunk.ChunkSize != 0)
 			{
 				heightOffset = -_height;
-				_height = _height / Chunk.ChunkSize * Chunk.ChunkSize + Chunk.ChunkSize;
+				_height = (ushort)(_height / Chunk.ChunkSize * Chunk.ChunkSize + Chunk.ChunkSize);
 				heightOffset += _height;
 			}
 
@@ -118,10 +118,10 @@ namespace VoxelMap
 			return x * _height * Depth + y * Depth + z;
 		}
 
-		private static int GetMapHeight(IReadOnlyList<byte> data)
+		private static ushort GetMapHeight(IReadOnlyList<byte> data)
 		{
 			var position = 0;
-			var height = 0;
+			ushort height = 0;
 			for (var y = 0; y < Depth; y++)
 				for (var x = 0; x < Width; x++)
 				{
@@ -130,7 +130,7 @@ namespace VoxelMap
 						int number4ByteChunks = data[position];
 						int topColorStart = data[position + 1];
 						int topColorEnd = data[position + 2];
-						height = Math.Max(height, topColorEnd + 1);
+						height = (ushort)Math.Max(height, topColorEnd + 1);
 						int lengthBottom = topColorEnd - topColorStart + 1;
 						if (number4ByteChunks == 0)
 						{

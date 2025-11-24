@@ -1,5 +1,4 @@
 ﻿using System;
-using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 namespace UI
@@ -12,36 +11,25 @@ namespace UI
 
 		public CanvasGroup CanvasGroup => canvasGroup;
 
-		public void ChangeGameTime(TimeSpan timeLeft)
+		public void ChangeGameTime(TimeSpan gameTime)
 		{
-			serverTimeText.SetText($"{timeLeft.Minutes}:{timeLeft.Seconds:00}");
+			serverTimeText.SetText($"{gameTime.Minutes}:{gameTime.Seconds:00}");
 		}
 
-		public async void ChangeRespawnTime(TimeSpan timeLeft)
+		public void ChangeRespawnTime(TimeSpan respawnTime)
 		{
-			try
+			if (respawnTime == TimeSpan.Zero)
 			{
-				if (!respawnTimeText.gameObject.activeSelf)
-				{
-					respawnTimeText.gameObject.SetActive(true);
-				}
-
-				while (timeLeft.TotalSeconds > 0)
-				{
-					timeLeft = timeLeft.Subtract(TimeSpan.FromSeconds(1));
-					respawnTimeText.SetText($"You will respawn in {timeLeft.TotalSeconds}");
-					if (await UniTask.WaitForSeconds(1, cancellationToken: destroyCancellationToken).SuppressCancellationThrow())
-					{
-						return;
-					}
-				}
-
 				respawnTimeText.gameObject.SetActive(false);
+				return;
 			}
-			catch (Exception e)
+
+			if (respawnTime > TimeSpan.Zero && !respawnTimeText.gameObject.activeSelf)
 			{
-				Debug.LogException(e);
+				respawnTimeText.gameObject.SetActive(true);
 			}
+
+			respawnTimeText.SetText($"You will respawn in {(int)respawnTime.TotalSeconds}");
 		}
 	}
 }

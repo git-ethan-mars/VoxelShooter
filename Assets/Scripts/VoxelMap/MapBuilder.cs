@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Data;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
+using VoxelMap.Data;
 namespace VoxelMap
 {
 	public class MapBuilder
@@ -26,8 +26,9 @@ namespace VoxelMap
 
 		private AmbientData _ambient;
 		private FogData _fog;
-		private LightData _light;
+		private DirectionalLightData _directionalLight;
 		private Material _skybox;
+		private MapConfigure _mapConfigure;
 
 		public MapBuilder(IMapFactory mapFactory, MapData mapData)
 		{
@@ -49,9 +50,9 @@ namespace VoxelMap
 			return this;
 		}
 
-		public MapBuilder WithDirectionalLight(LightData lightData)
+		public MapBuilder WithDirectionalLight(DirectionalLightData directionalLightData)
 		{
-			_light = lightData;
+			_directionalLight = directionalLightData;
 			return this;
 		}
 
@@ -81,10 +82,11 @@ namespace VoxelMap
 
 		public MapBuilder FromConfigure(MapConfigure mapConfigure)
 		{
+			_mapConfigure = mapConfigure;
 			return WithWaterColor(mapConfigure.WaterColor)
 				.WithInnerColor(mapConfigure.InnerColor)
 				.WithAmbient(mapConfigure.AmbientData)
-				.WithDirectionalLight(mapConfigure.LightData)
+				.WithDirectionalLight(mapConfigure.DirectionalLightData)
 				.WithFog(mapConfigure.FogData)
 				.WithSkybox(mapConfigure.SkyboxMaterial)
 				.WithWalls();
@@ -111,19 +113,19 @@ namespace VoxelMap
 			{
 				var waterColorJob = new WaterColorChangeJob(_mapData, _waterColor);
 				waterColorJob.ScheduleParallel(_mapData.Width * _mapData.Depth, 32, default).Complete();
-				var mapCenter = new Vector3((float)_mapData.Width / 2, 1, (float)_mapData.Depth / 2);
-				_mapFactory.CreateWaterPlane(mapCenter, _waterColor, map.transform);
 			}
 
 			using var faceCountPerChunk = new NativeArray<int>(_mapData.ChunkCount, Allocator.TempJob);
 			var calculateFacesJob = new CalculateFacesJob(_mapData, faceCountPerChunk);
-			calculateFacesJob.Schedule(_mapData.ChunkCount, default).Complete();
+			calculateFacesJob.ScheduleParallel(_mapData.ChunkCount, 32, default).Complete();
 
 			Chunk[] chunks = GenerateChunks(_mapData, map.transform, faceCountPerChunk);
+			
+			Chunk.RegenerateParallel(_mapData, chunks);
 
 			SetupEnvironment(_mapData, map);
 
-			map.Construct(_mapData, chunks);
+			map.Construct(_mapData, chunks, _mapConfigure);
 			return map;
 		}
 
@@ -145,8 +147,6 @@ namespace VoxelMap
 				await waterColorJob.ScheduleParallel(_mapData.Width * _mapData.Depth, 32, default)
 					.ToUniTask(PlayerLoopTiming.Update);
 				token.ThrowIfCancellationRequested();
-				var mapCenter = new Vector3((float)_mapData.Width / 2, 1, (float)_mapData.Depth / 2);
-				_mapFactory.CreateWaterPlane(mapCenter, _waterColor, map.transform);
 			}
 
 			using var faceCountPerChunk = new NativeArray<int>(_mapData.ChunkCount, Allocator.Persistent);
@@ -160,7 +160,7 @@ namespace VoxelMap
 			
 			SetupEnvironment(_mapData, map);
 
-			map.Construct(_mapData, chunks);
+			map.Construct(_mapData, chunks, _mapConfigure);
 			return map;
 		}
 
@@ -177,7 +177,6 @@ namespace VoxelMap
 				var meshFilter = chunkView.GetComponent<MeshFilter>();
 				var meshCollider = chunkView.GetComponent<MeshCollider>();
 				chunks[i] = new Chunk(i, mapData, meshFilter, meshCollider, faceCountPerChunk[i]);
-				chunks[i].Regenerate();
 			}
 
 			return chunks;
@@ -200,9 +199,9 @@ namespace VoxelMap
 				Environment.ApplySkybox(_skybox);
 			}
 
-			if (!_light.Equals(default))
+			if (!_directionalLight.Equals(default))
 			{
-				_mapFactory.CreateDirectionalLight(_light, map.transform);
+				_mapFactory.CreateDirectionalLight(_directionalLight, map.transform);
 			}
 
 			if (!_fog.Equals(default))

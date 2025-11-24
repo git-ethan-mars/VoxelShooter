@@ -19,16 +19,16 @@ namespace GamePlay
 		private IInputService _inputService;
 		private IStaticDataService _staticData;
 		private IPlayerService _playerService;
-		private CameraService _cameraService;
+		private CameraProvider _cameraProvider;
 		private CharacterProvider _characterProvider;
 		public RectPalette RectPalette { get; private set; }
 
 		[Inject]
-		private void Construct(IInputService inputService, CameraService cameraService, IStaticDataService staticData,
+		private void Construct(IInputService inputService, CameraProvider cameraProvider, IStaticDataService staticData,
 			CharacterProvider characterProvider, IPlayerService playerService)
 		{
 			_inputService = inputService;
-			_cameraService = cameraService;
+			_cameraProvider = cameraProvider;
 			_staticData = staticData;
 			_characterProvider = characterProvider;
 			_playerService = playerService;
@@ -61,10 +61,10 @@ namespace GamePlay
 			
 			if (_inputService.IsFirstActionButtonDown())
 			{
-				CmdBuild(_cameraService.CentredRay);
+				CmdBuild(_cameraProvider.CentredRay);
 			}
 
-			if (_cameraService.GetBuildRayCastHit(out RaycastHit hit, placeDistance))
+			if (_cameraProvider.GetBuildRayCastHit(out RaycastHit hit, placeDistance))
 			{
 				var voxelPosition = Vector3Int.FloorToInt(hit.point - hit.normal / 2) + Map.WorldOffset;
 				Graphics.DrawMesh(wireframeCube, Matrix4x4.TRS(voxelPosition, Quaternion.identity, Vector3.one * 1.001f),

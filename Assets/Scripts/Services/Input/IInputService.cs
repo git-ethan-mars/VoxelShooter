@@ -12,6 +12,7 @@ namespace Services
 		bool IsSecondActionButtonUp();
 		bool IsReloadingButtonDown();
 		bool IsJumpButtonDown();
+		bool IsSprintButtonHold();
 		float GetScrollSpeed();
 		bool IsScoreboardButtonDown();
 		bool IsScoreboardButtonUp();

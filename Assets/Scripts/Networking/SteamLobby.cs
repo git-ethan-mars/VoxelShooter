@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 using AOT;
-using Mirror;
+using Cysharp.Threading.Tasks;
 using Steamworks;
 using UnityEngine;
 namespace Networking
@@ -9,21 +9,13 @@ namespace Networking
 	public class SteamLobby : MonoBehaviour
 	{
 		private const string HostAddressKey = "HostAddress";
-		[SerializeField]
-		private NetworkManager networkManager;
-		private bool _isHost;
-		private CSteamID _steamLobbyId;
-		protected Callback<AvatarImageLoaded_t> AvatarLoaded;
 		protected Callback<GameLobbyJoinRequested_t> JoinRequested;
-		protected Callback<LobbyCreated_t> LobbyCreated;
-		protected Callback<LobbyEnter_t> LobbyEntered;
 
 		protected SteamAPIWarningMessageHook_t m_SteamAPIWarningMessageHook;
 
 
-		public void Construct(bool isHost)
+		private void Awake()
 		{
-			_isHost = isHost;
 			if (!Packsize.Test())
 			{
 				Debug.LogError(
@@ -72,9 +64,9 @@ namespace Networking
 			// [*] Your App ID is not completely set up, i.e. in Release State: Unavailable, or it's missing default packages.
 			// Valve's documentation for this is located here:
 			// https://partner.steamgames.com/doc/sdk/api#initialization_and_shutdown
-			IsInitialized = SteamAPI.Init();
-			enabled = IsInitialized;
-			if (!IsInitialized)
+			var isInitialized = SteamAPI.Init();
+			enabled = isInitialized;
+			if (!isInitialized)
 			{
 				Debug.LogError(
 					"[Steamworks.NET] SteamAPI_Init() failed. Refer to Valve's documentation or the comment above this line for more information.",
@@ -82,19 +74,11 @@ namespace Networking
 				return;
 			}
 
-			LobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
 			JoinRequested = Callback<GameLobbyJoinRequested_t>.Create(OnJoinRequest);
-			LobbyEntered = Callback<LobbyEnter_t>.Create(OnLobbyEntered);
-			if (_isHost)
-			{
-				SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, networkManager.maxConnections);
-			}
 
 			m_SteamAPIWarningMessageHook = SteamAPIDebugTextHook;
 			SteamClient.SetWarningMessageHook(m_SteamAPIWarningMessageHook);
 		}
-
-		private bool IsInitialized { get; set; }
 
 		private void Update()
 		{
@@ -103,8 +87,47 @@ namespace Networking
 
 		private void OnDestroy()
 		{
-			SteamMatchmaking.LeaveLobby(_steamLobbyId);
 			SteamAPI.Shutdown();
+		}
+
+		public async UniTask<CSteamID> CreateLobbyAsync(int maxPlayers)
+		{
+			var tcs = new UniTaskCompletionSource<CSteamID>();
+			using var lobbyCreatedCallback = Callback<LobbyCreated_t>.Create(callback =>
+			{
+				if (callback.m_eResult != EResult.k_EResultOK)
+				{
+					tcs.TrySetException(new InvalidOperationException(callback.m_eResult.ToString()));
+				}
+				else
+				{
+					SteamMatchmaking.SetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), HostAddressKey,
+						SteamUser.GetSteamID().ToString());
+					tcs.TrySetResult(new CSteamID(callback.m_ulSteamIDLobby));
+				}
+			});
+
+			SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePublic, maxPlayers);
+			return await tcs.Task;
+		}
+
+		public async UniTask<string> JoinLobby(CSteamID steamLobbyId)
+		{
+			var tsc = new UniTaskCompletionSource<string>();
+
+			using var lobbyEnteredCallback = Callback<LobbyEnter_t>.Create(_ =>
+			{
+				string networkAddress = SteamMatchmaking.GetLobbyData(steamLobbyId, HostAddressKey);
+				tsc.TrySetResult(networkAddress);
+			});
+
+			SteamMatchmaking.JoinLobby(steamLobbyId);
+			return await tsc.Task;
+		}
+
+		public void LeaveLobby(CSteamID steamLobbyId)
+		{
+			SteamMatchmaking.LeaveLobby(steamLobbyId);
 		}
 
 		[MonoPInvokeCallback(typeof(SteamAPIWarningMessageHook_t))]
@@ -113,31 +136,9 @@ namespace Networking
 			Debug.LogWarning(pchDebugText);
 		}
 
-		private void OnLobbyCreated(LobbyCreated_t callback)
-		{
-			if (callback.m_eResult != EResult.k_EResultOK)
-			{
-				return;
-			}
-
-			networkManager.StartHost();
-			SteamMatchmaking.SetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), HostAddressKey,
-				SteamUser.GetSteamID().ToString());
-		}
-
 		private void OnJoinRequest(GameLobbyJoinRequested_t callback)
 		{
-			_steamLobbyId = callback.m_steamIDLobby;
-			SteamMatchmaking.JoinLobby(_steamLobbyId);
-		}
-
-		private void OnLobbyEntered(LobbyEnter_t callback)
-		{
-			if (NetworkServer.active) return;
-			_steamLobbyId = new CSteamID(callback.m_ulSteamIDLobby);
-			networkManager.networkAddress =
-				SteamMatchmaking.GetLobbyData(_steamLobbyId, HostAddressKey);
-			networkManager.StartClient();
+			Debug.Log("FRIENDLIST");
 		}
 	}
 }

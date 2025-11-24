@@ -20,7 +20,7 @@ namespace GamePlay
 
 		private IInputService _inputService;
 		private IEntityFactory _entityFactory;
-		private CameraService _cameraService;
+		private CameraProvider _cameraProvider;
 		private CharacterProvider _characterProvider;
 		private IStaticDataService _staticData;
 		private IPlayerService _playerService;
@@ -31,12 +31,12 @@ namespace GamePlay
 
 		[Inject]
 		private void Construct(IInputService inputService, IEntityFactory entityFactory,
-			CameraService cameraService, IStaticDataService staticData, CharacterProvider characterProvider,
+			CameraProvider cameraProvider, IStaticDataService staticData, CharacterProvider characterProvider,
 			IPlayerService playerService)
 		{
 			_inputService = inputService;
 			_entityFactory = entityFactory;
-			_cameraService = cameraService;
+			_cameraProvider = cameraProvider;
 			_staticData = staticData;
 			_characterProvider = characterProvider;
 			_playerService = playerService;
@@ -61,10 +61,10 @@ namespace GamePlay
 
 			if (_inputService.IsFirstActionButtonDown())
 			{
-				PlaceTnt(_cameraService.CentredRay);
+				PlaceTnt(_cameraProvider.CentredRay);
 			}
 			
-			if (_cameraService.GetBuildRayCastHit(out RaycastHit rayCastHit, PlaceDistance))
+			if (_cameraProvider.GetBuildRayCastHit(out RaycastHit rayCastHit, PlaceDistance))
 			{
 				var voxelCenter = Vector3Int.FloorToInt(rayCastHit.point - rayCastHit.normal / 2) + Map.WorldOffset;
 				Vector3 position = voxelCenter + rayCastHit.normal / 2;

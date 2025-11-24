@@ -24,7 +24,7 @@ namespace GamePlay
 
 		protected IInputService InputService;
 		protected NetworkAudioPlayer AudioPlayer;
-		protected CameraService CameraService;
+		protected CameraProvider CameraProvider;
 
 		private CancellationTokenSource _onChangeSlot;
 		private bool _isReloading;
@@ -57,13 +57,13 @@ namespace GamePlay
 
 			if (InputService.IsFirstActionButtonDown())
 			{
-				Shoot(CameraService.CentredRay);
+				Shoot(CameraProvider.CentredRay);
 			}
 			else if (Configure.IsAutomatic)
 			{
 				if (InputService.IsFirstActionButtonHold())
 				{
-					Shoot(CameraService.CentredRay);
+					Shoot(CameraProvider.CentredRay);
 
 					if (_bulletsInMagazine.Value <= 0)
 					{
@@ -111,7 +111,7 @@ namespace GamePlay
 		}
 
 		[Command]
-		private async void Shoot(Ray ray)
+		private void Shoot(Ray ray)
 		{
 			if (!CanShoot())
 			{
@@ -171,7 +171,7 @@ namespace GamePlay
 			}
 		}
 
-		[Command]
+		[Server]
 		private async void ResetShoot()
 		{
 			bool isCanceled =
@@ -187,6 +187,7 @@ namespace GamePlay
 			_isReady = true;
 		}
 
+		[Server]
 		private void ScanHit(Ray ray)
 		{
 			bool raycastResult = Physics.Raycast(ray, out RaycastHit rayHit, Configure.Range, LayerMasks.AttackMask);

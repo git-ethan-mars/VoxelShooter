@@ -1,5 +1,6 @@
 ﻿using Data;
 using UnityEngine;
+using VoxelMap.Data;
 namespace GamePlay
 {
 	public interface IEntityFactory
@@ -12,6 +13,6 @@ namespace GamePlay
 		SpawnPoint CreateSpawnPoint(SpawnPointData position, Transform parent);
 		SpawningGrenade CreateSpawningGrenade(Vector3 position);
 		Spectator CreateSpectator(Vector3 position);
-		Character CreateCharacter(Vector3 position, GameClass chosenClass);
+		Character CreateCharacter(Vector3 position, GameClass chosenClass, string nickname);
 	}
 }

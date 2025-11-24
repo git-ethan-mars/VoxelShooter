@@ -14,11 +14,9 @@ namespace GamePlay
 {
 	public class DrillLauncher : InventoryItem
 	{
-		[SerializeField] private AudioType reloadSound;
-		
 		private IInputService _inputService;
 		private IEntityFactory _entityFactory;
-		private CameraService _cameraService;
+		private CameraProvider _cameraProvider;
 		private NetworkAudioPlayer _audioPlayer;
 
 		private readonly SyncReactiveProperty<int> _amount = new SyncReactiveProperty<int>();
@@ -26,12 +24,12 @@ namespace GamePlay
 		private CancellationTokenSource _onChangeSlot;
 
 		[Inject]
-		private void Construct(IInputService inputService, IEntityFactory entityFactory, CameraService cameraService,
+		private void Construct(IInputService inputService, IEntityFactory entityFactory, CameraProvider cameraProvider,
 			IStaticDataService staticData, NetworkAudioPlayer audioPlayer)
 		{
 			_inputService = inputService;
 			_entityFactory = entityFactory;
-			_cameraService = cameraService;
+			_cameraProvider = cameraProvider;
 			_audioPlayer = audioPlayer;
 		}
 
@@ -55,7 +53,7 @@ namespace GamePlay
 			
 			if (_inputService.IsFirstActionButtonDown())
 			{
-				Shoot(_cameraService.CentredRay);
+				Shoot(_cameraProvider.CentredRay);
 			}
 		}
 
@@ -102,7 +100,7 @@ namespace GamePlay
 		[Server]
 		private async void Reload()
 		{
-			_audioPlayer.SendAudio(reloadSound, netIdentity, false);
+			_audioPlayer.SendAudio(AudioType.DrillLauncherReload, netIdentity, false);
 			
 			_isReloading = true;
 			bool isCanceled = await UniTask.WaitForSeconds(Configure.ReloadTime, cancellationToken: _onChangeSlot.Token).SuppressCancellationThrow();

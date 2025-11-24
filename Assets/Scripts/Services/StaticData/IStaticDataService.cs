@@ -12,7 +12,6 @@ namespace Services
 		GameObject GetItemPrefab(ItemType itemType);
 		Characteristics GetCharacteristics(GameClass gameClass);
 		LobbyBalance GetLobbyBalance();
-		VoxelHealthBalance GetVoxelHealthBalance();
 		AudioData GetAudioData(AudioType audioType);
 		RectPaletteData GetRectPaletteData();
 		Sprite GetSlotIcon(ItemType type);

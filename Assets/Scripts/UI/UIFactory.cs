@@ -25,7 +25,6 @@ namespace UI
 			GameObjectInjector.InjectRecursive(inGameUI.gameObject, inGameUI.gameObject.scene.GetSceneContainer());
 			inGameUI.Hud.Initialize();
 			inGameUI.Hud.InventoryPresenter.Initialize();
-			inGameUI.Hud.PalettePresenter.Initialize();
 			inGameUI.ChooseClassMenu.Initialize();
 			return inGameUI;
 		}

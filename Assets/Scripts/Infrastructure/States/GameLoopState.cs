@@ -1,12 +1,12 @@
 using System;
+using Cysharp.Threading.Tasks;
 using Data;
 using GamePlay;
-using Networking;
-using Networking.Messages;
 using R3;
 using Services;
 using UI;
 using UnityEngine;
+using VoxelMap;
 namespace Infrastructure.States
 {
 	public class GameLoopState : IPayloadedState<GameSession>
@@ -14,60 +14,56 @@ namespace Infrastructure.States
 		private readonly GameStateMachine _gameStateMachine;
 		private readonly IStaticDataService _staticData;
 		private readonly IStorageService _storageService;
-		private readonly VoxelShooterNetworkManager _networkManager;
 		private readonly UIProvider _uiProvider;
 		private readonly IUIFactory _uiFactory;
+		private readonly CameraProvider _cameraProvider;
 
 		private GameSession _gameSession;
 		private LoadingWindow _loadingWindow;
 
 		public GameLoopState(GameStateMachine gameStateMachine, IStaticDataService staticData, IStorageService storageService,
-			VoxelShooterNetworkManager networkManager, UIProvider uiProvider, IUIFactory uiFactory)
+			UIProvider uiProvider, IUIFactory uiFactory, CameraProvider cameraProvider)
 		{
 			_gameStateMachine = gameStateMachine;
 			_staticData = staticData;
 			_storageService = storageService;
-			_networkManager = networkManager;
 			_uiProvider = uiProvider;
 			_uiFactory = uiFactory;
+			_cameraProvider = cameraProvider;
 		}
 
 		public async void Enter(GameSession gameSession)
 		{
 			_gameSession = gameSession;
 			_loadingWindow = _uiFactory.CreateLoadingWindow();
-
-			var progress = new Progress<float>(_loadingWindow.UpdateLoadingBar);
-			
-			await _gameSession.RunAsync(progress);
-			
 			_uiProvider.InGameUI = _uiFactory.CreateInGameUI();
+			_gameSession.OnMapReady.Subscribe(OnMapReady)
+				.AddTo(_gameSession.GameSessionFinished);
+			_gameSession.Progress = new Progress<float>(_loadingWindow.UpdateLoadingBar);
+
+			var gameSessionPresenter = new GameSessionPresenter(_gameSession, _loadingWindow, _uiProvider.InGameUI);
+			gameSessionPresenter.Initialize();
 			
-			_gameSession.State
-				.Subscribe(OnGameSessionStateChanged)
-				.AddTo(_uiProvider.InGameUI);
-			_gameSession.TimeLeft
-				.Subscribe(_uiProvider.InGameUI.TimeInfo.ChangeGameTime)
-				.AddTo(_uiProvider.InGameUI);
+			await _gameSession.RunAsync();
+			
 			_uiProvider.InGameUI.InGameMenu.ExitButtonPressed
 				.Subscribe(_ => OnExitButtonPressed())
 				.AddTo(_uiProvider.InGameUI);
-			_uiProvider.InGameUI.ChooseClassMenu.ChangeClassButtonPressed
-				.Subscribe(OnChangeClassButtonPressed)
-				.AddTo(_uiProvider.InGameUI);
+			
 			
 			_storageService.Subscribe<MouseSettingsData>(OnMouseSettingsChanged)
 				.AddTo(_uiProvider.InGameUI);
 		}
 
+		private void OnMapReady(Map map)
+		{
+			var mapCenter = new Vector3Ushort((ushort)(map.Width / 2), (ushort)(map.Height / 2), (ushort)(map.Depth / 2));
+			_cameraProvider.MainCamera.transform.SetPositionAndRotation(mapCenter, Quaternion.Euler(90, 0, 0));
+		}
+
 		public void Exit()
 		{
 			_gameSession.Dispose();
-		}
-
-		private void OnClientDisconnected()
-		{
-			Debug.Log("Client disconnected");
 		}
 
 		private void OnMouseSettingsChanged(MouseSettingsData mouseSettingsData)
@@ -76,30 +72,9 @@ namespace Infrastructure.States
 			_uiProvider.InGameUI.Hud.SetCrosshairIcon(crosshairSprite.Sprite);
 		}
 
-		private void OnChangeClassButtonPressed(GameClass chosenClass)
-		{
-			var request = new ChangeClassRequest(chosenClass);
-			_networkManager.SendRequest(request);
-		}
-
 		private void OnExitButtonPressed()
 		{
 			_gameStateMachine.Enter<GameMenuState>();
-		}
-
-		private void OnGameSessionStateChanged(GameSessionState state)
-		{
-			switch (state)
-			{
-				case GameSessionState.Playing:
-					_uiProvider.InGameUI.Show();
-					_loadingWindow.Hide();
-					break;
-				case GameSessionState.Waiting:
-					_loadingWindow.Show();
-					_uiProvider.InGameUI.Hide();
-					break;
-			}
 		}
 	}
 }

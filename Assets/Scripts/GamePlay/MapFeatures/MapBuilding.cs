@@ -1,24 +1,21 @@
-using System.Collections.Generic;
+using Reflex.Attributes;
 using UnityEngine;
+using UnityEngine.Pool;
 using VoxelMap;
 namespace GamePlay.MapFeatures
 {
-	public class MapBuilding : IMapFeature, IBuildVisitor
+	public class MapBuilding : MapFeature, IBuildVisitor
 	{
-		private readonly ColumnDestructionAlgorithm _destructionAlgorithm;
-		private readonly EntityContainerService _entityContainerService;
-		private readonly Map _map;
-		private readonly VoxelHealthSystem _voxelHealthSystem;
+		private MapProvider _mapProvider;
+		private EntityContainerService _entityContainer;
 
-		public MapBuilding(EntityContainerService entityContainerService, Map map, VoxelHealthSystem voxelHealthSystem = null,
-			ColumnDestructionAlgorithm destructionAlgorithm = null)
+		[Inject]
+		private void Construct(MapProvider mapProvider, EntityContainerService entityContainer)
 		{
-			_entityContainerService = entityContainerService;
-			_map = map;
-			_voxelHealthSystem = voxelHealthSystem;
-			_destructionAlgorithm = destructionAlgorithm;
+			_mapProvider = mapProvider;
+			_entityContainer = entityContainer;
 		}
-
+		
 		public void Visit(Block block, RaycastHit rayCastHit)
 		{
 			if (block.Amount.Value <= 0)
@@ -26,38 +23,33 @@ namespace GamePlay.MapFeatures
 				return;
 			}
 
-			Vector3Int voxelPosition = Vector3Int.FloorToInt(rayCastHit.point + rayCastHit.normal / 2);
+			Vector3Ushort voxelPosition = Vector3Ushort.FloorToUshort(rayCastHit.point + rayCastHit.normal / 2);
 			var voxel = new Voxel(voxelPosition, new VoxelData(block.Color));
-			var voxels = new List<Voxel> { voxel };
-			if (!CanBuild(voxels))
+			
+			ListPool<Voxel>.Get(out var voxels);
+			voxels.Add(voxel);
+			
+			if (!_mapProvider.Map.IsInsideMap(voxel.Position) || !CanBuild(voxel))
 			{
 				return;
 			}
 
-			_voxelHealthSystem?.RestoreVoxels(voxels);
-			_destructionAlgorithm?.Add(voxels);
-			_map.SetVoxelsByGlobalPositions(voxels);
+			_mapProvider.Map.SetVoxelsByGlobalPositions(voxels);
+			
 			block.Amount.Value -= 1;
+			
+			ListPool<Voxel>.Release(voxels);
 		}
 
-		public void OnAdd()
+		private bool CanBuild(Voxel voxel)
 		{
-			var buildVisitorWrapper = _map.gameObject.AddComponent<BuildVisitorWrapper>();
-			buildVisitorWrapper.Construct(this);
-		}
-
-		private bool CanBuild(List<Voxel> voxels)
-		{
-			foreach (Entity entity in _entityContainerService.GetEntitiesByType<Entity>())
+			foreach (Entity entity in _entityContainer.GetEntitiesByType<Entity>())
 			{
-				for (var i = 0; i < voxels.Count; i++)
+				if (entity.Bounds.min.x < voxel.Position.x + 1 && entity.Bounds.max.x > voxel.Position.x &&
+				    entity.Bounds.min.y < voxel.Position.y + 1 && entity.Bounds.max.y > voxel.Position.y &&
+				    entity.Bounds.min.z < voxel.Position.z + 1 && entity.Bounds.max.z > voxel.Position.z)
 				{
-					if (entity.Bounds.min.x < voxels[i].Position.x + 1 && entity.Bounds.max.x > voxels[i].Position.x &&
-					    entity.Bounds.min.y < voxels[i].Position.y + 1 && entity.Bounds.max.y > voxels[i].Position.y &&
-					    entity.Bounds.min.z < voxels[i].Position.z + 1 && entity.Bounds.max.z > voxels[i].Position.z)
-					{
-						return false;
-					}
+					return false;
 				}
 			}
 

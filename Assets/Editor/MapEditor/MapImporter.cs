@@ -1,12 +1,12 @@
 using System.IO;
 using Data;
-using Infrastructure;
 using Services;
 using UnityEditor;
 using UnityEditor.AssetImporters;
 using UnityEditor.Callbacks;
 using UnityEngine;
 using VoxelMap;
+using VoxelMap.Data;
 using Object = UnityEngine.Object;
 
 namespace Editor
@@ -44,9 +44,9 @@ namespace Editor
 		{
 			Color32[] colors = new Color32[mapData.Width * mapData.Depth];
 
-			for (var x = 0; x < mapData.Width; x++)
+			for (ushort x = 0; x < mapData.Width; x++)
 			{
-				for (var z = 0; z < mapData.Depth; z++)
+				for (ushort z = 0; z < mapData.Depth; z++)
 				{
 					colors[z * mapData.Width + x] = GetHighestBlockColor(mapData, x, z);
 				}
@@ -62,15 +62,25 @@ namespace Editor
 
 		}
 
-		private Color32 GetHighestBlockColor(MapData mapData, int x, int z)
+		private Color32 GetHighestBlockColor(MapData mapData, ushort x, ushort z)
 		{
-			for (var y = mapData.Height - 1; y >= 0; y--)
+			ushort y = (ushort)(mapData.Height - 1);
+			
+			if (mapData[x, y, z] != VoxelData.Air)
 			{
+				return mapData[x, y, z].Color;
+			}
+
+			do
+			{
+				y--;
+				
 				if (mapData[x, y, z] != VoxelData.Air)
 				{
 					return mapData[x, y, z].Color;
 				}
-			}
+				
+			} while (y > 0);
 
 			return VoxelData.Air.Color;
 		}

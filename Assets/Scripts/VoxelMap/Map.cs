@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using R3;
-using System.Linq;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Pool;
+using VoxelMap.Data;
 namespace VoxelMap
 {
 	public class Map : MonoBehaviour
@@ -13,27 +13,33 @@ namespace VoxelMap
 		public static readonly Vector3 WorldOffset = new Vector3(0.5f, 0.5f, 0.5f);
 
 		private readonly HashSet<Chunk> _regeneratingChunks = new HashSet<Chunk>();
-		private readonly List<IMapFeature> _features = new List<IMapFeature>();
 
 		private MapData _mapData;
 		private Chunk[] _chunks;
 
-		public void Construct(MapData mapData, Chunk[] chunks)
+		public void Construct(MapData mapData, Chunk[] chunks, MapConfigure mapConfigure)
 		{
 			_mapData = mapData;
 			_chunks = chunks;
 			MapData = new MapData.Readonly(mapData);
+			MapConfigure = mapConfigure;
 		}
 
-		public int Width => _mapData.Width;
-		public int Height => _mapData.Height;
-		public int Depth => _mapData.Depth;
+		public ushort Width => _mapData.Width;
+		public ushort Height => _mapData.Height;
+		public ushort Depth => _mapData.Depth;
 		public IReadOnlyList<Chunk> Chunks => _chunks;
 		public Observable<Chunk> ChunkUpdated => _chunkUpdated;
 		public Observable<Unit> MapUpdated => _mapUpdated;
+		public Observable<IReadOnlyList<Voxel>> VoxelsAdded => _voxelsAdded;
+		public Observable<IReadOnlyList<Vector3Ushort>> VoxelsRemoved => _voxelsRemoved;
+		private readonly Subject<IReadOnlyList<Voxel>> _voxelsAdded = new Subject<IReadOnlyList<Voxel>>();
+		private readonly Subject<IReadOnlyList<Vector3Ushort>> _voxelsRemoved = new Subject<IReadOnlyList<Vector3Ushort>>();
+		public MapConfigure MapConfigure { get; private set; }
 		public MapData.Readonly MapData { get; private set; }
 		private readonly Subject<Chunk> _chunkUpdated = new Subject<Chunk>();
 		private readonly Subject<Unit> _mapUpdated = new Subject<Unit>();
+		private readonly Dictionary<Type, MapFeature> _features = new Dictionary<Type, MapFeature>();
 
 		private void Update()
 		{
@@ -47,59 +53,43 @@ namespace VoxelMap
 
 		private void RegenerateChunks()
 		{
-			foreach (Chunk chunk in _regeneratingChunks)
-			{
-				chunk.Regenerate();
-				_chunkUpdated.OnNext(chunk);
-			}
-
 			if (_regeneratingChunks.Count <= 0)
 			{
 				return;
 			}
-			
-			_regeneratingChunks.Clear();
-			_mapUpdated.OnNext(Unit.Default);
 
-		}
-		
-		public void AddMapFeature(IMapFeature feature)
-		{
-			feature.OnAdd();
-			_features.Add(feature);
-		}
+			Chunk.RegenerateParallel(_mapData, _regeneratingChunks);
 
-		public bool TryGetMapFeature<T>(out T mapFeature) where T : IMapFeature
-		{
-			mapFeature = default;
-			IMapFeature foundFeature = _features.FirstOrDefault(feature => feature.GetType() == typeof(T));
-			if (foundFeature == null)
+
+			foreach (Chunk chunk in _regeneratingChunks)
 			{
-				return false;
+				_chunkUpdated.OnNext(chunk);
 			}
 
-			mapFeature = (T)foundFeature;
-			return true;
+			_regeneratingChunks.Clear();
+			_mapUpdated.OnNext(Unit.Default);
 		}
 
-		public VoxelData GetVoxelByGlobalPosition(int x, int y, int z)
+		public VoxelData GetVoxelByGlobalPosition(ushort x, ushort y, ushort z)
 		{
 			return _mapData[x, y, z];
 		}
 
-		public VoxelData GetVoxelByGlobalPosition(Vector3Int position)
+		public VoxelData GetVoxelByGlobalPosition(Vector3Ushort position)
 		{
 			return GetVoxelByGlobalPosition(position.x, position.y, position.z);
 		}
 
-		public void SetVoxelsByGlobalPositions(List<Voxel> voxels)
+		public void SetVoxelsByGlobalPositions(IReadOnlyList<Voxel> voxels)
 		{
 			using var pooledObject = DictionaryPool<int, NativeList<Voxel>>.Get(out var changedByChunkIndex);
-			
+
 			foreach (Voxel voxel in voxels)
 			{
-				AssertPosition(voxel.Position.x, voxel.Position.y, voxel.Position.z);
-				int chunkIndex = _mapData.GetChunkIndex(voxel.Position.x, voxel.Position.y, voxel.Position.z);
+				Vector3Ushort position = voxel.Position;
+
+				int chunkIndex = _mapData.GetChunkIndex(position.x, position.y, position.z);
+
 				if (!changedByChunkIndex.ContainsKey(chunkIndex))
 				{
 					changedByChunkIndex[chunkIndex] = new NativeList<Voxel>(Allocator.TempJob);
@@ -110,18 +100,49 @@ namespace VoxelMap
 
 			foreach ((int chunkNumber, var changes) in changedByChunkIndex)
 			{
-				RefreshFaces(chunkNumber, changes, _regeneratingChunks);
+				RefreshFaceAmount(chunkNumber, changes);
 				changes.Dispose();
 			}
+
+			var addedVoxels = ListPool<Voxel>.Get();
+			var removedPosition = ListPool<Vector3Ushort>.Get();
+
+			for (var i = 0; i < voxels.Count; i++)
+			{
+				if (voxels[i].Data.IsSolid())
+				{
+					addedVoxels.Add(voxels[i]);
+				}
+				else
+				{
+					removedPosition.Add(voxels[i].Position);
+				}
+			}
+
+			if (addedVoxels.Count > 0)
+			{
+				_voxelsAdded.OnNext(addedVoxels);
+			}
+
+			if (removedPosition.Count > 0)
+			{
+				_voxelsRemoved.OnNext(removedPosition);
+			}
+			
+			ListPool<Voxel>.Release(addedVoxels);
+			ListPool<Vector3Ushort>.Release(removedPosition);
 		}
 
-		public bool IsInsideMap(int x, int y, int z)
+		public bool IsInsideMap(ushort x, ushort y, ushort z)
 		{
-			return x >= 0 && x < Width &&
-			       y >= 0 && y < Height &&
-			       z >= 0 && z < Depth;
+			return x < Width && y < Height && z < Depth;
 		}
-		
+
+		public bool IsInsideMap(Vector3Ushort position)
+		{
+			return IsInsideMap(position.x, position.y, position.z);
+		}
+
 		public bool HasIntersection(Bounds bounds)
 		{
 			for (float x = bounds.min.x; x < bounds.max.x; x++)
@@ -130,7 +151,7 @@ namespace VoxelMap
 				{
 					for (float z = bounds.min.z; z < bounds.max.z; z++)
 					{
-						if (GetVoxelByGlobalPosition((int)x, (int)y, (int)z).IsSolid())
+						if (GetVoxelByGlobalPosition((ushort)x, (ushort)y, (ushort)z).IsSolid())
 						{
 							return true;
 						}
@@ -141,87 +162,96 @@ namespace VoxelMap
 			return false;
 		}
 
-		public bool TryGetRandomTopVoxelPosition(out Vector3Int position)
+		public bool TryGetRandomTopVoxelPosition(out Vector3Ushort position)
 		{
-			int x = UnityEngine.Random.Range(0, _mapData.Width);
-			int z = UnityEngine.Random.Range(0, _mapData.Depth);
+			var x = (ushort)UnityEngine.Random.Range(0, _mapData.Width);
+			var z = (ushort)UnityEngine.Random.Range(0, _mapData.Depth);
 
-			for (int y = _mapData.Height - 1; y >= 0; y--)
+			ushort y = (ushort)(_mapData.Height - 1);
+
+			if (_mapData.GetFace(x, y, z).HasFlag(Face.Top))
 			{
-				if (_mapData.GetFace(x, y, z).HasFlag(Face.Top))
-				{
-					position = new Vector3Int(x, y, z);
-					return true;
-				}
+				position = new Vector3Ushort(x, y, z);
+				return true;
 			}
 
-			position = Vector3Int.zero;
+			do
+			{
+				y--;
+
+				if (_mapData.GetFace(x, y, z).HasFlag(Face.Top))
+				{
+					position = new Vector3Ushort(x, y, z);
+					return true;
+				}
+
+			} while (y > 0);
+
+			position = Vector3Ushort.zero;
 			return false;
 		}
 
-		public int GetTopVoxelHeight(int x, int z)
+		public void AddFeature<TFeature>() where TFeature : MapFeature
 		{
-			for (int y = _mapData.Height - 1; y >= 0; y--)
-			{
-				if (_mapData.GetFace(x, y, z).HasFlag(Face.Top))
-				{
-					return y;
-				}
-			}
-			
-			throw new InvalidOperationException($"Couldn't find top voxel at x={x}, z={z}");
+			var feature = gameObject.AddComponent<TFeature>();
+			_features[typeof(TFeature)] = feature;
 		}
 
-		private void AssertPosition(int x, int y, int z)
+		public bool TryGetFeature<TFeature>(out TFeature feature) where TFeature : MapFeature
 		{
-			if (!IsInsideMap(x, y, z))
+			feature = null;
+
+			if (_features.TryGetValue(typeof(TFeature), out MapFeature foundFeature))
 			{
-				throw new ArgumentException($"{nameof(x)}={x} {nameof(y)}={y} {nameof(z)}={z} is not valid position");
+				feature = (TFeature)foundFeature;
+				return true;
 			}
+
+			return false;
 		}
 
-		private void RefreshFaces(int chunkIndex, NativeList<Voxel> voxels, HashSet<Chunk> regeneratingChunks)
+		private void RefreshFaceAmount(int chunkIndex, NativeList<Voxel> voxels)
 		{
-			using NativeArray<Face> neighboursToRegenerate = new NativeArray<Face>(1, Allocator.TempJob);
+			using NativeReference<Face> regeneratingNeighbours = new NativeReference<Face>(Allocator.TempJob);
 			using NativeHashMap<int, int> faceCountChangesByChunk = new NativeHashMap<int, int>(1, Allocator.TempJob);
-			var recalculateFacesJob = new RecalculateFacesJob(voxels, _mapData, chunkIndex, neighboursToRegenerate, faceCountChangesByChunk);
+			var recalculateFacesJob = new RecalculateFacesJob(voxels, _mapData, chunkIndex, regeneratingNeighbours, faceCountChangesByChunk);
 			recalculateFacesJob.Schedule().Complete();
-			
-			regeneratingChunks.Add(Chunks[chunkIndex]);
+
+			_regeneratingChunks.Add(Chunks[chunkIndex]);
 
 			foreach (var kvp in faceCountChangesByChunk)
 			{
 				Chunks[kvp.Key].FaceCount += kvp.Value;
 			}
 
-			if (neighboursToRegenerate[0].HasFlag(Face.Right) && TryGetRightChunk(chunkIndex, out Chunk rightChunk))
+			if (regeneratingNeighbours.Value.HasFlag(Face.Right) && TryGetRightChunk(chunkIndex, out Chunk rightChunk))
 			{
-				regeneratingChunks.Add(rightChunk);
+				_regeneratingChunks.Add(rightChunk);
 			}
 
-			if (neighboursToRegenerate[0].HasFlag(Face.Left) && TryGetLeftChunk(chunkIndex, out Chunk leftChunk))
+			if (regeneratingNeighbours.Value.HasFlag(Face.Left) && TryGetLeftChunk(chunkIndex, out Chunk leftChunk))
 			{
-				regeneratingChunks.Add(leftChunk);
+				_regeneratingChunks.Add(leftChunk);
 			}
 
-			if (neighboursToRegenerate[0].HasFlag(Face.Top) && TryGetTopChunk(chunkIndex, out Chunk topChunk))
+			if (regeneratingNeighbours.Value.HasFlag(Face.Top) && TryGetTopChunk(chunkIndex, out Chunk topChunk))
 			{
-				regeneratingChunks.Add(topChunk);
+				_regeneratingChunks.Add(topChunk);
 			}
 
-			if (neighboursToRegenerate[0].HasFlag(Face.Bottom) && TryGetBottomChunk(chunkIndex, out Chunk bottomChunk))
+			if (regeneratingNeighbours.Value.HasFlag(Face.Bottom) && TryGetBottomChunk(chunkIndex, out Chunk bottomChunk))
 			{
-				regeneratingChunks.Add(bottomChunk);
+				_regeneratingChunks.Add(bottomChunk);
 			}
 
-			if (neighboursToRegenerate[0].HasFlag(Face.Front) && TryGetFrontChunk(chunkIndex, out Chunk frontChunk))
+			if (regeneratingNeighbours.Value.HasFlag(Face.Front) && TryGetFrontChunk(chunkIndex, out Chunk frontChunk))
 			{
-				regeneratingChunks.Add(frontChunk);
+				_regeneratingChunks.Add(frontChunk);
 			}
 
-			if (neighboursToRegenerate[0].HasFlag(Face.Back) && TryGetBackChunk(chunkIndex, out Chunk backChunk))
+			if (regeneratingNeighbours.Value.HasFlag(Face.Back) && TryGetBackChunk(chunkIndex, out Chunk backChunk))
 			{
-				regeneratingChunks.Add(backChunk);
+				_regeneratingChunks.Add(backChunk);
 			}
 		}
 

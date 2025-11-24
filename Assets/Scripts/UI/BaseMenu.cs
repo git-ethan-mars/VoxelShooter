@@ -1,12 +1,23 @@
 using UnityEngine;
 namespace UI
 {
-	public interface IBaseMenu
+	[RequireComponent(typeof(CanvasGroup))]
+	public abstract class BaseMenu : MonoBehaviour
 	{
-		CanvasGroup CanvasGroup { get; }
-
-		void Show();
-		void Hide();
-		Transform transform { get; }
+		public CanvasGroup CanvasGroup
+		{
+			get
+			{
+				if (_canvasGroup == null)
+				{
+					_canvasGroup = GetComponent<CanvasGroup>();
+				}
+				
+				return _canvasGroup;
+			}
+		}
+		private CanvasGroup _canvasGroup;
+		public abstract void Show();
+		public abstract void Hide();
 	}
 }

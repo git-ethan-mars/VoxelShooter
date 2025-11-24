@@ -8,8 +8,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 namespace UI
 {
-	[RequireComponent(typeof(CanvasGroup))]
-	public class SettingsMenu : MonoBehaviour, IBaseMenu
+	public class SettingsMenu : BaseMenu
 	{
 		[Header("Mouse")]
 		[SerializeField] private Toggle mouseSectionToggle;
@@ -35,8 +34,6 @@ namespace UI
 		[SerializeField] private Color activeToggleColor;
 		[SerializeField] private Color inactiveToggleColor;
 
-		[field: SerializeField] public CanvasGroup CanvasGroup { get; private set; }
-
 		private SettingsMenuStateMachine _settingsMenuStateMachine;
 		private IStorageService _storageService;
 		public Observable<Unit> BackButtonPressed => backButton.onClick.AsObservable();
@@ -55,14 +52,14 @@ namespace UI
 			videoSectionToggle.onValueChanged.AsObservable().Subscribe(OnVideoSectionToggleChanged).AddTo(this);
 		}
 
-		public void Show()
+		public override void Show()
 		{
 			EventSystem.current.SetSelectedGameObject(mouseSectionToggle.gameObject);
 			mouseSectionToggle.SetIsOnWithoutNotify(true);
 			OnMouseSectionToggleChanged(true);
 		}
 
-		public void Hide()
+		public override void Hide()
 		{
 			_storageService.Save<MouseSettingsData>(IStorageService.MouseSettingsKey);
 			_storageService.Save<VolumeSettingsData>(IStorageService.VolumeSettingsKey);

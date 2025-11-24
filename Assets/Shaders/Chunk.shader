@@ -1,4 +1,4 @@
-Shader "Custom/NewUnlitUniversalRenderPipelineShader"
+Shader "Custom/Chunk"
 {
     Properties
     {

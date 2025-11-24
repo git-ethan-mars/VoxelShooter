@@ -24,8 +24,7 @@ namespace GamePlay
 		{
 			if (_previousSpeed < -minSpeedToDamage && Mathf.Abs(rigidBody.linearVelocity.y) < SpeedThreshold)
 			{
-				var damage = (int)(-(_previousSpeed + minSpeedToDamage) *
-				                   damagePerMetersPerSecond);
+				int damage = Mathf.CeilToInt(-(_previousSpeed + minSpeedToDamage) * damagePerMetersPerSecond);
 				_damageaeble.Damage(damage);
 			}
 

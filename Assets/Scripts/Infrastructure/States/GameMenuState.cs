@@ -1,7 +1,7 @@
 ﻿using Data;
-using ParrelSync;
 using R3;
 using Services;
+using Services.ServerList;
 using UI;
 using UnityEngine;
 namespace Infrastructure.States
@@ -30,17 +30,11 @@ namespace Infrastructure.States
 
 			GameMenu gameMenu = _uiFactory.CreateGameMenu();
 			gameMenu.CreateGameRequested.Subscribe(OnCreateGameRequested).AddTo(gameMenu);
-			if (!ClonesManager.IsClone())
-			{
-				OnCreateGameRequested(new GameSettings("Crossroads", 10, 10, 10));
-			}
-			else
-			{
-				OnJoinButtonPressed();
-			}
+
 #if LOCAL_BUILD
 			gameMenu.JoinButtonPressed.Subscribe(_ => OnJoinButtonPressed()).AddTo(gameMenu);
 #endif
+			gameMenu.JoinServerButtonPressed.Subscribe(OnJoinServerButtonPressed).AddTo(gameMenu);
 		}
 
 		public void Exit()
@@ -60,5 +54,10 @@ namespace Infrastructure.States
 			_gameStateMachine.Enter<InitializeClientState>();
 		}
 #endif
+		private async void OnJoinServerButtonPressed(Server server)
+		{
+			await _sceneLoader.LoadAsync(Scenes.Main);
+			_gameStateMachine.Enter<JoinSteamLobbyState, Server>(server);
+		}
 	}
 }

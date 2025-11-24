@@ -4,77 +4,95 @@
 
 struct VertexData
 {
-    float3 Position;
-    float3 Normal;
-    uint Color;
-    float2 UV;
+	float3 Position;
+	float3 Normal;
+	uint Color;
+	float2 UV;
+	float Neighbours;
 };
 
+int BufferSize;
+int ChunkSize;
 StructuredBuffer<VertexData> VertexBuffer;
 RWStructuredBuffer<uint> HeightBuffer;
-float ChunkSize;
-float3 MeshPositionOffset;
+float3 ChunkPosition;
 RWTexture2D<float4> MapTexture;
 
-bool IsValidQuad(uint3 quadId)
+float3 GetQuadCenter(uint vid)
 {
-    uint length;
-    uint stride;
-    VertexBuffer.GetDimensions(length, stride);
-    
-    if (4 * quadId.x >= length)
-    {
-        return false;
-    }
-    
-    float3 normal = VertexBuffer[4 * quadId.x].Normal;
-
-    if (normal.y != 1)
-    {
-        return false;
-    }
-
-    return true;
+	return min(VertexBuffer[vid].Position, min(VertexBuffer[vid + 1].Position,
+		min(VertexBuffer[vid + 2].Position, VertexBuffer[vid + 3].Position)));
 }
 
 [numthreads(8,8,1)]
 void ClearHeight(uint3 id : SV_DispatchThreadID)
 {
-    HeightBuffer[id.x * ChunkSize + id.y] = 0;
+	HeightBuffer[id.x * ChunkSize + id.y] = 0;
 }
 
 [numthreads(16,1,1)]
 void UpdateHeight(uint3 quadId : SV_DispatchThreadID)
 {
-    return;
-    if (!IsValidQuad(quadId))
-    {
-        return;
-    }
-    
-    float3 quadCenter = min(VertexBuffer[4 * quadId.x].Position, min(VertexBuffer[4 * quadId.x + 1].Position,
-        min(VertexBuffer[4 * quadId.x + 2].Position, VertexBuffer[4 * quadId.x + 3].Position)));
-    float3 worldPosition = quadCenter + MeshPositionOffset;
-    HeightBuffer[quadCenter.x * ChunkSize + quadCenter.z] = max(HeightBuffer[quadCenter.x * ChunkSize + quadCenter.z], (uint)worldPosition.y);
-    //InterlockedMax(HeightBuffer[quadCenter.x * ChunkSize + quadCenter.z], (uint)worldPosition.y);
+	uint vid = 4 * quadId.x;
+	if (vid >= (uint)BufferSize)
+	{
+		return;
+	}
+
+	if (abs(VertexBuffer[vid].Normal.y - 1) > 0.001f)
+	{
+		return;
+	}
+		
+	float3 voxelPosition = GetQuadCenter(vid);
+	float3 worldPosition = voxelPosition + ChunkPosition;
+	InterlockedMax(HeightBuffer[(int)(voxelPosition.x * ChunkSize + voxelPosition.z)], (uint)worldPosition.y);
 }
 
 [numthreads(16,1,1)]
 void UpdateChunk(uint3 quadId : SV_DispatchThreadID)
 {
-    if (!IsValidQuad(quadId))
-    {
-        return;
-    }
-    
-    float3 quadCenter = min(VertexBuffer[4 * quadId.x].Position, min(VertexBuffer[4 * quadId.x + 1].Position,
-        min(VertexBuffer[4 * quadId.x + 2].Position, VertexBuffer[4 * quadId.x + 3].Position)));
-    float3 worldPosition = quadCenter + MeshPositionOffset;
+	uint vid = 4 * quadId.x;
+	if (vid >= (uint)BufferSize)
+	{
+		return;
+	}
 
-    if (HeightBuffer[quadCenter.x * ChunkSize + quadCenter.z] == (uint)worldPosition.y)
-    {
-        const uint encodedColor = VertexBuffer[4 * quadId.x].Color;
-        MapTexture[worldPosition.xz] = float4((float)(encodedColor & 255), (float)(encodedColor >> 8 & 255), (float)(encodedColor >> 16 & 255), 256)
-            * 1.0f / 256;
-    }
+	const uint encodedColor = VertexBuffer[4 * quadId.x].Color;
+	float3 voxelPosition = GetQuadCenter(vid);
+	float3 worldPosition = voxelPosition + ChunkPosition;
+
+	if (HeightBuffer[(int)(voxelPosition.x * ChunkSize + voxelPosition.z)] == (uint)worldPosition.y)
+	{
+		MapTexture[worldPosition.xz] = float4((float)(encodedColor & 255) / 256,
+			(float)(encodedColor >> 8 & 255) / 256, (float)(encodedColor >> 16 & 255) / 256, 1);
+	}
 }
+
+/*float4 GridColor;
+
+[numthreads(16,1,1)]
+void DrawGrid(uint3 id : SV_DispatchThreadID)
+{
+	uint width;
+	uint height;
+
+	MapTexture.GetDimensions(width, height);
+
+	if ((id.x + 1) * ChunkSize - 1 < height)
+	{
+		for (int x = 0; x < width; x++)
+		{
+			MapTexture[uint2(x, id.x * ChunkSize)] = GridColor;
+			MapTexture[uint2(x, (id.x + 1) * ChunkSize - 1)] = GridColor;
+		}
+	}
+	if ((id.x + 1) * ChunkSize - 1 < width)
+	{
+		for (int y = 0; y < width; y++)
+		{
+			MapTexture[uint2(id.x * ChunkSize, y)] = GridColor;
+			MapTexture[uint2((id.x + 1) * ChunkSize - 1, y)] = GridColor;	
+		}
+	}
+}*/

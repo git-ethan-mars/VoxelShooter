@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Data;
 using Mirror;
 using Networking.Messages;
 using UnityEngine;
@@ -12,12 +13,12 @@ namespace Networking
 	public class GameStateSender
 	{
 		private const int MessageSize = 500 * 1024;
-		private const float SendInterval = 0.01f;
+		private const float SendInterval = 0.5f;
 
-		private readonly VoxelShooterNetworkManager _networkManager;
+		private readonly VSNetworkManager _networkManager;
 		private readonly MapProvider _mapProvider;
 
-		public GameStateSender(VoxelShooterNetworkManager networkManager, MapProvider mapProvider)
+		public GameStateSender(VSNetworkManager networkManager, MapProvider mapProvider)
 		{
 			_networkManager = networkManager;
 			_mapProvider = mapProvider;
@@ -46,9 +47,9 @@ namespace Networking
 			Debug.Log($"Sending finished successfully to {connection}");
 		}
 
-		public void SendGameTime(NetworkConnectionToClient connection, TimeSpan timeLeft)
+		public void SendGameSettings(NetworkConnectionToClient connection, GameSettings gameSettings)
 		{
-			var response = new GameTimeResponse(timeLeft);
+			var response = new GameSettingsResponse(gameSettings);
 			_networkManager.SendResponse(connection, response);
 		}
 

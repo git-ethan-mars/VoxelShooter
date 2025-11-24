@@ -52,6 +52,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: BlockBox
       objectReference: {fileID: 0}
+    - target: {fileID: 5158380655034889353, guid: 487c11d6b4e7cef43b71b550ad71b8e4, type: 3}
+      propertyPath: m_Center.y
+      value: -0.05
+      objectReference: {fileID: 0}
     - target: {fileID: 5558965601909318591, guid: 487c11d6b4e7cef43b71b550ad71b8e4, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -107,5 +111,5 @@ MonoBehaviour:
   parachute: {fileID: 4291857041833401256}
   platformPrefab: {fileID: 1860990585157332521, guid: d440957adc7d97a41873781bb8f97699, type: 3}
   localBounds:
-    m_Center: {x: 0, y: 0, z: 0}
-    m_Extent: {x: 0.5, y: 0.5, z: 0.5}
+    m_Center: {x: 0, y: -0.05, z: 0}
+    m_Extent: {x: 0.4, y: 0.4, z: 0.4}

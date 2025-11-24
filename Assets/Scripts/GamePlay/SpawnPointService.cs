@@ -1,8 +1,9 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using Data;
-using Services;
 using UnityEngine;
 using VoxelMap;
+using VoxelMap.Data;
 namespace GamePlay
 {
 	public class SpawnPointService : ISpawnPointService
@@ -11,15 +12,13 @@ namespace GamePlay
 
 		private readonly IEntityFactory _entityFactory;
 		private readonly MapProvider _mapProvider;
-		private readonly IMapConfigureLoader _mapConfigureLoader;
 
 		private int _spawnPointIndex;
 
-		public SpawnPointService(IEntityFactory entityFactory, MapProvider mapProvider, IMapConfigureLoader mapConfigureLoader)
+		public SpawnPointService(IEntityFactory entityFactory, MapProvider mapProvider)
 		{
 			_entityFactory = entityFactory;
 			_mapProvider = mapProvider;
-			_mapConfigureLoader = mapConfigureLoader;
 		}
 
 		public void CreateSpawnPoints()
@@ -27,7 +26,7 @@ namespace GamePlay
 			_spawnPointIndex = 0;
 			_spawnPoints.Clear();
 
-			MapConfigure mapConfigure = _mapConfigureLoader.GetMapConfigure(_mapProvider.MapName);
+			MapConfigure mapConfigure = _mapProvider.Map.MapConfigure;
 			
 			foreach (SpawnPointData spawnPointData in mapConfigure.SpawnPoints)
 			{
@@ -36,16 +35,28 @@ namespace GamePlay
 			}
 		}
 
-		public Vector3 GetSpawnPoint()
+		public async UniTask<Vector3> GetSpawnPointAsync()
 		{
+			Vector3 spawnPosition;
+			
 			if (_spawnPoints.Count == 0)
 			{
-				return Vector3.zero;
+				Vector3Ushort topVoxelPosition;
+				
+				while (!_mapProvider.Map.TryGetRandomTopVoxelPosition(out topVoxelPosition))
+				{
+					await UniTask.Yield();
+				}
+
+				spawnPosition = topVoxelPosition + Map.WorldOffset;
+			}
+			else
+			{
+				spawnPosition = _spawnPoints[_spawnPointIndex].transform.position;
+				_spawnPointIndex = (_spawnPointIndex + 1 +_spawnPoints.Count) % _spawnPoints.Count;
 			}
 			
-			Vector3 position = _spawnPoints[_spawnPointIndex].transform.position;
-			_spawnPointIndex++;
-			return position;
+			return spawnPosition;
 		}
 	}
 

@@ -14,7 +14,6 @@ namespace Services
 		private const string CrosshairSpritesPath = "StaticData/Crosshair Sprites Collection";
 		private const string PlayerCharacteristicsPath = "StaticData/Characteristics Collection";
 		private const string LobbyBalancePath = "StaticData/Lobby Balance";
-		private const string VoxelHealthBalancePath = "StaticData/Block Health";
 		private const string AudioCollectionPath = "StaticData/Audio Collection";
 		private const string RectPaletteDataPath = "StaticData/Rect Palette Data";
 		private const string ItemIconsPath = "StaticData/Item Icons";
@@ -30,7 +29,6 @@ namespace Services
 		private Dictionary<AudioType, AudioData> _audioDataByAudioType;
 		private LobbyBalance _lobbyBalance;
 		private RectPaletteData _rectPaletteData;
-		private VoxelHealthBalance _voxelHealthBalance;
 
 		public StaticDataService(IAssetProvider assets)
 		{
@@ -44,7 +42,6 @@ namespace Services
 			LoadCharacteristics();
 			LoadCrosshairSprites();
 			LoadLobbyBalance();
-			LoadVoxelHealthBalance();
 			LoadAudio();
 			LoadRectPaletteData();
 		}
@@ -102,11 +99,6 @@ namespace Services
 			return _lobbyBalance;
 		}
 
-		public VoxelHealthBalance GetVoxelHealthBalance()
-		{
-			return _voxelHealthBalance;
-		}
-
 		public AudioData GetAudioData(AudioType audioType)
 		{
 			return _audioDataByAudioType[audioType];
@@ -159,11 +151,6 @@ namespace Services
 		private void LoadLobbyBalance()
 		{
 			_lobbyBalance = _assets.Load<LobbyBalance>(LobbyBalancePath);
-		}
-
-		private void LoadVoxelHealthBalance()
-		{
-			_voxelHealthBalance = _assets.Load<VoxelHealthBalance>(VoxelHealthBalancePath);
 		}
 
 		private void LoadAudio()

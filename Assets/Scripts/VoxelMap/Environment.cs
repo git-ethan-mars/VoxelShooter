@@ -1,5 +1,5 @@
-﻿using Data;
-using UnityEngine;
+﻿using UnityEngine;
+using VoxelMap.Data;
 namespace VoxelMap
 {
 	public static class Environment

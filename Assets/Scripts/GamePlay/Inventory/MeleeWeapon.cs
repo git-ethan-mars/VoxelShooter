@@ -3,7 +3,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Data;
 using GamePlay.Core;
-using GamePlay.MapFeatures;
 using Mirror;
 using Networking.Audio;
 using Services;
@@ -18,11 +17,11 @@ namespace GamePlay
 		[SerializeField] protected Mesh wireframeCube;
 		[SerializeField] private AudioType digSound;
 		[SerializeField] protected AudioType hitSound;
-		
+
 		private CancellationTokenSource _onChangeSlot;
 
 		protected IInputService InputService { get; set; }
-		protected CameraService CameraService { get; set; }
+		protected CameraProvider CameraProvider { get; set; }
 		protected NetworkAudioPlayer AudioPlayer { get; set; }
 		public new MeleeWeaponConfigure Configure => base.Configure as MeleeWeaponConfigure;
 
@@ -34,25 +33,31 @@ namespace GamePlay
 			{
 				return;
 			}
-			
+
 			if (InputService.IsFirstActionButtonDown())
 			{
-				Hit(CameraService.CentredRay, false);
+				Hit(CameraProvider.CentredRay, false);
 			}
 			if (Configure.HasStrongHit && InputService.IsSecondActionButtonDown())
 			{
-				Hit(CameraService.CentredRay, true);
+				Hit(CameraProvider.CentredRay, true);
 			}
 
-			if (CameraService.GetBuildRayCastHit(out RaycastHit hit, Configure.Range))
+			if (CameraProvider.GetBuildRayCastHit(out RaycastHit hit, Configure.Range))
 			{
-				var voxelPosition = Vector3Int.FloorToInt(hit.point - hit.normal / 2) + Map.WorldOffset;
-				Graphics.DrawMesh(wireframeCube, Matrix4x4.TRS(voxelPosition, Quaternion.identity, Vector3.one * 1.001f), 
+				Vector3Ushort voxelPosition = Vector3Ushort.FloorToUshort(hit.point - hit.normal / 2);
+				
+				if (voxelPosition.y == 0)
+				{
+					return;
+				}
+
+				Graphics.DrawMesh(wireframeCube, Matrix4x4.TRS(voxelPosition + Map.WorldOffset, Quaternion.identity, Vector3.one * 1.001f),
 					wireframeMaterial, 0);
 			}
 		}
 
-		
+
 		public override void Select()
 		{
 			base.Select();
@@ -79,6 +84,7 @@ namespace GamePlay
 			ScanHit(ray, isStrongHit);
 		}
 
+		[Server]
 		private void ScanHit(Ray ray, bool isStrongHit)
 		{
 			bool raycastResult = Physics.Raycast(ray, out RaycastHit rayHit, Configure.Range, LayerMasks.AttackMask);

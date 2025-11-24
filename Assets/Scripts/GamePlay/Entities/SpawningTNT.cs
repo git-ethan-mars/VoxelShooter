@@ -21,9 +21,6 @@ namespace GamePlay
 		[SerializeField] private Canvas canvas;
 		[SerializeField] private TextMeshProUGUI timerText;
 
-		[SerializeField] private AudioType explosionAudio;
-		[SerializeField] private AudioType countdownAudio;
-
 		private MapProvider _mapProvider;
 		private EntityContainerService _entityContainer;
 		private NetworkAudioPlayer _audioPlayer;
@@ -64,7 +61,7 @@ namespace GamePlay
 
 		private bool IsSuspended()
 		{
-			Vector3Int voxelPosition = Vector3Int.FloorToInt(transform.position - Vector3.Scale(transform.up, Map.WorldOffset));
+			Vector3Ushort voxelPosition = Vector3Ushort.FloorToUshort(transform.position - Vector3.Scale(transform.up, Map.WorldOffset));
 			VoxelData voxelData = _mapProvider.Map.GetVoxelByGlobalPosition(voxelPosition);
 			return !voxelData.IsSolid();
 		}
@@ -95,7 +92,7 @@ namespace GamePlay
 
 		private void Explode()
 		{
-			if (_mapProvider.Map.TryGetMapFeature(out MapDestruction mapDestruction))
+			if (_mapProvider.Map.TryGetFeature(out MapDestruction mapDestruction))
 			{
 				mapDestruction.Visit(_configure.ExplosionData, transform.position);
 			}	
@@ -107,7 +104,7 @@ namespace GamePlay
 
 			_particleFactory.CreateRchParticle(transform.position, _configure.ParticleSpeed, _configure.ParticleCount,
 				_configure.ExplosionData.radius);
-			_audioPlayer.SendAudio(explosionAudio, transform.position);
+			_audioPlayer.SendAudio(AudioType.TNTExplosion, transform.position);
 			
 			_disposable?.Dispose();
 

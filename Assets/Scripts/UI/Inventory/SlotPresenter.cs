@@ -1,6 +1,5 @@
 using System;
 using GamePlay.Core;
-using R3;
 using Services;
 using UnityEngine;
 namespace UI.Inventory
@@ -9,7 +8,6 @@ namespace UI.Inventory
 	{
 		protected readonly TItem InventoryItem;
 		private readonly SlotView _slotView;
-		private IDisposable _disposable;
 
 		protected readonly IStaticDataService StaticData;
 		private Sprite _slotIcon;
@@ -23,38 +21,23 @@ namespace UI.Inventory
 
 		public override void Initialize()
 		{
-			_disposable = InventoryItem.IsSelected.Subscribe(OnItemSelected);
-
 			_slotIcon = StaticData.GetSlotIcon(InventoryItem.Type);
 			_slotView.SetSlotIcon(_slotIcon);
 		}
 
-		public override void Dispose()
-		{
-			OnDeselected();
-			_disposable?.Dispose();
-		}
-
-		protected virtual void OnSelected()
+		public override void Select()
 		{
 			_slotView.Select();
 		}
 
-		protected virtual void OnDeselected()
+		public override void Deselect()
 		{
 			_slotView.Deselect();
 		}
 
-		private void OnItemSelected(bool isSelected)
+		public override void Dispose()
 		{
-			if (isSelected)
-			{
-				OnSelected();
-			}
-			else
-			{
-				OnDeselected();
-			}
+			Deselect();
 		}
 	}
 
@@ -62,5 +45,7 @@ namespace UI.Inventory
 	{
 		public abstract void Initialize();
 		public abstract void Dispose();
+		public abstract void Select();
+		public abstract void Deselect();
 	}
 }

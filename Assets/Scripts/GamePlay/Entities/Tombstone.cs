@@ -50,13 +50,18 @@ namespace GamePlay
 				.AddTo(this);
 		}
 
-		public async UniTask ExplodeWithDelay(TimeSpan delay)
+		public async UniTaskVoid ExplodeWithDelay(TimeSpan delay)
 		{
 			await UniTask.Delay(delay, cancellationToken: destroyCancellationToken);
 
+			if (destroyCancellationToken.IsCancellationRequested)
+			{
+				return;
+			}
+
 			_particleFactory.CreateRchParticle(transform.position, particleSpeed, particleCount, explosionData.radius);
 
-			if (_mapProvider.Map.TryGetMapFeature(out MapDestruction mapDestruction))
+			if (_mapProvider.Map.TryGetFeature(out MapDestruction mapDestruction))
 			{
 				mapDestruction.Visit(explosionData, transform.position);
 			}

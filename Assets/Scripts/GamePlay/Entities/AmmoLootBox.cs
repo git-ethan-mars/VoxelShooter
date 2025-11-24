@@ -21,6 +21,9 @@ namespace GamePlay
 					case DrillLauncher drillLauncher:
 						drillLauncher.Amount.Value += 1;
 						break;
+					case RocketLauncher rocketLauncher:
+						rocketLauncher.Amount.Value += 1;
+						break;
 				}
 			} 
 		}

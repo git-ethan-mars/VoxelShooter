@@ -26,16 +26,16 @@ namespace UI.Inventory
 			_projectileIcon = StaticData.GetProjectileIcon(InventoryItem.Type);
 		}
 
-		protected override void OnSelected()
+		public override void Select()
 		{
-			base.OnSelected();
+			base.Select();
 
 			_hud.ShowAmmoInfo(_projectileIcon, $"{InventoryItem.ChargedRockets} / {InventoryItem.Amount}");
 		}
 
-		protected override void OnDeselected()
+		public override void Deselect()
 		{
-			base.OnDeselected();
+			base.Deselect();
 
 			_hud.HideAmmoInfo();
 		}
@@ -49,7 +49,10 @@ namespace UI.Inventory
 
 		private void OnRocketsValueChanged()
 		{
-			_hud.SetAmmoCount($"{InventoryItem.ChargedRockets} / {InventoryItem.Amount}");
+			if (InventoryItem.IsSelected)
+			{
+				_hud.SetAmmoCount($"{InventoryItem.ChargedRockets} / {InventoryItem.Amount}");
+			}
 		}
 	}
 }

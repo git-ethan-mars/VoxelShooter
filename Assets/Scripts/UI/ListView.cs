@@ -28,15 +28,6 @@ namespace UI
 			return item;
 		}
 
-		protected void DespawnElement(T item)
-		{
-			if (item != null && Items.Remove(item))
-			{
-				item.gameObject.SetActive(false);
-				_freeList.Enqueue(item);
-			}
-		}
-
 		public void Clear()
 		{
 			for (int i = 0, count = Items.Count; i < count; i++)
@@ -48,5 +39,15 @@ namespace UI
 
 			Items.Clear();
 		}
+
+		protected void DespawnElement(T item)
+		{
+			if (item != null && Items.Remove(item))
+			{
+				item.gameObject.SetActive(false);
+				_freeList.Enqueue(item);
+			}
+		}
+
 	}
 }

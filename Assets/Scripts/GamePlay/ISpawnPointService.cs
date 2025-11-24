@@ -1,9 +1,10 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 namespace GamePlay
 {
 	public interface ISpawnPointService
 	{
 		void CreateSpawnPoints();
-		Vector3 GetSpawnPoint();
+		UniTask<Vector3> GetSpawnPointAsync();
 	}
 }

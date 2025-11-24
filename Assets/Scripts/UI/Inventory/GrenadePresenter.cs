@@ -25,6 +25,20 @@ namespace UI.Inventory
 			_projectileIcon = StaticData.GetProjectileIcon(InventoryItem.Type);
 		}
 
+		public override void Select()
+		{
+			base.Select();
+
+			_hud.ShowItemInfo(_projectileIcon, InventoryItem.Amount.ToString());
+		}
+
+		public override void Deselect()
+		{
+			base.Deselect();
+
+			_hud.HideItemInfo();
+		}
+
 		public override void Dispose()
 		{
 			base.Dispose();
@@ -32,23 +46,12 @@ namespace UI.Inventory
 			_disposable.Dispose();
 		}
 
-		protected override void OnSelected()
-		{
-			base.OnSelected();
-
-			_hud.ShowItemInfo(_projectileIcon, InventoryItem.Amount.ToString());
-		}
-
-		protected override void OnDeselected()
-		{
-			base.OnDeselected();
-
-			_hud.HideItemInfo();
-		}
-
 		private void OnAmountChanged(int amount)
 		{
-			_hud.SetItemCount(amount.ToString());
+			if (InventoryItem.IsSelected)
+			{
+				_hud.SetItemCount(amount.ToString());
+			}
 		}
 	}
 }

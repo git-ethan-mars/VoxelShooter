@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
@@ -9,60 +10,70 @@ using Networking;
 using Networking.Core;
 using Networking.Messages;
 using R3;
+using Reflex.Extensions;
+using Reflex.Injectors;
 using Services;
 using UnityEngine;
 using VoxelMap;
+using VoxelMap.Data;
 using Object = UnityEngine.Object;
 namespace GamePlay
 {
 	public class GameSession : IDisposable
 	{
+		public CancellationToken GameSessionFinished => _gameSessionFinishedCancellationTokenSource.Token;
 		public CancellationToken MapChangeToken => _mapChangeCancellationTokenSource.Token;
 		public ReadOnlyReactiveProperty<GameSessionState> State => _state;
-		public ReadOnlyReactiveProperty<TimeSpan> TimeLeft => _timeLeft;
+		public ReadOnlyReactiveProperty<TimeSpan> GameTime => _gameTime;
+		public ReadOnlyReactiveProperty<TimeSpan> RespawnTime => _respawnTime;
+		public Observable<Map> OnMapReady => _onMapReady;
+		public IProgress<float> Progress { set => _progress = value; }
+		public GameSettings GameSettings { get; private set; }
 
 		private readonly MapProvider _mapProvider;
-		private readonly VoxelShooterNetworkManager _networkManager;
+		private readonly VSNetworkManager _networkManager;
 		private readonly GameStateDownloader _gameDownloader;
 		private readonly IMapFactory _mapFactory;
 		private readonly IMapConfigureLoader _mapConfigureLoader;
+		private readonly IEntityFactory _entityFactory;
 		private readonly LootBoxDropper _lootBoxDropper;
 		private readonly EntityContainerService _entityContainer;
 		private readonly ISpawnPointService _spawnPointService;
 		private readonly IPlayerService _playerService;
-		private readonly IStaticDataService _staticData;
-		private readonly GameSettings _gameSettings;
-		private readonly ReactiveProperty<TimeSpan> _timeLeft = new ReactiveProperty<TimeSpan>();
-		private readonly ReactiveProperty<GameSessionState> _state = new ReactiveProperty<GameSessionState>();
 		private bool _isRunning;
-		private CancellationTokenSource _cts = new CancellationTokenSource();
+		private readonly ReactiveProperty<TimeSpan> _gameTime = new ReactiveProperty<TimeSpan>();
+		private readonly ReactiveProperty<TimeSpan> _respawnTime = new ReactiveProperty<TimeSpan>();
+		private readonly ReactiveProperty<GameSessionState> _state = new ReactiveProperty<GameSessionState>();
+		private readonly Subject<Map> _onMapReady = new Subject<Map>();
 		private CancellationTokenSource _mapChangeCancellationTokenSource = new CancellationTokenSource();
+		private readonly CancellationTokenSource _gameSessionFinishedCancellationTokenSource = new CancellationTokenSource();
+		private IProgress<float> _progress;
 
-
-		public GameSession(GameSettings gameSettings, MapProvider mapProvider, VoxelShooterNetworkManager networkManager,
-			IMapFactory mapFactory, IMapConfigureLoader mapConfigureLoader, LootBoxDropper lootBoxDropper, EntityContainerService entityContainer,
-			ISpawnPointService spawnPointService, IPlayerService playerService, IStaticDataService staticData)
+		public GameSession(GameSettings gameSettings, MapProvider mapProvider, VSNetworkManager networkManager,
+			IMapFactory mapFactory, IMapConfigureLoader mapConfigureLoader, IEntityFactory entityFactory,
+			LootBoxDropper lootBoxDropper, EntityContainerService entityContainer,
+			ISpawnPointService spawnPointService, IPlayerService playerService)
 		{
-			_gameSettings = gameSettings;
+			GameSettings = gameSettings;
 			_mapProvider = mapProvider;
 			_networkManager = networkManager;
 			_mapFactory = mapFactory;
 			_mapConfigureLoader = mapConfigureLoader;
+			_entityFactory = entityFactory;
 			_lootBoxDropper = lootBoxDropper;
 			_entityContainer = entityContainer;
 			_spawnPointService = spawnPointService;
 			_playerService = playerService;
-			_staticData = staticData;
 		}
 
-		public GameSession(MapProvider mapProvider, VoxelShooterNetworkManager networkManager, GameStateDownloader gameDownloader)
+		public GameSession(MapProvider mapProvider, VSNetworkManager networkManager, GameStateDownloader gameDownloader)
 		{
 			_mapProvider = mapProvider;
 			_networkManager = networkManager;
 			_gameDownloader = gameDownloader;
 		}
 
-		public async UniTask RunAsync(IProgress<float> progress)
+		public async UniTask RunAsync()
 		{
 			if (_isRunning)
 			{
@@ -74,7 +85,7 @@ namespace GamePlay
 
 			if (_networkManager.mode == NetworkManagerMode.Host)
 			{
-				bool isCanceled = await ChangeMapAsync(_gameSettings.MapName, progress).SuppressCancellationThrow();
+				bool isCanceled = await ChangeMapAsync(GameSettings.MapName).SuppressCancellationThrow();
 
 				if (isCanceled)
 				{
@@ -87,10 +98,10 @@ namespace GamePlay
 			{
 				_networkManager.MessageReceived
 					.OfMessageType<MapChangeResponse>()
-					.Subscribe(_ => OnMapChangedMessage(progress))
+					.Subscribe(_ => OnMapChangedMessage())
 					.AddTo(_networkManager);
 
-				bool isCanceled = await DownloadGameStateAsync(progress, MapChangeToken).SuppressCancellationThrow();
+				bool isCanceled = await DownloadGameStateAsync(MapChangeToken).SuppressCancellationThrow();
 
 				if (!isCanceled)
 				{
@@ -101,16 +112,104 @@ namespace GamePlay
 					Debug.Log("Download game state cancelled");
 				}
 			}
+		}
 
-			_timeLeft
-				.Where(time => time <= TimeSpan.Zero && _state.Value == GameSessionState.Playing)
-				.Subscribe(_ => OnTimeFinished(progress))
-				.AddTo(_networkManager);
+		public async UniTask<GameClass> ChangeGameClassAsync(GameClass chosenClass)
+		{
+			var request = new ChangeClassRequest(chosenClass);
+			_networkManager.SendRequest(request);
+			var response = await _networkManager.MessageReceived
+				.FirstAsync<ChangeGameClassResponse>(cancellationToken: GameSessionFinished);
+			
+			if (_respawnTime.Value == TimeSpan.Zero)
+			{
+				_respawnTime.Value = GameSettings.RespawnTime;
+			}
+			
+			return response.Message.GameClass;
+		}
+
+		public async UniTaskVoid ChangeClass(NetworkConnectionToClient connection, GameClass chosenClass)
+		{
+			if (!_playerService.TryGetPlayerData(connection.connectionId, out PlayerData playerData))
+			{
+				throw new KeyNotFoundException($"Couldn't find player {connection.connectionId}");
+			}
+
+			if (playerData.GameClass == chosenClass)
+			{
+				return;
+			}
+
+			if (playerData.GameClass == GameClass.None)
+			{
+				playerData.GameClass = chosenClass;
+				Character character = await SpawnCharacterAsync(playerData);
+				NetworkServer.AddPlayerForConnection(connection, character.gameObject);
+				playerData.IsAlive = true;
+			}
+			else if (playerData.IsAlive)
+			{
+				connection.identity.GetComponent<Character>().Damage(int.MaxValue);
+				playerData.GameClass = chosenClass;
+			}
+			else
+			{
+				playerData.GameClass = chosenClass;
+			}
+			
+			var response = new ChangeGameClassResponse(playerData.GameClass);
+			_networkManager.SendResponse(connection, response);
+		}
+
+		private async UniTask<Character> SpawnCharacterAsync(PlayerData playerData)
+		{
+			GameClass chosenClass = playerData.GameClass;
+			string nickName = playerData.NickName;
+			Vector3 position = await _spawnPointService.GetSpawnPointAsync();
+			Character character = _entityFactory.CreateCharacter(position, chosenClass, nickName);
+			character.HealthSystem.Health
+				.Where(healthValue => healthValue == 0)
+				.Subscribe(_ => OnCharacterDied(character))
+				.AddTo(character);
+
+			return character;
+		}
+
+		private async void OnCharacterDied(Character oldCharacter)
+		{
+			NetworkConnectionToClient connection = oldCharacter.netIdentity.connectionToClient;
+
+			if (!_playerService.TryGetPlayerData(connection.connectionId, out PlayerData playerData))
+			{
+				return;
+			}
+
+			playerData.IsAlive = false;
+			Spectator spectator = _entityFactory.CreateSpectator(oldCharacter.transform.position);
+			NetworkServer.ReplacePlayerForConnection(connection, spectator.gameObject, ReplacePlayerOptions.Destroy);
+			Tombstone tombStone = _entityFactory.CreateTombstone(oldCharacter.transform.position);
+			tombStone.ExplodeWithDelay(GameSettings.RespawnTime - TimeSpan.FromSeconds(1)).Forget();
+
+			TimeSpan respawnTime = TimeSpan.FromSeconds(Time.time) + GameSettings.RespawnTime;
+
+			while (respawnTime > TimeSpan.FromSeconds(Time.time))
+			{
+				await UniTask.Yield();
+			}
+
+			if (connection.isReady)
+			{
+				Character character = await SpawnCharacterAsync(playerData);
+				NetworkServer.ReplacePlayerForConnection(connection, character.gameObject, ReplacePlayerOptions.Destroy);
+				playerData.IsAlive = true;
+			}
 		}
 
 		public void Dispose()
 		{
-			_cts?.Dispose();
+			_gameSessionFinishedCancellationTokenSource.Cancel();
+			_gameSessionFinishedCancellationTokenSource.Dispose();
 			_mapChangeCancellationTokenSource?.Dispose();
 
 			if (_networkManager.mode == NetworkManagerMode.Host)
@@ -127,22 +226,42 @@ namespace GamePlay
 		{
 			_state.Value = GameSessionState.Playing;
 
-			_cts = new CancellationTokenSource();
+			var timerCts = new CancellationTokenSource();
+			var endGameTime = TimeSpan.FromSeconds(Time.time) + GameSettings.GameDuration;
 
-			Observable.Interval(TimeSpan.FromSeconds(1), _cts.Token)
-				.Subscribe(_ =>
+			Observable.EveryUpdate(timerCts.Token).Subscribe(_ =>
 				{
-					_timeLeft.Value -= TimeSpan.FromSeconds(1);
-				})
-				.AddTo(_cts.Token);
+					var timeLeft = endGameTime - TimeSpan.FromSeconds(Time.time);
+
+					if (timeLeft > TimeSpan.Zero)
+					{
+						_gameTime.Value = timeLeft;
+						
+						if (_respawnTime.Value > TimeSpan.Zero)
+						{
+							_respawnTime.Value -= TimeSpan.FromSeconds(Time.deltaTime);
+							
+							if (_respawnTime.Value < TimeSpan.Zero)
+							{
+								_respawnTime.Value = TimeSpan.Zero;
+							}
+						}
+					}
+					else
+					{
+						timerCts.Cancel();
+						timerCts.Dispose();
+					}
+				},
+				_ => OnTimerFinished());
 
 			if (_networkManager.mode == NetworkManagerMode.Host)
 			{
-				_lootBoxDropper.StartDropping(_gameSettings.BoxSpawnTime, _cts.Token).Forget();
+				_lootBoxDropper.StartDropping(GameSettings.BoxRespawnTime, timerCts.Token).Forget();
 			}
 		}
 
-		private async UniTask ChangeMapAsync(string mapName, IProgress<float> progress)
+		private async UniTask ChangeMapAsync(string mapName)
 		{
 			if (_networkManager.mode != NetworkManagerMode.Host)
 			{
@@ -158,40 +277,43 @@ namespace GamePlay
 			MapData mapData = await MapDataReader.ReadFromFileAsync(mapName, MapChangeToken);
 			MapConfigure mapConfigure = _mapConfigureLoader.GetMapConfigure(mapName);
 			MapBuilder mapBuilder = new MapBuilder(_mapFactory, mapData).FromConfigure(mapConfigure);
-			Map map = await mapBuilder.BuildAsync(progress, Application.exitCancellationToken);
+			Map map = await mapBuilder.BuildAsync(_progress, Application.exitCancellationToken);
 
-			var voxelHealthSystem = new VoxelHealthSystem(map, _staticData);
-			var mapBuilding = new MapBuilding(_entityContainer, map, voxelHealthSystem);
-			map.AddMapFeature(mapBuilding);
-			//var columnDestructionAlgorithm = new ColumnDestructionAlgorithm(map);
-			var mapDestruction = new MapDestruction(map, voxelHealthSystem);
-			map.AddMapFeature(mapDestruction);
+			map.AddFeature<MapBuilding>();
+			map.AddFeature<MapDestruction>();
+			map.AddFeature<VoxelHealthSystem>();
+			map.AddFeature<MapUpdateSender>();
+			//map.AddFeature<ColumnDestructionAlgorithm>();
 
 			_mapProvider.MapName = mapName;
 			_mapProvider.Map = map;
+
+			GameObjectInjector.InjectObject(map.gameObject, map.gameObject.scene.GetSceneContainer());
 
 			_spawnPointService.CreateSpawnPoints();
 
-			_timeLeft.Value = _gameSettings.GameDuration;
+			_onMapReady.OnNext(map);
+
+			_gameTime.Value = GameSettings.GameDuration;
 		}
 
-		private async UniTask DownloadGameStateAsync(IProgress<float> progress, CancellationToken cancellationToken = default)
+		private async UniTask DownloadGameStateAsync(CancellationToken cancellationToken = default)
 		{
 			string mapName = await _gameDownloader.DownloadMapNameAsync(cancellationToken);
-			Map map = await _gameDownloader.DownloadMapAsync(mapName, progress, cancellationToken);
-			TimeSpan timeLeft = await _gameDownloader.DownloadGameTime(cancellationToken);
+			Map map = await _gameDownloader.DownloadMapAsync(mapName, _progress, cancellationToken);
+			GameSettings gameSettings = await _gameDownloader.DownloadGameSettings(cancellationToken);
 			_mapProvider.MapName = mapName;
 			_mapProvider.Map = map;
-			_timeLeft.Value = timeLeft;
+			GameSettings = gameSettings;
+			_gameTime.Value = gameSettings.GameDuration;
+
+			_onMapReady.OnNext(map);
 
 			NetworkClient.Ready();
 		}
 
-		private async void OnTimeFinished(IProgress<float> progress)
+		private async void OnTimerFinished()
 		{
-			_cts.Cancel();
-			_cts.Dispose();
-
 			_state.Value = GameSessionState.Waiting;
 
 			if (_networkManager.mode == NetworkManagerMode.Host)
@@ -218,7 +340,7 @@ namespace GamePlay
 				_playerService.ResetData();
 
 				string mapName = await PickRandomMapName();
-				bool isCanceled = await ChangeMapAsync(mapName, progress).SuppressCancellationThrow();
+				bool isCanceled = await ChangeMapAsync(mapName).SuppressCancellationThrow();
 
 				if (isCanceled)
 				{
@@ -232,9 +354,9 @@ namespace GamePlay
 			}
 		}
 
-		private async void OnMapChangedMessage(IProgress<float> progress)
+		private async void OnMapChangedMessage()
 		{
-			Debug.Log("Map change message recieved");
+			Debug.Log("Map change message received");
 
 			_mapChangeCancellationTokenSource.Cancel();
 			_mapChangeCancellationTokenSource.Dispose();
@@ -245,7 +367,7 @@ namespace GamePlay
 				Object.Destroy(_mapProvider.Map.gameObject);
 			}
 
-			bool isCanceled = await DownloadGameStateAsync(progress, MapChangeToken).SuppressCancellationThrow();
+			bool isCanceled = await DownloadGameStateAsync(MapChangeToken).SuppressCancellationThrow();
 
 			if (!isCanceled)
 			{

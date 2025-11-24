@@ -13,10 +13,6 @@ MonoBehaviour:
   m_Name: DrillHit
   m_EditorClassIdentifier: 
   <Clip>k__BackingField: {fileID: 8300000, guid: 009d623c2cd8d314bae5fbcb25468c75, type: 3}
-  clip: {fileID: 8300000, guid: 009d623c2cd8d314bae5fbcb25468c75, type: 3}
   <Volume>k__BackingField: 1
-  volume: 1
   <MinDistance>k__BackingField: 0
-  minDistance: 0
-  <MaxDistance>k__BackingField: 10
-  maxDistance: 10
+  <MaxDistance>k__BackingField: 25

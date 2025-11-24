@@ -4,11 +4,11 @@ namespace GamePlay.MapFeatures
 {
 	public class SphereDamageCalculator : IVoxelDamageCalculator
 	{
-		private readonly Vector3 _center;
+		private readonly Vector3Ushort _center;
 		private readonly int _damage;
 		private readonly int _radius;
 
-		public SphereDamageCalculator(Vector3 center, int radius, int damage)
+		public SphereDamageCalculator(Vector3Ushort center, int radius, int damage)
 		{
 			_center = center;
 			_radius = radius;

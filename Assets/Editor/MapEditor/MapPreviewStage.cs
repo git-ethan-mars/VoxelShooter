@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using VoxelMap;
+using VoxelMap.Data;
 namespace Editor
 {
 	public class MapPreviewStage : PreviewSceneStage
@@ -13,7 +14,7 @@ namespace Editor
 
 		public void Setup(MapConfigure mapConfigure)
 		{
-			var mapFactory = new MapFactory(new AssetProvider());
+			var mapFactory = new MapFactory();
 			MapData mapData = MapDataReader.ReadFromFile(mapConfigure.name);
 			MapBuilder mapBuilder = new MapBuilder(mapFactory, mapData)
 				.FromConfigure(mapConfigure)

@@ -4,7 +4,8 @@ namespace Networking
 {
 	public class NetworkFactory : INetworkFactory
 	{
-		private const string NetworkManagerPath = "Prefabs/Network/LocalNetworkManager";
+		private const string LocalNetworkManagerPath = "Prefabs/Network/LocalNetworkManager";
+		private const string SteamNetworkManagerPath = "Prefabs/Network/SteamNetworkManager";
 
 		private readonly IAssetProvider _assets;
 
@@ -13,9 +14,13 @@ namespace Networking
 			_assets = container.Single<IAssetProvider>();
 		}
 
-		public VoxelShooterNetworkManager CreateNetworkManager()
+		public VSNetworkManager CreateNetworkManager()
 		{
-			var networkManager = _assets.Instantiate(NetworkManagerPath).GetComponent<VoxelShooterNetworkManager>();
+#if LOCAL_BUILD
+			var networkManager = _assets.Instantiate(LocalNetworkManagerPath).GetComponent<VSNetworkManager>();
+#else
+			var networkManager = _assets.Instantiate(SteamNetworkManagerPath).GetComponent<VSNetworkManager>();
+#endif
 			return networkManager;
 		}
 	}

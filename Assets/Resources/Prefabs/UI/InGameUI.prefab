@@ -65,7 +65,7 @@ MonoBehaviour:
   <Scoreboard>k__BackingField: {fileID: 2905982421402417462}
   <SettingsMenu>k__BackingField: {fileID: 4746634793245235211}
   <Hud>k__BackingField: {fileID: 3030755137032057536}
-  <WorldMap>k__BackingField: {fileID: 3192393743615382325}
+  <WorldMap>k__BackingField: {fileID: 6280675102894527564}
   canvasGroup: {fileID: 1027526292100179895}
 --- !u!223 &893652179862288476
 Canvas:
@@ -528,10 +528,6 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2954006870208760593, guid: 7a34b9fbdad963a44b232f83cd1c9376, type: 3}
-      propertyPath: worldMap
-      value: 
-      objectReference: {fileID: 3192393743615382325}
     - target: {fileID: 5912939448006961105, guid: 7a34b9fbdad963a44b232f83cd1c9376, type: 3}
       propertyPath: m_SizeDelta.x
       value: 0
@@ -542,7 +538,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5931000695046598191, guid: 7a34b9fbdad963a44b232f83cd1c9376, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 25
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6798800915128001127, guid: 7a34b9fbdad963a44b232f83cd1c9376, type: 3}
       propertyPath: m_AnchorMax.y
@@ -660,10 +656,10 @@ PrefabInstance:
       propertyPath: m_Alpha
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7746659244992120626, guid: 7a34b9fbdad963a44b232f83cd1c9376, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
+    - target: {fileID: 7941335691948174233, guid: 7a34b9fbdad963a44b232f83cd1c9376, type: 3}
+      propertyPath: worldMap
+      value: 
+      objectReference: {fileID: 6280675102894527564}
     - target: {fileID: 7978816040378047793, guid: 7a34b9fbdad963a44b232f83cd1c9376, type: 3}
       propertyPath: m_Name
       value: HUD
@@ -1291,9 +1287,9 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 8571721631625997593, guid: 8faf6dbc88bd6a1488be0d6d1cd2fdb9, type: 3}
   m_PrefabInstance: {fileID: 8578065264009317379}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &3192393743615382325 stripped
+--- !u!114 &6280675102894527564 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6577157450657128246, guid: 8faf6dbc88bd6a1488be0d6d1cd2fdb9, type: 3}
+  m_CorrespondingSourceObject: {fileID: 2315439900780894287, guid: 8faf6dbc88bd6a1488be0d6d1cd2fdb9, type: 3}
   m_PrefabInstance: {fileID: 8578065264009317379}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
@@ -1301,4 +1297,4 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8bd4ff603dcb4603bbd7399181240983, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: VoxelShooter.UI::UI.WorldMap

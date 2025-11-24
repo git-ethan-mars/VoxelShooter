@@ -8,15 +8,15 @@ namespace UI.Inventory
 	public class RangeWeaponPresenter : SlotPresenter<RangeWeapon>
 	{
 		private readonly Hud _hud;
-		private readonly CameraService _cameraService;
+		private readonly CameraProvider _cameraProvider;
 		private IDisposable _disposable;
 		private Sprite _projectileIcon;
 
-		public RangeWeaponPresenter(IStaticDataService staticData, UIProvider uiProvider, CameraService cameraService,
+		public RangeWeaponPresenter(IStaticDataService staticData, UIProvider uiProvider, CameraProvider cameraProvider,
 			SlotView slotView, RangeWeapon rangeWeapon) : base(staticData, rangeWeapon, slotView)
 		{
 			_hud = uiProvider.InGameUI.Hud;
-			_cameraService = cameraService;
+			_cameraProvider = cameraProvider;
 		}
 
 		public override void Initialize()
@@ -30,16 +30,16 @@ namespace UI.Inventory
 			_projectileIcon = StaticData.GetProjectileIcon(InventoryItem.Type);
 		}
 
-		protected override void OnSelected()
+		public override void Select()
 		{
-			base.OnSelected();
+			base.Select();
 
 			_hud.ShowAmmoInfo(_projectileIcon, $"{InventoryItem.BulletsInMagazine} / {InventoryItem.TotalBullets}");
 		}
 
-		protected override void OnDeselected()
+		public override void Deselect()
 		{
-			base.OnDeselected();
+			base.Deselect();
 
 			_hud.HideAmmoInfo();
 		}
@@ -53,12 +53,18 @@ namespace UI.Inventory
 
 		private void OnTotalBulletsChanged(int totalBullets)
 		{
-			_hud.SetAmmoCount($"{InventoryItem.BulletsInMagazine} / {totalBullets}");
+			if (InventoryItem.IsSelected)
+			{
+				_hud.SetAmmoCount($"{InventoryItem.BulletsInMagazine} / {totalBullets}");
+			}
 		}
 
 		private void OnBulletsInMagazineChanged(int bulletsInMagazine)
 		{
-			_hud.SetAmmoCount($"{bulletsInMagazine} / {InventoryItem.TotalBullets}");
+			if (InventoryItem.IsSelected)
+			{
+				_hud.SetAmmoCount($"{bulletsInMagazine} / {InventoryItem.TotalBullets}");
+			}
 		}
 
 		private void OnWeaponZoomed(bool isZoomed)
@@ -68,14 +74,14 @@ namespace UI.Inventory
 				_hud.ScopeImage.gameObject.SetActive(true);
 				_hud.ScopeImage.sprite = StaticData.GetScopeIcon(InventoryItem.Type);
 				_hud.CrosshairImage.gameObject.SetActive(false);
-				_cameraService.ZoomIn(InventoryItem.Configure.ZoomMultiplier);
+				_cameraProvider.ZoomIn(InventoryItem.Configure.ZoomMultiplier);
 			}
 			else
 			{
 				_hud.ScopeImage.gameObject.SetActive(false);
 				_hud.ScopeImage.sprite = null;
 				_hud.CrosshairImage.gameObject.SetActive(true);
-				_cameraService.ZoomOut();
+				_cameraProvider.ZoomOut();
 			}
 		}
 	}

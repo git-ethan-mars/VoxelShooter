@@ -14,7 +14,7 @@ using VoxelMap;
 namespace UI
 {
 	[RequireComponent(typeof(CanvasGroup))]
-	public class MatchMenu : MonoBehaviour, IBaseMenu
+	public class MatchMenu : BaseMenu
 	{
 		[SerializeField] private Button backButton;
 		[SerializeField] private Button resetButton;
@@ -28,8 +28,6 @@ namespace UI
 		[Header("Map choice")]
 		[SerializeField] private MapCarouselView mapCarouselView;
 		
-		[field: SerializeField] public CanvasGroup CanvasGroup { get; private set; }
-
 		private LobbyBalance _lobbyBalance;
 		private IMapConfigureLoader _mapConfigureLoader;
 
@@ -72,13 +70,13 @@ namespace UI
 		public Observable<Unit> BackButtonPressed => backButton.onClick.AsObservable();
 		public Observable<GameSettings> ApplyButtonPressed => applyButton.onClick.AsObservable().Select(_ => GetWorldSettings());
 
-		public void Show()
+		public override void Show()
 		{
 			_cts = new CancellationTokenSource().AddTo(this);
 			EventSystem.current.SetSelectedGameObject(applyButton.gameObject);
 		}
 
-		public void Hide()
+		public override void Hide()
 		{
 			_cts.Cancel();
 			_cts.Dispose();

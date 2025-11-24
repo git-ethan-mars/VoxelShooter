@@ -22,31 +22,39 @@ namespace UI.Inventory
 		{
 			base.Initialize();
 
-			_disposable = InventoryItem.Amount.Subscribe(value => _hud.SetItemCount(value.ToString()));
+			_disposable = InventoryItem.Amount.Subscribe(OnAmountChanged);
 			_projectileIcon = StaticData.GetProjectileIcon(InventoryItem.Type);
+		}
+
+		public override void Select()
+		{
+			base.Select();
+
+			_hud.ShowPalette();
+			_hud.ShowItemInfo(_projectileIcon, InventoryItem.Amount.ToString());
+		}
+
+		public override void Deselect()
+		{
+			base.Deselect();
+
+			_hud.HidePalette();
+			_hud.HideItemInfo();
 		}
 
 		public override void Dispose()
 		{
 			base.Dispose();
-			
+
 			_disposable.Dispose();
 		}
 
-		protected override void OnSelected()
+		private void OnAmountChanged(int amount)
 		{
-			base.OnSelected();
-			
-			_hud.ShowPalette();
-			_hud.ShowItemInfo(_projectileIcon, InventoryItem.Amount.ToString());
-		}
-
-		protected override void OnDeselected()
-		{
-			base.OnDeselected();
-			
-			_hud.HidePalette();
-			_hud.HideItemInfo();
+			if (InventoryItem.IsSelected)
+			{
+				_hud.SetItemCount(amount.ToString());
+			}
 		}
 	}
 }

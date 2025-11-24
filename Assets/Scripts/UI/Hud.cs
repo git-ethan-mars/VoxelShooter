@@ -23,8 +23,10 @@ namespace UI
 		[field: SerializeField] public InventoryPresenter InventoryPresenter { get; private set; }
 		[field: SerializeField] public PalettePresenter PalettePresenter { get; private set; }
 		[field: SerializeField] public PaletteView PaletteView { get; private set; }
+		[field: SerializeField] public MiniMap MiniMap { get; private set; }
 		[field: SerializeField] public Image ScopeImage { get; private set; }
 		[field: SerializeField] public Image CrosshairImage { get; private set; }
+
 
 		[Inject]
 		private void Construct(CharacterProvider characterProvider)
@@ -86,12 +88,12 @@ namespace UI
 		
 		public void ShowPalette()
 		{
-			PaletteView.gameObject.SetActive(true);
+			PalettePresenter.Initialize();
 		}
 
 		public void HidePalette()
 		{
-			PaletteView.gameObject.SetActive(false);
+			PaletteView.Clear();
 		}
 	}
 }

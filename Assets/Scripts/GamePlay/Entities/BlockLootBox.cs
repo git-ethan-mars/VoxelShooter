@@ -7,7 +7,7 @@ namespace GamePlay
 
 		protected override void OnPickUp(Character character)
 		{
-			Block block = character.Inventory.Items.OfType<Block>().FirstOrDefault();
+			Block block = character.Inventory.GetItem<Block>();
 
 			if (block != null)
 			{

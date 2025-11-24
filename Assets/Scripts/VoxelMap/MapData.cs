@@ -8,15 +8,15 @@ namespace VoxelMap
 	public struct MapData : IDisposable
 	{
 		public int ChunkCount => Width * Depth * Height / Chunk.ChunkSizeCubed;
-		public readonly int Width;
-		public readonly int Depth;
-		public readonly int Height;
+		public readonly ushort Width;
+		public readonly ushort Depth;
+		public readonly ushort Height;
 		[NativeDisableContainerSafetyRestriction]
 		internal NativeArray<Face> Faces;
 		[NativeDisableContainerSafetyRestriction]
 		internal NativeArray<VoxelData> Voxels;
 
-		public MapData(NativeArray<VoxelData> voxels, int width, int height, int depth)
+		public MapData(NativeArray<VoxelData> voxels, ushort width, ushort height, ushort depth)
 		{
 			Width = width;
 			Height = height;
@@ -25,7 +25,7 @@ namespace VoxelMap
 			Voxels = voxels;
 		}
 
-		public VoxelData this[int x, int y, int z]
+		public VoxelData this[ushort x, ushort y, ushort z]
 		{
 			get
 			{
@@ -53,7 +53,7 @@ namespace VoxelMap
 			set => Voxels[index] = value;
 		}
 
-		public Face GetFace(int x, int y, int z)
+		public Face GetFace(ushort x, ushort y, ushort z)
 		{
 			var faceIndex = GetVoxelIndex(x, y, z);
 
@@ -65,7 +65,7 @@ namespace VoxelMap
 			return Faces[faceIndex];
 		}
 
-		public void SetFace(int x, int y, int z, Face face)
+		public void SetFace(ushort x, ushort y, ushort z, Face face)
 		{
 			var faceIndex = GetVoxelIndex(x, y, z);
 
@@ -77,12 +77,12 @@ namespace VoxelMap
 			Faces[faceIndex] = face;
 		}
 
-		public readonly bool IsValidPosition(int x, int y, int z)
+		public readonly bool IsValidPosition(ushort x, ushort y, ushort z)
 		{
-			return 0 <= x && x < Width && 0 <= y && y < Height && 0 <= z && z < Depth;
+			return x < Width && y < Height && z < Depth;
 		}
 
-		public int GetVoxelIndex(int x, int y, int z)
+		public int GetVoxelIndex(ushort x, ushort y, ushort z)
 		{
 			int chunkStartX = x / Chunk.ChunkSize;
 			int chunkStartY = y / Chunk.ChunkSize;
@@ -93,7 +93,7 @@ namespace VoxelMap
 			return startChunkIndex + localIndex;
 		}
 
-		public int GetChunkIndex(int x, int y, int z)
+		public int GetChunkIndex(ushort x, ushort y, ushort z)
 		{
 			int chunkX = x / Chunk.ChunkSize;
 			int chunkY = y / Chunk.ChunkSize;
@@ -169,40 +169,25 @@ namespace VoxelMap
 
 		public struct Readonly
 		{
-			public int ChunkCount => Width * Depth * Height / Chunk.ChunkSizeCubed;
-			public readonly int Width;
-			public readonly int Depth;
-			public readonly int Height;
+			private int ChunkCount => _width * _depth * _height / Chunk.ChunkSizeCubed;
+			private readonly int _width;
+			private readonly int _depth;
+			private readonly int _height;
 			[NativeDisableContainerSafetyRestriction]
-			internal NativeArray<Face>.ReadOnly Faces;
+			private readonly NativeArray<VoxelData>.ReadOnly _voxels;
 			[NativeDisableContainerSafetyRestriction]
-			internal NativeArray<VoxelData>.ReadOnly Voxels;
-			
+			private NativeArray<Face>.ReadOnly _faces;
+
 			public Readonly(MapData mapData)
 			{
-				Width = mapData.Width;
-				Depth = mapData.Depth;
-				Height = mapData.Height;
-				Faces = mapData.Faces.AsReadOnly();
-				Voxels = mapData.Voxels.AsReadOnly();
+				_width = mapData.Width;
+				_depth = mapData.Depth;
+				_height = mapData.Height;
+				_voxels = mapData.Voxels.AsReadOnly();
+				_faces = mapData.Faces.AsReadOnly();
 			}
 
-			public VoxelData this[int x, int y, int z]
-			{
-				get
-				{
-					if (!IsValidPosition(x, y, z))
-					{
-						throw new IndexOutOfRangeException($"{x}, {y}, {z} is not a valid position.");
-					}
-
-					return Voxels[GetVoxelIndex(x, y, z)];
-				}
-			}
-
-			public VoxelData this[int index] => Voxels[index];
-
-			public Face GetFace(int x, int y, int z)
+			public Face GetFace(ushort x, ushort y, ushort z)
 			{
 				var faceIndex = GetVoxelIndex(x, y, z);
 
@@ -211,62 +196,7 @@ namespace VoxelMap
 					throw new IndexOutOfRangeException($"{x}, {y}, {z} is not a valid position.");
 				}
 
-				return Faces[faceIndex];
-			}
-
-			public readonly bool IsValidPosition(int x, int y, int z)
-			{
-				return 0 <= x && x < Width && 0 <= y && y < Height && 0 <= z && z < Depth;
-			}
-
-			public int GetVoxelIndex(int x, int y, int z)
-			{
-				int chunkStartX = x / Chunk.ChunkSize;
-				int chunkStartY = y / Chunk.ChunkSize;
-				int chunkStartZ = z / Chunk.ChunkSize;
-				int startChunkIndex = (chunkStartZ + chunkStartY * Depth / Chunk.ChunkSize +
-				                       chunkStartX * (Depth * Height / Chunk.ChunkSizeSquared)) * Chunk.ChunkSizeCubed;
-				int localIndex = x % Chunk.ChunkSize * Chunk.ChunkSizeSquared + y % Chunk.ChunkSize * Chunk.ChunkSize + z % Chunk.ChunkSize;
-				return startChunkIndex + localIndex;
-			}
-
-			public int GetChunkIndex(int x, int y, int z)
-			{
-				int chunkX = x / Chunk.ChunkSize;
-				int chunkY = y / Chunk.ChunkSize;
-				int chunkZ = z / Chunk.ChunkSize;
-				return chunkX * Height * Depth / Chunk.ChunkSizeSquared + chunkY * Depth / Chunk.ChunkSize + chunkZ;
-			}
-
-			public byte[] Serialize()
-			{
-				var chunkBuffers = new NativeList<byte>[ChunkCount];
-				var jobHandles = new NativeArray<JobHandle>(ChunkCount, Allocator.TempJob);
-
-				for (int i = 0; i < ChunkCount; i++)
-				{
-					chunkBuffers[i] = new NativeList<byte>(Allocator.TempJob);
-					var job = new SerializeChunkJob(chunkBuffers[i], Voxels, i, VoxelData.DefaultInner.Color);
-					jobHandles[i] = job.Schedule();
-				}
-
-				JobHandle.CompleteAll(jobHandles);
-
-				jobHandles.Dispose();
-
-				using var finalBuffer = new NativeList<byte>(Allocator.Temp);
-				finalBuffer.AddInt(Width);
-				finalBuffer.AddInt(Height);
-				finalBuffer.AddInt(Depth);
-
-				foreach (var chunkBuffer in chunkBuffers)
-				{
-					finalBuffer.AddRange(chunkBuffer.AsArray());
-					chunkBuffer.Dispose();
-				}
-
-				byte[] result = finalBuffer.AsArray().ToArray();
-				return result;
+				return _faces[faceIndex];
 			}
 
 			public async UniTask<byte[]> SerializeAsync()
@@ -277,16 +207,16 @@ namespace VoxelMap
 				for (int i = 0; i < ChunkCount; i++)
 				{
 					chunkBuffers[i] = new NativeList<byte>(Allocator.Persistent);
-					var job = new SerializeChunkJob(chunkBuffers[i], Voxels, i, VoxelData.DefaultInner.Color);
+					var job = new SerializeChunkJob(chunkBuffers[i], _voxels, i, VoxelData.DefaultInner.Color);
 					tasks[i] = job.Schedule().ToUniTask(PlayerLoopTiming.Update);
 				}
 
 				await UniTask.WhenAll(tasks);
 
 				using var finalBuffer = new NativeList<byte>(Allocator.Temp);
-				finalBuffer.AddInt(Width);
-				finalBuffer.AddInt(Height);
-				finalBuffer.AddInt(Depth);
+				finalBuffer.AddInt(_width);
+				finalBuffer.AddInt(_height);
+				finalBuffer.AddInt(_depth);
 
 				foreach (var chunkBuffer in chunkBuffers)
 				{
@@ -296,6 +226,22 @@ namespace VoxelMap
 
 				byte[] result = finalBuffer.AsArray().ToArray();
 				return result;
+			}
+
+			private int GetVoxelIndex(ushort x, ushort y, ushort z)
+			{
+				int chunkStartX = x / Chunk.ChunkSize;
+				int chunkStartY = y / Chunk.ChunkSize;
+				int chunkStartZ = z / Chunk.ChunkSize;
+				int startChunkIndex = (chunkStartZ + chunkStartY * _depth / Chunk.ChunkSize +
+				                       chunkStartX * (_depth * _height / Chunk.ChunkSizeSquared)) * Chunk.ChunkSizeCubed;
+				int localIndex = x % Chunk.ChunkSize * Chunk.ChunkSizeSquared + y % Chunk.ChunkSize * Chunk.ChunkSize + z % Chunk.ChunkSize;
+				return startChunkIndex + localIndex;
+			}
+
+			private readonly bool IsValidPosition(ushort x, ushort y, ushort z)
+			{
+				return x < _width && y < _height && z < _depth;
 			}
 		}
 	}

@@ -9,7 +9,7 @@ namespace UI.Inventory
 		private readonly Hud _hud;
 		private Sprite _projectileIcon;
 
-		public TNTPresenter(IStaticDataService staticData, UIProvider uiProvider, TNT tnt, SlotView slotView) : base(staticData, tnt, 
+		public TNTPresenter(IStaticDataService staticData, UIProvider uiProvider, TNT tnt, SlotView slotView) : base(staticData, tnt,
 			slotView)
 		{
 			_hud = uiProvider.InGameUI.Hud;
@@ -23,23 +23,26 @@ namespace UI.Inventory
 			InventoryItem.Amount.Subscribe(OnAmountChanged).AddTo(InventoryItem);
 		}
 
-		protected override void OnSelected()
+		public override void Select()
 		{
-			base.OnSelected();
+			base.Select();
 
 			_hud.ShowItemInfo(_projectileIcon, InventoryItem.Amount.ToString());
 		}
 
-		protected override void OnDeselected()
+		public override void Deselect()
 		{
-			base.OnDeselected();
+			base.Deselect();
 
 			_hud.HideItemInfo();
 		}
 
 		private void OnAmountChanged(int amount)
 		{
-			_hud.SetItemCount(amount.ToString());
+			if (InventoryItem.IsSelected)
+			{
+				_hud.SetItemCount(amount.ToString());
+			}
 		}
 	}
 }

@@ -46,7 +46,6 @@ namespace Infrastructure.Installers
 		{
 			containerBuilder.AddSingleton(typeof(PlayerService), typeof(IPlayerService));
 			containerBuilder.AddSingleton(typeof(SpawnPointService), typeof(ISpawnPointService));
-			containerBuilder.AddSingleton(typeof(GameClassChanger));
 			containerBuilder.AddSingleton(typeof(LootBoxDropper));
 		}
 
@@ -61,7 +60,7 @@ namespace Infrastructure.Installers
 			containerBuilder.AddSingleton(typeof(GameSessionCreator));
 			containerBuilder.AddSingleton(typeof(CharacterProvider));
 			containerBuilder.AddSingleton(typeof(MapProvider));
-			containerBuilder.AddSingleton(typeof(CameraService));
+			containerBuilder.AddSingleton(typeof(CameraProvider));
 			containerBuilder.AddSingleton(typeof(EntityContainerService));
 # if LOCAL_BUILD
 			containerBuilder.AddSingleton(typeof(LocalPlayerDataLoader), typeof(IPlayerDataLoader));
@@ -91,13 +90,14 @@ namespace Infrastructure.Installers
 			var gameStateMachine = container.Single<GameStateMachine>();
 			gameStateMachine.RegisterState(container.Construct<InitializeHostState>());
 			gameStateMachine.RegisterState(container.Construct<InitializeClientState>());
+			gameStateMachine.RegisterState(container.Construct<JoinSteamLobbyState>());
 			gameStateMachine.RegisterState(container.Construct<GameLoopState>());
 		}
 
 		private static void RegisterItemPresenters(Container container)
 		{
 			var staticData = container.Single<IStaticDataService>();
-			var cameraService = container.Single<CameraService>();
+			var cameraService = container.Single<CameraProvider>();
 			var uiProvider = container.Single<UIProvider>();
 			var registry = container.Single<ISlotPresenterRegistry>();
 			registry.Register<Block>((block, view) =>

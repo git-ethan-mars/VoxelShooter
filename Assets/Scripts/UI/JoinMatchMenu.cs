@@ -1,19 +1,18 @@
 using R3;
 using Reflex.Attributes;
-using Services;
+using Services.ServerList;
 using UnityEngine;
 using UnityEngine.UI;
 namespace UI
 {
-	[RequireComponent(typeof(CanvasGroup))]
-	public class JoinMatchMenu : ListView<ServerView>, IBaseMenu
+	public class JoinMatchMenu : BaseMenu
 	{
 		private IServerListService _serverList;
-		
+
+		[SerializeField] private ServerListView serverListView;
 		[SerializeField] private Button backButton;
-		[field: SerializeField] public CanvasGroup CanvasGroup { get; private set; }
 		public Observable<Unit> BackButtonPressed => backButton.onClick.AsObservable();
-		
+		public Observable<Server> JoinServerButtonPressed => serverListView.JoinServerButtonPressed;
 
 		[Inject]
 		private void Construct(IServerListService serverList)
@@ -21,25 +20,15 @@ namespace UI
 			_serverList = serverList;
 		}
 
-		public async void Show()
+		public override async void Show()
 		{
 			var servers = await _serverList.GetServersAsync(Application.exitCancellationToken);
-
-			foreach (ServerInfo info in servers)
-			{
-				ServerView serverView = SpawnElement();
-				serverView.ServerName.SetText(info.ServerTitle);
-				serverView.MapName.SetText(info.MapName);
-			}
-			
-			for (int i = servers.Count; i < Items.Count; i++)
-			{
-				DespawnElement(Items[i]);
-			}
+			serverListView.Init(servers);
 		}
 
-		public void Hide()
+		public override void Hide()
 		{
+			serverListView.Hide();
 		}
 	}
 }

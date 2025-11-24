@@ -16,7 +16,7 @@ namespace GamePlay
 		private PositionConstraint positionConstraint;
 		
 		private IInputService _inputService;
-		private CameraService _cameraService;
+		private CameraProvider _cameraProvider;
 		private IStorageService _storageService;
 		private EntityContainerService _entityContainer;
 
@@ -26,11 +26,11 @@ namespace GamePlay
 		private Character _target;
 
 		[Inject]
-		private void Construct(IInputService inputService, IStorageService storageService, CameraService cameraService,
+		private void Construct(IInputService inputService, IStorageService storageService, CameraProvider cameraProvider,
 			EntityContainerService entityContainer)
 		{
 			_inputService = inputService;
-			_cameraService = cameraService;
+			_cameraProvider = cameraProvider;
 			_storageService = storageService;
 			_entityContainer = entityContainer;
 		}
@@ -49,9 +49,9 @@ namespace GamePlay
 		{
 			base.OnStopLocalPlayer();
 			
-			if (_cameraService.MainCamera.transform.parent == transform)
+			if (_cameraProvider.MainCamera.transform.parent == transform)
 			{
-				_cameraService.MainCamera.transform.SetParent(null);
+				_cameraProvider.MainCamera.transform.SetParent(null);
 			}
 		}
 
@@ -137,8 +137,8 @@ namespace GamePlay
 
 		private void MountCamera()
 		{
-			_cameraService.MainCamera.transform.SetParent(transform);
-			_cameraService.MainCamera.transform.SetLocalPositionAndRotation(Vector3.back * DistanceToPlayer, Quaternion.identity);
+			_cameraProvider.MainCamera.transform.SetParent(transform);
+			_cameraProvider.MainCamera.transform.SetLocalPositionAndRotation(Vector3.back * DistanceToPlayer, Quaternion.identity);
 		}
 	}
 }
