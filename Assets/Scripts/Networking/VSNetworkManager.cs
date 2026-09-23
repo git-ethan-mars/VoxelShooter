@@ -43,24 +43,6 @@ namespace Networking
 			RegisterRequest<VoteRequest>();
 		}
 
-		public override void OnServerDisconnect(NetworkConnectionToClient connection)
-		{
-			base.OnServerDisconnect(connection);
-
-			_playerDisconnected.OnNext(connection);
-		}
-
-		public override void OnStopHost()
-		{
-			base.OnStopHost();
-
-			UnregisterRequest<MapNameRequest>();
-			UnregisterRequest<MapDownloadRequest>();
-			UnregisterRequest<GameSettingsRequest>();
-			UnregisterRequest<ChangeGameClassRequest>();
-			UnregisterRequest<VoteRequest>();
-		}
-
 		public override void OnStartClient()
 		{
 			base.OnStartClient();
@@ -77,6 +59,17 @@ namespace Networking
 			RegisterResponse<DynamicAudioResponse>();
 			RegisterResponse<VoteResponse>();
 			RegisterResponse<VoteFinishResponse>();
+		}
+
+		public override void OnStopHost()
+		{
+			base.OnStopHost();
+
+			UnregisterRequest<MapNameRequest>();
+			UnregisterRequest<MapDownloadRequest>();
+			UnregisterRequest<GameSettingsRequest>();
+			UnregisterRequest<ChangeGameClassRequest>();
+			UnregisterRequest<VoteRequest>();
 		}
 
 		public override void OnStopClient()
@@ -97,15 +90,22 @@ namespace Networking
 			UnregisterResponse<VoteFinishResponse>();
 		}
 
+		public override void OnServerDisconnect(NetworkConnectionToClient connection)
+		{
+			base.OnServerDisconnect(connection);
+
+			_playerDisconnected.OnNext(connection);
+		}
+
 		public async UniTask SendMapAsync(NetworkConnectionToClient connection)
 		{
 			string currentMapName = _mapProvider.Map.CurrentValue.MapName;
 			byte[] snapshot = await _mapProvider.Map.CurrentValue.MapData.SerializeAsync();
 
-			for (var offset = 0; offset < snapshot.Length; offset += messageSize)
+			for (int offset = 0; offset < snapshot.Length; offset += messageSize)
 			{
 				int length = Math.Min(messageSize, snapshot.Length - offset);
-				var chunk = new byte[length];
+				byte[] chunk = new byte[length];
 				Array.Copy(snapshot, offset, chunk, 0, length);
 				var message = new MapDownloadResponse(chunk, offset, snapshot.Length);
 

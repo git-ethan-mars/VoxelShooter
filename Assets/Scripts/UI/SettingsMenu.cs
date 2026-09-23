@@ -53,6 +53,11 @@ namespace UI
 			videoSectionToggle.onValueChanged.AsObservable().Subscribe(OnVideoSectionToggleChanged).AddTo(this);
 		}
 
+		private void OnDestroy()
+		{
+			_settingsMenuStateMachine.Reset();
+		}
+
 		public override void Show()
 		{
 			EventSystem.current.SetSelectedGameObject(mouseSectionToggle.gameObject);
@@ -65,11 +70,6 @@ namespace UI
 			_storageService.Save<MouseSettingsData>(IStorageService.MouseSettingsKey);
 			_storageService.Save<VolumeSettingsData>(IStorageService.VolumeSettingsKey);
 			_storageService.Save<VideoSettingsData>(IStorageService.VideoSettingsKey);
-		}
-
-		private void OnDestroy()
-		{
-			_settingsMenuStateMachine.Reset();
 		}
 
 		private void OnMouseSectionToggleChanged(bool value)

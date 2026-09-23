@@ -45,20 +45,6 @@ namespace GamePlay
 			_audioSender = audioSender;
 		}
 
-		public override void OnStartServer()
-		{
-			base.OnStartServer();
-
-			_mapProvider.Map.CurrentValue.MapUpdated
-				.Subscribe(_ => ValidatePosition())
-				.AddTo(this);
-		}
-
-		protected virtual void OnPickUp(Character receiver)
-		{
-			_audioSender.SendAudio(AudioType.LootBoxPickUp, transform.position);
-		}
-
 		private void Start()
 		{
 			if (_lootBoxRoot == null)
@@ -76,17 +62,18 @@ namespace GamePlay
 			_platform.transform.position = platformPosition;
 		}
 
-		private void OnDestroy()
+		public override void OnStartServer()
 		{
-			if (_platform != null)
-			{
-				Destroy(_platform);
-			}
+			base.OnStartServer();
+
+			_mapProvider.Map.CurrentValue.MapUpdated
+				.Subscribe(_ => ValidatePosition())
+				.AddTo(this);
 		}
 
 		private void OnCollisionEnter(Collision other)
 		{
-			var character = other.gameObject.GetComponent<Character>();
+			Character character = other.gameObject.GetComponent<Character>();
 
 			if (character)
 			{
@@ -106,6 +93,25 @@ namespace GamePlay
 			}
 		}
 
+		private void OnDrawGizmosSelected()
+		{
+			Gizmos.color = Color.yellow;
+			Gizmos.DrawWireCube(Bounds.center, Bounds.size);
+		}
+
+		private void OnDestroy()
+		{
+			if (_platform != null)
+			{
+				Destroy(_platform);
+			}
+		}
+
+		protected virtual void OnPickUp(Character receiver)
+		{
+			_audioSender.SendAudio(AudioType.LootBoxPickUp, transform.position);
+		}
+
 		private void ValidatePosition()
 		{
 			while (_mapProvider.Map.CurrentValue.HasIntersection(Bounds))
@@ -116,7 +122,7 @@ namespace GamePlay
 
 		private ushort GetTopVoxelHeight(ushort x, ushort z)
 		{
-			var y = (ushort)(_mapProvider.Map.CurrentValue.Height - 1);
+			ushort y = (ushort)(_mapProvider.Map.CurrentValue.Height - 1);
 
 			if (_mapProvider.Map.CurrentValue.MapData.GetFace(x, y, z).HasFlag(Face.Top))
 			{
@@ -134,12 +140,6 @@ namespace GamePlay
 			} while (y > 0);
 
 			throw new InvalidOperationException($"Couldn't find top voxel at x={x}, z={z}");
-		}
-
-		private void OnDrawGizmosSelected()
-		{
-			Gizmos.color = Color.yellow;
-			Gizmos.DrawWireCube(Bounds.center, Bounds.size);
 		}
 	}
 }

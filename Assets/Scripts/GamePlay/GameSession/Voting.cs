@@ -44,7 +44,7 @@ namespace GamePlay
 			return voting;
 		}
 
-		public async UniTask<string> RunVoting(TimeSpan duration, string title,
+		public async UniTask<string> RunVotingAsync(TimeSpan duration, string title,
 			string[] variants, CancellationToken cancellationToken = default)
 		{
 			_isActivated.Value = true;
@@ -56,7 +56,7 @@ namespace GamePlay
 			await UniTask.Delay(TimeSpan.FromSeconds(duration.TotalSeconds), cancellationToken: cancellationToken);
 
 			string bestCandidate = null;
-			var maxQuantity = int.MinValue;
+			int maxQuantity = int.MinValue;
 
 			foreach ((string candidate, int voteQuantity) in _voteByCandidate)
 			{

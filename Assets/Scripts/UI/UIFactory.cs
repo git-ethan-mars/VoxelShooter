@@ -19,7 +19,7 @@ namespace UI
 
 		public GameMenu CreateGameMenu()
 		{
-			var gameMenu = _assets.Instantiate(UIPath.GameMenuPath).GetComponent<GameMenu>();
+			GameMenu gameMenu = _assets.Instantiate(UIPath.GameMenuPath).GetComponent<GameMenu>();
 			GameObjectInjector.InjectRecursive(gameMenu.gameObject, gameMenu.gameObject.scene.GetSceneContainer());
 			return gameMenu;
 		}
@@ -28,7 +28,7 @@ namespace UI
 		{
 			if (gameMode is DeathMatch deathMatch)
 			{
-				var view = _assets.Instantiate(UIPath.DeathMatchViewPath).GetComponent<DeathMatchView>();
+				DeathMatchView view = _assets.Instantiate(UIPath.DeathMatchViewPath).GetComponent<DeathMatchView>();
 				view.Initialize(deathMatch);
 				_uiProvider.Hud = view.Hud;
 				return view;
@@ -39,7 +39,7 @@ namespace UI
 
 		public LoadingWindow CreateLoadingWindow()
 		{
-			var loadingWindow = _assets.Instantiate(UIPath.LoadingWindowPath).GetComponent<LoadingWindow>();
+			LoadingWindow loadingWindow = _assets.Instantiate(UIPath.LoadingWindowPath).GetComponent<LoadingWindow>();
 			_uiProvider.LoadingWindow = loadingWindow;
 			return loadingWindow;
 		}

@@ -186,7 +186,7 @@ namespace Services
 			return Input.GetKeyDown(BlueprintKeys[number]);
 		}
 
-		public void Enable() // TODO : Кажется этот метод не должен тут быть
+		public void Enable() // TODO: This method probably does not belong here
 		{
 			_isEnabled = true;
 		}

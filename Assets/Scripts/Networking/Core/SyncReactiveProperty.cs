@@ -28,6 +28,11 @@ namespace Networking.Core
 			_reactivePropertyWrapper = new ReactivePropertyWrapper(OnInnerReactivePropertyChanged);
 		}
 
+		public override void Reset()
+		{
+			_reactivePropertyWrapper.Value = default;
+		}
+
 		public override void OnSerializeAll(NetworkWriter writer)
 		{
 			writer.Write(_reactivePropertyWrapper.Value);
@@ -46,11 +51,6 @@ namespace Networking.Core
 		public override void OnDeserializeDelta(NetworkReader reader)
 		{
 			OnDeserializeAll(reader);
-		}
-
-		public override void Reset()
-		{
-			_reactivePropertyWrapper.Value = default;
 		}
 
 		public override void ClearChanges()

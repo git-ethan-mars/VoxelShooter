@@ -27,21 +27,6 @@ namespace GamePlay
 		protected CameraProvider CameraProvider { get; set; }
 		protected NetworkAudioSender AudioSender { get; set; }
 
-
-		public override void Select()
-		{
-			base.Select();
-			_onChangeSlot = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
-			ResetHit(_onChangeSlot.Token);
-		}
-
-		public override void Deselect()
-		{
-			base.Deselect();
-			_onChangeSlot?.Cancel();
-			_onChangeSlot?.Dispose();
-		}
-
 		private void Update()
 		{
 			if (!IsLocalItem)
@@ -61,7 +46,7 @@ namespace GamePlay
 
 			if (CameraProvider.GetBuildRayCastHit(out RaycastHit hit, Configure.Range))
 			{
-				Vector3Ushort voxelPosition = Vector3Ushort.FloorToUshort(hit.point - hit.normal / 2);
+				var voxelPosition = Vector3Ushort.FloorToUshort(hit.point - hit.normal / 2);
 
 				if (voxelPosition.y == 0)
 				{
@@ -71,6 +56,21 @@ namespace GamePlay
 				Graphics.DrawMesh(wireframeCube, Matrix4x4.TRS(voxelPosition + Map.WorldOffset, Quaternion.identity, Vector3.one * 1.001f),
 					wireframeMaterial, 0);
 			}
+		}
+
+
+		public override void Select()
+		{
+			base.Select();
+			_onChangeSlot = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+			ResetHit(_onChangeSlot.Token);
+		}
+
+		public override void Deselect()
+		{
+			base.Deselect();
+			_onChangeSlot?.Cancel();
+			_onChangeSlot?.Dispose();
 		}
 
 		[Command]
@@ -95,7 +95,7 @@ namespace GamePlay
 				return;
 			}
 
-			var mapDestruction = rayHit.collider.GetComponentInParent<MapDestruction>();
+			MapDestruction mapDestruction = rayHit.collider.GetComponentInParent<MapDestruction>();
 
 			if (mapDestruction != null)
 			{
@@ -104,7 +104,7 @@ namespace GamePlay
 				return;
 			}
 
-			var damageVisitor = rayHit.collider.GetComponentInParent<IDamageVisitor>();
+			IDamageVisitor damageVisitor = rayHit.collider.GetComponentInParent<IDamageVisitor>();
 
 			if (damageVisitor != null)
 			{

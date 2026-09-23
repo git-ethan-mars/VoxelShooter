@@ -19,6 +19,12 @@ namespace UI.SettingsMenuStates
 			};
 		}
 
+		public void Reset()
+		{
+			_currentState?.Exit();
+			_currentState = null;
+		}
+
 		public void SwitchState<TState>() where TState : ISettingsMenuState
 		{
 			ISettingsMenuState nextState = _states[typeof(TState)];
@@ -30,12 +36,6 @@ namespace UI.SettingsMenuStates
 			_currentState?.Exit();
 			_currentState = nextState;
 			_currentState.Enter();
-		}
-
-		public void Reset()
-		{
-			_currentState?.Exit();
-			_currentState = null;
 		}
 	}
 }

@@ -26,7 +26,7 @@ namespace GamePlay
 
 		public void ChangeClass(NetworkConnectionToClient connection, GameClass gameClass)
 		{
-			var playerData = _playerDataById[connection];
+			DeathMatchPlayerData playerData = _playerDataById[connection];
 			_playerDataById[connection] = playerData.WithGameClass(gameClass);
 		}
 	}

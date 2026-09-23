@@ -7,7 +7,7 @@ namespace VoxelMap
 	[BurstCompile]
 	public struct RecalculateFacesJob : IJob
 	{
-		private NativeReference<Face> _regeneratingRegeneratingNeighbours;
+		private NativeReference<Face> _regeneratingNeighbours;
 		private NativeHashMap<int, int> _faceCountChangesByChunk;
 
 		[ReadOnly] private NativeList<Voxel> _voxels;
@@ -21,7 +21,7 @@ namespace VoxelMap
 			_voxels = voxels;
 			_mapData = mapData;
 			_chunkIndex = chunkIndex;
-			_regeneratingRegeneratingNeighbours = regeneratingNeighbours;
+			_regeneratingNeighbours = regeneratingNeighbours;
 			_faceCountChangesByChunk = faceCountChangesByChunk;
 		}
 
@@ -29,7 +29,7 @@ namespace VoxelMap
 		{
 			_faceCountChangesByChunk[_chunkIndex] = 0;
 
-			for (var i = 0; i < _voxels.Length; i++)
+			for (int i = 0; i < _voxels.Length; i++)
 			{
 				ushort x = _voxels[i].Position.x;
 				ushort y = _voxels[i].Position.y;
@@ -53,7 +53,7 @@ namespace VoxelMap
 
 		private Face CalculateFaces(ushort x, ushort y, ushort z)
 		{
-			var face = Face.None;
+			Face face = Face.None;
 
 			if (_mapData[x, y, z].IsSolid())
 			{
@@ -132,32 +132,32 @@ namespace VoxelMap
 		{
 			if (x % Chunk.ChunkSize == 0)
 			{
-				_regeneratingRegeneratingNeighbours.Value |= Face.Left;
+				_regeneratingNeighbours.Value |= Face.Left;
 			}
 
 			if (x % Chunk.ChunkSize == Chunk.ChunkSize - 1)
 			{
-				_regeneratingRegeneratingNeighbours.Value |= Face.Right;
+				_regeneratingNeighbours.Value |= Face.Right;
 			}
 
 			if (y % Chunk.ChunkSize == 0)
 			{
-				_regeneratingRegeneratingNeighbours.Value |= Face.Bottom;
+				_regeneratingNeighbours.Value |= Face.Bottom;
 			}
 
 			if (y % Chunk.ChunkSize == Chunk.ChunkSize - 1)
 			{
-				_regeneratingRegeneratingNeighbours.Value |= Face.Top;
+				_regeneratingNeighbours.Value |= Face.Top;
 			}
 
 			if (z % Chunk.ChunkSize == 0)
 			{
-				_regeneratingRegeneratingNeighbours.Value |= Face.Back;
+				_regeneratingNeighbours.Value |= Face.Back;
 			}
 
 			if (z % Chunk.ChunkSize == Chunk.ChunkSize - 1)
 			{
-				_regeneratingRegeneratingNeighbours.Value |= Face.Front;
+				_regeneratingNeighbours.Value |= Face.Front;
 			}
 		}
 
@@ -174,7 +174,9 @@ namespace VoxelMap
 		private void UpdateSingleNeighbour(ushort nx, ushort ny, ushort nz, Face faceFlag, bool shouldHaveFace)
 		{
 			if (!_mapData.IsValidPosition(nx, ny, nz) || !_mapData[nx, ny, nz].IsSolid())
+			{
 				return;
+			}
 
 			int chunkIndex = _mapData.GetChunkIndex(nx, ny, nz);
 			Face oldFace = _mapData.GetFace(nx, ny, nz);

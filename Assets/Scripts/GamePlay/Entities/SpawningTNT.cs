@@ -49,6 +49,12 @@ namespace GamePlay
 				.AddTo(this);
 		}
 
+		private void OnDrawGizmosSelected()
+		{
+			Gizmos.color = Color.yellow;
+			Gizmos.DrawWireCube(Bounds.center, Bounds.size);
+		}
+
 		[ServerCallback]
 		public async UniTask ExplodeAsync(CancellationToken cancellationToken)
 		{
@@ -75,7 +81,7 @@ namespace GamePlay
 
 		private bool IsSuspended()
 		{
-			Vector3Ushort voxelPosition = Vector3Ushort.FloorToUshort(transform.position - Vector3.Scale(transform.up, Map.WorldOffset));
+			var voxelPosition = Vector3Ushort.FloorToUshort(transform.position - Vector3.Scale(transform.up, Map.WorldOffset));
 			VoxelData voxelData = MapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(voxelPosition);
 			return !voxelData.IsSolid();
 		}
@@ -89,12 +95,6 @@ namespace GamePlay
 			_audioSender.SendAudio(AudioType.TNTExplosion, transform.position);
 
 			Destroy(gameObject);
-		}
-
-		private void OnDrawGizmosSelected()
-		{
-			Gizmos.color = Color.yellow;
-			Gizmos.DrawWireCube(Bounds.center, Bounds.size);
 		}
 	}
 }

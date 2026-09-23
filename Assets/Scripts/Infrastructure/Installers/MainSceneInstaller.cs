@@ -1,5 +1,4 @@
 using GamePlay;
-using GamePlay.Audio;
 using Infrastructure.States;
 using Networking;
 using R3;
@@ -76,7 +75,7 @@ namespace Infrastructure.Installers
 
 		private static void RegisterGameStates(Container container)
 		{
-			var gameStateMachine = container.Single<GameStateMachine>();
+			GameStateMachine gameStateMachine = container.Single<GameStateMachine>();
 			gameStateMachine.RegisterState(container.Construct<InitializeHostState>());
 			gameStateMachine.RegisterState(container.Construct<InitializeClientState>());
 			gameStateMachine.RegisterState(container.Construct<JoinSteamLobbyState>());
@@ -85,11 +84,11 @@ namespace Infrastructure.Installers
 
 		private static void RegisterItemPresenters(Container container)
 		{
-			var staticData = container.Single<IStaticDataService>();
-			var cameraService = container.Single<CameraProvider>();
-			var uiProvider = container.Single<UIProvider>();
-			var characterProvider = container.Single<CharacterProvider>();
-			var registry = container.Single<ISlotPresenterRegistry>();
+			IStaticDataService staticData = container.Single<IStaticDataService>();
+			CameraProvider cameraService = container.Single<CameraProvider>();
+			UIProvider uiProvider = container.Single<UIProvider>();
+			CharacterProvider characterProvider = container.Single<CharacterProvider>();
+			ISlotPresenterRegistry registry = container.Single<ISlotPresenterRegistry>();
 			registry.Register<Block>((block, view) =>
 				new BlockPresenter(staticData, characterProvider, uiProvider, block, view));
 			registry.Register<DrillLauncher>((drill, view) =>

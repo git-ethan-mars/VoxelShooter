@@ -8,11 +8,11 @@ namespace GamePlay
 {
 	public class GameModeFactory
 	{
-		public async UniTask<GameMode> CreateGameMode(GameSettings gameSettings)
+		public async UniTask<GameMode> CreateGameModeAsync(GameSettings gameSettings)
 		{
 			var deathMatch = (DeathMatch)ConstructorInjector.Construct(typeof(DeathMatch),
 				SceneManager.GetActiveScene().GetSceneContainer());
-			await deathMatch.Start(gameSettings);
+			await deathMatch.StartAsync(gameSettings);
 			return deathMatch;
 		}
 	}

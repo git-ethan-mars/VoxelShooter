@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 
-namespace Services.ServerList
+namespace Services
 {
 	public interface IServerListService
 	{

@@ -41,7 +41,7 @@ namespace GamePlay
 
 			_boxSpawnTimer += deltaTime;
 
-			var map = _mapProvider.Map.CurrentValue;
+			Map map = _mapProvider.Map.CurrentValue;
 
 			if (map == null)
 			{
@@ -72,8 +72,8 @@ namespace GamePlay
 			_busyPositions.Add(gridPosition);
 			var boxPosition = new Vector3(topVoxelPosition.x + Map.WorldOffset.x, map.Height - 1,
 				topVoxelPosition.z + Map.WorldOffset.z);
-			var lootBoxType = LootBoxTypes[Random.Range(0, LootBoxTypes.Length)];
-			var lootBox = _entityFactory.CreateLootBox(lootBoxType, boxPosition);
+			LootBoxType lootBoxType = LootBoxTypes[Random.Range(0, LootBoxTypes.Length)];
+			LootBox lootBox = _entityFactory.CreateLootBox(lootBoxType, boxPosition);
 			lootBox.PickedUp.Subscribe(_ => _busyPositions.Remove(gridPosition)).AddTo(lootBox);
 		}
 

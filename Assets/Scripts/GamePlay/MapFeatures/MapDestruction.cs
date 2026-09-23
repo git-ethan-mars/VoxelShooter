@@ -21,13 +21,13 @@ namespace GamePlay
 
 		public void Visit(RangeWeapon rangeWeapon, RaycastHit hit)
 		{
-			Vector3Ushort position = Vector3Ushort.FloorToUshort(hit.point - hit.normal / 2);
+			var position = Vector3Ushort.FloorToUshort(hit.point - hit.normal / 2);
 			var voxel = new Voxel(position, _mapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(position));
 
 			if (IsDestructible(voxel))
 			{
 				var constantDamageCalculator = new ConstantDamageCalculator(rangeWeapon.Configure.Damage);
-				ListPool<Voxel>.Get(out var voxels);
+				ListPool<Voxel>.Get(out List<Voxel> voxels);
 				voxels.Add(voxel);
 				HandleVoxels(voxels, constantDamageCalculator);
 				ListPool<Voxel>.Release(voxels);
@@ -36,13 +36,13 @@ namespace GamePlay
 
 		public void Visit(MeleeWeapon meleeWeapon, bool isStrongHit, RaycastHit hit)
 		{
-			Vector3Ushort hitPosition = Vector3Ushort.FloorToUshort(hit.point - hit.normal / 2);
+			var hitPosition = Vector3Ushort.FloorToUshort(hit.point - hit.normal / 2);
 			var constantDamageCalculator = new ConstantDamageCalculator(meleeWeapon.Configure.DamageToVoxel);
-			ListPool<Voxel>.Get(out var voxels);
+			ListPool<Voxel>.Get(out List<Voxel> voxels);
 			if (isStrongHit)
 			{
 				const int length = 3;
-				for (var y = (ushort)(hitPosition.y - length / 2); y <= hitPosition.y + length / 2; y++)
+				for (ushort y = (ushort)(hitPosition.y - length / 2); y <= hitPosition.y + length / 2; y++)
 				{
 					var position = new Vector3Ushort(hitPosition.x, y, hitPosition.z);
 
@@ -66,7 +66,7 @@ namespace GamePlay
 
 			HandleVoxels(voxels, constantDamageCalculator);
 
-			var inventory = meleeWeapon.netIdentity.connectionToClient.identity.GetComponent<Character>().Inventory;
+			Inventory inventory = meleeWeapon.netIdentity.connectionToClient.identity.GetComponent<Character>().Inventory;
 			inventory.VoxelAmount.Value += voxels.Count;
 
 			ListPool<Voxel>.Release(voxels);

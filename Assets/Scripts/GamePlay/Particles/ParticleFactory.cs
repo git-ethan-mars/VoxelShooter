@@ -15,7 +15,7 @@ namespace GamePlay
 
 		public ParticleSystem CreateBulletImpact(Vector3 position, Quaternion rotation, Color color)
 		{
-			var particles = _assets.Instantiate(ParticlePath.BulletImpactPath, position, rotation)
+			ParticleSystem particles = _assets.Instantiate(ParticlePath.BulletImpactPath, position, rotation)
 				.GetComponent<ParticleSystem>();
 			ParticleSystem.MainModule main = particles.main;
 			main.startColor = color;
@@ -25,7 +25,7 @@ namespace GamePlay
 
 		public ParticleSystem CreateVoxelDestructionParticle(Vector3 position, Quaternion rotation, Color color)
 		{
-			var particles = _assets.Instantiate(ParticlePath.VoxelDestructionParticlePath, position, rotation)
+			ParticleSystem particles = _assets.Instantiate(ParticlePath.VoxelDestructionParticlePath, position, rotation)
 				.GetComponent<ParticleSystem>();
 			ParticleSystem.MainModule main = particles.main;
 			main.startColor = color;
@@ -35,7 +35,7 @@ namespace GamePlay
 
 		public ParticleSystem CreateBlood(Vector3 position, Quaternion rotation)
 		{
-			var blood = _assets.Instantiate(ParticlePath.BloodSprayPath, position, rotation)
+			ParticleSystem blood = _assets.Instantiate(ParticlePath.BloodSprayPath, position, rotation)
 				.GetComponent<ParticleSystem>();
 			DestroyParticleAsync(blood.gameObject, blood.main.startLifetime.constant).Forget();
 			return blood;
@@ -43,7 +43,7 @@ namespace GamePlay
 
 		public ParticleSystem CreateRchParticle(Vector3 position, int startSpeed, int burstCount, float radius)
 		{
-			var rchParticle = _assets.Instantiate(ParticlePath.RchParticlePath, position, Quaternion.identity)
+			ParticleSystem rchParticle = _assets.Instantiate(ParticlePath.RchParticlePath, position, Quaternion.identity)
 				.GetComponent<ParticleSystem>();
 			ParticleSystem.MainModule main = rchParticle.main;
 			main.startSpeed = startSpeed;

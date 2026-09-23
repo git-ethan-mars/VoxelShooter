@@ -1,7 +1,9 @@
+using System.Collections.Generic;
 using Data;
 using R3;
 using Services;
 using UnityEngine;
+using Gradient = Data.Gradient;
 
 namespace UI
 {
@@ -23,13 +25,13 @@ namespace UI
 		{
 			RectPaletteData rectPaletteData = staticData.GetRectPaletteData();
 			int column = rectPaletteData.Column;
-			var gradients = rectPaletteData.Gradients;
+			IReadOnlyList<Gradient> gradients = rectPaletteData.Gradients;
 			_pointerX = 0;
 			_pointerY = 0;
 			_colors = new Color[gradients.Count, column];
-			for (var i = 0; i < gradients.Count; i++)
+			for (int i = 0; i < gradients.Count; i++)
 			{
-				for (var j = 0; j < column; j++)
+				for (int j = 0; j < column; j++)
 				{
 					Color color = gradients[i].CalculateGradient((float)j / gradients.Count);
 					_colors[i, j] = color;

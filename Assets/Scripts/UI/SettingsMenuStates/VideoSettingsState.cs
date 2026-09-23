@@ -23,7 +23,7 @@ namespace UI.SettingsMenuStates
 			_videoSection = videoSection;
 			_storageService = storageService;
 
-			var currentSettings = _storageService.Load<VideoSettingsData>(IStorageService.VideoSettingsKey);
+			VideoSettingsData currentSettings = _storageService.Load<VideoSettingsData>(IStorageService.VideoSettingsKey);
 			_resolutionModel = new CarouselModel<Resolution>(currentSettings.Resolution, Screen.resolutions);
 			_screenModeModel =
 				new CarouselModel<FullScreenMode>(currentSettings.ScreenMode, FullScreenMode.FullScreenWindow, FullScreenMode.Windowed);

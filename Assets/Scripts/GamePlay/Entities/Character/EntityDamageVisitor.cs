@@ -33,7 +33,7 @@ namespace GamePlay
 					throw new ArgumentNullException(nameof(rangeWeapon.OwnerId));
 				}
 
-				var killReason = KillReasonsMapper.KillReasonByItemType(rangeWeapon.Type);
+				KillReason killReason = KillReasonsMapper.KillReasonByItemType(rangeWeapon.Type);
 				var targetId = new PlayerId(connectionToClient.connectionId);
 				var killData = new KillData(rangeWeapon.OwnerId.Value, targetId, killReason);
 				_killList.AddKill(killData);
@@ -54,7 +54,7 @@ namespace GamePlay
 					throw new ArgumentNullException(nameof(meleeWeapon.OwnerId));
 				}
 
-				var killReason = KillReasonsMapper.KillReasonByItemType(meleeWeapon.Type);
+				KillReason killReason = KillReasonsMapper.KillReasonByItemType(meleeWeapon.Type);
 				var targetId = new PlayerId(connectionToClient.connectionId);
 				var killData = new KillData(meleeWeapon.OwnerId.Value, targetId, killReason);
 				_killList.AddKill(killData);
@@ -69,7 +69,7 @@ namespace GamePlay
 				return;
 			}
 
-			var damage = (int)((1 - Vector3.Distance(transform.position, explosive.transform.position) / explosionData.radius)
+			int damage = (int)((1 - Vector3.Distance(transform.position, explosive.transform.position) / explosionData.radius)
 			                   * explosionData.damage);
 			healthSystem.Decrease(damage);
 
@@ -80,7 +80,7 @@ namespace GamePlay
 					throw new ArgumentNullException(nameof(explosive.OwnerId));
 				}
 
-				var killReason = KillReasonsMapper.KillReasonByExplosiveType(explosive.Type);
+				KillReason killReason = KillReasonsMapper.KillReasonByExplosiveType(explosive.Type);
 				var targetId = new PlayerId(connectionToClient.connectionId);
 				var killData = new KillData(explosive.OwnerId.Value, targetId, killReason);
 				_killList.AddKill(killData);

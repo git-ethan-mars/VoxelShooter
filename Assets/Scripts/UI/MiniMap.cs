@@ -56,12 +56,17 @@ namespace UI
 			RedrawMiniMap();
 		}
 
+		private void OnDestroy()
+		{
+			_minimapTexture.Release();
+		}
+
 		private void RedrawMiniMap()
 		{
 			int drawMiniMap = computeShader.FindKernel(DrawMiniMap);
 			computeShader.SetTexture(drawMiniMap, MapTexture, worldMap.MainTexture);
 			computeShader.SetTexture(drawMiniMap, MiniMapTexture, _minimapTexture);
-			var characterPosition = _characterProvider.Character.Value.transform.position;
+			Vector3 characterPosition = _characterProvider.Character.Value.transform.position;
 			computeShader.SetFloats(CharacterPosition, characterPosition.x, characterPosition.z);
 			Color waterColor = _mapProvider.Map.CurrentValue.MapConfigure.WaterColor;
 			computeShader.SetFloats(FallbackColor, waterColor.r, waterColor.g, waterColor.b, waterColor.a);
@@ -100,11 +105,6 @@ namespace UI
 		{
 			return Mathf.Abs(_characterProvider.Character.Value.transform.position.x - lootBoxPosition.x) < (float)_minimapTexture.width / 2 &&
 			       Mathf.Abs(_characterProvider.Character.Value.transform.position.z - lootBoxPosition.z) < (float)_minimapTexture.height / 2;
-		}
-
-		private void OnDestroy()
-		{
-			_minimapTexture.Release();
 		}
 	}
 }

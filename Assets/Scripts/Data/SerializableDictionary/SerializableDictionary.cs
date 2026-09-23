@@ -7,7 +7,7 @@ namespace Data.SerializableDictionary
 	[System.Serializable]
 	public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializationCallbackReceiver
 	{
-		[SerializeField] private List<SerializedDictionaryKVPProps<TKey, TValue>> dictionaryList = new();
+		[SerializeField] private List<SerializedDictionaryKVPProps<TKey, TValue>> dictionaryList = new List<SerializedDictionaryKVPProps<TKey, TValue>>();
 
 		public new TValue this[TKey key]
 		{
@@ -40,7 +40,7 @@ namespace Data.SerializableDictionary
 
 		void ISerializationCallbackReceiver.OnBeforeSerialize()
 		{
-			foreach (var kVP in this)
+			foreach (KeyValuePair<TKey, TValue> kVP in this)
 			{
 				if (dictionaryList.FirstOrDefault(value => this.Comparer.Equals(value.Key, kVP.Key))
 				    is SerializedDictionaryKVPProps<TKey, TValue> serializedKVP)
@@ -67,7 +67,7 @@ namespace Data.SerializableDictionary
 
 			dictionaryList.RemoveAll(r => r.Key == null);
 
-			foreach (var serializedKVP in dictionaryList)
+			foreach (SerializedDictionaryKVPProps<TKey, TValue> serializedKVP in dictionaryList)
 			{
 				if (!(serializedKVP.isKeyDuplicated = ContainsKey(serializedKVP.Key)))
 				{

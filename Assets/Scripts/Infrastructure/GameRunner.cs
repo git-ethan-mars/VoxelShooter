@@ -10,7 +10,7 @@ namespace Infrastructure
 
 		private void Awake()
 		{
-			var bootstrapper = FindAnyObjectByType<GameBootstrapper>();
+			GameBootstrapper bootstrapper = FindAnyObjectByType<GameBootstrapper>();
 
 			if (!bootstrapper)
 			{

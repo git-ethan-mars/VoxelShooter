@@ -17,7 +17,7 @@ namespace VoxelMap
 		public static async UniTask<MapData> LoadVxlAsync(string mapPath, CancellationToken cancellationToken = default)
 		{
 			byte[] data = await File.ReadAllBytesAsync(mapPath, cancellationToken);
-			var voxels = LoadVxlCore(data);
+			NativeArray<VoxelData> voxels = LoadVxlCore(data);
 			var mapData = new MapData(voxels, Width, _height, Depth);
 			return mapData;
 		}
@@ -25,7 +25,7 @@ namespace VoxelMap
 		public static MapData LoadVxl(string mapPath)
 		{
 			byte[] data = File.ReadAllBytes(mapPath);
-			var voxels = LoadVxlCore(data);
+			NativeArray<VoxelData> voxels = LoadVxlCore(data);
 			var mapData = new MapData(voxels, Width, _height, Depth);
 			return mapData;
 		}
@@ -33,7 +33,7 @@ namespace VoxelMap
 		private static NativeArray<VoxelData> LoadVxlCore(byte[] data)
 		{
 			_height = GetMapHeight(data);
-			var heightOffset = 0;
+			int heightOffset = 0;
 			if (_height % Chunk.ChunkSize != 0)
 			{
 				heightOffset = -_height;
@@ -42,13 +42,13 @@ namespace VoxelMap
 			}
 
 			var colors = new Color32[Width * _height * Depth];
-			var currentPosition = 0;
+			int currentPosition = 0;
 
-			for (var y = 0; y < Depth; ++y)
+			for (int y = 0; y < Depth; ++y)
 			{
-				for (var x = 0; x < Width; ++x)
+				for (int x = 0; x < Width; ++x)
 				{
-					var z = 0;
+					int z = 0;
 					for (; z < _height; ++z)
 					{
 						colors[GetPosition(x, z, y)] = new Color32(89, 53, 47, 255);
@@ -68,7 +68,7 @@ namespace VoxelMap
 
 						for (; z <= topColorEnd; z++)
 						{
-							var packedColor = BitConverter.ToUInt32(data, colorPosition);
+							uint packedColor = BitConverter.ToUInt32(data, colorPosition);
 							colorPosition += 4;
 							colors[GetPosition(x, z, y)] = packedColor.ToColor32();
 						}
@@ -90,7 +90,7 @@ namespace VoxelMap
 
 						for (z = bottomColorStart; z < bottomColorEnd; z++)
 						{
-							var packedColor = BitConverter.ToUInt32(data, colorPosition);
+							uint packedColor = BitConverter.ToUInt32(data, colorPosition);
 							colorPosition += 4;
 							colors[GetPosition(x, z, y)] = packedColor.ToColor32();
 						}
@@ -99,11 +99,11 @@ namespace VoxelMap
 			}
 
 			var voxels = new NativeArray<VoxelData>(Width * _height * Depth, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
-			for (var x = 0; x < Width; x++)
+			for (int x = 0; x < Width; x++)
 			{
-				for (var y = 0; y < _height - heightOffset; y++)
+				for (int y = 0; y < _height - heightOffset; y++)
 				{
-					for (var z = 0; z < Depth; z++)
+					for (int z = 0; z < Depth; z++)
 					{
 						int index = (Width - 1 - x) * _height * Depth + (_height - heightOffset - 1 - y) * Depth + z;
 						voxels[index] = new VoxelData(colors[GetPosition(x, y, z)]);
@@ -122,10 +122,10 @@ namespace VoxelMap
 
 		private static ushort GetMapHeight(IReadOnlyList<byte> data)
 		{
-			var position = 0;
+			int position = 0;
 			ushort height = 0;
-			for (var y = 0; y < Depth; y++)
-			for (var x = 0; x < Width; x++)
+			for (int y = 0; y < Depth; y++)
+			for (int x = 0; x < Width; x++)
 			{
 				while (true)
 				{

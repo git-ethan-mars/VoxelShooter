@@ -21,7 +21,7 @@ namespace GamePlay
 
 		public TEntity GetById<TEntity>(EntityId id) where TEntity : Entity
 		{
-			var foundEntity = _entities.GetValueOrDefault(id);
+			Entity foundEntity = _entities.GetValueOrDefault(id);
 
 			if (foundEntity == null)
 			{

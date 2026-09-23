@@ -38,13 +38,13 @@ namespace UI
 			ExitButtonPressed = exitButton.onClick.AsObservable();
 			ChangeClassButtonPressed = Observable.Empty<GameClass>();
 
-			for (var i = 0; i < playableGameClasses.Length; i++)
+			for (int i = 0; i < playableGameClasses.Length; i++)
 			{
 				GameClass gameClass = playableGameClasses[i];
 				gameClassesInfo[i].SetClassName(gameClass);
 
 				Characteristics characteristics = _staticData.GetCharacteristics(gameClass);
-				var itemTypes = _staticData.GetItems(gameClass);
+				IReadOnlyList<ItemType> itemTypes = _staticData.GetItems(gameClass);
 				gameClassesInfo[i].SetHealthValue(characteristics.MaxHealth);
 
 				SetupWeapon(gameClassesInfo[i], itemTypes[0], true);
@@ -61,7 +61,7 @@ namespace UI
 
 		private void SetupWeapon(GameClassInfo info, ItemType itemType, bool isMain)
 		{
-			var itemConfigure = _staticData.GetItemConfigure<InventoryItemConfigure>(itemType);
+			InventoryItemConfigure itemConfigure = _staticData.GetItemConfigure<InventoryItemConfigure>(itemType);
 
 			if (itemConfigure is RangeWeaponConfigure rangeWeaponConfigure)
 			{

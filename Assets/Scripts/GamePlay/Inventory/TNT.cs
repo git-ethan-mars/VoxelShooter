@@ -61,9 +61,9 @@ namespace GamePlay
 
 			if (_cameraProvider.GetBuildRayCastHit(out RaycastHit rayCastHit, PlaceDistance))
 			{
-				var voxelCenter = Vector3Int.FloorToInt(rayCastHit.point - rayCastHit.normal / 2) + Map.WorldOffset;
+				Vector3 voxelCenter = Vector3Int.FloorToInt(rayCastHit.point - rayCastHit.normal / 2) + Map.WorldOffset;
 				Vector3 position = voxelCenter + rayCastHit.normal / 2;
-				Quaternion rotation = Quaternion.LookRotation(rayCastHit.normal == Vector3.up || rayCastHit.normal == Vector3.down ? Vector3.forward : Vector3.up, rayCastHit.normal);
+				var rotation = Quaternion.LookRotation(rayCastHit.normal == Vector3.up || rayCastHit.normal == Vector3.down ? Vector3.forward : Vector3.up, rayCastHit.normal);
 				Graphics.DrawMesh(tntMesh, Matrix4x4.TRS(position, rotation, Vector3.one), tntMaterial, 0);
 			}
 		}
@@ -81,7 +81,7 @@ namespace GamePlay
 				return;
 			}
 
-			var character = connection.identity.GetComponent<Character>();
+			Character character = connection.identity.GetComponent<Character>();
 
 			if (character == null)
 			{
@@ -98,7 +98,7 @@ namespace GamePlay
 
 			Vector3 voxelCenter = Vector3Int.FloorToInt(rayHit.point - rayHit.normal / 2) + Map.WorldOffset;
 			Vector3 position = voxelCenter + rayHit.normal / 2;
-			Quaternion rotation = Quaternion.LookRotation(rayHit.normal == Vector3.up || rayHit.normal == Vector3.down ? Vector3.forward : Vector3.up, rayHit.normal);
+			var rotation = Quaternion.LookRotation(rayHit.normal == Vector3.up || rayHit.normal == Vector3.down ? Vector3.forward : Vector3.up, rayHit.normal);
 			SpawningTNT tnt = _entityFactory.CreateSpawningTnt(position, rotation, connection);
 			tnt.ExplodeAsync(tnt.destroyCancellationToken).Forget();
 			_amount.Value -= 1;

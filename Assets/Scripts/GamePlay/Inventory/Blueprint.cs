@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Data;
-using GamePlay.Audio;
 using Mirror;
 using R3;
 using Reflex.Attributes;
@@ -68,24 +67,6 @@ namespace GamePlay
 			meshFilter.mesh = CreateBlueprintMesh();
 		}
 
-		public Vector3Int GetPlacementPosition(RaycastHit hit)
-		{
-			RefreshPositions();
-			Vector3Int anchor = Vector3Int.FloorToInt(hit.point + hit.normal / 2);
-			var normal = Vector3Int.RoundToInt(hit.normal);
-			var offset = new Vector3Int(
-				GetSurfaceOffset(normal.x, _minPosition.x, _maxPosition.x),
-				GetSurfaceOffset(normal.y, _minPosition.y, _maxPosition.y),
-				GetSurfaceOffset(normal.z, _minPosition.z, _maxPosition.z));
-			return anchor + offset;
-		}
-
-		public override void Deselect()
-		{
-			base.Deselect();
-			meshRenderer.enabled = false;
-		}
-
 		private void Update()
 		{
 			if (!IsLocalItem)
@@ -107,7 +88,7 @@ namespace GamePlay
 				CmdRotate();
 			}
 
-			for (var i = 0; i < Configure.Layouts.Count; i++)
+			for (int i = 0; i < Configure.Layouts.Count; i++)
 			{
 				if (_inputService.IsBlueprintButtonDown(i))
 				{
@@ -118,7 +99,7 @@ namespace GamePlay
 			if (_cameraProvider.GetBuildRayCastHit(out RaycastHit hit, placeDistance))
 			{
 				Vector3Int blueprintPosition = GetPlacementPosition(hit);
-				var buildVisitor = hit.collider.GetComponentInParent<IBuildVisitor>();
+				IBuildVisitor buildVisitor = hit.collider.GetComponentInParent<IBuildVisitor>();
 
 				if (Positions.Any(offset => !buildVisitor.IsAvailablePosition(blueprintPosition + offset)))
 				{
@@ -134,7 +115,7 @@ namespace GamePlay
 
 				if (_inputService.IsScrollButtonDown())
 				{
-					Vector3Ushort colorPickingPosition = Vector3Ushort.FloorToUshort(hit.point - hit.normal / 2);
+					var colorPickingPosition = Vector3Ushort.FloorToUshort(hit.point - hit.normal / 2);
 					VoxelData colorPickingVoxel = _mapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(colorPickingPosition);
 					character.Inventory.DesiredVoxelColor.Value = colorPickingVoxel.Color;
 					Debug.Log(colorPickingVoxel.Color);
@@ -144,6 +125,24 @@ namespace GamePlay
 			{
 				meshRenderer.enabled = false;
 			}
+		}
+
+		public Vector3Int GetPlacementPosition(RaycastHit hit)
+		{
+			RefreshPositions();
+			var anchor = Vector3Int.FloorToInt(hit.point + hit.normal / 2);
+			var normal = Vector3Int.RoundToInt(hit.normal);
+			var offset = new Vector3Int(
+				GetSurfaceOffset(normal.x, _minPosition.x, _maxPosition.x),
+				GetSurfaceOffset(normal.y, _minPosition.y, _maxPosition.y),
+				GetSurfaceOffset(normal.z, _minPosition.z, _maxPosition.z));
+			return anchor + offset;
+		}
+
+		public override void Deselect()
+		{
+			base.Deselect();
+			meshRenderer.enabled = false;
 		}
 
 		private static int GetSurfaceOffset(int normal, int min, int max)
@@ -210,7 +209,7 @@ namespace GamePlay
 			}
 
 			_positions.Clear();
-			Quaternion rotation = Quaternion.Euler(0, 90 * _rotationStep, 0);
+			var rotation = Quaternion.Euler(0, 90 * _rotationStep, 0);
 			var min = new Vector3Int(int.MaxValue, int.MaxValue, int.MaxValue);
 			var max = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
 
@@ -236,7 +235,7 @@ namespace GamePlay
 				return;
 			}
 
-			var character = connection.identity.GetComponent<Character>();
+			Character character = connection.identity.GetComponent<Character>();
 
 			if (character == null)
 			{
@@ -256,7 +255,7 @@ namespace GamePlay
 				return;
 			}
 
-			var buildVisitor = rayHit.collider.GetComponentInParent<IBuildVisitor>();
+			IBuildVisitor buildVisitor = rayHit.collider.GetComponentInParent<IBuildVisitor>();
 
 			if (buildVisitor != null && buildVisitor.Visit(this, rayHit, voxelColor))
 			{
@@ -271,7 +270,7 @@ namespace GamePlay
 		[TargetRpc]
 		private void PlayDeniedSound()
 		{
-			_audioPlayer.Play(AudioType.ShotgunShoot, transform.position).Forget();
+			_audioPlayer.PlayAsync(AudioType.ShotgunShoot, transform.position).Forget();
 		}
 
 		private Mesh CreateBlueprintMesh()
@@ -284,7 +283,7 @@ namespace GamePlay
 			var triangles = new List<int>();
 			var occupied = new HashSet<Vector3Int>(Positions);
 
-			for (var i = 0; i < Positions.Count; i++)
+			for (int i = 0; i < Positions.Count; i++)
 			{
 				Vector3Int voxelPosition = Positions[i];
 
@@ -342,7 +341,7 @@ namespace GamePlay
 			uv.Add(new Vector2(1, 1));
 			uv.Add(new Vector2(1, 0));
 
-			for (var i = 0; i < 4; i++)
+			for (int i = 0; i < 4; i++)
 			{
 				normals.Add(Vector3.up);
 				colors.Add(color);
@@ -364,7 +363,7 @@ namespace GamePlay
 			uv.Add(new Vector2(1, 0));
 			uv.Add(new Vector2(0, 0));
 
-			for (var i = 0; i < 4; i++)
+			for (int i = 0; i < 4; i++)
 			{
 				normals.Add(Vector3.down);
 				colors.Add(color);
@@ -386,7 +385,7 @@ namespace GamePlay
 			uv.Add(new Vector2(1, 1));
 			uv.Add(new Vector2(0, 1));
 
-			for (var i = 0; i < 4; i++)
+			for (int i = 0; i < 4; i++)
 			{
 				normals.Add(Vector3.forward);
 				colors.Add(color);
@@ -408,7 +407,7 @@ namespace GamePlay
 			uv.Add(new Vector2(1, 0));
 			uv.Add(new Vector2(1, 1));
 
-			for (var i = 0; i < 4; i++)
+			for (int i = 0; i < 4; i++)
 			{
 				normals.Add(Vector3.back);
 				colors.Add(color);
@@ -430,7 +429,7 @@ namespace GamePlay
 			uv.Add(new Vector2(1, 0));
 			uv.Add(new Vector2(1, 1));
 
-			for (var i = 0; i < 4; i++)
+			for (int i = 0; i < 4; i++)
 			{
 				normals.Add(Vector3.right);
 				colors.Add(color);
@@ -452,7 +451,7 @@ namespace GamePlay
 			uv.Add(new Vector2(1, 1));
 			uv.Add(new Vector2(0, 1));
 
-			for (var i = 0; i < 4; i++)
+			for (int i = 0; i < 4; i++)
 			{
 				normals.Add(Vector3.left);
 				colors.Add(color);

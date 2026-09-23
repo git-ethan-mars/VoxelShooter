@@ -32,7 +32,7 @@ namespace Editor
 		public override void OnImportAsset(AssetImportContext ctx)
 		{
 			string mapName = Path.GetFileNameWithoutExtension(ctx.assetPath);
-			MapConfigureLoader mapConfigureLoader = new MapConfigureLoader();
+			var mapConfigureLoader = new MapConfigureLoader();
 			MapConfigure mapConfigure = mapConfigureLoader.GetMapConfigure(mapName);
 			using MapData mapData = MapDataReader.ReadFromFile(mapName);
 			Texture2D minimapTexture = GetMinimapTexture(mapData);
@@ -41,7 +41,7 @@ namespace Editor
 
 		private Texture2D GetMinimapTexture(MapData mapData)
 		{
-			Color32[] colors = new Color32[mapData.Width * mapData.Depth];
+			var colors = new Color32[mapData.Width * mapData.Depth];
 
 			for (ushort x = 0; x < mapData.Width; x++)
 			{
@@ -51,7 +51,7 @@ namespace Editor
 				}
 			}
 
-			Texture2D texture = new Texture2D(mapData.Width, mapData.Depth);
+			var texture = new Texture2D(mapData.Width, mapData.Depth);
 
 			texture.filterMode = FilterMode.Point;
 			texture.SetPixels32(colors);

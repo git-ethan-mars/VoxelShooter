@@ -2,7 +2,6 @@ using Infrastructure.States;
 using R3;
 using Reflex.Core;
 using Services;
-using Services.ServerList;
 using UI;
 using UnityEngine;
 
@@ -41,7 +40,7 @@ namespace Infrastructure.Installers
 		private void OnContainerBuilt(Container container)
 		{
 			container.Single<IStaticDataService>().Initialize();
-			var gameStateMachine = container.Single<GameStateMachine>();
+			GameStateMachine gameStateMachine = container.Single<GameStateMachine>();
 			gameStateMachine.RegisterState(container.Construct<BootstrapState>());
 			gameStateMachine.RegisterState(container.Construct<GameMenuState>());
 		}

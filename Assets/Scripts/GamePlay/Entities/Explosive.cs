@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Data;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -28,30 +29,30 @@ namespace GamePlay
 		{
 			if (MapProvider.Map.CurrentValue.TryGetFeature(out MapDestruction mapDestruction))
 			{
-				Vector3Ushort explosionCenter = Vector3Ushort.FloorToUshort(transform.position);
+				var explosionCenter = Vector3Ushort.FloorToUshort(transform.position);
 
 				if (!MapProvider.Map.CurrentValue.IsInsideMap(explosionCenter.x, explosionCenter.y, explosionCenter.z))
 				{
 					return;
 				}
 
-				ListPool<Voxel>.Get(out var voxels);
+				ListPool<Voxel>.Get(out List<Voxel> voxels);
 				var damageCalculator = new SphereDamageCalculator(explosionCenter, explosionData.radius, explosionData.damage);
 
-				for (var x = (ushort)Mathf.Max(explosionCenter.x - explosionData.radius, 0);
+				for (ushort x = (ushort)Mathf.Max(explosionCenter.x - explosionData.radius, 0);
 				     x <= Mathf.Min(explosionCenter.x + explosionData.radius,
 					     MapProvider.Map.CurrentValue.Width);
 				     x++)
 				{
-					for (var y = (ushort)Mathf.Max(explosionCenter.y - explosionData.radius, 0);
+					for (ushort y = (ushort)Mathf.Max(explosionCenter.y - explosionData.radius, 0);
 					     y <= Mathf.Min(explosionCenter.y + explosionData.radius, MapProvider.Map.CurrentValue.Height);
 					     y++)
 					{
-						for (var z = (ushort)Mathf.Max(explosionCenter.z - explosionData.radius, 0);
+						for (ushort z = (ushort)Mathf.Max(explosionCenter.z - explosionData.radius, 0);
 						     z <= Mathf.Min(explosionCenter.z + explosionData.radius, MapProvider.Map.CurrentValue.Depth);
 						     z++)
 						{
-							Vector3Ushort position = new Vector3Ushort(x, y, z);
+							var position = new Vector3Ushort(x, y, z);
 
 							VoxelData blockData = MapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(position);
 							var voxel = new Voxel(position, blockData);

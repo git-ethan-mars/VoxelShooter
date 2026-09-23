@@ -24,7 +24,7 @@ namespace GamePlay
 			foreach (ItemType itemType in _staticData.GetItems(gameClass))
 			{
 				GameObject itemPrefab = _staticData.GetItemPrefab(itemType);
-				var item = _assets.Instantiate(itemPrefab).GetComponent<InventoryItem>();
+				InventoryItem item = _assets.Instantiate(itemPrefab).GetComponent<InventoryItem>();
 				NetworkServer.Spawn(item.gameObject);
 				items.Add(item);
 			}

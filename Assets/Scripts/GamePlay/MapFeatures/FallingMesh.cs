@@ -37,20 +37,20 @@ namespace GamePlay
 			}
 
 			_hasCollided = true;
-			await ProcessCollision(meshFilter.mesh, length, DestructionTime);
+			await ProcessCollisionAsync(meshFilter.mesh, length, DestructionTime);
 		}
 
-		private async UniTask ProcessCollision(Mesh mesh, int length, float lifetime)
+		private async UniTask ProcessCollisionAsync(Mesh mesh, int length, float lifetime)
 		{
 			await UniTask.WaitForSeconds(lifetime);
 
-			var vertices = mesh.vertices;
-			var colors = mesh.colors;
+			Vector3[] vertices = mesh.vertices;
+			Color[] colors = mesh.colors;
 			var particlesContainer = new List<ParticleSystem>();
 			int blocksCount = length / 24;
 			double modifier = Math.Max(Math.Round((double)blocksCount / ParticleSystemsCountModifier), 1);
-			var counter = 0;
-			for (var i = 0; i < length; i += 24)
+			int counter = 0;
+			for (int i = 0; i < length; i += 24)
 			{
 				if (counter % modifier == 0)
 				{
@@ -67,7 +67,7 @@ namespace GamePlay
 			meshRenderer.enabled = false;
 			GetComponent<Collider>().enabled = false;
 			rb.isKinematic = true;
-			var tasks = particlesContainer.Select(p => _particlePool.ReleaseAsync(p, p.main.startLifetime.constant));
+			IEnumerable<UniTask> tasks = particlesContainer.Select(p => _particlePool.ReleaseAsync(p, p.main.startLifetime.constant));
 			await UniTask.WhenAll(tasks);
 			await UniTask.WaitForSeconds(lifetime);
 			Destroy(gameObject);

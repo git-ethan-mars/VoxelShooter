@@ -46,13 +46,13 @@ namespace GamePlay
 
 			if (_cameraProvider.GetBuildRayCastHit(out RaycastHit hit, placeDistance))
 			{
-				var voxelPosition = Vector3Int.FloorToInt(hit.point - hit.normal / 2) + Map.WorldOffset;
+				Vector3 voxelPosition = Vector3Int.FloorToInt(hit.point - hit.normal / 2) + Map.WorldOffset;
 				Graphics.DrawMesh(wireframeCube, Matrix4x4.TRS(voxelPosition, Quaternion.identity, Vector3.one * 1.001f),
 					wireframeMaterial, 0);
 
 				if (_inputService.IsScrollButtonDown())
 				{
-					Vector3Ushort colorPickingPosition = Vector3Ushort.FloorToUshort(hit.point - hit.normal / 2);
+					var colorPickingPosition = Vector3Ushort.FloorToUshort(hit.point - hit.normal / 2);
 					VoxelData colorPickingVoxel = _mapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(colorPickingPosition);
 					character.Inventory.DesiredVoxelColor.Value = colorPickingVoxel.Color;
 					Debug.Log(colorPickingVoxel.Color);
@@ -68,7 +68,7 @@ namespace GamePlay
 				return;
 			}
 
-			var character = connection.identity.GetComponent<Character>();
+			Character character = connection.identity.GetComponent<Character>();
 
 			if (character == null)
 			{
@@ -87,7 +87,7 @@ namespace GamePlay
 				return;
 			}
 
-			var buildVisitor = rayHit.collider.GetComponentInParent<IBuildVisitor>();
+			IBuildVisitor buildVisitor = rayHit.collider.GetComponentInParent<IBuildVisitor>();
 
 			if (buildVisitor != null && buildVisitor.Visit(this, rayHit, voxelColor))
 			{

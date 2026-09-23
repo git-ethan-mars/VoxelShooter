@@ -32,7 +32,7 @@ namespace GamePlay
 			if (meshData.Vertices.Count > MaxVerticesForMeshCollider)
 			{
 				fallingMesh.AddComponent<SphereCollider>();
-				var sphereCollider = fallingMesh.GetComponent<SphereCollider>();
+				SphereCollider sphereCollider = fallingMesh.GetComponent<SphereCollider>();
 				Bounds meshRenderer = fallingMesh.GetComponent<MeshRenderer>().bounds;
 				sphereCollider.center = meshRenderer.center;
 				sphereCollider.radius = 1;
@@ -41,7 +41,7 @@ namespace GamePlay
 			else
 			{
 				fallingMesh.AddComponent<MeshCollider>();
-				var meshCollider = fallingMesh.GetComponent<MeshCollider>();
+				MeshCollider meshCollider = fallingMesh.GetComponent<MeshCollider>();
 				meshCollider.convex = true;
 				meshCollider.sharedMesh = mesh;
 				meshCollider.material = _assets.Load<PhysicsMaterial>(MeshPath.PhysicMaterial);

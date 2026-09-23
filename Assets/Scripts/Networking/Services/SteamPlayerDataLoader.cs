@@ -46,8 +46,8 @@ namespace Networking
 				Debug.Log("Can't get avatar size");
 			}
 
-			var avatarSizeInBytes = (int)(avatarWidth * avatarHeight * 4);
-			var avatarBuffer = new byte[avatarSizeInBytes];
+			int avatarSizeInBytes = (int)(avatarWidth * avatarHeight * 4);
+			byte[] avatarBuffer = new byte[avatarSizeInBytes];
 			if (!SteamUtils.GetImageRGBA(imageHandle, avatarBuffer, avatarSizeInBytes))
 			{
 				Debug.Log("Can't download avatar");
@@ -61,7 +61,7 @@ namespace Networking
 
 		private void OnPlayerAvatarDownloaded(AvatarImageLoaded_t avatarImageResult)
 		{
-			var texture = ReadPlayerAvatar(avatarImageResult.m_iImage);
+			Texture2D texture = ReadPlayerAvatar(avatarImageResult.m_iImage);
 			_taskCancellationSource.TrySetResult(texture);
 		}
 	}

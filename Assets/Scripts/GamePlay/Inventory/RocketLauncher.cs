@@ -68,7 +68,7 @@ namespace GamePlay
 			}
 
 			Vector3 rocketPosition = ray.origin + ray.direction * 3;
-			Quaternion rocketRotation = Quaternion.LookRotation(ray.direction);
+			var rocketRotation = Quaternion.LookRotation(ray.direction);
 			Rocket rocket = _entityFactory.CreateRocket(rocketPosition, rocketRotation, connectionToClient);
 			rocket.Launch();
 			_chargedRockets.Value -= 1;

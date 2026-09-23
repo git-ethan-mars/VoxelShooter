@@ -22,7 +22,7 @@ namespace GamePlay
 
 		public void GenerateFallVoxels(Voxel[] voxels)
 		{
-			for (var i = 0; i < voxels.Length; i++)
+			for (int i = 0; i < voxels.Length; i++)
 			{
 				int x = voxels[i].Position.x;
 				int y = voxels[i].Position.y;

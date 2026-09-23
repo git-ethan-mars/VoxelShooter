@@ -17,7 +17,7 @@ namespace Data.SerializableDictionary
 					return null;
 				}
 
-				T castValue = value as T;
+				var castValue = value as T;
 				if (castValue == null)
 				{
 					Debug.LogError($"value cannot be cast to {typeof(T)}. It is of type {value.GetType()}");

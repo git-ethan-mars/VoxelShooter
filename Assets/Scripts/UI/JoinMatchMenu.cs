@@ -1,6 +1,7 @@
+using System.Collections.Generic;
 using R3;
 using Reflex.Attributes;
-using Services.ServerList;
+using Services;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -23,7 +24,7 @@ namespace UI
 
 		public override async void Show()
 		{
-			var servers = await _serverList.GetServersAsync(Application.exitCancellationToken);
+			List<Server> servers = await _serverList.GetServersAsync(Application.exitCancellationToken);
 			serverListView.Init(servers);
 		}
 

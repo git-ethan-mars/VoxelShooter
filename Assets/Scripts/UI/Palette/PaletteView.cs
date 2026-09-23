@@ -26,15 +26,43 @@ namespace UI
 			_characterProvider = characterProvider;
 		}
 
+		private void Update()
+		{
+			if (_inputService.IsUpArrowButtonDown())
+			{
+				_rectPalette.MovePointerUp();
+			}
+
+			if (_inputService.IsDownArrowButtonDown())
+			{
+				_rectPalette.MovePointerDown();
+			}
+
+			if (_inputService.IsRightArrowButtonDown())
+			{
+				_rectPalette.MovePointerRight();
+			}
+
+			if (_inputService.IsLeftArrowButtonDown())
+			{
+				_rectPalette.MovePointerLeft();
+			}
+		}
+
+		private void OnDestroy()
+		{
+			_cts?.Dispose();
+		}
+
 		public void Initialize()
 		{
 			Character character = _characterProvider.Character.Value;
 
 			grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
 			grid.constraintCount = _rectPalette.ColumnCount;
-			for (var i = 0; i < _rectPalette.RowCount; i++)
+			for (int i = 0; i < _rectPalette.RowCount; i++)
 			{
-				for (var j = 0; j < _rectPalette.ColumnCount; j++)
+				for (int j = 0; j < _rectPalette.ColumnCount; j++)
 				{
 					PaletteElementView element = SpawnElement();
 					element.Construct(_rectPalette[i, j]);
@@ -65,34 +93,6 @@ namespace UI
 
 			_cts = new CancellationTokenSource();
 			await _selectedElement.RunAnimationAsync(_cts.Token);
-		}
-
-		private void Update()
-		{
-			if (_inputService.IsUpArrowButtonDown())
-			{
-				_rectPalette.MovePointerUp();
-			}
-
-			if (_inputService.IsDownArrowButtonDown())
-			{
-				_rectPalette.MovePointerDown();
-			}
-
-			if (_inputService.IsRightArrowButtonDown())
-			{
-				_rectPalette.MovePointerRight();
-			}
-
-			if (_inputService.IsLeftArrowButtonDown())
-			{
-				_rectPalette.MovePointerLeft();
-			}
-		}
-
-		private void OnDestroy()
-		{
-			_cts?.Dispose();
 		}
 	}
 }

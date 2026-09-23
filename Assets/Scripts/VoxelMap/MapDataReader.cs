@@ -63,13 +63,13 @@ namespace VoxelMap
 			using var ms = new MemoryStream();
 			stream.CopyTo(ms);
 			byte[] bytes = ms.ToArray();
-			var width = BitConverter.ToUInt16(bytes, 0);
-			var height = BitConverter.ToUInt16(bytes, 4);
-			var depth = BitConverter.ToUInt16(bytes, 8);
+			ushort width = BitConverter.ToUInt16(bytes, 0);
+			ushort height = BitConverter.ToUInt16(bytes, 4);
+			ushort depth = BitConverter.ToUInt16(bytes, 8);
 			var voxels = new NativeArray<VoxelData>(width * height * depth, Allocator.Persistent);
-			var position = 12;
+			int position = 12;
 			int chunksCount = width * height * depth / Chunk.ChunkSizeCubed;
-			for (var i = 0; i < chunksCount; i++)
+			for (int i = 0; i < chunksCount; i++)
 			{
 				var mapRun = (MapRun)bytes[position];
 				position += 1;
@@ -77,9 +77,9 @@ namespace VoxelMap
 				{
 					if (mapRun == MapRun.Solid)
 					{
-						var solidStart = BitConverter.ToInt32(bytes, position);
+						int solidStart = BitConverter.ToInt32(bytes, position);
 						position += 4;
-						var solidEnd = BitConverter.ToInt32(bytes, position);
+						int solidEnd = BitConverter.ToInt32(bytes, position);
 						position += 4;
 						for (int j = solidStart; j <= solidEnd; j++)
 						{
@@ -89,9 +89,9 @@ namespace VoxelMap
 
 					if (mapRun == MapRun.Colored)
 					{
-						var coloredStart = BitConverter.ToInt32(bytes, position);
+						int coloredStart = BitConverter.ToInt32(bytes, position);
 						position += 4;
-						var coloredEnd = BitConverter.ToInt32(bytes, position);
+						int coloredEnd = BitConverter.ToInt32(bytes, position);
 						position += 4;
 						for (int j = coloredStart; j <= coloredEnd; j++)
 						{
@@ -116,13 +116,13 @@ namespace VoxelMap
 			using var ms = new MemoryStream();
 			await stream.CopyToAsync(ms, token);
 			byte[] bytes = ms.ToArray();
-			var width = BitConverter.ToUInt16(bytes, 0);
-			var height = BitConverter.ToUInt16(bytes, 4);
-			var depth = BitConverter.ToUInt16(bytes, 8);
+			ushort width = BitConverter.ToUInt16(bytes, 0);
+			ushort height = BitConverter.ToUInt16(bytes, 4);
+			ushort depth = BitConverter.ToUInt16(bytes, 8);
 			var voxels = new NativeArray<VoxelData>(width * height * depth, Allocator.Persistent);
-			var position = 12;
+			int position = 12;
 			int chunksCount = width * height * depth / Chunk.ChunkSizeCubed;
-			for (var i = 0; i < chunksCount; i++)
+			for (int i = 0; i < chunksCount; i++)
 			{
 				var mapRun = (MapRun)bytes[position];
 				position += 1;
@@ -130,9 +130,9 @@ namespace VoxelMap
 				{
 					if (mapRun == MapRun.Solid)
 					{
-						var solidStart = BitConverter.ToInt32(bytes, position);
+						int solidStart = BitConverter.ToInt32(bytes, position);
 						position += 4;
-						var solidEnd = BitConverter.ToInt32(bytes, position);
+						int solidEnd = BitConverter.ToInt32(bytes, position);
 						position += 4;
 						for (int j = solidStart; j <= solidEnd; j++)
 						{
@@ -142,9 +142,9 @@ namespace VoxelMap
 
 					if (mapRun == MapRun.Colored)
 					{
-						var coloredStart = BitConverter.ToInt32(bytes, position);
+						int coloredStart = BitConverter.ToInt32(bytes, position);
 						position += 4;
-						var coloredEnd = BitConverter.ToInt32(bytes, position);
+						int coloredEnd = BitConverter.ToInt32(bytes, position);
 						position += 4;
 						for (int j = coloredStart; j <= coloredEnd; j++)
 						{

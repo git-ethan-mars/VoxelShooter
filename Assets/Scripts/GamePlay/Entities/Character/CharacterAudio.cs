@@ -24,17 +24,17 @@ namespace GamePlay
 			_storageService = storageService;
 		}
 
-		public override void OnStartLocalPlayer()
-		{
-			_storageService.Subscribe<VolumeSettingsData>(OnVolumeSettingsChanged)
-				.AddTo(this);
-		}
-
 		private void Start()
 		{
 			character.HealthSystem.Health.Pairwise()
 				.Where(pair => pair.Previous > pair.Current)
 				.Subscribe(_ => PlayHurtSound())
+				.AddTo(this);
+		}
+
+		public override void OnStartLocalPlayer()
+		{
+			_storageService.Subscribe<VolumeSettingsData>(OnVolumeSettingsChanged)
 				.AddTo(this);
 		}
 

@@ -31,7 +31,7 @@ namespace UI.Carousel
 			mapImage.transform.localPosition = new Vector3((inverse ? -1 : 1) * mask.rectTransform.rect.width, 0, 0);
 			previousMapImage.transform.localPosition = Vector3.zero;
 
-			UniTask slideAnimation = DOTween.Sequence()
+			var slideAnimation = DOTween.Sequence()
 				.Append(mapImage.transform
 					.DOLocalMoveX(0, animationDuration)
 					.SetEase(Ease.InOutSine))

@@ -58,7 +58,7 @@ namespace VoxelMap
 
 		public Face GetFace(ushort x, ushort y, ushort z)
 		{
-			var faceIndex = GetVoxelIndex(x, y, z);
+			int faceIndex = GetVoxelIndex(x, y, z);
 
 			if (!IsValidPosition(x, y, z))
 			{
@@ -70,7 +70,7 @@ namespace VoxelMap
 
 		public void SetFace(ushort x, ushort y, ushort z, Face face)
 		{
-			var faceIndex = GetVoxelIndex(x, y, z);
+			int faceIndex = GetVoxelIndex(x, y, z);
 
 			if (!IsValidPosition(x, y, z))
 			{
@@ -125,7 +125,7 @@ namespace VoxelMap
 			finalBuffer.AddInt(Height);
 			finalBuffer.AddInt(Depth);
 
-			foreach (var chunkBuffer in chunkBuffers)
+			foreach (NativeList<byte> chunkBuffer in chunkBuffers)
 			{
 				finalBuffer.AddRange(chunkBuffer.AsArray());
 				chunkBuffer.Dispose();
@@ -154,7 +154,7 @@ namespace VoxelMap
 			finalBuffer.AddInt(Height);
 			finalBuffer.AddInt(Depth);
 
-			foreach (var chunkBuffer in chunkBuffers)
+			foreach (NativeList<byte> chunkBuffer in chunkBuffers)
 			{
 				finalBuffer.AddRange(chunkBuffer.AsArray());
 				chunkBuffer.Dispose();
@@ -207,7 +207,7 @@ namespace VoxelMap
 
 			public Face GetFace(ushort x, ushort y, ushort z)
 			{
-				var faceIndex = GetVoxelIndex(x, y, z);
+				int faceIndex = GetVoxelIndex(x, y, z);
 
 				if (!IsValidPosition(x, y, z))
 				{
@@ -236,7 +236,7 @@ namespace VoxelMap
 				finalBuffer.AddInt(_height);
 				finalBuffer.AddInt(_depth);
 
-				foreach (var chunkBuffer in chunkBuffers)
+				foreach (NativeList<byte> chunkBuffer in chunkBuffers)
 				{
 					finalBuffer.AddRange(chunkBuffer.AsArray());
 					chunkBuffer.Dispose();

@@ -49,7 +49,7 @@ namespace Services
 
 		public IReadOnlyList<ItemType> GetItems(GameClass gameClass)
 		{
-			if (_inventoryByGameClass.TryGetValue(gameClass, out var items))
+			if (_inventoryByGameClass.TryGetValue(gameClass, out List<ItemType> items))
 			{
 				return items;
 			}
@@ -104,7 +104,7 @@ namespace Services
 
 		public Sprite GetSlotIcon(ItemType type)
 		{
-			if (_slotIconByItemType.TryGetValue(type, out var slotIcon))
+			if (_slotIconByItemType.TryGetValue(type, out Sprite slotIcon))
 			{
 				return slotIcon;
 			}
@@ -115,7 +115,7 @@ namespace Services
 
 		public Sprite GetProjectileIcon(ItemType type)
 		{
-			if (_projectileIconByItemType.TryGetValue(type, out var projectileIcon))
+			if (_projectileIconByItemType.TryGetValue(type, out Sprite projectileIcon))
 			{
 				return projectileIcon;
 			}
@@ -143,7 +143,7 @@ namespace Services
 
 		private void LoadItemIcons()
 		{
-			var itemIcons = _assets.Load<ItemIconCollection>(ItemIconsPath);
+			ItemIconCollection itemIcons = _assets.Load<ItemIconCollection>(ItemIconsPath);
 			_slotIconByItemType = itemIcons.SlotIconByItemType;
 			_projectileIconByItemType = itemIcons.ProjectileIconByItemType;
 			_scopeIconByItemType = itemIcons.ScopeIconByItemType;

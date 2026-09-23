@@ -26,7 +26,7 @@ namespace GamePlay
 			_columns = new List<Run>[_mapProvider.Map.CurrentValue.Width * _mapProvider.Map.CurrentValue.Depth];
 			_neighboursByRun = new Dictionary<Run, HashSet<Run>>();
 
-			for (var i = 0; i < _columns.Length; i++)
+			for (int i = 0; i < _columns.Length; i++)
 			{
 				_columns[i] = new List<Run>();
 			}
@@ -44,7 +44,7 @@ namespace GamePlay
 
 		private void Add(IReadOnlyList<Voxel> voxels)
 		{
-			for (var i = 0; i < voxels.Count; i++)
+			for (int i = 0; i < voxels.Count; i++)
 			{
 				if (!TryMergeWithExistingRuns(voxels[i]))
 				{
@@ -56,10 +56,10 @@ namespace GamePlay
 
 		private void Remove(IReadOnlyList<Vector3Ushort> removingPositions)
 		{
-			using var neighbourPositions = ListPool<Vector3Ushort>.Get(out var neighboursList);
-			using var runsSet = HashSetPool<Run>.Get(out var runs);
-			using var deletingRunsList = ListPool<Run>.Get(out var deletingRuns);
-			using var fallingVoxelsList = ListPool<Voxel>.Get(out var fallingVoxels);
+			using PooledObject<List<Vector3Ushort>> neighbourPositions = ListPool<Vector3Ushort>.Get(out List<Vector3Ushort> neighboursList);
+			using PooledObject<HashSet<Run>> runsSet = HashSetPool<Run>.Get(out HashSet<Run> runs);
+			using PooledObject<List<Run>> deletingRunsList = ListPool<Run>.Get(out List<Run> deletingRuns);
+			using PooledObject<List<Voxel>> fallingVoxelsList = ListPool<Voxel>.Get(out List<Voxel> fallingVoxels);
 
 			for (int i = 0; i < removingPositions.Count; i++)
 			{
@@ -100,10 +100,10 @@ namespace GamePlay
 			var path = new Stack<Run>();
 			while (runs.Count > 0)
 			{
-				using var visitedSet = HashSetPool<Run>.Get(out var visited);
+				using PooledObject<HashSet<Run>> visitedSet = HashSetPool<Run>.Get(out HashSet<Run> visited);
 				Run startRun = runs.First();
 				path.Push(startRun);
-				var isSeparatedComponent = true;
+				bool isSeparatedComponent = true;
 
 				while (path.Count > 0)
 				{
@@ -156,7 +156,7 @@ namespace GamePlay
 			_columns[run.X * _mapProvider.Map.CurrentValue.Depth + run.Z].Add(run);
 			_neighboursByRun[run] = new HashSet<Run>();
 
-			using var pooledObject = ListPool<Vector3Ushort>.Get(out var neighbourPositions);
+			using PooledObject<List<Vector3Ushort>> pooledObject = ListPool<Vector3Ushort>.Get(out List<Vector3Ushort> neighbourPositions);
 
 			for (ushort y = run.Begin; y < run.Begin + run.Length; y++)
 			{
@@ -241,9 +241,9 @@ namespace GamePlay
 
 		private void PreProcessGraph()
 		{
-			for (var i = 0; i < _columns.Length; i++)
+			for (int i = 0; i < _columns.Length; i++)
 			{
-				for (var j = 0; j < _columns[i].Count; j++)
+				for (int j = 0; j < _columns[i].Count; j++)
 				{
 					_neighboursByRun[_columns[i][j]] = new HashSet<Run>();
 				}
@@ -255,7 +255,7 @@ namespace GamePlay
 				{
 					for (ushort y = 0; y < _mapProvider.Map.CurrentValue.Height; y++)
 					{
-						Vector3Ushort position = new Vector3Ushort(x, y, z);
+						var position = new Vector3Ushort(x, y, z);
 
 						if (!_mapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(position).IsSolid() || !TryFindRunInColumn(position, out Run
 							    currentRun))
@@ -278,9 +278,9 @@ namespace GamePlay
 
 		private bool TryMergeWithExistingRuns(Voxel voxel)
 		{
-			var runs = _columns[voxel.Position.x * _mapProvider.Map.CurrentValue.Depth + voxel.Position.z];
+			List<Run> runs = _columns[voxel.Position.x * _mapProvider.Map.CurrentValue.Depth + voxel.Position.z];
 
-			for (var i = 0; i < runs.Count; i++)
+			for (int i = 0; i < runs.Count; i++)
 			{
 				if (voxel.Position.y >= runs[i].Begin && voxel.Position.y < runs[i].Begin + runs[i].Length)
 				{
@@ -319,9 +319,9 @@ namespace GamePlay
 
 		private bool TryFindRunInColumn(Vector3Ushort position, out Run run)
 		{
-			var column = _columns[position.x * _mapProvider.Map.CurrentValue.Depth + position.z];
+			List<Run> column = _columns[position.x * _mapProvider.Map.CurrentValue.Depth + position.z];
 
-			for (var i = 0; i < column.Count; i++)
+			for (int i = 0; i < column.Count; i++)
 			{
 				if (column[i].Begin <= position.y && position.y < column[i].Begin + column[i].Length)
 				{

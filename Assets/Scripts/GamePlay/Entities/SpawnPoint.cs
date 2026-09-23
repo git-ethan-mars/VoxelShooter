@@ -27,6 +27,12 @@ namespace GamePlay
 				.AddTo(this);
 		}
 
+		private void OnDrawGizmosSelected()
+		{
+			Gizmos.color = Color.yellow;
+			Gizmos.DrawWireCube(Bounds.center, Bounds.size);
+		}
+
 		private void ValidatePosition()
 		{
 			while (!_mapProvider.Map.CurrentValue.HasIntersection(Bounds))
@@ -38,12 +44,6 @@ namespace GamePlay
 			{
 				transform.position += Vector3.up;
 			}
-		}
-
-		private void OnDrawGizmosSelected()
-		{
-			Gizmos.color = Color.yellow;
-			Gizmos.DrawWireCube(Bounds.center, Bounds.size);
 		}
 	}
 }

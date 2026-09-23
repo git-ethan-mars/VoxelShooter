@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using R3;
-using Services.ServerList;
+using Services;
 
 namespace UI
 {
@@ -12,9 +12,19 @@ namespace UI
 
 		public Observable<Server> JoinServerButtonPressed => _joinServerButtonPressed;
 
+		private void OnDestroy()
+		{
+			for (int i = 0; i < _disposables.Count; i++)
+			{
+				_disposables[i].Dispose();
+			}
+
+			_disposables.Clear();
+		}
+
 		public void Init(List<Server> servers)
 		{
-			for (var i = 0; i < servers.Count; i++)
+			for (int i = 0; i < servers.Count; i++)
 			{
 				Server server = servers[i];
 				ServerView serverView = SpawnElement();
@@ -28,17 +38,7 @@ namespace UI
 		{
 			Clear();
 
-			for (var i = 0; i < _disposables.Count; i++)
-			{
-				_disposables[i].Dispose();
-			}
-
-			_disposables.Clear();
-		}
-
-		private void OnDestroy()
-		{
-			for (var i = 0; i < _disposables.Count; i++)
+			for (int i = 0; i < _disposables.Count; i++)
 			{
 				_disposables[i].Dispose();
 			}

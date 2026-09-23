@@ -42,9 +42,14 @@ namespace GamePlay
 			_mapProvider = mapProvider;
 		}
 
-		public Vector3 GetHorizontalVelocity()
+		private void FixedUpdate()
 		{
-			return Vector3.Scale(HorizontalMask, rigidBody.linearVelocity);
+			if (!isLocalPlayer)
+			{
+				return;
+			}
+
+			Tick();
 		}
 
 		private void Update()
@@ -62,14 +67,9 @@ namespace GamePlay
 			}
 		}
 
-		private void FixedUpdate()
+		public Vector3 GetHorizontalVelocity()
 		{
-			if (!isLocalPlayer)
-			{
-				return;
-			}
-
-			Tick();
+			return Vector3.Scale(HorizontalMask, rigidBody.linearVelocity);
 		}
 
 		private bool CanClimb()
@@ -77,7 +77,7 @@ namespace GamePlay
 			Vector3 slidingPosition = transform.position + Sign(_desiredMovementDirection) * hitBox.radius
 			                                             + _desiredMovementDirection * (GetHorizontalVelocity().magnitude * Time.fixedDeltaTime)
 			                                             + Vector3.up;
-			Vector3Ushort slidingVoxelPosition = Vector3Ushort.FloorToUshort(slidingPosition - Vector3.up / 2);
+			var slidingVoxelPosition = Vector3Ushort.FloorToUshort(slidingPosition - Vector3.up / 2);
 			var slidingVoxel = new Voxel(slidingVoxelPosition, _mapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(slidingVoxelPosition));
 			return slidingVoxel.Data.IsSolid() && !Physics.CheckCapsule(slidingPosition + Vector3.up * (hitBox.radius + Epsilon),
 				slidingPosition + Vector3.up * (hitBox.height - hitBox.radius - Epsilon), hitBox.radius, LayerMasks.BuildMask);
@@ -93,7 +93,7 @@ namespace GamePlay
 
 		private void Move(Vector2 direction, float speed, bool sprint)
 		{
-			Vector3 forward = Vector3.ProjectOnPlane(ForwardDirectionObject.position - transform.position, Vector3.up);
+			var forward = Vector3.ProjectOnPlane(ForwardDirectionObject.position - transform.position, Vector3.up);
 			Vector3 right = Quaternion.Euler(0f, 90, 0f) * forward;
 			Vector3 horizontalDirection = (direction.x * forward + direction.y * right).normalized;
 

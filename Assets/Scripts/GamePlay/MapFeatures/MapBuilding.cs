@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Reflex.Attributes;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -19,10 +20,10 @@ namespace GamePlay
 
 		public bool Visit(Block block, RaycastHit rayCastHit, Color32 color)
 		{
-			Vector3Ushort voxelPosition = Vector3Ushort.FloorToUshort(rayCastHit.point + rayCastHit.normal / 2);
+			var voxelPosition = Vector3Ushort.FloorToUshort(rayCastHit.point + rayCastHit.normal / 2);
 			var voxel = new Voxel(voxelPosition, new VoxelData(color));
 
-			using var pooledList = ListPool<Voxel>.Get(out var voxels);
+			using PooledObject<List<Voxel>> pooledList = ListPool<Voxel>.Get(out List<Voxel> voxels);
 			voxels.Add(voxel);
 
 			if (!IsAvailablePosition(voxel.Position))
@@ -38,7 +39,7 @@ namespace GamePlay
 		public bool Visit(Blueprint blueprint, RaycastHit rayCastHit, Color32 color)
 		{
 			Vector3Int blueprintPosition = blueprint.GetPlacementPosition(rayCastHit);
-			using var pooledList = ListPool<Voxel>.Get(out var voxels);
+			using PooledObject<List<Voxel>> pooledList = ListPool<Voxel>.Get(out List<Voxel> voxels);
 
 			foreach (Vector3Int offset in blueprint.Positions)
 			{

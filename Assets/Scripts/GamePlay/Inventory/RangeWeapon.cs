@@ -44,33 +44,7 @@ namespace GamePlay
 			_totalBullets.Value = Configure.TotalBullets;
 			_bulletsInMagazine.Value = Configure.MagazineSize;
 
-			ResetRecoil(destroyCancellationToken).Forget();
-		}
-
-		public override void Select()
-		{
-			base.Select();
-
-			_onChangeSlot = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
-
-			if (_isReloading)
-			{
-				Reload();
-			}
-
-			if (!_isReady)
-			{
-				ResetShoot();
-			}
-		}
-
-		public override void Deselect()
-		{
-			base.Deselect();
-			_onChangeSlot?.Cancel();
-			_onChangeSlot?.Dispose();
-
-			_isZoomed.Value = false;
+			ResetRecoilAsync(destroyCancellationToken).Forget();
 		}
 
 		protected void Update()
@@ -112,6 +86,32 @@ namespace GamePlay
 			}
 		}
 
+		public override void Select()
+		{
+			base.Select();
+
+			_onChangeSlot = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+
+			if (_isReloading)
+			{
+				Reload();
+			}
+
+			if (!_isReady)
+			{
+				ResetShoot();
+			}
+		}
+
+		public override void Deselect()
+		{
+			base.Deselect();
+			_onChangeSlot?.Cancel();
+			_onChangeSlot?.Dispose();
+
+			_isZoomed.Value = false;
+		}
+
 		[Command]
 		private void Shoot(Ray ray)
 		{
@@ -120,7 +120,7 @@ namespace GamePlay
 				return;
 			}
 
-			for (var i = 0; i < Configure.BulletsPerTap; i++)
+			for (int i = 0; i < Configure.BulletsPerTap; i++)
 			{
 				Vector3 spread = GetRandomSpreadDirection();
 				ray = new Ray(ray.origin, ray.direction + spread);
@@ -164,7 +164,7 @@ namespace GamePlay
 			_isReloading = false;
 		}
 
-		private async UniTask ResetRecoil(CancellationToken token)
+		private async UniTask ResetRecoilAsync(CancellationToken token)
 		{
 			while (!destroyCancellationToken.IsCancellationRequested)
 			{
@@ -198,7 +198,7 @@ namespace GamePlay
 				return;
 			}
 
-			var mapDestruction = rayHit.collider.GetComponentInParent<MapDestruction>();
+			MapDestruction mapDestruction = rayHit.collider.GetComponentInParent<MapDestruction>();
 
 			if (mapDestruction != null)
 			{
@@ -206,7 +206,7 @@ namespace GamePlay
 				return;
 			}
 
-			var damageVisitor = rayHit.collider.GetComponentInParent<IDamageVisitor>();
+			IDamageVisitor damageVisitor = rayHit.collider.GetComponentInParent<IDamageVisitor>();
 			damageVisitor?.Visit(this, rayHit);
 		}
 

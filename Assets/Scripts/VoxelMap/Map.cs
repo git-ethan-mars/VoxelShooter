@@ -44,6 +44,16 @@ namespace VoxelMap
 			MapName = mapName;
 		}
 
+		private void Update()
+		{
+			RegenerateChunks();
+		}
+
+		private void OnDestroy()
+		{
+			_mapData.Dispose();
+		}
+
 		public VoxelData GetVoxelByGlobalPosition(ushort x, ushort y, ushort z)
 		{
 			return _mapData[x, y, z];
@@ -56,7 +66,7 @@ namespace VoxelMap
 
 		public void SetVoxelsByGlobalPositions(IReadOnlyList<Voxel> voxels)
 		{
-			using var pooledObject = DictionaryPool<int, NativeList<Voxel>>.Get(out var changedByChunkIndex);
+			using PooledObject<Dictionary<int, NativeList<Voxel>>> pooledObject = DictionaryPool<int, NativeList<Voxel>>.Get(out Dictionary<int, NativeList<Voxel>> changedByChunkIndex);
 
 			foreach (Voxel voxel in voxels)
 			{
@@ -72,16 +82,16 @@ namespace VoxelMap
 				changedByChunkIndex[chunkIndex].Add(voxel);
 			}
 
-			foreach ((int chunkNumber, var changes) in changedByChunkIndex)
+			foreach ((int chunkNumber, NativeList<Voxel> changes) in changedByChunkIndex)
 			{
 				RefreshFaceAmount(chunkNumber, changes);
 				changes.Dispose();
 			}
 
-			var addedVoxels = ListPool<Voxel>.Get();
-			var removedPosition = ListPool<Vector3Ushort>.Get();
+			List<Voxel> addedVoxels = ListPool<Voxel>.Get();
+			List<Vector3Ushort> removedPosition = ListPool<Vector3Ushort>.Get();
 
-			for (var i = 0; i < voxels.Count; i++)
+			for (int i = 0; i < voxels.Count; i++)
 			{
 				if (voxels[i].Data.IsSolid())
 				{
@@ -138,8 +148,8 @@ namespace VoxelMap
 
 		public bool TryGetRandomTopVoxelPosition(out Vector3Ushort position)
 		{
-			var x = (ushort)UnityEngine.Random.Range(0, _mapData.Width);
-			var z = (ushort)UnityEngine.Random.Range(0, _mapData.Depth);
+			ushort x = (ushort)UnityEngine.Random.Range(0, _mapData.Width);
+			ushort z = (ushort)UnityEngine.Random.Range(0, _mapData.Depth);
 
 			ushort y = (ushort)(_mapData.Height - 1);
 
@@ -166,7 +176,7 @@ namespace VoxelMap
 
 		public void AddFeature<TFeature>() where TFeature : MapFeature
 		{
-			var feature = gameObject.AddComponent<TFeature>();
+			TFeature feature = gameObject.AddComponent<TFeature>();
 			_features[typeof(TFeature)] = feature;
 		}
 
@@ -186,16 +196,6 @@ namespace VoxelMap
 		public override string ToString()
 		{
 			return $"{MapName} Width: {_mapData.Width}, Height: {_mapData.Height}, Depth: {_mapData.Depth}";
-		}
-
-		private void Update()
-		{
-			RegenerateChunks();
-		}
-
-		private void OnDestroy()
-		{
-			_mapData.Dispose();
 		}
 
 		private void RegenerateChunks()
@@ -219,14 +219,14 @@ namespace VoxelMap
 
 		private void RefreshFaceAmount(int chunkIndex, NativeList<Voxel> voxels)
 		{
-			using NativeReference<Face> regeneratingNeighbours = new NativeReference<Face>(Allocator.TempJob);
-			using NativeHashMap<int, int> faceCountChangesByChunk = new NativeHashMap<int, int>(1, Allocator.TempJob);
+			using var regeneratingNeighbours = new NativeReference<Face>(Allocator.TempJob);
+			using var faceCountChangesByChunk = new NativeHashMap<int, int>(1, Allocator.TempJob);
 			var recalculateFacesJob = new RecalculateFacesJob(voxels, _mapData, chunkIndex, regeneratingNeighbours, faceCountChangesByChunk);
 			recalculateFacesJob.Schedule().Complete();
 
 			_regeneratingChunks.Add(Chunks[chunkIndex]);
 
-			foreach (var kvp in faceCountChangesByChunk)
+			foreach (KVPair<int, int> kvp in faceCountChangesByChunk)
 			{
 				Chunks[kvp.Key].FaceCount += kvp.Value;
 			}

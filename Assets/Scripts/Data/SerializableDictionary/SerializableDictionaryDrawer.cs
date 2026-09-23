@@ -9,20 +9,20 @@ namespace Data.SerializableDictionary
 	[CustomPropertyDrawer(typeof(SerializableDictionary<,>), true)]
 	public class SerializableDictionaryDrawer : PropertyDrawer
 	{
-		private ReorderableList reorderableList;
-		private bool isDividerDragged;
+		private ReorderableList _reorderableList;
+		private bool _isDividerDragged;
 
-		private SerializedProperty property;
-		private SerializedProperty dictionaryList;
-		private SerializedProperty dividerPosProp;
+		private SerializedProperty _property;
+		private SerializedProperty _dictionaryList;
+		private SerializedProperty _dividerPosProperty;
 
 		public override void OnGUI(Rect rect, SerializedProperty prop, GUIContent label)
 		{
-			var indentedRect = EditorGUI.IndentedRect(rect);
+			Rect indentedRect = EditorGUI.IndentedRect(rect);
 
 			void Head()
 			{
-				var headerRect = indentedRect;
+				Rect headerRect = indentedRect;
 				headerRect.height = EditorGUIUtility.singleLineHeight;
 
 				void ExpandablePanel()
@@ -33,7 +33,7 @@ namespace Data.SerializableDictionary
 
 					if (Event.current != null && fullHeaderRect.Contains(Event.current.mousePosition))
 					{
-						Color transparentGrey = new Color(0.4f, 0.4f, 0.4f, 0.4f);
+						var transparentGrey = new Color(0.4f, 0.4f, 0.4f, 0.4f);
 						EditorGUI.DrawRect(fullHeaderRect, transparentGrey);
 					}
 
@@ -47,7 +47,7 @@ namespace Data.SerializableDictionary
 
 					GUI.color = Color.white;
 
-					var triangleRect = rect;
+					Rect triangleRect = rect;
 					triangleRect.height = EditorGUIUtility.singleLineHeight;
 
 					EditorGUI.Foldout(triangleRect, prop.isExpanded, "");
@@ -58,7 +58,7 @@ namespace Data.SerializableDictionary
 					GUI.color = Color.white;
 
 #if UNITY_2022_1_OR_NEWER
-					var labelRect = headerRect;
+					Rect labelRect = headerRect;
 					labelRect.x += 12;
 					GUI.Label(labelRect, prop.displayName);
 #else
@@ -78,18 +78,18 @@ namespace Data.SerializableDictionary
 						return;
 					}
 
-					var hasRepeated = false;
+					bool hasRepeated = false;
 					var repeatedKeys = new List<string>();
 
-					for (int i = 0; i < dictionaryList.arraySize; i++)
+					for (int i = 0; i < _dictionaryList.arraySize; i++)
 					{
-						SerializedProperty isKeyRepeatedProperty = dictionaryList.GetArrayElementAtIndex(i)
+						SerializedProperty isKeyRepeatedProperty = _dictionaryList.GetArrayElementAtIndex(i)
 							.FindPropertyRelative("isKeyDuplicated");
 
 						if (isKeyRepeatedProperty.boolValue)
 						{
 							hasRepeated = true;
-							SerializedProperty keyProperty = dictionaryList.GetArrayElementAtIndex(i).FindPropertyRelative("Key");
+							SerializedProperty keyProperty = _dictionaryList.GetArrayElementAtIndex(i).FindPropertyRelative("Key");
 							string keyString = GetSerializedPropertyValueAsString(keyProperty);
 							repeatedKeys.Add(keyString);
 						}
@@ -102,8 +102,8 @@ namespace Data.SerializableDictionary
 
 					float with = GUI.skin.label.CalcSize(new GUIContent(prop.displayName)).x;
 					headerRect.x += with + 35f;
-					var warningRect = headerRect;
-					Rect warningRectIcon = new Rect(headerRect.x - 18, headerRect.y, headerRect.width, headerRect.height);
+					Rect warningRect = headerRect;
+					var warningRectIcon = new Rect(headerRect.x - 18, headerRect.y, headerRect.width, headerRect.height);
 					GUI.color = Color.white;
 					GUI.Label(warningRectIcon, EditorGUIUtility.IconContent("console.erroricon"));
 					GUI.color = new Color(1.0f, 0.443f, 0.443f);
@@ -148,7 +148,7 @@ namespace Data.SerializableDictionary
 				indentedRect.y += indentedRect.height - newHeight;
 				indentedRect.height = newHeight;
 
-				reorderableList.DoList(indentedRect);
+				_reorderableList.DoList(indentedRect);
 			}
 
 			SetupProps(prop);
@@ -161,12 +161,12 @@ namespace Data.SerializableDictionary
 		{
 			SetupProps(prop);
 
-			var height = EditorGUIUtility.singleLineHeight;
+			float height = EditorGUIUtility.singleLineHeight;
 
 			if (prop.isExpanded)
 			{
 				SetupList(prop);
-				height += reorderableList.GetHeight() + 5;
+				height += _reorderableList.GetHeight() + 5;
 			}
 
 			return height;
@@ -174,21 +174,21 @@ namespace Data.SerializableDictionary
 
 		public void SetupProps(SerializedProperty prop)
 		{
-			if (this.property != null)
+			if (_property != null)
 			{
 				return;
 			}
 
-			this.property = prop;
-			this.dictionaryList = prop.FindPropertyRelative("dictionaryList");
-			this.dividerPosProp = prop.FindPropertyRelative("dividerPos");
+			_property = prop;
+			_dictionaryList = prop.FindPropertyRelative("dictionaryList");
+			_dividerPosProperty = prop.FindPropertyRelative("dividerPos");
 		}
 
 		private float GetListElementHeight(int index)
 		{
-			var kvpProp = dictionaryList.GetArrayElementAtIndex(index);
-			var keyProp = kvpProp.FindPropertyRelative("Key");
-			var valueProp = kvpProp.FindPropertyRelative("Value");
+			SerializedProperty kvpProp = _dictionaryList.GetArrayElementAtIndex(index);
+			SerializedProperty keyProp = kvpProp.FindPropertyRelative("Key");
+			SerializedProperty valueProp = kvpProp.FindPropertyRelative("Value");
 
 			float GetPropertyHeight(SerializedProperty prop)
 			{
@@ -197,9 +197,9 @@ namespace Data.SerializableDictionary
 					return EditorGUI.GetPropertyHeight(prop);
 				}
 
-				var height = 1f;
+				float height = 1f;
 
-				foreach (var childProp in GetChildren(prop, false))
+				foreach (SerializedProperty childProp in GetChildren(prop, false))
 				{
 					height += EditorGUI.GetPropertyHeight(childProp) + 1;
 				}
@@ -218,9 +218,9 @@ namespace Data.SerializableDictionary
 			Rect valueRect;
 			Rect dividerRect;
 
-			var kvpProp = dictionaryList.GetArrayElementAtIndex(index);
-			var keyProp = kvpProp.FindPropertyRelative("Key");
-			var valueProp = kvpProp.FindPropertyRelative("Value");
+			SerializedProperty kvpProp = _dictionaryList.GetArrayElementAtIndex(index);
+			SerializedProperty keyProp = kvpProp.FindPropertyRelative("Key");
+			SerializedProperty valueProp = kvpProp.FindPropertyRelative("Value");
 
 			void Draw(Rect rect, SerializedProperty prop)
 			{
@@ -231,9 +231,9 @@ namespace Data.SerializableDictionary
 				}
 				else
 				{
-					foreach (var childProp in GetChildren(prop, false))
+					foreach (SerializedProperty childProp in GetChildren(prop, false))
 					{
-						var childPropHeight = EditorGUI.GetPropertyHeight(childProp);
+						float childPropHeight = EditorGUI.GetPropertyHeight(childProp);
 						rect.height = childPropHeight;
 						EditorGUI.PropertyField(rect, childProp, true);
 						rect.y += childPropHeight + 2;
@@ -243,10 +243,10 @@ namespace Data.SerializableDictionary
 
 			void DrawRects()
 			{
-				var dividerWidh = IsSingleLine(valueProp) ? 6 : 16f;
-				var dividerPosition = 0.25f;
+				float dividerWidh = IsSingleLine(valueProp) ? 6 : 16f;
+				float dividerPosition = 0.25f;
 
-				var fullRect = rect;
+				Rect fullRect = rect;
 				fullRect.width -= 1;
 				fullRect.height -= 2;
 
@@ -282,8 +282,8 @@ namespace Data.SerializableDictionary
 #if !ODIN_INSPECTOR
 				if (valueProp.type.StartsWith("InterfaceHolder"))
 				{
-					var interfaceValue = valueProp.FindPropertyRelative("value");
-					MonoBehaviour newValue = (MonoBehaviour)EditorGUI.ObjectField(valueRect,
+					SerializedProperty interfaceValue = valueProp.FindPropertyRelative("value");
+					var newValue = (MonoBehaviour)EditorGUI.ObjectField(valueRect,
 						interfaceValue.objectReferenceValue, typeof(MonoBehaviour), true);
 
 					if (interfaceValue.objectReferenceValue != newValue)
@@ -316,19 +316,19 @@ namespace Data.SerializableDictionary
 				{
 					if (Event.current.type == EventType.MouseDown)
 					{
-						//isDividerDragged = true;
+						//_isDividerDragged = true;
 					}
 					else if (Event.current.type == EventType.MouseUp
 					         || Event.current.type == EventType.MouseMove
 					         || Event.current.type == EventType.MouseLeaveWindow)
 					{
-						isDividerDragged = false;
+						_isDividerDragged = false;
 					}
 				}
 
-				if (isDividerDragged && Event.current != null && Event.current.type == EventType.MouseDrag)
+				if (_isDividerDragged && Event.current != null && Event.current.type == EventType.MouseDrag)
 				{
-					dividerPosProp.floatValue = Mathf.Clamp(dividerPosProp.floatValue + Event.current.delta.x / rect.width, .2f, .8f);
+					_dividerPosProperty.floatValue = Mathf.Clamp(_dividerPosProperty.floatValue + Event.current.delta.x / rect.width, .2f, .8f);
 				}
 			}
 
@@ -347,9 +347,9 @@ namespace Data.SerializableDictionary
 		{
 			prop = prop.Copy();
 
-			var startPath = prop.propertyPath;
+			string startPath = prop.propertyPath;
 
-			var enterVisibleChildren = true;
+			bool enterVisibleChildren = true;
 
 			while (prop.NextVisible(enterVisibleChildren) && prop.propertyPath.StartsWith(startPath))
 			{
@@ -365,17 +365,17 @@ namespace Data.SerializableDictionary
 
 		private void SetupList(SerializedProperty prop)
 		{
-			if (reorderableList != null)
+			if (_reorderableList != null)
 			{
 				return;
 			}
 
 			SetupProps(prop);
 
-			this.reorderableList = new ReorderableList(dictionaryList.serializedObject, dictionaryList, true, false, true, true);
-			this.reorderableList.drawElementCallback = DrawListElement;
-			this.reorderableList.elementHeightCallback = GetListElementHeight;
-			this.reorderableList.drawNoneElementCallback = ShowDictIsEmptyMessage;
+			_reorderableList = new ReorderableList(_dictionaryList.serializedObject, _dictionaryList, true, false, true, true);
+			_reorderableList.drawElementCallback = DrawListElement;
+			_reorderableList.elementHeightCallback = GetListElementHeight;
+			_reorderableList.drawNoneElementCallback = ShowDictIsEmptyMessage;
 		}
 	}
 }

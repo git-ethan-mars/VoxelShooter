@@ -28,6 +28,40 @@ namespace UI
 			_uiProvider = uiProvider;
 		}
 
+		protected override void Update()
+		{
+			base.Update();
+
+			if (InputService.IsChooseClassButtonDown())
+			{
+				SwitchState<ChooseClassMenuState>();
+			}
+
+			if (InputService.IsScoreboardButtonDown())
+			{
+				SwitchState<ScoreboardState>();
+			}
+
+			if (InputService.IsScoreboardButtonUp())
+			{
+				SwitchState<DefaultState>();
+			}
+
+			if (_respawnTimer == TimeSpan.Zero)
+			{
+				return;
+			}
+
+			_respawnTimer -= TimeSpan.FromSeconds(Time.deltaTime);
+
+			if (_respawnTimer < TimeSpan.Zero)
+			{
+				_respawnTimer = TimeSpan.Zero;
+			}
+
+			timeInfo.ChangeRespawnTime(TimeSpan.FromSeconds(_respawnTimer.TotalSeconds));
+		}
+
 		public void Initialize(DeathMatch deathMatch)
 		{
 			_deathMatch = deathMatch;
@@ -71,40 +105,6 @@ namespace UI
 			if (gameState == GameState.ShowingStatistics)
 			{
 			}
-		}
-
-		protected override void Update()
-		{
-			base.Update();
-
-			if (InputService.IsChooseClassButtonDown())
-			{
-				SwitchState<ChooseClassMenuState>();
-			}
-
-			if (InputService.IsScoreboardButtonDown())
-			{
-				SwitchState<ScoreboardState>();
-			}
-
-			if (InputService.IsScoreboardButtonUp())
-			{
-				SwitchState<DefaultState>();
-			}
-
-			if (_respawnTimer == TimeSpan.Zero)
-			{
-				return;
-			}
-
-			_respawnTimer -= TimeSpan.FromSeconds(Time.deltaTime);
-
-			if (_respawnTimer < TimeSpan.Zero)
-			{
-				_respawnTimer = TimeSpan.Zero;
-			}
-
-			timeInfo.ChangeRespawnTime(TimeSpan.FromSeconds(_respawnTimer.TotalSeconds));
 		}
 
 		private void OnGameTimeChanged(TimeSpan timeLeft)

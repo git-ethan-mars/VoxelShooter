@@ -50,7 +50,7 @@ namespace UI.Inventory
 
 				modelBounds.Encapsulate(meshFilter.mesh.bounds);
 
-				var meshRenderer = modelCopy.GetComponent<MeshRenderer>();
+				MeshRenderer meshRenderer = modelCopy.GetComponent<MeshRenderer>();
 				meshRenderer.enabled = true;
 				_meshRenderers.Add(meshRenderer);
 			}
@@ -65,7 +65,7 @@ namespace UI.Inventory
 
 		public void RemoveModel()
 		{
-			foreach (var meshRender in _meshRenderers)
+			foreach (MeshRenderer meshRender in _meshRenderers)
 			{
 				Destroy(meshRender.gameObject);
 			}

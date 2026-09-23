@@ -16,8 +16,8 @@ namespace VoxelMap
 
 		public void Execute(int index)
 		{
-			var x = (ushort)(index / _mapData.Depth);
-			var z = (ushort)(index % _mapData.Depth);
+			ushort x = (ushort)(index / _mapData.Depth);
+			ushort z = (ushort)(index % _mapData.Depth);
 
 			if (!_mapData[x, 0, z].IsSolid())
 			{

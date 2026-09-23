@@ -18,7 +18,7 @@ namespace Networking
 		public VSNetworkManager CreateNetworkManager()
 		{
 #if LOCAL_BUILD
-			var networkManager = _assets.Instantiate(LocalNetworkManagerPath).GetComponent<VSNetworkManager>();
+			VSNetworkManager networkManager = _assets.Instantiate(LocalNetworkManagerPath).GetComponent<VSNetworkManager>();
 #else
 			var networkManager = _assets.Instantiate(SteamNetworkManagerPath).GetComponent<VSNetworkManager>();
 #endif

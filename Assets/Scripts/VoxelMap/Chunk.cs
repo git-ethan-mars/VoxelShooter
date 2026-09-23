@@ -45,8 +45,8 @@ namespace VoxelMap
 			Mesh.MeshDataArray meshArray = Mesh.AllocateWritableMeshData(1);
 			Mesh.MeshData meshData = meshArray[0];
 			SetupMeshData(meshData);
-			var vertices = meshData.GetVertexData<VertexData>();
-			var indexes = meshData.GetIndexData<int>();
+			NativeArray<VertexData> vertices = meshData.GetVertexData<VertexData>();
+			NativeArray<int> indexes = meshData.GetIndexData<int>();
 
 			var fillJob = new FillChunkMeshJob(_mapData, _index, vertices, indexes);
 			fillJob.Schedule().Complete();
@@ -65,8 +65,8 @@ namespace VoxelMap
 
 			SetupMeshData(meshData);
 
-			var vertices = meshData.GetVertexData<VertexData>();
-			var indexes = meshData.GetIndexData<int>();
+			NativeArray<VertexData> vertices = meshData.GetVertexData<VertexData>();
+			NativeArray<int> indexes = meshData.GetIndexData<int>();
 
 			var fillJob = new FillChunkMeshJob(_mapData, _index, vertices, indexes);
 			await fillJob.Schedule().ToUniTask(PlayerLoopTiming.Update);
@@ -87,11 +87,11 @@ namespace VoxelMap
 		{
 			var chunkDataArray = new NativeArray<ChunkData>(chunks.Count, Allocator.TempJob);
 			var meshIndexes = new NativeArray<EntityId>(chunks.Count, Allocator.TempJob);
-			var meshContexts = ArrayPool<(Mesh.MeshDataArray meshDataArray, Mesh.MeshData meshData)>.Shared.Rent(chunks.Count);
+			(Mesh.MeshDataArray meshDataArray, Mesh.MeshData meshData)[] meshContexts = ArrayPool<(Mesh.MeshDataArray meshDataArray, Mesh.MeshData meshData)>.Shared.Rent(chunks.Count);
 
 			try
 			{
-				var chunkNumber = 0;
+				int chunkNumber = 0;
 
 				foreach (Chunk chunk in chunks)
 				{
@@ -102,8 +102,8 @@ namespace VoxelMap
 
 					chunk.SetupMeshData(meshData);
 
-					var vertices = meshData.GetVertexData<VertexData>();
-					var indexes = meshData.GetIndexData<int>();
+					NativeArray<VertexData> vertices = meshData.GetVertexData<VertexData>();
+					NativeArray<int> indexes = meshData.GetIndexData<int>();
 
 					var verticesPointer = new IntPtr(vertices.GetUnsafePtr());
 					var indexesPointer = new IntPtr(indexes.GetUnsafePtr());

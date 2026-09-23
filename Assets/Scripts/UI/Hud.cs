@@ -30,6 +30,15 @@ namespace UI
 			_characterProvider = characterProvider;
 		}
 
+		private void OnEnable()
+		{
+			_characterProvider.Character
+				.Where(character => character != null)
+				.SelectMany(character => character.HealthSystem.Health)
+				.Subscribe(health => healthCounter.SetHealthValue(health.ToString()))
+				.AddTo(this);
+		}
+
 		public void ShowItemInfo(Sprite icon, string text)
 		{
 			itemInfo.SetActive(true);
@@ -96,15 +105,6 @@ namespace UI
 		public void HidePalette()
 		{
 			paletteView.Clear();
-		}
-
-		private void OnEnable()
-		{
-			_characterProvider.Character
-				.Where(character => character != null)
-				.SelectMany(character => character.HealthSystem.Health)
-				.Subscribe(health => healthCounter.SetHealthValue(health.ToString()))
-				.AddTo(this);
 		}
 	}
 }

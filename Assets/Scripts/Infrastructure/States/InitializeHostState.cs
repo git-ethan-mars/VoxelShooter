@@ -20,7 +20,7 @@ namespace Infrastructure.States
 		public async void Enter(GameSettings gameSettings)
 		{
 			_networkManager.StartHost();
-			GameMode gameMode = await _gameModeFactory.CreateGameMode(gameSettings);
+			GameMode gameMode = await _gameModeFactory.CreateGameModeAsync(gameSettings);
 			_gameStateMachine.Enter<GameLoopState, GameMode>(gameMode);
 			await gameMode.LoadMapAsync(gameSettings.MapName);
 		}

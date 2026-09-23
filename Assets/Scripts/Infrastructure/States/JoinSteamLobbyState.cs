@@ -1,5 +1,5 @@
 using Networking;
-using Services.ServerList;
+using Services;
 using Steamworks;
 using UnityEngine;
 
@@ -18,8 +18,8 @@ namespace Infrastructure.States
 
 		public async void Enter(Server server)
 		{
-			var steamLobby = _networkManager.GetComponent<SteamLobby>();
-			string networkAddress = await steamLobby.JoinLobby(new CSteamID(server.SteamIDLobby));
+			SteamLobby steamLobby = _networkManager.GetComponent<SteamLobby>();
+			string networkAddress = await steamLobby.JoinLobbyAsync(new CSteamID(server.SteamIDLobby));
 
 			if (string.IsNullOrEmpty(networkAddress))
 			{

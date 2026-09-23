@@ -29,7 +29,7 @@ namespace UI.SettingsMenuStates
 			_mouseSection = mouseSection;
 			_sensitivity = sensitivity;
 			_aimSensitivity = aimSensitivity;
-			var currentSettings = _storageService.Load<MouseSettingsData>(IStorageService.MouseSettingsKey);
+			MouseSettingsData currentSettings = _storageService.Load<MouseSettingsData>(IStorageService.MouseSettingsKey);
 			_sensitivity.Construct(currentSettings.GeneralSensitivity, MinSliderValue, MaxSliderValue);
 			_aimSensitivity.Construct(currentSettings.AimSensitivity, MinSliderValue, MaxSliderValue);
 			_crosshairModel = new CarouselModel<CrosshairSprite>(staticData.GetCrosshairSprite(currentSettings.CrosshairId),

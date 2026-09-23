@@ -35,13 +35,6 @@ namespace GamePlay
 			EntityContainer = entityContainer;
 		}
 
-		[Server]
-		public void Initialize(GameClass gameClass, string nickName)
-		{
-			_gameClass = gameClass;
-			_nickName = nickName;
-		}
-
 		public override void OnStartClient()
 		{
 			base.OnStartClient();
@@ -55,15 +48,22 @@ namespace GamePlay
 			_characterProvider.Character.Value = this;
 		}
 
+		private void OnDrawGizmosSelected()
+		{
+			Gizmos.color = Color.yellow;
+			Gizmos.DrawWireCube(Bounds.center, Bounds.size);
+		}
+
 		public override void OnStopLocalPlayer()
 		{
 			_characterProvider.Character.Value = null;
 		}
 
-		private void OnDrawGizmosSelected()
+		[Server]
+		public void Initialize(GameClass gameClass, string nickName)
 		{
-			Gizmos.color = Color.yellow;
-			Gizmos.DrawWireCube(Bounds.center, Bounds.size);
+			_gameClass = gameClass;
+			_nickName = nickName;
 		}
 	}
 }

@@ -42,13 +42,31 @@ namespace Data
 				saturation = (max - min) / (1 - Math.Abs(1 - (max + min)));
 			}
 
-			if (Math.Abs(max - min) < 1e-7) return (0, saturation, lightness);
+			if (Math.Abs(max - min) < 1e-7)
+			{
+				return (0, saturation, lightness);
+			}
+
 			if (Math.Abs(max - rgb.r) < 1e-7 && rgb.g >= rgb.b)
+			{
 				return (60 * (rgb.g - rgb.b) / (max - min), saturation, lightness);
+			}
+
 			if (Math.Abs(max - rgb.r) < 1e-7 && rgb.g < rgb.b)
+			{
 				return (60 * (rgb.g - rgb.b) / (max - min) + 360, saturation, lightness);
-			if (Math.Abs(max - rgb.g) < 1e-7) return (60 * (rgb.b - rgb.r) / (max - min) + 120, saturation, lightness);
-			if (Math.Abs(max - rgb.b) < 1e-7) return (60 * (rgb.r - rgb.g) / (max - min) + 240, saturation, lightness);
+			}
+
+			if (Math.Abs(max - rgb.g) < 1e-7)
+			{
+				return (60 * (rgb.b - rgb.r) / (max - min) + 120, saturation, lightness);
+			}
+
+			if (Math.Abs(max - rgb.b) < 1e-7)
+			{
+				return (60 * (rgb.r - rgb.g) / (max - min) + 240, saturation, lightness);
+			}
+
 			return (0, saturation, lightness);
 		}
 

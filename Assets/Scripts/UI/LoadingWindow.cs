@@ -13,6 +13,14 @@ namespace UI
 
 		private float _previousProgress;
 
+		private void Awake()
+		{
+			for (int i = 0; i < bulletCount; i++)
+			{
+				SpawnElement();
+			}
+		}
+
 		public void Show()
 		{
 			canvasGroup.alpha = 1;
@@ -51,14 +59,6 @@ namespace UI
 			}
 
 			_previousProgress = progress;
-		}
-
-		private void Awake()
-		{
-			for (int i = 0; i < bulletCount; i++)
-			{
-				SpawnElement();
-			}
 		}
 	}
 }

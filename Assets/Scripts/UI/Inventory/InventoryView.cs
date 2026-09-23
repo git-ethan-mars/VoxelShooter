@@ -10,28 +10,6 @@ namespace UI.Inventory
 		private float _showTimer;
 		private bool _isVisible;
 
-		public void ForceShowInventory()
-		{
-			foreach (MeshRenderer meshRenderer in Items.SelectMany(slot => slot.MeshRenderers))
-			{
-				meshRenderer.enabled = true;
-			}
-
-			_showTimer = 0;
-			_isVisible = true;
-		}
-
-		public void HideInventory()
-		{
-			foreach (MeshRenderer meshRenderer in Items.SelectMany(slot => slot.MeshRenderers))
-			{
-				meshRenderer.enabled = false;
-			}
-
-			_showTimer = 0;
-			_isVisible = false;
-		}
-
 		private void Start()
 		{
 			ForceShowInventory();
@@ -52,6 +30,28 @@ namespace UI.Inventory
 			{
 				HideInventory();
 			}
+		}
+
+		public void ForceShowInventory()
+		{
+			foreach (MeshRenderer meshRenderer in Items.SelectMany(slot => slot.MeshRenderers))
+			{
+				meshRenderer.enabled = true;
+			}
+
+			_showTimer = 0;
+			_isVisible = true;
+		}
+
+		public void HideInventory()
+		{
+			foreach (MeshRenderer meshRenderer in Items.SelectMany(slot => slot.MeshRenderers))
+			{
+				meshRenderer.enabled = false;
+			}
+
+			_showTimer = 0;
+			_isVisible = false;
 		}
 	}
 }

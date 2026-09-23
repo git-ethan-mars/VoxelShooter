@@ -24,10 +24,12 @@ namespace GamePlay
 
 		public void OnUpdate(IReadOnlyDictionary<NetworkConnectionToClient, DeathMatchPlayerSession> sessions, float deltaTime)
 		{
-			foreach (var session in sessions.Values)
+			foreach (DeathMatchPlayerSession session in sessions.Values)
 			{
 				if (session.IsAlive || session.Data.GameClass == GameClass.None)
+				{
 					continue;
+				}
 
 				session.RespawnTime -= TimeSpan.FromSeconds(deltaTime);
 
@@ -54,11 +56,13 @@ namespace GamePlay
 		public void Kill(DeathMatchPlayerSession session)
 		{
 			if (!session.IsAlive)
+			{
 				return;
+			}
 
 			Vector3 position = session.Connection.identity.transform.position;
 			Tombstone tombstone = _entityFactory.CreateTombstone(position, session.Connection);
-			tombstone.ExplodeWithDelay(_respawnTime - TimeSpan.FromSeconds(1)).Forget();
+			tombstone.ExplodeWithDelayAsync(_respawnTime - TimeSpan.FromSeconds(1)).Forget();
 
 			Spectator spectator = _entityFactory.CreateSpectator(position);
 			NetworkServer.ReplacePlayerForConnection(

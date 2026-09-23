@@ -4,7 +4,7 @@ namespace Data.Mappers
 {
 	public static class KillReasonsMapper
 	{
-		private static readonly Dictionary<ItemType, KillReason> ReasonByItemType = new()
+		private static readonly Dictionary<ItemType, KillReason> ReasonByItemType = new Dictionary<ItemType, KillReason>
 		{
 			[ItemType.AssaultRifle] = KillReason.AssaultRifle,
 			[ItemType.Rifle] = KillReason.Rifle,
@@ -15,7 +15,7 @@ namespace Data.Mappers
 			[ItemType.Knife] = KillReason.Knife,
 		};
 
-		private static readonly Dictionary<ExplosiveType, KillReason> ReasonByExplosiveType = new()
+		private static readonly Dictionary<ExplosiveType, KillReason> ReasonByExplosiveType = new Dictionary<ExplosiveType, KillReason>
 		{
 			[ExplosiveType.Drill] = KillReason.Drill,
 			[ExplosiveType.Grenade] = KillReason.Grenade,
@@ -26,7 +26,7 @@ namespace Data.Mappers
 
 		public static KillReason KillReasonByItemType(ItemType itemType)
 		{
-			if (!ReasonByItemType.TryGetValue(itemType, out var killReason))
+			if (!ReasonByItemType.TryGetValue(itemType, out KillReason killReason))
 			{
 				throw new KeyNotFoundException($"Mapper doesn't have mapping for {itemType}");
 			}
@@ -36,7 +36,7 @@ namespace Data.Mappers
 
 		public static KillReason KillReasonByExplosiveType(ExplosiveType explosiveType)
 		{
-			if (!ReasonByExplosiveType.TryGetValue(explosiveType, out var killReason))
+			if (!ReasonByExplosiveType.TryGetValue(explosiveType, out KillReason killReason))
 			{
 				throw new KeyNotFoundException($"Mapped doesn't have mapping for {explosiveType}");
 			}

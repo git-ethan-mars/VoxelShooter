@@ -11,12 +11,12 @@ namespace UI.Carousel
 		[SerializeField] protected Button increaseButton;
 		[SerializeField] protected Button decreaseButton;
 
-		public abstract void OnModelValueChanged(T value);
-
 		private void Awake()
 		{
 			IncreaseButtonPressed = increaseButton.onClick.AsObservable();
 			DecreaseButtonPressed = decreaseButton.onClick.AsObservable();
 		}
+
+		public abstract void OnModelValueChanged(T value);
 	}
 }

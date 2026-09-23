@@ -21,7 +21,7 @@ namespace VoxelMap
 			_mapConfigLoader = mapConfigLoader;
 		}
 
-		public async UniTask LoadMap(MapData mapData, string mapName)
+		public async UniTask LoadMapAsync(MapData mapData, string mapName)
 		{
 			if (_map.Value != null)
 			{

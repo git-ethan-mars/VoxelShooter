@@ -13,7 +13,7 @@ namespace GamePlay
 		public FallingMeshParticlePool(IParticleFactory particleFactory)
 		{
 			var particleContainer = new GameObject(ContainerName);
-			for (var i = 0; i < PoolSize; i++)
+			for (int i = 0; i < PoolSize; i++)
 			{
 				ParticleSystem meshParticle = particleFactory.CreateFallingMeshParticle(particleContainer.transform);
 				meshParticle.gameObject.SetActive(false);

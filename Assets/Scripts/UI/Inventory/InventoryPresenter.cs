@@ -62,7 +62,7 @@ namespace UI.Inventory
 				inventoryView.ForceShowInventory();
 			}
 
-			for (var i = 0; i < _inventory.Items.Count; i++)
+			for (int i = 0; i < _inventory.Items.Count; i++)
 			{
 				if (_inputService.IsSlotButtonPressed(i))
 				{
@@ -78,7 +78,7 @@ namespace UI.Inventory
 			{
 				_inventory = character.Inventory;
 
-				for (var i = 0; i < _inventory.Items.Count; i++)
+				for (int i = 0; i < _inventory.Items.Count; i++)
 				{
 					OnItemAdded(i);
 				}
@@ -108,7 +108,7 @@ namespace UI.Inventory
 
 		private void ResetView()
 		{
-			for (var i = 0; i < _presenters.Count; i++)
+			for (int i = 0; i < _presenters.Count; i++)
 			{
 				_presenters[i].Dispose();
 			}

@@ -33,12 +33,6 @@ namespace GamePlay
 			_audioSender = audioSender;
 		}
 
-		public void Launch()
-		{
-			rigidBody.linearVelocity = transform.forward * _configure.Speed;
-			DestroyAsync(destroyCancellationToken).Forget();
-		}
-
 		[ServerCallback]
 		private void FixedUpdate()
 		{
@@ -59,6 +53,12 @@ namespace GamePlay
 			Explode(_configure.ExplosionData);
 
 			_audioSender.SendAudio(AudioType.DrillHit, transform.position);
+		}
+
+		public void Launch()
+		{
+			rigidBody.linearVelocity = transform.forward * _configure.Speed;
+			DestroyAsync(destroyCancellationToken).Forget();
 		}
 
 		private async UniTaskVoid DestroyAsync(CancellationToken token)

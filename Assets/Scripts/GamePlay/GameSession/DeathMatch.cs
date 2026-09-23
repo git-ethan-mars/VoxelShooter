@@ -30,7 +30,7 @@ namespace GamePlay
 		private readonly Subject<Unit> _characterDied = new Subject<Unit>();
 		private readonly ReactiveProperty<TimeSpan> _timeLeft = new ReactiveProperty<TimeSpan>();
 
-		private readonly Dictionary<NetworkConnectionToClient, DeathMatchPlayerSession> _sessions = new();
+		private readonly Dictionary<NetworkConnectionToClient, DeathMatchPlayerSession> _sessions = new Dictionary<NetworkConnectionToClient, DeathMatchPlayerSession>();
 
 		private GameSettings _gameSettings;
 
@@ -51,9 +51,39 @@ namespace GamePlay
 			_respawnService = respawnService;
 		}
 
-		public override async UniTask Start(GameSettings gameSettings)
+		public override void Update()
 		{
-			await base.Start(gameSettings);
+			base.Update();
+
+			if (MutableGameState.Value != GamePlay.GameState.Playing)
+			{
+				return;
+			}
+
+			_timeLeft.Value -= TimeSpan.FromSeconds(Time.deltaTime);
+
+			if (_timeLeft.Value < TimeSpan.Zero)
+			{
+				_timeLeft.Value = TimeSpan.Zero;
+
+				if (NetworkManager.mode == NetworkManagerMode.Host)
+				{
+					CleanUp();
+
+					StartMapVotingFlowAsync().Forget();
+				}
+			}
+
+			if (NetworkManager.mode == NetworkManagerMode.Host)
+			{
+				_respawnService.OnUpdate(_sessions, Time.deltaTime);
+				_lootBoxSpawner.OnUpdate(Time.deltaTime);
+			}
+		}
+
+		public override async UniTask StartAsync(GameSettings gameSettings)
+		{
+			await base.StartAsync(gameSettings);
 
 			_gameSettings = gameSettings;
 			_timeLeft.Value = gameSettings.GameDuration;
@@ -75,36 +105,6 @@ namespace GamePlay
 				.AddTo(NetworkManager);
 		}
 
-		public override void Update()
-		{
-			base.Update();
-
-			if (_gameState.Value != GamePlay.GameState.Playing)
-			{
-				return;
-			}
-
-			_timeLeft.Value -= TimeSpan.FromSeconds(Time.deltaTime);
-
-			if (_timeLeft.Value < TimeSpan.Zero)
-			{
-				_timeLeft.Value = TimeSpan.Zero;
-
-				if (NetworkManager.mode == NetworkManagerMode.Host)
-				{
-					CleanUp();
-
-					StartMapVotingFlow().Forget();
-				}
-			}
-
-			if (NetworkManager.mode == NetworkManagerMode.Host)
-			{
-				_respawnService.OnUpdate(_sessions, Time.deltaTime);
-				_lootBoxSpawner.OnUpdate(Time.deltaTime);
-			}
-		}
-
 		public void ChangeClass(GameClass chosenClass)
 		{
 			NetworkManager.SendRequest(new ChangeGameClassRequest(chosenClass));
@@ -112,16 +112,16 @@ namespace GamePlay
 
 		public override async UniTask LoadMapAsync(string mapName)
 		{
-			_gameState.Value = GamePlay.GameState.Loading;
+			MutableGameState.Value = GamePlay.GameState.Loading;
 
 			await base.LoadMapAsync(mapName);
 			_spawnPointService.CreateSpawnPoints();
 
-			_gameState.Value = GamePlay.GameState.Playing;
+			MutableGameState.Value = GamePlay.GameState.Playing;
 
-			foreach (var connection in _sessions.Keys)
+			foreach (NetworkConnectionToClient connection in _sessions.Keys)
 			{
-				var spawnPosition = _spawnPointService.GetRandomSpawnPoint();
+				Vector3 spawnPosition = _spawnPointService.GetRandomSpawnPoint();
 				Spectator spectator = _entityFactory.CreateSpectator(spawnPosition);
 				NetworkServer.AddPlayerForConnection(connection, spectator.gameObject);
 			}
@@ -129,11 +129,11 @@ namespace GamePlay
 
 		protected override void OnAddPlayer(NetworkConnectionToClient connection, string nickName, Texture2D avatar)
 		{
-			var playerData = Scoreboard.AddPlayer(connection, nickName, avatar);
+			DeathMatchPlayerData playerData = Scoreboard.AddPlayer(connection, nickName, avatar);
 			var session = new DeathMatchPlayerSession(connection, playerData);
 			_sessions[connection] = session;
 
-			if (_gameState.Value == GamePlay.GameState.MapVoting)
+			if (MutableGameState.Value == GamePlay.GameState.MapVoting)
 			{
 				MapVoting.OnAddPlayer(connection);
 
@@ -143,9 +143,9 @@ namespace GamePlay
 				}
 			}
 
-			if (_gameState.Value == GamePlay.GameState.Playing)
+			if (MutableGameState.Value == GamePlay.GameState.Playing)
 			{
-				var spawnPosition = _spawnPointService.GetRandomSpawnPoint();
+				Vector3 spawnPosition = _spawnPointService.GetRandomSpawnPoint();
 				Spectator spectator = _entityFactory.CreateSpectator(spawnPosition);
 				NetworkServer.AddPlayerForConnection(connection, spectator.gameObject);
 			}
@@ -163,30 +163,30 @@ namespace GamePlay
 
 			_lootBoxSpawner.Clean();
 
-			foreach (var session in _sessions.Values)
+			foreach (DeathMatchPlayerSession session in _sessions.Values)
 			{
 				session.IsAlive = false;
 				session.RespawnTime = TimeSpan.Zero;
 			}
 		}
 
-		private async UniTaskVoid StartMapVotingFlow()
+		private async UniTaskVoid StartMapVotingFlowAsync()
 		{
-			_gameState.Value = GamePlay.GameState.MapVoting;
+			MutableGameState.Value = GamePlay.GameState.MapVoting;
 			_timeLeft.Value = GameSettings.GameDuration;
 
 			const string votingTitle = "Map Voting";
 			string[] mapNames = MapDataReader.GetExistedMaps().ToArray();
-			var mapCandidates = new string[Math.Min(VotingMaps, mapNames.Length)];
+			string[] mapCandidates = new string[Math.Min(VotingMaps, mapNames.Length)];
 
-			for (var i = 0; i < mapCandidates.Length; i++)
+			for (int i = 0; i < mapCandidates.Length; i++)
 			{
 				int candidateIndex = Random.Range(i, mapNames.Length);
 				(mapNames[i], mapNames[candidateIndex]) = (mapNames[candidateIndex], mapNames[i]);
 				mapCandidates[i] = mapNames[i];
 			}
 
-			var mapName = await MapVoting.RunVoting(TimeSpan.FromSeconds(VotingDuration), votingTitle, mapCandidates,
+			string mapName = await MapVoting.RunVotingAsync(TimeSpan.FromSeconds(VotingDuration), votingTitle, mapCandidates,
 				NetworkManager.destroyCancellationToken);
 
 			await LoadMapAsync(mapName);
@@ -203,7 +203,7 @@ namespace GamePlay
 
 		private void OnChangeGameClassRequest(NetworkConnectionToClient connection, ChangeGameClassRequest request)
 		{
-			if (!_sessions.TryGetValue(connection, out var session))
+			if (!_sessions.TryGetValue(connection, out DeathMatchPlayerSession session))
 			{
 				Debug.LogWarning($"Couldn't find session for id: {connection.connectionId}");
 				return;

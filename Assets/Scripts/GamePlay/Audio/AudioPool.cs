@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Services;
 using UnityEngine;
 
-namespace GamePlay.Audio
+namespace GamePlay
 {
 	public class AudioPool
 	{
@@ -19,7 +19,7 @@ namespace GamePlay.Audio
 		{
 			_assets = assets;
 
-			for (var i = 0; i < PoolSize; i++)
+			for (int i = 0; i < PoolSize; i++)
 			{
 				AddNewAudioSource();
 			}
@@ -32,7 +32,7 @@ namespace GamePlay.Audio
 				AddNewAudioSource();
 			}
 
-			var audioSource = _stack.Pop();
+			AudioSource audioSource = _stack.Pop();
 			audioSource.gameObject.SetActive(true);
 
 			return audioSource;
@@ -47,7 +47,7 @@ namespace GamePlay.Audio
 
 		private void AddNewAudioSource()
 		{
-			var audioSource = _assets.Instantiate(AudioSourcePath, _container).GetComponent<AudioSource>();
+			AudioSource audioSource = _assets.Instantiate(AudioSourcePath, _container).GetComponent<AudioSource>();
 			audioSource.gameObject.SetActive(false);
 			_stack.Push(audioSource);
 		}

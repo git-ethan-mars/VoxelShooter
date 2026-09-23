@@ -5,7 +5,8 @@ using Mirror;
 using Services;
 using UnityEngine;
 using AudioType = Data.AudioType;
-namespace GamePlay.Audio
+
+namespace GamePlay
 {
 	public class AudioPlayer
 	{
@@ -18,14 +19,14 @@ namespace GamePlay.Audio
 			_audioPool = new AudioPool(assetProvider);
 		}
 
-		public async UniTaskVoid Play(AudioType audioType, Vector3 position)
+		public async UniTaskVoid PlayAsync(AudioType audioType, Vector3 position)
 		{
 			AudioData audioData = _staticData.GetAudioData(audioType);
 			AudioSource audioSource = _audioPool.Get();
 			SetupAudioSource(audioSource, audioData, true);
 			audioSource.transform.position = position;
 			audioSource.Play();
-			
+
 			await UniTask.Delay(TimeSpan.FromSeconds(audioData.Clip.length));
 
 			if (audioSource != null)
@@ -33,8 +34,8 @@ namespace GamePlay.Audio
 				_audioPool.Release(audioSource);
 			}
 		}
-		
-		public async UniTaskVoid Play(AudioType audioType, NetworkIdentity identity, bool isSpatial)
+
+		public async UniTaskVoid PlayAsync(AudioType audioType, NetworkIdentity identity, bool isSpatial)
 		{
 			AudioData audioData = _staticData.GetAudioData(audioType);
 			AudioSource audioSource = _audioPool.Get();
@@ -51,6 +52,7 @@ namespace GamePlay.Audio
 					_audioPool.Release(audioSource);
 					return;
 				}
+
 				if (audioSource == null)
 				{
 					return;

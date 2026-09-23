@@ -29,7 +29,7 @@ namespace UI.SettingsMenuStates
 			_masterVolume = masterVolume;
 			_musicVolume = musicVolume;
 			_soundVolume = soundVolume;
-			var currentSettings = _storageService.Load<VolumeSettingsData>(IStorageService.VolumeSettingsKey);
+			VolumeSettingsData currentSettings = _storageService.Load<VolumeSettingsData>(IStorageService.VolumeSettingsKey);
 			_masterVolume.Construct((int)(currentSettings.MasterVolume * AudioListenerValueToSlider), MinSliderValue,
 				MaxSliderValue);
 			_musicVolume.Construct((int)(currentSettings.MusicVolume * AudioListenerValueToSlider), MinSliderValue,

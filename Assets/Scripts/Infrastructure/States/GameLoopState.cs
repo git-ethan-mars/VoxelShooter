@@ -1,6 +1,5 @@
 using System;
 using GamePlay;
-using GamePlay.Audio;
 using Mirror;
 using Networking;
 using Networking.Core;
@@ -40,10 +39,10 @@ namespace Infrastructure.States
 			_updateLoop = Observable.EveryUpdate().Subscribe(_ => gameMode.Update());
 
 			_networkManager.MessageReceived.OfMessageType<StaticAudioResponse>()
-				.Subscribe(directedMessage => _audioPlayer.Play(directedMessage.Message.AudioType, directedMessage.Message.Position).Forget())
+				.Subscribe(directedMessage => _audioPlayer.PlayAsync(directedMessage.Message.AudioType, directedMessage.Message.Position).Forget())
 				.AddTo(_networkManager);
 			_networkManager.MessageReceived.OfMessageType<DynamicAudioResponse>()
-				.Subscribe(directedMessage => _audioPlayer.Play(directedMessage.Message.AudioType, directedMessage.Message.NetworkIdentity,
+				.Subscribe(directedMessage => _audioPlayer.PlayAsync(directedMessage.Message.AudioType, directedMessage.Message.NetworkIdentity,
 					directedMessage.Message.IsSpatial).Forget())
 				.AddTo(_networkManager);
 

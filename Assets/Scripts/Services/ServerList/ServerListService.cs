@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine.Networking;
 
-namespace Services.ServerList
+namespace Services
 {
 	public class ServerListService : IServerListService
 	{
@@ -54,9 +54,9 @@ namespace Services.ServerList
 				throw new InvalidOperationException(request.error);
 			}
 
-			var result = JsonConvert.DeserializeObject<Dictionary<string, object>>(request.downloadHandler.text);
+			Dictionary<string, object> result = JsonConvert.DeserializeObject<Dictionary<string, object>>(request.downloadHandler.text);
 			_token = result["token"].ToString();
-			var server = JsonConvert.DeserializeObject<Server>(result["server"].ToString());
+			Server server = JsonConvert.DeserializeObject<Server>(result["server"].ToString());
 			return server;
 		}
 
@@ -64,7 +64,7 @@ namespace Services.ServerList
 		{
 			var path = new Uri(BaseUri, $"{ServersEndpoint}/{serverID}");
 
-			using UnityWebRequest request = UnityWebRequest.Delete(path);
+			using var request = UnityWebRequest.Delete(path);
 			request.SetRequestHeader("Authorization", $"Bearer {_token}");
 			await request.SendWebRequest().ToUniTask(cancellationToken: cancellationToken).SuppressCancellationThrow();
 
@@ -80,7 +80,7 @@ namespace Services.ServerList
 
 			string json = JsonConvert.SerializeObject(server);
 
-			UnityWebRequest request = UnityWebRequest.Put(path, json);
+			var request = UnityWebRequest.Put(path, json);
 			request.SetRequestHeader("Content-Type", "application/json");
 			request.SetRequestHeader("Authorization", $"Bearer {_token}");
 			await request.SendWebRequest().ToUniTask(cancellationToken: cancellationToken).SuppressCancellationThrow();
@@ -90,7 +90,7 @@ namespace Services.ServerList
 		{
 			var uriBuilder = new StringBuilder(baseUri);
 			bool first = true;
-			foreach (var param in parameters)
+			foreach (KeyValuePair<string, string> param in parameters)
 			{
 				// Use Uri.EscapeDataString to properly URL-encode the keys and values
 				string key = UnityWebRequest.EscapeURL(param.Key);

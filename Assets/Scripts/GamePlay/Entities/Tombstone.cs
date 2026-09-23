@@ -42,7 +42,13 @@ namespace GamePlay
 				.AddTo(this);
 		}
 
-		public async UniTaskVoid ExplodeWithDelay(TimeSpan delay)
+		private void OnDrawGizmosSelected()
+		{
+			Gizmos.color = Color.yellow;
+			Gizmos.DrawWireCube(Bounds.center, Bounds.size);
+		}
+
+		public async UniTaskVoid ExplodeWithDelayAsync(TimeSpan delay)
 		{
 			await UniTask.Delay(delay, cancellationToken: destroyCancellationToken);
 
@@ -64,12 +70,6 @@ namespace GamePlay
 			{
 				transform.position += Vector3.up;
 			}
-		}
-
-		private void OnDrawGizmosSelected()
-		{
-			Gizmos.color = Color.yellow;
-			Gizmos.DrawWireCube(Bounds.center, Bounds.size);
 		}
 	}
 }

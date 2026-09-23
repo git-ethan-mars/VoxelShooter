@@ -45,16 +45,6 @@ namespace GamePlay
 			_storageService.Subscribe<MouseSettingsData>(ChangeMouseSettings).AddTo(this);
 		}
 
-		public override void OnStopLocalPlayer()
-		{
-			base.OnStopLocalPlayer();
-
-			if (_cameraProvider.MainCamera.transform.parent == transform)
-			{
-				_cameraProvider.MainCamera.transform.SetParent(null);
-			}
-		}
-
 		private void Update()
 		{
 			if (!isLocalPlayer)
@@ -66,7 +56,7 @@ namespace GamePlay
 
 			if (_inputService.IsFirstActionButtonDown() || _target == null)
 			{
-				var entity = GetNextTarget();
+				Entity entity = GetNextTarget();
 
 				if (entity != null)
 				{
@@ -89,15 +79,25 @@ namespace GamePlay
 				positionConstraint.RemoveSource(0);
 			}
 
-			var speed = _inputService.IsSprintButtonHold() ? Speed * AccelerationMultiplier : Speed;
+			float speed = _inputService.IsSprintButtonHold() ? Speed * AccelerationMultiplier : Speed;
 
 			transform.position += (transform.forward * _inputService.Axis.x + transform.right * _inputService.Axis.y)
 			                      * (speed * Time.deltaTime);
 		}
 
+		public override void OnStopLocalPlayer()
+		{
+			base.OnStopLocalPlayer();
+
+			if (_cameraProvider.MainCamera.transform.parent == transform)
+			{
+				_cameraProvider.MainCamera.transform.SetParent(null);
+			}
+		}
+
 		private Entity GetNextTarget()
 		{
-			var character = SelectNextTarget<Character>();
+			Character character = SelectNextTarget<Character>();
 
 			if (character != null)
 			{
@@ -117,9 +117,9 @@ namespace GamePlay
 			}
 			else
 			{
-				var previousEntityWasTarget = false;
+				bool previousEntityWasTarget = false;
 
-				foreach (var entity in _entityContainer.GetEntitiesByType<TEntity>())
+				foreach (TEntity entity in _entityContainer.GetEntitiesByType<TEntity>())
 				{
 					if (previousEntityWasTarget)
 					{

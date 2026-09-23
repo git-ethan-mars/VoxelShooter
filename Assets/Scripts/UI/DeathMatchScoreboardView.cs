@@ -13,6 +13,11 @@ namespace UI
 		private DeathmatchScoreboard _scoreboard;
 		[field: SerializeField] public CanvasGroup CanvasGroup { get; private set; }
 
+		private void OnDestroy()
+		{
+			_scoreboard.PlayerDataById.CollectionChanged -= OnCollectionChanged;
+		}
+
 		public void Initialize(DeathmatchScoreboard scoreboard)
 		{
 			_scoreboard = scoreboard;
@@ -24,7 +29,7 @@ namespace UI
 			if (Items.Count < _scoreboard.PlayerDataById.Count)
 			{
 				int difference = _scoreboard.PlayerDataById.Count - Items.Count;
-				for (var i = 0; i < difference; i++)
+				for (int i = 0; i < difference; i++)
 				{
 					SpawnElement();
 				}
@@ -37,9 +42,9 @@ namespace UI
 				}
 			}
 
-			var index = 0;
+			int index = 0;
 
-			foreach (var (_, playerData) in _scoreboard.PlayerDataById)
+			foreach ((_, DeathMatchPlayerData playerData) in _scoreboard.PlayerDataById)
 			{
 				Items[index].NickName.SetText(playerData.NickName);
 				Items[index].KillCount.SetText(playerData.Kills.ToString());
@@ -48,11 +53,6 @@ namespace UI
 				Items[index].Avatar.texture = playerData.Avatar;
 				index++;
 			}
-		}
-
-		private void OnDestroy()
-		{
-			_scoreboard.PlayerDataById.CollectionChanged -= OnCollectionChanged;
 		}
 	}
 }

@@ -33,7 +33,7 @@ namespace UI
 
 		public void Clear()
 		{
-			for (var i = Items.Count - 1; i >= 0; i--)
+			for (int i = Items.Count - 1; i >= 0; i--)
 			{
 				T item = Items[i];
 				item.gameObject.SetActive(false);

@@ -37,35 +37,35 @@ namespace GamePlay
 
 		public SpawningTNT CreateSpawningTnt(Vector3 position, Quaternion rotation, NetworkConnectionToClient connection)
 		{
-			var tnt = _assets.Instantiate(TntPath, position, rotation).GetComponent<SpawningTNT>();
+			SpawningTNT tnt = _assets.Instantiate(TntPath, position, rotation).GetComponent<SpawningTNT>();
 			NetworkServer.Spawn(tnt.gameObject, connection);
 			return tnt;
 		}
 
 		public SpawningGrenade CreateSpawningGrenade(Vector3 position, NetworkConnectionToClient connection)
 		{
-			var spawningGrenade = _assets.Instantiate(GrenadePath, position, Quaternion.identity).GetComponent<SpawningGrenade>();
+			SpawningGrenade spawningGrenade = _assets.Instantiate(GrenadePath, position, Quaternion.identity).GetComponent<SpawningGrenade>();
 			NetworkServer.Spawn(spawningGrenade.gameObject, connection);
 			return spawningGrenade;
 		}
 
 		public Tombstone CreateTombstone(Vector3 position, NetworkConnectionToClient connection)
 		{
-			var tombstone = _assets.Instantiate(TombstonePath, position, Quaternion.identity).GetComponent<Tombstone>();
+			Tombstone tombstone = _assets.Instantiate(TombstonePath, position, Quaternion.identity).GetComponent<Tombstone>();
 			NetworkServer.Spawn(tombstone.gameObject, connection);
 			return tombstone;
 		}
 
 		public Rocket CreateRocket(Vector3 position, Quaternion rotation, NetworkConnectionToClient connection)
 		{
-			var rocket = _assets.Instantiate(RocketPath, position, rotation).GetComponent<Rocket>();
+			Rocket rocket = _assets.Instantiate(RocketPath, position, rotation).GetComponent<Rocket>();
 			NetworkServer.Spawn(rocket.gameObject, connection);
 			return rocket;
 		}
 
 		public Drill CreateDrill(Vector3 position, Quaternion rotation, NetworkConnectionToClient connection)
 		{
-			var drill = _assets.Instantiate(DrillPath, position, rotation).GetComponent<Drill>();
+			Drill drill = _assets.Instantiate(DrillPath, position, rotation).GetComponent<Drill>();
 			NetworkServer.Spawn(drill.gameObject, connection);
 			return drill;
 		}
@@ -87,7 +87,7 @@ namespace GamePlay
 
 		public SpawnPoint CreateSpawnPoint(SpawnPointData spawnPointData, Transform parent)
 		{
-			var spawnPoint = _assets.Instantiate(SpawnPointPath,
+			SpawnPoint spawnPoint = _assets.Instantiate(SpawnPointPath,
 				spawnPointData.ToVectorWithOffset(), Quaternion.identity, parent).GetComponent<SpawnPoint>();
 			NetworkServer.Spawn(spawnPoint.gameObject);
 			return spawnPoint;
@@ -114,7 +114,7 @@ namespace GamePlay
 
 		public Spectator CreateSpectator(Vector3 position)
 		{
-			var spectator = _assets.Instantiate(SpectatorPlayerPath, position, Quaternion.identity).GetComponent<Spectator>();
+			Spectator spectator = _assets.Instantiate(SpectatorPlayerPath, position, Quaternion.identity).GetComponent<Spectator>();
 			return spectator;
 		}
 	}

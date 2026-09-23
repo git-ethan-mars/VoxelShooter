@@ -27,11 +27,6 @@ namespace GamePlay
 			_configure = staticData.GetItemConfigure<RocketLauncherConfigure>(ItemType.RocketLauncher);
 		}
 
-		public void Launch()
-		{
-			rigidBody.linearVelocity = transform.forward * _configure.Speed;
-		}
-
 		private void OnCollisionEnter(Collision collision)
 		{
 			Explode(_configure.ExplosionData);
@@ -39,6 +34,11 @@ namespace GamePlay
 			_particleFactory.CreateRchParticle(transform.position, _configure.ParticleSpeed, _configure.ParticleCount,
 				_configure.ExplosionData.radius);
 			Destroy(gameObject);
+		}
+
+		public void Launch()
+		{
+			rigidBody.linearVelocity = transform.forward * _configure.Speed;
 		}
 	}
 }

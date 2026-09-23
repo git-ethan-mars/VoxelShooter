@@ -57,6 +57,11 @@ namespace UI
 			InitMapChoice();
 		}
 
+		private void OnDestroy()
+		{
+			_mapCarouselPresenter.Dispose();
+		}
+
 		public override void Show()
 		{
 			_cts = new CancellationTokenSource().AddTo(this);
@@ -79,14 +84,9 @@ namespace UI
 			await mapCarouselView.PlayMapImageAnimationAsync(true, _cts.Token);
 		}
 
-		private void OnDestroy()
-		{
-			_mapCarouselPresenter.Dispose();
-		}
-
 		private void InitMapChoice()
 		{
-			var maps = LoadMaps();
+			MapView[] maps = LoadMaps();
 			_mapCarouselModel = new CarouselModel<MapView>(maps[0], maps);
 			_mapCarouselPresenter = new CarouselPresenter<MapView>(_mapCarouselModel, mapCarouselView);
 			_mapCarouselPresenter.Initialize();
@@ -112,7 +112,7 @@ namespace UI
 				Directory.CreateDirectory(Constants.MapFolderPath);
 			}
 
-			var mapNames = MapDataReader.GetExistedMaps()
+			MapView[] mapNames = MapDataReader.GetExistedMaps()
 				.Select(fileName => new MapView(fileName, _mapConfigureLoader.GetMapConfigure(fileName).Image))
 				.ToArray();
 			return mapNames;

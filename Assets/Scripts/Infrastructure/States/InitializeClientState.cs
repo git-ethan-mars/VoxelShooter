@@ -31,7 +31,7 @@ namespace Infrastructure.States
 			GameSettings gameSettings = (await _networkManager.MessageReceived
 				.FirstAsync<GameSettingsResponse>()).Message.GameSettings;
 
-			GameMode gameMode = await _gameModeFactory.CreateGameMode(gameSettings);
+			GameMode gameMode = await _gameModeFactory.CreateGameModeAsync(gameSettings);
 			_gameStateMachine.Enter<GameLoopState, GameMode>(gameMode);
 		}
 

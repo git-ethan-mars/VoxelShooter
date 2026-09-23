@@ -51,6 +51,12 @@ namespace UI
 			computeShader.SetVector(GridColor, gridColor);
 		}
 
+		private void OnDestroy()
+		{
+			_heightBuffer.Release();
+			MainTexture?.Release();
+		}
+
 		internal void OnMapChanged(Map map)
 		{
 			if (MainTexture != null)
@@ -71,7 +77,7 @@ namespace UI
 
 			for (int x = 0; x < map.Width / Chunk.ChunkSize; x++)
 			{
-				for (var z = 0; z < map.Depth / Chunk.ChunkSize; z++)
+				for (int z = 0; z < map.Depth / Chunk.ChunkSize; z++)
 				{
 					RefreshChunkColumn(x, z);
 				}
@@ -83,7 +89,7 @@ namespace UI
 			computeShader.SetBuffer(_clearHeightKernel, HeightBuffer, _heightBuffer);
 			computeShader.Dispatch(_clearHeightKernel, Chunk.ChunkSize / 8, Chunk.ChunkSize / 8, 1);
 
-			for (var y = 0; y < _mapProvider.Map.CurrentValue.Height / Chunk.ChunkSize; y++)
+			for (int y = 0; y < _mapProvider.Map.CurrentValue.Height / Chunk.ChunkSize; y++)
 			{
 				int chunkIndex = GetChunkIndex(x, y, z);
 				ProcessChunk(chunkIndex);
@@ -100,7 +106,7 @@ namespace UI
 			}
 
 			chunk.Mesh.vertexBufferTarget |= GraphicsBuffer.Target.Raw;
-			using var vertexBuffer = chunk.Mesh.GetVertexBuffer(0);
+			using GraphicsBuffer vertexBuffer = chunk.Mesh.GetVertexBuffer(0);
 
 			computeShader.SetBuffer(_updateHeightKernel, VertexBuffer, vertexBuffer);
 			computeShader.SetBuffer(_updateHeightKernel, HeightBuffer, _heightBuffer);
@@ -125,12 +131,6 @@ namespace UI
 		{
 			return x * (_mapProvider.Map.CurrentValue.Height * _mapProvider.Map.CurrentValue.Depth / Chunk.ChunkSizeSquared)
 			       + y * (_mapProvider.Map.CurrentValue.Depth / Chunk.ChunkSize) + z;
-		}
-
-		private void OnDestroy()
-		{
-			_heightBuffer.Release();
-			MainTexture?.Release();
 		}
 	}
 }

@@ -156,16 +156,16 @@ namespace VoxelMap
 
 		private Chunk[] GenerateChunks(MapData mapData, Transform container, NativeArray<int> faceCountPerChunk)
 		{
-			var chunksContainer = new GameObject(ChunksContainerName).transform;
+			Transform chunksContainer = new GameObject(ChunksContainerName).transform;
 			chunksContainer.SetParent(container);
 			var chunks = new Chunk[mapData.ChunkCount];
-			for (var i = 0; i < mapData.ChunkCount; i++)
+			for (int i = 0; i < mapData.ChunkCount; i++)
 			{
 				Vector3 chunkPosition = ChunkIndexToPosition(i, mapData);
 				GameObject chunkView = _mapFactory.CreateChunkView(chunkPosition, chunksContainer);
 				chunkView.name = $"Chunk {i}";
-				var meshFilter = chunkView.GetComponent<MeshFilter>();
-				var meshCollider = chunkView.GetComponent<MeshCollider>();
+				MeshFilter meshFilter = chunkView.GetComponent<MeshFilter>();
+				MeshCollider meshCollider = chunkView.GetComponent<MeshCollider>();
 				chunks[i] = new Chunk(i, mapData, meshFilter, meshCollider, faceCountPerChunk[i]);
 			}
 
@@ -207,17 +207,17 @@ namespace VoxelMap
 		{
 			var chunks = new Chunk[mapData.ChunkCount];
 			var tasks = new UniTask[mapData.ChunkCount];
-			var completedChunks = 0;
-			var chunksContainer = new GameObject(ChunksContainerName).transform;
+			int completedChunks = 0;
+			Transform chunksContainer = new GameObject(ChunksContainerName).transform;
 			chunksContainer.SetParent(container);
 
-			for (var i = 0; i < mapData.ChunkCount; i++)
+			for (int i = 0; i < mapData.ChunkCount; i++)
 			{
 				Vector3 chunkPosition = ChunkIndexToPosition(i, mapData);
 				GameObject chunkView = _mapFactory.CreateChunkView(chunkPosition, chunksContainer);
 				chunkView.name = $"Chunk {i}";
-				var meshFilter = chunkView.GetComponent<MeshFilter>();
-				var meshCollider = chunkView.GetComponent<MeshCollider>();
+				MeshFilter meshFilter = chunkView.GetComponent<MeshFilter>();
+				MeshCollider meshCollider = chunkView.GetComponent<MeshCollider>();
 				chunks[i] = new Chunk(i, mapData, meshFilter, meshCollider, faceCountPerChunk[i]);
 				tasks[i] = chunks[i].RegenerateAsync(token).ContinueWith(() =>
 				{

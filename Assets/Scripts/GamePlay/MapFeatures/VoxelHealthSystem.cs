@@ -23,9 +23,9 @@ namespace GamePlay
 
 		public void ApplyDamage(IReadOnlyList<Voxel> voxels, IVoxelDamageCalculator damageCalculator)
 		{
-			using var poolObject = ListPool<Voxel>.Get(out var changedVoxels);
+			using PooledObject<List<Voxel>> poolObject = ListPool<Voxel>.Get(out List<Voxel> changedVoxels);
 
-			for (var i = 0; i < voxels.Count; i++)
+			for (int i = 0; i < voxels.Count; i++)
 			{
 				Vector3Ushort position = voxels[i].Position;
 
@@ -57,7 +57,7 @@ namespace GamePlay
 					_health[position] = current;
 
 					float currentBrightness = maxBrightness * (current / MaxHealth + 1) / 2;
-					Color newColor = Color.HSVToRGB(hue, saturation, currentBrightness);
+					var newColor = Color.HSVToRGB(hue, saturation, currentBrightness);
 
 					changedVoxels.Add(new Voxel(position, new VoxelData(newColor)));
 				}

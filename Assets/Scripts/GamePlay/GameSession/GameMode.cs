@@ -23,14 +23,40 @@ namespace GamePlay
 		protected EntityContainer EntityContainer;
 		protected MapProvider MapProvider;
 
-		protected readonly ReactiveProperty<GameState> _gameState = new ReactiveProperty<GameState>(GamePlay.GameState.Loading);
+		protected readonly ReactiveProperty<GameState> MutableGameState = new ReactiveProperty<GameState>(GamePlay.GameState.Loading);
 		private readonly List<Voxel> _addingVoxels = new List<Voxel>();
 		private readonly List<Vector3Ushort> _removingPositions = new List<Vector3Ushort>();
 		public GameSettings GameSettings { get; private set; }
 
-		public ReadOnlyReactiveProperty<GameState> GameState => _gameState;
+		public ReadOnlyReactiveProperty<GameState> GameState => MutableGameState;
 
-		public virtual async UniTask Start(GameSettings gameSettings)
+		public virtual void Update()
+		{
+			if (NetworkManager.mode == NetworkManagerMode.ClientOnly)
+			{
+				if (MapProvider.Map == null)
+				{
+					return;
+				}
+
+				MapProvider.Map.CurrentValue.SetVoxelsByGlobalPositions(_addingVoxels);
+				_addingVoxels.Clear();
+
+				Voxel[] removingVoxels = ArrayPool<Voxel>.Shared.Rent(_removingPositions.Count);
+
+				for (int i = 0; i < _removingPositions.Count; i++)
+				{
+					removingVoxels[i] = new Voxel(_removingPositions[i], VoxelData.Air);
+				}
+
+				MapProvider.Map.CurrentValue.SetVoxelsByGlobalPositions(removingVoxels);
+				_removingPositions.Clear();
+
+				ArrayPool<Voxel>.Shared.Return(removingVoxels);
+			}
+		}
+
+		public virtual async UniTask StartAsync(GameSettings gameSettings)
 		{
 			GameSettings = gameSettings;
 			NetworkManager.PlayerConnected.Subscribe(tuple => OnAddPlayer(tuple.connection, tuple.nickName, tuple.avatar))
@@ -45,7 +71,7 @@ namespace GamePlay
 			if (NetworkManager.mode == NetworkManagerMode.ClientOnly)
 			{
 				NetworkManager.MessageReceived.OfMessageType<MapChangeResponse>()
-					.Subscribe(_ => OnMapChanged().Forget())
+					.Subscribe(_ => OnMapChangedAsync().Forget())
 					.AddTo(NetworkManager);
 				NetworkManager.MessageReceived.OfMessageType<AddedVoxelResponse>()
 					.Subscribe(directedMessage => _addingVoxels.AddRange(directedMessage.Message.AddedVoxels))
@@ -58,36 +84,10 @@ namespace GamePlay
 			}
 		}
 
-		public virtual void Update()
-		{
-			if (NetworkManager.mode == NetworkManagerMode.ClientOnly)
-			{
-				if (MapProvider.Map == null)
-				{
-					return;
-				}
-
-				MapProvider.Map.CurrentValue.SetVoxelsByGlobalPositions(_addingVoxels);
-				_addingVoxels.Clear();
-
-				var removingVoxels = ArrayPool<Voxel>.Shared.Rent(_removingPositions.Count);
-
-				for (var i = 0; i < _removingPositions.Count; i++)
-				{
-					removingVoxels[i] = new Voxel(_removingPositions[i], VoxelData.Air);
-				}
-
-				MapProvider.Map.CurrentValue.SetVoxelsByGlobalPositions(removingVoxels);
-				_removingPositions.Clear();
-
-				ArrayPool<Voxel>.Shared.Return(removingVoxels);
-			}
-		}
-
 		public virtual async UniTask LoadMapAsync(string mapName)
 		{
 			MapData mapData = await MapDataReader.ReadFromFileAsync(mapName);
-			await MapProvider.LoadMap(mapData, mapName);
+			await MapProvider.LoadMapAsync(mapData, mapName);
 
 			MapProvider.Map.CurrentValue.AddFeature<MapBuilding>();
 			MapProvider.Map.CurrentValue.AddFeature<MapDestruction>();
@@ -122,15 +122,15 @@ namespace GamePlay
 			}
 		}
 
-		private async UniTask OnMapChanged()
+		private async UniTask OnMapChangedAsync()
 		{
-			_gameState.Value = GamePlay.GameState.Loading;
+			MutableGameState.Value = GamePlay.GameState.Loading;
 			var mapNameRequest = new MapNameRequest();
 			NetworkManager.SendRequest(mapNameRequest);
-			var mapNameResponse = await NetworkManager.MessageReceived.FirstAsync<MapNameResponse>();
+			DirectedMessage<MapNameResponse> mapNameResponse = await NetworkManager.MessageReceived.FirstAsync<MapNameResponse>();
 			string mapName = mapNameResponse.Message.MapName;
 			await DownloadMapAsync(mapName);
-			_gameState.Value = GamePlay.GameState.Playing;
+			MutableGameState.Value = GamePlay.GameState.Playing;
 		}
 
 		private async UniTask DownloadMapAsync(string mapName, CancellationToken cancellationToken = default)
@@ -143,9 +143,9 @@ namespace GamePlay
 
 			using IDisposable disposable = NetworkManager.MessageReceived
 				.OfMessageType<MapDownloadResponse>()
-				.Subscribe(response => ProcessMessage(response.Message).Forget());
+				.Subscribe(response => ProcessMessageAsync(response.Message).Forget());
 
-			async UniTask ProcessMessage(MapDownloadResponse message)
+			async UniTask ProcessMessageAsync(MapDownloadResponse message)
 			{
 				if (cancellationToken.IsCancellationRequested)
 				{
@@ -160,7 +160,7 @@ namespace GamePlay
 				{
 					using var memoryStream = new MemoryStream(buffer);
 					MapData mapData = await MapDataReader.ReadFromStreamAsync(memoryStream, cancellationToken);
-					await MapProvider.LoadMap(mapData, mapName);
+					await MapProvider.LoadMapAsync(mapData, mapName);
 					tsc.TrySetResult();
 				}
 			}

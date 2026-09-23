@@ -44,6 +44,19 @@ namespace GamePlay
 			_amount.Value = Configure.Amount;
 		}
 
+		private void Update()
+		{
+			if (!IsLocalItem)
+			{
+				return;
+			}
+
+			if (_inputService.IsFirstActionButtonDown())
+			{
+				Shoot(_cameraProvider.CentredRay);
+			}
+		}
+
 		public override void Select()
 		{
 			base.Select();
@@ -64,19 +77,6 @@ namespace GamePlay
 			_onChangeSlot?.Dispose();
 		}
 
-		private void Update()
-		{
-			if (!IsLocalItem)
-			{
-				return;
-			}
-
-			if (_inputService.IsFirstActionButtonDown())
-			{
-				Shoot(_cameraProvider.CentredRay);
-			}
-		}
-
 		[Command]
 		private void Shoot(Ray ray)
 		{
@@ -86,7 +86,7 @@ namespace GamePlay
 			}
 
 			Vector3 drillPosition = ray.origin + ray.direction * 3;
-			Quaternion drillRotation = Quaternion.LookRotation(ray.direction);
+			var drillRotation = Quaternion.LookRotation(ray.direction);
 			Drill drill = _entityFactory.CreateDrill(drillPosition, drillRotation, connectionToClient);
 			drill.Launch();
 			_amount.Value -= 1;

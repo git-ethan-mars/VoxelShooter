@@ -25,29 +25,14 @@ namespace UI
 			_inputService = inputService;
 		}
 
-		public void Initialize(Voting voting)
-		{
-			_voting = voting;
-
-			_voting.IsActivated.Subscribe(value => enabled = value);
-
-			_voting.Title.Subscribe(title.SetText).AddTo(this);
-			_voting.VoteByCandidate.CollectionChanged += OnVotingChanged;
-		}
-
 		private void OnEnable()
 		{
 			canvasGroup.alpha = 1;
 		}
 
-		private void OnDisable()
-		{
-			canvasGroup.alpha = 0;
-		}
-
 		private void Update()
 		{
-			var i = 0;
+			int i = 0;
 
 			foreach ((string candidate, int _) in _voting.VoteByCandidate)
 			{
@@ -58,6 +43,26 @@ namespace UI
 
 				i++;
 			}
+		}
+
+		private void OnDisable()
+		{
+			canvasGroup.alpha = 0;
+		}
+
+		private void OnDestroy()
+		{
+			_voting.VoteByCandidate.CollectionChanged -= OnVotingChanged;
+		}
+
+		public void Initialize(Voting voting)
+		{
+			_voting = voting;
+
+			_voting.IsActivated.Subscribe(value => enabled = value);
+
+			_voting.Title.Subscribe(title.SetText).AddTo(this);
+			_voting.VoteByCandidate.CollectionChanged += OnVotingChanged;
 		}
 
 		private void OnVotingChanged(in NotifyCollectionChangedEventArgs<KeyValuePair<string, int>> e)
@@ -76,11 +81,6 @@ namespace UI
 					Clear();
 					break;
 			}
-		}
-
-		private void OnDestroy()
-		{
-			_voting.VoteByCandidate.CollectionChanged -= OnVotingChanged;
 		}
 	}
 }

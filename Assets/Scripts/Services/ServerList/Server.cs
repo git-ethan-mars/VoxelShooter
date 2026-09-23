@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace Services.ServerList
+namespace Services
 {
 	public record Server
 	{

@@ -34,7 +34,7 @@ namespace VoxelMap
 
 		public void Execute(int chunkIndex)
 		{
-			for (var i = 0; i < Chunk.ChunkSizeCubed; i++)
+			for (int i = 0; i < Chunk.ChunkSizeCubed; i++)
 			{
 				int voxelIndex = chunkIndex * Chunk.ChunkSizeCubed + i;
 				_faces[voxelIndex] = Face.None;

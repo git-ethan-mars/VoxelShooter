@@ -6,7 +6,7 @@ namespace UI.Inventory
 {
 	public class SlotPresenterRegistry : ISlotPresenterRegistry
 	{
-		private readonly Dictionary<Type, Func<InventoryItem, SlotView, SlotPresenter>> _creators = new();
+		private readonly Dictionary<Type, Func<InventoryItem, SlotView, SlotPresenter>> _creators = new Dictionary<Type, Func<InventoryItem, SlotView, SlotPresenter>>();
 
 		public void Register<T>(Func<T, SlotView, SlotPresenter> creator) where T : InventoryItem
 		{
@@ -19,7 +19,7 @@ namespace UI.Inventory
 
 			while (currentType != null && currentType != typeof(object))
 			{
-				if (_creators.TryGetValue(currentType, out var creator))
+				if (_creators.TryGetValue(currentType, out Func<InventoryItem, SlotView, SlotPresenter> creator))
 				{
 					return creator(item, slotView);
 				}

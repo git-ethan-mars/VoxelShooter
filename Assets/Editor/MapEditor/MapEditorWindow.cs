@@ -14,6 +14,18 @@ namespace Editor
 		private ReorderableList _spawnPoints;
 		private SerializedObject _serializedObject;
 
+		private void OnGUI()
+		{
+			_serializedObject.Update();
+			DrawGUI();
+			_serializedObject.ApplyModifiedProperties();
+		}
+
+		private void OnDisable()
+		{
+			_serializedObject.Dispose();
+		}
+
 		public void Setup(MapConfigure mapConfigure)
 		{
 			_serializedObject = new SerializedObject(mapConfigure);
@@ -29,21 +41,9 @@ namespace Editor
 			};
 		}
 
-		private void OnDisable()
-		{
-			_serializedObject.Dispose();
-		}
-
-		private void OnGUI()
-		{
-			_serializedObject.Update();
-			DrawGUI();
-			_serializedObject.ApplyModifiedProperties();
-		}
-
 		private void DrawGUI()
 		{
-			var imageProperty = _serializedObject.FindProperty(GetBackingField(nameof(MapConfigure.Image)));
+			SerializedProperty imageProperty = _serializedObject.FindProperty(GetBackingField(nameof(MapConfigure.Image)));
 			EditorGUI.BeginChangeCheck();
 			EditorGUILayout.ObjectField(imageProperty, new GUIContent(imageProperty.displayName));
 
@@ -68,11 +68,11 @@ namespace Editor
 		{
 			EditorGUILayout.LabelField("Color blocks");
 			EditorGUI.indentLevel += 1;
-			var waterColorProperty = _serializedObject.FindProperty(GetBackingField(nameof(MapConfigure.WaterColor)));
+			SerializedProperty waterColorProperty = _serializedObject.FindProperty(GetBackingField(nameof(MapConfigure.WaterColor)));
 			waterColorProperty.colorValue = EditorGUILayout.ColorField(waterColorProperty.displayName,
 				waterColorProperty.colorValue);
 
-			var innerColorProperty = _serializedObject.FindProperty(GetBackingField(nameof(MapConfigure.InnerColor)));
+			SerializedProperty innerColorProperty = _serializedObject.FindProperty(GetBackingField(nameof(MapConfigure.InnerColor)));
 			innerColorProperty.colorValue = EditorGUILayout.ColorField(new GUIContent(innerColorProperty.displayName),
 				innerColorProperty.colorValue);
 
@@ -81,7 +81,7 @@ namespace Editor
 
 		private void DrawWeatherProperty()
 		{
-			var weatherProperty = _serializedObject.FindProperty(GetBackingField(nameof(MapConfigure.Weather)));
+			SerializedProperty weatherProperty = _serializedObject.FindProperty(GetBackingField(nameof(MapConfigure.Weather)));
 			EditorGUI.BeginChangeCheck();
 			EditorGUILayout.ObjectField(weatherProperty, new GUIContent(weatherProperty.displayName));
 			if (EditorGUI.EndChangeCheck())
@@ -95,17 +95,17 @@ namespace Editor
 			EditorGUILayout.LabelField("Ambient settings");
 			EditorGUI.BeginChangeCheck();
 			EditorGUI.indentLevel += 1;
-			var skyboxMaterialProperty = _serializedObject.FindProperty(GetBackingField(nameof(MapConfigure.SkyboxMaterial)));
+			SerializedProperty skyboxMaterialProperty = _serializedObject.FindProperty(GetBackingField(nameof(MapConfigure.SkyboxMaterial)));
 			EditorGUILayout.ObjectField(skyboxMaterialProperty, new GUIContent(skyboxMaterialProperty.displayName));
-			var ambientDataProperty = _serializedObject.FindProperty(GetBackingField(nameof(MapConfigure.AmbientData)));
+			SerializedProperty ambientDataProperty = _serializedObject.FindProperty(GetBackingField(nameof(MapConfigure.AmbientData)));
 
-			var ambientModeProperty = ambientDataProperty.FindPropertyRelative(nameof(MapConfigure.AmbientData.mode));
+			SerializedProperty ambientModeProperty = ambientDataProperty.FindPropertyRelative(nameof(MapConfigure.AmbientData.mode));
 			ambientModeProperty.intValue =
 				EditorGUILayout.IntPopup("Source", ambientModeProperty.intValue, _ambientModes, new[] { 0, 1, 3 });
 
-			var skyColorProperty = ambientDataProperty.FindPropertyRelative(nameof(MapConfigure.AmbientData.skyColor));
-			var equatorColorProperty = ambientDataProperty.FindPropertyRelative(nameof(MapConfigure.AmbientData.equatorColor));
-			var groundColorProperty = ambientDataProperty.FindPropertyRelative(nameof(MapConfigure.AmbientData.groundColor));
+			SerializedProperty skyColorProperty = ambientDataProperty.FindPropertyRelative(nameof(MapConfigure.AmbientData.skyColor));
+			SerializedProperty equatorColorProperty = ambientDataProperty.FindPropertyRelative(nameof(MapConfigure.AmbientData.equatorColor));
+			SerializedProperty groundColorProperty = ambientDataProperty.FindPropertyRelative(nameof(MapConfigure.AmbientData.groundColor));
 
 			if ((AmbientMode)ambientModeProperty.intValue == AmbientMode.Skybox)
 			{
@@ -115,7 +115,7 @@ namespace Editor
 				}
 				else
 				{
-					var ambientIntensityProperty = ambientDataProperty.FindPropertyRelative(nameof(MapConfigure.AmbientData.intensity));
+					SerializedProperty ambientIntensityProperty = ambientDataProperty.FindPropertyRelative(nameof(MapConfigure.AmbientData.intensity));
 					ambientIntensityProperty.floatValue =
 						EditorGUILayout.Slider("Intensity Multiplier",
 							ambientIntensityProperty.floatValue, 0.0F, 8.0F);
@@ -152,12 +152,12 @@ namespace Editor
 		private void AddItem(ReorderableList reorderableList)
 		{
 			reorderableList.serializedProperty.arraySize += 1;
-			var cameraTransform = ((SceneView)SceneView.sceneViews[0]).camera.transform;
+			Transform cameraTransform = ((SceneView)SceneView.sceneViews[0]).camera.transform;
 			var spawnPointPosition = Vector3Int.FloorToInt(cameraTransform.position + cameraTransform.forward * 5);
 			reorderableList.serializedProperty.GetArrayElementAtIndex(reorderableList.index).objectReferenceValue =
 				null;
 
-			var spawnPointsProperty = _serializedObject.FindProperty(GetBackingField(nameof(MapConfigure.SpawnPoints)));
+			SerializedProperty spawnPointsProperty = _serializedObject.FindProperty(GetBackingField(nameof(MapConfigure.SpawnPoints)));
 			spawnPointsProperty.arraySize += 1;
 		}
 
@@ -167,13 +167,13 @@ namespace Editor
 				.objectReferenceValue);
 
 			reorderableList.serializedProperty.DeleteArrayElementAtIndex(reorderableList.index);
-			var spawnPointsProperty = _serializedObject.FindProperty(GetBackingField(nameof(MapConfigure.SpawnPoints)));
+			SerializedProperty spawnPointsProperty = _serializedObject.FindProperty(GetBackingField(nameof(MapConfigure.SpawnPoints)));
 			spawnPointsProperty.DeleteArrayElementAtIndex(spawnPointsProperty.arraySize - 1);
 		}
 
 		private void DrawListItems(Rect rect, int index, bool isActive, bool isFocused)
 		{
-			var element = _spawnPoints.serializedProperty.GetArrayElementAtIndex(index);
+			SerializedProperty element = _spawnPoints.serializedProperty.GetArrayElementAtIndex(index);
 			EditorGUI.ObjectField(rect, element.displayName, element.objectReferenceValue, typeof(GameObject),
 				false);
 		}

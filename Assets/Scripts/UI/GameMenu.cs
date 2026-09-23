@@ -6,7 +6,6 @@ using DG.Tweening;
 using R3;
 using Reflex.Attributes;
 using Services;
-using Services.ServerList;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -64,37 +63,37 @@ namespace UI
 
 		private void OnCreateMatchButtonPressed()
 		{
-			SwapWindowsLeftward(matchMenu, mainMenu).Forget();
+			SwapWindowsLeftwardAsync(matchMenu, mainMenu).Forget();
 		}
 
 		private void OnJoinMatchButtonPressed()
 		{
-			SwapWindowsLeftward(joinMatchMenu, mainMenu).Forget();
+			SwapWindowsLeftwardAsync(joinMatchMenu, mainMenu).Forget();
 		}
 
 		private void OnJoinMatchMenuBackButtonPressed()
 		{
-			SwapWindowsRightward(mainMenu, joinMatchMenu).Forget();
+			SwapWindowsRightwardAsync(mainMenu, joinMatchMenu).Forget();
 		}
 
 		private void OnSettingsButtonPressed()
 		{
-			SwapWindowsLeftward(settingsMenu, mainMenu).Forget();
+			SwapWindowsLeftwardAsync(settingsMenu, mainMenu).Forget();
 		}
 
 		private void OnSettingsMenuBackButtonPressed()
 		{
-			SwapWindowsRightward(mainMenu, settingsMenu).Forget();
+			SwapWindowsRightwardAsync(mainMenu, settingsMenu).Forget();
 			_eventSystem.SetSelectedGameObject(mainMenu.SettingsButton.gameObject);
 		}
 
 		private void OnMatchMenuBackButtonPressed()
 		{
-			SwapWindowsRightward(mainMenu, matchMenu).Forget();
+			SwapWindowsRightwardAsync(mainMenu, matchMenu).Forget();
 			_eventSystem.SetSelectedGameObject(mainMenu.CreateMatchButton.gameObject);
 		}
 
-		private async UniTaskVoid SwapWindowsLeftward(BaseMenu nextWindow, BaseMenu previousWindow)
+		private async UniTaskVoid SwapWindowsLeftwardAsync(BaseMenu nextWindow, BaseMenu previousWindow)
 		{
 			nextWindow.transform.localPosition = new Vector3(canvas.renderingDisplaySize.x + ((RectTransform)nextWindow.transform).rect.width / 2,
 				0, 0);
@@ -114,7 +113,7 @@ namespace UI
 			previousWindow.Hide();
 		}
 
-		private async UniTaskVoid SwapWindowsRightward(BaseMenu nextWindow, BaseMenu previousWindow)
+		private async UniTaskVoid SwapWindowsRightwardAsync(BaseMenu nextWindow, BaseMenu previousWindow)
 		{
 			nextWindow.transform.localPosition = new Vector3(-canvas.renderingDisplaySize.x - ((RectTransform)nextWindow.transform).rect.width / 2, 0, 0);
 			nextWindow.CanvasGroup.blocksRaycasts = true;

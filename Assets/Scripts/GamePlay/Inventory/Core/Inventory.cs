@@ -24,14 +24,6 @@ namespace GamePlay
 		public Observable<int> ItemAdded { get; private set; }
 		public Observable<(int oldSlotIndex, int slotIndex)> SlotSelected => _onSlotSelected;
 
-		[Server]
-		public void Initialize(IEnumerable<InventoryItem> items, int voxelsCount)
-		{
-			_items.AddRange(items);
-			_items[0].Select();
-			_voxelAmount.Value = voxelsCount;
-		}
-
 		public override void OnStartClient()
 		{
 			base.OnStartClient();
@@ -44,13 +36,21 @@ namespace GamePlay
 				}
 			}
 
-			for (var i = 0; i < _items.Count; i++)
+			for (int i = 0; i < _items.Count; i++)
 			{
 				OnItemAdded(i);
 			}
 
 			ItemAdded = Observable.FromEvent<int>(handler => _items.OnAdd += handler, handler => _items.OnAdd -= handler);
 			ItemAdded.Subscribe(OnItemAdded).AddTo(this);
+		}
+
+		[Server]
+		public void Initialize(IEnumerable<InventoryItem> items, int voxelsCount)
+		{
+			_items.AddRange(items);
+			_items[0].Select();
+			_voxelAmount.Value = voxelsCount;
 		}
 
 		[Command]

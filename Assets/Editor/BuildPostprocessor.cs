@@ -16,13 +16,13 @@ namespace Editor
 		[PostProcessBuild]
 		public static void OnPostprocessBuild(BuildTarget target, string pathToExecutionFile)
 		{
-			var pathToBuildFolder = Path.GetDirectoryName(pathToExecutionFile);
+			string pathToBuildFolder = Path.GetDirectoryName(pathToExecutionFile);
 			File.Copy(Path.Combine(Path.GetDirectoryName(Application.dataPath)!, SteamAppIdFileName),
 				Path.Combine(pathToBuildFolder!, SteamAppIdFileName), true);
-			var pathToMaps = Path.Combine(Application.dataPath, MapFolder);
-			var pathToDataFolder = Path.Combine(pathToBuildFolder!, Application.productName + BuildDataSuffix);
+			string pathToMaps = Path.Combine(Application.dataPath, MapFolder);
+			string pathToDataFolder = Path.Combine(pathToBuildFolder!, Application.productName + BuildDataSuffix);
 			Directory.CreateDirectory(Path.Combine(pathToDataFolder, MapFolder));
-			foreach (var mapFileName in Directory.GetFiles(pathToMaps, $"*{Constants.RchExtension}")
+			foreach (string mapFileName in Directory.GetFiles(pathToMaps, $"*{Constants.RchExtension}")
 				         .Union(Directory.GetFiles(pathToMaps, $"*{Constants.VxlExtension}")))
 			{
 				File.Copy(Path.Combine(mapFileName),

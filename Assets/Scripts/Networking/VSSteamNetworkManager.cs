@@ -2,7 +2,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using Mirror;
 using Reflex.Attributes;
-using Services.ServerList;
+using Services;
 using Steamworks;
 using UnityEngine;
 using VoxelMap;
@@ -33,7 +33,7 @@ namespace Networking
 
 			_steamLobbyID = await steamLobby.CreateLobbyAsync(maxConnections);
 			_server = await _serverList.CreateNewServerAsync(_steamLobbyID.m_SteamID, maxConnections, destroyCancellationToken);
-			UpdateServerPeriodically().Forget();
+			UpdateServerPeriodicallyAsync().Forget();
 		}
 
 		public override async void OnStopHost()
@@ -47,7 +47,7 @@ namespace Networking
 			}
 		}
 
-		private async UniTaskVoid UpdateServerPeriodically()
+		private async UniTaskVoid UpdateServerPeriodicallyAsync()
 		{
 			while (!destroyCancellationToken.IsCancellationRequested)
 			{

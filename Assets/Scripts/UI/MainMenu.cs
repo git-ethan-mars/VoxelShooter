@@ -16,20 +16,20 @@ namespace UI
 		public Observable<Unit> SettingsButtonPressed { get; private set; }
 		public Observable<Unit> ExitButtonPressed { get; private set; }
 
-		public override void Show()
-		{
-		}
-
-		public override void Hide()
-		{
-		}
-
 		private void OnEnable()
 		{
 			CreateMatchButtonPressed = CreateMatchButton.onClick.AsObservable();
 			JoinButtonPressed = JoinMatchButton.onClick.AsObservable();
 			SettingsButtonPressed = SettingsButton.onClick.AsObservable();
 			ExitButtonPressed = exitButton.onClick.AsObservable();
+		}
+
+		public override void Show()
+		{
+		}
+
+		public override void Hide()
+		{
 		}
 	}
 }

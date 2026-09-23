@@ -14,7 +14,7 @@ namespace Editor
 
 		public static void Open(MapConfigure mapConfigure)
 		{
-			var sceneView = GetWindow<MapEditorSceneView>();
+			MapEditorSceneView sceneView = GetWindow<MapEditorSceneView>();
 			sceneView._mapConfigure = mapConfigure;
 			sceneView.Setup();
 			sceneView.Repaint();

@@ -31,7 +31,7 @@ namespace VoxelMap
 		{
 			Transform wallContainer = new GameObject(WallContainerName).transform;
 			wallContainer.SetParent(parent);
-			var allFaces = Enum.GetValues(typeof(Face)).Cast<Face>().Where(face => face != Face.None);
+			IEnumerable<Face> allFaces = Enum.GetValues(typeof(Face)).Cast<Face>().Where(face => face != Face.None);
 			foreach (Face face in allFaces)
 			{
 				GameObject wall = Object.Instantiate(Resources.Load<GameObject>(WallPath), wallContainer);
@@ -107,7 +107,7 @@ namespace VoxelMap
 
 		public void CreateDirectionalLight(DirectionalLightData directionalLightData, Transform parent)
 		{
-			var light = new GameObject(DirectionalLightName).AddComponent<Light>();
+			Light light = new GameObject(DirectionalLightName).AddComponent<Light>();
 			light.transform.position = directionalLightData.position;
 			light.transform.rotation = directionalLightData.rotation;
 			light.color = directionalLightData.color;
@@ -133,7 +133,7 @@ namespace VoxelMap
 			Transform spawnPointContainer = new GameObject(SpawnPointContainerName).transform;
 			spawnPointContainer.SetParent(parent);
 
-			for (var i = 0; i < data.Count; i++)
+			for (int i = 0; i < data.Count; i++)
 			{
 				Object.Instantiate(Resources.Load<GameObject>(SpawnPointPath), data[i].position,
 					Quaternion.identity, spawnPointContainer);

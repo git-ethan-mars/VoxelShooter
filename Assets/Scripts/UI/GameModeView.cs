@@ -43,25 +43,6 @@ namespace UI
 			};
 		}
 
-		public abstract void OnGameStateChanged(GameState gameState);
-
-		public void OnMapChanged(Map map)
-		{
-			canvasGroup.alpha = 1;
-			SettingsMenu.BackButtonPressed
-				.Subscribe(_ => SwitchState<InGameMenuState>())
-				.AddTo(map);
-			InGameMenu.ResumeButtonPressed
-				.Subscribe(_ => SwitchState<DefaultState>())
-				.AddTo(map);
-			InGameMenu.SettingsButtonPressed
-				.Subscribe(_ => SwitchState<SettingsMenuState>())
-				.AddTo(map);
-			_storageService.Subscribe<MouseSettingsData>(OnMouseSettingsChanged)
-				.AddTo(map);
-			WorldMap.OnMapChanged(map);
-		}
-
 		protected virtual void Update()
 		{
 			if (InputService.IsScoreboardButtonUp())
@@ -83,6 +64,30 @@ namespace UI
 			{
 				SwitchState<DefaultState>();
 			}
+		}
+
+		private void OnDestroy()
+		{
+			_currentState?.Exit();
+		}
+
+		public abstract void OnGameStateChanged(GameState gameState);
+
+		public void OnMapChanged(Map map)
+		{
+			canvasGroup.alpha = 1;
+			SettingsMenu.BackButtonPressed
+				.Subscribe(_ => SwitchState<InGameMenuState>())
+				.AddTo(map);
+			InGameMenu.ResumeButtonPressed
+				.Subscribe(_ => SwitchState<DefaultState>())
+				.AddTo(map);
+			InGameMenu.SettingsButtonPressed
+				.Subscribe(_ => SwitchState<SettingsMenuState>())
+				.AddTo(map);
+			_storageService.Subscribe<MouseSettingsData>(OnMouseSettingsChanged)
+				.AddTo(map);
+			WorldMap.OnMapChanged(map);
 		}
 
 		protected void AddState<T>(T state) where T : IInGameUIState
@@ -113,11 +118,6 @@ namespace UI
 		{
 			CrosshairSprite crosshairSprite = _staticData.GetCrosshairSprite(mouseSettingsData.CrosshairId);
 			Hud.SetCrosshairIcon(crosshairSprite.Sprite);
-		}
-
-		private void OnDestroy()
-		{
-			_currentState?.Exit();
 		}
 	}
 }

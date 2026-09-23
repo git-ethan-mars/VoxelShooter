@@ -36,7 +36,7 @@ namespace GamePlay
 
 		private void HandleSpineRotation()
 		{
-			var currentAngle = _cameraProvider.MainCamera.transform.eulerAngles.y;
+			float currentAngle = _cameraProvider.MainCamera.transform.eulerAngles.y;
 
 			if (currentAngle - _previousAngle < -180)
 			{
