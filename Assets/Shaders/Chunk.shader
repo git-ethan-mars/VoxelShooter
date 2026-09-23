@@ -227,7 +227,7 @@ Shader "Cyanilux/URPTemplates/SimpleLitShaderExample" {
 				lightingData.additionalLightsColor = CalculateBlinnPhong(mainLight, inputData, surfaceData);
 				//float4 color = CalculateFinalColor(lightingData, surfaceData.alpha);
 				float3 color = MixFog(surfaceData.albedo, inputData.fogCoord) * IN.ao;
-				return float4(color, 1);
+				return float4(IN.color.rgb, 1);
 			}
 			ENDHLSL
 		}
