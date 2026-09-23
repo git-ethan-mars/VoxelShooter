@@ -175,11 +175,4 @@ namespace GamePlay
 			return new Vector3(MathF.Sign(vector.x), MathF.Sign(vector.y), MathF.Sign(vector.z));
 		}
 	}
-
-	public enum MovementState
-	{
-		InAir,
-		OnGround,
-		OnWater
-	}
 }
