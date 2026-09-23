@@ -13,6 +13,7 @@ namespace Data
 		Spade = 8,
 		Knife = 9,
 		Grenade = 10,
-		TNT = 11
+		TNT = 11,
+		Blueprint = 12
 	}
 }
