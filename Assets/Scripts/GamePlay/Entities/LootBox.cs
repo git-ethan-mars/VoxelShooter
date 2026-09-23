@@ -7,6 +7,7 @@ using Services;
 using UnityEngine;
 using VoxelMap;
 using AudioType = Data.AudioType;
+
 namespace GamePlay
 {
 	[SelectionBase]
@@ -58,8 +59,6 @@ namespace GamePlay
 
 		private void OnDestroy()
 		{
-			_audioSender.SendAudio(AudioType.LootBoxPickUp, transform.position);
-			
 			if (_platform != null)
 			{
 				Destroy(_platform);
@@ -138,6 +137,10 @@ namespace GamePlay
 		public override Bounds Bounds => new Bounds(localBounds.center + transform.position, localBounds.size);
 		public bool IsLanded { get; private set; }
 		public Observable<Unit> PickedUp => _pickedUp;
-		protected abstract void OnPickUp(Character receiver);
+
+		protected virtual void OnPickUp(Character receiver)
+		{
+			_audioSender.SendAudio(AudioType.LootBoxPickUp, transform.position);
+		}
 	}
 }
