@@ -9,3 +9,57 @@ insert_final_newline = true
 # Keep the existing layout of long lines, only fix indentation/spacing
 resharper_wrap_lines = false
 resharper_keep_existing_linebreaks = true
+trim_trailing_whitespace = true
+
+# var only when the type is evident from the right-hand side (new T(), casts, as T);
+# built-in types (int, bool, float, string...) are always written explicitly
+csharp_style_var_for_built_in_types = false:warning
+csharp_style_var_when_type_is_apparent = true:warning
+csharp_style_var_elsewhere = false:warning
+resharper_csharp_for_built_in_types = use_explicit_type
+resharper_csharp_for_simple_types = use_var_when_evident
+resharper_csharp_for_other_types = use_var_when_evident
+resharper_suggest_var_or_type_built_in_types_highlighting = warning
+resharper_suggest_var_or_type_simple_types_highlighting = warning
+resharper_suggest_var_or_type_elsewhere_highlighting = warning
+
+# Always the full new T(), never target-typed new()
+csharp_style_implicit_object_creation_when_type_is_apparent = false:warning
+resharper_csharp_object_creation_when_type_evident = explicitly_typed
+resharper_csharp_object_creation_when_type_not_evident = explicitly_typed
+resharper_arrange_object_creation_when_type_evident_highlighting = warning
+resharper_arrange_object_creation_when_type_not_evident_highlighting = warning
+
+# Braces are required for every if/else/for/foreach/while/do/using/lock/fixed body
+csharp_prefer_braces = true:warning
+resharper_braces_for_ifelse = required
+resharper_braces_for_for = required
+resharper_braces_for_foreach = required
+resharper_braces_for_while = required
+resharper_braces_for_dowhile = required
+resharper_braces_for_using = required
+resharper_braces_for_lock = required
+resharper_braces_for_fixed = required
+resharper_enforce_if_statement_braces_highlighting = warning
+resharper_enforce_for_statement_braces_highlighting = warning
+resharper_enforce_foreach_statement_braces_highlighting = warning
+resharper_enforce_while_statement_braces_highlighting = warning
+resharper_enforce_do_while_statement_braces_highlighting = warning
+resharper_enforce_using_statement_braces_highlighting = warning
+resharper_enforce_lock_statement_braces_highlighting = warning
+resharper_enforce_fixed_statement_braces_highlighting = warning
+
+# this. only where it is required to resolve a name clash
+dotnet_style_qualification_for_field = false:warning
+dotnet_style_qualification_for_property = false:warning
+dotnet_style_qualification_for_method = false:warning
+dotnet_style_qualification_for_event = false:warning
+resharper_instance_members_qualify_members = none
+resharper_arrange_this_qualifier_highlighting = warning
+
+# Naming (not enforced automatically, keep by hand):
+# - private fields: _camelCase; [SerializeField] private fields: camelCase
+# - protected fields, constants and static readonly fields: PascalCase
+# - methods returning UniTask / UniTask<T> / UniTaskVoid end with Async;
+#   async void handlers, overrides and Unity/Mirror callbacks keep their names
+# - one top-level type per file, the file is named after the type
