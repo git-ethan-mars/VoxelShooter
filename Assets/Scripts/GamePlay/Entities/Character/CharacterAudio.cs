@@ -1,3 +1,4 @@
+using Mirror;
 using R3;
 using Reflex.Attributes;
 using Services;
@@ -5,8 +6,12 @@ using UnityEngine;
 
 namespace GamePlay
 {
-	public class CharacterAudio : MonoBehaviour
+	public class CharacterAudio : NetworkBehaviour
 	{
+		private const float MoveSpeedThreshold = 1e-3f;
+		
+		[SerializeField] private Character character;
+		[SerializeField] private CharacterMovement movement;
 		[SerializeField] private AudioSource stepAudioSource;
 		[SerializeField] private AudioSource footStepInWaterAudioSource;
 		[SerializeField] private AudioSource hurtAudioSource;
@@ -21,11 +26,41 @@ namespace GamePlay
 
 		private void Start()
 		{
-			_storageService.Subscribe<VolumeSettingsData>(OnVolumeSettingsChanged)
+			character.HealthSystem.Health.Pairwise()
+				.Where(pair => pair.Previous > pair.Current)
+				.Subscribe(_ => PlayHurtSound())
 				.AddTo(this);
 		}
 
-		public void EnableStepSound()
+		public override void OnStartLocalPlayer()
+		{
+			_storageService.Subscribe<VolumeSettingsData>(OnVolumeSettingsChanged)
+				.AddTo(this);
+		}
+		
+		private void Update()
+		{
+			if (movement.GetHorizontalVelocity().magnitude > MoveSpeedThreshold)
+			{
+				if (movement.State == MovementState.OnGround)
+				{
+					EnableStepSound();
+					DisableFootStepInWaterSound();
+				}
+				if (movement.State == MovementState.OnWater)
+				{
+					EnableFootStepInWaterSound();
+					DisableStepSound();
+				}
+			}
+			else
+			{
+				DisableFootStepInWaterSound();
+				DisableStepSound();
+			}
+		}
+
+		private void EnableStepSound()
 		{
 			if (!stepAudioSource.isPlaying)
 			{
@@ -33,12 +68,12 @@ namespace GamePlay
 			}
 		}
 
-		public void DisableStepSound()
+		private void DisableStepSound()
 		{
 			stepAudioSource.Stop();
 		}
 
-		public void EnableFootStepInWaterSound()
+		private void EnableFootStepInWaterSound()
 		{
 			if (!footStepInWaterAudioSource.isPlaying)
 			{
@@ -48,12 +83,12 @@ namespace GamePlay
 			footStepInWaterAudioSource.loop = true;
 		}
 
-		public void DisableFootStepInWaterSound()
+		private void DisableFootStepInWaterSound()
 		{
 			footStepInWaterAudioSource.loop = false;
 		}
 
-		public void PlayHurtSound()
+		private void PlayHurtSound()
 		{
 			hurtAudioSource.Play();
 		}

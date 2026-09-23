@@ -1,4 +1,3 @@
-using System.Linq;
 namespace GamePlay
 {
 	public class BlockLootBox : LootBox
@@ -7,12 +6,7 @@ namespace GamePlay
 
 		protected override void OnPickUp(Character character)
 		{
-			Block block = character.Inventory.GetItem<Block>();
-
-			if (block != null)
-			{
-				block.Amount.Value += BlockBonus;
-			}
+			character.Inventory.VoxelAmount.Value += BlockBonus;
 		}
 	}
 }

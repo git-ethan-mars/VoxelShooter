@@ -2,46 +2,28 @@ using System;
 using Cysharp.Threading.Tasks;
 using Data;
 using Mirror;
-using Networking.Messages;
 using Services;
 using UnityEngine;
 using AudioType = Data.AudioType;
-namespace Networking.Audio
+namespace GamePlay.Audio
 {
-	public class NetworkAudioPlayer
+	public class AudioPlayer
 	{
 		private readonly IStaticDataService _staticData;
-		private readonly VSNetworkManager _networkManager;
 		private readonly AudioPool _audioPool;
 
-		public NetworkAudioPlayer(IAssetProvider assetProvider, IStaticDataService staticData, VSNetworkManager networkManager)
+		public AudioPlayer(IAssetProvider assetProvider, IStaticDataService staticData)
 		{
 			_staticData = staticData;
-			_networkManager = networkManager;
 			_audioPool = new AudioPool(assetProvider);
-		}
-
-		public void SendAudio(AudioType audioType, Vector3 position)
-		{
-			var audioResponse = new StaticAudioResponse(audioType, position);
-			_networkManager.SendResponseToAll(audioResponse, true);
-		}
-
-		public void SendAudio(AudioType audioType, NetworkIdentity target, bool isSpatial)
-		{
-			var audioResponse = new DynamicAudioResponse(audioType, target, isSpatial);
-			_networkManager.SendResponseToAll(audioResponse, true);
 		}
 
 		public async UniTaskVoid Play(AudioType audioType, Vector3 position)
 		{
 			AudioData audioData = _staticData.GetAudioData(audioType);
 			AudioSource audioSource = _audioPool.Get();
+			SetupAudioSource(audioSource, audioData, true);
 			audioSource.transform.position = position;
-			audioSource.resource = audioData.Clip;
-			audioSource.minDistance = audioData.MinDistance;
-			audioSource.maxDistance = audioData.MaxDistance;
-			audioSource.spatialBlend = 1.0f;
 			audioSource.Play();
 			
 			await UniTask.Delay(TimeSpan.FromSeconds(audioData.Clip.length));
@@ -56,11 +38,7 @@ namespace Networking.Audio
 		{
 			AudioData audioData = _staticData.GetAudioData(audioType);
 			AudioSource audioSource = _audioPool.Get();
-			audioSource.resource = audioData.Clip;
-			audioSource.volume = audioData.Volume;
-			audioSource.minDistance = audioData.MinDistance;
-			audioSource.maxDistance = audioData.MaxDistance;
-			audioSource.spatialBlend = isSpatial ? 1.0f : 0.0f;
+			SetupAudioSource(audioSource, audioData, isSpatial);
 			audioSource.Play();
 
 			Transform target = identity?.transform;
@@ -68,7 +46,12 @@ namespace Networking.Audio
 
 			while (endTime > Time.time)
 			{
-				if (audioSource == null || target == null)
+				if (target == null)
+				{
+					_audioPool.Release(audioSource);
+					return;
+				}
+				if (audioSource == null)
 				{
 					return;
 				}
@@ -80,6 +63,14 @@ namespace Networking.Audio
 
 			_audioPool.Release(audioSource);
 		}
-	}
 
+		private void SetupAudioSource(AudioSource audioSource, AudioData audioData, bool isSpatial)
+		{
+			audioSource.resource = audioData.Clip;
+			audioSource.volume = audioData.Volume;
+			audioSource.minDistance = audioData.MinDistance;
+			audioSource.maxDistance = audioData.MaxDistance;
+			audioSource.spatialBlend = isSpatial ? 1.0f : 0.0f;
+		}
+	}
 }

@@ -1,39 +1,28 @@
 using Data;
-using GamePlay.MapFeatures;
 using Reflex.Attributes;
 using Services;
 using UnityEngine;
 using VoxelMap;
 namespace GamePlay
 {
-	public class Rocket : Entity
+	public class Rocket : Explosive
 	{
+		public override ExplosiveType Type => ExplosiveType.Rocket;
+
 		[SerializeField] private Rigidbody rigidBody;
 		[SerializeField] private BoxCollider boxCollider;
 
-		private MapProvider _mapProvider;
-		private IParticleFactory _particleFactory;
-		private EntityContainerService _entityContainer;
 		private RocketLauncherConfigure _configure;
+		private IParticleFactory _particleFactory;
 
 		[Inject]
 		private void Construct(MapProvider mapProvider, IParticleFactory particleFactory, IStaticDataService staticData,
-			EntityContainerService entityContainer)
+			EntityContainer entityContainer)
 		{
-			_mapProvider = mapProvider;
+			MapProvider = mapProvider;
+			EntityContainer = entityContainer;
 			_particleFactory = particleFactory;
-			_entityContainer = entityContainer;
 			_configure = staticData.GetItemConfigure<RocketLauncherConfigure>(ItemType.RocketLauncher);
-		}
-
-		private void Start()
-		{
-			_entityContainer.Add(this);
-		}
-
-		private void OnDestroy()
-		{
-			_entityContainer.Remove(this);
 		}
 
 		public void Launch()
@@ -43,17 +32,10 @@ namespace GamePlay
 
 		private void OnCollisionEnter(Collision collision)
 		{
-			if (_mapProvider.Map.TryGetFeature(out MapDestruction mapDestruction))
-			{
-				mapDestruction.Visit(_configure.ExplosionData, transform.position);
-			}
+			Explode(_configure.ExplosionData);
 
-			foreach (IDamageVisitor visitor in _entityContainer.GetEntitiesByType<IDamageVisitor>())
-			{
-				visitor.Visit(_configure.ExplosionData, transform.position);
-			}
-
-			_particleFactory.CreateRchParticle(transform.position, _configure.ParticleSpeed, _configure.ParticleCount, _configure.ExplosionData.radius);
+			_particleFactory.CreateRchParticle(transform.position, _configure.ParticleSpeed, _configure.ParticleCount,
+				_configure.ExplosionData.radius);
 			Destroy(gameObject);
 		}
 

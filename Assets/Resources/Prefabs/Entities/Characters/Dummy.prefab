@@ -55,7 +55,6 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -293,7 +292,6 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
-  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -1498,15 +1496,12 @@ GameObject:
   m_Component:
   - component: {fileID: 2291839090602957664}
   - component: {fileID: 7594348653312256416}
-  - component: {fileID: 6638822043700395874}
   - component: {fileID: 5905459186336284304}
   - component: {fileID: 6857508958543600273}
   - component: {fileID: 3273598293640757197}
-  - component: {fileID: 2245012279666688116}
   - component: {fileID: 2154552714451633666}
   - component: {fileID: 6981516187310365211}
   - component: {fileID: 5895448737681136690}
-  - component: {fileID: 8369461538910030769}
   - component: {fileID: 1669275410990531162}
   - component: {fileID: 20795050865477212}
   - component: {fileID: 7488648302166853953}
@@ -1517,7 +1512,7 @@ GameObject:
   - component: {fileID: 1521037712145662109}
   - component: {fileID: 2956149723697428923}
   m_Layer: 6
-  m_Name: Character
+  m_Name: Dummy
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1563,31 +1558,14 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  movement: {fileID: 6638822043700395874}
+  movement: {fileID: 0}
+  characterAudio: {fileID: 6981516187310365211}
+  visual: {fileID: 3273598293640757197}
   localBounds:
     m_Center: {x: 0, y: 1, z: 0}
     m_Extent: {x: 0.5, y: 1, z: 0.5}
   <HealthSystem>k__BackingField: {fileID: 6857508958543600273}
   <Inventory>k__BackingField: {fileID: 5905459186336284304}
---- !u!114 &6638822043700395874
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8073471595118213303}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 342e70a3da6f4a6386588389d893d5a4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  character: {fileID: 7594348653312256416}
-  rigidBody: {fileID: 1669275410990531162}
-  hitBox: {fileID: 1434628957995934217}
-  <ForwardDirectionObject>k__BackingField: {fileID: 6355259989164046683}
 --- !u!114 &5905459186336284304
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1630,29 +1608,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6bb6888bdb87489793dbdf41a7238a8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  character: {fileID: 7594348653312256416}
   nickNameText: {fileID: 5134682052967373561}
   skin: {fileID: 0}
   nickNameCanvas: {fileID: 6590214071143806559}
---- !u!114 &2245012279666688116
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8073471595118213303}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c78fb4570f374d6d83bb56cde3da1ebc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  head: {fileID: 0}
 --- !u!114 &2154552714451633666
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1668,7 +1626,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  characterMovement: {fileID: 6638822043700395874}
+  characterMovement: {fileID: 0}
   headTrackingObject: {fileID: 6355259989164046683}
   spineTrackingObject: {fileID: 7846052843520873579}
 --- !u!114 &6981516187310365211
@@ -1683,11 +1641,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c55ac7a4ca534074874a141c2a575a33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: VoxelShooter.GamePlay::GamePlay.CharacterAudio
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  character: {fileID: 7594348653312256416}
-  movement: {fileID: 6638822043700395874}
   stepAudioSource: {fileID: 6389219759065743125}
   footStepInWaterAudioSource: {fileID: 8622572483202164578}
   hurtAudioSource: {fileID: 5154367837078621791}
@@ -1709,24 +1662,6 @@ MonoBehaviour:
   minSpeedToDamage: 25
   damagePerMetersPerSecond: 3
   rigidBody: {fileID: 1669275410990531162}
-  <Entity>k__BackingField: {fileID: 7594348653312256416}
---- !u!114 &8369461538910030769
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8073471595118213303}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 443eecca50a8427ca8f693f541ccbae7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: VoxelShooter.GamePlay::GamePlay.EntityDamageVisitor
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  entity: {fileID: 7594348653312256416}
-  healthSystem: {fileID: 6857508958543600273}
 --- !u!54 &1669275410990531162
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1767,7 +1702,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sceneId: 0
-  _assetId: 2237326186
+  _assetId: 3665378859
   serverOnly: 0
   visibility: 0
   hasSpawned: 0

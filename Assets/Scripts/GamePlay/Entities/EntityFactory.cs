@@ -1,9 +1,6 @@
 ﻿using System;
 using Data;
-using GamePlay.Core;
 using Mirror;
-using Reflex.Extensions;
-using Reflex.Injectors;
 using Services;
 using UnityEngine;
 using VoxelMap.Data;
@@ -37,38 +34,38 @@ namespace GamePlay
 			_itemFactory = itemFactory;
 		}
 
-		public SpawningTNT CreateSpawningTnt(Vector3 position, Quaternion rotation)
+		public SpawningTNT CreateSpawningTnt(Vector3 position, Quaternion rotation, NetworkConnectionToClient connection)
 		{
 			var tnt = _assets.Instantiate(TntPath, position, rotation).GetComponent<SpawningTNT>();
-			NetworkServer.Spawn(tnt.gameObject);
+			NetworkServer.Spawn(tnt.gameObject, connection);
 			return tnt;
 		}
 
-		public SpawningGrenade CreateSpawningGrenade(Vector3 position)
+		public SpawningGrenade CreateSpawningGrenade(Vector3 position, NetworkConnectionToClient connection)
 		{
 			var spawningGrenade = _assets.Instantiate(GrenadePath, position, Quaternion.identity).GetComponent<SpawningGrenade>();
-			NetworkServer.Spawn(spawningGrenade.gameObject);
+			NetworkServer.Spawn(spawningGrenade.gameObject, connection);
 			return spawningGrenade;
 		}
 
-		public Tombstone CreateTombstone(Vector3 position)
+		public Tombstone CreateTombstone(Vector3 position, NetworkConnectionToClient connection)
 		{
 			var tombstone = _assets.Instantiate(TombstonePath, position, Quaternion.identity).GetComponent<Tombstone>();
-			NetworkServer.Spawn(tombstone.gameObject);
+			NetworkServer.Spawn(tombstone.gameObject, connection);
 			return tombstone;
 		}
 
-		public Rocket CreateRocket(Vector3 position, Quaternion rotation)
+		public Rocket CreateRocket(Vector3 position, Quaternion rotation, NetworkConnectionToClient connection)
 		{
 			var rocket = _assets.Instantiate(RocketPath, position, rotation).GetComponent<Rocket>();
-			NetworkServer.Spawn(rocket.gameObject);
+			NetworkServer.Spawn(rocket.gameObject, connection);
 			return rocket;
 		}
 
-		public Drill CreateDrill(Vector3 position, Quaternion rotation)
+		public Drill CreateDrill(Vector3 position, Quaternion rotation, NetworkConnectionToClient connection)
 		{
 			var drill = _assets.Instantiate(DrillPath, position, rotation).GetComponent<Drill>();
-			NetworkServer.Spawn(drill.gameObject);
+			NetworkServer.Spawn(drill.gameObject, connection);
 			return drill;
 		}
 
@@ -91,7 +88,7 @@ namespace GamePlay
 		{
 			var spawnPoint = _assets.Instantiate(SpawnPointPath,
 				spawnPointData.ToVectorWithOffset(), Quaternion.identity, parent).GetComponent<SpawnPoint>();
-			GameObjectInjector.InjectSingle(spawnPoint.gameObject, spawnPoint.gameObject.scene.GetSceneContainer());
+			NetworkServer.Spawn(spawnPoint.gameObject);
 			return spawnPoint;
 		}
 
@@ -109,7 +106,7 @@ namespace GamePlay
 			Characteristics characteristics = _staticData.GetCharacteristics(chosenClass);
 			character.Initialize(chosenClass, nickName);
 			character.HealthSystem.Initialize(characteristics.MaxHealth);
-			character.Inventory.Initialize(_itemFactory.CreateItems(chosenClass));
+			character.Inventory.Initialize(_itemFactory.CreateItems(chosenClass), characteristics.VoxelsCount);
 			
 			return character;
 		}

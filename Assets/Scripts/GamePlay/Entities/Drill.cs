@@ -1,9 +1,8 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Data;
-using GamePlay.MapFeatures;
 using Mirror;
-using Networking.Audio;
+using Networking;
 using Reflex.Attributes;
 using Services;
 using UnityEngine;
@@ -11,35 +10,23 @@ using VoxelMap;
 using AudioType = Data.AudioType;
 namespace GamePlay
 {
-	public class Drill : Entity
+	public class Drill : Explosive
 	{
 		[SerializeField] private ParticleSystem particles;
 		[SerializeField] private Rigidbody rigidBody;
 		[SerializeField] private BoxCollider boxCollider;
 
-		private MapProvider _mapProvider;
-		private EntityContainerService _entityContainer;
 		private DrillLauncherConfigure _configure;
-		private NetworkAudioPlayer _audioPlayer;
+		private NetworkAudioSender _audioSender;
 
 		[Inject]
-		private void Construct(MapProvider mapProvider, IStaticDataService staticData, EntityContainerService entityContainer,
-			NetworkAudioPlayer audioPlayer)
+		private void Construct(MapProvider mapProvider, IStaticDataService staticData, EntityContainer entityContainer,
+			NetworkAudioSender audioSender)
 		{
-			_mapProvider = mapProvider;
-			_entityContainer = entityContainer;
+			MapProvider = mapProvider;
+			EntityContainer = entityContainer;
 			_configure = staticData.GetItemConfigure<DrillLauncherConfigure>(ItemType.DrillLauncher);
-			_audioPlayer = audioPlayer;
-		}
-
-		private void Start()
-		{
-			_entityContainer.Add(this);
-		}
-
-		private void OnDestroy()
-		{
-			_entityContainer.Remove(this);
+			_audioSender = audioSender;
 		}
 
 		[ServerCallback]
@@ -59,17 +46,9 @@ namespace GamePlay
 		[ServerCallback]
 		private void OnTriggerEnter(Collider other)
 		{
-			if (_mapProvider.Map.TryGetFeature(out MapDestruction mapDestruction))
-			{
-				mapDestruction.Visit(_configure.ExplosionData, transform.position);
-			}
-
-			foreach (IDamageVisitor visitor in _entityContainer.GetEntitiesByType<IDamageVisitor>())
-			{
-				visitor.Visit(_configure.ExplosionData, transform.position);
-			}
+			Explode(_configure.ExplosionData);
 			
-			_audioPlayer.SendAudio(AudioType.DrillHit, transform.position);
+			_audioSender.SendAudio(AudioType.DrillHit, transform.position);
 		}
 
 		public void Launch()
@@ -85,5 +64,6 @@ namespace GamePlay
 		}
 
 		public override Bounds Bounds => boxCollider.bounds;
+		public override ExplosiveType Type => ExplosiveType.Drill;
 	}
 }

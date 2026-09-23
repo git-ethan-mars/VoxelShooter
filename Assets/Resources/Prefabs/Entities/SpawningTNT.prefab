@@ -231,7 +231,7 @@ GameObject:
   - component: {fileID: 5495791962192936130}
   - component: {fileID: 1731460858568746133}
   - component: {fileID: 4096107904344075148}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Base
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -322,7 +322,7 @@ GameObject:
   - component: {fileID: 1274707429556553451}
   - component: {fileID: 3556596571637137790}
   - component: {fileID: 8323378879709321966}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: SpawningTNT
   m_TagString: TNT
   m_Icon: {fileID: 0}
@@ -366,8 +366,6 @@ MonoBehaviour:
     m_Extent: {x: 0.5, y: 0.5, z: 0.5}
   canvas: {fileID: 8379580092094507939}
   timerText: {fileID: 2645569852548358579}
-  explosionAudio: 22
-  countdownAudio: 21
 --- !u!65 &1274707429556553451
 BoxCollider:
   m_ObjectHideFlags: 0

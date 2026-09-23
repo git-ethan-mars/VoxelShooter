@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6464533200681777329}
   - component: {fileID: 5307326762368300063}
   - component: {fileID: 1540951592530588938}
-  m_Layer: 12
+  m_Layer: 6
   m_Name: LootBox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -161,7 +161,7 @@ GameObject:
   - component: {fileID: 7456349925006509116}
   - component: {fileID: 8574959002991754334}
   - component: {fileID: 5558965601909318591}
-  m_Layer: 12
+  m_Layer: 6
   m_Name: Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -250,7 +250,7 @@ GameObject:
   - component: {fileID: 3226993605927747051}
   - component: {fileID: 397175964193496517}
   - component: {fileID: 801588044680338553}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Parachute
   m_TagString: Untagged
   m_Icon: {fileID: 0}

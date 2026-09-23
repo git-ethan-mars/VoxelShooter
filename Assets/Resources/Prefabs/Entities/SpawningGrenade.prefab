@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8204297298052960431}
   - component: {fileID: 6416692345676687845}
   - component: {fileID: 7505549572478193009}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Base
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -100,7 +100,7 @@ GameObject:
   - component: {fileID: 5890835488720573409}
   - component: {fileID: 8725545015294978731}
   - component: {fileID: 5202474331513638463}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Ring
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -189,7 +189,7 @@ GameObject:
   - component: {fileID: 4444020837656509538}
   - component: {fileID: 1547965262061438248}
   - component: {fileID: 2620743230801715644}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Handle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -282,7 +282,7 @@ GameObject:
   - component: {fileID: -4685652171039545383}
   - component: {fileID: -8471271700833301178}
   - component: {fileID: 5101682353408027119}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: SpawningGrenade
   m_TagString: Untagged
   m_Icon: {fileID: 0}

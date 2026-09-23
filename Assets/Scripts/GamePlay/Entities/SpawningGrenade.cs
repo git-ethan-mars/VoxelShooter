@@ -1,27 +1,37 @@
+using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using Data;
+using Mirror;
+using Networking;
 using Reflex.Attributes;
+using Services;
+using TMPro;
 using UnityEngine;
+using VoxelMap;
+using AudioType = Data.AudioType;
 namespace GamePlay
 {
-	public class SpawningGrenade : Entity
+	public class SpawningGrenade : Explosive
 	{
 		[SerializeField] private Rigidbody rigidBody;
 		[SerializeField] private BoxCollider boxCollider;
-		private EntityContainerService _entityContainer;
+		[SerializeField] private Canvas canvas;
+		[SerializeField] private TextMeshProUGUI timerText;
+		
+		private GrenadeConfigure _configure;
+		private IParticleFactory _particleFactory;
+		private NetworkAudioSender _audioSender;
 
 		[Inject]
-		private void Construct(EntityContainerService entityContainer)
+		private void Construct(EntityContainer entityContainer, MapProvider mapProvider, IStaticDataService staticData,
+			IParticleFactory particleFactory, NetworkAudioSender audioSender)
 		{
-			_entityContainer = entityContainer;
-		}
-
-		private void Start()
-		{
-			_entityContainer.Add(this);
-		}
-
-		private void OnDestroy()
-		{
-			_entityContainer.Remove(this);
+			EntityContainer = entityContainer;
+			MapProvider = mapProvider;
+			_configure = staticData.GetItemConfigure<GrenadeConfigure>(ItemType.Grenade);
+			_particleFactory = particleFactory;
+			_audioSender = audioSender;
 		}
 
 		public void Throw(Vector3 direction, float throwForce)
@@ -29,12 +39,12 @@ namespace GamePlay
 			rigidBody.AddForce(direction * throwForce);
 		}
 		
-		/*[ServerCallback]
+		[ServerCallback]
 		public async UniTask ExplodeAsync(CancellationToken cancellationToken)
 		{
 			canvas.transform.position = gameObject.transform.position + new Vector3(0, 1.5f, 0);
 
-			int elapsedTime = _configure.DelayInSeconds;
+			float elapsedTime = _configure.DelayInSeconds;
 			timerText.SetText(elapsedTime.ToString());
 
 			while (elapsedTime > 0 && !cancellationToken.IsCancellationRequested)
@@ -50,30 +60,21 @@ namespace GamePlay
 				return;
 			}
 
-			Explode();
+			ExplodeWithFx();
 		}
 
-		private void Explode()
+		private void ExplodeWithFx()
 		{
-			if (_mapProvider.Map.TryGetMapFeature(out MapDestruction mapDestruction))
-			{
-				mapDestruction.Visit(_configure.ExplosionData, transform.position);
-			}	
-
-			foreach (IDamageVisitor visitor in _entityContainer.GetEntitiesByType<IDamageVisitor>())
-			{
-				visitor.Visit(_configure.ExplosionData, transform.position);
-			}
-
+			Explode(_configure.ExplosionData);
+			
 			_particleFactory.CreateRchParticle(transform.position, _configure.ParticleSpeed, _configure.ParticleCount,
 				_configure.ExplosionData.radius);
-			_audioPlayer.Play(explosionAudio, transform.position);
+			_audioSender.SendAudio(AudioType.GrenadeExplosion, transform.position);
 			
-			_disposable?.Dispose();
-
 			Destroy(gameObject);
-		}*/
+		}
 
 		public override Bounds Bounds => boxCollider.bounds;
+		public override ExplosiveType Type => ExplosiveType.Grenade;
 	}
 }

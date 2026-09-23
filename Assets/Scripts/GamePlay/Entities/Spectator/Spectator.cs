@@ -5,140 +5,161 @@ using Reflex.Attributes;
 using Services;
 using UnityEngine;
 using UnityEngine.Animations;
+
 namespace GamePlay
 {
-	public class Spectator : NetworkBehaviour
-	{
-		private const float SensitivityMultiplier = 50.0f;
-		private const float DistanceToPlayer = 5.0f;
-		
-		[SerializeField]
-		private PositionConstraint positionConstraint;
-		
-		private IInputService _inputService;
-		private CameraProvider _cameraProvider;
-		private IStorageService _storageService;
-		private EntityContainerService _entityContainer;
+    public class Spectator : NetworkBehaviour
+    {
+        private const float SensitivityMultiplier = 50.0f;
+        private const float Speed = 10.0f;
+        private const float AccelerationMultiplier = 2.5f;
+        private const float DistanceToTarget = 5.0f;
 
-		private float _sensitivity;
-		private float _xRotation;
-		private float _yRotation;
-		private Character _target;
+        [SerializeField] private PositionConstraint positionConstraint;
 
-		[Inject]
-		private void Construct(IInputService inputService, IStorageService storageService, CameraProvider cameraProvider,
-			EntityContainerService entityContainer)
-		{
-			_inputService = inputService;
-			_cameraProvider = cameraProvider;
-			_storageService = storageService;
-			_entityContainer = entityContainer;
-		}
+        private IInputService _inputService;
+        private CameraProvider _cameraProvider;
+        private IStorageService _storageService;
+        private EntityContainer _entityContainer;
 
-		public override void OnStartLocalPlayer()
-		{
-			base.OnStartLocalPlayer();
-			
-			MountCamera();
-			
-			_sensitivity = _storageService.Load<MouseSettingsData>(IStorageService.MouseSettingsKey).GeneralSensitivity;
-			_storageService.Subscribe<MouseSettingsData>(ChangeMouseSettings).AddTo(this);
-		}
+        private float _sensitivity;
+        private float _xRotation;
+        private float _yRotation;
+        private Transform _target;
 
-		public override void OnStopLocalPlayer()
-		{
-			base.OnStopLocalPlayer();
-			
-			if (_cameraProvider.MainCamera.transform.parent == transform)
-			{
-				_cameraProvider.MainCamera.transform.SetParent(null);
-			}
-		}
+        [Inject]
+        private void Construct(IInputService inputService, IStorageService storageService, CameraProvider cameraProvider,
+            EntityContainer entityContainer)
+        {
+            _inputService = inputService;
+            _cameraProvider = cameraProvider;
+            _storageService = storageService;
+            _entityContainer = entityContainer;
+        }
 
-		private void Update()
-		{
-			if (!isLocalPlayer)
-			{
-				return;
-			}
+        public override void OnStartLocalPlayer()
+        {
+            MountCamera();
 
-			Rotate(_inputService.MouseAxis);
+            _sensitivity = _storageService.Load<MouseSettingsData>(IStorageService.MouseSettingsKey).GeneralSensitivity;
+            _storageService.Subscribe<MouseSettingsData>(ChangeMouseSettings).AddTo(this);
+        }
 
-			if (_inputService.IsFirstActionButtonDown() || _target == null)
-			{
-				_target = SelectNextTarget();
+        public override void OnStopLocalPlayer()
+        {
+            base.OnStopLocalPlayer();
 
-				if (_target == null)
-				{
-					return;
-				}
-				
-				var constraintSource = new ConstraintSource() { sourceTransform = _target.transform, weight = 1 };
-					
-				if (positionConstraint.sourceCount == 0)
-				{
-					positionConstraint.AddSource(constraintSource);
-				}
-				else
-				{
-					positionConstraint.SetSource(0, constraintSource);
-				}
-			}
-		}
+            if (_cameraProvider.MainCamera.transform.parent == transform)
+            {
+                _cameraProvider.MainCamera.transform.SetParent(null);
+            }
+        }
 
-		private Character SelectNextTarget()
-		{
-			Character nextTarget = null;
+        private void Update()
+        {
+            if (!isLocalPlayer)
+            {
+                return;
+            }
 
-			if (_target == null)
-			{
-				nextTarget = _entityContainer.GetEntitiesByType<Character>().FirstOrDefault();
-			}
-			else
-			{
-				var previousCharacterWasTarget = false;
+            Rotate(_inputService.MouseAxis);
 
-				foreach (var character in _entityContainer.GetEntitiesByType<Character>())
-				{
-					if (previousCharacterWasTarget)
-					{
-						nextTarget = character;
-						break;
-					}
+            if (_inputService.IsFirstActionButtonDown() || _target == null)
+            {
+                var entity = GetNextTarget();
+                
+                    if (entity != null)
+                {
+                    _target = entity.transform;
+                    var constraintSource = new ConstraintSource() { sourceTransform = _target.transform, weight = 1 };
 
-					if (character == _target)
-					{
-						previousCharacterWasTarget = true;
-					}
-				}
-				
-				if (nextTarget == null)
-				{
-					nextTarget = _entityContainer.GetEntitiesByType<Character>().First();
-				}
-			}
+                    if (positionConstraint.sourceCount == 0)
+                    {
+                        positionConstraint.AddSource(constraintSource);
+                    }
+                    else
+                    {
+                        positionConstraint.SetSource(0, constraintSource);
+                    }
+                }
+            }
 
-			return nextTarget;
-		}
+            if (_inputService.Axis != Vector2.zero && positionConstraint.sourceCount > 0)
+            {
+                positionConstraint.RemoveSource(0);
+            }
 
-		private void Rotate(Vector2 direction)
-		{
-			float mouseX = direction.x * SensitivityMultiplier * _sensitivity * Time.deltaTime;
-			float mouseY = direction.y * SensitivityMultiplier * _sensitivity * Time.deltaTime;
-			_yRotation += mouseX;
-			_xRotation -= mouseY;
-			transform.rotation = Quaternion.Euler(_xRotation, _yRotation, 0);
-		}
+            var speed = _inputService.IsSprintButtonHold() ? Speed *  AccelerationMultiplier : Speed;
+            
+            transform.position += (transform.forward * _inputService.Axis.x + transform.right * _inputService.Axis.y) 
+                                  * (speed * Time.deltaTime);
+        }
+        
+        private Entity GetNextTarget()
+        {
+            var character = SelectNextTarget<Character>();
 
-		private void ChangeMouseSettings(MouseSettingsData mouseSettings)
-		{
-			_sensitivity = mouseSettings.GeneralSensitivity;
-		}
+            if (character != null)
+            {
+                return character;
+            }
+            
+            return SelectNextTarget<SpawnPoint>();
+        }
 
-		private void MountCamera()
-		{
-			_cameraProvider.MainCamera.transform.SetParent(transform);
-			_cameraProvider.MainCamera.transform.SetLocalPositionAndRotation(Vector3.back * DistanceToPlayer, Quaternion.identity);
-		}
-	}
+        private TEntity SelectNextTarget<TEntity>() where TEntity : Entity
+        {
+            TEntity nextTarget = null;
+
+            if (_target == null)
+            {
+                nextTarget = _entityContainer.GetEntitiesByType<TEntity>().FirstOrDefault();
+            }
+            else
+            {
+                var previousEntityWasTarget = false;
+
+                foreach (var entity in _entityContainer.GetEntitiesByType<TEntity>())
+                {
+                    if (previousEntityWasTarget)
+                    {
+                        nextTarget = entity;
+                        break;
+                    }
+
+                    if (entity.transform == _target)
+                    {
+                        previousEntityWasTarget = true;
+                    }
+                }
+
+                if (nextTarget == null)
+                {
+                    nextTarget = _entityContainer.GetEntitiesByType<TEntity>().FirstOrDefault();
+                }
+            }
+
+            return nextTarget;
+        }
+
+        private void Rotate(Vector2 direction)
+        {
+            float mouseX = direction.x * SensitivityMultiplier * _sensitivity * Time.deltaTime;
+            float mouseY = direction.y * SensitivityMultiplier * _sensitivity * Time.deltaTime;
+            _yRotation += mouseX;
+            _xRotation -= mouseY;
+            transform.rotation = Quaternion.Euler(_xRotation, _yRotation, 0);
+        }
+
+        private void ChangeMouseSettings(MouseSettingsData mouseSettings)
+        {
+            _sensitivity = mouseSettings.GeneralSensitivity;
+        }
+
+        private void MountCamera()
+        {
+            _cameraProvider.MainCamera.transform.SetParent(transform);
+            _cameraProvider.MainCamera.transform.SetLocalPositionAndRotation(Vector3.back * DistanceToTarget, Quaternion.identity);
+        }
+    }
 }

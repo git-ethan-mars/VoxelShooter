@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using Services;
 using UnityEngine;
-namespace Networking.Audio
+
+namespace GamePlay.Audio
 {
 	public class AudioPool
 	{

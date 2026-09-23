@@ -1,7 +1,6 @@
 ﻿using System;
 using Cysharp.Threading.Tasks;
 using Data;
-using GamePlay.MapFeatures;
 using R3;
 using Reflex.Attributes;
 using UnityEngine;
@@ -9,7 +8,7 @@ using VoxelMap;
 namespace GamePlay
 {
 	[SelectionBase]
-	public class Tombstone : Entity
+	public class Tombstone : Explosive
 	{
 		[SerializeField] private new Collider collider;
 		[SerializeField] private Bounds localBounds;
@@ -19,33 +18,21 @@ namespace GamePlay
 		[SerializeField] private int particleCount;
 		[SerializeField] private int particleSpeed;
 
-		private MapProvider _mapProvider;
-		private EntityContainerService _entityContainer;
 		private IParticleFactory _particleFactory;
 
 		[Inject]
-		private void Construct(MapProvider mapProvider, EntityContainerService entityContainer, IParticleFactory particleFactory)
+		private void Construct(MapProvider mapProvider, EntityContainer entityContainer, IParticleFactory particleFactory)
 		{
-			_mapProvider = mapProvider;
-			_entityContainer = entityContainer;
+			MapProvider = mapProvider;
+			EntityContainer = entityContainer;
 			_particleFactory = particleFactory;
-		}
-
-		private void Start()
-		{
-			_entityContainer.Add(this);
-		}
-
-		private void OnDestroy()
-		{
-			_entityContainer.Remove(this);
 		}
 
 		public override void OnStartServer()
 		{
 			base.OnStartServer();
 
-			_mapProvider.Map.MapUpdated
+			MapProvider.Map.CurrentValue.MapUpdated
 				.Subscribe(_ => ValidatePosition())
 				.AddTo(this);
 		}
@@ -58,25 +45,17 @@ namespace GamePlay
 			{
 				return;
 			}
+			
+			Explode(explosionData);
 
 			_particleFactory.CreateRchParticle(transform.position, particleSpeed, particleCount, explosionData.radius);
-
-			if (_mapProvider.Map.TryGetFeature(out MapDestruction mapDestruction))
-			{
-				mapDestruction.Visit(explosionData, transform.position);
-			}
-
-			foreach (IDamageVisitor visitor in _entityContainer.GetEntitiesByType<IDamageVisitor>())
-			{
-				visitor.Visit(explosionData, transform.position);
-			}
 
 			Destroy(gameObject);
 		}
 
 		private void ValidatePosition()
 		{
-			while (_mapProvider.Map.HasIntersection(Bounds))
+			while (MapProvider.Map.CurrentValue.HasIntersection(Bounds))
 			{
 				transform.position += Vector3.up;
 			}
@@ -89,5 +68,6 @@ namespace GamePlay
 		}
 
 		public override Bounds Bounds => new Bounds(localBounds.center + transform.position, localBounds.size);
+		public override ExplosiveType Type => ExplosiveType.Tombstone;
 	}
 }

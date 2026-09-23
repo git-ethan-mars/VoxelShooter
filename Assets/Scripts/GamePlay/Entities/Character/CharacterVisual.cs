@@ -1,26 +1,20 @@
+using Mirror;
 using TMPro;
 using UnityEngine;
 namespace GamePlay
 {
-	public class CharacterVisual : MonoBehaviour
+	public class CharacterVisual : NetworkBehaviour
 	{
+		[SerializeField] private Character character;
 		[SerializeField] private TextMeshProUGUI nickNameText;
 		[SerializeField] private SkinnedMeshRenderer skin;
 		[SerializeField] private Canvas nickNameCanvas;
 
-		public void TurnOffBodyRender()
+		public override void OnStartLocalPlayer()
 		{
 			skin.enabled = false;
-		}
-
-		public void TurnOffNickName()
-		{
 			nickNameCanvas.gameObject.SetActive(false);
-		}
-
-		public void SetNickName(string nickName)
-		{
-			nickNameText.SetText(nickName);
+			nickNameText.SetText(character.NickName);
 		}
 	}
 }

@@ -2,9 +2,8 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Data;
-using GamePlay.MapFeatures;
 using Mirror;
-using Networking.Audio;
+using Networking;
 using R3;
 using Reflex.Attributes;
 using Services;
@@ -14,55 +13,42 @@ using VoxelMap;
 using AudioType = Data.AudioType;
 namespace GamePlay
 {
-	public class SpawningTNT : Entity
+	public class SpawningTNT : Explosive
 	{
 		[SerializeField] private Bounds localBounds;
 		
 		[SerializeField] private Canvas canvas;
 		[SerializeField] private TextMeshProUGUI timerText;
 
-		private MapProvider _mapProvider;
-		private EntityContainerService _entityContainer;
-		private NetworkAudioPlayer _audioPlayer;
+		private NetworkAudioSender _audioSender;
 		private IParticleFactory _particleFactory;
 		private TNTConfigure _configure;
-
-		private IDisposable _disposable;
-
+		
 		[Inject]
-		private void Construct(IStaticDataService staticData, MapProvider mapProvider, EntityContainerService entityContainer,
-			NetworkAudioPlayer audioPlayer, IParticleFactory particleFactory)
+		private void Construct(IStaticDataService staticData, MapProvider mapProvider, EntityContainer entityContainer,
+			NetworkAudioSender audioSender, IParticleFactory particleFactory)
 		{
+			MapProvider = mapProvider;
+			EntityContainer = entityContainer;
 			_configure = staticData.GetItemConfigure<TNTConfigure>(ItemType.TNT);
-			_mapProvider = mapProvider;
-			_entityContainer = entityContainer;
-			_audioPlayer = audioPlayer;
+			_audioSender = audioSender;
 			_particleFactory = particleFactory;
-		}
-
-		private void Start()
-		{
-			_entityContainer.Add(this);
-		}
-
-		private void OnDestroy()
-		{
-			_entityContainer.Remove(this);
 		}
 
 		public override void OnStartServer()
 		{
 			base.OnStartServer();
 
-			_disposable = _mapProvider.Map.MapUpdated
+			MapProvider.Map.CurrentValue.MapUpdated
 				.Where(_ => IsSuspended())
-				.Subscribe(_ => Explode());
+				.Subscribe(_ => ExplodeWithFx())
+				.AddTo(this);
 		}
 
 		private bool IsSuspended()
 		{
 			Vector3Ushort voxelPosition = Vector3Ushort.FloorToUshort(transform.position - Vector3.Scale(transform.up, Map.WorldOffset));
-			VoxelData voxelData = _mapProvider.Map.GetVoxelByGlobalPosition(voxelPosition);
+			VoxelData voxelData = MapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(voxelPosition);
 			return !voxelData.IsSolid();
 		}
 
@@ -87,27 +73,17 @@ namespace GamePlay
 				return;
 			}
 
-			Explode();
+			ExplodeWithFx();
 		}
 
-		private void Explode()
+		private void ExplodeWithFx()
 		{
-			if (_mapProvider.Map.TryGetFeature(out MapDestruction mapDestruction))
-			{
-				mapDestruction.Visit(_configure.ExplosionData, transform.position);
-			}	
-
-			foreach (IDamageVisitor visitor in _entityContainer.GetEntitiesByType<IDamageVisitor>())
-			{
-				visitor.Visit(_configure.ExplosionData, transform.position);
-			}
-
+			Explode(_configure.ExplosionData);
+			
 			_particleFactory.CreateRchParticle(transform.position, _configure.ParticleSpeed, _configure.ParticleCount,
 				_configure.ExplosionData.radius);
-			_audioPlayer.SendAudio(AudioType.TNTExplosion, transform.position);
+			_audioSender.SendAudio(AudioType.TNTExplosion, transform.position);
 			
-			_disposable?.Dispose();
-
 			Destroy(gameObject);
 		}
 
@@ -118,5 +94,6 @@ namespace GamePlay
 		}
 
 		public override Bounds Bounds => new Bounds(transform.position + localBounds.center, localBounds.size);
+		public override ExplosiveType Type => ExplosiveType.Tnt;
 	}
 }

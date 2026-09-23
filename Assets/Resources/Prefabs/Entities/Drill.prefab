@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 9190993097749295376}
   - component: {fileID: 515832896664781652}
   - component: {fileID: 6491987118293592073}
-  m_Layer: 11
+  m_Layer: 6
   m_Name: Drill
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -55,7 +55,6 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  drillHit: 2
   particles: {fileID: 796040190074194916}
   rigidBody: {fileID: 6081013060560421041}
   boxCollider: {fileID: 3428673413064696427}
@@ -182,7 +181,7 @@ GameObject:
   - component: {fileID: 7817562399513892871}
   - component: {fileID: 1668502591781572079}
   - component: {fileID: 8921072783788834528}
-  m_Layer: 11
+  m_Layer: 6
   m_Name: Base
   m_TagString: Untagged
   m_Icon: {fileID: 0}

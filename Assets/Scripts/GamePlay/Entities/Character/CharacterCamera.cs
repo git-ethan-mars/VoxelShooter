@@ -32,8 +32,6 @@ namespace GamePlay
 
 		public override void OnStartLocalPlayer()
 		{
-			base.OnStartLocalPlayer();
-
 			var mouseSettings = _storageService.Load<MouseSettingsData>(IStorageService.MouseSettingsKey);
 			_mouseSensitivity = mouseSettings.GeneralSensitivity;
 			_aimSensitivity = mouseSettings.AimSensitivity;

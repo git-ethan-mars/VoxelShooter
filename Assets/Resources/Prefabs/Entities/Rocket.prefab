@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 98189730067645228}
   - component: {fileID: 4084073396381437492}
   - component: {fileID: 6184230876888987081}
-  m_Layer: 11
+  m_Layer: 6
   m_Name: Rocket
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -179,7 +179,7 @@ GameObject:
   - component: {fileID: 5622231735798167380}
   - component: {fileID: 6962110642809717808}
   - component: {fileID: 4879848163779684208}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Base
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -266,7 +266,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4344712372350032186}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: FlameEffect
   m_TagString: Untagged
   m_Icon: {fileID: 0}

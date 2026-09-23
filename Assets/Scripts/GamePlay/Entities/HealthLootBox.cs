@@ -6,7 +6,7 @@ namespace GamePlay
 
 		protected override void OnPickUp(Character character)
 		{
-			character.Heal(HealBonus);
+			character.HealthSystem.Increase(HealBonus);
 		}
 	}
 }

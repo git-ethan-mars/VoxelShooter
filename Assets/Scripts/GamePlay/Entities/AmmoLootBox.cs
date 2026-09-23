@@ -1,4 +1,3 @@
-using GamePlay.Core;
 namespace GamePlay
 {
 	public class AmmoLootBox : LootBox
