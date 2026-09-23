@@ -32,7 +32,6 @@ namespace UI.Inventory
 			}
 			
 			Canvas.ForceUpdateCanvases();
-			LayoutRebuilder.ForceRebuildLayoutImmediate(uiArea.root as RectTransform);
 			
 			float uiWorldSize = Mathf.Min(uiArea.rect.width, uiArea.rect.height);
 			Bounds modelBounds = item.MeshFilters.First().mesh.bounds;
