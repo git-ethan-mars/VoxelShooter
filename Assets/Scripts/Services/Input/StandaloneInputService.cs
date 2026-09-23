@@ -3,6 +3,8 @@ namespace Services
 {
 	public class StandaloneInputService : IInputService
 	{
+		private static readonly KeyCode[] BlueprintKeys = { KeyCode.Z, KeyCode.X, KeyCode.C, KeyCode.V };
+
 		private bool _isEnabled;
 		public Vector2 Axis => _isEnabled
 			? new Vector2(Input.GetAxisRaw("Vertical"), Input.GetAxisRaw("Horizontal"))
@@ -161,6 +163,16 @@ namespace Services
 			}
 
 			return false;
+		}
+
+		public bool IsBlueprintButtonDown(int number)
+		{
+			if (!_isEnabled || number < 0 || number >= BlueprintKeys.Length)
+			{
+				return false;
+			}
+
+			return Input.GetKeyDown(BlueprintKeys[number]);
 		}
 
 		public void Enable() // TODO : Кажется этот метод не должен тут быть

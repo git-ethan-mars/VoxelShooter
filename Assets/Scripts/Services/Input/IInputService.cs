@@ -25,6 +25,7 @@ namespace Services
 		bool IsUpArrowButtonDown();
 		bool IsDownArrowButtonDown();
 		bool IsSlotButtonPressed(int number);
+		bool IsBlueprintButtonDown(int number);
 		void Enable();
 		void Disable();
 		bool IsScrollButtonDown();

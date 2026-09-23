@@ -39,7 +39,7 @@ namespace GamePlay
 			Vector3Int blueprintPosition = blueprint.GetPlacementPosition(rayCastHit);
 			using var pooledList = ListPool<Voxel>.Get(out var voxels);
 
-			foreach (Vector3Int offset in blueprint.Configure.Positions)
+			foreach (Vector3Int offset in blueprint.Positions)
 			{
 				Vector3Int voxelPosition = blueprintPosition + offset;
 

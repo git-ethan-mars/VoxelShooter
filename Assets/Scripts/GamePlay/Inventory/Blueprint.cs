@@ -3,6 +3,7 @@ using System.Linq;
 using Data;
 using GamePlay.Audio;
 using Mirror;
+using R3;
 using Reflex.Attributes;
 using Services;
 using UnityEngine;
@@ -35,6 +36,27 @@ namespace GamePlay
 		}
 
 		public new BlueprintConfigure Configure => base.Configure as BlueprintConfigure;
+		public BlueprintLayout CurrentLayout => Configure.Layouts[_layoutIndex];
+		public Observable<BlueprintLayout> LayoutChanged => _layoutChanged;
+
+		public IReadOnlyList<Vector3Int> Positions
+		{
+			get
+			{
+				RefreshPositions();
+				return _positions;
+			}
+		}
+
+		[SyncVar(hook = nameof(OnLayoutChanged))] private int _layoutIndex;
+		[SyncVar(hook = nameof(OnRotationChanged))] private int _rotationStep;
+
+		private readonly Subject<BlueprintLayout> _layoutChanged = new Subject<BlueprintLayout>();
+		private readonly List<Vector3Int> _positions = new List<Vector3Int>();
+		private int _positionsLayoutIndex = -1;
+		private int _positionsRotationStep = -1;
+		private Vector3Int _minPosition;
+		private Vector3Int _maxPosition;
 
 		public override void OnStartAuthority()
 		{
@@ -58,12 +80,25 @@ namespace GamePlay
 				CmdBuild(_cameraProvider.CentredRay, voxelColor);
 			}
 
+			if (_inputService.IsSecondActionButtonDown())
+			{
+				CmdRotate();
+			}
+
+			for (var i = 0; i < Configure.Layouts.Count; i++)
+			{
+				if (_inputService.IsBlueprintButtonDown(i))
+				{
+					CmdSelectLayout(i);
+				}
+			}
+
 			if (_cameraProvider.GetBuildRayCastHit(out RaycastHit hit, placeDistance))
 			{
 				Vector3Int blueprintPosition = GetPlacementPosition(hit);
 				var buildVisitor = hit.collider.GetComponentInParent<IBuildVisitor>();
 
-				if (Configure.Positions.Any(offset => !buildVisitor.IsAvailablePosition(blueprintPosition + offset)))
+				if (Positions.Any(offset => !buildVisitor.IsAvailablePosition(blueprintPosition + offset)))
 				{
 					meshRenderer.materials[1].color = new Color(1, 0, 0, 0.2f);
 				}
@@ -91,16 +126,102 @@ namespace GamePlay
 
 		public Vector3Int GetPlacementPosition(RaycastHit hit)
 		{
-			Vector3 boundOffset = Vector3.Scale(hit.normal, meshFilter.mesh.bounds.extents);
-			Vector3Int blueprintPosition = Vector3Int.FloorToInt(hit.point + hit.normal / 2)
-			                               + new Vector3Int((int)boundOffset.x, (int)boundOffset.y, (int)boundOffset.z);
-			return blueprintPosition;
+			RefreshPositions();
+			Vector3Int anchor = Vector3Int.FloorToInt(hit.point + hit.normal / 2);
+			var normal = Vector3Int.RoundToInt(hit.normal);
+			var offset = new Vector3Int(
+				GetSurfaceOffset(normal.x, _minPosition.x, _maxPosition.x),
+				GetSurfaceOffset(normal.y, _minPosition.y, _maxPosition.y),
+				GetSurfaceOffset(normal.z, _minPosition.z, _maxPosition.z));
+			return anchor + offset;
+		}
+
+		private static int GetSurfaceOffset(int normal, int min, int max)
+		{
+			if (normal > 0)
+			{
+				return -min;
+			}
+
+			if (normal < 0)
+			{
+				return -max;
+			}
+
+			return 0;
 		}
 
 		public override void Deselect()
 		{
 			base.Deselect();
 			meshRenderer.enabled = false;
+		}
+
+		[Command]
+		private void CmdSelectLayout(int layoutIndex)
+		{
+			if (!IsSelected || layoutIndex < 0 || layoutIndex >= Configure.Layouts.Count)
+			{
+				return;
+			}
+
+			_layoutIndex = layoutIndex;
+		}
+
+		[Command]
+		private void CmdRotate()
+		{
+			if (!IsSelected)
+			{
+				return;
+			}
+
+			_rotationStep = (_rotationStep + 1) % 4;
+		}
+
+		private void OnLayoutChanged(int oldLayoutIndex, int newLayoutIndex)
+		{
+			RebuildMeshIfOwned();
+			_layoutChanged.OnNext(CurrentLayout);
+		}
+
+		private void OnRotationChanged(int oldRotationStep, int newRotationStep)
+		{
+			RebuildMeshIfOwned();
+		}
+
+		private void RebuildMeshIfOwned()
+		{
+			if (isOwned)
+			{
+				meshFilter.mesh = CreateBlueprintMesh();
+			}
+		}
+
+		private void RefreshPositions()
+		{
+			if (_positionsLayoutIndex == _layoutIndex && _positionsRotationStep == _rotationStep)
+			{
+				return;
+			}
+
+			_positions.Clear();
+			Quaternion rotation = Quaternion.Euler(0, 90 * _rotationStep, 0);
+			var min = new Vector3Int(int.MaxValue, int.MaxValue, int.MaxValue);
+			var max = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
+
+			foreach (Vector3Int position in CurrentLayout.Positions)
+			{
+				var rotatedPosition = Vector3Int.RoundToInt(rotation * position);
+				_positions.Add(rotatedPosition);
+				min = Vector3Int.Min(min, rotatedPosition);
+				max = Vector3Int.Max(max, rotatedPosition);
+			}
+
+			_minPosition = min;
+			_maxPosition = max;
+			_positionsLayoutIndex = _layoutIndex;
+			_positionsRotationStep = _rotationStep;
 		}
 
 		[Command]
@@ -118,7 +239,7 @@ namespace GamePlay
 				return;
 			}
 
-			if (character.Inventory.VoxelAmount.CurrentValue < Configure.Positions.Count)
+			if (character.Inventory.VoxelAmount.CurrentValue < Positions.Count)
 			{
 				PlayDeniedSound();
 				return;
@@ -135,7 +256,7 @@ namespace GamePlay
 
 			if (buildVisitor != null && buildVisitor.Visit(this, rayHit, voxelColor))
 			{
-				character.Inventory.VoxelAmount.Value -= Configure.Positions.Count;
+				character.Inventory.VoxelAmount.Value -= Positions.Count;
 			}
 			else
 			{
@@ -157,32 +278,33 @@ namespace GamePlay
 			var colors = new List<Color32>();
 			var uv = new List<Vector2>();
 			var triangles = new List<int>();
+			var occupied = new HashSet<Vector3Int>(Positions);
 
-			for (var i = 0; i < Configure.Positions.Count; i++)
+			for (var i = 0; i < Positions.Count; i++)
 			{
-				Vector3Int voxelPosition = Configure.Positions[i];
+				Vector3Int voxelPosition = Positions[i];
 
-				if (!Configure.Positions.Contains(new Vector3Int(voxelPosition.x, voxelPosition.y + 1, voxelPosition.z)))
+				if (!occupied.Contains(new Vector3Int(voxelPosition.x, voxelPosition.y + 1, voxelPosition.z)))
 				{
 					GenerateTopSide(voxelPosition.x, voxelPosition.y, voxelPosition.z, Color.white, vertices, normals, colors, uv, triangles);
 				}
-				if (!Configure.Positions.Contains(new Vector3Int(voxelPosition.x, voxelPosition.y - 1, voxelPosition.z)))
+				if (!occupied.Contains(new Vector3Int(voxelPosition.x, voxelPosition.y - 1, voxelPosition.z)))
 				{
 					GenerateBottomSide(voxelPosition.x, voxelPosition.y, voxelPosition.z, Color.white, vertices, normals, colors, uv, triangles);
 				}
-				if (!Configure.Positions.Contains(new Vector3Int(voxelPosition.x + 1, voxelPosition.y, voxelPosition.z)))
+				if (!occupied.Contains(new Vector3Int(voxelPosition.x + 1, voxelPosition.y, voxelPosition.z)))
 				{
 					GenerateRightSide(voxelPosition.x, voxelPosition.y, voxelPosition.z, Color.white, vertices, normals, colors, uv, triangles);
 				}
-				if (!Configure.Positions.Contains(new Vector3Int(voxelPosition.x - 1, voxelPosition.y, voxelPosition.z)))
+				if (!occupied.Contains(new Vector3Int(voxelPosition.x - 1, voxelPosition.y, voxelPosition.z)))
 				{
 					GenerateLeftSide(voxelPosition.x, voxelPosition.y, voxelPosition.z, Color.white, vertices, normals, colors, uv, triangles);
 				}
-				if (!Configure.Positions.Contains(new Vector3Int(voxelPosition.x, voxelPosition.y, voxelPosition.z + 1)))
+				if (!occupied.Contains(new Vector3Int(voxelPosition.x, voxelPosition.y, voxelPosition.z + 1)))
 				{
 					GenerateFrontSide(voxelPosition.x, voxelPosition.y, voxelPosition.z, Color.white, vertices, normals, colors, uv, triangles);
 				}
-				if (!Configure.Positions.Contains(new Vector3Int(voxelPosition.x, voxelPosition.y, voxelPosition.z - 1)))
+				if (!occupied.Contains(new Vector3Int(voxelPosition.x, voxelPosition.y, voxelPosition.z - 1)))
 				{
 					GenerateBackSide(voxelPosition.x, voxelPosition.y, voxelPosition.z, Color.white, vertices, normals, colors, uv, triangles);
 				}

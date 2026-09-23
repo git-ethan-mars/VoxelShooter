@@ -25,7 +25,9 @@ namespace UI.Inventory
 		{
 			base.Initialize();
 
-			_disposable = _characterProvider.Character.Value.Inventory.VoxelAmount.Subscribe(OnAmountChanged);
+			_disposable = Disposable.Combine(
+				_characterProvider.Character.Value.Inventory.VoxelAmount.Subscribe(_ => OnItemInfoChanged()),
+				InventoryItem.LayoutChanged.Subscribe(_ => OnItemInfoChanged()));
 			_projectileIcon = StaticData.GetProjectileIcon(InventoryItem.Type);
 		}
 
@@ -34,7 +36,7 @@ namespace UI.Inventory
 			base.Select();
 
 			_hud.ShowPalette();
-			_hud.ShowItemInfo(_projectileIcon, _characterProvider.Character.Value.Inventory.VoxelAmount.CurrentValue.ToString());
+			_hud.ShowItemInfo(_projectileIcon, GetItemInfoText());
 			_hud.SetCrosshairVisibility(true);
 		}
 
@@ -54,12 +56,18 @@ namespace UI.Inventory
 			_disposable.Dispose();
 		}
 
-		private void OnAmountChanged(int amount)
+		private void OnItemInfoChanged()
 		{
 			if (InventoryItem.IsSelected)
 			{
-				_hud.SetItemCount(amount.ToString());
+				_hud.SetItemCount(GetItemInfoText());
 			}
+		}
+
+		private string GetItemInfoText()
+		{
+			int voxelAmount = _characterProvider.Character.Value.Inventory.VoxelAmount.CurrentValue;
+			return $"{InventoryItem.CurrentLayout.Name}: {InventoryItem.Positions.Count}/{voxelAmount}";
 		}
 	}
 }

@@ -12,15 +12,62 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96ae05aeb6044723a1b99912ed5146c5, type: 3}
   m_Name: Blueprint
   m_EditorClassIdentifier: VoxelShooter.Data::Data.BlueprintConfigure
-  <Positions>k__BackingField:
-  - {x: 0, y: 0, z: 0}
-  - {x: 1, y: 0, z: 0}
-  - {x: 2, y: 0, z: 0}
-  - {x: -1, y: 0, z: 0}
-  - {x: -2, y: 0, z: 0}
-  - {x: 0, y: 1, z: 0}
-  - {x: 0, y: -1, z: 0}
-  - {x: 0, y: 0, z: 1}
-  - {x: 0, y: 0, z: 2}
-  - {x: 0, y: 0, z: -1}
-  - {x: 0, y: 0, z: -2}
+  <Layouts>k__BackingField:
+  - <Name>k__BackingField: Wall
+    <Positions>k__BackingField:
+    - {x: -1, y: 0, z: 0}
+    - {x: 0, y: 0, z: 0}
+    - {x: 1, y: 0, z: 0}
+    - {x: -1, y: 1, z: 0}
+    - {x: 0, y: 1, z: 0}
+    - {x: 1, y: 1, z: 0}
+    - {x: -1, y: 2, z: 0}
+    - {x: 0, y: 2, z: 0}
+    - {x: 1, y: 2, z: 0}
+  - <Name>k__BackingField: Stairs
+    <Positions>k__BackingField:
+    - {x: -1, y: 0, z: 0}
+    - {x: 0, y: 0, z: 0}
+    - {x: 1, y: 0, z: 0}
+    - {x: 0, y: 0, z: 1}
+    - {x: -1, y: 1, z: 1}
+    - {x: 0, y: 1, z: 1}
+    - {x: 1, y: 1, z: 1}
+    - {x: 0, y: 1, z: 2}
+    - {x: -1, y: 2, z: 2}
+    - {x: 0, y: 2, z: 2}
+    - {x: 1, y: 2, z: 2}
+  - <Name>k__BackingField: Fortification
+    <Positions>k__BackingField:
+    - {x: 0, y: 0, z: 0}
+    - {x: -1, y: 0, z: -1}
+    - {x: 1, y: 0, z: -1}
+    - {x: -1, y: 0, z: 0}
+    - {x: 1, y: 0, z: 0}
+    - {x: -1, y: 0, z: 1}
+    - {x: 0, y: 0, z: 1}
+    - {x: 1, y: 0, z: 1}
+    - {x: -1, y: 1, z: -1}
+    - {x: 1, y: 1, z: -1}
+    - {x: -1, y: 1, z: 1}
+    - {x: 1, y: 1, z: 1}
+    - {x: -1, y: 2, z: -1}
+    - {x: -1, y: 2, z: 0}
+    - {x: -1, y: 2, z: 1}
+    - {x: 0, y: 2, z: 1}
+    - {x: 1, y: 2, z: 1}
+    - {x: 1, y: 2, z: 0}
+    - {x: 1, y: 2, z: -1}
+  - <Name>k__BackingField: Cross
+    <Positions>k__BackingField:
+    - {x: 0, y: 0, z: 0}
+    - {x: 1, y: 0, z: 0}
+    - {x: 2, y: 0, z: 0}
+    - {x: -1, y: 0, z: 0}
+    - {x: -2, y: 0, z: 0}
+    - {x: 0, y: 1, z: 0}
+    - {x: 0, y: -1, z: 0}
+    - {x: 0, y: 0, z: 1}
+    - {x: 0, y: 0, z: 2}
+    - {x: 0, y: 0, z: -1}
+    - {x: 0, y: 0, z: -2}
