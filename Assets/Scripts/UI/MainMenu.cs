@@ -1,55 +1,34 @@
-using Infrastructure.States;
+using R3;
 using UnityEngine;
 using UnityEngine.UI;
-
 namespace UI
 {
-    public class MainMenu : MonoBehaviour
-    {
-        [SerializeField]
-        private Button joinMatchButton;
+	public class MainMenu : BaseMenu
+	{
+		[field: SerializeField] public Button CreateMatchButton { get; private set; }
+		[field: SerializeField] public Button JoinMatchButton { get; private set; }
+		[field: SerializeField] public Button SettingsButton { get; private set; }
+		[SerializeField] private Button exitButton;
 
-        [SerializeField]
-        private Button createMatchButton;
+		private void OnEnable()
+		{
+			CreateMatchButtonPressed = CreateMatchButton.onClick.AsObservable();
+			JoinButtonPressed = JoinMatchButton.onClick.AsObservable();
+			SettingsButtonPressed = SettingsButton.onClick.AsObservable();
+			ExitButtonPressed = exitButton.onClick.AsObservable();
+		}
 
-        [SerializeField]
-        private Button settingButton;
+		public Observable<Unit> CreateMatchButtonPressed { get; private set; }
+		public Observable<Unit> JoinButtonPressed { get; private set; }
+		public Observable<Unit> SettingsButtonPressed { get; private set; }
+		public Observable<Unit> ExitButtonPressed { get; private set; }
 
-        [SerializeField]
-        private Button exitButton;
+		public override void Show()
+		{
+		}
 
-        private GameStateMachine _stateMachine;
-
-        public void Construct(GameStateMachine stateMachine)
-        {
-            _stateMachine = stateMachine;
-            createMatchButton.onClick.AddListener(stateMachine.Enter<CreateMatchState>);
-            settingButton.onClick.AddListener(stateMachine.Enter<SettingsMenuState>);
-            if (Constants.isLocalBuild)
-            {
-                joinMatchButton.onClick.AddListener(stateMachine.Enter<JoinLocalMatchState>);
-            }
-            else
-            {
-                joinMatchButton.onClick.AddListener(stateMachine.Enter<JoinSteamLobbyState>);
-            }
-
-            exitButton.onClick.AddListener(Application.Quit);
-        }
-
-        private void OnDestroy()
-        {
-            createMatchButton.onClick.RemoveListener(_stateMachine.Enter<CreateMatchState>);
-            if (Constants.isLocalBuild)
-            {
-                joinMatchButton.onClick.RemoveListener(_stateMachine.Enter<JoinLocalMatchState>);
-            }
-            else
-            {
-                joinMatchButton.onClick.RemoveListener(_stateMachine.Enter<JoinSteamLobbyState>);
-            }
-
-            exitButton.onClick.RemoveListener(Application.Quit);
-        }
-    }
+		public override void Hide()
+		{
+		}
+	}
 }

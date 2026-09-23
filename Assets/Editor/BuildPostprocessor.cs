@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.Callbacks;
+using VoxelMap;
 
 namespace Editor
 {

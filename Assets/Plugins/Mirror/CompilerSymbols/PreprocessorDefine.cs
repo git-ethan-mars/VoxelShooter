@@ -11,21 +11,21 @@ namespace Mirror
         [InitializeOnLoadMethod]
         public static void AddDefineSymbols()
         {
+#if UNITY_2021_2_OR_NEWER
+            string currentDefines = PlayerSettings.GetScriptingDefineSymbols(UnityEditor.Build.NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup));
+#else
+            // Deprecated in Unity 2023.1
             string currentDefines = PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+#endif
+            // Remove oldest when adding next month's symbol.
+            // Keep a rolling 12 months of symbols.
             HashSet<string> defines = new HashSet<string>(currentDefines.Split(';'))
             {
                 "MIRROR",
-                "MIRROR_57_0_OR_NEWER",
-                "MIRROR_58_0_OR_NEWER",
-                "MIRROR_65_0_OR_NEWER",
-                "MIRROR_66_0_OR_NEWER",
-                "MIRROR_2022_9_OR_NEWER",
-                "MIRROR_2022_10_OR_NEWER",
-                "MIRROR_70_0_OR_NEWER",
-                "MIRROR_71_0_OR_NEWER",
-                "MIRROR_73_OR_NEWER"
-                // Remove oldest when adding next month's symbol.
-                // Keep a rolling 12 months of symbols.
+                "MIRROR_89_OR_NEWER",
+                "MIRROR_90_OR_NEWER",
+                "MIRROR_93_OR_NEWER",
+                "MIRROR_96_OR_NEWER"
             };
 
             // only touch PlayerSettings if we actually modified it,
@@ -33,7 +33,12 @@ namespace Mirror
             string newDefines = string.Join(";", defines);
             if (newDefines != currentDefines)
             {
+#if UNITY_2021_2_OR_NEWER
+                PlayerSettings.SetScriptingDefineSymbols(UnityEditor.Build.NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup), newDefines);
+#else
+                // Deprecated in Unity 2023.1
                 PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup, newDefines);
+#endif
             }
         }
     }

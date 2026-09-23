@@ -1,0 +1,47 @@
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using VoxelMap;
+using VoxelMap.Data;
+namespace Editor
+{
+	public class MapPreviewStage : PreviewSceneStage
+	{
+		private Map _map;
+		private MapEditorWindow _editorWindow;
+
+		public void Setup(MapConfigure mapConfigure)
+		{
+			MapData mapData = MapDataReader.ReadFromFile(mapConfigure.name);
+			MapBuilder mapBuilder = new MapBuilder()
+				.FromConfigure(mapConfigure)
+				.WithSpawnPoints(mapConfigure.SpawnPoints);
+			_map = mapBuilder.Build(mapData, mapConfigure.name);
+
+			StageUtility.PlaceGameObjectInCurrentStage(_map.gameObject);
+			Selection.activeObject = _map.gameObject;
+
+			_editorWindow = EditorWindow.GetWindow<MapEditorWindow>();
+			_editorWindow.Setup(mapConfigure);
+
+			_editorWindow.Repaint();
+		}
+
+		protected override GUIContent CreateHeaderContent()
+		{
+			return new GUIContent(nameof(MapPreviewStage));
+		}
+
+		protected override void OnCloseStage()
+		{
+			base.OnCloseStage();
+
+			if (_map != null)
+			{
+				DestroyImmediate(_map.gameObject);
+			}
+			
+			_editorWindow?.Close();
+		}
+	}
+}

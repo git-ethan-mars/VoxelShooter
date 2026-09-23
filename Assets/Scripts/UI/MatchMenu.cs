@@ -1,142 +1,125 @@
+using System.IO;
+using System.Linq;
+using System.Threading;
 using Data;
-using Infrastructure.Services.StaticData;
-using Infrastructure.States;
+using R3;
+using Reflex.Attributes;
+using Services;
 using TMPro;
+using UI.Carousel;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
-
+using VoxelMap;
 namespace UI
 {
-    public class MatchMenu : MonoBehaviour
-    {
-        [SerializeField]
-        private Button backButton;
+	[RequireComponent(typeof(CanvasGroup))]
+	public class MatchMenu : BaseMenu
+	{
+		[SerializeField] private Button backButton;
+		[SerializeField] private Button resetButton;
+		[SerializeField] private Button applyButton;
 
-        [SerializeField]
-        private Button resetButton;
+		[Header("Game Duration")]
+		[SerializeField] private TextMeshProUGUI gameDuration;
+		[SerializeField] private Button incrementGameDuration;
+		[SerializeField] private Button decrementGameDuration;
 
-        [SerializeField]
-        private Button applyButton;
+		[Header("Map choice")]
+		[SerializeField] private MapCarouselView mapCarouselView;
+		
+		private LobbyBalance _lobbyBalance;
+		private IMapConfigureLoader _mapConfigureLoader;
 
-        [Header("Game Duration")]
-        [SerializeField]
-        private TextMeshProUGUI gameDuration;
+		private Limitation _timeLimitation;
 
-        [SerializeField]
-        private Button incrementGameDuration;
+		private CarouselPresenter<MapView> _mapCarouselPresenter;
+		private CarouselModel<MapView> _mapCarouselModel;
+		private CancellationTokenSource _cts;
 
-        [SerializeField]
-        private Button decrementGameDuration;
+		[Inject]
+		private void Construct(IMapConfigureLoader mapConfigureLoader, IStaticDataService staticData)
+		{
+			_mapConfigureLoader = mapConfigureLoader;
+			_lobbyBalance = staticData.GetLobbyBalance();
 
-        [Header("Map choice")]
-        [SerializeField]
-        private TextMeshProUGUI mapName;
+			resetButton.OnClickAsObservable().Subscribe(_ => OnResetButton()).AddTo(this);
 
-        [SerializeField]
-        private Button nextMapButton;
+			mapCarouselView.IncreaseButtonPressed.Subscribe(_ => OnNextMapButtonPressed()).AddTo(this);
+			mapCarouselView.DecreaseButtonPressed.Subscribe(_ => OnPreviousMapButtonPressed()).AddTo(this);
 
-        [SerializeField]
-        private Button previousMapButton;
+			InitGameDuration();
+			InitMapChoice();
+		}
 
-        [SerializeField]
-        private RawImage mapImage;
+		private async void OnNextMapButtonPressed()
+		{
+			await mapCarouselView.PlayMapImageAnimationAsync(false, _cts.Token);
+		}
 
-        private Limitation _timeLimitation;
-        private IMapRepository _mapRepository;
-        private GameStateMachine _stateMachine;
-        private int _minGameTime;
-        private int _maxGameTime;
-        private LobbyBalance _lobbyBalance;
+		private async void OnPreviousMapButtonPressed()
+		{
+			await mapCarouselView.PlayMapImageAnimationAsync(true, _cts.Token);
+		}
 
-        public void Construct(IMapRepository mapRepository, IStaticDataService staticData,
-            GameStateMachine stateMachine)
-        {
-            _mapRepository = mapRepository;
-            _stateMachine = stateMachine;
-            _lobbyBalance = staticData.GetLobbyBalance();
-            _minGameTime = _lobbyBalance.minMatchDuration;
-            _maxGameTime = _lobbyBalance.maxMatchDuration;
-            InitGameDuration();
-            InitMapChoice();
-            resetButton.onClick.AddListener(OnResetButton);
-            backButton.onClick.AddListener(OnBackButton);
-            applyButton.onClick.AddListener(OnApplyButton);
-            nextMapButton.onClick.AddListener(OnNextMapButton);
-            previousMapButton.onClick.AddListener(OnPreviousButton);
-        }
+		private void OnDestroy()
+		{
+			_mapCarouselPresenter.Dispose();
+		}
 
-        private void InitMapChoice()
-        {
-            var configure = _mapRepository.GetCurrentMap();
-            if (configure != null)
-            {
-                mapName.SetText(configure.Item1);
-                mapImage.texture = configure.Item2.image;
-            }
-        }
+		public Observable<Unit> BackButtonPressed => backButton.onClick.AsObservable();
+		public Observable<GameSettings> ApplyButtonPressed => applyButton.onClick.AsObservable().Select(_ => GetWorldSettings());
 
-        private void OnDestroy()
-        {
-            resetButton.onClick.RemoveListener(OnResetButton);
-            backButton.onClick.RemoveListener(OnBackButton);
-            applyButton.onClick.RemoveListener(OnApplyButton);
-            nextMapButton.onClick.RemoveListener(OnNextMapButton);
-            previousMapButton.onClick.RemoveListener(OnPreviousButton);
-        }
+		public override void Show()
+		{
+			_cts = new CancellationTokenSource().AddTo(this);
+			EventSystem.current.SetSelectedGameObject(applyButton.gameObject);
+		}
 
-        private void InitGameDuration()
-        {
-            _timeLimitation = new Limitation(_minGameTime, _maxGameTime);
-            _timeLimitation.CurrentValue.ValueChanged += value => gameDuration.SetText(value.ToString());
-            incrementGameDuration.onClick.AddListener(_timeLimitation.Increment);
-            decrementGameDuration.onClick.AddListener(_timeLimitation.Decrement);
-            gameDuration.SetText(_timeLimitation.CurrentValue.Value.ToString());
-        }
+		public override void Hide()
+		{
+			_cts.Cancel();
+			_cts.Dispose();
+		}
 
-        private void OnResetButton()
-        {
-            _timeLimitation.Reset();
-        }
+		private void InitMapChoice()
+		{
+			var maps = LoadMaps();
+			_mapCarouselModel = new CarouselModel<MapView>(maps[0], maps);
+			_mapCarouselPresenter = new CarouselPresenter<MapView>(_mapCarouselModel, mapCarouselView);
+			_mapCarouselPresenter.Initialize();
+		}
 
-        private void OnBackButton()
-        {
-            _stateMachine.Enter<MainMenuState>();
-        }
+		private void InitGameDuration()
+		{
+			_timeLimitation = new Limitation(_lobbyBalance.minMatchDuration, _lobbyBalance.maxMatchDuration);
+			_timeLimitation.Subscribe(value => gameDuration.SetText(value.ToString())).AddTo(this);
+			incrementGameDuration.OnClickAsObservable().Subscribe(_ => _timeLimitation.Value++).AddTo(this);
+			decrementGameDuration.OnClickAsObservable().Subscribe(_ => _timeLimitation.Value--).AddTo(this);
+		}
 
-        private void OnApplyButton()
-        {
-            var serverSettings = new ServerSettings(mapName.text, _timeLimitation.CurrentValue.Value,
-                _lobbyBalance.spawnTime, _lobbyBalance.boxSpawnTime);
-            if (Constants.isLocalBuild)
-            {
-                _stateMachine.Enter<StartMatchState, ServerSettings>(
-                    serverSettings);
-            }
-            else
-            {
-                _stateMachine.Enter<StartSteamLobbyState, ServerSettings>(
-                    serverSettings);
-            }
-        }
+		private void OnResetButton()
+		{
+			_timeLimitation.Reset();
+		}
 
-        private void OnNextMapButton()
-        {
-            var configure = _mapRepository.GetNextMap();
-            if (configure != null)
-            {
-                mapName.SetText(configure.Item1);
-                mapImage.texture = configure.Item2.image;
-            }
-        }
+		private MapView[] LoadMaps()
+		{
+			if (!Directory.Exists(Constants.MapFolderPath))
+			{
+				Directory.CreateDirectory(Constants.MapFolderPath);
+			}
 
-        private void OnPreviousButton()
-        {
-            var configure = _mapRepository.GetPreviousMap();
-            if (configure != null)
-            {
-                mapName.SetText(configure.Item1);
-                mapImage.texture = configure.Item2.image;
-            }
-        }
-    }
+			var mapNames = MapDataReader.GetExistedMaps()
+				.Select(fileName => new MapView(fileName, _mapConfigureLoader.GetMapConfigure(fileName).Image))
+				.ToArray();
+			return mapNames;
+		}
+
+		private GameSettings GetWorldSettings()
+		{
+			string mapName = _mapCarouselModel.CurrentItem.CurrentValue.MapName;
+			return new GameSettings(mapName, _timeLimitation.Value, _lobbyBalance.spawnTime, _lobbyBalance.spawnTime);
+		}
+	}
 }

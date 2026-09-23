@@ -1,38 +1,38 @@
-﻿using Infrastructure.Factory;
 using Networking;
-
+using Services.ServerList;
+using Steamworks;
+using UnityEngine;
 namespace Infrastructure.States
 {
-    public class JoinSteamLobbyState : IState
-    {
-        private readonly GameStateMachine _stateMachine;
-        private readonly SceneLoader _sceneLoader;
-        private readonly IGameFactory _gameFactory;
-        private readonly IUIFactory _uiFactory;
-        private const string Main = "Main";
+	public class JoinSteamLobbyState : IPayloadedState<Server>
+	{
+		private readonly GameStateMachine _gameStateMachine;
+		private readonly VSNetworkManager _networkManager;
 
-        public JoinSteamLobbyState(GameStateMachine stateMachine, SceneLoader sceneLoader, IGameFactory gameFactory,
-            IUIFactory uiFactory)
-        {
-            _stateMachine = stateMachine;
-            _sceneLoader = sceneLoader;
-            _gameFactory = gameFactory;
-            _uiFactory = uiFactory;
-        }
+		public JoinSteamLobbyState(GameStateMachine gameStateMachine, VSNetworkManager networkManager)
+		{
+			_gameStateMachine = gameStateMachine;
+			_networkManager = networkManager;
+		}
+		
+		public async void Enter(Server server)
+		{
+			var steamLobby = _networkManager.GetComponent<SteamLobby>();
+			string networkAddress = await steamLobby.JoinLobby(new CSteamID(server.SteamIDLobby));
+			
+			if (string.IsNullOrEmpty(networkAddress))
+			{
+				Debug.Log("Wrong network address");
+				_gameStateMachine.Enter<GameMenuState>();
+				return;
+			}
+			
+			_networkManager.networkAddress = networkAddress;
+			_gameStateMachine.Enter<InitializeClientState>();
+		}
 
-        public void Enter()
-        {
-            _sceneLoader.Load(Main, OnLoaded);
-        }
-
-        private void OnLoaded()
-        {
-            var networkManager = _gameFactory.CreateSteamNetworkManager(_stateMachine, null, false);
-            _uiFactory.CreateLoadingWindow(networkManager.Client);
-        }
-
-        public void Exit()
-        {
-        }
-    }
+		public void Exit()
+		{
+		}
+	}
 }

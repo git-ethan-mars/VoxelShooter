@@ -1,14 +1,12 @@
-﻿using Mirror;
-
-namespace Networking.Messages.Responses
+namespace Networking.Messages
 {
-    public struct MapNameResponse : NetworkMessage
-    {
-        public string MapName;
+	public struct MapNameResponse : IResponse
+	{
+		public readonly string MapName;
 
-        public MapNameResponse(string mapName)
-        {
-            MapName = mapName;
-        }
-    }
+		public MapNameResponse(string mapName)
+		{
+			MapName = mapName;
+		}
+	}
 }

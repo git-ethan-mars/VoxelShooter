@@ -1,17 +1,15 @@
-using Mirror;
-using Steamworks;
-
-namespace Networking.Messages.Requests
+using UnityEngine;
+namespace Networking.Messages
 {
-    public struct AuthenticationRequest : NetworkMessage
-    {
-        public readonly CSteamID SteamID;
-        public readonly string NickName;
+	public struct AuthenticationRequest : IRequest
+	{
+		public readonly string NickName;
+		public readonly Texture2D Avatar;
 
-        public AuthenticationRequest(CSteamID steamID, string nickName)
-        {
-            SteamID = steamID;
-            NickName = nickName;
-        }
-    }
+		public AuthenticationRequest(string nickName, Texture2D avatar)
+		{
+			NickName = nickName;
+			Avatar = avatar;
+		}
+	}
 }

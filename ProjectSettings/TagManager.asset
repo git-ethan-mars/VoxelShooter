@@ -2,7 +2,7 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!78 &1
 TagManager:
-  serializedVersion: 2
+  serializedVersion: 3
   tags:
   - Chunk
   - Head
@@ -19,11 +19,11 @@ TagManager:
   - Chunk
   - Water
   - UI
-  - Body
   - Entity
   - Falling Mesh
   - Wall
-  - Player
+  - 
+  - 
   - 
   - 
   - 
@@ -49,3 +49,5 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  m_RenderingLayers:
+  - Default

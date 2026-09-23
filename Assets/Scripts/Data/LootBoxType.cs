@@ -1,9 +1,9 @@
 namespace Data
 {
-    public enum LootBoxType
-    {
-        Ammo,
-        Health,
-        Block
-    }
+	public enum LootBoxType
+	{
+		Ammo,
+		Health,
+		Block
+	}
 }

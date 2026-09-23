@@ -1,46 +1,63 @@
 using System;
-using System.Collections.Generic;
-using Networking;
 using UnityEngine;
 using UnityEngine.UI;
-
 namespace UI
 {
-    public class LoadingWindow : MonoBehaviour
-    {
-        [SerializeField]
-        private List<Image> bullets;
+	public class LoadingWindow : ListView<Image>
+	{
+		[SerializeField] private CanvasGroup canvasGroup;
+		[SerializeField] private int bulletCount;
+		[SerializeField, Range(0, 1)] private float hideAlpha;
+		[SerializeField, Range(0, 1)] private float showAlpha;
 
-        private float _previousProgress;
-        private IClient _client;
+		private float _previousProgress;
 
-        public void Construct(IClient client)
-        {
-            _client = client;
-            _client.MapLoadProgressed += UpdateLoadingBar;
-        }
+		private void Awake()
+		{
+			for (int i = 0; i < bulletCount; i++)
+			{
+				SpawnElement();
+			}
+		}
 
-        private void UpdateLoadingBar(float progress)
-        {
-            var startBulletIndex = (int) Math.Floor(_previousProgress * bullets.Count);
-            var endBulletIndex = (int) Math.Ceiling(progress * bullets.Count);
-            for (var i = startBulletIndex; i < endBulletIndex; i++)
-            {
-                var currentColor = bullets[i].color;
-                bullets[i].color = new Color(currentColor.r, currentColor.g, currentColor.b, 255);
-            }
+		public void Show()
+		{
+			canvasGroup.alpha = 1;
+			
+			for (int i = 0; i < bulletCount; i++)
+			{
+				Color currentColor = Items[i].color;
+				Items[i].color = new Color(currentColor.r, currentColor.g, currentColor.b, hideAlpha);
+			}
+		}
 
-            _previousProgress = progress;
-            // ReSharper disable once CompareOfFloatsByEqualityOperator
-            if (progress == 1)
-            {
-                Destroy(gameObject);
-            }
-        }
+		public void Hide()
+		{
+			canvasGroup.alpha = 0;
+		}
 
-        public void OnDestroy()
-        {
-            _client.MapLoadProgressed -= UpdateLoadingBar;
-        }
-    }
+		public void UpdateLoadingBar(float progress)
+		{
+			if (Mathf.Approximately(_previousProgress, progress))
+			{
+				return;
+			}
+
+			int bulletProgressIndex = (int)Math.Ceiling(progress * bulletCount);
+
+			for (int i = 0; i < bulletProgressIndex; i++)
+			{
+				Color currentColor = Items[i].color;
+				Items[i].color = new Color(currentColor.r, currentColor.g, currentColor.b, showAlpha);
+			}
+
+			for (int i = bulletProgressIndex; i < bulletCount; i++)
+			{
+				Color currentColor = Items[i].color;
+				Items[i].color = new Color(currentColor.r, currentColor.g, currentColor.b, hideAlpha);
+			}
+
+			_previousProgress = progress;
+		}
+	}
 }

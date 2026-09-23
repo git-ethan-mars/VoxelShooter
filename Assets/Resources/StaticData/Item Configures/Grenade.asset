@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 712109275e584c6e9354aeffec68289c, type: 3}
+  m_Name: Grenade
+  m_EditorClassIdentifier: 
+  <Amount>k__BackingField: 5
+  <DelayInSeconds>k__BackingField: 2
+  <Radius>k__BackingField: 4
+  <Damage>k__BackingField: 0
+  <MaxThrowDuration>k__BackingField: 1
+  <ThrowForceModifier>k__BackingField: 1800
+  <MinThrowForce>k__BackingField: 900
+  <ParticleSpeed>k__BackingField: 3
+  <ParticleCount>k__BackingField: 30
+  <ExplosionSound>k__BackingField: {fileID: 11400000, guid: 9eebc9c80e42edd4f94203f43574c8b4, type: 2}

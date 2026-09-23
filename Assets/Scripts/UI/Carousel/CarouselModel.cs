@@ -1,41 +1,31 @@
 using System;
-using System.Collections.Generic;
-
+using R3;
 namespace UI.Carousel
 {
-    public class CarouselModel<T>
-    {
-        public event Action<T> ValueChanged;
-        private readonly List<T> _items;
-        private int _currentIndex;
+	public class CarouselModel<T>
+	{
+		private readonly T[] _options;
+		private int _currentIndex;
 
-        public CarouselModel(List<T> items)
-        {
-            _items = items;
-        }
+		public CarouselModel(T initialValue, params T[] options)
+		{
+			CurrentItem = new ReactiveProperty<T>(initialValue);
+			_currentIndex = Array.FindIndex(options, item => CurrentItem.Value.Equals(item));
+			_options = options;
+		}
 
-        public T CurrentItem
-        {
-            get => _currentItem;
-            set
-            {
-                _currentItem = value;
-                ValueChanged?.Invoke(_currentItem);
-            }
-        }
+		public ReactiveProperty<T> CurrentItem { get; }
 
-        private T _currentItem;
+		public void MoveForward()
+		{
+			_currentIndex = (_currentIndex + 1 + _options.Length) % _options.Length;
+			CurrentItem.Value = _options[_currentIndex];
+		}
 
-        public void MoveForward()
-        {
-            _currentIndex = (_items.FindIndex(item => item.Equals(_currentItem)) + 1 + _items.Count) % _items.Count;
-            CurrentItem = _items[_currentIndex];
-        }
-
-        public void MoveBack()
-        {
-            _currentIndex = (_items.FindIndex(item => item.Equals(_currentItem)) - 1 + _items.Count) % _items.Count;
-            CurrentItem = _items[_currentIndex];
-        }
-    }
+		public void MoveBack()
+		{
+			_currentIndex = (_currentIndex - 1 + _options.Length) % _options.Length;
+			CurrentItem.Value = _options[_currentIndex];
+		}
+	}
 }

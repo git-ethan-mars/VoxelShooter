@@ -1,16 +1,21 @@
-﻿using Mirror;
-
 namespace Data
 {
     public class KillData
     {
-        public readonly NetworkConnectionToClient Killer;
-        public readonly NetworkConnectionToClient Victim;
+        public PlayerId SourceId;
+        public PlayerId TargetId;
+        public KillReason Reason;
 
-        public KillData(NetworkConnectionToClient killer, NetworkConnectionToClient victim)
+        public KillData(PlayerId sourceId, PlayerId targetId, KillReason reason)
         {
-            Killer = killer;
-            Victim = victim;
+            SourceId = sourceId;
+            TargetId = targetId;
+            Reason = reason;
+        }
+
+        public override string ToString()
+        {
+            return $"[SOURCE] {SourceId} [TARGET] {TargetId} [REASON] {Reason}";
         }
     }
 }

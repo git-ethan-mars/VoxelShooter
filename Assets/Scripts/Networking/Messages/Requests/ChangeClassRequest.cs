@@ -1,14 +1,13 @@
-﻿using Data;
-using Mirror;
-
-namespace Networking.Messages.Requests
+using Data;
+namespace Networking.Messages
 {
-    public struct ChangeClassRequest : NetworkMessage
-    {
-        public readonly GameClass GameClass;
-        public ChangeClassRequest(GameClass gameClass)
-        {
-            GameClass = gameClass;
-        }
-    }
+	public struct ChangeGameClassRequest : IRequest
+	{
+		public readonly GameClass GameClass;
+
+		public ChangeGameClassRequest(GameClass gameClass)
+		{
+			GameClass = gameClass;
+		}
+	}
 }

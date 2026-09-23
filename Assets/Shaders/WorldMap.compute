@@ -1,0 +1,98 @@
+#pragma kernel ClearHeight
+#pragma kernel UpdateHeight
+#pragma kernel UpdateChunk
+
+struct VertexData
+{
+	float3 Position;
+	float3 Normal;
+	uint Color;
+	float2 UV;
+	float Neighbours;
+};
+
+int BufferSize;
+int ChunkSize;
+StructuredBuffer<VertexData> VertexBuffer;
+RWStructuredBuffer<uint> HeightBuffer;
+float3 ChunkPosition;
+RWTexture2D<float4> MapTexture;
+
+float3 GetQuadCenter(uint vid)
+{
+	return min(VertexBuffer[vid].Position, min(VertexBuffer[vid + 1].Position,
+		min(VertexBuffer[vid + 2].Position, VertexBuffer[vid + 3].Position)));
+}
+
+[numthreads(8,8,1)]
+void ClearHeight(uint3 id : SV_DispatchThreadID)
+{
+	HeightBuffer[id.x * ChunkSize + id.y] = 0;
+}
+
+[numthreads(16,1,1)]
+void UpdateHeight(uint3 quadId : SV_DispatchThreadID)
+{
+	uint vid = 4 * quadId.x;
+	if (vid >= (uint)BufferSize)
+	{
+		return;
+	}
+
+	if (abs(VertexBuffer[vid].Normal.y - 1) > 0.001f)
+	{
+		return;
+	}
+		
+	float3 voxelPosition = GetQuadCenter(vid);
+	float3 worldPosition = voxelPosition + ChunkPosition;
+	InterlockedMax(HeightBuffer[(int)(voxelPosition.x * ChunkSize + voxelPosition.z)], (uint)worldPosition.y);
+}
+
+[numthreads(16,1,1)]
+void UpdateChunk(uint3 quadId : SV_DispatchThreadID)
+{
+	uint vid = 4 * quadId.x;
+	if (vid >= (uint)BufferSize)
+	{
+		return;
+	}
+
+	const uint encodedColor = VertexBuffer[4 * quadId.x].Color;
+	float3 voxelPosition = GetQuadCenter(vid);
+	float3 worldPosition = voxelPosition + ChunkPosition;
+
+	if (HeightBuffer[(int)(voxelPosition.x * ChunkSize + voxelPosition.z)] == (uint)worldPosition.y)
+	{
+		MapTexture[worldPosition.xz] = float4((float)(encodedColor & 255) / 256,
+			(float)(encodedColor >> 8 & 255) / 256, (float)(encodedColor >> 16 & 255) / 256, 1);
+	}
+}
+
+/*float4 GridColor;
+
+[numthreads(16,1,1)]
+void DrawGrid(uint3 id : SV_DispatchThreadID)
+{
+	uint width;
+	uint height;
+
+	MapTexture.GetDimensions(width, height);
+
+	if ((id.x + 1) * ChunkSize - 1 < height)
+	{
+		for (int x = 0; x < width; x++)
+		{
+			MapTexture[uint2(x, id.x * ChunkSize)] = GridColor;
+			MapTexture[uint2(x, (id.x + 1) * ChunkSize - 1)] = GridColor;
+		}
+	}
+	if ((id.x + 1) * ChunkSize - 1 < width)
+	{
+		for (int y = 0; y < width; y++)
+		{
+			MapTexture[uint2(id.x * ChunkSize, y)] = GridColor;
+			MapTexture[uint2((id.x + 1) * ChunkSize - 1, y)] = GridColor;	
+		}
+	}
+}*/

@@ -78,3 +78,6 @@ crashlytics-build.properties
 
 # Aseprite
 *.aseprite
+# Imported Unity package samples
+/[Aa]ssets/[Ss]amples/
+/[Aa]ssets/[Ss]amples.meta

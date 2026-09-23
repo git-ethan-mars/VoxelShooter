@@ -52,22 +52,19 @@ namespace Mirror
         public ArraySegment<byte> payload;
     }
 
-    // holds multiple buffered rpcs for the given connection.
-    // more efficient than sending one message per rpc.
-    public struct RpcBufferMessage : NetworkMessage
+    [Flags] public enum SpawnFlags : byte
     {
-        // payload contains multiple serialized RpcMessages.
-        // but without the message header.
-        public ArraySegment<byte> payload;
+        None          = 0,
+        isOwner       = 1 << 0,
+        isLocalPlayer = 1 << 1
     }
 
     public struct SpawnMessage : NetworkMessage
     {
         // netId of new or existing object
         public uint netId;
-        public bool isLocalPlayer;
-        // Sets hasAuthority on the spawned object
-        public bool isOwner;
+        // isOwner and isLocalPlayer are merged into one byte via bitwise op
+        public SpawnFlags spawnFlags;
         public ulong sceneId;
         // If sceneId != 0 then it is used instead of assetId
         public uint assetId;
@@ -80,13 +77,53 @@ namespace Mirror
         // serialized component data
         // ArraySegment to avoid unnecessary allocations
         public ArraySegment<byte> payload;
+
+        // Backwards compatibility after implementing spawnFlags
+        public bool isOwner
+        {
+            get => spawnFlags.HasFlag(SpawnFlags.isOwner);
+            set => spawnFlags = 
+                value 
+                ? spawnFlags | SpawnFlags.isOwner 
+                : spawnFlags & ~SpawnFlags.isOwner;
+        }
+
+        // Backwards compatibility after implementing spawnFlags
+        public bool isLocalPlayer
+        {
+            get => spawnFlags.HasFlag(SpawnFlags.isLocalPlayer);
+            set => spawnFlags = 
+                value 
+                ? spawnFlags | SpawnFlags.isLocalPlayer 
+                : spawnFlags & ~SpawnFlags.isLocalPlayer;
+        }
     }
 
     public struct ChangeOwnerMessage : NetworkMessage
     {
         public uint netId;
-        public bool isOwner;
-        public bool isLocalPlayer;
+        // isOwner and isLocalPlayer are merged into one byte via bitwise op
+        public SpawnFlags spawnFlags;
+
+        // Backwards compatibility after implementing spawnFlags
+        public bool isOwner
+        {
+            get => spawnFlags.HasFlag(SpawnFlags.isOwner);
+            set => spawnFlags = 
+                value 
+                ? spawnFlags | SpawnFlags.isOwner 
+                : spawnFlags & ~SpawnFlags.isOwner;
+        }
+
+        // Backwards compatibility after implementing spawnFlags
+        public bool isLocalPlayer
+        {
+            get => spawnFlags.HasFlag(SpawnFlags.isLocalPlayer);
+            set => spawnFlags = 
+                value 
+                ? spawnFlags | SpawnFlags.isLocalPlayer 
+                : spawnFlags & ~SpawnFlags.isLocalPlayer;
+        }
     }
 
     public struct ObjectSpawnStartedMessage : NetworkMessage {}
@@ -111,23 +148,39 @@ namespace Mirror
         public ArraySegment<byte> payload;
     }
 
-    // A client sends this message to the server
-    // to calculate RTT and synchronize time
+    // whoever wants to measure rtt, sends this to the other end.
     public struct NetworkPingMessage : NetworkMessage
     {
-        public double clientTime;
+        // local time is used to calculate round trip time,
+        // and to calculate the predicted time offset.
+        public double localTime;
 
-        public NetworkPingMessage(double value)
+        // predicted time is sent to compare the final error, for debugging only
+        public double predictedTimeAdjusted;
+
+        public NetworkPingMessage(double localTime, double predictedTimeAdjusted)
         {
-            clientTime = value;
+            this.localTime = localTime;
+            this.predictedTimeAdjusted = predictedTimeAdjusted;
         }
     }
 
-    // The server responds with this message
-    // The client can use this to calculate RTT and sync time
+    // the other end responds with this message.
+    // we can use this to calculate rtt.
     public struct NetworkPongMessage : NetworkMessage
     {
-        public double clientTime;
-        public double serverTime;
+        // local time is used to calculate round trip time.
+        public double localTime;
+
+        // predicted error is used to adjust the predicted timeline.
+        public double predictionErrorUnadjusted;
+        public double predictionErrorAdjusted; // for debug purposes
+
+        public NetworkPongMessage(double localTime, double predictionErrorUnadjusted, double predictionErrorAdjusted)
+        {
+            this.localTime = localTime;
+            this.predictionErrorUnadjusted = predictionErrorUnadjusted;
+            this.predictionErrorAdjusted = predictionErrorAdjusted;
+        }
     }
 }
