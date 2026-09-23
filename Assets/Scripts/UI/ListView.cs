@@ -1,17 +1,17 @@
 using System.Collections.Generic;
 using UnityEngine;
+
 namespace UI
 {
 	public abstract class ListView<T> : MonoBehaviour where T : Component
 	{
-		[SerializeField]
-		private T itemPrefab;
-
-		[SerializeField]
-		private Transform container;
-		private readonly LinkedList<T> _freeList = new LinkedList<T>();
-
 		protected readonly List<T> Items = new List<T>();
+
+		[SerializeField] private T itemPrefab;
+
+		[SerializeField] private Transform container;
+
+		private readonly LinkedList<T> _freeList = new LinkedList<T>();
 
 		public T SpawnElement()
 		{

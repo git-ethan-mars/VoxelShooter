@@ -5,6 +5,7 @@ using R3;
 using Services;
 using UI.Carousel;
 using UnityEngine;
+
 namespace UI.SettingsMenuStates
 {
 	public class MouseSettingsState : ISettingsMenuState
@@ -44,7 +45,7 @@ namespace UI.SettingsMenuStates
 			_saveSettingsSubscription = Observable.Merge(_sensitivity.Slider.Select(_ => Unit.Default), _aimSensitivity.Slider.Select(_ => Unit
 				.Default), _crosshairModel.CurrentItem.Select(_ => Unit.Default)).Subscribe(_ =>
 				_storageService.Set(new MouseSettingsData(_sensitivity.Slider.CurrentValue, _aimSensitivity.Slider.CurrentValue,
-						_crosshairModel.CurrentItem.CurrentValue.ID)));
+					_crosshairModel.CurrentItem.CurrentValue.ID)));
 		}
 
 		public void Exit()

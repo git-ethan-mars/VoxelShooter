@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+
 namespace UI.Carousel
 {
 	public class ScreenModeCarouselView : CarouselView<FullScreenMode>

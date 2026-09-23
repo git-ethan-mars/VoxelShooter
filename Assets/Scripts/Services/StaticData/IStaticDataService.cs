@@ -2,6 +2,7 @@
 using Data;
 using UnityEngine;
 using AudioType = Data.AudioType;
+
 namespace Services
 {
 	public interface IStaticDataService

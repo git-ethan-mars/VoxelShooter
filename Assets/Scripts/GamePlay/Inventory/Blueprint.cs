@@ -9,14 +9,14 @@ using Services;
 using UnityEngine;
 using VoxelMap;
 using AudioType = Data.AudioType;
+
 namespace GamePlay
 {
 	public class Blueprint : InventoryItem
 	{
-		public override ItemType Type => ItemType.Blueprint;
+		[SerializeField] protected MeshRenderer meshRenderer;
 
 		[SerializeField] private MeshFilter meshFilter;
-		[SerializeField] protected MeshRenderer meshRenderer;
 
 		private IInputService _inputService;
 		private CameraProvider _cameraProvider;
@@ -24,16 +24,19 @@ namespace GamePlay
 		private CharacterProvider _characterProvider;
 		private AudioPlayer _audioPlayer;
 
-		[Inject]
-		private void Construct(IInputService inputService, CameraProvider cameraProvider, CharacterProvider characterProvider, 
-			MapProvider mapProvider, AudioPlayer audioPlayer)
-		{
-			_inputService = inputService;
-			_cameraProvider = cameraProvider;
-			_characterProvider = characterProvider;
-			_mapProvider = mapProvider;
-			_audioPlayer = audioPlayer;
-		}
+		[SyncVar(hook = nameof(OnLayoutChanged))]
+		private int _layoutIndex;
+
+		[SyncVar(hook = nameof(OnRotationChanged))]
+		private int _rotationStep;
+
+		private readonly Subject<BlueprintLayout> _layoutChanged = new Subject<BlueprintLayout>();
+		private readonly List<Vector3Int> _positions = new List<Vector3Int>();
+		private int _positionsLayoutIndex = -1;
+		private int _positionsRotationStep = -1;
+		private Vector3Int _minPosition;
+		private Vector3Int _maxPosition;
+		public override ItemType Type => ItemType.Blueprint;
 
 		public new BlueprintConfigure Configure => base.Configure as BlueprintConfigure;
 		public BlueprintLayout CurrentLayout => Configure.Layouts[_layoutIndex];
@@ -48,20 +51,39 @@ namespace GamePlay
 			}
 		}
 
-		[SyncVar(hook = nameof(OnLayoutChanged))] private int _layoutIndex;
-		[SyncVar(hook = nameof(OnRotationChanged))] private int _rotationStep;
-
-		private readonly Subject<BlueprintLayout> _layoutChanged = new Subject<BlueprintLayout>();
-		private readonly List<Vector3Int> _positions = new List<Vector3Int>();
-		private int _positionsLayoutIndex = -1;
-		private int _positionsRotationStep = -1;
-		private Vector3Int _minPosition;
-		private Vector3Int _maxPosition;
+		[Inject]
+		private void Construct(IInputService inputService, CameraProvider cameraProvider, CharacterProvider characterProvider,
+			MapProvider mapProvider, AudioPlayer audioPlayer)
+		{
+			_inputService = inputService;
+			_cameraProvider = cameraProvider;
+			_characterProvider = characterProvider;
+			_mapProvider = mapProvider;
+			_audioPlayer = audioPlayer;
+		}
 
 		public override void OnStartAuthority()
 		{
 			base.OnStartAuthority();
 			meshFilter.mesh = CreateBlueprintMesh();
+		}
+
+		public Vector3Int GetPlacementPosition(RaycastHit hit)
+		{
+			RefreshPositions();
+			Vector3Int anchor = Vector3Int.FloorToInt(hit.point + hit.normal / 2);
+			var normal = Vector3Int.RoundToInt(hit.normal);
+			var offset = new Vector3Int(
+				GetSurfaceOffset(normal.x, _minPosition.x, _maxPosition.x),
+				GetSurfaceOffset(normal.y, _minPosition.y, _maxPosition.y),
+				GetSurfaceOffset(normal.z, _minPosition.z, _maxPosition.z));
+			return anchor + offset;
+		}
+
+		public override void Deselect()
+		{
+			base.Deselect();
+			meshRenderer.enabled = false;
 		}
 
 		private void Update()
@@ -109,7 +131,7 @@ namespace GamePlay
 
 				transform.position = blueprintPosition;
 				meshRenderer.enabled = true;
-				
+
 				if (_inputService.IsScrollButtonDown())
 				{
 					Vector3Ushort colorPickingPosition = Vector3Ushort.FloorToUshort(hit.point - hit.normal / 2);
@@ -122,18 +144,6 @@ namespace GamePlay
 			{
 				meshRenderer.enabled = false;
 			}
-		}
-
-		public Vector3Int GetPlacementPosition(RaycastHit hit)
-		{
-			RefreshPositions();
-			Vector3Int anchor = Vector3Int.FloorToInt(hit.point + hit.normal / 2);
-			var normal = Vector3Int.RoundToInt(hit.normal);
-			var offset = new Vector3Int(
-				GetSurfaceOffset(normal.x, _minPosition.x, _maxPosition.x),
-				GetSurfaceOffset(normal.y, _minPosition.y, _maxPosition.y),
-				GetSurfaceOffset(normal.z, _minPosition.z, _maxPosition.z));
-			return anchor + offset;
 		}
 
 		private static int GetSurfaceOffset(int normal, int min, int max)
@@ -149,12 +159,6 @@ namespace GamePlay
 			}
 
 			return 0;
-		}
-
-		public override void Deselect()
-		{
-			base.Deselect();
-			meshRenderer.enabled = false;
 		}
 
 		[Command]
@@ -288,22 +292,27 @@ namespace GamePlay
 				{
 					GenerateTopSide(voxelPosition.x, voxelPosition.y, voxelPosition.z, Color.white, vertices, normals, colors, uv, triangles);
 				}
+
 				if (!occupied.Contains(new Vector3Int(voxelPosition.x, voxelPosition.y - 1, voxelPosition.z)))
 				{
 					GenerateBottomSide(voxelPosition.x, voxelPosition.y, voxelPosition.z, Color.white, vertices, normals, colors, uv, triangles);
 				}
+
 				if (!occupied.Contains(new Vector3Int(voxelPosition.x + 1, voxelPosition.y, voxelPosition.z)))
 				{
 					GenerateRightSide(voxelPosition.x, voxelPosition.y, voxelPosition.z, Color.white, vertices, normals, colors, uv, triangles);
 				}
+
 				if (!occupied.Contains(new Vector3Int(voxelPosition.x - 1, voxelPosition.y, voxelPosition.z)))
 				{
 					GenerateLeftSide(voxelPosition.x, voxelPosition.y, voxelPosition.z, Color.white, vertices, normals, colors, uv, triangles);
 				}
+
 				if (!occupied.Contains(new Vector3Int(voxelPosition.x, voxelPosition.y, voxelPosition.z + 1)))
 				{
 					GenerateFrontSide(voxelPosition.x, voxelPosition.y, voxelPosition.z, Color.white, vertices, normals, colors, uv, triangles);
 				}
+
 				if (!occupied.Contains(new Vector3Int(voxelPosition.x, voxelPosition.y, voxelPosition.z - 1)))
 				{
 					GenerateBackSide(voxelPosition.x, voxelPosition.y, voxelPosition.z, Color.white, vertices, normals, colors, uv, triangles);
@@ -320,14 +329,14 @@ namespace GamePlay
 			return mesh;
 		}
 
-		private void GenerateTopSide(int x, int y, int z, Color32 color, List<Vector3> vertices, List<Vector3> normals, List<Color32> colors, 
+		private void GenerateTopSide(int x, int y, int z, Color32 color, List<Vector3> vertices, List<Vector3> normals, List<Color32> colors,
 			List<Vector2> uv, List<int> triangles)
 		{
 			vertices.Add(new Vector3(x, y + 1, z));
 			vertices.Add(new Vector3(x, y + 1, z + 1));
 			vertices.Add(new Vector3(x + 1, y + 1, z));
 			vertices.Add(new Vector3(x + 1, y + 1, z + 1));
-			
+
 			uv.Add(new Vector2(0, 1));
 			uv.Add(new Vector2(0, 0));
 			uv.Add(new Vector2(1, 1));
@@ -349,7 +358,7 @@ namespace GamePlay
 			vertices.Add(new Vector3(x + 1, y, z));
 			vertices.Add(new Vector3(x, y, z + 1));
 			vertices.Add(new Vector3(x + 1, y, z + 1));
-			
+
 			uv.Add(new Vector2(1, 1));
 			uv.Add(new Vector2(0, 1));
 			uv.Add(new Vector2(1, 0));
@@ -376,7 +385,7 @@ namespace GamePlay
 			uv.Add(new Vector2(0, 0));
 			uv.Add(new Vector2(1, 1));
 			uv.Add(new Vector2(0, 1));
-			
+
 			for (var i = 0; i < 4; i++)
 			{
 				normals.Add(Vector3.forward);
@@ -393,7 +402,7 @@ namespace GamePlay
 			vertices.Add(new Vector3(x, y + 1, z));
 			vertices.Add(new Vector3(x + 1, y, z));
 			vertices.Add(new Vector3(x + 1, y + 1, z));
-			
+
 			uv.Add(new Vector2(0, 0));
 			uv.Add(new Vector2(0, 1));
 			uv.Add(new Vector2(1, 0));
@@ -415,7 +424,7 @@ namespace GamePlay
 			vertices.Add(new Vector3(x + 1, y + 1, z));
 			vertices.Add(new Vector3(x + 1, y, z + 1));
 			vertices.Add(new Vector3(x + 1, y + 1, z + 1));
-			
+
 			uv.Add(new Vector2(0, 0));
 			uv.Add(new Vector2(0, 1));
 			uv.Add(new Vector2(1, 0));
@@ -442,7 +451,7 @@ namespace GamePlay
 			uv.Add(new Vector2(0, 0));
 			uv.Add(new Vector2(1, 1));
 			uv.Add(new Vector2(0, 1));
-			
+
 			for (var i = 0; i < 4; i++)
 			{
 				normals.Add(Vector3.left);

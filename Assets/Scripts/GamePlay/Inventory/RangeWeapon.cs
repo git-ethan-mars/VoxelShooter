@@ -10,6 +10,7 @@ using Services;
 using UnityEngine;
 using AudioType = Data.AudioType;
 using Random = UnityEngine.Random;
+
 namespace GamePlay
 {
 	public abstract class RangeWeapon : InventoryItem
@@ -19,10 +20,6 @@ namespace GamePlay
 		[SerializeField] private AudioType shootSound;
 		[SerializeField] private AudioType reloadSound;
 		[SerializeField] private ParticleSystem shootingParticles;
-
-		protected IInputService InputService { get; set; }
-		protected NetworkAudioSender AudioSender { get; set; }
-		protected CameraProvider CameraProvider { get; set; }
 
 		private CancellationTokenSource _onChangeSlot;
 		private bool _isReloading;
@@ -36,16 +33,46 @@ namespace GamePlay
 		public Observable<bool> IsZoomed => _isZoomed;
 		public new RangeWeaponConfigure Configure => base.Configure as RangeWeaponConfigure;
 
+		protected IInputService InputService { get; set; }
+		protected NetworkAudioSender AudioSender { get; set; }
+		protected CameraProvider CameraProvider { get; set; }
+
 		public override void OnStartServer()
 		{
 			base.OnStartServer();
 
 			_totalBullets.Value = Configure.TotalBullets;
 			_bulletsInMagazine.Value = Configure.MagazineSize;
-			
+
 			ResetRecoil(destroyCancellationToken).Forget();
 		}
-		
+
+		public override void Select()
+		{
+			base.Select();
+
+			_onChangeSlot = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+
+			if (_isReloading)
+			{
+				Reload();
+			}
+
+			if (!_isReady)
+			{
+				ResetShoot();
+			}
+		}
+
+		public override void Deselect()
+		{
+			base.Deselect();
+			_onChangeSlot?.Cancel();
+			_onChangeSlot?.Dispose();
+
+			_isZoomed.Value = false;
+		}
+
 		protected void Update()
 		{
 			if (!IsLocalItem)
@@ -73,39 +100,16 @@ namespace GamePlay
 					shootingParticles.Stop();
 				}
 			}
+
 			if (InputService.IsSecondActionButtonDown())
 			{
 				_isZoomed.Value = !_isZoomed.Value;
 			}
+
 			if (InputService.IsReloadingButtonDown() && CanReload())
 			{
 				Reload();
 			}
-		}
-
-		public override void Select()
-		{
-			base.Select();
-
-			_onChangeSlot = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
-
-			if (_isReloading)
-			{
-				Reload();
-			}
-			if (!_isReady)
-			{
-				ResetShoot();
-			}
-		}
-
-		public override void Deselect()
-		{
-			base.Deselect();
-			_onChangeSlot?.Cancel();
-			_onChangeSlot?.Dispose();
-
-			_isZoomed.Value = false;
 		}
 
 		[Command]
@@ -216,7 +220,8 @@ namespace GamePlay
 
 		private float GetSpreadByAxis()
 		{
-			return Math.Abs(_recoilModifier) < SpreadThreshold ? 0
+			return Math.Abs(_recoilModifier) < SpreadThreshold
+				? 0
 				: Random.Range(-Configure.BaseRecoil, Configure.BaseRecoil) * (_recoilModifier + 1);
 		}
 

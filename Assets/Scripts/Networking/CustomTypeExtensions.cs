@@ -1,6 +1,7 @@
 using System;
 using Data;
 using Mirror;
+
 namespace Networking
 {
 	public static class CustomTypeExtensions
@@ -15,7 +16,7 @@ namespace Networking
 			writer.WriteLong(timeSpan.Ticks);
 		}
 
-		
+
 		public static DeathMatchPlayerData ReadDeathMatchPlayerData(this NetworkReader reader)
 		{
 			return new DeathMatchPlayerData(reader.ReadString(), reader.ReadTexture2D());

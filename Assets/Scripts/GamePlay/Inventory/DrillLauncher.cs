@@ -9,6 +9,7 @@ using Reflex.Attributes;
 using Services;
 using UnityEngine;
 using AudioType = Data.AudioType;
+
 namespace GamePlay
 {
 	public class DrillLauncher : InventoryItem
@@ -21,6 +22,10 @@ namespace GamePlay
 		private readonly SyncReactiveProperty<int> _amount = new SyncReactiveProperty<int>();
 		private bool _isReloading;
 		private CancellationTokenSource _onChangeSlot;
+
+		public override ItemType Type => ItemType.DrillLauncher;
+		public ReactiveProperty<int> Amount => _amount;
+		private new DrillLauncherConfigure Configure => base.Configure as DrillLauncherConfigure;
 
 		[Inject]
 		private void Construct(IInputService inputService, IEntityFactory entityFactory, CameraProvider cameraProvider,
@@ -39,27 +44,10 @@ namespace GamePlay
 			_amount.Value = Configure.Amount;
 		}
 
-		public override ItemType Type => ItemType.DrillLauncher;
-		private new DrillLauncherConfigure Configure => base.Configure as DrillLauncherConfigure;
-		public ReactiveProperty<int> Amount => _amount;
-		
-		private void Update()
-		{
-			if (!IsLocalItem)
-			{
-				return;
-			}
-			
-			if (_inputService.IsFirstActionButtonDown())
-			{
-				Shoot(_cameraProvider.CentredRay);
-			}
-		}
-
 		public override void Select()
 		{
 			base.Select();
-			
+
 			_onChangeSlot = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
 
 			if (_isReloading)
@@ -71,9 +59,22 @@ namespace GamePlay
 		public override void Deselect()
 		{
 			base.Deselect();
-			
+
 			_onChangeSlot?.Cancel();
 			_onChangeSlot?.Dispose();
+		}
+
+		private void Update()
+		{
+			if (!IsLocalItem)
+			{
+				return;
+			}
+
+			if (_inputService.IsFirstActionButtonDown())
+			{
+				Shoot(_cameraProvider.CentredRay);
+			}
 		}
 
 		[Command]
@@ -100,7 +101,7 @@ namespace GamePlay
 		private async void Reload()
 		{
 			_audioSender.SendAudio(AudioType.DrillLauncherReload, netIdentity, false);
-			
+
 			_isReloading = true;
 			bool isCanceled = await UniTask.WaitForSeconds(Configure.ReloadTime, cancellationToken: _onChangeSlot.Token).SuppressCancellationThrow();
 
@@ -108,7 +109,7 @@ namespace GamePlay
 			{
 				return;
 			}
-			
+
 			_isReloading = false;
 		}
 

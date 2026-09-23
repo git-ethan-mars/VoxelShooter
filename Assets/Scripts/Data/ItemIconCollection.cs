@@ -1,5 +1,6 @@
 using Data.SerializableDictionary;
 using UnityEngine;
+
 namespace Data
 {
 	[CreateAssetMenu(fileName = "Item Icons", menuName = "Inventory System/Item Icons")]
@@ -9,5 +10,4 @@ namespace Data
 		[field: SerializeField] public SerializableDictionary<ItemType, Sprite> ProjectileIconByItemType { get; private set; }
 		[field: SerializeField] public SerializableDictionary<ItemType, Sprite> ScopeIconByItemType { get; private set; }
 	}
-
 }

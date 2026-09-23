@@ -3,12 +3,14 @@ using Networking.Messages;
 using R3;
 using Reflex.Attributes;
 using UnityEngine;
+
 namespace Networking
 {
 	public class VSNetworkAuthenticator : NetworkAuthenticator
 	{
 		private readonly Subject<(NetworkConnectionToClient, string, Texture2D)> _onAuthenticatedPlayer =
 			new Subject<(NetworkConnectionToClient, string, Texture2D)>();
+
 		private VSNetworkManager _networkManager;
 		private IPlayerDataLoader _playerDataLoader;
 
@@ -51,7 +53,7 @@ namespace Networking
 			{
 				ClientAccept();
 			}
-			
+
 			_onAuthenticatedPlayer.OnNext((connection, request.NickName, request.Avatar));
 		}
 	}

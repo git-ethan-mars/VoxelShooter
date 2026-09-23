@@ -2,6 +2,7 @@ using Data;
 using R3;
 using Services;
 using UnityEngine;
+
 namespace UI
 {
 	public class RectPalette
@@ -11,6 +12,12 @@ namespace UI
 
 		private int _pointerX;
 		private int _pointerY;
+
+		public Observable<(int row, int column)> SelectedCell => _selectedCell;
+		public Color32 SelectedColor => _colors[_pointerY, _pointerX];
+		public Color this[int x, int y] => _colors[x, y];
+		public int RowCount => _colors.GetLength(0);
+		public int ColumnCount => _colors.GetLength(1);
 
 		public RectPalette(IStaticDataService staticData)
 		{
@@ -31,12 +38,6 @@ namespace UI
 
 			_selectedCell = new ReactiveProperty<(int row, int column)>((_pointerX, _pointerY));
 		}
-
-		public Observable<(int row, int column)> SelectedCell => _selectedCell;
-		public Color32 SelectedColor => _colors[_pointerY, _pointerX];
-		public Color this[int x, int y] => _colors[x, y];
-		public int RowCount => _colors.GetLength(0);
-		public int ColumnCount => _colors.GetLength(1);
 
 		public void MovePointerLeft()
 		{

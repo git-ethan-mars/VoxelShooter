@@ -1,11 +1,12 @@
 using Mirror;
+
 namespace Networking.Core
 {
 	public class DirectedMessage
 	{
 		public readonly NetworkConnectionToClient Connection;
 		public readonly NetworkMessage Message;
-		
+
 		public DirectedMessage(NetworkConnectionToClient connection, NetworkMessage message)
 		{
 			Connection = connection;
@@ -17,5 +18,4 @@ namespace Networking.Core
 			Message = message;
 		}
 	}
-	
 }

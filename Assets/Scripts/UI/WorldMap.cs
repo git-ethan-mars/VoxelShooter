@@ -4,6 +4,7 @@ using Reflex.Attributes;
 using UnityEngine;
 using UnityEngine.UI;
 using VoxelMap;
+
 namespace UI
 {
 	public class WorldMap : MonoBehaviour
@@ -35,7 +36,7 @@ namespace UI
 
 		[field: SerializeField] public CanvasGroup CanvasGroup { get; private set; }
 		public RenderTexture MainTexture { get; private set; }
-		
+
 		[Inject]
 		private void Construct(MapProvider mapProvider)
 		{
@@ -45,7 +46,7 @@ namespace UI
 			_clearHeightKernel = computeShader.FindKernel(ClearHeight);
 			_updateHeightKernel = computeShader.FindKernel(UpdateHeight);
 			_updateChunkKernel = computeShader.FindKernel(UpdateChunk);
-			
+
 			computeShader.SetInt(ChunkSize, Chunk.ChunkSize);
 			computeShader.SetVector(GridColor, gridColor);
 		}

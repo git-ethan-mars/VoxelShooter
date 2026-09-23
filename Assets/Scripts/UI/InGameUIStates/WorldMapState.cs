@@ -8,7 +8,7 @@ namespace UI.InGameUIStates
 		{
 			_worldMap = worldMap;
 		}
-		
+
 		public void Enter()
 		{
 			_worldMap.CanvasGroup.alpha = 1;

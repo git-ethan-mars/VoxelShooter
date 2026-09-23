@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+
 namespace VoxelMap.Data
 {
 	[Serializable]
@@ -22,7 +23,7 @@ namespace VoxelMap.Data
 
 		public bool Equals(DirectionalLightData other)
 		{
-			return position.Equals(other.position) && rotation.Equals(other.rotation) && 
+			return position.Equals(other.position) && rotation.Equals(other.rotation) &&
 			       color.Equals(other.color) && bias.Equals(other.bias) && normalBias.Equals(other.normalBias);
 		}
 

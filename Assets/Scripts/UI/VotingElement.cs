@@ -1,14 +1,15 @@
 using TMPro;
 using UnityEngine;
+
 namespace UI
 {
 	public class VotingElement : MonoBehaviour
 	{
 		[SerializeField] private TextMeshProUGUI text;
-		
-		public string Candidate { get; private set; }
-		
+
 		private int _votes;
+
+		public string Candidate { get; private set; }
 
 		public void Initialize(string candidate)
 		{

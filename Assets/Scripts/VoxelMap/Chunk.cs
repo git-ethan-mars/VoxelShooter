@@ -8,6 +8,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Rendering;
+
 namespace VoxelMap
 {
 	public class Chunk
@@ -16,14 +17,14 @@ namespace VoxelMap
 		public const int ChunkSizeSquared = 1024;
 		public const int ChunkSizeCubed = 32768;
 
-		public Mesh Mesh { get; }
-		public Vector3Int Position => Vector3Int.FloorToInt(_meshFilter.gameObject.transform.position);
-		public int FaceCount { get; set; }
-
 		private readonly int _index;
 		private readonly MeshCollider _collider;
 		private readonly MapData _mapData;
 		private readonly MeshFilter _meshFilter;
+
+		public Mesh Mesh { get; }
+		public Vector3Int Position => Vector3Int.FloorToInt(_meshFilter.gameObject.transform.position);
+		public int FaceCount { get; set; }
 		private int VertexCount => 4 * FaceCount;
 		private int IndexCount => 6 * FaceCount;
 		private Bounds Bounds => new Bounds((float)ChunkSize / 2 * Vector3.one, ChunkSize * Vector3.one);
@@ -44,12 +45,12 @@ namespace VoxelMap
 			Mesh.MeshDataArray meshArray = Mesh.AllocateWritableMeshData(1);
 			Mesh.MeshData meshData = meshArray[0];
 			SetupMeshData(meshData);
-			var vertices = meshData.GetVertexData<VertexData>(); 
+			var vertices = meshData.GetVertexData<VertexData>();
 			var indexes = meshData.GetIndexData<int>();
 
 			var fillJob = new FillChunkMeshJob(_mapData, _index, vertices, indexes);
 			fillJob.Schedule().Complete();
-			
+
 			ApplyMeshData(meshArray, meshData);
 
 			var bakeJob = new BakeChunkColliderJob(Mesh.GetEntityId());
@@ -69,14 +70,14 @@ namespace VoxelMap
 
 			var fillJob = new FillChunkMeshJob(_mapData, _index, vertices, indexes);
 			await fillJob.Schedule().ToUniTask(PlayerLoopTiming.Update);
-			
+
 			cancellationToken.ThrowIfCancellationRequested();
 
 			ApplyMeshData(meshArray, meshData);
 
 			var bakeJob = new BakeChunkColliderJob(Mesh.GetEntityId());
 			await bakeJob.Schedule().ToUniTask(PlayerLoopTiming.Update);
-			
+
 			cancellationToken.ThrowIfCancellationRequested();
 
 			ApplyMeshCollider();
@@ -87,7 +88,7 @@ namespace VoxelMap
 			var chunkDataArray = new NativeArray<ChunkData>(chunks.Count, Allocator.TempJob);
 			var meshIndexes = new NativeArray<EntityId>(chunks.Count, Allocator.TempJob);
 			var meshContexts = ArrayPool<(Mesh.MeshDataArray meshDataArray, Mesh.MeshData meshData)>.Shared.Rent(chunks.Count);
-			
+
 			try
 			{
 				var chunkNumber = 0;
@@ -96,7 +97,7 @@ namespace VoxelMap
 				{
 					Mesh.MeshDataArray meshArray = Mesh.AllocateWritableMeshData(1);
 					Mesh.MeshData meshData = meshArray[0];
-					
+
 					meshContexts[chunkNumber] = (meshArray, meshData);
 
 					chunk.SetupMeshData(meshData);
@@ -108,7 +109,7 @@ namespace VoxelMap
 					var indexesPointer = new IntPtr(indexes.GetUnsafePtr());
 					int chunkIndex = chunk._index;
 
-					chunkDataArray[chunkNumber] = new ChunkData(verticesPointer, vertices.Length, 
+					chunkDataArray[chunkNumber] = new ChunkData(verticesPointer, vertices.Length,
 						indexesPointer, indexes.Length, chunkIndex);
 					chunkNumber++;
 				}
@@ -117,7 +118,7 @@ namespace VoxelMap
 				fillJob.ScheduleParallel(chunkDataArray.Length, 2, default).Complete();
 
 				chunkNumber = 0;
-				
+
 				foreach (Chunk chunk in chunks)
 				{
 					chunk.ApplyMeshData(meshContexts[chunkNumber].meshDataArray, meshContexts[chunkNumber].meshData);
@@ -148,8 +149,8 @@ namespace VoxelMap
 		private void SetupMeshData(Mesh.MeshData meshData)
 		{
 			var attributes = new NativeArray<VertexAttributeDescriptor>(5, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
-			attributes[0] = new VertexAttributeDescriptor(VertexAttribute.Position, dimension:3);
-			attributes[1] = new VertexAttributeDescriptor(VertexAttribute.Normal, dimension:3);
+			attributes[0] = new VertexAttributeDescriptor(VertexAttribute.Position, dimension: 3);
+			attributes[1] = new VertexAttributeDescriptor(VertexAttribute.Normal, dimension: 3);
 			attributes[2] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.UNorm8, dimension: 4);
 			attributes[3] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, dimension: 2);
 			attributes[4] = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, dimension: 1);

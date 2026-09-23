@@ -1,5 +1,6 @@
 using Services;
 using UnityEngine;
+
 namespace UI.InGameUIStates
 {
 	public class InGameMenuState : IInGameUIState
@@ -16,7 +17,7 @@ namespace UI.InGameUIStates
 		public void Enter()
 		{
 			_inputService.Disable();
-			
+
 			Cursor.lockState = CursorLockMode.None;
 			_inGameMenu.CanvasGroup.alpha = 1.0f;
 			_inGameMenu.CanvasGroup.interactable = true;
@@ -26,7 +27,7 @@ namespace UI.InGameUIStates
 		public void Exit()
 		{
 			_inputService.Enable();
-			
+
 			_inGameMenu.CanvasGroup.alpha = 0.0f;
 			_inGameMenu.CanvasGroup.interactable = false;
 			_inGameMenu.CanvasGroup.blocksRaycasts = false;

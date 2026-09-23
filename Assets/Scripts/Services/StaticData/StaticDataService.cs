@@ -4,6 +4,7 @@ using System.Linq;
 using Data;
 using UnityEngine;
 using AudioType = Data.AudioType;
+
 namespace Services
 {
 	public class StaticDataService : IStaticDataService
@@ -44,14 +45,6 @@ namespace Services
 			LoadLobbyBalance();
 			LoadAudio();
 			LoadRectPaletteData();
-		}
-
-		private void LoadItemIcons()
-		{
-			var itemIcons = _assets.Load<ItemIconCollection>(ItemIconsPath);
-			_slotIconByItemType = itemIcons.SlotIconByItemType;
-			_projectileIconByItemType = itemIcons.ProjectileIconByItemType;
-			_scopeIconByItemType = itemIcons.ScopeIconByItemType;
 		}
 
 		public IReadOnlyList<ItemType> GetItems(GameClass gameClass)
@@ -115,7 +108,7 @@ namespace Services
 			{
 				return slotIcon;
 			}
-			
+
 			Debug.LogWarning($"Could not find slot icon for {type}");
 			return null;
 		}
@@ -126,7 +119,7 @@ namespace Services
 			{
 				return projectileIcon;
 			}
-			
+
 			Debug.LogWarning($"Could not find projectile icon for {type}");
 			return null;
 		}
@@ -146,6 +139,14 @@ namespace Services
 		public IEnumerable<CrosshairSprite> GetCrosshairSprites()
 		{
 			return _crosshairSprites.Select((sprite, id) => new CrosshairSprite(id, sprite));
+		}
+
+		private void LoadItemIcons()
+		{
+			var itemIcons = _assets.Load<ItemIconCollection>(ItemIconsPath);
+			_slotIconByItemType = itemIcons.SlotIconByItemType;
+			_projectileIconByItemType = itemIcons.ProjectileIconByItemType;
+			_scopeIconByItemType = itemIcons.ScopeIconByItemType;
 		}
 
 		private void LoadItems()

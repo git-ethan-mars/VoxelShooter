@@ -4,6 +4,7 @@ using Reflex.Attributes;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+
 namespace UI
 {
 	public class Hud : MonoBehaviour
@@ -27,15 +28,6 @@ namespace UI
 		private void Construct(CharacterProvider characterProvider)
 		{
 			_characterProvider = characterProvider;
-		}
-
-		private void OnEnable()
-		{
-			_characterProvider.Character
-				.Where(character => character != null)
-				.SelectMany(character => character.HealthSystem.Health)
-				.Subscribe(health => healthCounter.SetHealthValue(health.ToString()))
-				.AddTo(this);
 		}
 
 		public void ShowItemInfo(Sprite icon, string text)
@@ -104,6 +96,15 @@ namespace UI
 		public void HidePalette()
 		{
 			paletteView.Clear();
+		}
+
+		private void OnEnable()
+		{
+			_characterProvider.Character
+				.Where(character => character != null)
+				.SelectMany(character => character.HealthSystem.Health)
+				.Subscribe(health => healthCounter.SetHealthValue(health.ToString()))
+				.AddTo(this);
 		}
 	}
 }

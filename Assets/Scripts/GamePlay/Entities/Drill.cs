@@ -8,6 +8,7 @@ using Services;
 using UnityEngine;
 using VoxelMap;
 using AudioType = Data.AudioType;
+
 namespace GamePlay
 {
 	public class Drill : Explosive
@@ -19,6 +20,9 @@ namespace GamePlay
 		private DrillLauncherConfigure _configure;
 		private NetworkAudioSender _audioSender;
 
+		public override Bounds Bounds => boxCollider.bounds;
+		public override ExplosiveType Type => ExplosiveType.Drill;
+
 		[Inject]
 		private void Construct(MapProvider mapProvider, IStaticDataService staticData, EntityContainer entityContainer,
 			NetworkAudioSender audioSender)
@@ -27,6 +31,12 @@ namespace GamePlay
 			EntityContainer = entityContainer;
 			_configure = staticData.GetItemConfigure<DrillLauncherConfigure>(ItemType.DrillLauncher);
 			_audioSender = audioSender;
+		}
+
+		public void Launch()
+		{
+			rigidBody.linearVelocity = transform.forward * _configure.Speed;
+			DestroyAsync(destroyCancellationToken).Forget();
 		}
 
 		[ServerCallback]
@@ -42,19 +52,13 @@ namespace GamePlay
 				Destroy(gameObject);
 			}
 		}
-		
+
 		[ServerCallback]
 		private void OnTriggerEnter(Collider other)
 		{
 			Explode(_configure.ExplosionData);
-			
-			_audioSender.SendAudio(AudioType.DrillHit, transform.position);
-		}
 
-		public void Launch()
-		{
-			rigidBody.linearVelocity = transform.forward * _configure.Speed;
-			DestroyAsync(destroyCancellationToken).Forget();
+			_audioSender.SendAudio(AudioType.DrillHit, transform.position);
 		}
 
 		private async UniTaskVoid DestroyAsync(CancellationToken token)
@@ -62,8 +66,5 @@ namespace GamePlay
 			await UniTask.WaitForSeconds(_configure.LifeTime, cancellationToken: token);
 			Destroy(gameObject);
 		}
-
-		public override Bounds Bounds => boxCollider.bounds;
-		public override ExplosiveType Type => ExplosiveType.Drill;
 	}
 }

@@ -6,6 +6,7 @@ using Unity.Jobs;
 using UnityEngine;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
+
 namespace VoxelMap
 {
 	[BurstCompile]
@@ -13,10 +14,13 @@ namespace VoxelMap
 	{
 		private MapData _mapData;
 		private readonly int _chunkIndex;
+
 		[NativeDisableContainerSafetyRestriction]
 		private NativeArray<VertexData> _chunkVertices;
+
 		[NativeDisableContainerSafetyRestriction]
 		private NativeArray<int> _chunkIndexes;
+
 		private int _vertexCount;
 
 		private readonly ushort _chunkOffsetX;
@@ -385,15 +389,15 @@ namespace VoxelMap
 
 				// va: right, left, front, back
 				neighbours |= (IsVisibleBlock((ushort)(worldX + rightX), worldY, worldZ) ? 1 : 0) << 0; // right
-				neighbours |= (IsVisibleBlock((ushort)(worldX + leftX), worldY, worldZ) ? 1 : 0) << 1;  // left
-				neighbours |= (IsVisibleBlock(worldX, worldY, (ushort)(worldZ - 1)) ? 1 : 0) << 2;      // front (-Z)
-				neighbours |= (IsVisibleBlock(worldX, worldY, (ushort)(worldZ + 1)) ? 1 : 0) << 3;      // back  (+Z)
+				neighbours |= (IsVisibleBlock((ushort)(worldX + leftX), worldY, worldZ) ? 1 : 0) << 1; // left
+				neighbours |= (IsVisibleBlock(worldX, worldY, (ushort)(worldZ - 1)) ? 1 : 0) << 2; // front (-Z)
+				neighbours |= (IsVisibleBlock(worldX, worldY, (ushort)(worldZ + 1)) ? 1 : 0) << 3; // back  (+Z)
 
 
 				// vb: front-right, front-left, back-left, back-right
 				neighbours |= (IsVisibleBlock((ushort)(worldX + rightX), worldY, (ushort)(worldZ - 1)) ? 1 : 0) << 4; // fr
-				neighbours |= (IsVisibleBlock((ushort)(worldX + leftX), worldY, (ushort)(worldZ - 1)) ? 1 : 0) << 5;  // fl
-				neighbours |= (IsVisibleBlock((ushort)(worldX + leftX), worldY, (ushort)(worldZ + 1)) ? 1 : 0) << 6;  // bl
+				neighbours |= (IsVisibleBlock((ushort)(worldX + leftX), worldY, (ushort)(worldZ - 1)) ? 1 : 0) << 5; // fl
+				neighbours |= (IsVisibleBlock((ushort)(worldX + leftX), worldY, (ushort)(worldZ + 1)) ? 1 : 0) << 6; // bl
 				neighbours |= (IsVisibleBlock((ushort)(worldX + rightX), worldY, (ushort)(worldZ + 1)) ? 1 : 0) << 7; // br
 
 				int upwardY = isTop ? +1 : -1;
@@ -422,14 +426,14 @@ namespace VoxelMap
 
 				// va: right, left, front, back → в плоскости XY: front = +Y, back = -Y
 				neighbours |= (IsVisibleBlock((ushort)(worldX + rightX), worldY, worldZ) ? 1 : 0) << 0; // right
-				neighbours |= (IsVisibleBlock((ushort)(worldX + leftX), worldY, worldZ) ? 1 : 0) << 1;  // left
-				neighbours |= (IsVisibleBlock(worldX, (ushort)(worldY + 1), worldZ) ? 1 : 0) << 2;      // front (+Y)
-				neighbours |= (IsVisibleBlock(worldX, (ushort)(worldY - 1), worldZ) ? 1 : 0) << 3;      // back  (-Y)
+				neighbours |= (IsVisibleBlock((ushort)(worldX + leftX), worldY, worldZ) ? 1 : 0) << 1; // left
+				neighbours |= (IsVisibleBlock(worldX, (ushort)(worldY + 1), worldZ) ? 1 : 0) << 2; // front (+Y)
+				neighbours |= (IsVisibleBlock(worldX, (ushort)(worldY - 1), worldZ) ? 1 : 0) << 3; // back  (-Y)
 
 				// vb: front-right, front-left, back-left, back-right
 				neighbours |= (IsVisibleBlock((ushort)(worldX + rightX), (ushort)(worldY + 1), worldZ) ? 1 : 0) << 4; // fr
-				neighbours |= (IsVisibleBlock((ushort)(worldX + leftX), (ushort)(worldY + 1), worldZ) ? 1 : 0) << 5;  // fl
-				neighbours |= (IsVisibleBlock((ushort)(worldX + leftX), (ushort)(worldY - 1), worldZ) ? 1 : 0) << 6;  // bl
+				neighbours |= (IsVisibleBlock((ushort)(worldX + leftX), (ushort)(worldY + 1), worldZ) ? 1 : 0) << 5; // fl
+				neighbours |= (IsVisibleBlock((ushort)(worldX + leftX), (ushort)(worldY - 1), worldZ) ? 1 : 0) << 6; // bl
 				neighbours |= (IsVisibleBlock((ushort)(worldX + rightX), (ushort)(worldY - 1), worldZ) ? 1 : 0) << 7; // br
 
 				// vc: right, left, front, back (на уровне "вперёд": Z+1 для front, Z-1 для back)
@@ -455,14 +459,14 @@ namespace VoxelMap
 
 				// va: right, left, front, back → front = +Y, back = -Y
 				neighbours |= (IsVisibleBlock(worldX, worldY, (ushort)(worldZ + rightZ)) ? 1 : 0) << 0; // right
-				neighbours |= (IsVisibleBlock(worldX, worldY, (ushort)(worldZ + leftZ)) ? 1 : 0) << 1;  // left
-				neighbours |= (IsVisibleBlock(worldX, (ushort)(worldY + 1), worldZ) ? 1 : 0) << 2;      // front (+Y)
-				neighbours |= (IsVisibleBlock(worldX, (ushort)(worldY - 1), worldZ) ? 1 : 0) << 3;      // back  (-Y)
+				neighbours |= (IsVisibleBlock(worldX, worldY, (ushort)(worldZ + leftZ)) ? 1 : 0) << 1; // left
+				neighbours |= (IsVisibleBlock(worldX, (ushort)(worldY + 1), worldZ) ? 1 : 0) << 2; // front (+Y)
+				neighbours |= (IsVisibleBlock(worldX, (ushort)(worldY - 1), worldZ) ? 1 : 0) << 3; // back  (-Y)
 
 				// vb: front-right, front-left, back-left, back-right
 				neighbours |= (IsVisibleBlock(worldX, (ushort)(worldY + 1), (ushort)(worldZ + rightZ)) ? 1 : 0) << 4; // fr
-				neighbours |= (IsVisibleBlock(worldX, (ushort)(worldY + 1), (ushort)(worldZ + leftZ)) ? 1 : 0) << 5;  // fl
-				neighbours |= (IsVisibleBlock(worldX, (ushort)(worldY - 1), (ushort)(worldZ + leftZ)) ? 1 : 0) << 6;  // bl
+				neighbours |= (IsVisibleBlock(worldX, (ushort)(worldY + 1), (ushort)(worldZ + leftZ)) ? 1 : 0) << 5; // fl
+				neighbours |= (IsVisibleBlock(worldX, (ushort)(worldY - 1), (ushort)(worldZ + leftZ)) ? 1 : 0) << 6; // bl
 				neighbours |= (IsVisibleBlock(worldX, (ushort)(worldY - 1), (ushort)(worldZ + rightZ)) ? 1 : 0) << 7; // br
 
 				// vc: right, left, front, back (на уровне "вправо": X+1 для right, X-1 для left)

@@ -6,26 +6,23 @@ using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Pool;
 using VoxelMap.Data;
+
 namespace VoxelMap
 {
 	public class Map : MonoBehaviour
 	{
-		public string MapName { get; private set; }
 		public static readonly Vector3 WorldOffset = new Vector3(0.5f, 0.5f, 0.5f);
 
 		private readonly HashSet<Chunk> _regeneratingChunks = new HashSet<Chunk>();
 
 		private MapData _mapData;
 		private Chunk[] _chunks;
-
-		public void Construct(MapData mapData, string mapName, Chunk[] chunks, MapConfigure mapConfigure)
-		{
-			_mapData = mapData;
-			_chunks = chunks;
-			MapData = new MapData.Readonly(mapData);
-			MapConfigure = mapConfigure;
-			MapName = mapName;
-		}
+		private readonly Subject<IReadOnlyList<Voxel>> _voxelsAdded = new Subject<IReadOnlyList<Voxel>>();
+		private readonly Subject<IReadOnlyList<Vector3Ushort>> _voxelsRemoved = new Subject<IReadOnlyList<Vector3Ushort>>();
+		private readonly Subject<Chunk> _chunkUpdated = new Subject<Chunk>();
+		private readonly Subject<Unit> _mapUpdated = new Subject<Unit>();
+		private readonly Dictionary<Type, MapFeature> _features = new Dictionary<Type, MapFeature>();
+		public string MapName { get; private set; }
 
 		public ushort Width => _mapData.Width;
 		public ushort Height => _mapData.Height;
@@ -35,41 +32,16 @@ namespace VoxelMap
 		public Observable<Unit> MapUpdated => _mapUpdated;
 		public Observable<IReadOnlyList<Voxel>> VoxelsAdded => _voxelsAdded;
 		public Observable<IReadOnlyList<Vector3Ushort>> VoxelsRemoved => _voxelsRemoved;
-		private readonly Subject<IReadOnlyList<Voxel>> _voxelsAdded = new Subject<IReadOnlyList<Voxel>>();
-		private readonly Subject<IReadOnlyList<Vector3Ushort>> _voxelsRemoved = new Subject<IReadOnlyList<Vector3Ushort>>();
 		public MapConfigure MapConfigure { get; private set; }
 		public MapData.Readonly MapData { get; private set; }
-		private readonly Subject<Chunk> _chunkUpdated = new Subject<Chunk>();
-		private readonly Subject<Unit> _mapUpdated = new Subject<Unit>();
-		private readonly Dictionary<Type, MapFeature> _features = new Dictionary<Type, MapFeature>();
 
-		private void Update()
+		public void Construct(MapData mapData, string mapName, Chunk[] chunks, MapConfigure mapConfigure)
 		{
-			RegenerateChunks();
-		}
-
-		private void OnDestroy()
-		{
-			_mapData.Dispose();
-		}
-
-		private void RegenerateChunks()
-		{
-			if (_regeneratingChunks.Count <= 0)
-			{
-				return;
-			}
-
-			Chunk.RegenerateParallel(_mapData, _regeneratingChunks);
-
-
-			foreach (Chunk chunk in _regeneratingChunks)
-			{
-				_chunkUpdated.OnNext(chunk);
-			}
-
-			_regeneratingChunks.Clear();
-			_mapUpdated.OnNext(Unit.Default);
+			_mapData = mapData;
+			_chunks = chunks;
+			MapData = new MapData.Readonly(mapData);
+			MapConfigure = mapConfigure;
+			MapName = mapName;
 		}
 
 		public VoxelData GetVoxelByGlobalPosition(ushort x, ushort y, ushort z)
@@ -186,7 +158,6 @@ namespace VoxelMap
 					position = new Vector3Ushort(x, y, z);
 					return true;
 				}
-
 			} while (y > 0);
 
 			position = Vector3Ushort.zero;
@@ -215,6 +186,35 @@ namespace VoxelMap
 		public override string ToString()
 		{
 			return $"{MapName} Width: {_mapData.Width}, Height: {_mapData.Height}, Depth: {_mapData.Depth}";
+		}
+
+		private void Update()
+		{
+			RegenerateChunks();
+		}
+
+		private void OnDestroy()
+		{
+			_mapData.Dispose();
+		}
+
+		private void RegenerateChunks()
+		{
+			if (_regeneratingChunks.Count <= 0)
+			{
+				return;
+			}
+
+			Chunk.RegenerateParallel(_mapData, _regeneratingChunks);
+
+
+			foreach (Chunk chunk in _regeneratingChunks)
+			{
+				_chunkUpdated.OnNext(chunk);
+			}
+
+			_regeneratingChunks.Clear();
+			_mapUpdated.OnNext(Unit.Default);
 		}
 
 		private void RefreshFaceAmount(int chunkIndex, NativeList<Voxel> voxels)
@@ -269,9 +269,9 @@ namespace VoxelMap
 
 			if (topChunkNeighbourIndex < Chunks.Count &&
 			    chunkIndex / (_mapData.Depth / Chunk.ChunkSize * _mapData.Height / Chunk.ChunkSize) == topChunkNeighbourIndex / (_mapData.Depth /
-				    Chunk.ChunkSize *
-				    _mapData.Height /
-				    Chunk.ChunkSize))
+			                                                                                                                     Chunk.ChunkSize *
+			                                                                                                                     _mapData.Height /
+			                                                                                                                     Chunk.ChunkSize))
 			{
 				chunk = Chunks[topChunkNeighbourIndex];
 				return true;

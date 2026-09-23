@@ -4,6 +4,7 @@ using Mirror;
 using Networking;
 using Networking.Core;
 using Networking.Messages;
+
 namespace Infrastructure.States
 {
 	public class InitializeClientState : IState
@@ -22,14 +23,14 @@ namespace Infrastructure.States
 		public async void Enter()
 		{
 			_networkManager.StartClient();
-			
+
 			await _networkManager.MessageReceived.FirstAsync<AuthenticationResponse>();
 			NetworkClient.connection.isAuthenticated = true;
-			
+
 			_networkManager.SendRequest(new GameSettingsRequest());
 			GameSettings gameSettings = (await _networkManager.MessageReceived
 				.FirstAsync<GameSettingsResponse>()).Message.GameSettings;
-			
+
 			GameMode gameMode = await _gameModeFactory.CreateGameMode(gameSettings);
 			_gameStateMachine.Enter<GameLoopState, GameMode>(gameMode);
 		}

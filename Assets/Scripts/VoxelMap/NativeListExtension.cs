@@ -1,4 +1,5 @@
 using Unity.Collections;
+
 namespace VoxelMap
 {
 	public static class NativeListExtension

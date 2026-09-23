@@ -9,6 +9,7 @@ using UI;
 using UI.Inventory;
 using UnityEngine;
 using VoxelMap;
+
 namespace Infrastructure.Installers
 {
 	public class MainSceneInstaller : MonoBehaviour, IInstaller
@@ -19,7 +20,7 @@ namespace Infrastructure.Installers
 			BindFactories(containerBuilder);
 			BindGameObjects(containerBuilder);
 			BindRegistry(containerBuilder);
-			
+
 			containerBuilder.AddSingleton(typeof(LootBoxSpawner));
 			containerBuilder.AddSingleton(typeof(SpawnPointService));
 			containerBuilder.AddSingleton(typeof(RespawnService));

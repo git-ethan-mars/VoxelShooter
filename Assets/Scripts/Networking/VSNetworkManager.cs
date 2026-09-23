@@ -7,20 +7,23 @@ using R3;
 using Reflex.Attributes;
 using UnityEngine;
 using VoxelMap;
+
 namespace Networking
 {
 	public abstract class VSNetworkManager : NetworkManager
 	{
 		[SerializeField] private int messageSize = 500 * 1024;
 		[SerializeField] private float sendInterval = 0.5f;
-		
+
 		private readonly Subject<DirectedMessage> _messageReceived = new Subject<DirectedMessage>();
 		private readonly Subject<NetworkConnectionToClient> _playerDisconnected = new Subject<NetworkConnectionToClient>();
 		private MapProvider _mapProvider;
 
 		public Observable<DirectedMessage> MessageReceived => _messageReceived;
+
 		public Observable<(NetworkConnectionToClient connection, string nickName, Texture2D avatar)> PlayerConnected
 			=> ((VSNetworkAuthenticator)authenticator).OnAuthenticatedPlayer;
+
 		public Observable<NetworkConnectionToClient> PlayerDisconnected => _playerDisconnected;
 
 		[Inject]
@@ -28,7 +31,7 @@ namespace Networking
 		{
 			_mapProvider = mapProvider;
 		}
-		
+
 		public override void OnStartHost()
 		{
 			base.OnStartHost();

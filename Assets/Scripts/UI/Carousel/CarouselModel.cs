@@ -1,5 +1,6 @@
 using System;
 using R3;
+
 namespace UI.Carousel
 {
 	public class CarouselModel<T>
@@ -7,14 +8,14 @@ namespace UI.Carousel
 		private readonly T[] _options;
 		private int _currentIndex;
 
+		public ReactiveProperty<T> CurrentItem { get; }
+
 		public CarouselModel(T initialValue, params T[] options)
 		{
 			CurrentItem = new ReactiveProperty<T>(initialValue);
 			_currentIndex = Array.FindIndex(options, item => CurrentItem.Value.Equals(item));
 			_options = options;
 		}
-
-		public ReactiveProperty<T> CurrentItem { get; }
 
 		public void MoveForward()
 		{

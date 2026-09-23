@@ -1,6 +1,7 @@
 using Mirror;
 using TMPro;
 using UnityEngine;
+
 namespace GamePlay
 {
 	public class CharacterVisual : NetworkBehaviour

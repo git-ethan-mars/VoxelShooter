@@ -1,0 +1,11 @@
+root = true
+
+[*.cs]
+charset = utf-8
+indent_style = tab
+indent_size = 4
+tab_width = 4
+insert_final_newline = true
+# Keep the existing layout of long lines, only fix indentation/spacing
+resharper_wrap_lines = false
+resharper_keep_existing_linebreaks = true

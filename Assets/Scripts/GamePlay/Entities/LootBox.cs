@@ -24,12 +24,17 @@ namespace GamePlay
 		[SerializeField] private Bounds localBounds;
 
 		private readonly Subject<Unit> _pickedUp = new Subject<Unit>();
-		
+
 		private MapProvider _mapProvider;
 		private IAssetProvider _assets;
 		private NetworkAudioSender _audioSender;
 
 		private GameObject _platform;
+
+		public Sprite MiniMapImage => miniMapImage;
+		public override Bounds Bounds => new Bounds(localBounds.center + transform.position, localBounds.size);
+		public bool IsLanded { get; private set; }
+		public Observable<Unit> PickedUp => _pickedUp;
 
 		[Inject]
 		private void Construct(EntityContainer entityContainer, MapProvider mapProvider, IAssetProvider assets, NetworkAudioSender audioSender)
@@ -38,6 +43,20 @@ namespace GamePlay
 			_mapProvider = mapProvider;
 			_assets = assets;
 			_audioSender = audioSender;
+		}
+
+		public override void OnStartServer()
+		{
+			base.OnStartServer();
+
+			_mapProvider.Map.CurrentValue.MapUpdated
+				.Subscribe(_ => ValidatePosition())
+				.AddTo(this);
+		}
+
+		protected virtual void OnPickUp(Character receiver)
+		{
+			_audioSender.SendAudio(AudioType.LootBoxPickUp, transform.position);
 		}
 
 		private void Start()
@@ -63,15 +82,6 @@ namespace GamePlay
 			{
 				Destroy(_platform);
 			}
-		}
-
-		public override void OnStartServer()
-		{
-			base.OnStartServer();
-
-			_mapProvider.Map.CurrentValue.MapUpdated
-				.Subscribe(_ => ValidatePosition())
-				.AddTo(this);
 		}
 
 		private void OnCollisionEnter(Collision other)
@@ -103,7 +113,7 @@ namespace GamePlay
 				transform.position += Vector3.up;
 			}
 		}
-		
+
 		private ushort GetTopVoxelHeight(ushort x, ushort z)
 		{
 			var y = (ushort)(_mapProvider.Map.CurrentValue.Height - 1);
@@ -121,7 +131,6 @@ namespace GamePlay
 				{
 					return y;
 				}
-
 			} while (y > 0);
 
 			throw new InvalidOperationException($"Couldn't find top voxel at x={x}, z={z}");
@@ -131,16 +140,6 @@ namespace GamePlay
 		{
 			Gizmos.color = Color.yellow;
 			Gizmos.DrawWireCube(Bounds.center, Bounds.size);
-		}
-
-		public Sprite MiniMapImage => miniMapImage;
-		public override Bounds Bounds => new Bounds(localBounds.center + transform.position, localBounds.size);
-		public bool IsLanded { get; private set; }
-		public Observable<Unit> PickedUp => _pickedUp;
-
-		protected virtual void OnPickUp(Character receiver)
-		{
-			_audioSender.SendAudio(AudioType.LootBoxPickUp, transform.position);
 		}
 	}
 }

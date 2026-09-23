@@ -3,16 +3,17 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
+
 namespace VoxelMap
 {
 	[BurstCompile]
 	public struct SerializeChunkJob : IJob
 	{
-		[WriteOnly]
-		private NativeList<byte> _buffer;
-		[ReadOnly] 
-		[NativeDisableContainerSafetyRestriction] 
+		[WriteOnly] private NativeList<byte> _buffer;
+
+		[ReadOnly] [NativeDisableContainerSafetyRestriction]
 		private NativeArray<VoxelData>.ReadOnly _voxels;
+
 		private readonly int _chunkIndex;
 		private readonly Color32 _innerColor;
 		private int _coloredStart;
@@ -44,10 +45,12 @@ namespace VoxelMap
 					{
 						WriteColoredRun();
 					}
+
 					if (!IsSolidRunStarted)
 					{
 						_solidStart = i;
 					}
+
 					_solidEnd = i;
 				}
 
@@ -83,10 +86,12 @@ namespace VoxelMap
 			{
 				WriteSolidRun();
 			}
+
 			if (IsColoredRunStarted)
 			{
 				WriteColoredRun();
 			}
+
 			_buffer.Add((byte)MapRun.ChunkEnd);
 		}
 
@@ -105,7 +110,7 @@ namespace VoxelMap
 			_buffer.Add((byte)MapRun.Colored);
 			_buffer.AddInt(_coloredStart);
 			_buffer.AddInt(_coloredEnd);
-			
+
 			for (int i = _coloredStart; i <= _coloredEnd; i++)
 			{
 				int voxelIndex = _chunkIndex * Chunk.ChunkSizeCubed + i;

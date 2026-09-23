@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+
 namespace Data
 {
 	[CreateAssetMenu(fileName = "Blueprint Configure", menuName = "Inventory System/Item Configures/Blueprint Configure")]

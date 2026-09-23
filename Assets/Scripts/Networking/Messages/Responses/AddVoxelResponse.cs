@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using VoxelMap;
+
 namespace Networking.Messages
 {
 	public struct AddedVoxelResponse : IResponse

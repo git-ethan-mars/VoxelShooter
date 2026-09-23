@@ -1,6 +1,7 @@
 using System;
 using GamePlay;
 using UI.Inventory;
+
 namespace UI.InGameUIStates
 {
 	public class DeathMatchState : DefaultState

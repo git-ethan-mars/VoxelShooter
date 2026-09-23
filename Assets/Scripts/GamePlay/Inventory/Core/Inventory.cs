@@ -4,12 +4,16 @@ using Mirror;
 using Networking.Core;
 using R3;
 using UnityEngine;
+
 namespace GamePlay
 {
 	public class Inventory : NetworkBehaviour
 	{
 		private readonly SyncList<InventoryItem> _items = new SyncList<InventoryItem>();
-		[SyncVar(hook = nameof(OnSlotSelected))] private int _activeSlotIndex;
+
+		[SyncVar(hook = nameof(OnSlotSelected))]
+		private int _activeSlotIndex;
+
 		private readonly Subject<(int oldItemIndex, int newItemIndex)> _onSlotSelected = new Subject<(int, int)>();
 		private readonly SyncReactiveProperty<int> _voxelAmount = new SyncReactiveProperty<int>();
 		private readonly SyncReactiveProperty<Color32> _desiredVoxelColor = new SyncReactiveProperty<Color32>();

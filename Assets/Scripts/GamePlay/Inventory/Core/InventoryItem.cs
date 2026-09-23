@@ -12,33 +12,34 @@ namespace GamePlay
 	[SelectionBase]
 	public abstract class InventoryItem : NetworkBehaviour
 	{
-		[field: SerializeField] public MeshFilter[] MeshFilters { get; private set; }
 		[field: SerializeField] private MeshRenderer[] renderers;
-		public abstract ItemType Type { get; }
-		protected InventoryItemConfigure Configure { get; private set; }
-		protected bool IsLocalItem => isOwned;
 		private readonly SyncReactiveProperty<bool> _isSelected = new SyncReactiveProperty<bool>();
+		[field: SerializeField] public MeshFilter[] MeshFilters { get; private set; }
+		public abstract ItemType Type { get; }
 		public bool IsSelected => _isSelected.Value;
-		
+
 		public PlayerId? OwnerId
 		{
-			get 
+			get
 			{
 				if (netIdentity.connectionToClient is null)
 				{
 					return null;
 				}
-			
+
 				return new PlayerId(netIdentity.connectionToClient.connectionId);
 			}
 		}
+
+		protected InventoryItemConfigure Configure { get; private set; }
+		protected bool IsLocalItem => isOwned;
 
 		[Inject]
 		private void Construct(CharacterProvider characterProvider, IStaticDataService staticData)
 		{
 			Configure = staticData.GetItemConfigure<InventoryItemConfigure>(Type);
 		}
-		
+
 		public override void OnStartClient()
 		{
 			((ReactiveProperty<bool>)_isSelected).Where(isSelected => isSelected)
@@ -48,7 +49,7 @@ namespace GamePlay
 				.Subscribe(_ => OnDeselected())
 				.AddTo(this);
 		}
-		
+
 		[Server]
 		public virtual void Select()
 		{

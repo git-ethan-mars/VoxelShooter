@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+
 namespace VoxelMap
 {
 	public struct MapData : IDisposable
@@ -11,8 +12,10 @@ namespace VoxelMap
 		public readonly ushort Width;
 		public readonly ushort Depth;
 		public readonly ushort Height;
+
 		[NativeDisableContainerSafetyRestriction]
 		internal NativeArray<Face> Faces;
+
 		[NativeDisableContainerSafetyRestriction]
 		internal NativeArray<VoxelData> Voxels;
 
@@ -173,8 +176,10 @@ namespace VoxelMap
 			private readonly int _width;
 			private readonly int _depth;
 			private readonly int _height;
+
 			[NativeDisableContainerSafetyRestriction]
 			private readonly NativeArray<VoxelData>.ReadOnly _voxels;
+
 			[NativeDisableContainerSafetyRestriction]
 			private NativeArray<Face>.ReadOnly _faces;
 
@@ -186,7 +191,7 @@ namespace VoxelMap
 				_voxels = mapData.Voxels.AsReadOnly();
 				_faces = mapData.Faces.AsReadOnly();
 			}
-			
+
 			public VoxelData this[ushort x, ushort y, ushort z]
 			{
 				get

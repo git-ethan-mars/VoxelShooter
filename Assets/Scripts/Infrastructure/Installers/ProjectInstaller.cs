@@ -5,6 +5,7 @@ using Services;
 using Services.ServerList;
 using UI;
 using UnityEngine;
+
 namespace Infrastructure.Installers
 {
 	public class ProjectInstaller : MonoBehaviour, IInstaller

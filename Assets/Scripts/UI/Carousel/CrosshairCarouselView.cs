@@ -1,6 +1,7 @@
 using Data;
 using UnityEngine;
 using UnityEngine.UI;
+
 namespace UI.Carousel
 {
 	public class CrosshairCarouselView : CarouselView<CrosshairSprite>

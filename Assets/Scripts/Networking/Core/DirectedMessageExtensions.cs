@@ -3,6 +3,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Mirror;
 using R3;
+
 namespace Networking.Core
 {
 	public static class DirectedMessageExtensions
@@ -13,8 +14,8 @@ namespace Networking.Core
 			return new OfMessageType<TResult>(observable);
 		}
 
-		public static UniTask<DirectedMessage<TResult>> FirstAsync<TResult>(this Observable<DirectedMessage> observable, CancellationToken 
-				cancellationToken = default)
+		public static UniTask<DirectedMessage<TResult>> FirstAsync<TResult>(this Observable<DirectedMessage> observable, CancellationToken
+			cancellationToken = default)
 			where TResult : struct, NetworkMessage
 		{
 			return new OfMessageType<TResult>(observable).FirstAsync(cancellationToken: cancellationToken).AsUniTask();
@@ -49,7 +50,6 @@ namespace Networking.Core
 				if (value.Message is not TResult)
 					return;
 				_observer.OnNext(new DirectedMessage<TResult>(value.Connection, (TResult)value.Message));
-
 			}
 
 			protected override void OnErrorResumeCore(Exception error) => _observer.OnErrorResume(error);

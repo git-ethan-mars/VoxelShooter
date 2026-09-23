@@ -32,7 +32,7 @@ namespace GamePlay
 			{
 				throw new InvalidCastException(nameof(TEntity));
 			}
-			
+
 			return entity;
 		}
 

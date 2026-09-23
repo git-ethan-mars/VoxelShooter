@@ -2,12 +2,11 @@ using Data;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+
 namespace UI
 {
 	public class GameClassInfo : MonoBehaviour
 	{
-		[field: SerializeField] public Button ChooseClassButton { get; private set; }
-		
 		[SerializeField] private TextMeshProUGUI classNameText;
 		[SerializeField] private TextMeshProUGUI healthValueText;
 		[SerializeField] private Image mainWeaponIcon;
@@ -17,6 +16,7 @@ namespace UI
 		[SerializeField] private Image secondaryWeaponProjectileIcon;
 		[SerializeField] private TextMeshProUGUI secondaryWeaponDescription;
 		[SerializeField] private Image meleeWeaponIcon;
+		[field: SerializeField] public Button ChooseClassButton { get; private set; }
 
 		public void SetHealthValue(int health)
 		{

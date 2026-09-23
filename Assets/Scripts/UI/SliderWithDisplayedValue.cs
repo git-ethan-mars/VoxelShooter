@@ -4,14 +4,16 @@ using R3;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+
 namespace UI
 {
 	public class SliderWithDisplayedValue : MonoBehaviour
 	{
-		[SerializeField]
-		private TextMeshProUGUI displayedValue;
-		[SerializeField]
-		private Slider slider;
+		[SerializeField] private TextMeshProUGUI displayedValue;
+
+		[SerializeField] private Slider slider;
+
+		public ReadOnlyReactiveProperty<float> Slider { get; private set; }
 
 		public void Construct(int initializedValue, int minValue, int maxValue)
 		{
@@ -20,10 +22,7 @@ namespace UI
 			slider.minValue = minValue;
 			slider.value = initializedValue;
 			Slider = slider.OnValueChangedAsObservable().ToReadOnlyReactiveProperty().AddTo(this);
-			Slider.Subscribe(value =>
-			{
-				displayedValue.SetText(value.ToString(CultureInfo.InvariantCulture));
-			}).AddTo(this);
+			Slider.Subscribe(value => { displayedValue.SetText(value.ToString(CultureInfo.InvariantCulture)); }).AddTo(this);
 		}
 
 		public void Construct(float initializedValue, float minValue, float maxValue)
@@ -35,12 +34,7 @@ namespace UI
 			Slider = slider.OnValueChangedAsObservable().ToReadOnlyReactiveProperty().AddTo(this);
 			Slider
 				.Select(value => (float)Math.Round(value, 1))
-				.Subscribe(value =>
-				{
-					displayedValue.SetText(value.ToString(CultureInfo.InvariantCulture));
-				}).AddTo(this);
+				.Subscribe(value => { displayedValue.SetText(value.ToString(CultureInfo.InvariantCulture)); }).AddTo(this);
 		}
-
-		public ReadOnlyReactiveProperty<float> Slider { get; private set; }
 	}
 }

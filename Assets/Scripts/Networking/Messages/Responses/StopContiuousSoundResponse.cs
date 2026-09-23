@@ -1,4 +1,5 @@
 using Mirror;
+
 namespace Networking.Messages
 {
 	public struct StopContinuousSoundResponse : NetworkMessage

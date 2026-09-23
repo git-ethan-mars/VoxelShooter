@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using VoxelMap.Data;
 using Environment = VoxelMap.Environment;
+
 namespace Editor
 {
 	public class MapEditorWindow : EditorWindow
@@ -50,7 +51,7 @@ namespace Editor
 			{
 				_serializedObject.ApplyModifiedProperties();
 			}
-			
+
 			DrawColorBlocks();
 			DrawAmbientProperties();
 			DrawWeatherProperty();

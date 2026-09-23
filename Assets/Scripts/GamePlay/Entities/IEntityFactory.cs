@@ -2,6 +2,7 @@
 using Mirror;
 using UnityEngine;
 using VoxelMap.Data;
+
 namespace GamePlay
 {
 	public interface IEntityFactory

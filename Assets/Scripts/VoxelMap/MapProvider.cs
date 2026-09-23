@@ -5,6 +5,7 @@ using Services;
 using UnityEngine;
 using VoxelMap.Data;
 using Object = UnityEngine.Object;
+
 namespace VoxelMap
 {
 	public class MapProvider

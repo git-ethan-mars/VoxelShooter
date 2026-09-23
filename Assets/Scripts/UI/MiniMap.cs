@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using VoxelMap;
 using Image = UnityEngine.UI.Image;
+
 namespace UI
 {
 	public class MiniMap : ListView<Image>
@@ -23,7 +24,7 @@ namespace UI
 		private MapProvider _mapProvider;
 		private CharacterProvider _characterProvider;
 		private EntityContainer _entityContainer;
-		
+
 		private RenderTexture _minimapTexture;
 
 		[Inject]
@@ -42,7 +43,7 @@ namespace UI
 			_minimapTexture.Create();
 			minimapImage.texture = _minimapTexture;
 		}
-		
+
 		private void Update()
 		{
 			if (_characterProvider.Character.Value == null)
@@ -71,7 +72,7 @@ namespace UI
 
 		private void RedrawCursor()
 		{
-			float zAngle = -Mathf.Atan2(_characterProvider.Character.Value.ForwardDirection.x, 
+			float zAngle = -Mathf.Atan2(_characterProvider.Character.Value.ForwardDirection.x,
 				_characterProvider.Character.Value.ForwardDirection.z) * Mathf.Rad2Deg;
 			minimapCursor.transform.rotation = Quaternion.Euler(0, 0, zAngle);
 		}

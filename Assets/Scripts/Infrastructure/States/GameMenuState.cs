@@ -4,6 +4,7 @@ using Services;
 using Services.ServerList;
 using UI;
 using UnityEngine;
+
 namespace Infrastructure.States
 {
 	public class GameMenuState : IState
@@ -36,7 +37,6 @@ namespace Infrastructure.States
 #else
 			gameMenu.JoinServerButtonPressed.Subscribe(OnJoinServerButtonPressed).AddTo(gameMenu);
 #endif
-			
 		}
 
 		public void Exit()

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using GamePlay;
+
 namespace UI.Inventory
 {
 	public class SlotPresenterRegistry : ISlotPresenterRegistry
@@ -22,6 +23,7 @@ namespace UI.Inventory
 				{
 					return creator(item, slotView);
 				}
+
 				currentType = currentType.BaseType;
 			}
 

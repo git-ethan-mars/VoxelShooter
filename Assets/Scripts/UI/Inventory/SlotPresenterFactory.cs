@@ -1,4 +1,5 @@
 using GamePlay;
+
 namespace UI.Inventory
 {
 	public class SlotPresenterFactory : ISlotPresenterFactory
@@ -15,5 +16,4 @@ namespace UI.Inventory
 			return _registry.Create(item, slotView);
 		}
 	}
-
 }

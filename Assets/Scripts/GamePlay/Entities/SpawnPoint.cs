@@ -2,6 +2,7 @@
 using Reflex.Attributes;
 using UnityEngine;
 using VoxelMap;
+
 namespace GamePlay
 {
 	public class SpawnPoint : Entity
@@ -9,6 +10,8 @@ namespace GamePlay
 		[SerializeField] private Bounds localBounds;
 
 		private MapProvider _mapProvider;
+
+		public override Bounds Bounds => new Bounds(localBounds.center + transform.position, localBounds.size);
 
 		[Inject]
 		private void Construct(MapProvider mapProvider, EntityContainer entityContainer)
@@ -42,7 +45,5 @@ namespace GamePlay
 			Gizmos.color = Color.yellow;
 			Gizmos.DrawWireCube(Bounds.center, Bounds.size);
 		}
-
-		public override Bounds Bounds => new Bounds(localBounds.center + transform.position, localBounds.size);
 	}
 }

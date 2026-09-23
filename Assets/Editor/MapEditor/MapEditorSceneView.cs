@@ -25,7 +25,7 @@ namespace Editor
 			_stage = CreateInstance<MapPreviewStage>();
 			StageUtility.GoToStage(_stage, true);
 			_stage.Setup(_mapConfigure);
-			
+
 			FrameSelected();
 			titleContent = new GUIContent(_mapConfigure.name);
 		}

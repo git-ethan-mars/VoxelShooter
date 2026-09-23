@@ -3,6 +3,7 @@ using System.IO;
 using Newtonsoft.Json;
 using R3;
 using UnityEngine;
+
 namespace Services
 {
 	public class JsonToFileStorageService : IStorageService
@@ -19,7 +20,7 @@ namespace Services
 			using (var fileStream = new StreamWriter(path))
 			{
 				fileStream.Write(json);
-			} 
+			}
 		}
 
 		public void Set<T>(T data) where T : ISettingsData
@@ -45,7 +46,7 @@ namespace Services
 					StorageHelper<T>.ReactiveProperty = new ReactiveProperty<T>(data);
 				}
 			}
-			
+
 			return StorageHelper<T>.ReactiveProperty.CurrentValue;
 		}
 

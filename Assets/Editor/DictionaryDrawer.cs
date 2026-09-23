@@ -350,3 +350,5 @@ public class CharacteristicByGameClassDictDrawer : DictionaryDrawer<GameClass, C
 
 [CustomPropertyDrawer(typeof(ItemsByGameClassDict))]
 public class ItemsByGameClassDictDrawer : DictionaryDrawer<GameClass, List<ItemType>> { }*/
+
+

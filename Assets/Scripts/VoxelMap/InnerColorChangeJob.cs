@@ -1,6 +1,7 @@
 using Unity.Burst;
 using Unity.Jobs;
 using UnityEngine;
+
 namespace VoxelMap
 {
 	[BurstCompile]

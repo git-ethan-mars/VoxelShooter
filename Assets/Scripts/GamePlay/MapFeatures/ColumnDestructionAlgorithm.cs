@@ -6,6 +6,7 @@ using Reflex.Attributes;
 using UnityEngine;
 using UnityEngine.Pool;
 using VoxelMap;
+
 namespace GamePlay
 {
 	public class ColumnDestructionAlgorithm : MapFeature
@@ -66,7 +67,7 @@ namespace GamePlay
 				{
 					continue;
 				}
-				
+
 				if (removingPositions[i].y == run.Begin || removingPositions[i].y == run.Begin + run.Length - 1)
 				{
 					var newRun = new Run(run.X, run.Z, removingPositions[i].y == run.Begin ? (ushort)(run.Begin + 1) : run.Begin,
@@ -75,7 +76,7 @@ namespace GamePlay
 					AddRun(newRun);
 				}
 				else
-			 	{
+				{
 					SplitRun(run, removingPositions[i].y, out Run firstRun, out Run secondRun);
 					RemoveRun(run);
 					AddRun(firstRun);
@@ -139,12 +140,12 @@ namespace GamePlay
 				{
 					fallingVoxels.Add(new Voxel(fallingPosition, VoxelData.Air));
 				}
-			
+
 				RemoveRun(deletingRun);
 			}
 
 			if (fallingVoxels.Count > 0)
-			{	
+			{
 				Debug.Log(fallingVoxels.Count);
 				_mapProvider.Map.CurrentValue.SetVoxelsByGlobalPositions(fallingVoxels);
 			}
@@ -161,7 +162,8 @@ namespace GamePlay
 			{
 				var position = new Vector3Ushort(run.X, y, run.Z);
 
-				foreach (Vector3Ushort neighbour in run.IsCreatedByPlayer ? GetConnectedNeighboursWithoutDiagonals(position)
+				foreach (Vector3Ushort neighbour in run.IsCreatedByPlayer
+					         ? GetConnectedNeighboursWithoutDiagonals(position)
 					         : GetConnectedNeighbours(position))
 				{
 					neighbourPositions.Add(neighbour);
@@ -255,8 +257,8 @@ namespace GamePlay
 					{
 						Vector3Ushort position = new Vector3Ushort(x, y, z);
 
-						if (!_mapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(position).IsSolid() || !TryFindRunInColumn(position, out Run 
-							currentRun))
+						if (!_mapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(position).IsSolid() || !TryFindRunInColumn(position, out Run
+							    currentRun))
 						{
 							continue;
 						}
@@ -284,7 +286,7 @@ namespace GamePlay
 				{
 					return false;
 				}
-				
+
 				if (runs[i].Begin + runs[i].Length == voxel.Position.y)
 				{
 					RemoveRun(runs[i]);

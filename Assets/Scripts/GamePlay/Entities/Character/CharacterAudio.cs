@@ -9,7 +9,7 @@ namespace GamePlay
 	public class CharacterAudio : NetworkBehaviour
 	{
 		private const float MoveSpeedThreshold = 1e-3f;
-		
+
 		[SerializeField] private Character character;
 		[SerializeField] private CharacterMovement movement;
 		[SerializeField] private AudioSource stepAudioSource;
@@ -24,6 +24,12 @@ namespace GamePlay
 			_storageService = storageService;
 		}
 
+		public override void OnStartLocalPlayer()
+		{
+			_storageService.Subscribe<VolumeSettingsData>(OnVolumeSettingsChanged)
+				.AddTo(this);
+		}
+
 		private void Start()
 		{
 			character.HealthSystem.Health.Pairwise()
@@ -32,12 +38,6 @@ namespace GamePlay
 				.AddTo(this);
 		}
 
-		public override void OnStartLocalPlayer()
-		{
-			_storageService.Subscribe<VolumeSettingsData>(OnVolumeSettingsChanged)
-				.AddTo(this);
-		}
-		
 		private void Update()
 		{
 			if (movement.GetHorizontalVelocity().magnitude > MoveSpeedThreshold)
@@ -47,6 +47,7 @@ namespace GamePlay
 					EnableStepSound();
 					DisableFootStepInWaterSound();
 				}
+
 				if (movement.State == MovementState.OnWater)
 				{
 					EnableFootStepInWaterSound();
@@ -79,7 +80,7 @@ namespace GamePlay
 			{
 				footStepInWaterAudioSource.Play();
 			}
-			
+
 			footStepInWaterAudioSource.loop = true;
 		}
 

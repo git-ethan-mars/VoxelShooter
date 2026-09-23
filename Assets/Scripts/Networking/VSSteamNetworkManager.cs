@@ -6,6 +6,7 @@ using Services.ServerList;
 using Steamworks;
 using UnityEngine;
 using VoxelMap;
+
 namespace Networking
 {
 	public class VSSteamNetworkManager : VSNetworkManager

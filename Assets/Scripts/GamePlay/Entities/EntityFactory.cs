@@ -4,6 +4,7 @@ using Mirror;
 using Services;
 using UnityEngine;
 using VoxelMap.Data;
+
 namespace GamePlay
 {
 	public class EntityFactory : IEntityFactory
@@ -102,12 +103,12 @@ namespace GamePlay
 				GameClass.Grenadier => _assets.Instantiate(GrenadierPath, position, Quaternion.identity).GetComponent<Character>(),
 				_ => throw new ArgumentOutOfRangeException(nameof(chosenClass))
 			};
-			
+
 			Characteristics characteristics = _staticData.GetCharacteristics(chosenClass);
 			character.Initialize(chosenClass, nickName);
 			character.HealthSystem.Initialize(characteristics.MaxHealth);
 			character.Inventory.Initialize(_itemFactory.CreateItems(chosenClass), characteristics.VoxelsCount);
-			
+
 			return character;
 		}
 

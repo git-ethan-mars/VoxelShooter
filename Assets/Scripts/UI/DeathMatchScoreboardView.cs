@@ -5,13 +5,13 @@ using GamePlay;
 using Mirror;
 using ObservableCollections;
 using UnityEngine;
+
 namespace UI
 {
 	public class DeathMatchScoreboardView : ListView<DeathMatchScoreboardRecord>
 	{
-		[field:SerializeField] public CanvasGroup CanvasGroup { get; private set; }
-
 		private DeathmatchScoreboard _scoreboard;
+		[field: SerializeField] public CanvasGroup CanvasGroup { get; private set; }
 
 		public void Initialize(DeathmatchScoreboard scoreboard)
 		{
@@ -38,7 +38,7 @@ namespace UI
 			}
 
 			var index = 0;
-			
+
 			foreach (var (_, playerData) in _scoreboard.PlayerDataById)
 			{
 				Items[index].NickName.SetText(playerData.NickName);

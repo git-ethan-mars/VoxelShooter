@@ -3,6 +3,7 @@ using GamePlay;
 using R3;
 using UI.Inventory;
 using UnityEngine;
+
 namespace UI.InGameUIStates
 {
 	public class DefaultState : IInGameUIState
@@ -10,9 +11,9 @@ namespace UI.InGameUIStates
 		private readonly CharacterProvider _characterProvider;
 		private readonly Hud _hud;
 		private readonly InventoryView _inventoryView;
-		
+
 		private IDisposable _disposable;
-		
+
 		public DefaultState(CharacterProvider characterProvider, Hud hud, InventoryView inventoryView)
 		{
 			_characterProvider = characterProvider;

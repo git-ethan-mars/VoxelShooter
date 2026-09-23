@@ -4,6 +4,7 @@ using Reflex.Attributes;
 using UnityEngine;
 using UnityEngine.Pool;
 using VoxelMap;
+
 namespace GamePlay
 {
 	public class MapDestruction : MapFeature
@@ -64,10 +65,10 @@ namespace GamePlay
 			}
 
 			HandleVoxels(voxels, constantDamageCalculator);
-			
+
 			var inventory = meleeWeapon.netIdentity.connectionToClient.identity.GetComponent<Character>().Inventory;
 			inventory.VoxelAmount.Value += voxels.Count;
-			
+
 			ListPool<Voxel>.Release(voxels);
 		}
 
@@ -87,7 +88,7 @@ namespace GamePlay
 		{
 			return voxel.Data.IsSolid() && voxel.Position.x < _mapProvider.Map.CurrentValue.Width &&
 			       voxel.Position.y > 0 && voxel.Position.y < _mapProvider.Map.CurrentValue.Height && voxel.Position.z < _mapProvider.Map
-				   .CurrentValue.Depth;
+				       .CurrentValue.Depth;
 		}
 	}
 }

@@ -1,5 +1,6 @@
 using Mirror;
 using UnityEngine;
+
 namespace GamePlay
 {
 	public class FallingDamage : NetworkBehaviour
@@ -10,10 +11,10 @@ namespace GamePlay
 		[SerializeField] private int damagePerMetersPerSecond = 3;
 		[SerializeField] private Rigidbody rigidBody;
 
-		[field: SerializeField] public Entity Entity { get; private set; }
-
 		private float _previousSpeed;
 		private IDamageVisitor _damageVisitor;
+
+		[field: SerializeField] public Entity Entity { get; private set; }
 
 		private void Awake()
 		{

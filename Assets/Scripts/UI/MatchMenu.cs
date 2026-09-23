@@ -11,6 +11,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using VoxelMap;
+
 namespace UI
 {
 	[RequireComponent(typeof(CanvasGroup))]
@@ -20,14 +21,15 @@ namespace UI
 		[SerializeField] private Button resetButton;
 		[SerializeField] private Button applyButton;
 
-		[Header("Game Duration")]
-		[SerializeField] private TextMeshProUGUI gameDuration;
+		[Header("Game Duration")] [SerializeField]
+		private TextMeshProUGUI gameDuration;
+
 		[SerializeField] private Button incrementGameDuration;
 		[SerializeField] private Button decrementGameDuration;
 
-		[Header("Map choice")]
-		[SerializeField] private MapCarouselView mapCarouselView;
-		
+		[Header("Map choice")] [SerializeField]
+		private MapCarouselView mapCarouselView;
+
 		private LobbyBalance _lobbyBalance;
 		private IMapConfigureLoader _mapConfigureLoader;
 
@@ -36,6 +38,9 @@ namespace UI
 		private CarouselPresenter<MapView> _mapCarouselPresenter;
 		private CarouselModel<MapView> _mapCarouselModel;
 		private CancellationTokenSource _cts;
+
+		public Observable<Unit> BackButtonPressed => backButton.onClick.AsObservable();
+		public Observable<GameSettings> ApplyButtonPressed => applyButton.onClick.AsObservable().Select(_ => GetWorldSettings());
 
 		[Inject]
 		private void Construct(IMapConfigureLoader mapConfigureLoader, IStaticDataService staticData)
@@ -52,6 +57,18 @@ namespace UI
 			InitMapChoice();
 		}
 
+		public override void Show()
+		{
+			_cts = new CancellationTokenSource().AddTo(this);
+			EventSystem.current.SetSelectedGameObject(applyButton.gameObject);
+		}
+
+		public override void Hide()
+		{
+			_cts.Cancel();
+			_cts.Dispose();
+		}
+
 		private async void OnNextMapButtonPressed()
 		{
 			await mapCarouselView.PlayMapImageAnimationAsync(false, _cts.Token);
@@ -65,21 +82,6 @@ namespace UI
 		private void OnDestroy()
 		{
 			_mapCarouselPresenter.Dispose();
-		}
-
-		public Observable<Unit> BackButtonPressed => backButton.onClick.AsObservable();
-		public Observable<GameSettings> ApplyButtonPressed => applyButton.onClick.AsObservable().Select(_ => GetWorldSettings());
-
-		public override void Show()
-		{
-			_cts = new CancellationTokenSource().AddTo(this);
-			EventSystem.current.SetSelectedGameObject(applyButton.gameObject);
-		}
-
-		public override void Hide()
-		{
-			_cts.Cancel();
-			_cts.Dispose();
 		}
 
 		private void InitMapChoice()

@@ -3,6 +3,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+
 namespace VoxelMap
 {
 	[BurstCompile]
@@ -11,6 +12,7 @@ namespace VoxelMap
 	{
 		[NativeDisableContainerSafetyRestriction]
 		private NativeArray<Face> _faces;
+
 		[NativeDisableContainerSafetyRestriction]
 		private readonly NativeArray<VoxelData> _voxels;
 
@@ -81,7 +83,7 @@ namespace VoxelMap
 
 				if (CheckLeftFace(x, y, z))
 				{
-					_faces[voxelIndex] |= Face.Left; 
+					_faces[voxelIndex] |= Face.Left;
 					_facesCountPerChunk[chunkIndex]++;
 				}
 			}

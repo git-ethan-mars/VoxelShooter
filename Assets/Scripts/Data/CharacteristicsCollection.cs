@@ -1,5 +1,6 @@
 using Data.SerializableDictionary;
 using UnityEngine;
+
 namespace Data
 {
 	[CreateAssetMenu(fileName = "Characteristics Collection", menuName = "Stats/Characteristics Collection")]

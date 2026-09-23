@@ -4,6 +4,7 @@ using Reflex.Attributes;
 using Services;
 using UnityEngine;
 using VoxelMap;
+
 namespace GamePlay
 {
 	public class CharacterMovement : NetworkBehaviour
@@ -16,7 +17,6 @@ namespace GamePlay
 		[SerializeField] private Character character;
 		[SerializeField] private Rigidbody rigidBody;
 		[SerializeField] private CapsuleCollider hitBox;
-		[field: SerializeField] public Transform ForwardDirectionObject { get; private set; }
 
 		private static readonly Vector3 HorizontalMask = new Vector3(1, 0, 1);
 
@@ -31,6 +31,7 @@ namespace GamePlay
 
 		private float _leftBoarderAngle;
 		private float _rightBoarderAngle;
+		[field: SerializeField] public Transform ForwardDirectionObject { get; private set; }
 
 		public MovementState State { get; private set; }
 
@@ -39,6 +40,11 @@ namespace GamePlay
 		{
 			_inputService = inputService;
 			_mapProvider = mapProvider;
+		}
+
+		public Vector3 GetHorizontalVelocity()
+		{
+			return Vector3.Scale(HorizontalMask, rigidBody.linearVelocity);
 		}
 
 		private void Update()
@@ -66,11 +72,6 @@ namespace GamePlay
 			Tick();
 		}
 
-		public Vector3 GetHorizontalVelocity()
-		{
-			return Vector3.Scale(HorizontalMask, rigidBody.linearVelocity);
-		}
-
 		private bool CanClimb()
 		{
 			Vector3 slidingPosition = transform.position + Sign(_desiredMovementDirection) * hitBox.radius
@@ -80,7 +81,6 @@ namespace GamePlay
 			var slidingVoxel = new Voxel(slidingVoxelPosition, _mapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(slidingVoxelPosition));
 			return slidingVoxel.Data.IsSolid() && !Physics.CheckCapsule(slidingPosition + Vector3.up * (hitBox.radius + Epsilon),
 				slidingPosition + Vector3.up * (hitBox.height - hitBox.radius - Epsilon), hitBox.radius, LayerMasks.BuildMask);
-
 		}
 
 		private bool IsGrounded()
@@ -149,6 +149,7 @@ namespace GamePlay
 						new Vector3(rigidBody.linearVelocity.x / 2, rigidBody.linearVelocity.y, rigidBody.linearVelocity.z / 2);
 				}
 			}
+
 			if (State == MovementState.InAir)
 			{
 				rigidBody.AddForce(GravityScale * Physics.gravity);

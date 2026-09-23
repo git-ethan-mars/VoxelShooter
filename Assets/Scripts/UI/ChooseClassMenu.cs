@@ -5,6 +5,7 @@ using Reflex.Attributes;
 using Services;
 using UnityEngine;
 using UnityEngine.UI;
+
 namespace UI
 {
 	[RequireComponent(typeof(CanvasGroup))]
@@ -12,11 +13,11 @@ namespace UI
 	{
 		[SerializeField] private Button exitButton;
 		[SerializeField] private List<GameClassInfo> gameClassesInfo;
+
+		private IStaticDataService _staticData;
 		[field: SerializeField] public CanvasGroup CanvasGroup { get; private set; }
 		public Observable<GameClass> ChangeClassButtonPressed { get; private set; }
 		public Observable<Unit> ExitButtonPressed { get; private set; }
-
-		private IStaticDataService _staticData;
 
 		[Inject]
 		private void Construct(IStaticDataService staticData)
@@ -26,7 +27,8 @@ namespace UI
 
 		public void Initialize()
 		{
-			GameClass[] playableGameClasses = {
+			GameClass[] playableGameClasses =
+			{
 				GameClass.Builder,
 				GameClass.Sniper,
 				GameClass.Grenadier,
@@ -35,7 +37,7 @@ namespace UI
 
 			ExitButtonPressed = exitButton.onClick.AsObservable();
 			ChangeClassButtonPressed = Observable.Empty<GameClass>();
-			
+
 			for (var i = 0; i < playableGameClasses.Length; i++)
 			{
 				GameClass gameClass = playableGameClasses[i];

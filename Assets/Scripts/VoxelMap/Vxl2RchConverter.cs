@@ -5,6 +5,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Unity.Collections;
 using UnityEngine;
+
 namespace VoxelMap
 {
 	public static class Vxl2RchConverter
@@ -109,6 +110,7 @@ namespace VoxelMap
 					}
 				}
 			}
+
 			return voxels;
 		}
 
@@ -123,24 +125,24 @@ namespace VoxelMap
 			var position = 0;
 			ushort height = 0;
 			for (var y = 0; y < Depth; y++)
-				for (var x = 0; x < Width; x++)
+			for (var x = 0; x < Width; x++)
+			{
+				while (true)
 				{
-					while (true)
+					int number4ByteChunks = data[position];
+					int topColorStart = data[position + 1];
+					int topColorEnd = data[position + 2];
+					height = (ushort)Math.Max(height, topColorEnd + 1);
+					int lengthBottom = topColorEnd - topColorStart + 1;
+					if (number4ByteChunks == 0)
 					{
-						int number4ByteChunks = data[position];
-						int topColorStart = data[position + 1];
-						int topColorEnd = data[position + 2];
-						height = (ushort)Math.Max(height, topColorEnd + 1);
-						int lengthBottom = topColorEnd - topColorStart + 1;
-						if (number4ByteChunks == 0)
-						{
-							position += 4 * (lengthBottom + 1);
-							break;
-						}
-
-						position += data[position] * 4;
+						position += 4 * (lengthBottom + 1);
+						break;
 					}
+
+					position += data[position] * 4;
 				}
+			}
 
 			return height;
 		}

@@ -5,17 +5,17 @@ using Services;
 
 namespace GamePlay
 {
-    public class MachineGun : RangeWeapon
-    {
-        [Inject]
-        private void Construct(IInputService inputService, CameraProvider cameraProvider, NetworkAudioSender audioSender,
-            IStaticDataService staticData)
-        {
-            InputService = inputService;
-            CameraProvider = cameraProvider;
-            AudioSender = audioSender;
-        }
+	public class MachineGun : RangeWeapon
+	{
+		public override ItemType Type => ItemType.MachineGun;
 
-        public override ItemType Type => ItemType.MachineGun;
-    }
+		[Inject]
+		private void Construct(IInputService inputService, CameraProvider cameraProvider, NetworkAudioSender audioSender,
+			IStaticDataService staticData)
+		{
+			InputService = inputService;
+			CameraProvider = cameraProvider;
+			AudioSender = audioSender;
+		}
+	}
 }

@@ -2,14 +2,14 @@
 using Mirror;
 using Networking.Core;
 using R3;
+
 namespace GamePlay
 {
 	public class HealthSystem : NetworkBehaviour
 	{
-		public ReactiveProperty<int> Health => _health;
-		
 		private readonly SyncReactiveProperty<int> _health = new SyncReactiveProperty<int>();
 		private int _maxHealth = 100;
+		public ReactiveProperty<int> Health => _health;
 
 		[Server]
 		public void Initialize(int maxHealth)

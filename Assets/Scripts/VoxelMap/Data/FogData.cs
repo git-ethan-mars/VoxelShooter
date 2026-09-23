@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+
 namespace VoxelMap.Data
 {
 	[Serializable]
@@ -24,7 +25,7 @@ namespace VoxelMap.Data
 
 		public bool Equals(FogData other)
 		{
-			return activated == other.activated && mode == other.mode && color.Equals(other.color) && 
+			return activated == other.activated && mode == other.mode && color.Equals(other.color) &&
 			       startDistance.Equals(other.startDistance) && endDistance.Equals(other.endDistance) &&
 			       density.Equals(other.density);
 		}

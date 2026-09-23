@@ -2,6 +2,7 @@ using System;
 using R3;
 using Services;
 using UnityEngine;
+
 namespace UI.SettingsMenuStates
 {
 	public class VolumeSettingsState : ISettingsMenuState
@@ -48,8 +49,8 @@ namespace UI.SettingsMenuStates
 					.Slider
 					.Select
 						(_ => Unit.Default)).Subscribe(_ => _storageService.Set(new VolumeSettingsData(_masterVolume.Slider.CurrentValue * SliderToAudioListenerValue,
-					_musicVolume.Slider.CurrentValue * SliderToAudioListenerValue,
-					_soundVolume.Slider.CurrentValue * SliderToAudioListenerValue)));
+				_musicVolume.Slider.CurrentValue * SliderToAudioListenerValue,
+				_soundVolume.Slider.CurrentValue * SliderToAudioListenerValue)));
 			_disposable = Disposable.Combine(masterVolumeSubscription, saveVolumeSubscription);
 		}
 

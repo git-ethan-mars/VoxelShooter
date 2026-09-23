@@ -14,19 +14,21 @@ using Reflex.Extensions;
 using Reflex.Injectors;
 using UnityEngine;
 using VoxelMap;
+
 namespace GamePlay
 {
 	public abstract class GameMode
 	{
-		private readonly List<Voxel> _addingVoxels = new List<Voxel>();
-		private readonly List<Vector3Ushort> _removingPositions = new List<Vector3Ushort>();
-
 		protected VSNetworkManager NetworkManager;
 		protected EntityContainer EntityContainer;
 		protected MapProvider MapProvider;
 
 		protected readonly ReactiveProperty<GameState> _gameState = new ReactiveProperty<GameState>(GamePlay.GameState.Loading);
+		private readonly List<Voxel> _addingVoxels = new List<Voxel>();
+		private readonly List<Vector3Ushort> _removingPositions = new List<Vector3Ushort>();
 		public GameSettings GameSettings { get; private set; }
+
+		public ReadOnlyReactiveProperty<GameState> GameState => _gameState;
 
 		public virtual async UniTask Start(GameSettings gameSettings)
 		{
@@ -82,6 +84,44 @@ namespace GamePlay
 			}
 		}
 
+		public virtual async UniTask LoadMapAsync(string mapName)
+		{
+			MapData mapData = await MapDataReader.ReadFromFileAsync(mapName);
+			await MapProvider.LoadMap(mapData, mapName);
+
+			MapProvider.Map.CurrentValue.AddFeature<MapBuilding>();
+			MapProvider.Map.CurrentValue.AddFeature<MapDestruction>();
+			MapProvider.Map.CurrentValue.AddFeature<VoxelHealthSystem>();
+			MapProvider.Map.CurrentValue.AddFeature<MapUpdateSender>();
+
+			GameObjectInjector.InjectObject(MapProvider.Map.CurrentValue.gameObject,
+				MapProvider.Map.CurrentValue.gameObject.scene.GetSceneContainer());
+		}
+
+		protected virtual void OnAddPlayer(NetworkConnectionToClient connectionToClient, string nickName, Texture2D avatar)
+		{
+		}
+
+		protected virtual void OnRemovePlayer(NetworkConnectionToClient connection)
+		{
+		}
+
+		protected virtual void CleanUp()
+		{
+			foreach (NetworkConnectionToClient connection in NetworkServer.connections.Values)
+			{
+				if (connection != NetworkServer.localConnection)
+				{
+					NetworkServer.SetClientNotReady(connection);
+				}
+			}
+
+			foreach (Entity entity in EntityContainer.GetEntitiesByType<Entity>())
+			{
+				NetworkServer.Destroy(entity.gameObject);
+			}
+		}
+
 		private async UniTask OnMapChanged()
 		{
 			_gameState.Value = GamePlay.GameState.Loading;
@@ -126,41 +166,6 @@ namespace GamePlay
 			}
 
 			await tsc.Task.AttachExternalCancellation(cancellationToken);
-		}
-
-		public ReadOnlyReactiveProperty<GameState> GameState => _gameState;
-
-		protected virtual void OnAddPlayer(NetworkConnectionToClient connectionToClient, string nickName, Texture2D avatar) {}
-		protected virtual void OnRemovePlayer(NetworkConnectionToClient connection) {}
-
-		protected virtual void CleanUp()
-		{
-			foreach (NetworkConnectionToClient connection in NetworkServer.connections.Values)
-			{
-				if (connection != NetworkServer.localConnection)
-				{
-					NetworkServer.SetClientNotReady(connection);
-				}
-			}
-
-			foreach (Entity entity in EntityContainer.GetEntitiesByType<Entity>())
-			{
-				NetworkServer.Destroy(entity.gameObject);
-			}
-		}
-
-		public virtual async UniTask LoadMapAsync(string mapName)
-		{
-			MapData mapData = await MapDataReader.ReadFromFileAsync(mapName);
-			await MapProvider.LoadMap(mapData, mapName);
-
-			MapProvider.Map.CurrentValue.AddFeature<MapBuilding>();
-			MapProvider.Map.CurrentValue.AddFeature<MapDestruction>();
-			MapProvider.Map.CurrentValue.AddFeature<VoxelHealthSystem>();
-			MapProvider.Map.CurrentValue.AddFeature<MapUpdateSender>();
-
-			GameObjectInjector.InjectObject(MapProvider.Map.CurrentValue.gameObject,
-				MapProvider.Map.CurrentValue.gameObject.scene.GetSceneContainer());
 		}
 	}
 }

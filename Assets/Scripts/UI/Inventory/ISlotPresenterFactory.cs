@@ -1,4 +1,5 @@
 using GamePlay;
+
 namespace UI.Inventory
 {
 	public interface ISlotPresenterFactory

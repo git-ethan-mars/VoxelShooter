@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using UnityEngine;
+
 namespace Services
 {
 	public class VideoSettingsData : ISettingsData

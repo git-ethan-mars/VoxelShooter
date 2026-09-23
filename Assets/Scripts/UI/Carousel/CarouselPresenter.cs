@@ -1,5 +1,6 @@
 using System;
 using R3;
+
 namespace UI.Carousel
 {
 	public class CarouselPresenter<T> : IDisposable

@@ -3,6 +3,7 @@ using Data;
 using Reflex.Extensions;
 using Reflex.Injectors;
 using UnityEngine.SceneManagement;
+
 namespace GamePlay
 {
 	public class GameModeFactory

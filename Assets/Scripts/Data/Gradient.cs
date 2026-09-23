@@ -1,15 +1,14 @@
 using System;
 using UnityEngine;
+
 namespace Data
 {
 	[Serializable]
 	public class Gradient
 	{
-		[SerializeField]
-		private Color start;
+		[SerializeField] public Color end;
 
-		[SerializeField]
-		public Color end;
+		[SerializeField] private Color start;
 
 		public Gradient(Color start, Color end)
 		{

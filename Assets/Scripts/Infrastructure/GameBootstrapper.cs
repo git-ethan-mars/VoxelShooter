@@ -14,8 +14,8 @@ namespace Infrastructure
 	public class GameBootstrapper : MonoBehaviour
 	{
 		private const string LocalBuild = "LOCAL_BUILD";
-		[SerializeField]
-		private bool isLocalBuild;
+
+		[SerializeField] private bool isLocalBuild;
 
 		private GameStateMachine _gameStateMachine;
 
@@ -45,6 +45,7 @@ namespace Infrastructure
 				symbols.Add(LocalBuild);
 				PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.Standalone, string.Join(';', symbols));
 			}
+
 			if (!isLocalBuild && initialSymbols.Contains(LocalBuild))
 			{
 				symbols.Remove(LocalBuild);

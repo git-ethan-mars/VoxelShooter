@@ -2,6 +2,7 @@ using Networking;
 using Services.ServerList;
 using Steamworks;
 using UnityEngine;
+
 namespace Infrastructure.States
 {
 	public class JoinSteamLobbyState : IPayloadedState<Server>
@@ -14,19 +15,19 @@ namespace Infrastructure.States
 			_gameStateMachine = gameStateMachine;
 			_networkManager = networkManager;
 		}
-		
+
 		public async void Enter(Server server)
 		{
 			var steamLobby = _networkManager.GetComponent<SteamLobby>();
 			string networkAddress = await steamLobby.JoinLobby(new CSteamID(server.SteamIDLobby));
-			
+
 			if (string.IsNullOrEmpty(networkAddress))
 			{
 				Debug.Log("Wrong network address");
 				_gameStateMachine.Enter<GameMenuState>();
 				return;
 			}
-			
+
 			_networkManager.networkAddress = networkAddress;
 			_gameStateMachine.Enter<InitializeClientState>();
 		}

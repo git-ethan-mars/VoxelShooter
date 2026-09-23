@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.Rendering;
+
 namespace VoxelMap.Data
 {
 	[Serializable]
@@ -23,7 +24,7 @@ namespace VoxelMap.Data
 
 		public bool Equals(AmbientData other)
 		{
-			return mode == other.mode && skyColor.Equals(other.skyColor) && equatorColor.Equals(other.equatorColor) 
+			return mode == other.mode && skyColor.Equals(other.skyColor) && equatorColor.Equals(other.equatorColor)
 			       && groundColor.Equals(other.groundColor) && intensity.Equals(other.intensity);
 		}
 

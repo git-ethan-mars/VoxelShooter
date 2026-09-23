@@ -2,7 +2,7 @@ namespace Data
 {
 	public enum AudioType
 	{
-		AssaultRifleReload,	
+		AssaultRifleReload,
 		AssaultRifleShoot,
 		DrillHit,
 		DrillLauncherReload,

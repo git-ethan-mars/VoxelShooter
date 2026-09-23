@@ -1,5 +1,6 @@
 using Data;
 using Mirror;
+
 namespace Networking.Messages
 {
 	public struct DynamicAudioResponse : IResponse

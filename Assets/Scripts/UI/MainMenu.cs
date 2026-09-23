@@ -1,22 +1,15 @@
 using R3;
 using UnityEngine;
 using UnityEngine.UI;
+
 namespace UI
 {
 	public class MainMenu : BaseMenu
 	{
+		[SerializeField] private Button exitButton;
 		[field: SerializeField] public Button CreateMatchButton { get; private set; }
 		[field: SerializeField] public Button JoinMatchButton { get; private set; }
 		[field: SerializeField] public Button SettingsButton { get; private set; }
-		[SerializeField] private Button exitButton;
-
-		private void OnEnable()
-		{
-			CreateMatchButtonPressed = CreateMatchButton.onClick.AsObservable();
-			JoinButtonPressed = JoinMatchButton.onClick.AsObservable();
-			SettingsButtonPressed = SettingsButton.onClick.AsObservable();
-			ExitButtonPressed = exitButton.onClick.AsObservable();
-		}
 
 		public Observable<Unit> CreateMatchButtonPressed { get; private set; }
 		public Observable<Unit> JoinButtonPressed { get; private set; }
@@ -29,6 +22,14 @@ namespace UI
 
 		public override void Hide()
 		{
+		}
+
+		private void OnEnable()
+		{
+			CreateMatchButtonPressed = CreateMatchButton.onClick.AsObservable();
+			JoinButtonPressed = JoinMatchButton.onClick.AsObservable();
+			SettingsButtonPressed = SettingsButton.onClick.AsObservable();
+			ExitButtonPressed = exitButton.onClick.AsObservable();
 		}
 	}
 }

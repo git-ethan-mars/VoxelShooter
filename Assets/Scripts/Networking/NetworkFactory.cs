@@ -1,5 +1,6 @@
 using Reflex.Core;
 using Services;
+
 namespace Networking
 {
 	public class NetworkFactory : INetworkFactory

@@ -6,6 +6,7 @@ using R3;
 using Reflex.Attributes;
 using Services;
 using UnityEngine;
+
 namespace GamePlay
 {
 	public class RocketLauncher : InventoryItem
@@ -20,6 +21,9 @@ namespace GamePlay
 		public ReactiveProperty<int> Amount => _amount;
 		public ReactiveProperty<int> ChargedRockets => _chargedRockets;
 
+		public override ItemType Type => ItemType.RocketLauncher;
+		private new RocketLauncherConfigure Configure => base.Configure as RocketLauncherConfigure;
+
 		[Inject]
 		private void Construct(IInputService inputService, IEntityFactory entityFactory, CameraProvider cameraProvider,
 			IStaticDataService staticData)
@@ -28,9 +32,6 @@ namespace GamePlay
 			_entityFactory = entityFactory;
 			_cameraProvider = cameraProvider;
 		}
-
-		public override ItemType Type => ItemType.RocketLauncher;
-		private new RocketLauncherConfigure Configure => base.Configure as RocketLauncherConfigure;
 
 		public override void OnStartServer()
 		{

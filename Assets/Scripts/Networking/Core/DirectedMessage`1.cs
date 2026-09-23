@@ -1,4 +1,5 @@
 using Mirror;
+
 namespace Networking.Core
 {
 	public class DirectedMessage<TMessage> : DirectedMessage where TMessage : struct, NetworkMessage

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
+
 namespace VoxelMap.Data
 {
 	[CreateAssetMenu]
@@ -14,8 +15,7 @@ namespace VoxelMap.Data
 		[field: SerializeField]
 		public Color32 WaterColor { get; private set; }
 
-		[field: SerializeField]
-		public Color32 InnerColor { get; private set; }
+		[field: SerializeField] public Color32 InnerColor { get; private set; }
 
 		[field: Header("Lighting")]
 		[field: SerializeField]
@@ -37,6 +37,5 @@ namespace VoxelMap.Data
 		[field: Header("Spawn points")]
 		[field: SerializeField]
 		public List<SpawnPointData> SpawnPoints { get; set; } = new List<SpawnPointData>();
-
 	}
 }

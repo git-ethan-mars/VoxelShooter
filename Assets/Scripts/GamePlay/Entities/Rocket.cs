@@ -3,17 +3,19 @@ using Reflex.Attributes;
 using Services;
 using UnityEngine;
 using VoxelMap;
+
 namespace GamePlay
 {
 	public class Rocket : Explosive
 	{
-		public override ExplosiveType Type => ExplosiveType.Rocket;
-
 		[SerializeField] private Rigidbody rigidBody;
 		[SerializeField] private BoxCollider boxCollider;
 
 		private RocketLauncherConfigure _configure;
 		private IParticleFactory _particleFactory;
+		public override ExplosiveType Type => ExplosiveType.Rocket;
+
+		public override Bounds Bounds => boxCollider.bounds;
 
 		[Inject]
 		private void Construct(MapProvider mapProvider, IParticleFactory particleFactory, IStaticDataService staticData,
@@ -38,7 +40,5 @@ namespace GamePlay
 				_configure.ExplosionData.radius);
 			Destroy(gameObject);
 		}
-
-		public override Bounds Bounds => boxCollider.bounds;
 	}
 }

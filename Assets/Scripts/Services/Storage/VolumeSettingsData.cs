@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+
 namespace Services
 {
 	public class VolumeSettingsData : ISettingsData

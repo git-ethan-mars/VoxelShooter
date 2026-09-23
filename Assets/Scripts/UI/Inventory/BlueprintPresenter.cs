@@ -3,6 +3,7 @@ using GamePlay;
 using R3;
 using Services;
 using UnityEngine;
+
 namespace UI.Inventory
 {
 	public class BlueprintPresenter : SlotPresenter<Blueprint>
@@ -12,7 +13,7 @@ namespace UI.Inventory
 
 		private IDisposable _disposable;
 		private Sprite _projectileIcon;
-		
+
 		public BlueprintPresenter(IStaticDataService staticData, CharacterProvider characterProvider,
 			UIProvider uiProvider, Blueprint blueprint, SlotView slotView)
 			: base(staticData, blueprint, slotView)

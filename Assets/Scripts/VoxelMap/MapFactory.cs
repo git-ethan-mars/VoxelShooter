@@ -6,6 +6,7 @@ using VoxelMap.Data;
 using Object = UnityEngine.Object;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
+
 namespace VoxelMap
 {
 	internal class MapFactory

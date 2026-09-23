@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Data;
 using Mirror;
+
 namespace Networking.Messages
 {
 	public struct ScoreboardResponse : NetworkMessage

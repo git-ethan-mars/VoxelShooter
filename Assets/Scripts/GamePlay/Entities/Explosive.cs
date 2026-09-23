@@ -8,23 +8,22 @@ namespace GamePlay
 {
 	public abstract class Explosive : Entity
 	{
-		public abstract ExplosiveType Type { get; }
-		
 		protected MapProvider MapProvider;
-		
+		public abstract ExplosiveType Type { get; }
+
 		public PlayerId? OwnerId
 		{
-			get 
+			get
 			{
 				if (netIdentity.connectionToClient is null)
 				{
 					return null;
 				}
-			
+
 				return new PlayerId(netIdentity.connectionToClient.connectionId);
 			}
 		}
-		
+
 		protected void Explode(ExplosionData explosionData)
 		{
 			if (MapProvider.Map.CurrentValue.TryGetFeature(out MapDestruction mapDestruction))

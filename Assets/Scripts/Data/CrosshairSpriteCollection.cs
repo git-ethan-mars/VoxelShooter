@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+
 namespace Data
 {
 	[CreateAssetMenu(fileName = "Crosshair Sprites Collection", menuName = "Sprites/CrosshairSpriteCollection")]

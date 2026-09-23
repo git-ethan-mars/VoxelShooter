@@ -1,5 +1,6 @@
 using GamePlay;
 using Services;
+
 namespace UI.Inventory
 {
 	public class MeleeWeaponPresenter : SlotPresenter<MeleeWeapon>
@@ -11,18 +12,18 @@ namespace UI.Inventory
 		{
 			_hud = uiProvider.Hud;
 		}
-		
+
 		public override void Select()
 		{
 			base.Select();
-			
+
 			_hud.SetCrosshairVisibility(true);
 		}
 
 		public override void Deselect()
 		{
 			base.Deselect();
-			
+
 			_hud.SetCrosshairVisibility(false);
 		}
 	}

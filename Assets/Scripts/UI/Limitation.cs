@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using R3;
 using UnityEngine;
+
 namespace UI
 {
 	public sealed class Limitation : ReactiveProperty<int>
@@ -16,15 +17,15 @@ namespace UI
 			OnValueChanging(ref GetValueRef());
 		}
 
+		public void Reset()
+		{
+			Value = _minValue;
+		}
+
 		protected override void OnValueChanging(ref int value)
 		{
 			base.OnValueChanging(ref value);
 			value = Mathf.Clamp(value, _minValue, _maxValue);
-		}
-
-		public void Reset()
-		{
-			Value = _minValue;
 		}
 	}
 }

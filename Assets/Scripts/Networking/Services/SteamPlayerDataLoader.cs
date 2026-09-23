@@ -2,6 +2,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using Steamworks;
 using UnityEngine;
+
 namespace Networking
 {
 	public class SteamPlayerDataLoader : IPlayerDataLoader, IDisposable
@@ -29,10 +30,15 @@ namespace Networking
 			{
 				return ReadPlayerAvatar(imageHandle);
 			}
-			
+
 			return await _taskCancellationSource.Task;
 		}
-		
+
+		public void Dispose()
+		{
+			_avatarLoaded?.Dispose();
+		}
+
 		private Texture2D ReadPlayerAvatar(int imageHandle)
 		{
 			if (!SteamUtils.GetImageSize(imageHandle, out uint avatarWidth, out uint avatarHeight))
@@ -46,21 +52,17 @@ namespace Networking
 			{
 				Debug.Log("Can't download avatar");
 			}
+
 			var texture = new Texture2D((int)avatarWidth, (int)avatarHeight, TextureFormat.RGBA32, false, true);
 			texture.LoadRawTextureData(avatarBuffer);
 			texture.Apply();
 			return texture;
 		}
-		
+
 		private void OnPlayerAvatarDownloaded(AvatarImageLoaded_t avatarImageResult)
 		{
 			var texture = ReadPlayerAvatar(avatarImageResult.m_iImage);
 			_taskCancellationSource.TrySetResult(texture);
-		}
-
-		public void Dispose()
-		{
-			_avatarLoaded?.Dispose();
 		}
 	}
 }

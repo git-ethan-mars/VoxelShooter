@@ -1,4 +1,5 @@
 using Services;
+
 namespace UI.InGameUIStates
 {
 	public class SettingsMenuState : IInGameUIState
@@ -15,7 +16,7 @@ namespace UI.InGameUIStates
 		public void Enter()
 		{
 			_inputService.Disable();
-			
+
 			_settingsMenu.CanvasGroup.alpha = 1;
 			_settingsMenu.CanvasGroup.interactable = true;
 			_settingsMenu.CanvasGroup.blocksRaycasts = true;
@@ -25,7 +26,7 @@ namespace UI.InGameUIStates
 		public void Exit()
 		{
 			_inputService.Enable();
-			
+
 			_settingsMenu.CanvasGroup.alpha = 0;
 			_settingsMenu.CanvasGroup.interactable = false;
 			_settingsMenu.CanvasGroup.blocksRaycasts = false;

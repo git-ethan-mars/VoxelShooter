@@ -5,6 +5,7 @@ using Reflex.Attributes;
 using Services;
 using UnityEngine;
 using UnityEngine.UI;
+
 namespace UI
 {
 	public class PaletteView : ListView<PaletteElementView>
@@ -53,7 +54,7 @@ namespace UI
 				_cts.Cancel();
 				_cts.Dispose();
 			}
-			
+
 			_selectedElement = Items[index];
 			Character character = _characterProvider.Character.Value;
 
@@ -72,14 +73,17 @@ namespace UI
 			{
 				_rectPalette.MovePointerUp();
 			}
+
 			if (_inputService.IsDownArrowButtonDown())
 			{
 				_rectPalette.MovePointerDown();
 			}
+
 			if (_inputService.IsRightArrowButtonDown())
 			{
 				_rectPalette.MovePointerRight();
 			}
+
 			if (_inputService.IsLeftArrowButtonDown())
 			{
 				_rectPalette.MovePointerLeft();

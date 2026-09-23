@@ -1,4 +1,5 @@
 ﻿using VoxelMap;
+
 namespace GamePlay
 {
 	public class ConstantDamageCalculator : IVoxelDamageCalculator

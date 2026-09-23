@@ -1,4 +1,5 @@
 using UnityEngine;
+
 namespace Networking.Messages
 {
 	public struct AuthenticationRequest : IRequest

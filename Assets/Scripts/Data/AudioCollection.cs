@@ -1,5 +1,6 @@
 using Data.SerializableDictionary;
 using UnityEngine;
+
 namespace Data
 {
 	[CreateAssetMenu(fileName = "Audio Collection", menuName = "Project Audio/Audio Collection")]

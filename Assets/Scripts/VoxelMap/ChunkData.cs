@@ -1,4 +1,5 @@
 using System;
+
 namespace VoxelMap
 {
 	public readonly struct ChunkData

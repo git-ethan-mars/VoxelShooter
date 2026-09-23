@@ -4,13 +4,14 @@ using Networking.Messages;
 using R3;
 using Reflex.Attributes;
 using VoxelMap;
+
 namespace GamePlay
 {
 	public class MapUpdateSender : MapFeature
 	{
 		private MapProvider _mapProvider;
 		private VSNetworkManager _networkManager;
-		
+
 		private readonly List<Voxel> _addedVoxels = new List<Voxel>();
 		private readonly List<Vector3Ushort> _removedPositions = new List<Vector3Ushort>();
 
@@ -34,6 +35,7 @@ namespace GamePlay
 				_networkManager.SendResponseToAll(new AddedVoxelResponse(_addedVoxels));
 				_addedVoxels.Clear();
 			}
+
 			if (_removedPositions.Count > 0)
 			{
 				_networkManager.SendResponseToAll(new RemovedPositionResponse(_removedPositions));
@@ -51,5 +53,4 @@ namespace GamePlay
 			_removedPositions.AddRange(removedVoxels);
 		}
 	}
-
 }

@@ -3,6 +3,7 @@ using Mirror;
 using Reflex.Attributes;
 using Services;
 using UnityEngine;
+
 namespace GamePlay
 {
 	public class Character : Entity
@@ -23,6 +24,8 @@ namespace GamePlay
 		public Vector3 ForwardDirection => Vector3.ProjectOnPlane(movement.ForwardDirectionObject.position - transform.position, Vector3.up);
 		public string NickName => _nickName;
 
+		public override Bounds Bounds => new Bounds(transform.position + localBounds.center, localBounds.size);
+
 		[Inject]
 		private void Construct(IStaticDataService staticData, CharacterProvider characterProvider,
 			EntityContainer entityContainer)
@@ -31,7 +34,7 @@ namespace GamePlay
 			_characterProvider = characterProvider;
 			EntityContainer = entityContainer;
 		}
-		
+
 		[Server]
 		public void Initialize(GameClass gameClass, string nickName)
 		{
@@ -42,7 +45,7 @@ namespace GamePlay
 		public override void OnStartClient()
 		{
 			base.OnStartClient();
-			
+
 			Characteristics = _staticData.GetCharacteristics(_gameClass);
 			name = $"{Id} [CLASS: {_gameClass}]";
 		}
@@ -51,7 +54,7 @@ namespace GamePlay
 		{
 			_characterProvider.Character.Value = this;
 		}
-		
+
 		public override void OnStopLocalPlayer()
 		{
 			_characterProvider.Character.Value = null;
@@ -62,7 +65,5 @@ namespace GamePlay
 			Gizmos.color = Color.yellow;
 			Gizmos.DrawWireCube(Bounds.center, Bounds.size);
 		}
-
-		public override Bounds Bounds => new Bounds(transform.position + localBounds.center, localBounds.size);
 	}
 }

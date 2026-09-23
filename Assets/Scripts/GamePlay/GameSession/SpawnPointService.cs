@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using VoxelMap;
 using VoxelMap.Data;
+
 namespace GamePlay
 {
 	public class SpawnPointService
@@ -60,7 +61,7 @@ namespace GamePlay
 			{
 				spawnPosition = _spawnPoints[Random.Range(0, _spawnPoints.Count)].transform.position;
 			}
-			
+
 			return spawnPosition;
 		}
 	}

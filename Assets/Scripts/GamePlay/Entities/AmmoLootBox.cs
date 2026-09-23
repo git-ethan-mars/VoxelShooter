@@ -24,7 +24,7 @@ namespace GamePlay
 						rocketLauncher.Amount.Value += 1;
 						break;
 				}
-			} 
+			}
 		}
 	}
 }

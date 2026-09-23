@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Unity.Collections;
+
 namespace VoxelMap
 {
 	public static class MapDataReader
@@ -15,7 +16,7 @@ namespace VoxelMap
 				.Union(Directory.GetFiles(Constants.MapFolderPath, $"*{Constants.VxlExtension}"))
 				.Select(Path.GetFileNameWithoutExtension).ToList();
 		}
-		
+
 		public static MapData ReadFromFile(string mapName)
 		{
 			string rchFilePath = Path.Combine(Constants.MapFolderPath, $"{mapName}{Constants.RchExtension}");
@@ -30,12 +31,12 @@ namespace VoxelMap
 			{
 				return Vxl2RchConverter.LoadVxl(vxlFilePath);
 			}
-			
+
 			var voxels = new NativeArray<VoxelData>(16777216, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
 			var mapData = new MapData(voxels, 512, 64, 512);
-			return mapData; 
+			return mapData;
 		}
-		
+
 		public static async UniTask<MapData> ReadFromFileAsync(string mapName, CancellationToken token = default)
 		{
 			string rchFilePath = Path.Combine(Constants.MapFolderPath, $"{mapName}{Constants.RchExtension}");

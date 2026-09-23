@@ -7,13 +7,14 @@ using Reflex.Attributes;
 using Services;
 using TMPro;
 using UnityEngine;
+
 namespace UI
 {
 	public class VotingView : ListView<VotingElement>
 	{
 		[SerializeField] private CanvasGroup canvasGroup;
 		[SerializeField] private TextMeshProUGUI title;
-		
+
 		private IInputService _inputService;
 
 		private Voting _voting;
@@ -47,7 +48,7 @@ namespace UI
 		private void Update()
 		{
 			var i = 0;
-			
+
 			foreach ((string candidate, int _) in _voting.VoteByCandidate)
 			{
 				if (_inputService.IsSlotButtonPressed(i))
@@ -58,7 +59,7 @@ namespace UI
 				i++;
 			}
 		}
-		
+
 		private void OnVotingChanged(in NotifyCollectionChangedEventArgs<KeyValuePair<string, int>> e)
 		{
 			switch (e.Action)

@@ -6,6 +6,7 @@ using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 using VoxelMap.Data;
+
 namespace VoxelMap
 {
 	public class MapBuilder
@@ -107,7 +108,7 @@ namespace VoxelMap
 			calculateFacesJob.ScheduleParallel(_mapData.ChunkCount, 32, default).Complete();
 
 			Chunk[] chunks = GenerateChunks(_mapData, map.transform, faceCountPerChunk);
-			
+
 			Chunk.RegenerateParallel(_mapData, chunks);
 
 			SetupEnvironment(_mapData, map);
@@ -116,7 +117,7 @@ namespace VoxelMap
 			return map;
 		}
 
-		public async UniTask<Map> BuildAsync(MapData mapData, string mapName, 
+		public async UniTask<Map> BuildAsync(MapData mapData, string mapName,
 			IProgress<float> progress = null, CancellationToken token = default)
 		{
 			_mapData = mapData;
@@ -142,11 +143,11 @@ namespace VoxelMap
 			var calculateFacesJob = new CalculateFacesJob(_mapData, faceCountPerChunk);
 			await calculateFacesJob.Schedule(_mapData.ChunkCount, default)
 				.ToUniTask(PlayerLoopTiming.Update);
-			
+
 			token.ThrowIfCancellationRequested();
-			
+
 			Chunk[] chunks = await GenerateChunksAsync(_mapData, map.transform, faceCountPerChunk, progress, token);
-			
+
 			SetupEnvironment(_mapData, map);
 
 			map.Construct(_mapData, mapName, chunks, _mapConfigure);
@@ -197,7 +198,7 @@ namespace VoxelMap
 			{
 				Environment.ApplyAmbientLighting(_ambient);
 			}
-			
+
 			_mapFactory.CreateWater(_mapData, map.transform, _waterColor);
 		}
 

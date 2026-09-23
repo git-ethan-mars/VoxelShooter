@@ -1,4 +1,5 @@
 using UnityEngine;
+
 namespace VoxelMap
 {
 	public static class Constants

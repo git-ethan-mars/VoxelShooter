@@ -1,5 +1,6 @@
 using Unity.Jobs;
 using UnityEngine;
+
 namespace VoxelMap
 {
 	public struct WaterColorChangeJob : IJobFor

@@ -3,6 +3,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using VoxelMap;
 using VoxelMap.Data;
+
 namespace Editor
 {
 	public class MapPreviewStage : PreviewSceneStage
@@ -40,7 +41,7 @@ namespace Editor
 			{
 				DestroyImmediate(_map.gameObject);
 			}
-			
+
 			_editorWindow?.Close();
 		}
 	}

@@ -11,6 +11,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
+
 namespace UI
 {
 	public class GameMenu : MonoBehaviour
@@ -124,8 +125,8 @@ namespace UI
 
 			var nextWindowAnimation = nextWindow.transform.DOLocalMoveX(0, AnimationDuration).ToUniTask();
 			var previousWindowAnimation = previousWindow.transform.DOLocalMoveX(canvas.renderingDisplaySize.x + ((RectTransform)previousWindow
-				.transform).rect.width / 2, 
-					AnimationDuration).ToUniTask();
+					.transform).rect.width / 2,
+				AnimationDuration).ToUniTask();
 			await UniTask.WhenAll(nextWindowAnimation, previousWindowAnimation);
 
 			previousWindow.Hide();

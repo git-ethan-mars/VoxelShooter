@@ -5,6 +5,7 @@ using R3;
 using Reflex.Attributes;
 using UnityEngine;
 using VoxelMap;
+
 namespace GamePlay
 {
 	[SelectionBase]
@@ -13,12 +14,16 @@ namespace GamePlay
 		[SerializeField] private new Collider collider;
 		[SerializeField] private Bounds localBounds;
 
-		[Header("Explosion settings")]
-		[SerializeField] private ExplosionData explosionData;
+		[Header("Explosion settings")] [SerializeField]
+		private ExplosionData explosionData;
+
 		[SerializeField] private int particleCount;
 		[SerializeField] private int particleSpeed;
 
 		private IParticleFactory _particleFactory;
+
+		public override Bounds Bounds => new Bounds(localBounds.center + transform.position, localBounds.size);
+		public override ExplosiveType Type => ExplosiveType.Tombstone;
 
 		[Inject]
 		private void Construct(MapProvider mapProvider, EntityContainer entityContainer, IParticleFactory particleFactory)
@@ -45,7 +50,7 @@ namespace GamePlay
 			{
 				return;
 			}
-			
+
 			Explode(explosionData);
 
 			_particleFactory.CreateRchParticle(transform.position, particleSpeed, particleCount, explosionData.radius);
@@ -66,8 +71,5 @@ namespace GamePlay
 			Gizmos.color = Color.yellow;
 			Gizmos.DrawWireCube(Bounds.center, Bounds.size);
 		}
-
-		public override Bounds Bounds => new Bounds(localBounds.center + transform.position, localBounds.size);
-		public override ExplosiveType Type => ExplosiveType.Tombstone;
 	}
 }

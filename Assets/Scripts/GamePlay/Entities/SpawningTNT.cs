@@ -11,19 +11,23 @@ using TMPro;
 using UnityEngine;
 using VoxelMap;
 using AudioType = Data.AudioType;
+
 namespace GamePlay
 {
 	public class SpawningTNT : Explosive
 	{
 		[SerializeField] private Bounds localBounds;
-		
+
 		[SerializeField] private Canvas canvas;
 		[SerializeField] private TextMeshProUGUI timerText;
 
 		private NetworkAudioSender _audioSender;
 		private IParticleFactory _particleFactory;
 		private TNTConfigure _configure;
-		
+
+		public override Bounds Bounds => new Bounds(transform.position + localBounds.center, localBounds.size);
+		public override ExplosiveType Type => ExplosiveType.Tnt;
+
 		[Inject]
 		private void Construct(IStaticDataService staticData, MapProvider mapProvider, EntityContainer entityContainer,
 			NetworkAudioSender audioSender, IParticleFactory particleFactory)
@@ -43,13 +47,6 @@ namespace GamePlay
 				.Where(_ => IsSuspended())
 				.Subscribe(_ => ExplodeWithFx())
 				.AddTo(this);
-		}
-
-		private bool IsSuspended()
-		{
-			Vector3Ushort voxelPosition = Vector3Ushort.FloorToUshort(transform.position - Vector3.Scale(transform.up, Map.WorldOffset));
-			VoxelData voxelData = MapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(voxelPosition);
-			return !voxelData.IsSolid();
 		}
 
 		[ServerCallback]
@@ -76,14 +73,21 @@ namespace GamePlay
 			ExplodeWithFx();
 		}
 
+		private bool IsSuspended()
+		{
+			Vector3Ushort voxelPosition = Vector3Ushort.FloorToUshort(transform.position - Vector3.Scale(transform.up, Map.WorldOffset));
+			VoxelData voxelData = MapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(voxelPosition);
+			return !voxelData.IsSolid();
+		}
+
 		private void ExplodeWithFx()
 		{
 			Explode(_configure.ExplosionData);
-			
+
 			_particleFactory.CreateRchParticle(transform.position, _configure.ParticleSpeed, _configure.ParticleCount,
 				_configure.ExplosionData.radius);
 			_audioSender.SendAudio(AudioType.TNTExplosion, transform.position);
-			
+
 			Destroy(gameObject);
 		}
 
@@ -92,8 +96,5 @@ namespace GamePlay
 			Gizmos.color = Color.yellow;
 			Gizmos.DrawWireCube(Bounds.center, Bounds.size);
 		}
-
-		public override Bounds Bounds => new Bounds(transform.position + localBounds.center, localBounds.size);
-		public override ExplosiveType Type => ExplosiveType.Tnt;
 	}
 }

@@ -2,6 +2,7 @@ using Reflex.Attributes;
 using UnityEngine;
 using UnityEngine.Pool;
 using VoxelMap;
+
 namespace GamePlay
 {
 	public class MapBuilding : MapFeature, IBuildVisitor

@@ -4,7 +4,7 @@ namespace Networking.Messages
 	{
 		public readonly string MapName;
 		public readonly int Votes;
-		
+
 		public MapVoteUpdateResponse(string mapName, int votes)
 		{
 			MapName = mapName;

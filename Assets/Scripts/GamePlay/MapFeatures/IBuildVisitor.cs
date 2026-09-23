@@ -1,4 +1,5 @@
 using UnityEngine;
+
 namespace GamePlay
 {
 	public interface IBuildVisitor

@@ -1,5 +1,6 @@
 using Services;
 using UnityEngine;
+
 namespace UI.InGameUIStates
 {
 	public class ChooseClassMenuState : IInGameUIState

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using VoxelMap;
+
 namespace GamePlay
 {
 	public class SphereDamageCalculator : IVoxelDamageCalculator

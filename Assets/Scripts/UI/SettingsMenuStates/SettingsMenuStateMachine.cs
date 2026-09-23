@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+
 namespace UI.SettingsMenuStates
 {
 	public class SettingsMenuStateMachine

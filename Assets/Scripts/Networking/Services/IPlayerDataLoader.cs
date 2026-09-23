@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+
 namespace Networking
 {
 	public interface IPlayerDataLoader

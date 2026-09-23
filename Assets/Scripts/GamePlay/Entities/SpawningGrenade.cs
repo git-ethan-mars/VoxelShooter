@@ -10,6 +10,7 @@ using TMPro;
 using UnityEngine;
 using VoxelMap;
 using AudioType = Data.AudioType;
+
 namespace GamePlay
 {
 	public class SpawningGrenade : Explosive
@@ -18,10 +19,13 @@ namespace GamePlay
 		[SerializeField] private BoxCollider boxCollider;
 		[SerializeField] private Canvas canvas;
 		[SerializeField] private TextMeshProUGUI timerText;
-		
+
 		private GrenadeConfigure _configure;
 		private IParticleFactory _particleFactory;
 		private NetworkAudioSender _audioSender;
+
+		public override Bounds Bounds => boxCollider.bounds;
+		public override ExplosiveType Type => ExplosiveType.Grenade;
 
 		[Inject]
 		private void Construct(EntityContainer entityContainer, MapProvider mapProvider, IStaticDataService staticData,
@@ -38,7 +42,7 @@ namespace GamePlay
 		{
 			rigidBody.AddForce(direction * throwForce);
 		}
-		
+
 		[ServerCallback]
 		public async UniTask ExplodeAsync(CancellationToken cancellationToken)
 		{
@@ -66,15 +70,12 @@ namespace GamePlay
 		private void ExplodeWithFx()
 		{
 			Explode(_configure.ExplosionData);
-			
+
 			_particleFactory.CreateRchParticle(transform.position, _configure.ParticleSpeed, _configure.ParticleCount,
 				_configure.ExplosionData.radius);
 			_audioSender.SendAudio(AudioType.GrenadeExplosion, transform.position);
-			
+
 			Destroy(gameObject);
 		}
-
-		public override Bounds Bounds => boxCollider.bounds;
-		public override ExplosiveType Type => ExplosiveType.Grenade;
 	}
 }

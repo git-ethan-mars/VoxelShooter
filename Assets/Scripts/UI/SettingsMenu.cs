@@ -6,26 +6,27 @@ using UI.SettingsMenuStates;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+
 namespace UI
 {
 	public class SettingsMenu : BaseMenu
 	{
-		[Header("Mouse")]
-		[SerializeField] private Toggle mouseSectionToggle;
+		[Header("Mouse")] [SerializeField] private Toggle mouseSectionToggle;
+
 		[SerializeField] private GameObject mouseSection;
 		[SerializeField] private SliderWithDisplayedValue generalSensitivity;
 		[SerializeField] private SliderWithDisplayedValue aimSensitivity;
 		[SerializeField] private CrosshairCarouselView crosshairView;
 
-		[Header("Volume")]
-		[SerializeField] private Toggle volumeSectionToggle;
+		[Header("Volume")] [SerializeField] private Toggle volumeSectionToggle;
+
 		[SerializeField] private GameObject volumeSection;
 		[SerializeField] private SliderWithDisplayedValue masterVolume;
 		[SerializeField] private SliderWithDisplayedValue musicVolume;
 		[SerializeField] private SliderWithDisplayedValue soundVolume;
 
-		[Header("Video")]
-		[SerializeField] private Toggle videoSectionToggle;
+		[Header("Video")] [SerializeField] private Toggle videoSectionToggle;
+
 		[SerializeField] private GameObject videoSection;
 		[SerializeField] private ResolutionCarouselView resolutionView;
 		[SerializeField] private ScreenModeCarouselView screenModeView;

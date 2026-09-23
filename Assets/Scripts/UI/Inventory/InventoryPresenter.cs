@@ -5,6 +5,7 @@ using Reflex.Attributes;
 using Services;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
+
 namespace UI.Inventory
 {
 	public sealed class InventoryPresenter : MonoBehaviour
@@ -20,7 +21,7 @@ namespace UI.Inventory
 		private ISlotPresenterFactory _presenterFactory;
 
 		private GamePlay.Inventory _inventory;
-		
+
 		[Inject]
 		private void Construct(IInputService inputService, CameraProvider cameraProvider, CharacterProvider characterProvider,
 			ISlotPresenterFactory slotPresenterFactory)
@@ -46,9 +47,9 @@ namespace UI.Inventory
 			{
 				return;
 			}
-			
+
 			float scrollSpeed = _inputService.GetScrollSpeed();
-			
+
 			if (scrollSpeed < 0)
 			{
 				_inventory.CmdChangeToPreviousInventorySlot();

@@ -1,14 +1,15 @@
 using System;
 using GamePlay;
 using Services;
+
 namespace UI.Inventory
 {
 	public class SlotPresenter<TItem> : SlotPresenter where TItem : InventoryItem
 	{
 		protected readonly TItem InventoryItem;
-		private readonly SlotView _slotView;
 
 		protected readonly IStaticDataService StaticData;
+		private readonly SlotView _slotView;
 
 		protected SlotPresenter(IStaticDataService staticData, TItem inventoryItem, SlotView slotView)
 		{

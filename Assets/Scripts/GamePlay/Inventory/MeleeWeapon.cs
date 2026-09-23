@@ -8,53 +8,24 @@ using Services;
 using UnityEngine;
 using VoxelMap;
 using AudioType = Data.AudioType;
+
 namespace GamePlay
 {
 	public abstract class MeleeWeapon : InventoryItem
 	{
 		[SerializeField] protected Material wireframeMaterial;
 		[SerializeField] protected Mesh wireframeCube;
-		[SerializeField] private AudioType digSound;
 		[SerializeField] protected AudioType hitSound;
+		[SerializeField] private AudioType digSound;
 
 		private CancellationTokenSource _onChangeSlot;
+
+		private bool _isReady = true;
+		public new MeleeWeaponConfigure Configure => base.Configure as MeleeWeaponConfigure;
 
 		protected IInputService InputService { get; set; }
 		protected CameraProvider CameraProvider { get; set; }
 		protected NetworkAudioSender AudioSender { get; set; }
-		public new MeleeWeaponConfigure Configure => base.Configure as MeleeWeaponConfigure;
-
-		private bool _isReady = true;
-
-		private void Update()
-		{
-			if (!IsLocalItem)
-			{
-				return;
-			}
-
-			if (InputService.IsFirstActionButtonDown())
-			{
-				Hit(CameraProvider.CentredRay, false);
-			}
-			if (Configure.HasStrongHit && InputService.IsSecondActionButtonDown())
-			{
-				Hit(CameraProvider.CentredRay, true);
-			}
-
-			if (CameraProvider.GetBuildRayCastHit(out RaycastHit hit, Configure.Range))
-			{
-				Vector3Ushort voxelPosition = Vector3Ushort.FloorToUshort(hit.point - hit.normal / 2);
-				
-				if (voxelPosition.y == 0)
-				{
-					return;
-				}
-
-				Graphics.DrawMesh(wireframeCube, Matrix4x4.TRS(voxelPosition + Map.WorldOffset, Quaternion.identity, Vector3.one * 1.001f),
-					wireframeMaterial, 0);
-			}
-		}
 
 
 		public override void Select()
@@ -69,6 +40,37 @@ namespace GamePlay
 			base.Deselect();
 			_onChangeSlot?.Cancel();
 			_onChangeSlot?.Dispose();
+		}
+
+		private void Update()
+		{
+			if (!IsLocalItem)
+			{
+				return;
+			}
+
+			if (InputService.IsFirstActionButtonDown())
+			{
+				Hit(CameraProvider.CentredRay, false);
+			}
+
+			if (Configure.HasStrongHit && InputService.IsSecondActionButtonDown())
+			{
+				Hit(CameraProvider.CentredRay, true);
+			}
+
+			if (CameraProvider.GetBuildRayCastHit(out RaycastHit hit, Configure.Range))
+			{
+				Vector3Ushort voxelPosition = Vector3Ushort.FloorToUshort(hit.point - hit.normal / 2);
+
+				if (voxelPosition.y == 0)
+				{
+					return;
+				}
+
+				Graphics.DrawMesh(wireframeCube, Matrix4x4.TRS(voxelPosition + Map.WorldOffset, Quaternion.identity, Vector3.one * 1.001f),
+					wireframeMaterial, 0);
+			}
 		}
 
 		[Command]
@@ -87,7 +89,7 @@ namespace GamePlay
 		private void ScanHit(Ray ray, bool isStrongHit)
 		{
 			bool raycastResult = Physics.Raycast(ray, out RaycastHit rayHit, Configure.Range, LayerMasks.AttackMask);
-			
+
 			if (!raycastResult)
 			{
 				return;
@@ -107,7 +109,7 @@ namespace GamePlay
 			if (damageVisitor != null)
 			{
 				AudioSender.SendAudio(hitSound, rayHit.point);
-				damageVisitor.Visit(this, rayHit);	
+				damageVisitor.Visit(this, rayHit);
 			}
 		}
 

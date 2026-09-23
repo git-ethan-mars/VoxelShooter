@@ -20,7 +20,7 @@ namespace Editor
 			string assetPath = AssetDatabase.GetAssetPath(obj);
 
 			if (AssetDatabase.GetMainAssetTypeAtPath(AssetDatabase.GetAssetPath(entityId)) != typeof(MapConfigure) ||
-			     Path.GetExtension(assetPath) != Constants.RchExtension || Application.isPlaying)
+			    Path.GetExtension(assetPath) != Constants.RchExtension || Application.isPlaying)
 			{
 				return false;
 			}
@@ -58,13 +58,12 @@ namespace Editor
 			texture.Apply();
 
 			return texture;
-
 		}
 
 		private Color32 GetHighestBlockColor(MapData mapData, ushort x, ushort z)
 		{
 			ushort y = (ushort)(mapData.Height - 1);
-			
+
 			if (mapData[x, y, z] != VoxelData.Air)
 			{
 				return mapData[x, y, z].Color;
@@ -73,12 +72,11 @@ namespace Editor
 			do
 			{
 				y--;
-				
+
 				if (mapData[x, y, z] != VoxelData.Air)
 				{
 					return mapData[x, y, z].Color;
 				}
-				
 			} while (y > 0);
 
 			return VoxelData.Air.Color;

@@ -8,24 +8,24 @@ using UI.InGameUIStates;
 using UI.Inventory;
 using UnityEngine;
 using VoxelMap;
+
 namespace UI
 {
 	public abstract class GameModeView : MonoBehaviour
 	{
-		private Dictionary<Type, IInGameUIState> _states;
-		private IInGameUIState _currentState;
-
 		protected IInputService InputService;
 		protected CharacterProvider CharacterProvider;
+		[SerializeField] protected InventoryView inventoryView;
+		private Dictionary<Type, IInGameUIState> _states;
+		private IInGameUIState _currentState;
 		private IStaticDataService _staticData;
 		private IStorageService _storageService;
+		[SerializeField] private CanvasGroup canvasGroup;
 
 		[field: SerializeField] public InGameMenu InGameMenu { get; private set; }
 		[field: SerializeField] public SettingsMenu SettingsMenu { get; private set; }
 		[field: SerializeField] public Hud Hud { get; private set; }
 		[field: SerializeField] public WorldMap WorldMap { get; private set; }
-		[SerializeField] protected InventoryView inventoryView;
-		[SerializeField] private CanvasGroup canvasGroup;
 
 		protected void Construct(IInputService inputService, IStaticDataService staticData,
 			IStorageService storageService, CharacterProvider characterProvider)
@@ -41,26 +41,6 @@ namespace UI
 				[typeof(SettingsMenuState)] = new SettingsMenuState(inputService, SettingsMenu),
 				[typeof(WorldMapState)] = new WorldMapState(WorldMap)
 			};
-		}
-
-		protected virtual void Update()
-		{
-			if (InputService.IsScoreboardButtonUp())
-			{
-				SwitchState<DefaultState>();
-			}
-			if (InputService.IsInGameMenuButtonDown())
-			{
-				SwitchState<InGameMenuState>();
-			}
-			if (InputService.IsMapButtonDown())
-			{
-				SwitchState<WorldMapState>();
-			}
-			if (InputService.IsMapButtonUp())
-			{
-				SwitchState<DefaultState>();
-			}
 		}
 
 		public abstract void OnGameStateChanged(GameState gameState);
@@ -80,6 +60,29 @@ namespace UI
 			_storageService.Subscribe<MouseSettingsData>(OnMouseSettingsChanged)
 				.AddTo(map);
 			WorldMap.OnMapChanged(map);
+		}
+
+		protected virtual void Update()
+		{
+			if (InputService.IsScoreboardButtonUp())
+			{
+				SwitchState<DefaultState>();
+			}
+
+			if (InputService.IsInGameMenuButtonDown())
+			{
+				SwitchState<InGameMenuState>();
+			}
+
+			if (InputService.IsMapButtonDown())
+			{
+				SwitchState<WorldMapState>();
+			}
+
+			if (InputService.IsMapButtonUp())
+			{
+				SwitchState<DefaultState>();
+			}
 		}
 
 		protected void AddState<T>(T state) where T : IInGameUIState

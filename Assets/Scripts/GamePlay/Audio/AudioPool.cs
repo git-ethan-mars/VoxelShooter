@@ -6,11 +6,11 @@ namespace GamePlay.Audio
 {
 	public class AudioPool
 	{
-		private readonly IAssetProvider _assets;
 		private const string AudioSourcePath = "Prefabs/AudioSource";
 		private const string ContainerName = "AudioContainer";
 
 		private const int PoolSize = 100;
+		private readonly IAssetProvider _assets;
 
 		private readonly Stack<AudioSource> _stack = new Stack<AudioSource>(PoolSize);
 		private readonly Transform _container = new GameObject(ContainerName).transform;

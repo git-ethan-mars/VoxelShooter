@@ -6,10 +6,9 @@ namespace GamePlay
 {
 	public abstract class Entity : NetworkBehaviour
 	{
+		protected EntityContainer EntityContainer;
 		public abstract Bounds Bounds { get; }
 		public EntityId Id => new EntityId(netIdentity.netId);
-		
-		protected EntityContainer EntityContainer;
 
 		public override void OnStartClient()
 		{

@@ -1,4 +1,5 @@
 using R3;
+
 namespace GamePlay
 {
 	public class CharacterProvider

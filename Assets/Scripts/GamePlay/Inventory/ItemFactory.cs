@@ -3,6 +3,7 @@ using Data;
 using Mirror;
 using Services;
 using UnityEngine;
+
 namespace GamePlay
 {
 	public class ItemFactory : IItemFactory
@@ -19,7 +20,7 @@ namespace GamePlay
 		public List<InventoryItem> CreateItems(GameClass gameClass)
 		{
 			var items = new List<InventoryItem>();
-			
+
 			foreach (ItemType itemType in _staticData.GetItems(gameClass))
 			{
 				GameObject itemPrefab = _staticData.GetItemPrefab(itemType);

@@ -14,20 +14,24 @@ namespace GamePlay
 {
 	public class Voting
 	{
-		public Observable<bool> IsActivated => _isActivated;
-		public IReadOnlyObservableDictionary<string, int> VoteByCandidate => _voteByCandidate;
-		public Observable<string> Title => _title;
-
 		private readonly VSNetworkManager _networkManager;
 		private readonly ObservableDictionary<string, int> _voteByCandidate = new ObservableDictionary<string, int>();
 		private readonly HashSet<NetworkConnectionToClient> _voted = new HashSet<NetworkConnectionToClient>();
 		private readonly ReactiveProperty<bool> _isActivated = new ReactiveProperty<bool>();
 		private readonly ReactiveProperty<string> _title = new ReactiveProperty<string>();
+		public Observable<bool> IsActivated => _isActivated;
+		public IReadOnlyObservableDictionary<string, int> VoteByCandidate => _voteByCandidate;
+		public Observable<string> Title => _title;
+
+		private Voting(VSNetworkManager networkManager)
+		{
+			_networkManager = networkManager;
+		}
 
 		public static Voting Create(VSNetworkManager networkManager)
 		{
 			var voting = new Voting(networkManager);
-			
+
 			networkManager.MessageReceived.OfMessageType<VoteResponse>()
 				.Subscribe(directedMessage => voting.OnVoteResponse(directedMessage.Message.Title, directedMessage.Message.Variants))
 				.AddTo(networkManager);
@@ -40,12 +44,7 @@ namespace GamePlay
 			return voting;
 		}
 
-		private Voting(VSNetworkManager networkManager)
-		{
-			_networkManager = networkManager;
-		}
-
-		public async UniTask<string> RunVoting(TimeSpan duration, string title, 
+		public async UniTask<string> RunVoting(TimeSpan duration, string title,
 			string[] variants, CancellationToken cancellationToken = default)
 		{
 			_isActivated.Value = true;
@@ -55,7 +54,7 @@ namespace GamePlay
 			_networkManager.SendResponseToAll(response);
 
 			await UniTask.Delay(TimeSpan.FromSeconds(duration.TotalSeconds), cancellationToken: cancellationToken);
-				
+
 			string bestCandidate = null;
 			var maxQuantity = int.MinValue;
 
@@ -99,7 +98,7 @@ namespace GamePlay
 		{
 			_isActivated.Value = true;
 			_title.Value = title;
-			
+
 			foreach (string candidate in candidates)
 			{
 				_voteByCandidate[candidate] = 0;

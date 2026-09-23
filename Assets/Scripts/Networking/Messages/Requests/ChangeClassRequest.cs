@@ -1,4 +1,5 @@
 using Data;
+
 namespace Networking.Messages
 {
 	public struct ChangeGameClassRequest : IRequest

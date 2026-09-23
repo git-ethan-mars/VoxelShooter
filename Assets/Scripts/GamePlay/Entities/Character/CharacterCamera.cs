@@ -4,6 +4,7 @@ using R3;
 using Reflex.Attributes;
 using Services;
 using UnityEngine;
+
 namespace GamePlay
 {
 	public class CharacterCamera : NetworkBehaviour
@@ -12,7 +13,7 @@ namespace GamePlay
 		private const float SensitivityMultiplier = 50.0f;
 
 		[SerializeField] private Transform head;
-		
+
 		private IInputService _inputService;
 		private IStorageService _storageService;
 		private CameraProvider _cameraProvider;
@@ -35,7 +36,7 @@ namespace GamePlay
 			var mouseSettings = _storageService.Load<MouseSettingsData>(IStorageService.MouseSettingsKey);
 			_mouseSensitivity = mouseSettings.GeneralSensitivity;
 			_aimSensitivity = mouseSettings.AimSensitivity;
-			
+
 			_storageService.Subscribe<MouseSettingsData>(OnMouseSettingsChanged)
 				.AddTo(this);
 		}
@@ -57,10 +58,10 @@ namespace GamePlay
 			_yRotation += mouseX;
 			_xRotation -= mouseY;
 			_xRotation = Math.Clamp(_xRotation, -RotationLimit, RotationLimit);
-			
+
 			_cameraProvider.MainCamera.transform.rotation = Quaternion.Euler(_xRotation, _yRotation, 0.0f);
 		}
-		
+
 		private void OnMouseSettingsChanged(MouseSettingsData mouseSettings)
 		{
 			_mouseSensitivity = mouseSettings.GeneralSensitivity;

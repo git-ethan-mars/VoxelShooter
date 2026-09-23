@@ -7,6 +7,7 @@ using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine.Networking;
+
 namespace Services.ServerList
 {
 	public class ServerListService : IServerListService
@@ -42,7 +43,7 @@ namespace Services.ServerList
 				["available_slots"] = availableSlots.ToString(),
 			};
 			string relativeUrl = AddQueryParameters($"{ServersEndpoint}/new", parameters);
-			
+
 			var path = new Uri(BaseUri, relativeUrl);
 
 			UnityWebRequest request = await UnityWebRequest.Get(path).SendWebRequest()
@@ -84,7 +85,7 @@ namespace Services.ServerList
 			request.SetRequestHeader("Authorization", $"Bearer {_token}");
 			await request.SendWebRequest().ToUniTask(cancellationToken: cancellationToken).SuppressCancellationThrow();
 		}
-		
+
 		private string AddQueryParameters(string baseUri, Dictionary<string, string> parameters)
 		{
 			var uriBuilder = new StringBuilder(baseUri);
@@ -94,11 +95,12 @@ namespace Services.ServerList
 				// Use Uri.EscapeDataString to properly URL-encode the keys and values
 				string key = UnityWebRequest.EscapeURL(param.Key);
 				string value = UnityWebRequest.EscapeURL(param.Value);
-            
+
 				uriBuilder.Append(first ? '?' : '&');
 				uriBuilder.AppendFormat("{0}={1}", key, value);
 				first = false;
 			}
+
 			return uriBuilder.ToString();
 		}
 	}

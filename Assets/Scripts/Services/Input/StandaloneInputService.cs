@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+
 namespace Services
 {
 	public class StandaloneInputService : IInputService
@@ -6,6 +7,7 @@ namespace Services
 		private static readonly KeyCode[] BlueprintKeys = { KeyCode.Z, KeyCode.X, KeyCode.C, KeyCode.V };
 
 		private bool _isEnabled;
+
 		public Vector2 Axis => _isEnabled
 			? new Vector2(Input.GetAxisRaw("Vertical"), Input.GetAxisRaw("Horizontal"))
 			: Vector2.zero;
@@ -120,43 +122,52 @@ namespace Services
 			{
 				return false;
 			}
-			
+
 			if (number == 0)
 			{
 				return Input.GetKeyDown(KeyCode.Alpha1);
 			}
+
 			if (number == 1)
 			{
 				return Input.GetKeyDown(KeyCode.Alpha2);
 			}
+
 			if (number == 2)
 			{
 				return Input.GetKeyDown(KeyCode.Alpha3);
 			}
+
 			if (number == 3)
 			{
 				return Input.GetKeyDown(KeyCode.Alpha4);
 			}
+
 			if (number == 4)
 			{
 				return Input.GetKeyDown(KeyCode.Alpha5);
 			}
+
 			if (number == 5)
 			{
 				return Input.GetKeyDown(KeyCode.Alpha6);
 			}
+
 			if (number == 6)
 			{
 				return Input.GetKeyDown(KeyCode.Alpha7);
 			}
+
 			if (number == 7)
 			{
 				return Input.GetKeyDown(KeyCode.Alpha8);
 			}
+
 			if (number == 8)
 			{
 				return Input.GetKeyDown(KeyCode.Alpha9);
 			}
+
 			if (number == 9)
 			{
 				return Input.GetKeyDown(KeyCode.Alpha0);

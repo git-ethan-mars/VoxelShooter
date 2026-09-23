@@ -1,6 +1,7 @@
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
+
 namespace VoxelMap
 {
 	[BurstCompile]
@@ -9,8 +10,7 @@ namespace VoxelMap
 		private NativeReference<Face> _regeneratingRegeneratingNeighbours;
 		private NativeHashMap<int, int> _faceCountChangesByChunk;
 
-		[ReadOnly]
-		private NativeList<Voxel> _voxels;
+		[ReadOnly] private NativeList<Voxel> _voxels;
 
 		private MapData _mapData;
 		private readonly int _chunkIndex;
@@ -99,22 +99,27 @@ namespace VoxelMap
 			{
 				faceCount++;
 			}
+
 			if (FaceExtensions.HasFlag(faces, Face.Bottom))
 			{
 				faceCount++;
 			}
+
 			if (FaceExtensions.HasFlag(faces, Face.Front))
 			{
 				faceCount++;
 			}
+
 			if (FaceExtensions.HasFlag(faces, Face.Back))
 			{
 				faceCount++;
 			}
+
 			if (FaceExtensions.HasFlag(faces, Face.Right))
 			{
 				faceCount++;
 			}
+
 			if (FaceExtensions.HasFlag(faces, Face.Left))
 			{
 				faceCount++;
@@ -129,22 +134,27 @@ namespace VoxelMap
 			{
 				_regeneratingRegeneratingNeighbours.Value |= Face.Left;
 			}
+
 			if (x % Chunk.ChunkSize == Chunk.ChunkSize - 1)
 			{
 				_regeneratingRegeneratingNeighbours.Value |= Face.Right;
 			}
+
 			if (y % Chunk.ChunkSize == 0)
 			{
 				_regeneratingRegeneratingNeighbours.Value |= Face.Bottom;
 			}
+
 			if (y % Chunk.ChunkSize == Chunk.ChunkSize - 1)
 			{
 				_regeneratingRegeneratingNeighbours.Value |= Face.Top;
 			}
+
 			if (z % Chunk.ChunkSize == 0)
 			{
 				_regeneratingRegeneratingNeighbours.Value |= Face.Back;
 			}
+
 			if (z % Chunk.ChunkSize == Chunk.ChunkSize - 1)
 			{
 				_regeneratingRegeneratingNeighbours.Value |= Face.Front;

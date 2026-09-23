@@ -1,4 +1,5 @@
 using UnityEngine;
+
 namespace UI.InGameUIStates
 {
 	public class ScoreboardState : IInGameUIState

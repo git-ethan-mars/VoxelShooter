@@ -17,6 +17,8 @@ namespace GamePlay
 		private CharacterProvider _characterProvider;
 		private MapProvider _mapProvider;
 
+		public override ItemType Type => ItemType.Block;
+
 		[Inject]
 		private void Construct(IInputService inputService, CameraProvider cameraProvider, CharacterProvider characterProvider, MapProvider mapProvider)
 		{
@@ -26,8 +28,6 @@ namespace GamePlay
 			_mapProvider = mapProvider;
 		}
 
-		public override ItemType Type => ItemType.Block;
-		
 		private void Update()
 		{
 			if (!IsLocalItem)
@@ -38,7 +38,7 @@ namespace GamePlay
 			Character character = _characterProvider.Character.Value;
 			float placeDistance = character.Characteristics.PlaceDistance;
 			Color32 voxelColor = character.Inventory.DesiredVoxelColor.Value;
-			
+
 			if (_inputService.IsFirstActionButtonDown())
 			{
 				CmdBuild(_cameraProvider.CentredRay, voxelColor);
@@ -49,7 +49,7 @@ namespace GamePlay
 				var voxelPosition = Vector3Int.FloorToInt(hit.point - hit.normal / 2) + Map.WorldOffset;
 				Graphics.DrawMesh(wireframeCube, Matrix4x4.TRS(voxelPosition, Quaternion.identity, Vector3.one * 1.001f),
 					wireframeMaterial, 0);
-				
+
 				if (_inputService.IsScrollButtonDown())
 				{
 					Vector3Ushort colorPickingPosition = Vector3Ushort.FloorToUshort(hit.point - hit.normal / 2);
@@ -88,7 +88,7 @@ namespace GamePlay
 			}
 
 			var buildVisitor = rayHit.collider.GetComponentInParent<IBuildVisitor>();
-			
+
 			if (buildVisitor != null && buildVisitor.Visit(this, rayHit, voxelColor))
 			{
 				character.Inventory.VoxelAmount.Value -= 1;

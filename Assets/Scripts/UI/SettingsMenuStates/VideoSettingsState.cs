@@ -3,6 +3,7 @@ using R3;
 using Services;
 using UI.Carousel;
 using UnityEngine;
+
 namespace UI.SettingsMenuStates
 {
 	public class VideoSettingsState : ISettingsMenuState

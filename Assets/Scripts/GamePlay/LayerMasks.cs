@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+
 namespace GamePlay
 {
 	public static class LayerMasks

@@ -1,4 +1,5 @@
 ﻿using System;
+
 namespace VoxelMap
 {
 	[Flags]
@@ -12,5 +13,4 @@ namespace VoxelMap
 		Right = 16,
 		Left = 32
 	}
-
 }

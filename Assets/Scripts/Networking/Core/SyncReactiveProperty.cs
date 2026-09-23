@@ -1,10 +1,13 @@
 using System;
 using Mirror;
 using R3;
+
 namespace Networking.Core
 {
 	public class SyncReactiveProperty<T> : SyncObject
 	{
+		private readonly ReactivePropertyWrapper _reactivePropertyWrapper;
+
 		public T Value
 		{
 			get => _reactivePropertyWrapper.Value;
@@ -19,8 +22,6 @@ namespace Networking.Core
 				OnDirty?.Invoke();
 			}
 		}
-
-		private readonly ReactivePropertyWrapper _reactivePropertyWrapper;
 
 		public SyncReactiveProperty()
 		{
@@ -70,11 +71,6 @@ namespace Networking.Core
 		{
 			private readonly Action<T> _onValueChanged;
 
-			public ReactivePropertyWrapper(Action<T> onValueChanged)
-			{
-				_onValueChanged = onValueChanged;
-			}
-
 			public override T Value
 			{
 				get => base.Value;
@@ -83,6 +79,11 @@ namespace Networking.Core
 					base.Value = value;
 					_onValueChanged?.Invoke(value);
 				}
+			}
+
+			public ReactivePropertyWrapper(Action<T> onValueChanged)
+			{
+				_onValueChanged = onValueChanged;
 			}
 
 			public void SetValueWithoutNotify(T value)
