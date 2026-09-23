@@ -1,9 +1,7 @@
-using Data;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.Rendering;
-using VoxelMap;
 using VoxelMap.Data;
 using Environment = VoxelMap.Environment;
 namespace Editor
@@ -11,7 +9,6 @@ namespace Editor
 	public class MapEditorWindow : EditorWindow
 	{
 		private readonly string[] _ambientModes = { "Skybox", "Gradient", "Color" };
-		private readonly string[] _fogModes = { "Linear", "Exponential", "Exponential squared" };
 
 		private ReorderableList _spawnPoints;
 		private SerializedObject _serializedObject;
@@ -56,7 +53,6 @@ namespace Editor
 			
 			DrawColorBlocks();
 			DrawAmbientProperties();
-			DrawFogProperties();
 			DrawWeatherProperty();
 
 			_spawnPoints.DoLayoutList();
@@ -90,51 +86,6 @@ namespace Editor
 			if (EditorGUI.EndChangeCheck())
 			{
 				_serializedObject.ApplyModifiedProperties();
-			}
-		}
-
-		private void DrawFogProperties()
-		{
-			var fogDataProperty = _serializedObject.FindProperty(GetBackingField(nameof(MapConfigure.FogData)));
-			var fogActivatedProperty = fogDataProperty.FindPropertyRelative(nameof(MapConfigure.FogData.activated));
-			EditorGUI.BeginChangeCheck();
-			var isFogActivated =
-				EditorGUILayout.Toggle("Fog", fogActivatedProperty.boolValue);
-
-			fogActivatedProperty.boolValue = isFogActivated;
-			EditorGUI.indentLevel += 1;
-			if (isFogActivated)
-			{
-				var fogColorProperty = fogDataProperty.FindPropertyRelative(nameof(MapConfigure.FogData.color));
-				fogColorProperty.colorValue = EditorGUILayout.ColorField(fogColorProperty.displayName, fogColorProperty.colorValue);
-
-				var fogModeProperty = fogDataProperty.FindPropertyRelative(nameof(MapConfigure.FogData.mode));
-				fogModeProperty.intValue = EditorGUILayout.IntPopup(fogModeProperty.displayName, fogModeProperty.intValue,
-					_fogModes, new[] { 1, 2, 3 });
-
-				if ((FogMode)fogModeProperty.intValue != FogMode.Linear)
-				{
-					var fogDensityProperty = fogDataProperty.FindPropertyRelative(nameof(MapConfigure.FogData.density));
-					fogDensityProperty.floatValue = EditorGUILayout.FloatField(fogDensityProperty.displayName,
-						fogDensityProperty.floatValue);
-				}
-				else
-				{
-					var fogStartDistanceProperty = fogDataProperty.FindPropertyRelative(nameof(MapConfigure.FogData.startDistance));
-					fogStartDistanceProperty.floatValue = EditorGUILayout.FloatField(fogStartDistanceProperty.displayName,
-						fogStartDistanceProperty.floatValue);
-
-					var fogEndDistanceProperty = fogDataProperty.FindPropertyRelative(nameof(MapConfigure.FogData.endDistance));
-					fogEndDistanceProperty.floatValue = EditorGUILayout.FloatField(fogEndDistanceProperty.displayName,
-						fogEndDistanceProperty.floatValue);
-				}
-			}
-
-			EditorGUI.indentLevel -= 1;
-			_serializedObject.ApplyModifiedProperties();
-			if (EditorGUI.EndChangeCheck())
-			{
-				Environment.ApplyFog((FogData)fogDataProperty.managedReferenceValue);
 			}
 		}
 

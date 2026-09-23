@@ -12,8 +12,8 @@ namespace VoxelMap
 	{
 		private const string ChunksContainerName = "Chunks";
 
-		private readonly IMapFactory _mapFactory;
-		private readonly MapData _mapData;
+		private readonly MapFactory _mapFactory = new MapFactory();
+		private MapData _mapData;
 
 		private bool _waterColorChanging;
 		private Color32 _waterColor = VoxelData.Air.Color;
@@ -25,16 +25,9 @@ namespace VoxelMap
 		private List<SpawnPointData> _spawnPoints;
 
 		private AmbientData _ambient;
-		private FogData _fog;
 		private DirectionalLightData _directionalLight;
 		private Material _skybox;
 		private MapConfigure _mapConfigure;
-
-		public MapBuilder(IMapFactory mapFactory, MapData mapData)
-		{
-			_mapData = mapData;
-			_mapFactory = mapFactory;
-		}
 
 		public MapBuilder WithWaterColor(Color32 color)
 		{
@@ -53,12 +46,6 @@ namespace VoxelMap
 		public MapBuilder WithDirectionalLight(DirectionalLightData directionalLightData)
 		{
 			_directionalLight = directionalLightData;
-			return this;
-		}
-
-		public MapBuilder WithFog(FogData fogData)
-		{
-			_fog = fogData;
 			return this;
 		}
 
@@ -87,7 +74,6 @@ namespace VoxelMap
 				.WithInnerColor(mapConfigure.InnerColor)
 				.WithAmbient(mapConfigure.AmbientData)
 				.WithDirectionalLight(mapConfigure.DirectionalLightData)
-				.WithFog(mapConfigure.FogData)
 				.WithSkybox(mapConfigure.SkyboxMaterial)
 				.WithWalls();
 		}
@@ -98,8 +84,9 @@ namespace VoxelMap
 			return this;
 		}
 
-		public Map Build(Transform container = null)
+		public Map Build(MapData mapData, string mapName, Transform container = null)
 		{
+			_mapData = mapData;
 			Map map = _mapFactory.CreateEmptyMap();
 			map.transform.SetParent(container);
 
@@ -125,12 +112,14 @@ namespace VoxelMap
 
 			SetupEnvironment(_mapData, map);
 
-			map.Construct(_mapData, chunks, _mapConfigure);
+			map.Construct(_mapData, mapName, chunks, _mapConfigure);
 			return map;
 		}
 
-		public async UniTask<Map> BuildAsync(IProgress<float> progress = null, CancellationToken token = default)
+		public async UniTask<Map> BuildAsync(MapData mapData, string mapName, 
+			IProgress<float> progress = null, CancellationToken token = default)
 		{
+			_mapData = mapData;
 			Map map = _mapFactory.CreateEmptyMap();
 
 			if (_innerColorChanging)
@@ -160,7 +149,7 @@ namespace VoxelMap
 			
 			SetupEnvironment(_mapData, map);
 
-			map.Construct(_mapData, chunks, _mapConfigure);
+			map.Construct(_mapData, mapName, chunks, _mapConfigure);
 			return map;
 		}
 
@@ -204,15 +193,12 @@ namespace VoxelMap
 				_mapFactory.CreateDirectionalLight(_directionalLight, map.transform);
 			}
 
-			if (!_fog.Equals(default))
-			{
-				Environment.ApplyFog(_fog);
-			}
-
 			if (!_ambient.Equals(default))
 			{
 				Environment.ApplyAmbientLighting(_ambient);
 			}
+			
+			_mapFactory.CreateWater(_mapData, map.transform, _waterColor);
 		}
 
 		private async UniTask<Chunk[]> GenerateChunksAsync(MapData mapData, Transform container, NativeArray<int> faceCountPerChunk,

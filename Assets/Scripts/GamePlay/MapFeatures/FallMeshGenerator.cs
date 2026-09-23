@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using VoxelMap;
-namespace GamePlay.MapFeatures
+namespace GamePlay
 {
 	public class FallMeshGenerator
 	{

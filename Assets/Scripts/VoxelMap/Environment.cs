@@ -18,15 +18,5 @@ namespace VoxelMap
 			RenderSettings.ambientGroundColor = ambientData.groundColor;
 			RenderSettings.ambientIntensity = ambientData.intensity;
 		}
-
-		public static void ApplyFog(FogData fogData)
-		{
-			RenderSettings.fog = fogData.activated;
-			RenderSettings.fogMode = fogData.mode;
-			RenderSettings.fogColor = fogData.color;
-			RenderSettings.fogStartDistance = fogData.startDistance;
-			RenderSettings.fogEndDistance = fogData.endDistance;
-			RenderSettings.fogDensity = fogData.density;
-		}
 	}
 }

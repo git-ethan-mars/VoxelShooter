@@ -4,8 +4,7 @@ using Reflex.Attributes;
 using UnityEngine;
 using UnityEngine.Pool;
 using VoxelMap;
-
-namespace GamePlay.MapFeatures
+namespace GamePlay
 {
 	public class VoxelHealthSystem : MapFeature
 	{
@@ -29,12 +28,12 @@ namespace GamePlay.MapFeatures
 			{
 				Vector3Ushort position = voxels[i].Position;
 
-				if (!_mapProvider.Map.IsInsideMap(position.x, position.y, position.z))
+				if (!_mapProvider.Map.CurrentValue.IsInsideMap(position.x, position.y, position.z))
 				{
 					return;
 				}
 
-				if (!_mapProvider.Map.GetVoxelByGlobalPosition(position).IsSolid())
+				if (!_mapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(position).IsSolid())
 				{
 					return;
 				}
@@ -63,7 +62,7 @@ namespace GamePlay.MapFeatures
 				}
 			}
 
-			_mapProvider.Map.SetVoxelsByGlobalPositions(changedVoxels);
+			_mapProvider.Map.CurrentValue.SetVoxelsByGlobalPositions(changedVoxels);
 		}
 	}
 }

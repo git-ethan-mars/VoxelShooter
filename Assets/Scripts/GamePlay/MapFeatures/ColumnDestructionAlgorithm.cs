@@ -6,7 +6,7 @@ using Reflex.Attributes;
 using UnityEngine;
 using UnityEngine.Pool;
 using VoxelMap;
-namespace GamePlay.MapFeatures
+namespace GamePlay
 {
 	public class ColumnDestructionAlgorithm : MapFeature
 	{
@@ -22,7 +22,7 @@ namespace GamePlay.MapFeatures
 
 		private void Start()
 		{
-			_columns = new List<Run>[_mapProvider.Map.Width * _mapProvider.Map.Depth];
+			_columns = new List<Run>[_mapProvider.Map.CurrentValue.Width * _mapProvider.Map.CurrentValue.Depth];
 			_neighboursByRun = new Dictionary<Run, HashSet<Run>>();
 
 			for (var i = 0; i < _columns.Length; i++)
@@ -33,10 +33,10 @@ namespace GamePlay.MapFeatures
 			PreProcessColumns();
 			PreProcessGraph();
 
-			_mapProvider.Map.VoxelsAdded
+			_mapProvider.Map.CurrentValue.VoxelsAdded
 				.Subscribe(Add)
 				.AddTo(this);
-			_mapProvider.Map.VoxelsRemoved
+			_mapProvider.Map.CurrentValue.VoxelsRemoved
 				.Subscribe(Remove)
 				.AddTo(this);
 		}
@@ -146,13 +146,13 @@ namespace GamePlay.MapFeatures
 			if (fallingVoxels.Count > 0)
 			{	
 				Debug.Log(fallingVoxels.Count);
-				_mapProvider.Map.SetVoxelsByGlobalPositions(fallingVoxels);
+				_mapProvider.Map.CurrentValue.SetVoxelsByGlobalPositions(fallingVoxels);
 			}
 		}
 
 		private void AddRun(Run run)
 		{
-			_columns[run.X * _mapProvider.Map.Depth + run.Z].Add(run);
+			_columns[run.X * _mapProvider.Map.CurrentValue.Depth + run.Z].Add(run);
 			_neighboursByRun[run] = new HashSet<Run>();
 
 			using var pooledObject = ListPool<Vector3Ushort>.Get(out var neighbourPositions);
@@ -180,7 +180,7 @@ namespace GamePlay.MapFeatures
 
 		private void RemoveRun(Run run)
 		{
-			_columns[run.X * _mapProvider.Map.Depth + run.Z].Remove(run);
+			_columns[run.X * _mapProvider.Map.CurrentValue.Depth + run.Z].Remove(run);
 
 			foreach (Run adjacentRun in _neighboursByRun[run])
 			{
@@ -201,16 +201,16 @@ namespace GamePlay.MapFeatures
 
 		private void PreProcessColumns()
 		{
-			for (ushort x = 0; x < _mapProvider.Map.Width; x++)
+			for (ushort x = 0; x < _mapProvider.Map.CurrentValue.Width; x++)
 			{
-				for (ushort z = 0; z < _mapProvider.Map.Depth; z++)
+				for (ushort z = 0; z < _mapProvider.Map.CurrentValue.Depth; z++)
 				{
 					var runs = new List<Run>();
 					ushort startRun = 0;
 					ushort length = 0;
-					for (ushort y = 0; y < _mapProvider.Map.Height; y++)
+					for (ushort y = 0; y < _mapProvider.Map.CurrentValue.Height; y++)
 					{
-						bool isSolid = _mapProvider.Map.GetVoxelByGlobalPosition(x, y, z).IsSolid();
+						bool isSolid = _mapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(x, y, z).IsSolid();
 						if (isSolid)
 						{
 							if (length == 0)
@@ -221,7 +221,7 @@ namespace GamePlay.MapFeatures
 							length += 1;
 						}
 
-						if (!isSolid || y == _mapProvider.Map.Height - 1)
+						if (!isSolid || y == _mapProvider.Map.CurrentValue.Height - 1)
 						{
 							if (length > 0)
 							{
@@ -232,7 +232,7 @@ namespace GamePlay.MapFeatures
 						}
 					}
 
-					_columns[x * _mapProvider.Map.Depth + z] = runs;
+					_columns[x * _mapProvider.Map.CurrentValue.Depth + z] = runs;
 				}
 			}
 		}
@@ -247,15 +247,16 @@ namespace GamePlay.MapFeatures
 				}
 			}
 
-			for (ushort x = 0; x < _mapProvider.Map.Width; x++)
+			for (ushort x = 0; x < _mapProvider.Map.CurrentValue.Width; x++)
 			{
-				for (ushort z = 0; z < _mapProvider.Map.Depth; z++)
+				for (ushort z = 0; z < _mapProvider.Map.CurrentValue.Depth; z++)
 				{
-					for (ushort y = 0; y < _mapProvider.Map.Height; y++)
+					for (ushort y = 0; y < _mapProvider.Map.CurrentValue.Height; y++)
 					{
 						Vector3Ushort position = new Vector3Ushort(x, y, z);
 
-						if (!_mapProvider.Map.GetVoxelByGlobalPosition(position).IsSolid() || !TryFindRunInColumn(position, out Run currentRun))
+						if (!_mapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(position).IsSolid() || !TryFindRunInColumn(position, out Run 
+							currentRun))
 						{
 							continue;
 						}
@@ -275,7 +276,7 @@ namespace GamePlay.MapFeatures
 
 		private bool TryMergeWithExistingRuns(Voxel voxel)
 		{
-			var runs = _columns[voxel.Position.x * _mapProvider.Map.Depth + voxel.Position.z];
+			var runs = _columns[voxel.Position.x * _mapProvider.Map.CurrentValue.Depth + voxel.Position.z];
 
 			for (var i = 0; i < runs.Count; i++)
 			{
@@ -316,7 +317,7 @@ namespace GamePlay.MapFeatures
 
 		private bool TryFindRunInColumn(Vector3Ushort position, out Run run)
 		{
-			var column = _columns[position.x * _mapProvider.Map.Depth + position.z];
+			var column = _columns[position.x * _mapProvider.Map.CurrentValue.Depth + position.z];
 
 			for (var i = 0; i < column.Count; i++)
 			{
@@ -339,9 +340,9 @@ namespace GamePlay.MapFeatures
 				{
 					for (int zOffset = -1; zOffset <= 1; zOffset++)
 					{
-						if (position.x + xOffset >= _mapProvider.Map.Width ||
-						    position.y + yOffset >= _mapProvider.Map.Height ||
-						    position.z + zOffset >= _mapProvider.Map.Depth ||
+						if (position.x + xOffset >= _mapProvider.Map.CurrentValue.Width ||
+						    position.y + yOffset >= _mapProvider.Map.CurrentValue.Height ||
+						    position.z + zOffset >= _mapProvider.Map.CurrentValue.Depth ||
 						    position.x + xOffset < 0 ||
 						    position.y + yOffset < 0 ||
 						    position.z + zOffset < 0)
@@ -352,7 +353,7 @@ namespace GamePlay.MapFeatures
 						var neighbour = new Vector3Ushort((ushort)(position.x + xOffset), (ushort)(position.y + yOffset),
 							(ushort)(position.z + zOffset));
 
-						if (_mapProvider.Map.GetVoxelByGlobalPosition(neighbour).IsSolid())
+						if (_mapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(neighbour).IsSolid())
 						{
 							yield return neighbour;
 						}
@@ -374,9 +375,9 @@ namespace GamePlay.MapFeatures
 							continue;
 						}
 
-						if (position.x + xOffset >= _mapProvider.Map.Width ||
-						    position.y + yOffset >= _mapProvider.Map.Height ||
-						    position.z + zOffset >= _mapProvider.Map.Depth ||
+						if (position.x + xOffset >= _mapProvider.Map.CurrentValue.Width ||
+						    position.y + yOffset >= _mapProvider.Map.CurrentValue.Height ||
+						    position.z + zOffset >= _mapProvider.Map.CurrentValue.Depth ||
 						    position.x + xOffset < 0 ||
 						    position.y + yOffset < 0 ||
 						    position.z + zOffset < 0)
@@ -387,7 +388,7 @@ namespace GamePlay.MapFeatures
 						var neighbour = new Vector3Ushort((ushort)(position.x + xOffset), (ushort)(position.y + yOffset),
 							(ushort)(position.z + zOffset));
 
-						if (_mapProvider.Map.GetVoxelByGlobalPosition(neighbour).IsSolid())
+						if (_mapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(neighbour).IsSolid())
 						{
 							yield return neighbour;
 						}

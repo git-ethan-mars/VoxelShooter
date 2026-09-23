@@ -1,5 +1,5 @@
 ﻿using VoxelMap;
-namespace GamePlay.MapFeatures
+namespace GamePlay
 {
 	public interface IMeshFactory
 	{

@@ -2,12 +2,13 @@
 using UnityEngine;
 namespace VoxelMap
 {
-	public readonly struct VoxelData : IEquatable<VoxelData>
+	[Serializable]
+	public struct VoxelData : IEquatable<VoxelData>
 	{
 		public static readonly VoxelData Air = new VoxelData(new Color32(0, 0, 0, 0));
 		public static readonly VoxelData DefaultInner = new VoxelData(new Color32(1, 1, 1, 0));
 
-		public readonly Color32 Color;
+		public Color32 Color;
 
 		public VoxelData(Color32 color)
 		{

@@ -8,16 +8,17 @@ using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
 namespace VoxelMap
 {
-	public class MapFactory : IMapFactory
+	internal class MapFactory
 	{
 		private const string WallContainerName = "Walls";
 		private const string SpawnPointContainerName = "Spawnpoints";
-
 		private const string DirectionalLightName = "Directional Light";
+
 		private const string SpawnPointPath = "Prefabs/MapCreation/Spawnpoint";
 		private const string ChunkMeshRendererPath = "Prefabs/MapCreation/Chunk";
 		private const string WallPath = "Prefabs/MapCreation/Wall";
-		private const string MapProviderPath = "Prefabs/MapCreation/VoxelMap";
+		private const string MapPath = "Prefabs/MapCreation/VoxelMap";
+		private const string WaterPlanePath = "Prefabs/MapCreation/WaterPlane";
 
 		public GameObject CreateChunkView(Vector3 position, Transform parent)
 		{
@@ -116,6 +117,16 @@ namespace VoxelMap
 			light.transform.SetParent(parent);
 		}
 
+		public void CreateWater(MapData mapData, Transform parent, Color color)
+		{
+			GameObject water = Object.Instantiate(Resources.Load<GameObject>(WaterPlanePath), parent, true);
+			var position = new Vector3((float)mapData.Width / 2, 1.5f, (float)mapData.Depth / 2);
+			var scale = new Vector3((float)mapData.Width / 10, 1, (float)mapData.Depth / 10);
+			water.transform.position = position;
+			water.transform.localScale = scale;
+			water.GetComponent<MeshRenderer>().material.color = color;
+		}
+
 		public void CreateSpawnPoints(List<SpawnPointData> data, Transform parent)
 		{
 			Transform spawnPointContainer = new GameObject(SpawnPointContainerName).transform;
@@ -130,7 +141,7 @@ namespace VoxelMap
 
 		public Map CreateEmptyMap()
 		{
-			return Object.Instantiate(Resources.Load<GameObject>(MapProviderPath)).GetComponent<Map>();
+			return Object.Instantiate(Resources.Load<GameObject>(MapPath)).GetComponent<Map>();
 		}
 	}
 }

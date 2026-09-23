@@ -1,5 +1,4 @@
 using System.IO;
-using Data;
 using Services;
 using UnityEditor;
 using UnityEditor.AssetImporters;
@@ -15,25 +14,25 @@ namespace Editor
 	public class MapImporter : ScriptedImporter
 	{
 		[OnOpenAsset(1)]
-		public static bool OpenMapConfigureAsset(int instanceID)
+		public static bool OnOpenAsset(EntityId entityId, int line)
 		{
-			Object obj = EditorUtility.InstanceIDToObject(instanceID);
+			Object obj = EditorUtility.EntityIdToObject(entityId);
 			string assetPath = AssetDatabase.GetAssetPath(obj);
 
-			if (AssetDatabase.GetMainAssetTypeAtPath(AssetDatabase.GetAssetPath(instanceID)) != typeof(MapConfigure) ||
+			if (AssetDatabase.GetMainAssetTypeAtPath(AssetDatabase.GetAssetPath(entityId)) != typeof(MapConfigure) ||
 			     Path.GetExtension(assetPath) != Constants.RchExtension || Application.isPlaying)
 			{
 				return false;
 			}
 
-			MapEditorSceneView.Open((MapConfigure)EditorUtility.InstanceIDToObject(instanceID));
+			MapEditorSceneView.Open((MapConfigure)EditorUtility.EntityIdToObject(entityId));
 			return true;
 		}
 
 		public override void OnImportAsset(AssetImportContext ctx)
 		{
 			string mapName = Path.GetFileNameWithoutExtension(ctx.assetPath);
-			MapConfigureLoader mapConfigureLoader = new MapConfigureLoader(new AssetProvider());
+			MapConfigureLoader mapConfigureLoader = new MapConfigureLoader();
 			MapConfigure mapConfigure = mapConfigureLoader.GetMapConfigure(mapName);
 			using MapData mapData = MapDataReader.ReadFromFile(mapName);
 			Texture2D minimapTexture = GetMinimapTexture(mapData);

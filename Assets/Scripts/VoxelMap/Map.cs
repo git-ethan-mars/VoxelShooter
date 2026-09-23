@@ -10,6 +10,7 @@ namespace VoxelMap
 {
 	public class Map : MonoBehaviour
 	{
+		public string MapName { get; private set; }
 		public static readonly Vector3 WorldOffset = new Vector3(0.5f, 0.5f, 0.5f);
 
 		private readonly HashSet<Chunk> _regeneratingChunks = new HashSet<Chunk>();
@@ -17,12 +18,13 @@ namespace VoxelMap
 		private MapData _mapData;
 		private Chunk[] _chunks;
 
-		public void Construct(MapData mapData, Chunk[] chunks, MapConfigure mapConfigure)
+		public void Construct(MapData mapData, string mapName, Chunk[] chunks, MapConfigure mapConfigure)
 		{
 			_mapData = mapData;
 			_chunks = chunks;
 			MapData = new MapData.Readonly(mapData);
 			MapConfigure = mapConfigure;
+			MapName = mapName;
 		}
 
 		public ushort Width => _mapData.Width;
@@ -128,17 +130,17 @@ namespace VoxelMap
 			{
 				_voxelsRemoved.OnNext(removedPosition);
 			}
-			
+
 			ListPool<Voxel>.Release(addedVoxels);
 			ListPool<Vector3Ushort>.Release(removedPosition);
 		}
 
-		public bool IsInsideMap(ushort x, ushort y, ushort z)
+		public bool IsInsideMap(int x, int y, int z)
 		{
-			return x < Width && y < Height && z < Depth;
+			return x >= 0 && x < Width && y >= 0 && y < Height && z >= 0 && z < Depth;
 		}
 
-		public bool IsInsideMap(Vector3Ushort position)
+		public bool IsInsideMap(Vector3Int position)
 		{
 			return IsInsideMap(position.x, position.y, position.z);
 		}
@@ -208,6 +210,11 @@ namespace VoxelMap
 			}
 
 			return false;
+		}
+
+		public override string ToString()
+		{
+			return $"{MapName} Width: {_mapData.Width}, Height: {_mapData.Height}, Depth: {_mapData.Depth}";
 		}
 
 		private void RefreshFaceAmount(int chunkIndex, NativeList<Voxel> voxels)

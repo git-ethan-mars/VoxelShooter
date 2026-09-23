@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using Data;
+using UnityEngine;
 using VoxelMap.Data;
 
 namespace Services
@@ -12,9 +12,9 @@ namespace Services
 
 		private readonly Dictionary<string, MapConfigure> _mapConfigureByName;
 
-		public MapConfigureLoader(IAssetProvider assets)
+		public MapConfigureLoader()
 		{
-			_mapConfigureByName = assets.LoadAll<MapConfigure>(MapConfiguresPath)
+			_mapConfigureByName = Resources.LoadAll<MapConfigure>(MapConfiguresPath)
 				.ToDictionary(configure => configure.name, configure => configure);
 		}
 

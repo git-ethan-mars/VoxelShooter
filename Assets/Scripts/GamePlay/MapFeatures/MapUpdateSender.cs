@@ -3,9 +3,8 @@ using Networking;
 using Networking.Messages;
 using R3;
 using Reflex.Attributes;
-using UnityEngine;
 using VoxelMap;
-namespace GamePlay.MapFeatures
+namespace GamePlay
 {
 	public class MapUpdateSender : MapFeature
 	{
@@ -24,8 +23,8 @@ namespace GamePlay.MapFeatures
 
 		private void Start()
 		{
-			_mapProvider.Map.VoxelsAdded.Subscribe(OnVoxelsAdded).AddTo(this);
-			_mapProvider.Map.VoxelsRemoved.Subscribe(OnVoxelsRemoved).AddTo(this);
+			_mapProvider.Map.CurrentValue.VoxelsAdded.Subscribe(OnVoxelsAdded).AddTo(this);
+			_mapProvider.Map.CurrentValue.VoxelsRemoved.Subscribe(OnVoxelsRemoved).AddTo(this);
 		}
 
 		private void Update()

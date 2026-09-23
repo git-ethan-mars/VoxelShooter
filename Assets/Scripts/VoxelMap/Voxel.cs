@@ -1,5 +1,7 @@
+using System;
 namespace VoxelMap
 {
+	[Serializable]
 	public struct Voxel
 	{
 		public Vector3Ushort Position;

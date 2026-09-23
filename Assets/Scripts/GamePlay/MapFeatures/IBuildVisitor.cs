@@ -1,8 +1,10 @@
 using UnityEngine;
-namespace GamePlay.MapFeatures
+namespace GamePlay
 {
 	public interface IBuildVisitor
 	{
-		void Visit(Block block, RaycastHit rayCastHit);
+		bool Visit(Block block, RaycastHit rayCastHit, Color32 color);
+		bool Visit(Blueprint blueprint, RaycastHit rayCastHit, Color32 color);
+		bool IsAvailablePosition(Vector3Int position);
 	}
 }

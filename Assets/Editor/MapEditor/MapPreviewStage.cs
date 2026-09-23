@@ -1,5 +1,3 @@
-using Data;
-using Services;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -14,12 +12,11 @@ namespace Editor
 
 		public void Setup(MapConfigure mapConfigure)
 		{
-			var mapFactory = new MapFactory();
 			MapData mapData = MapDataReader.ReadFromFile(mapConfigure.name);
-			MapBuilder mapBuilder = new MapBuilder(mapFactory, mapData)
+			MapBuilder mapBuilder = new MapBuilder()
 				.FromConfigure(mapConfigure)
 				.WithSpawnPoints(mapConfigure.SpawnPoints);
-			_map = mapBuilder.Build();
+			_map = mapBuilder.Build(mapData, mapConfigure.name);
 
 			StageUtility.PlaceGameObjectInCurrentStage(_map.gameObject);
 			Selection.activeObject = _map.gameObject;

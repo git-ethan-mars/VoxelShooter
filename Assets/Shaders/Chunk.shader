@@ -1,78 +1,120 @@
-Shader "Custom/Chunk"
-{
-    Properties
+// Example Shader for Universal RP
+// Written by @Cyanilux
+// https://www.cyanilux.com/tutorials/urp-shader-code
+
+/*
+Roughly equivalent to the URP/SimpleLit.shader (but Forward path only)
+https://github.com/Unity-Technologies/Graphics/blob/master/Packages/com.unity.render-pipelines.universal/Shaders/SimpleLit.shader
+*/
+
+Shader "Cyanilux/URPTemplates/SimpleLitShaderExample" {
+	Properties
     {
-        _AmbientLighting ("Ambient lighting", Color) = (0.2, 0.2, 0.2, 1)
         _EdgeDetection ("Edge detection", Range(0, 1)) = 0.95
         _EdgeColorLightness ("Edge lightness", Range(0, 1)) = 0.015
     }
+	SubShader {
+		Tags {
+			"RenderPipeline"="UniversalPipeline"
+			"RenderType"="Opaque"
+			"Queue"="Geometry"
+		}
 
-    SubShader
-    {
-        Tags
-        {
-            "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline"
-        }
+		HLSLINCLUDE
+		#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
-        Pass
-        {
-            HLSLPROGRAM
-            #pragma vertex vert
-            #pragma fragment frag
+		ENDHLSL
 
-            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
-            #pragma multi_compile _ _SHADOW_SOFT
+		Pass {
+			Name "ForwardLit"
+			Tags { "LightMode"="UniversalForward" }
 
-            #define _MAIN_LIGHT_SHADOWS
+			HLSLPROGRAM
+			#pragma vertex LitPassVertex
+			#pragma fragment LitPassFragment
 
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+			// Material Keywords
+			#pragma shader_feature_local _NORMALMAP
+			#pragma shader_feature_local_fragment _EMISSION
+			#pragma shader_feature_local _RECEIVE_SHADOWS_OFF
+			//#pragma shader_feature_local_fragment _SURFACE_TYPE_TRANSPARENT
+			#pragma shader_feature_local_fragment _ALPHATEST_ON
+			#pragma shader_feature_local_fragment _ALPHAPREMULTIPLY_ON
+			//#pragma shader_feature_local_fragment _ _SPECGLOSSMAP _SPECULAR_COLOR
+			#pragma shader_feature_local_fragment _ _SPECGLOSSMAP
+			#define _SPECULAR_COLOR // always on
+			#pragma shader_feature_local_fragment _GLOSSINESS_FROM_BASE_ALPHA
 
-            struct vertexInput
+			// URP Keywords
+			#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+			// Note, v11 changes this to :
+			// #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+
+			#pragma multi_compile _ _SHADOWS_SOFT
+			#pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+			#pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+			#pragma multi_compile _ LIGHTMAP_SHADOW_MIXING // v10+ only, renamed from "_MIXED_LIGHTING_SUBTRACTIVE"
+			#pragma multi_compile _ SHADOWS_SHADOWMASK // v10+ only
+
+			// Unity Keywords
+			#pragma multi_compile_fog
+
+			// GPU Instancing (not supported)
+			//#pragma multi_compile_instancing
+
+			// Includes
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
+
+			// Structs
+			struct Attributes {
+				float4 positionOS	: POSITION;
+				float4 normalOS		: NORMAL;
+				float4 color		: COLOR;
+				float2 uv		    : TEXCOORD0;
+				float uv1	        : TEXCOORD1;
+				//UNITY_VERTEX_INPUT_INSTANCE_ID
+			};
+
+			struct Varyings {
+				float4 positionCS 					: SV_POSITION;
+				float2 uv		    				: TEXCOORD0;
+				uint   neighbours                   : TEXCOORD1;
+                float  ao                           : TEXCOORD2;
+				float3 positionWS					: TEXCOORD3;
+				half3 normalWS					    : TEXCOORD4;
+				
+				#ifdef _ADDITIONAL_LIGHTS_VERTEX
+					half4 fogFactorAndVertexLight	: TEXCOORD5; // x: fogFactor, yzw: vertex light
+				#else
+					half  fogFactor					: TEXCOORD5;
+				#endif
+
+				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+					float4 shadowCoord 				: TEXCOORD6;
+				#endif
+
+				float4 color						: COLOR;
+				//UNITY_VERTEX_INPUT_INSTANCE_ID
+				//UNITY_VERTEX_OUTPUT_STEREO
+			};
+
+			CBUFFER_START(UnityPerMaterial)
+			float _EdgeDetection;
+			float _EdgeColorLightness;
+			CBUFFER_END
+
+			float GetAmbientOcclusion(float alpha)
             {
-                float4 positionOS : POSITION;
-                float3 normalOS : NORMAL;
-                float4 color : COLOR;
-                float2 uv : TEXCOORD0;
-                float  uv1 : TEXCOORD1;
-            };
-
-            struct fragmentInput
-            {
-                float4 positionCS : SV_POSITION;
-                float3 color : COLOR;
-                float3 normalWS : TEXCOORD0;
-                float2 uv : TEXCOORD1;
-                uint   neighbours : TEXCOORD2;
-                float  ao : TEXCOORD3;
-                float4 shadowCoords : TEXCOORD4;
-            };
-
-            float GetAmbientOcclusion(float alpha)
-            {
-                int t = clamp(alpha * 255, 0.0, 3.0);
-
-                if (t == 0)
-                {
-                    return 0.1;
-                }
-                if (t == 1)
-                {
-                    return 0.6;
-                }
-                if (t == 2)
-                {
-                    return 0.8;
-                }
-
-                return 1;
+                int    t = clamp(alpha * 255, 0.0, 3.0);
+                float4 aoValues = float4(0.1, 0.6, 0.8, 1);
+                return aoValues[t];
             }
 
             float maxcomp(float4 v)
             {
                 return max(v.x, max(v.y, max(v.z, v.w)));
             }
-
-            float _EdgeDetection;
 
             float EdgeDetection(float2 uv0, uint neighbours)
             {
@@ -89,74 +131,133 @@ Shader "Custom/Chunk"
                 return maxcomp(max(wb, wc));
             }
 
-            float3 RGBToLinear(float3 color)
-            {
-                float3 linearRGBLo = color / 12.92;;
-                float3 linearRGBHi = pow(max(abs((color + 0.055) / 1.055), 1.192092896e-07), float3(2.4, 2.4, 2.4));
-                return float3(color <= 0.04045) ? linearRGBLo : linearRGBHi;
-            }
+			//  SurfaceData & InputData
+			void InitalizeSurfaceData(Varyings IN, out SurfaceData surfaceData){
+				surfaceData = (SurfaceData)0; // avoids "not completely initalized" errors
+				surfaceData.albedo = IN.color.rgb;
+				surfaceData.occlusion = 1; // unused
+			}
 
-            fragmentInput vert(vertexInput IN)
-            {
-                fragmentInput OUT;
-                float3        positionWS = TransformObjectToWorld(IN.positionOS);
-                OUT.positionCS = TransformWorldToHClip(positionWS);
-                OUT.color = IN.color.xyz;
-                OUT.normalWS = TransformObjectToWorldNormal(IN.normalOS);
-                OUT.uv = IN.uv;
-                OUT.neighbours = asuint(IN.uv1);
-                OUT.ao = GetAmbientOcclusion(IN.color.a);
-                OUT.shadowCoords = TransformWorldToShadowCoord(positionWS);
-                return OUT;
-            }
+			void InitializeInputData(Varyings input, out InputData inputData) {
+				inputData = (InputData)0; // avoids "not completely initalized" errors
 
-            float4 _AmbientLighting;
-            float _EdgeColorLightness;
+				inputData.positionWS = input.positionWS;
+				half3 viewDirWS = GetWorldSpaceNormalizeViewDir(inputData.positionWS);
+				inputData.normalWS = input.normalWS;
+				
+				inputData.normalWS = NormalizeNormalPerPixel(inputData.normalWS);
 
-            float4 frag(fragmentInput IN) : SV_Target
-            {
-                float4 color = float4(RGBToLinear(IN.color), 1);
-                
-                Light  mainLight = GetMainLight(IN.shadowCoords);
-                float3 attenuatedLightColor = mainLight.color * (mainLight.distanceAttenuation * mainLight.shadowAttenuation);
-                float3 lightingColor = LightingLambert(attenuatedLightColor, mainLight.direction, IN.normalWS);
-                lightingColor = saturate(lightingColor + _AmbientLighting);
-                color.rgb *= lightingColor;
+				viewDirWS = SafeNormalize(viewDirWS);
+				inputData.viewDirectionWS = viewDirWS;
 
-                float4 edge = EdgeDetection(IN.uv, IN.neighbours);
-                float3 hsv = RgbToHsv(color.rgb);
+				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+					inputData.shadowCoord = input.shadowCoord;
+				#elif defined(MAIN_LIGHT_CALCULATE_SHADOWS)
+					inputData.shadowCoord = TransformWorldToShadowCoord(inputData.positionWS);
+				#else
+					inputData.shadowCoord = float4(0, 0, 0, 0);
+				#endif
+
+				// Fog
+				#ifdef _ADDITIONAL_LIGHTS_VERTEX
+					inputData.fogCoord = input.fogFactorAndVertexLight.x;
+					inputData.vertexLighting = input.fogFactorAndVertexLight.yzw;
+				#else
+					inputData.fogCoord = input.fogFactor;
+					inputData.vertexLighting = half3(0, 0, 0);
+				#endif
+
+				inputData.bakedGI = EvaluateAmbientProbeSRGB(inputData.normalWS);
+				inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(input.positionCS);
+			}
+
+			// Vertex Shader
+			Varyings LitPassVertex(Attributes IN) {
+				Varyings OUT;
+
+				//UNITY_SETUP_INSTANCE_ID(IN);
+				//UNITY_TRANSFER_INSTANCE_ID(IN, OUT);
+				//UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(OUT);
+
+				VertexPositionInputs positionInputs = GetVertexPositionInputs(IN.positionOS.xyz);
+				VertexNormalInputs normalInputs = GetVertexNormalInputs(IN.normalOS.xyz);
+
+				OUT.positionCS = positionInputs.positionCS;
+				OUT.positionWS = positionInputs.positionWS;
+
+				half fogFactor = ComputeFogFactor(positionInputs.positionCS.z);
+				OUT.normalWS = NormalizeNormalPerVertex(normalInputs.normalWS);
+
+				#ifdef _ADDITIONAL_LIGHTS_VERTEX
+					OUT.fogFactorAndVertexLight = half4(fogFactor, vertexLight);
+				#else
+					OUT.fogFactor = fogFactor;
+				#endif
+
+				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+					OUT.shadowCoord = GetShadowCoord(positionInputs);
+				#endif
+
+				OUT.uv = IN.uv;
+				OUT.neighbours = asuint(IN.uv1);
+				OUT.ao = GetAmbientOcclusion(IN.color.a);
+				OUT.color = SRGBToLinear(IN.color);
+				return OUT;
+			}
+
+			// Fragment Shader
+			half4 LitPassFragment(Varyings IN) : SV_Target {
+				float3 hsv = RgbToHsv(IN.color.rgb);
+                float4 edgeFactor = EdgeDetection(IN.uv, IN.neighbours);
                 float4 edgeColor = float4(HsvToRgb(float3(hsv.rg, saturate(hsv.b + _EdgeColorLightness))), 1);
+                IN.color = lerp(IN.color, edgeColor, edgeFactor);
+				// Setup SurfaceData
+				SurfaceData surfaceData;
+				InitalizeSurfaceData(IN, surfaceData);
+				// Setup InputData
+				InputData inputData;
+				InitializeInputData(IN, inputData);
+				// Simple Lighting (Lambert & BlinnPhong)
+				//UniversalFragmentBlinnPhong()
+				half4 shadowMask = CalculateShadowMask(inputData);
+				AmbientOcclusionFactor aoFactor = CreateAmbientOcclusionFactor(inputData, surfaceData);
+    			Light mainLight = GetMainLight(inputData, shadowMask, aoFactor);
+				inputData.bakedGI *= surfaceData.albedo; // inputData.bakedGI - ambient
+				LightingData lightingData = CreateLightingData(inputData, surfaceData);
+				lightingData.additionalLightsColor = CalculateBlinnPhong(mainLight, inputData, surfaceData);
+				//float4 color = CalculateFinalColor(lightingData, surfaceData.alpha);
+				float3 color = MixFog(surfaceData.albedo, inputData.fogCoord) * IN.ao;
+				return float4(color, 1);
+			}
+			ENDHLSL
+		}
 
-                return (color * (1 - edge) + edgeColor * edge) * IN.ao;
-            }
-            ENDHLSL
-        }
-        Pass
-        {
-            Name "ShadowCaster"
-            Tags
-            {
-                "LightMode"="ShadowCaster"
-            }
+		// ShadowCaster, for casting shadows
+		Pass {
+			Name "ShadowCaster"
+			Tags { "LightMode"="ShadowCaster" }
 
-            ZWrite On
-            ZTest LEqual
+			ZWrite On
+			ZTest LEqual
 
-            HLSLPROGRAM
-            // Required to compile gles 2.0 with standard srp library
-            #pragma prefer_hlslcc gles
-            #pragma exclude_renderers d3d11_9x gles
-            //#pragma target 4.5
+			HLSLPROGRAM
+			#pragma vertex ShadowPassVertex
+			#pragma fragment ShadowPassFragment
 
-            // Material Keywords
-            #pragma shader_feature _ALPHATEST_ON
-            #pragma shader_feature _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+			// Material Keywords
+			#pragma shader_feature_local_fragment _ALPHATEST_ON
+			#pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
 
-            #pragma vertex ShadowPassVertex
-            #pragma fragment ShadowPassFragment
+			// GPU Instancing
+			#pragma multi_compile_instancing
+			//#pragma multi_compile _ DOTS_INSTANCING_ON
 
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/ShadowCasterPass.hlsl"
-            ENDHLSL
-        }
-    }
+			// Universal Pipeline Keywords
+			// (v11+) This is used during shadow map generation to differentiate between directional and punctual (point/spot) light shadows, as they use different formulas to apply Normal Bias
+			#pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+
+			#include "Packages/com.unity.render-pipelines.universal/Shaders/ShadowCasterPass.hlsl"
+			ENDHLSL
+		}
+	}
 }

@@ -30,10 +30,6 @@ namespace VoxelMap.Data
 		public AmbientData AmbientData { get; private set; } = new AmbientData(AmbientMode.Skybox, new Color32(54, 58, 66, 255),
 			new Color32(29, 32, 34, 255), new Color32(12, 11, 9, 255), 1);
 
-		[field: Header("Fog")]
-		[field: SerializeField]
-		public FogData FogData { get; private set; }
-
 		[field: Header("Weather")]
 		[field: SerializeField]
 		public ParticleSystem Weather { get; private set; }

@@ -1,12 +1,8 @@
+using System;
+using UnityEngine;
+
 namespace VoxelMap
 {
-	using System;
-	using UnityEngine;
-
-	/// <summary>
-	/// Представляет вектор с тремя компонентами типа ushort (0–65535).
-	/// Аналог Vector3Int, но для ushort.
-	/// </summary>
 	[Serializable]
 	public struct Vector3Ushort : IEquatable<Vector3Ushort>
 	{
@@ -21,14 +17,10 @@ namespace VoxelMap
 			this.z = z;
 		}
 
-		// Свойства для удобства
 		public static Vector3Ushort zero => new Vector3Ushort(0, 0, 0);
 		public static Vector3Ushort one => new Vector3Ushort(1, 1, 1);
-
-		// Преобразование в Vector3
 		public Vector3 ToVector3() => new Vector3(x, y, z);
 
-		// Преобразование из Vector3 (округление вниз)
 		public static Vector3Ushort FloorToUshort(Vector3 v)
 		{
 			return new Vector3Ushort(
@@ -47,7 +39,6 @@ namespace VoxelMap
 			);
 		}
 
-		// Арифметика (если нужна)
 		public static Vector3Ushort operator +(Vector3Ushort a, Vector3Ushort b)
 		{
 			return new Vector3Ushort(
@@ -65,7 +56,7 @@ namespace VoxelMap
 				(ushort)(a.z - b.z)
 			);
 		}
-		
+
 		public static Vector3Ushort operator *(Vector3Ushort a, int b)
 		{
 			return new Vector3Ushort(
@@ -74,7 +65,7 @@ namespace VoxelMap
 				(ushort)(a.z * b)
 			);
 		}
-		
+
 		public static Vector3Ushort operator *(int a, Vector3Ushort b)
 		{
 			return new Vector3Ushort(
@@ -83,13 +74,22 @@ namespace VoxelMap
 				(ushort)(a * b.z)
 			);
 		}
-		
+
 		public static implicit operator Vector3(Vector3Ushort v)
 		{
 			return new Vector3(v.x, v.y, v.z);
-		} 
+		}
 
-		// Сравнение
+		public static implicit operator Vector3Int(Vector3Ushort v)
+		{
+			return new Vector3Int(v.x, v.y, v.z);
+		}
+
+		public static explicit operator Vector3Ushort(Vector3Int v)
+		{
+			return new Vector3Ushort((ushort)v.x, (ushort)v.y, (ushort)v.z);
+		}
+
 		public bool Equals(Vector3Ushort other)
 		{
 			return x == other.x && y == other.y && z == other.z;

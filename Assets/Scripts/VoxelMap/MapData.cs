@@ -186,6 +186,19 @@ namespace VoxelMap
 				_voxels = mapData.Voxels.AsReadOnly();
 				_faces = mapData.Faces.AsReadOnly();
 			}
+			
+			public VoxelData this[ushort x, ushort y, ushort z]
+			{
+				get
+				{
+					if (!IsValidPosition(x, y, z))
+					{
+						throw new IndexOutOfRangeException($"{x}, {y}, {z} is not a valid position.");
+					}
+
+					return _voxels[GetVoxelIndex(x, y, z)];
+				}
+			}
 
 			public Face GetFace(ushort x, ushort y, ushort z)
 			{

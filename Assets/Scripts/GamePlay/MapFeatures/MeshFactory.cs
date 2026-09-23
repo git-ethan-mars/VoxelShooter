@@ -3,7 +3,7 @@ using UnityEngine;
 using VoxelMap;
 using Random = UnityEngine.Random;
 
-namespace GamePlay.MapFeatures
+namespace GamePlay
 {
 	public class MeshFactory : IMeshFactory
 	{

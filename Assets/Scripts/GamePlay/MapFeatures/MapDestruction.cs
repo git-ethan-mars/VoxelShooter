@@ -4,9 +4,9 @@ using Reflex.Attributes;
 using UnityEngine;
 using UnityEngine.Pool;
 using VoxelMap;
-namespace GamePlay.MapFeatures
+namespace GamePlay
 {
-	public class MapDestruction : MapFeature, IDamageVisitor
+	public class MapDestruction : MapFeature
 	{
 		private MapProvider _mapProvider;
 		private VoxelHealthSystem _voxelHealthSystem;
@@ -21,7 +21,7 @@ namespace GamePlay.MapFeatures
 		public void Visit(RangeWeapon rangeWeapon, RaycastHit hit)
 		{
 			Vector3Ushort position = Vector3Ushort.FloorToUshort(hit.point - hit.normal / 2);
-			var voxel = new Voxel(position, _mapProvider.Map.GetVoxelByGlobalPosition(position));
+			var voxel = new Voxel(position, _mapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(position));
 
 			if (IsDestructible(voxel))
 			{
@@ -45,7 +45,7 @@ namespace GamePlay.MapFeatures
 				{
 					var position = new Vector3Ushort(hitPosition.x, y, hitPosition.z);
 
-					var voxel = new Voxel(position, _mapProvider.Map.GetVoxelByGlobalPosition(position));
+					var voxel = new Voxel(position, _mapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(position));
 
 					if (IsDestructible(voxel))
 					{
@@ -55,7 +55,7 @@ namespace GamePlay.MapFeatures
 			}
 			else
 			{
-				var centeredBlock = new Voxel(hitPosition, _mapProvider.Map.GetVoxelByGlobalPosition(hitPosition));
+				var centeredBlock = new Voxel(hitPosition, _mapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(hitPosition));
 
 				if (IsDestructible(centeredBlock))
 				{
@@ -65,58 +65,13 @@ namespace GamePlay.MapFeatures
 
 			HandleVoxels(voxels, constantDamageCalculator);
 			
-			var block = meleeWeapon.netIdentity.connectionToClient.identity.GetComponent<Character>().Inventory.GetItem<Block>();
-
-			if (block != null)
-			{
-				block.Amount.Value += voxels.Count;
-			}
+			var inventory = meleeWeapon.netIdentity.connectionToClient.identity.GetComponent<Character>().Inventory;
+			inventory.VoxelAmount.Value += voxels.Count;
 			
 			ListPool<Voxel>.Release(voxels);
 		}
 
-		public void Visit(ExplosionData explosionData, Vector3 center)
-		{
-			Vector3Ushort explosionCenter = Vector3Ushort.FloorToUshort(center);
-			if (!_mapProvider.Map.IsInsideMap(explosionCenter.x, explosionCenter.y, explosionCenter.z))
-			{
-				return;
-			}
-
-			ListPool<Voxel>.Get(out var voxels);
-			var damageCalculator = new SphereDamageCalculator(explosionCenter, explosionData.radius, explosionData.damage);
-
-			for (var x = (ushort)Mathf.Max(explosionCenter.x - explosionData.radius, 0);
-			     x <= Mathf.Min(explosionCenter.x + explosionData.radius,
-				     _mapProvider.Map.Width);
-			     x++)
-			{
-				for (var y = (ushort)Mathf.Max(explosionCenter.y - explosionData.radius, 0);
-				     y <= Mathf.Min(explosionCenter.y + explosionData.radius, _mapProvider.Map.Height);
-				     y++)
-				{
-					for (var z = (ushort)Mathf.Max(explosionCenter.z - explosionData.radius, 0);
-					     z <= Mathf.Min(explosionCenter.z + explosionData.radius, _mapProvider.Map.Depth);
-					     z++)
-					{
-						Vector3Ushort position = new Vector3Ushort(x, y, z);
-
-						VoxelData blockData = _mapProvider.Map.GetVoxelByGlobalPosition(position);
-						var voxel = new Voxel(position, blockData);
-
-						if (IsDestructible(voxel) && Vector3.Distance(explosionCenter, position) < explosionData.radius)
-						{
-							voxels.Add(voxel);
-						}
-					}
-				}
-			}
-
-			HandleVoxels(voxels, damageCalculator);
-			ListPool<Voxel>.Release(voxels);
-		}
-
-		private void HandleVoxels(IReadOnlyList<Voxel> voxels, IVoxelDamageCalculator voxelDamageCalculator)
+		public void HandleVoxels(IReadOnlyList<Voxel> voxels, IVoxelDamageCalculator voxelDamageCalculator)
 		{
 			if (_voxelHealthSystem != null)
 			{
@@ -124,14 +79,15 @@ namespace GamePlay.MapFeatures
 			}
 			else
 			{
-				_mapProvider.Map.SetVoxelsByGlobalPositions(voxels);
+				_mapProvider.Map.CurrentValue.SetVoxelsByGlobalPositions(voxels);
 			}
 		}
 
-		private bool IsDestructible(Voxel voxel)
+		public bool IsDestructible(Voxel voxel)
 		{
-			return voxel.Data.IsSolid() && voxel.Position.x < _mapProvider.Map.Width &&
-			       voxel.Position.y > 0 && voxel.Position.y < _mapProvider.Map.Height && voxel.Position.z < _mapProvider.Map.Depth;
+			return voxel.Data.IsSolid() && voxel.Position.x < _mapProvider.Map.CurrentValue.Width &&
+			       voxel.Position.y > 0 && voxel.Position.y < _mapProvider.Map.CurrentValue.Height && voxel.Position.z < _mapProvider.Map
+				   .CurrentValue.Depth;
 		}
 	}
 }
