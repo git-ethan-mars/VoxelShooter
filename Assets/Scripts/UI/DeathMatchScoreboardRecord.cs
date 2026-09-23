@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 namespace UI
 {
-	public class ScoreboardRecord : MonoBehaviour
+	public class DeathMatchScoreboardRecord : MonoBehaviour
 	{
 		[field: SerializeField] public RawImage Avatar { get; private set; }
 		[field: SerializeField] public TextMeshProUGUI NickName { get; private set; }

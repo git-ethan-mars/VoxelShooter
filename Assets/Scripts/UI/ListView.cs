@@ -9,15 +9,18 @@ namespace UI
 
 		[SerializeField]
 		private Transform container;
-		private readonly Queue<T> _freeList = new Queue<T>();
+		private readonly LinkedList<T> _freeList = new LinkedList<T>();
 
 		protected readonly List<T> Items = new List<T>();
 
 		public T SpawnElement()
 		{
-			if (_freeList.TryDequeue(out T item))
+			T item;
+			if (_freeList.First != null)
 			{
+				item = _freeList.First.Value;
 				item.gameObject.SetActive(true);
+				_freeList.RemoveFirst();
 			}
 			else
 			{
@@ -30,11 +33,11 @@ namespace UI
 
 		public void Clear()
 		{
-			for (int i = 0, count = Items.Count; i < count; i++)
+			for (var i = Items.Count - 1; i >= 0; i--)
 			{
 				T item = Items[i];
 				item.gameObject.SetActive(false);
-				_freeList.Enqueue(item);
+				_freeList.AddFirst(item);
 			}
 
 			Items.Clear();
@@ -45,9 +48,8 @@ namespace UI
 			if (item != null && Items.Remove(item))
 			{
 				item.gameObject.SetActive(false);
-				_freeList.Enqueue(item);
+				_freeList.AddLast(item);
 			}
 		}
-
 	}
 }

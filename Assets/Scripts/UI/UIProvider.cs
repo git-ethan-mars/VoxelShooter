@@ -2,6 +2,7 @@ namespace UI
 {
 	public class UIProvider
 	{
-		public InGameUI InGameUI { get; set; }
+		public LoadingWindow LoadingWindow { get; set; }
+		public Hud Hud { get; set; }
 	}
 }

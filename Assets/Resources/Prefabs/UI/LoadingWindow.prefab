@@ -286,6 +286,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -331,7 +332,7 @@ MonoBehaviour:
   canvasGroup: {fileID: 258867676704271533}
   bulletCount: 50
   hideAlpha: 0.4
-  showAlpha: 255
+  showAlpha: 1
 --- !u!225 &258867676704271533
 CanvasGroup:
   m_ObjectHideFlags: 0

@@ -1,25 +1,24 @@
-using Services;
 using UnityEngine;
 namespace UI.InGameUIStates
 {
 	public class ScoreboardState : IInGameUIState
 	{
-		private readonly ScoreboardView _scoreboard;
+		private readonly DeathMatchScoreboardView _deathMatchScoreboard;
 
-		public ScoreboardState(ScoreboardView scoreboard)
+		public ScoreboardState(DeathMatchScoreboardView deathMatchScoreboard)
 		{
-			_scoreboard = scoreboard;
+			_deathMatchScoreboard = deathMatchScoreboard;
 		}
 
 		public void Enter()
 		{
 			Cursor.lockState = CursorLockMode.Locked;
-			_scoreboard.CanvasGroup.alpha = 1.0f;
+			_deathMatchScoreboard.CanvasGroup.alpha = 1.0f;
 		}
 
 		public void Exit()
 		{
-			_scoreboard.CanvasGroup.alpha = 0.0f;
+			_deathMatchScoreboard.CanvasGroup.alpha = 0.0f;
 		}
 	}
 }

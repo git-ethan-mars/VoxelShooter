@@ -1,9 +1,10 @@
-﻿namespace UI
+﻿using GamePlay;
+namespace UI
 {
 	public interface IUIFactory
 	{
 		GameMenu CreateGameMenu();
-		InGameUI CreateInGameUI();
 		LoadingWindow CreateLoadingWindow();
+		GameModeView CreateGameModeView(GameMode gameMode);
 	}
 }

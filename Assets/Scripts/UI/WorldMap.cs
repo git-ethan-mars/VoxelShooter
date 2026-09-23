@@ -25,7 +25,7 @@ namespace UI
 		[SerializeField] private Color gridColor;
 
 		private MapProvider _mapProvider;
-		private EntityContainerService _entityContainer;
+		private EntityContainer _entityContainer;
 
 		private ComputeBuffer _heightBuffer;
 		private int _clearHeightKernel;
@@ -35,8 +35,7 @@ namespace UI
 
 		[field: SerializeField] public CanvasGroup CanvasGroup { get; private set; }
 		public RenderTexture MainTexture { get; private set; }
-
-
+		
 		[Inject]
 		private void Construct(MapProvider mapProvider)
 		{
@@ -51,14 +50,14 @@ namespace UI
 			computeShader.SetVector(GridColor, gridColor);
 		}
 
-		public void Initialize()
+		internal void OnMapChanged(Map map)
 		{
 			if (MainTexture != null)
 			{
 				MainTexture.Release();
 			}
 
-			MainTexture = new RenderTexture(_mapProvider.Map.Width, _mapProvider.Map.Depth, 0, RenderTextureFormat.ARGB32)
+			MainTexture = new RenderTexture(map.Width, map.Depth, 0, RenderTextureFormat.ARGB32)
 			{
 				enableRandomWrite = true,
 				filterMode = FilterMode.Point
@@ -67,20 +66,15 @@ namespace UI
 			MainTexture.Create();
 			mapImage.texture = MainTexture;
 
-			_mapProvider.Map.ChunkUpdated.Subscribe(OnChunkUpdated).AddTo(_mapProvider.Map);
+			map.ChunkUpdated.Subscribe(OnChunkUpdated).AddTo(map);
 
-			for (int x = 0; x < _mapProvider.Map.Width / Chunk.ChunkSize; x++)
+			for (int x = 0; x < map.Width / Chunk.ChunkSize; x++)
 			{
-				for (var z = 0; z < _mapProvider.Map.Depth / Chunk.ChunkSize; z++)
+				for (var z = 0; z < map.Depth / Chunk.ChunkSize; z++)
 				{
 					RefreshChunkColumn(x, z);
 				}
 			}
-
-			/*int threadGroupX = Mathf.CeilToInt((float)Mathf.Max(_mapProvider.Map.Width / Chunk.ChunkSize,
-				                                   _mapProvider.Map.Depth / Chunk.ChunkSize) / 16);
-			computeShader.SetTexture(_drawGridKernel, MapTexture, MainTexture);
-			computeShader.Dispatch(_drawGridKernel,threadGroupX, 1, 1);*/
 		}
 
 		private void RefreshChunkColumn(int x, int z)
@@ -88,7 +82,7 @@ namespace UI
 			computeShader.SetBuffer(_clearHeightKernel, HeightBuffer, _heightBuffer);
 			computeShader.Dispatch(_clearHeightKernel, Chunk.ChunkSize / 8, Chunk.ChunkSize / 8, 1);
 
-			for (var y = 0; y < _mapProvider.Map.Height / Chunk.ChunkSize; y++)
+			for (var y = 0; y < _mapProvider.Map.CurrentValue.Height / Chunk.ChunkSize; y++)
 			{
 				int chunkIndex = GetChunkIndex(x, y, z);
 				ProcessChunk(chunkIndex);
@@ -97,7 +91,7 @@ namespace UI
 
 		private void ProcessChunk(int chunkIndex)
 		{
-			Chunk chunk = _mapProvider.Map.Chunks[chunkIndex];
+			Chunk chunk = _mapProvider.Map.CurrentValue.Chunks[chunkIndex];
 
 			if (chunk.Mesh.vertexCount == 0)
 			{
@@ -128,8 +122,8 @@ namespace UI
 
 		private int GetChunkIndex(int x, int y, int z)
 		{
-			return x * (_mapProvider.Map.Height * _mapProvider.Map.Depth / Chunk.ChunkSizeSquared)
-			       + y * (_mapProvider.Map.Depth / Chunk.ChunkSize) + z;
+			return x * (_mapProvider.Map.CurrentValue.Height * _mapProvider.Map.CurrentValue.Depth / Chunk.ChunkSizeSquared)
+			       + y * (_mapProvider.Map.CurrentValue.Depth / Chunk.ChunkSize) + z;
 		}
 
 		private void OnDestroy()

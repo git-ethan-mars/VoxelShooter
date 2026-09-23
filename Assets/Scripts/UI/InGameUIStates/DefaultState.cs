@@ -1,39 +1,37 @@
 using System;
 using GamePlay;
 using R3;
+using UI.Inventory;
 using UnityEngine;
 namespace UI.InGameUIStates
 {
 	public class DefaultState : IInGameUIState
 	{
 		private readonly CharacterProvider _characterProvider;
-		
-		private readonly TimeInfo _timeInfo;
 		private readonly Hud _hud;
+		private readonly InventoryView _inventoryView;
 		
 		private IDisposable _disposable;
-
-		public DefaultState(CharacterProvider characterProvider, TimeInfo timeInfo, Hud hud)
+		
+		public DefaultState(CharacterProvider characterProvider, Hud hud, InventoryView inventoryView)
 		{
 			_characterProvider = characterProvider;
-			_timeInfo = timeInfo;
 			_hud = hud;
+			_inventoryView = inventoryView;
 		}
 
-		public void Enter()
+		public virtual void Enter()
 		{
 			_disposable = _characterProvider.Character.Subscribe(OnCharacterChanged);
 			Cursor.lockState = CursorLockMode.Locked;
-			_timeInfo.CanvasGroup.alpha = 1.0f;
 			_hud.CanvasGroup.alpha = _characterProvider.Character.Value != null ? 1.0f : 0.0f;
 		}
 
-		public void Exit()
+		public virtual void Exit()
 		{
-			_timeInfo.CanvasGroup.alpha = 0.0f;
 			_hud.CanvasGroup.alpha = 0.0f;
-			
 			_disposable.Dispose();
+			_inventoryView.HideInventory();
 		}
 
 		private void OnCharacterChanged(Character character)

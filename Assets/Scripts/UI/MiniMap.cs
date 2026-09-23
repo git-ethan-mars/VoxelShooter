@@ -1,10 +1,8 @@
-using Data;
 using GamePlay;
 using Reflex.Attributes;
 using UnityEngine;
 using UnityEngine.UI;
 using VoxelMap;
-using VoxelMap.Data;
 using Image = UnityEngine.UI.Image;
 namespace UI
 {
@@ -24,13 +22,12 @@ namespace UI
 
 		private MapProvider _mapProvider;
 		private CharacterProvider _characterProvider;
-		private EntityContainerService _entityContainer;
-
-		private MapConfigure _mapConfigure;
+		private EntityContainer _entityContainer;
+		
 		private RenderTexture _minimapTexture;
 
 		[Inject]
-		private void Construct(MapProvider mapProvider, CharacterProvider characterProvider, EntityContainerService entityContainer)
+		private void Construct(MapProvider mapProvider, CharacterProvider characterProvider, EntityContainer entityContainer)
 		{
 			_mapProvider = mapProvider;
 			_characterProvider = characterProvider;
@@ -42,15 +39,10 @@ namespace UI
 				enableRandomWrite = true,
 				filterMode = FilterMode.Point
 			};
-		}
-
-		public void Initialize()
-		{
 			_minimapTexture.Create();
 			minimapImage.texture = _minimapTexture;
-			_mapConfigure = _mapProvider.Map.MapConfigure;
 		}
-
+		
 		private void Update()
 		{
 			if (_characterProvider.Character.Value == null)
@@ -70,7 +62,7 @@ namespace UI
 			computeShader.SetTexture(drawMiniMap, MiniMapTexture, _minimapTexture);
 			var characterPosition = _characterProvider.Character.Value.transform.position;
 			computeShader.SetFloats(CharacterPosition, characterPosition.x, characterPosition.z);
-			Color waterColor = _mapConfigure.WaterColor;
+			Color waterColor = _mapProvider.Map.CurrentValue.MapConfigure.WaterColor;
 			computeShader.SetFloats(FallbackColor, waterColor.r, waterColor.g, waterColor.b, waterColor.a);
 			computeShader.Dispatch(drawMiniMap,
 				Mathf.CeilToInt((float)_minimapTexture.width / 8), Mathf.CeilToInt((float)_minimapTexture.height / 8),
@@ -79,8 +71,8 @@ namespace UI
 
 		private void RedrawCursor()
 		{
-			float zAngle = -Mathf.Atan2(_characterProvider.Character.Value.transform.forward.x, _characterProvider.Character.Value
-				.transform.forward.z) * Mathf.Rad2Deg;
+			float zAngle = -Mathf.Atan2(_characterProvider.Character.Value.ForwardDirection.x, 
+				_characterProvider.Character.Value.ForwardDirection.z) * Mathf.Rad2Deg;
 			minimapCursor.transform.rotation = Quaternion.Euler(0, 0, zAngle);
 		}
 
