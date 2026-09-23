@@ -2,7 +2,7 @@ using Data;
 using R3;
 using Services;
 using UnityEngine;
-namespace GamePlay
+namespace UI
 {
 	public class RectPalette
 	{

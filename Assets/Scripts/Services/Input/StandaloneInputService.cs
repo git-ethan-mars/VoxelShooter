@@ -57,6 +57,11 @@ namespace Services
 			return _isEnabled ? Input.GetAxis("Mouse ScrollWheel") : 0.0f;
 		}
 
+		public bool IsScrollButtonDown()
+		{
+			return _isEnabled && Input.GetMouseButtonDown(2);
+		}
+
 		public bool IsScoreboardButtonDown()
 		{
 			return Input.GetKeyDown(KeyCode.Tab);
@@ -107,29 +112,55 @@ namespace Services
 			return Input.GetKeyDown(KeyCode.DownArrow) && _isEnabled;
 		}
 
-		public bool IsFirstSlotButtonPressed()
+		public bool IsSlotButtonPressed(int number)
 		{
-			return Input.GetKeyDown(KeyCode.Alpha1) && _isEnabled;
-		}
+			if (!_isEnabled)
+			{
+				return false;
+			}
+			
+			if (number == 0)
+			{
+				return Input.GetKeyDown(KeyCode.Alpha1);
+			}
+			if (number == 1)
+			{
+				return Input.GetKeyDown(KeyCode.Alpha2);
+			}
+			if (number == 2)
+			{
+				return Input.GetKeyDown(KeyCode.Alpha3);
+			}
+			if (number == 3)
+			{
+				return Input.GetKeyDown(KeyCode.Alpha4);
+			}
+			if (number == 4)
+			{
+				return Input.GetKeyDown(KeyCode.Alpha5);
+			}
+			if (number == 5)
+			{
+				return Input.GetKeyDown(KeyCode.Alpha6);
+			}
+			if (number == 6)
+			{
+				return Input.GetKeyDown(KeyCode.Alpha7);
+			}
+			if (number == 7)
+			{
+				return Input.GetKeyDown(KeyCode.Alpha8);
+			}
+			if (number == 8)
+			{
+				return Input.GetKeyDown(KeyCode.Alpha9);
+			}
+			if (number == 9)
+			{
+				return Input.GetKeyDown(KeyCode.Alpha0);
+			}
 
-		public bool IsSecondSlotButtonPressed()
-		{
-			return Input.GetKeyDown(KeyCode.Alpha2) && _isEnabled;
-		}
-
-		public bool IsThirdSlotButtonPressed()
-		{
-			return Input.GetKeyDown(KeyCode.Alpha3) && _isEnabled;
-		}
-
-		public bool IsFourthSlotButtonPressed()
-		{
-			return Input.GetKeyDown(KeyCode.Alpha4) && _isEnabled;
-		}
-
-		public bool IsFifthSlotButtonPressed()
-		{
-			return Input.GetKeyDown(KeyCode.Alpha5) && _isEnabled;
+			return false;
 		}
 
 		public void Enable() // TODO : Кажется этот метод не должен тут быть

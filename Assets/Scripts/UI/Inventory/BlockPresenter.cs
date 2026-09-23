@@ -7,22 +7,25 @@ namespace UI.Inventory
 {
 	public class BlockPresenter : SlotPresenter<Block>
 	{
+		private readonly CharacterProvider _characterProvider;
 		private readonly Hud _hud;
 
 		private IDisposable _disposable;
 		private Sprite _projectileIcon;
 
-		public BlockPresenter(IStaticDataService staticData, UIProvider uiProvider, Block block, SlotView slotView)
+		public BlockPresenter(IStaticDataService staticData, CharacterProvider characterProvider,
+			UIProvider uiProvider, Block block, SlotView slotView)
 			: base(staticData, block, slotView)
 		{
-			_hud = uiProvider.InGameUI.Hud;
+			_characterProvider = characterProvider;
+			_hud = uiProvider.Hud;
 		}
 
 		public override void Initialize()
 		{
 			base.Initialize();
 
-			_disposable = InventoryItem.Amount.Subscribe(OnAmountChanged);
+			_disposable = _characterProvider.Character.Value.Inventory.VoxelAmount.Subscribe(OnAmountChanged);
 			_projectileIcon = StaticData.GetProjectileIcon(InventoryItem.Type);
 		}
 
@@ -31,7 +34,8 @@ namespace UI.Inventory
 			base.Select();
 
 			_hud.ShowPalette();
-			_hud.ShowItemInfo(_projectileIcon, InventoryItem.Amount.ToString());
+			_hud.ShowItemInfo(_projectileIcon, _characterProvider.Character.Value.Inventory.VoxelAmount.CurrentValue.ToString());
+			_hud.SetCrosshairVisibility(true);
 		}
 
 		public override void Deselect()
@@ -40,6 +44,7 @@ namespace UI.Inventory
 
 			_hud.HidePalette();
 			_hud.HideItemInfo();
+			_hud.SetCrosshairVisibility(false);
 		}
 
 		public override void Dispose()

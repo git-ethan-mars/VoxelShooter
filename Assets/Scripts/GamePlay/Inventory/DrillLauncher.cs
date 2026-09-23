@@ -1,9 +1,8 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Data;
-using GamePlay.Core;
 using Mirror;
-using Networking.Audio;
+using Networking;
 using Networking.Core;
 using R3;
 using Reflex.Attributes;
@@ -17,7 +16,7 @@ namespace GamePlay
 		private IInputService _inputService;
 		private IEntityFactory _entityFactory;
 		private CameraProvider _cameraProvider;
-		private NetworkAudioPlayer _audioPlayer;
+		private NetworkAudioSender _audioSender;
 
 		private readonly SyncReactiveProperty<int> _amount = new SyncReactiveProperty<int>();
 		private bool _isReloading;
@@ -25,12 +24,12 @@ namespace GamePlay
 
 		[Inject]
 		private void Construct(IInputService inputService, IEntityFactory entityFactory, CameraProvider cameraProvider,
-			IStaticDataService staticData, NetworkAudioPlayer audioPlayer)
+			IStaticDataService staticData, NetworkAudioSender audioSender)
 		{
 			_inputService = inputService;
 			_entityFactory = entityFactory;
 			_cameraProvider = cameraProvider;
-			_audioPlayer = audioPlayer;
+			_audioSender = audioSender;
 		}
 
 		public override void OnStartServer()
@@ -87,7 +86,7 @@ namespace GamePlay
 
 			Vector3 drillPosition = ray.origin + ray.direction * 3;
 			Quaternion drillRotation = Quaternion.LookRotation(ray.direction);
-			Drill drill = _entityFactory.CreateDrill(drillPosition, drillRotation);
+			Drill drill = _entityFactory.CreateDrill(drillPosition, drillRotation, connectionToClient);
 			drill.Launch();
 			_amount.Value -= 1;
 
@@ -100,7 +99,7 @@ namespace GamePlay
 		[Server]
 		private async void Reload()
 		{
-			_audioPlayer.SendAudio(AudioType.DrillLauncherReload, netIdentity, false);
+			_audioSender.SendAudio(AudioType.DrillLauncherReload, netIdentity, false);
 			
 			_isReloading = true;
 			bool isCanceled = await UniTask.WaitForSeconds(Configure.ReloadTime, cancellationToken: _onChangeSlot.Token).SuppressCancellationThrow();

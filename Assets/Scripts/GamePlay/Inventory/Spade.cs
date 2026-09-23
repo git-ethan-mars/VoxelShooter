@@ -1,5 +1,5 @@
 using Data;
-using Networking.Audio;
+using Networking;
 using Reflex.Attributes;
 using Services;
 namespace GamePlay
@@ -8,11 +8,11 @@ namespace GamePlay
 	{
 		[Inject]
 		private void Construct(IInputService inputService, CameraProvider cameraProvider, 
-			IStaticDataService staticData, CharacterProvider characterProvider, NetworkAudioPlayer audioPlayer)
+			IStaticDataService staticData, CharacterProvider characterProvider, NetworkAudioSender audioSender)
 		{
 			InputService = inputService;
 			CameraProvider = cameraProvider;
-			AudioPlayer = audioPlayer;
+			AudioSender = audioSender;
 		}
 
 		public override ItemType Type => ItemType.Spade;

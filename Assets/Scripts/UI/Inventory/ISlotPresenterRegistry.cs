@@ -1,5 +1,5 @@
 using System;
-using GamePlay.Core;
+using GamePlay;
 namespace UI.Inventory
 {
 	public interface ISlotPresenterRegistry

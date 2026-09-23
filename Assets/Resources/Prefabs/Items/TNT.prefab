@@ -61,6 +61,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -82,9 +84,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &8009858165730397543
 GameObject:
@@ -136,7 +140,9 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  model:
+  <MeshFilters>k__BackingField:
+  - {fileID: 8169569557748584069}
+  renderers:
   - {fileID: 5890438036483834268}
   tntMesh: {fileID: 4300000, guid: fb7a322149dbf3e4eaa655959d2436bc, type: 2}
   tntMaterial: {fileID: 2100000, guid: 809125edff663814abee01d80ff264c7, type: 2}

@@ -1,19 +1,21 @@
 using Data;
-using Networking.Audio;
+using Networking;
 using Reflex.Attributes;
 using Services;
+
 namespace GamePlay
 {
-	public class MachineGun : RangeWeapon
-	{
-		[Inject]
-		private void Construct(IInputService inputService, CameraProvider cameraProvider, NetworkAudioPlayer audioPlayer, IStaticDataService staticData)
-		{
-			InputService = inputService;
-			CameraProvider = cameraProvider;
-			AudioPlayer = audioPlayer;
-		}
+    public class MachineGun : RangeWeapon
+    {
+        [Inject]
+        private void Construct(IInputService inputService, CameraProvider cameraProvider, NetworkAudioSender audioSender,
+            IStaticDataService staticData)
+        {
+            InputService = inputService;
+            CameraProvider = cameraProvider;
+            AudioSender = audioSender;
+        }
 
-		public override ItemType Type => ItemType.MachineGun;
-	}
+        public override ItemType Type => ItemType.MachineGun;
+    }
 }

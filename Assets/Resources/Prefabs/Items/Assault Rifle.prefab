@@ -88,6 +88,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &2071339500217872369
 GameObject:
@@ -177,6 +178,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &2355816785109923623
 GameObject:
@@ -298,6 +300,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &9030222180740480023
 GameObject:
@@ -352,7 +355,11 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  model:
+  <MeshFilters>k__BackingField:
+  - {fileID: 6488955652210647103}
+  - {fileID: 5395277646785709440}
+  - {fileID: 287065407741255459}
+  renderers:
   - {fileID: 7721664450987836587}
   - {fileID: 8933552102566240532}
   - {fileID: 3665479669250751415}

@@ -6,24 +6,39 @@ using R3;
 using Reflex.Attributes;
 using Services;
 using UnityEngine;
-namespace GamePlay.Core
+
+namespace GamePlay
 {
 	[SelectionBase]
 	public abstract class InventoryItem : NetworkBehaviour
 	{
-		[SerializeField] protected MeshRenderer[] model;
+		[field: SerializeField] public MeshFilter[] MeshFilters { get; private set; }
+		[field: SerializeField] private MeshRenderer[] renderers;
 		public abstract ItemType Type { get; }
 		protected InventoryItemConfigure Configure { get; private set; }
 		protected bool IsLocalItem => isOwned;
 		private readonly SyncReactiveProperty<bool> _isSelected = new SyncReactiveProperty<bool>();
 		public bool IsSelected => _isSelected.Value;
+		
+		public PlayerId? OwnerId
+		{
+			get 
+			{
+				if (netIdentity.connectionToClient is null)
+				{
+					return null;
+				}
+			
+				return new PlayerId(netIdentity.connectionToClient.connectionId);
+			}
+		}
 
 		[Inject]
 		private void Construct(CharacterProvider characterProvider, IStaticDataService staticData)
 		{
 			Configure = staticData.GetItemConfigure<InventoryItemConfigure>(Type);
 		}
-
+		
 		public override void OnStartClient()
 		{
 			((ReactiveProperty<bool>)_isSelected).Where(isSelected => isSelected)
@@ -49,13 +64,13 @@ namespace GamePlay.Core
 		private void OnSelected()
 		{
 			enabled = true;
-			Array.ForEach(model, part => part.enabled = true);
+			Array.ForEach(renderers, part => part.enabled = true);
 		}
 
 		private void OnDeselected()
 		{
 			enabled = false;
-			Array.ForEach(model, part => part.enabled = false);
+			Array.ForEach(renderers, part => part.enabled = false);
 		}
 	}
 }

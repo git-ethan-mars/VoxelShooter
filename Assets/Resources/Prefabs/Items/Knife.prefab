@@ -88,6 +88,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &9106257655567110729
 GameObject:
@@ -139,7 +140,9 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  model:
+  <MeshFilters>k__BackingField:
+  - {fileID: 5257173855863569490}
+  renderers:
   - {fileID: 4975925562638396929}
   wireframeMaterial: {fileID: 2100000, guid: c79e2cccda412094c920cf69114c22e9, type: 2}
   wireframeCube: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}

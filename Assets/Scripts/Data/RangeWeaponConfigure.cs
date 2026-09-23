@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 namespace Data
 {
-	[CreateAssetMenu(fileName = "Range Weapon", menuName = "Inventory System/Inventory Items/Range Weapon")]
+	[CreateAssetMenu(fileName = "Range Weapon Configure", menuName = "Inventory System/Item Configures/Range Weapon")]
 	public class RangeWeaponConfigure : InventoryItemConfigure
 	{
 		[field: Header("Configuration")]

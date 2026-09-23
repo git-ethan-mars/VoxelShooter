@@ -2,9 +2,8 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Data;
-using GamePlay.Core;
 using Mirror;
-using Networking.Audio;
+using Networking;
 using Services;
 using UnityEngine;
 using VoxelMap;
@@ -22,7 +21,7 @@ namespace GamePlay
 
 		protected IInputService InputService { get; set; }
 		protected CameraProvider CameraProvider { get; set; }
-		protected NetworkAudioPlayer AudioPlayer { get; set; }
+		protected NetworkAudioSender AudioSender { get; set; }
 		public new MeleeWeaponConfigure Configure => base.Configure as MeleeWeaponConfigure;
 
 		private bool _isReady = true;
@@ -88,23 +87,28 @@ namespace GamePlay
 		private void ScanHit(Ray ray, bool isStrongHit)
 		{
 			bool raycastResult = Physics.Raycast(ray, out RaycastHit rayHit, Configure.Range, LayerMasks.AttackMask);
+			
 			if (!raycastResult)
 			{
 				return;
 			}
 
+			var mapDestruction = rayHit.collider.GetComponentInParent<MapDestruction>();
+
+			if (mapDestruction != null)
+			{
+				mapDestruction.Visit(this, isStrongHit, rayHit);
+				AudioSender.SendAudio(digSound, rayHit.point);
+				return;
+			}
+
 			var damageVisitor = rayHit.collider.GetComponentInParent<IDamageVisitor>();
 
-			if (rayHit.collider.GetComponent<IDamageaeble>() != null)
+			if (damageVisitor != null)
 			{
-				AudioPlayer.SendAudio(hitSound, rayHit.point);
+				AudioSender.SendAudio(hitSound, rayHit.point);
+				damageVisitor.Visit(this, rayHit);	
 			}
-			else
-			{
-				AudioPlayer.SendAudio(digSound, rayHit.point);
-			}
-			
-			damageVisitor?.Visit(this, isStrongHit, rayHit);
 		}
 
 		[Server]

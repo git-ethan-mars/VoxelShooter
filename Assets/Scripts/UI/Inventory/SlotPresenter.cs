@@ -1,7 +1,6 @@
 using System;
-using GamePlay.Core;
+using GamePlay;
 using Services;
-using UnityEngine;
 namespace UI.Inventory
 {
 	public class SlotPresenter<TItem> : SlotPresenter where TItem : InventoryItem
@@ -10,7 +9,6 @@ namespace UI.Inventory
 		private readonly SlotView _slotView;
 
 		protected readonly IStaticDataService StaticData;
-		private Sprite _slotIcon;
 
 		protected SlotPresenter(IStaticDataService staticData, TItem inventoryItem, SlotView slotView)
 		{
@@ -21,8 +19,7 @@ namespace UI.Inventory
 
 		public override void Initialize()
 		{
-			_slotIcon = StaticData.GetSlotIcon(InventoryItem.Type);
-			_slotView.SetSlotIcon(_slotIcon);
+			_slotView.AddModel(InventoryItem);
 		}
 
 		public override void Select()
@@ -37,7 +34,8 @@ namespace UI.Inventory
 
 		public override void Dispose()
 		{
-			Deselect();
+			_slotView.Deselect();
+			_slotView.RemoveModel();
 		}
 	}
 

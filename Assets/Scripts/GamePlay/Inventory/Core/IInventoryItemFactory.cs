@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Data;
-namespace GamePlay.Core
+namespace GamePlay
 {
 	public interface IItemFactory
 	{

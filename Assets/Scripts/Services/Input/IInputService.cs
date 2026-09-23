@@ -24,12 +24,9 @@ namespace Services
 		bool IsRightArrowButtonDown();
 		bool IsUpArrowButtonDown();
 		bool IsDownArrowButtonDown();
-		bool IsFirstSlotButtonPressed();
-		bool IsSecondSlotButtonPressed();
-		bool IsThirdSlotButtonPressed();
-		bool IsFourthSlotButtonPressed();
-		bool IsFifthSlotButtonPressed();
+		bool IsSlotButtonPressed(int number);
 		void Enable();
 		void Disable();
+		bool IsScrollButtonDown();
 	}
 }

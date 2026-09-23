@@ -2,10 +2,8 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Data;
-using GamePlay.Core;
-using GamePlay.MapFeatures;
 using Mirror;
-using Networking.Audio;
+using Networking;
 using Networking.Core;
 using R3;
 using Services;
@@ -22,9 +20,9 @@ namespace GamePlay
 		[SerializeField] private AudioType reloadSound;
 		[SerializeField] private ParticleSystem shootingParticles;
 
-		protected IInputService InputService;
-		protected NetworkAudioPlayer AudioPlayer;
-		protected CameraProvider CameraProvider;
+		protected IInputService InputService { get; set; }
+		protected NetworkAudioSender AudioSender { get; set; }
+		protected CameraProvider CameraProvider { get; set; }
 
 		private CancellationTokenSource _onChangeSlot;
 		private bool _isReloading;
@@ -128,7 +126,7 @@ namespace GamePlay
 
 			_isReady = false;
 			_bulletsInMagazine.Value -= 1;
-			AudioPlayer.SendAudio(shootSound, netIdentity, false);
+			AudioSender.SendAudio(shootSound, netIdentity, false);
 			shootingParticles.Play();
 			ResetShoot();
 		}
@@ -137,7 +135,7 @@ namespace GamePlay
 		private async void Reload()
 		{
 			_isReloading = true;
-			AudioPlayer.SendAudio(reloadSound, netIdentity, false);
+			AudioSender.SendAudio(reloadSound, netIdentity, false);
 
 			bool isCanceled =
 				await UniTask.Delay(TimeSpan.FromSeconds(Configure.ReloadTime), cancellationToken: _onChangeSlot.Token)
@@ -193,6 +191,14 @@ namespace GamePlay
 			bool raycastResult = Physics.Raycast(ray, out RaycastHit rayHit, Configure.Range, LayerMasks.AttackMask);
 			if (!raycastResult)
 			{
+				return;
+			}
+
+			var mapDestruction = rayHit.collider.GetComponentInParent<MapDestruction>();
+
+			if (mapDestruction != null)
+			{
+				mapDestruction.Visit(this, rayHit);
 				return;
 			}
 

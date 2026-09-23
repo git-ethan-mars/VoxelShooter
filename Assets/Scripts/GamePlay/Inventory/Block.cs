@@ -1,9 +1,5 @@
 ﻿using Data;
-using GamePlay.Core;
-using GamePlay.MapFeatures;
 using Mirror;
-using Networking.Core;
-using R3;
 using Reflex.Attributes;
 using Services;
 using UnityEngine;
@@ -17,39 +13,21 @@ namespace GamePlay
 		[SerializeField] protected Mesh wireframeCube;
 
 		private IInputService _inputService;
-		private IStaticDataService _staticData;
-		private IPlayerService _playerService;
 		private CameraProvider _cameraProvider;
 		private CharacterProvider _characterProvider;
-		public RectPalette RectPalette { get; private set; }
+		private MapProvider _mapProvider;
 
 		[Inject]
-		private void Construct(IInputService inputService, CameraProvider cameraProvider, IStaticDataService staticData,
-			CharacterProvider characterProvider, IPlayerService playerService)
+		private void Construct(IInputService inputService, CameraProvider cameraProvider, CharacterProvider characterProvider, MapProvider mapProvider)
 		{
 			_inputService = inputService;
 			_cameraProvider = cameraProvider;
-			_staticData = staticData;
 			_characterProvider = characterProvider;
-			_playerService = playerService;
-			RectPalette = new RectPalette(staticData);
+			_mapProvider = mapProvider;
 		}
 
-		public override void OnStartServer()
-		{
-			base.OnStartServer();
-
-			_amount.Value = Configure.Amount;
-			_color.Value = RectPalette.SelectedColor;
-		}
-
-		public ReactiveProperty<int> Amount => _amount;
-		public Color32 Color => _color.Value;
 		public override ItemType Type => ItemType.Block;
-		private new BlockConfigure Configure => base.Configure as BlockConfigure;
-		private readonly SyncReactiveProperty<int> _amount = new SyncReactiveProperty<int>();
-		private readonly SyncReactiveProperty<Color32> _color = new SyncReactiveProperty<Color32>();
-
+		
 		private void Update()
 		{
 			if (!IsLocalItem)
@@ -57,11 +35,13 @@ namespace GamePlay
 				return;
 			}
 
-			float placeDistance = _characterProvider.Character.Value.Characteristics.PlaceDistance;
+			Character character = _characterProvider.Character.Value;
+			float placeDistance = character.Characteristics.PlaceDistance;
+			Color32 voxelColor = character.Inventory.DesiredVoxelColor.Value;
 			
 			if (_inputService.IsFirstActionButtonDown())
 			{
-				CmdBuild(_cameraProvider.CentredRay);
+				CmdBuild(_cameraProvider.CentredRay, voxelColor);
 			}
 
 			if (_cameraProvider.GetBuildRayCastHit(out RaycastHit hit, placeDistance))
@@ -69,47 +49,38 @@ namespace GamePlay
 				var voxelPosition = Vector3Int.FloorToInt(hit.point - hit.normal / 2) + Map.WorldOffset;
 				Graphics.DrawMesh(wireframeCube, Matrix4x4.TRS(voxelPosition, Quaternion.identity, Vector3.one * 1.001f),
 					wireframeMaterial, 0);
-			}
-			
-			if (_inputService.IsUpArrowButtonDown())
-			{
-				RectPalette.MovePointerUp();
-			}
-			if (_inputService.IsDownArrowButtonDown())
-			{
-				RectPalette.MovePointerDown();
-			}
-			if (_inputService.IsRightArrowButtonDown())
-			{
-				RectPalette.MovePointerRight();
-			}
-			if (_inputService.IsLeftArrowButtonDown())
-			{
-				RectPalette.MovePointerLeft();
-			}
-
-			if (!RectPalette.SelectedColor.Equals(_color.Value))
-			{
-				for (var i = 0; i < model.Length; i++)
-				{
-					model[i].material.color = RectPalette.SelectedColor;
-				}
 				
-				CmdChangeColor(RectPalette.SelectedColor);	
+				if (_inputService.IsScrollButtonDown())
+				{
+					Vector3Ushort colorPickingPosition = Vector3Ushort.FloorToUshort(hit.point - hit.normal / 2);
+					VoxelData colorPickingVoxel = _mapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(colorPickingPosition);
+					character.Inventory.DesiredVoxelColor.Value = colorPickingVoxel.Color;
+					Debug.Log(colorPickingVoxel.Color);
+				}
 			}
 		}
 
 		[Command]
-		private void CmdBuild(Ray ray, NetworkConnectionToClient connection = null)
+		private void CmdBuild(Ray ray, Color32 voxelColor, NetworkConnectionToClient connection = null)
 		{
-			if (connection == null || !_playerService.TryGetPlayerData(connection.connectionId, out PlayerData playerData))
+			if (connection == null)
 			{
 				return;
 			}
 
-			Characteristics characteristics = _staticData.GetCharacteristics(playerData.GameClass);
+			var character = connection.identity.GetComponent<Character>();
 
-			bool raycastResult = Physics.Raycast(ray, out RaycastHit rayHit, characteristics.PlaceDistance, LayerMasks.AttackMask);
+			if (character == null)
+			{
+				return;
+			}
+
+			if (character.Inventory.VoxelAmount.CurrentValue <= 0)
+			{
+				return;
+			}
+
+			bool raycastResult = Physics.Raycast(ray, out RaycastHit rayHit, character.Characteristics.PlaceDistance, LayerMasks.AttackMask);
 
 			if (!raycastResult)
 			{
@@ -117,13 +88,11 @@ namespace GamePlay
 			}
 
 			var buildVisitor = rayHit.collider.GetComponentInParent<IBuildVisitor>();
-			buildVisitor?.Visit(this, rayHit);
-		}
-
-		[Command]
-		private void CmdChangeColor(Color32 color)
-		{
-			_color.Value = color;
+			
+			if (buildVisitor != null && buildVisitor.Visit(this, rayHit, voxelColor))
+			{
+				character.Inventory.VoxelAmount.Value -= 1;
+			}
 		}
 	}
 }

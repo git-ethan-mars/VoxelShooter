@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using GamePlay.Core;
+using GamePlay;
 namespace UI.Inventory
 {
 	public class SlotPresenterRegistry : ISlotPresenterRegistry
@@ -12,7 +12,6 @@ namespace UI.Inventory
 			_creators[typeof(T)] = (item, view) => creator((T)item, view);
 		}
 
-		// Убираем generic из возвращаемого типа!
 		public SlotPresenter Create(InventoryItem item, SlotView slotView)
 		{
 			Type currentType = item.GetType();

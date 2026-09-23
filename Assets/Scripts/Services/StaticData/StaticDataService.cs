@@ -111,12 +111,24 @@ namespace Services
 
 		public Sprite GetSlotIcon(ItemType type)
 		{
-			return _slotIconByItemType[type];
+			if (_slotIconByItemType.TryGetValue(type, out var slotIcon))
+			{
+				return slotIcon;
+			}
+			
+			Debug.LogWarning($"Could not find slot icon for {type}");
+			return null;
 		}
 
 		public Sprite GetProjectileIcon(ItemType type)
 		{
-			return _projectileIconByItemType[type];
+			if (_projectileIconByItemType.TryGetValue(type, out var projectileIcon))
+			{
+				return projectileIcon;
+			}
+			
+			Debug.LogWarning($"Could not find projectile icon for {type}");
+			return null;
 		}
 
 		public Sprite GetScopeIcon(ItemType type)

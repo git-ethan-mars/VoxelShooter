@@ -14,7 +14,7 @@ namespace UI.Inventory
 		public DrillLauncherPresenter(IStaticDataService staticData, UIProvider uiProvider,
 			DrillLauncher drillLauncher, SlotView slotView) : base(staticData, drillLauncher, slotView)
 		{
-			_hud = uiProvider.InGameUI.Hud;
+			_hud = uiProvider.Hud;
 		}
 
 		public override void Initialize()
@@ -30,6 +30,7 @@ namespace UI.Inventory
 			base.Select();
 
 			_hud.ShowItemInfo(_projectileIcon, InventoryItem.Amount.ToString());
+			_hud.SetCrosshairVisibility(true);
 		}
 
 		public override void Deselect()
@@ -37,6 +38,7 @@ namespace UI.Inventory
 			base.Deselect();
 
 			_hud.HideItemInfo();
+			_hud.SetCrosshairVisibility(false);
 		}
 
 		public override void Dispose()

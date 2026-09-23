@@ -1,79 +1,73 @@
 using System.Collections.Generic;
 using GamePlay;
-using GamePlay.Core;
 using R3;
 using Reflex.Attributes;
 using Services;
 using UnityEngine;
-using UnityEngine.Audio;
+using UnityEngine.Rendering.Universal;
 namespace UI.Inventory
 {
 	public sealed class InventoryPresenter : MonoBehaviour
 	{
-		[SerializeField] private Hud hud;
 		[SerializeField] private PaletteView paletteView;
 		[SerializeField] private InventoryView inventoryView;
+		[SerializeField] private Camera canvasCamera;
 
 		private readonly List<SlotPresenter> _presenters = new List<SlotPresenter>();
 		private IInputService _inputService;
+		private CameraProvider _cameraProvider;
 		private CharacterProvider _characterProvider;
 		private ISlotPresenterFactory _presenterFactory;
 
-		private GamePlay.Core.Inventory _inventory;
-
+		private GamePlay.Inventory _inventory;
+		
 		[Inject]
 		private void Construct(IInputService inputService, CameraProvider cameraProvider, CharacterProvider characterProvider,
-			IStaticDataService staticData, ISlotPresenterFactory slotPresenterFactory)
+			ISlotPresenterFactory slotPresenterFactory)
 		{
 			_inputService = inputService;
+			_cameraProvider = cameraProvider;
 			_characterProvider = characterProvider;
 			_presenterFactory = slotPresenterFactory;
 		}
 
-		public void Initialize()
+		private void OnEnable()
 		{
 			_characterProvider.Character
 				.Subscribe(OnCharacterChanged)
 				.AddTo(this);
+			UniversalAdditionalCameraData additionalCameraData = _cameraProvider.MainCamera.GetUniversalAdditionalCameraData();
+			additionalCameraData.cameraStack.Add(canvasCamera);
 		}
 
 		private void Update()
 		{
+			if (_inventory == null)
+			{
+				return;
+			}
+			
 			float scrollSpeed = _inputService.GetScrollSpeed();
-
+			
 			if (scrollSpeed < 0)
 			{
 				_inventory.CmdChangeToPreviousInventorySlot();
+				inventoryView.ForceShowInventory();
 			}
 
 			if (scrollSpeed > 0)
 			{
 				_inventory.CmdChangeToNextInventorySlot();
+				inventoryView.ForceShowInventory();
 			}
 
-			if (_inputService.IsFirstSlotButtonPressed())
+			for (var i = 0; i < _inventory.Items.Count; i++)
 			{
-				_inventory.CmdSelectSlot(0);
-			}
-
-			if (_inputService.IsSecondSlotButtonPressed())
-			{
-				_inventory.CmdSelectSlot(1);
-			}
-
-			if (_inputService.IsThirdSlotButtonPressed())
-			{
-				_inventory.CmdSelectSlot(2);
-			}
-
-			if (_inputService.IsFourthSlotButtonPressed())
-			{
-				_inventory.CmdSelectSlot(3);
-			}
-
-			if (_inputService.IsFifthSlotButtonPressed())
-			{
-				_inventory.CmdSelectSlot(4);
+				if (_inputService.IsSlotButtonPressed(i))
+				{
+					_inventory.CmdSelectSlot(i);
+					inventoryView.ForceShowInventory();
+				}
 			}
 		}
 
@@ -87,7 +81,7 @@ namespace UI.Inventory
 				{
 					OnItemAdded(i);
 				}
-				
+
 				_inventory.ItemAdded.Subscribe(OnItemAdded).AddTo(_inventory);
 				_inventory.SlotSelected.Subscribe(OnItemSelected).AddTo(_inventory);
 			}

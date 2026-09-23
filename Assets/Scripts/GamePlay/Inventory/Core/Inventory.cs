@@ -1,25 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Mirror;
+using Networking.Core;
 using R3;
-namespace GamePlay.Core
+using UnityEngine;
+namespace GamePlay
 {
 	public class Inventory : NetworkBehaviour
 	{
 		private readonly SyncList<InventoryItem> _items = new SyncList<InventoryItem>();
 		[SyncVar(hook = nameof(OnSlotSelected))] private int _activeSlotIndex;
 		private readonly Subject<(int oldItemIndex, int newItemIndex)> _onSlotSelected = new Subject<(int, int)>();
+		private readonly SyncReactiveProperty<int> _voxelAmount = new SyncReactiveProperty<int>();
+		private readonly SyncReactiveProperty<Color32> _desiredVoxelColor = new SyncReactiveProperty<Color32>();
 
 		public IReadOnlyList<InventoryItem> Items => _items;
+		public ReactiveProperty<int> VoxelAmount => _voxelAmount;
+		public ReactiveProperty<Color32> DesiredVoxelColor => _desiredVoxelColor;
 		public Observable<int> ItemAdded { get; private set; }
 		public Observable<(int oldSlotIndex, int slotIndex)> SlotSelected => _onSlotSelected;
 
 		[Server]
-		public void Initialize(IEnumerable<InventoryItem> items)
+		public void Initialize(IEnumerable<InventoryItem> items, int voxelsCount)
 		{
 			_items.AddRange(items);
 			_items[0].Select();
+			_voxelAmount.Value = voxelsCount;
 		}
 
 		public override void OnStartClient()
@@ -63,11 +69,6 @@ namespace GamePlay.Core
 			int inventorySize = Items.Count;
 			int currentSlot = (_activeSlotIndex - 1 + inventorySize) % inventorySize;
 			SelectSlot(currentSlot);
-		}
-
-		public T GetItem<T>() where T : InventoryItem
-		{
-			return _items.OfType<T>().FirstOrDefault();
 		}
 
 		[Server]

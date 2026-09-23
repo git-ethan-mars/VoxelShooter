@@ -12,7 +12,7 @@ namespace UI.Inventory
 		public TNTPresenter(IStaticDataService staticData, UIProvider uiProvider, TNT tnt, SlotView slotView) : base(staticData, tnt,
 			slotView)
 		{
-			_hud = uiProvider.InGameUI.Hud;
+			_hud = uiProvider.Hud;
 		}
 
 		public override void Initialize()
@@ -28,6 +28,7 @@ namespace UI.Inventory
 			base.Select();
 
 			_hud.ShowItemInfo(_projectileIcon, InventoryItem.Amount.ToString());
+			_hud.SetCrosshairVisibility(true);
 		}
 
 		public override void Deselect()
@@ -35,6 +36,7 @@ namespace UI.Inventory
 			base.Deselect();
 
 			_hud.HideItemInfo();
+			_hud.SetCrosshairVisibility(false);
 		}
 
 		private void OnAmountChanged(int amount)

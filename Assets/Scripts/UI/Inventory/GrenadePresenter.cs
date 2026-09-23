@@ -14,7 +14,7 @@ namespace UI.Inventory
 		public GrenadePresenter(IStaticDataService staticData, UIProvider uiProvider, Grenade grenade, SlotView slotView)
 			: base(staticData, grenade, slotView)
 		{
-			_hud = uiProvider.InGameUI.Hud;
+			_hud = uiProvider.Hud;
 		}
 
 		public override void Initialize()

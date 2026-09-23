@@ -9,5 +9,6 @@ namespace Data
 		[field: SerializeField] public float Speed { get; private set; }
 		[field: SerializeField] public float JumpHeight {get; private set;}
 		[field: SerializeField] public float PlaceDistance {get; private set;}
+		[field: SerializeField] public int VoxelsCount { get; private set; }
 	}
 }

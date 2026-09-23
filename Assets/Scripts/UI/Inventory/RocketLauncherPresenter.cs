@@ -14,7 +14,7 @@ namespace UI.Inventory
 		public RocketLauncherPresenter(IStaticDataService staticData, UIProvider uiProvider, RocketLauncher rocketLauncher, SlotView slotView) :
 			base(staticData, rocketLauncher, slotView)
 		{
-			_hud = uiProvider.InGameUI.Hud;
+			_hud = uiProvider.Hud;
 		}
 
 		public override void Initialize()
@@ -31,6 +31,7 @@ namespace UI.Inventory
 			base.Select();
 
 			_hud.ShowAmmoInfo(_projectileIcon, $"{InventoryItem.ChargedRockets} / {InventoryItem.Amount}");
+			_hud.SetCrosshairVisibility(true);
 		}
 
 		public override void Deselect()
@@ -38,6 +39,7 @@ namespace UI.Inventory
 			base.Deselect();
 
 			_hud.HideAmmoInfo();
+			_hud.SetCrosshairVisibility(false);
 		}
 
 		public override void Dispose()

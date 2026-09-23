@@ -88,6 +88,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &5106030963746976738
 GameObject:
@@ -139,9 +140,10 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  model:
+  <MeshFilters>k__BackingField:
+  - {fileID: 3689783088230242192}
+  renderers:
   - {fileID: 1129938077308624044}
-  reloadSound: 3
 --- !u!114 &-534871451779756994
 MonoBehaviour:
   m_ObjectHideFlags: 0

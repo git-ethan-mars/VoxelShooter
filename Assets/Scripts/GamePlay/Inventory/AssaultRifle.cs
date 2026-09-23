@@ -1,5 +1,5 @@
 using Data;
-using Networking.Audio;
+using Networking;
 using Reflex.Attributes;
 using Services;
 namespace GamePlay
@@ -9,12 +9,12 @@ namespace GamePlay
 		public override ItemType Type => ItemType.AssaultRifle;
 
 		[Inject]
-		private void Construct(IInputService inputService, CameraProvider cameraProvider, NetworkAudioPlayer audioPlayer, 
+		private void Construct(IInputService inputService, CameraProvider cameraProvider, NetworkAudioSender audioSender, 
 			IStaticDataService staticData)
 		{
 			InputService = inputService;
 			CameraProvider = cameraProvider;
-			AudioPlayer = audioPlayer;
+			AudioSender = audioSender;
 		}
 	}
 }

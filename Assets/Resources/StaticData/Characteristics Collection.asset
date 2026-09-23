@@ -20,6 +20,7 @@ MonoBehaviour:
         <Speed>k__BackingField: 6
         <JumpHeight>k__BackingField: 1.25
         <PlaceDistance>k__BackingField: 8
+        <VoxelsCount>k__BackingField: 75
       index: 0
       isKeyDuplicated: 0
     - Key: 2
@@ -28,6 +29,7 @@ MonoBehaviour:
         <Speed>k__BackingField: 6
         <JumpHeight>k__BackingField: 1.25
         <PlaceDistance>k__BackingField: 6
+        <VoxelsCount>k__BackingField: 50
       index: 1
       isKeyDuplicated: 0
     - Key: 3
@@ -36,6 +38,7 @@ MonoBehaviour:
         <Speed>k__BackingField: 6
         <JumpHeight>k__BackingField: 1.25
         <PlaceDistance>k__BackingField: 6
+        <VoxelsCount>k__BackingField: 50
       index: 2
       isKeyDuplicated: 0
     - Key: 1
@@ -44,5 +47,6 @@ MonoBehaviour:
         <Speed>k__BackingField: 6.5
         <JumpHeight>k__BackingField: 1.75
         <PlaceDistance>k__BackingField: 6
+        <VoxelsCount>k__BackingField: 50
       index: 3
       isKeyDuplicated: 0

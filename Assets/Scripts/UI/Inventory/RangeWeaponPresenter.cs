@@ -15,7 +15,7 @@ namespace UI.Inventory
 		public RangeWeaponPresenter(IStaticDataService staticData, UIProvider uiProvider, CameraProvider cameraProvider,
 			SlotView slotView, RangeWeapon rangeWeapon) : base(staticData, rangeWeapon, slotView)
 		{
-			_hud = uiProvider.InGameUI.Hud;
+			_hud = uiProvider.Hud;
 			_cameraProvider = cameraProvider;
 		}
 
@@ -35,6 +35,7 @@ namespace UI.Inventory
 			base.Select();
 
 			_hud.ShowAmmoInfo(_projectileIcon, $"{InventoryItem.BulletsInMagazine} / {InventoryItem.TotalBullets}");
+			_hud.SetCrosshairVisibility(true);
 		}
 
 		public override void Deselect()
@@ -42,6 +43,7 @@ namespace UI.Inventory
 			base.Deselect();
 
 			_hud.HideAmmoInfo();
+			_hud.SetCrosshairVisibility(false);
 		}
 
 		public override void Dispose()
@@ -71,16 +73,14 @@ namespace UI.Inventory
 		{
 			if (isZoomed)
 			{
-				_hud.ScopeImage.gameObject.SetActive(true);
-				_hud.ScopeImage.sprite = StaticData.GetScopeIcon(InventoryItem.Type);
-				_hud.CrosshairImage.gameObject.SetActive(false);
+				_hud.SetScopeIcon(StaticData.GetScopeIcon(InventoryItem.Type));
+				_hud.SetCrosshairVisibility(false);
 				_cameraProvider.ZoomIn(InventoryItem.Configure.ZoomMultiplier);
 			}
 			else
 			{
-				_hud.ScopeImage.gameObject.SetActive(false);
-				_hud.ScopeImage.sprite = null;
-				_hud.CrosshairImage.gameObject.SetActive(true);
+				_hud.SetScopeIcon(null);
+				_hud.SetCrosshairVisibility(true);
 				_cameraProvider.ZoomOut();
 			}
 		}

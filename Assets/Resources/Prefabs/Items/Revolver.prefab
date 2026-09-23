@@ -52,7 +52,10 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  model:
+  <MeshFilters>k__BackingField:
+  - {fileID: 8437892084882529525}
+  - {fileID: 8312268487601223712}
+  renderers:
   - {fileID: 4917033609352968289}
   - {fileID: 4791449603226983604}
   shootSound: 12
@@ -208,6 +211,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &2682487331823866449
 GameObject:
@@ -297,6 +301,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1001 &2662060225230589139
 PrefabInstance:

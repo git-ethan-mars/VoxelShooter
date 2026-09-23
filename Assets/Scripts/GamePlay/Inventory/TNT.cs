@@ -1,6 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
 using Data;
-using GamePlay.Core;
 using Mirror;
 using Networking.Core;
 using R3;
@@ -22,24 +21,19 @@ namespace GamePlay
 		private IEntityFactory _entityFactory;
 		private CameraProvider _cameraProvider;
 		private CharacterProvider _characterProvider;
-		private IStaticDataService _staticData;
-		private IPlayerService _playerService;
-		
+
 		private readonly SyncReactiveProperty<int> _amount = new SyncReactiveProperty<int>();
 		public ReactiveProperty<int> Amount => _amount;
 		private float PlaceDistance => _characterProvider.Character.Value.Characteristics.PlaceDistance;
 
 		[Inject]
 		private void Construct(IInputService inputService, IEntityFactory entityFactory,
-			CameraProvider cameraProvider, IStaticDataService staticData, CharacterProvider characterProvider,
-			IPlayerService playerService)
+			CameraProvider cameraProvider, IStaticDataService staticData, CharacterProvider characterProvider)
 		{
 			_inputService = inputService;
 			_entityFactory = entityFactory;
 			_cameraProvider = cameraProvider;
-			_staticData = staticData;
 			_characterProvider = characterProvider;
-			_playerService = playerService;
 		}
 
 		public override ItemType Type => ItemType.TNT;
@@ -63,7 +57,7 @@ namespace GamePlay
 			{
 				PlaceTnt(_cameraProvider.CentredRay);
 			}
-			
+
 			if (_cameraProvider.GetBuildRayCastHit(out RaycastHit rayCastHit, PlaceDistance))
 			{
 				var voxelCenter = Vector3Int.FloorToInt(rayCastHit.point - rayCastHit.normal / 2) + Map.WorldOffset;
@@ -82,14 +76,20 @@ namespace GamePlay
 				return;
 			}
 
-			if (connection == null || !_playerService.TryGetPlayerData(connection.connectionId, out PlayerData playerData))
+			if (connection == null)
 			{
 				return;
 			}
 
-			Characteristics characteristics = _staticData.GetCharacteristics(playerData.GameClass);
+			var character = connection.identity.GetComponent<Character>();
 
-			bool raycastResult = Physics.Raycast(ray, out RaycastHit rayHit, characteristics.PlaceDistance, LayerMasks.AttackMask);
+			if (character == null)
+			{
+				return;
+			}
+
+			bool raycastResult = Physics.Raycast(ray, out RaycastHit rayHit, character.Characteristics.PlaceDistance, 
+				LayerMasks.AttackMask);
 
 			if (!raycastResult)
 			{
@@ -100,7 +100,7 @@ namespace GamePlay
 			Vector3 position = voxelCenter + rayHit.normal / 2;
 			Quaternion rotation = Quaternion.LookRotation(rayHit.normal == Vector3.up || rayHit.normal == Vector3.down ?
 				Vector3.forward : Vector3.up, rayHit.normal);
-			SpawningTNT tnt = _entityFactory.CreateSpawningTnt(position, rotation);
+			SpawningTNT tnt = _entityFactory.CreateSpawningTnt(position, rotation, connection);
 			tnt.ExplodeAsync(tnt.destroyCancellationToken).Forget();
 			_amount.Value -= 1;
 		}
