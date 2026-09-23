@@ -15,5 +15,13 @@ namespace Data
 			GameDuration = TimeSpan.FromMinutes(gameDuration);
 			RespawnTime = TimeSpan.FromSeconds(characterRespawnTime);
 		}
+		
+		public GameSettings(string mapName, TimeSpan gameDuration, TimeSpan characterRespawnTime, TimeSpan boxSpawnTime)
+		{
+			MapName = mapName;
+			BoxRespawnTime = boxSpawnTime;
+			GameDuration = gameDuration;
+			RespawnTime = characterRespawnTime;
+		}
 	}
 }

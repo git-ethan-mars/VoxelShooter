@@ -1,4 +1,4 @@
-using System.Globalization;
+using System;
 using Cysharp.Threading.Tasks;
 using Services;
 using UnityEngine;
@@ -17,7 +17,7 @@ namespace Networking
 		
 		public string GetPlayerNickName()
 		{
-			return Random.value.ToString(CultureInfo.InvariantCulture);
+			return Guid.NewGuid().ToString();
 		}
 
 		public UniTask<Texture2D> GetPlayerAvatarAsync()

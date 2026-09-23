@@ -1,80 +1,77 @@
 using System;
-using Cysharp.Threading.Tasks;
-using Data;
 using GamePlay;
+using GamePlay.Audio;
+using Mirror;
+using Networking;
+using Networking.Core;
+using Networking.Messages;
 using R3;
-using Services;
 using UI;
-using UnityEngine;
 using VoxelMap;
+
 namespace Infrastructure.States
 {
-	public class GameLoopState : IPayloadedState<GameSession>
-	{
-		private readonly GameStateMachine _gameStateMachine;
-		private readonly IStaticDataService _staticData;
-		private readonly IStorageService _storageService;
-		private readonly UIProvider _uiProvider;
-		private readonly IUIFactory _uiFactory;
-		private readonly CameraProvider _cameraProvider;
+    public class GameLoopState : IPayloadedState<GameMode>
+    {
+        private readonly GameStateMachine _gameStateMachine;
+        private readonly IUIFactory _uiFactory;
+        private readonly MapProvider _mapProvider;
+        private readonly VSNetworkManager _networkManager;
+        private readonly AudioPlayer _audioPlayer;
 
-		private GameSession _gameSession;
-		private LoadingWindow _loadingWindow;
+        private IDisposable _updateLoop;
 
-		public GameLoopState(GameStateMachine gameStateMachine, IStaticDataService staticData, IStorageService storageService,
-			UIProvider uiProvider, IUIFactory uiFactory, CameraProvider cameraProvider)
-		{
-			_gameStateMachine = gameStateMachine;
-			_staticData = staticData;
-			_storageService = storageService;
-			_uiProvider = uiProvider;
-			_uiFactory = uiFactory;
-			_cameraProvider = cameraProvider;
-		}
+        public GameLoopState(GameStateMachine gameStateMachine, IUIFactory uiFactory,
+            MapProvider mapProvider, VSNetworkManager networkManager, AudioPlayer audioPlayer)
+        {
+            _gameStateMachine = gameStateMachine;
+            _uiFactory = uiFactory;
+            _mapProvider = mapProvider;
+            _networkManager = networkManager;
+            _audioPlayer = audioPlayer;
+        }
 
-		public async void Enter(GameSession gameSession)
-		{
-			_gameSession = gameSession;
-			_loadingWindow = _uiFactory.CreateLoadingWindow();
-			_uiProvider.InGameUI = _uiFactory.CreateInGameUI();
-			_gameSession.OnMapReady.Subscribe(OnMapReady)
-				.AddTo(_gameSession.GameSessionFinished);
-			_gameSession.Progress = new Progress<float>(_loadingWindow.UpdateLoadingBar);
+        public void Enter(GameMode gameMode)
+        {
+            LoadingWindow loadingWindow = _uiFactory.CreateLoadingWindow();
+            GameModeView gameModeView = _uiFactory.CreateGameModeView(gameMode);
+            _mapProvider.MapLoadingProgress = new Progress<float>(loadingWindow.UpdateLoadingBar);
+            
+            _updateLoop = Observable.EveryUpdate().Subscribe(_ => gameMode.Update());
 
-			var gameSessionPresenter = new GameSessionPresenter(_gameSession, _loadingWindow, _uiProvider.InGameUI);
-			gameSessionPresenter.Initialize();
-			
-			await _gameSession.RunAsync();
-			
-			_uiProvider.InGameUI.InGameMenu.ExitButtonPressed
-				.Subscribe(_ => OnExitButtonPressed())
-				.AddTo(_uiProvider.InGameUI);
-			
-			
-			_storageService.Subscribe<MouseSettingsData>(OnMouseSettingsChanged)
-				.AddTo(_uiProvider.InGameUI);
-		}
+            _networkManager.MessageReceived.OfMessageType<StaticAudioResponse>()
+                .Subscribe(directedMessage => _audioPlayer.Play(directedMessage.Message.AudioType, directedMessage.Message.Position).Forget())
+                .AddTo(_networkManager);
+            _networkManager.MessageReceived.OfMessageType<DynamicAudioResponse>()
+                .Subscribe(directedMessage => _audioPlayer.Play(directedMessage.Message.AudioType, directedMessage.Message.NetworkIdentity,
+                    directedMessage.Message.IsSpatial).Forget())
+                .AddTo(_networkManager);
 
-		private void OnMapReady(Map map)
-		{
-			var mapCenter = new Vector3Ushort((ushort)(map.Width / 2), (ushort)(map.Height / 2), (ushort)(map.Depth / 2));
-			_cameraProvider.MainCamera.transform.SetPositionAndRotation(mapCenter, Quaternion.Euler(90, 0, 0));
-		}
+            gameModeView.InGameMenu.ExitButtonPressed
+                .Subscribe(_ => OnExitButtonPressed())
+                .AddTo(gameModeView);
+            gameMode.GameState.Subscribe(gameModeView.OnGameStateChanged)
+                .AddTo(gameModeView);
+            _mapProvider.Map.Where(map => map).Subscribe(gameModeView.OnMapChanged);
+        }
 
-		public void Exit()
-		{
-			_gameSession.Dispose();
-		}
+        public void Exit()
+        {
+            _updateLoop.Dispose();
 
-		private void OnMouseSettingsChanged(MouseSettingsData mouseSettingsData)
-		{
-			CrosshairSprite crosshairSprite = _staticData.GetCrosshairSprite(mouseSettingsData.CrosshairId);
-			_uiProvider.InGameUI.Hud.SetCrosshairIcon(crosshairSprite.Sprite);
-		}
+            if (_networkManager.mode == NetworkManagerMode.Host)
+            {
+                _networkManager.StopHost();
+            }
+            else
+            {
+                _networkManager.StopClient();
+            }
+        }
 
-		private void OnExitButtonPressed()
-		{
-			_gameStateMachine.Enter<GameMenuState>();
-		}
-	}
+        private void OnExitButtonPressed()
+        {
+            _gameStateMachine.Enter<GameMenuState>();
+        }
+    }
 }

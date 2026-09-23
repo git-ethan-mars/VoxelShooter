@@ -33,8 +33,10 @@ namespace Infrastructure.States
 
 #if LOCAL_BUILD
 			gameMenu.JoinButtonPressed.Subscribe(_ => OnJoinButtonPressed()).AddTo(gameMenu);
-#endif
+#else
 			gameMenu.JoinServerButtonPressed.Subscribe(OnJoinServerButtonPressed).AddTo(gameMenu);
+#endif
+			
 		}
 
 		public void Exit()

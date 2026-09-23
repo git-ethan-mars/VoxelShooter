@@ -17,6 +17,7 @@ namespace Infrastructure.Installers
 			containerBuilder.AddSingleton(typeof(SceneLoader));
 			containerBuilder.AddSingleton(typeof(MapConfigureLoader), typeof(IMapConfigureLoader));
 			containerBuilder.AddSingleton(typeof(GameStateMachine));
+			containerBuilder.AddSingleton(typeof(UIProvider));
 			Observable.FromEvent<Container>(
 					handler => containerBuilder.OnContainerBuilt += handler,
 					handler => containerBuilder.OnContainerBuilt -= handler)

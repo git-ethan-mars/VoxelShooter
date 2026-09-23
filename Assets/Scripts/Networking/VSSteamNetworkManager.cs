@@ -51,7 +51,7 @@ namespace Networking
 			while (!destroyCancellationToken.IsCancellationRequested)
 			{
 				await UniTask.Delay(TimeSpan.FromSeconds(serverListUpdateInterval), cancellationToken: destroyCancellationToken);
-				_server.MapName = _mapProvider.MapName ?? string.Empty;
+				_server.MapName = _mapProvider.Map.CurrentValue.MapName ?? string.Empty;
 				_server.ConnectedPlayers = NetworkServer.connections.Count;
 				_server.AvailableSlots = maxConnections;
 				await _serverList.UpdateServerAsync(_server, destroyCancellationToken);

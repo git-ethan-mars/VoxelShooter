@@ -16,19 +16,16 @@ namespace Networking
 		}
 
 		
-		public static PlayerData ReadPlayerData(this NetworkReader reader)
+		public static DeathMatchPlayerData ReadDeathMatchPlayerData(this NetworkReader reader)
 		{
-			return new PlayerData(reader.ReadString(), reader.ReadTexture2D(),
-				(GameClass)reader.ReadInt(), reader.ReadBool(), reader.ReadInt(), 
-				reader.ReadInt());
+			return new DeathMatchPlayerData(reader.ReadString(), reader.ReadTexture2D());
 		}
 
-		public static void WritePlayerData(this NetworkWriter writer, PlayerData playerData)
+		public static void WriteDeathMatchPlayerData(this NetworkWriter writer, DeathMatchPlayerData playerData)
 		{
 			writer.Write(playerData.NickName);
 			writer.Write(playerData.Avatar);
 			writer.Write(playerData.GameClass);
-			writer.Write(playerData.IsAlive);
 			writer.Write(playerData.Kills);
 			writer.Write(playerData.Deaths);
 		}

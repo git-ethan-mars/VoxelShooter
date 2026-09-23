@@ -9,10 +9,5 @@ namespace Networking.Core
 		{
 			Message = message;
 		}
-
-		public DirectedMessage(TMessage message) : base(message)
-		{
-			Message = message;
-		}
 	}
 }

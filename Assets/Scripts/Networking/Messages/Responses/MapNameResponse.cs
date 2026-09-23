@@ -1,4 +1,4 @@
-﻿namespace Networking.Messages
+namespace Networking.Messages
 {
 	public struct MapNameResponse : IResponse
 	{

@@ -1,9 +1,7 @@
 using GamePlay;
-using GamePlay.Core;
-using GamePlay.MapFeatures;
+using GamePlay.Audio;
 using Infrastructure.States;
 using Networking;
-using Networking.Audio;
 using R3;
 using Reflex.Core;
 using Services;
@@ -17,13 +15,15 @@ namespace Infrastructure.Installers
 	{
 		public void InstallBindings(ContainerBuilder containerBuilder)
 		{
-			BindHostServices(containerBuilder);
-			BindClientServices(containerBuilder);
 			BindCommonServices(containerBuilder);
 			BindFactories(containerBuilder);
 			BindGameObjects(containerBuilder);
 			BindRegistry(containerBuilder);
-			containerBuilder.AddSingleton(typeof(NetworkAudioPlayer));
+			
+			containerBuilder.AddSingleton(typeof(LootBoxSpawner));
+			containerBuilder.AddSingleton(typeof(SpawnPointService));
+			containerBuilder.AddSingleton(typeof(RespawnService));
+			containerBuilder.AddSingleton(typeof(KillList));
 
 			Observable.FromEvent<Container>(
 					handler => containerBuilder.OnContainerBuilt += handler,
@@ -38,30 +38,18 @@ namespace Infrastructure.Installers
 			containerBuilder.AddSingleton(typeof(NetworkFactory), typeof(INetworkFactory));
 			containerBuilder.AddSingleton(typeof(ParticleFactory), typeof(IParticleFactory));
 			containerBuilder.AddSingleton(typeof(MeshFactory), typeof(IMeshFactory));
-			containerBuilder.AddSingleton(typeof(MapFactory), typeof(IMapFactory));
 			containerBuilder.AddSingleton(typeof(SlotPresenterFactory), typeof(ISlotPresenterFactory));
-		}
-
-		private void BindHostServices(ContainerBuilder containerBuilder)
-		{
-			containerBuilder.AddSingleton(typeof(PlayerService), typeof(IPlayerService));
-			containerBuilder.AddSingleton(typeof(SpawnPointService), typeof(ISpawnPointService));
-			containerBuilder.AddSingleton(typeof(LootBoxDropper));
-		}
-
-		private void BindClientServices(ContainerBuilder containerBuilder)
-		{
-			containerBuilder.AddSingleton(typeof(GameStateDownloader));
+			containerBuilder.AddSingleton(typeof(GameModeFactory));
 		}
 
 		private void BindCommonServices(ContainerBuilder containerBuilder)
 		{
-			containerBuilder.AddSingleton(typeof(UIProvider));
-			containerBuilder.AddSingleton(typeof(GameSessionCreator));
 			containerBuilder.AddSingleton(typeof(CharacterProvider));
 			containerBuilder.AddSingleton(typeof(MapProvider));
 			containerBuilder.AddSingleton(typeof(CameraProvider));
-			containerBuilder.AddSingleton(typeof(EntityContainerService));
+			containerBuilder.AddSingleton(typeof(EntityContainer));
+			containerBuilder.AddSingleton(typeof(AudioPlayer));
+			containerBuilder.AddSingleton(typeof(NetworkAudioSender));
 # if LOCAL_BUILD
 			containerBuilder.AddSingleton(typeof(LocalPlayerDataLoader), typeof(IPlayerDataLoader));
 #else
@@ -99,21 +87,24 @@ namespace Infrastructure.Installers
 			var staticData = container.Single<IStaticDataService>();
 			var cameraService = container.Single<CameraProvider>();
 			var uiProvider = container.Single<UIProvider>();
+			var characterProvider = container.Single<CharacterProvider>();
 			var registry = container.Single<ISlotPresenterRegistry>();
 			registry.Register<Block>((block, view) =>
-				new BlockPresenter(staticData, uiProvider, block, view));
+				new BlockPresenter(staticData, characterProvider, uiProvider, block, view));
 			registry.Register<DrillLauncher>((drill, view) =>
 				new DrillLauncherPresenter(staticData, uiProvider, drill, view));
 			registry.Register<Grenade>((grenade, view) =>
 				new GrenadePresenter(staticData, uiProvider, grenade, view));
 			registry.Register<MeleeWeapon>((melee, view) =>
-				new MeleeWeaponPresenter(staticData, melee, view));
+				new MeleeWeaponPresenter(staticData, uiProvider, melee, view));
 			registry.Register<RangeWeapon>((weapon, view) =>
 				new RangeWeaponPresenter(staticData, uiProvider, cameraService, view, weapon));
 			registry.Register<RocketLauncher>((rocket, view) =>
 				new RocketLauncherPresenter(staticData, uiProvider, rocket, view));
 			registry.Register<TNT>((tnt, view) =>
 				new TNTPresenter(staticData, uiProvider, tnt, view));
+			registry.Register<Blueprint>((blueprint, view) =>
+				new BlueprintPresenter(staticData, characterProvider, uiProvider, blueprint, view));
 		}
 	}
 }

@@ -1,32 +1,37 @@
+using Data;
 using GamePlay;
+using Mirror;
 using Networking;
-using R3;
-using UI;
+using Networking.Core;
+using Networking.Messages;
 namespace Infrastructure.States
 {
 	public class InitializeClientState : IState
 	{
 		private readonly GameStateMachine _gameStateMachine;
-		private readonly GameSessionCreator _gameSessionCreator;
 		private readonly VSNetworkManager _networkManager;
+		private readonly GameModeFactory _gameModeFactory;
 
-		private LoadingWindow _loadingWindow;
-
-		public InitializeClientState(GameStateMachine gameStateMachine, GameSessionCreator gameSessionCreator,
-			VSNetworkManager networkManager)
+		public InitializeClientState(GameStateMachine gameStateMachine, VSNetworkManager networkManager, GameModeFactory gameModeFactory)
 		{
 			_gameStateMachine = gameStateMachine;
-			_gameSessionCreator = gameSessionCreator;
 			_networkManager = networkManager;
+			_gameModeFactory = gameModeFactory;
 		}
 
 		public async void Enter()
 		{
-			_networkManager.ClientDisconnected
-				.Subscribe(_ => _gameStateMachine.Enter<GameMenuState>())
-				.AddTo(_networkManager);
-			GameSession gameSession = await _gameSessionCreator.ConnectToGameSession();
-			_gameStateMachine.Enter<GameLoopState, GameSession>(gameSession);
+			_networkManager.StartClient();
+			
+			await _networkManager.MessageReceived.FirstAsync<AuthenticationResponse>();
+			NetworkClient.connection.isAuthenticated = true;
+			
+			_networkManager.SendRequest(new GameSettingsRequest());
+			GameSettings gameSettings = (await _networkManager.MessageReceived
+				.FirstAsync<GameSettingsResponse>()).Message.GameSettings;
+			
+			GameMode gameMode = await _gameModeFactory.CreateGameMode(gameSettings);
+			_gameStateMachine.Enter<GameLoopState, GameMode>(gameMode);
 		}
 
 		public void Exit()

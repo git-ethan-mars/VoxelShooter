@@ -5,9 +5,9 @@ namespace Networking.Messages
 {
 	public struct ScoreboardResponse : NetworkMessage
 	{
-		public readonly List<PlayerData> Scores;
+		public readonly List<DeathMatchPlayerData> Scores;
 
-		public ScoreboardResponse(List<PlayerData> scores)
+		public ScoreboardResponse(List<DeathMatchPlayerData> scores)
 		{
 			Scores = scores;
 		}

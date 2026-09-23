@@ -1,26 +1,28 @@
 using Data;
 using GamePlay;
-using UI;
+using Networking;
+
 namespace Infrastructure.States
 {
 	public class InitializeHostState : IPayloadedState<GameSettings>
 	{
 		private readonly GameStateMachine _gameStateMachine;
-		private readonly GameSessionCreator _gameSessionCreator;
+		private readonly VSNetworkManager _networkManager;
+		private readonly GameModeFactory _gameModeFactory;
 
-		private LoadingWindow _loadingWindow;
-
-		public InitializeHostState(GameStateMachine gameStateMachine, GameSessionCreator gameSessionCreator)
+		public InitializeHostState(GameStateMachine gameStateMachine, VSNetworkManager networkManager, GameModeFactory gameModeFactory)
 		{
 			_gameStateMachine = gameStateMachine;
-			_gameSessionCreator = gameSessionCreator;
+			_networkManager = networkManager;
+			_gameModeFactory = gameModeFactory;
 		}
 
-		public void Enter(GameSettings gameSettings)
+		public async void Enter(GameSettings gameSettings)
 		{
-			GameSession gameSession = _gameSessionCreator.Create(gameSettings);
-
-			_gameStateMachine.Enter<GameLoopState, GameSession>(gameSession);
+			_networkManager.StartHost();
+			GameMode gameMode = await _gameModeFactory.CreateGameMode(gameSettings);
+			_gameStateMachine.Enter<GameLoopState, GameMode>(gameMode);
+			await gameMode.LoadMapAsync(gameSettings.MapName);
 		}
 
 		public void Exit()

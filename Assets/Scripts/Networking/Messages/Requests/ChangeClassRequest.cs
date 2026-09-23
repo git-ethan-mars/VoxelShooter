@@ -1,11 +1,11 @@
 using Data;
 namespace Networking.Messages
 {
-	public struct ChangeClassRequest : IRequest
+	public struct ChangeGameClassRequest : IRequest
 	{
 		public readonly GameClass GameClass;
 
-		public ChangeClassRequest(GameClass gameClass)
+		public ChangeGameClassRequest(GameClass gameClass)
 		{
 			GameClass = gameClass;
 		}
