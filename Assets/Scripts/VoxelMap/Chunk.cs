@@ -52,7 +52,7 @@ namespace VoxelMap
 			
 			ApplyMeshData(meshArray, meshData);
 
-			var bakeJob = new BakeChunkColliderJob(Mesh.GetInstanceID());
+			var bakeJob = new BakeChunkColliderJob(Mesh.GetEntityId());
 			bakeJob.Schedule().Complete();
 			ApplyMeshCollider();
 		}
@@ -74,7 +74,7 @@ namespace VoxelMap
 
 			ApplyMeshData(meshArray, meshData);
 
-			var bakeJob = new BakeChunkColliderJob(Mesh.GetInstanceID());
+			var bakeJob = new BakeChunkColliderJob(Mesh.GetEntityId());
 			await bakeJob.Schedule().ToUniTask(PlayerLoopTiming.Update);
 			
 			cancellationToken.ThrowIfCancellationRequested();
@@ -85,7 +85,7 @@ namespace VoxelMap
 		public static unsafe void RegenerateParallel(MapData mapData, ICollection<Chunk> chunks)
 		{
 			var chunkDataArray = new NativeArray<ChunkData>(chunks.Count, Allocator.TempJob);
-			var meshIndexes = new NativeArray<int>(chunks.Count, Allocator.TempJob);
+			var meshIndexes = new NativeArray<EntityId>(chunks.Count, Allocator.TempJob);
 			var meshContexts = ArrayPool<(Mesh.MeshDataArray meshDataArray, Mesh.MeshData meshData)>.Shared.Rent(chunks.Count);
 			
 			try
@@ -121,7 +121,7 @@ namespace VoxelMap
 				foreach (Chunk chunk in chunks)
 				{
 					chunk.ApplyMeshData(meshContexts[chunkNumber].meshDataArray, meshContexts[chunkNumber].meshData);
-					meshIndexes[chunkNumber] = chunk.Mesh.GetInstanceID();
+					meshIndexes[chunkNumber] = chunk.Mesh.GetEntityId();
 					chunkNumber++;
 				}
 

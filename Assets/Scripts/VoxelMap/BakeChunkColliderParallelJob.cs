@@ -8,9 +8,9 @@ namespace VoxelMap
 	public readonly struct BakeChunkColliderParallelJob : IJobFor
 	{
 		[ReadOnly]
-		private readonly NativeArray<int> _meshIndexes;
+		private readonly NativeArray<EntityId> _meshIndexes;
 
-		public BakeChunkColliderParallelJob(NativeArray<int> meshIndexes)
+		public BakeChunkColliderParallelJob(NativeArray<EntityId> meshIndexes)
 		{
 			_meshIndexes = meshIndexes;
 		}

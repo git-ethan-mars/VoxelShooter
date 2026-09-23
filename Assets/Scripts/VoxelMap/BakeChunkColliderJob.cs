@@ -6,9 +6,9 @@ namespace VoxelMap
 	[BurstCompile]
 	public struct BakeChunkColliderJob : IJob
 	{
-		private readonly int _meshId;
+		private readonly EntityId _meshId;
 
-		public BakeChunkColliderJob(int meshId)
+		public BakeChunkColliderJob(EntityId meshId)
 		{
 			_meshId = meshId;
 		}
