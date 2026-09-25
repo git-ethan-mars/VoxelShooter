@@ -7,6 +7,7 @@ using Reflex.Attributes;
 using Services;
 using UnityEngine;
 using UnityEngine.Animations;
+using VoxelMap;
 
 namespace GamePlay
 {
@@ -16,8 +17,11 @@ namespace GamePlay
 		private const float Speed = 10.0f;
 		private const float AccelerationMultiplier = 2.5f;
 		private const float DistanceToTarget = 5.0f;
+		private const float CameraRadius = 0.3f;
+		private const float WallMargin = 0.6f;
 
 		[SerializeField] private PositionConstraint positionConstraint;
+		[SerializeField] private Rigidbody rigidBody;
 
 		[SyncVar] private uint _killerNetId;
 
@@ -25,6 +29,7 @@ namespace GamePlay
 		private CameraProvider _cameraProvider;
 		private IStorageService _storageService;
 		private EntityContainer _entityContainer;
+		private MapProvider _mapProvider;
 
 		private float _sensitivity;
 		private float _xRotation;
@@ -34,12 +39,13 @@ namespace GamePlay
 
 		[Inject]
 		private void Construct(IInputService inputService, IStorageService storageService, CameraProvider cameraProvider,
-			EntityContainer entityContainer)
+			EntityContainer entityContainer, MapProvider mapProvider)
 		{
 			_inputService = inputService;
 			_cameraProvider = cameraProvider;
 			_storageService = storageService;
 			_entityContainer = entityContainer;
+			_mapProvider = mapProvider;
 		}
 
 		[Server]
@@ -90,6 +96,10 @@ namespace GamePlay
 			{
 				Move(_inputService.Axis);
 			}
+			else
+			{
+				UpdateFollowCameraDistance();
+			}
 		}
 
 		public override void OnStopLocalPlayer()
@@ -132,8 +142,14 @@ namespace GamePlay
 				positionConstraint.SetSource(0, constraintSource);
 			}
 
+			// The constraint moves the spectator now, so physics must not fight it.
+			if (!rigidBody.isKinematic)
+			{
+				rigidBody.linearVelocity = Vector3.zero;
+				rigidBody.isKinematic = true;
+			}
 			positionConstraint.constraintActive = true;
-			_cameraProvider.MainCamera.transform.SetLocalPositionAndRotation(Vector3.back * DistanceToTarget, Quaternion.identity);
+			UpdateFollowCameraDistance();
 		}
 
 		private void EnterFreeView()
@@ -149,7 +165,11 @@ namespace GamePlay
 			}
 
 			positionConstraint.constraintActive = false;
-			transform.position = cameraPosition;
+			Vector3 position = ClampInsideWalls(cameraPosition);
+			transform.position = position;
+			rigidBody.position = position;
+			rigidBody.isKinematic = false;
+			rigidBody.linearVelocity = Vector3.zero;
 			_cameraProvider.MainCamera.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 		}
 
@@ -157,7 +177,37 @@ namespace GamePlay
 		{
 			float speed = _inputService.IsSprintButtonHold() ? Speed * AccelerationMultiplier : Speed;
 
-			transform.position += (transform.forward * direction.x + transform.right * direction.y) * (speed * Time.deltaTime);
+			// Moved by velocity, so the map walls stop the spectator.
+			rigidBody.linearVelocity = (transform.forward * direction.x + transform.right * direction.y) * speed;
+		}
+
+		// Pulls the follow camera closer when a map wall is behind it, so it never looks out of the map.
+		private void UpdateFollowCameraDistance()
+		{
+			float distance = DistanceToTarget;
+
+			if (Physics.SphereCast(transform.position, CameraRadius, -transform.forward, out RaycastHit hit, DistanceToTarget,
+				    LayerMasks.WallMask, QueryTriggerInteraction.Ignore))
+			{
+				distance = hit.distance;
+			}
+
+			_cameraProvider.MainCamera.transform.SetLocalPositionAndRotation(Vector3.back * distance, Quaternion.identity);
+		}
+
+		private Vector3 ClampInsideWalls(Vector3 position)
+		{
+			Map map = _mapProvider.Map.CurrentValue;
+
+			if (map == null)
+			{
+				return position;
+			}
+
+			return new Vector3(
+				Mathf.Clamp(position.x, WallMargin, map.Width - WallMargin),
+				Mathf.Clamp(position.y, WallMargin, map.Height - WallMargin),
+				Mathf.Clamp(position.z, WallMargin, map.Depth - WallMargin));
 		}
 
 		private Character GetKillerCharacter()

@@ -6,6 +6,7 @@ namespace GamePlay
 	{
 		public static readonly LayerMask AttackMask = LayerMask.GetMask("Entity") | LayerMask.GetMask("Chunk");
 		public static readonly LayerMask BuildMask = LayerMask.GetMask("Chunk");
+		public static readonly LayerMask WallMask = LayerMask.GetMask("Wall");
 		public static readonly LayerMask MovementBlockMask = LayerMask.GetMask("Entity") | LayerMask.GetMask("Chunk");
 	}
 }

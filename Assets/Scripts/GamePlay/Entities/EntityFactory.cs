@@ -22,7 +22,7 @@ namespace GamePlay
 		private const string CombatantPath = "Prefabs/Entities/Characters/Combatant";
 		private const string SniperPath = "Prefabs/Entities/Characters/Sniper";
 		private const string GrenadierPath = "Prefabs/Entities/Characters/Grenadier";
-		private const string SpectatorPlayerPath = "Prefabs/Spectator";
+		private const string SpectatorPlayerPath = "Prefabs/Entities/Spectator";
 
 		private readonly IAssetProvider _assets;
 		private readonly IStaticDataService _staticData;
