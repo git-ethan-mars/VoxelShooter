@@ -22,7 +22,8 @@ namespace GamePlay
 
 		[SerializeField] private Rigidbody rigidBody;
 
-		[SyncVar] private uint _killerNetId;
+		// The character to follow: the killer after a death, or the player chosen by the host.
+		[SyncVar(hook = nameof(OnFocusChanged))] private uint _focusNetId;
 
 		private IInputService _inputService;
 		private CameraProvider _cameraProvider;
@@ -50,9 +51,17 @@ namespace GamePlay
 		}
 
 		[Server]
-		public void Initialize(NetworkConnectionToClient killer)
+		public void Initialize(NetworkConnectionToClient focus)
 		{
-			_killerNetId = killer != null && killer.identity != null ? killer.identity.netId : 0;
+			_focusNetId = focus != null && focus.identity != null ? focus.identity.netId : 0;
+		}
+
+		[Server]
+		public void Spectate(NetworkIdentity target)
+		{
+			// Reset first, so choosing the same player again still moves the camera back to them.
+			_focusNetId = 0;
+			_focusNetId = target.netId;
 		}
 
 		public override void OnStartLocalPlayer()
@@ -62,7 +71,7 @@ namespace GamePlay
 			_sensitivity = _storageService.Load<MouseSettingsData>(IStorageService.MouseSettingsKey).GeneralSensitivity;
 			_storageService.Subscribe<MouseSettingsData>(ChangeMouseSettings).AddTo(this);
 
-			Entity initialTarget = GetKillerCharacter() ?? GetRandomTarget();
+			Entity initialTarget = GetFocusedCharacter() ?? GetRandomTarget();
 
 			if (initialTarget != null)
 			{
@@ -125,6 +134,21 @@ namespace GamePlay
 			if (_cameraProvider.MainCamera.transform.parent == transform)
 			{
 				_cameraProvider.MainCamera.transform.SetParent(null);
+			}
+		}
+
+		private void OnFocusChanged(uint oldNetId, uint newNetId)
+		{
+			if (!isLocalPlayer)
+			{
+				return;
+			}
+
+			Character character = GetFocusedCharacter();
+
+			if (character != null)
+			{
+				Follow(character);
 			}
 		}
 
@@ -214,15 +238,15 @@ namespace GamePlay
 				Mathf.Clamp(position.z, WallMargin, map.Depth - WallMargin));
 		}
 
-		private Character GetKillerCharacter()
+		private Character GetFocusedCharacter()
 		{
-			if (_killerNetId == 0)
+			if (_focusNetId == 0)
 			{
 				return null;
 			}
 
 			return _entityContainer.GetEntitiesByType<Character>()
-				.FirstOrDefault(character => character.netId == _killerNetId);
+				.FirstOrDefault(character => character.netId == _focusNetId);
 		}
 
 		private Entity GetRandomTarget()

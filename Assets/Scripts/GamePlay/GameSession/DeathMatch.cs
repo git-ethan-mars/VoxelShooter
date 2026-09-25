@@ -285,6 +285,7 @@ namespace GamePlay
 			Chat.RegisterCommand(new ChatCommand("players", "/players", "List the connected players with their ids", _ => ListPlayers()));
 			Chat.RegisterCommand(new ChatCommand("kick", "/kick <id>", "Disconnect a player from the game", KickPlayer));
 			Chat.RegisterCommand(new ChatCommand("kill", "/kill <id>", "Kill a player's character", KillPlayer));
+			Chat.RegisterCommand(new ChatCommand("spectate", "/spectate <id>", "Watch a player; N returns you to the game", SpectatePlayer));
 			Chat.RegisterCommand(new ChatCommand("endround", "/endround", "Finish the round and start the map voting", _ => EndRound()));
 		}
 
@@ -326,6 +327,45 @@ namespace GamePlay
 			_respawnService.Kill(session);
 			Chat.SendSystemMessage($"{session.Data.NickName} was killed by the host");
 			return null;
+		}
+
+		private string SpectatePlayer(string[] arguments)
+		{
+			if (!TryFindSession(arguments, out DeathMatchPlayerSession target, out string error))
+			{
+				return error ?? "Usage: /spectate <id>";
+			}
+
+			if (!_sessions.TryGetValue(NetworkServer.localConnection, out DeathMatchPlayerSession host) || target == host)
+			{
+				return "You can't spectate yourself";
+			}
+
+			if (MutableGameState.Value != GamePlay.GameState.Playing || !target.IsAlive || target.Connection.identity == null)
+			{
+				return $"{target.Data.NickName} is not alive";
+			}
+
+			NetworkIdentity hostIdentity = host.Connection.identity;
+
+			if (hostIdentity != null && hostIdentity.TryGetComponent(out Spectator spectator))
+			{
+				spectator.Spectate(target.Connection.identity);
+			}
+			else
+			{
+				// The host leaves the round without dying and comes back by choosing a class.
+				Vector3 position = hostIdentity != null ? hostIdentity.transform.position : target.Connection.identity.transform.position;
+				Spectator newSpectator = _entityFactory.CreateSpectator(position);
+				newSpectator.Initialize(target.Connection);
+				NetworkServer.ReplacePlayerForConnection(host.Connection, newSpectator.gameObject, ReplacePlayerOptions.Destroy);
+
+				host.IsAlive = false;
+				host.Data = host.Data.WithGameClass(GameClass.None);
+				Scoreboard.ChangeClass(host.Connection, GameClass.None);
+			}
+
+			return $"Spectating {target.Data.NickName}, press N to return to the game";
 		}
 
 		// Finds a player by the id shown in /players. The error is null when the id is missing.
