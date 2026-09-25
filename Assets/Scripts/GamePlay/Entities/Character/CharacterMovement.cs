@@ -57,6 +57,23 @@ namespace GamePlay
 			_mapProvider = mapProvider;
 		}
 
+		// Only the owner simulates its character; everywhere else NetworkTransform moves it,
+		// so the body must not be pushed around by physics or interpolation.
+		public override void OnStartServer()
+		{
+			SetSimulated(false);
+		}
+
+		public override void OnStartClient()
+		{
+			SetSimulated(false);
+		}
+
+		public override void OnStartLocalPlayer()
+		{
+			SetSimulated(true);
+		}
+
 		private void FixedUpdate()
 		{
 			if (!isLocalPlayer)
@@ -177,6 +194,12 @@ namespace GamePlay
 
 			_jumpRequested = false;
 			_resetHorizontalVelocity = false;
+		}
+
+		private void SetSimulated(bool isSimulated)
+		{
+			rigidBody.isKinematic = !isSimulated;
+			rigidBody.interpolation = isSimulated ? RigidbodyInterpolation.Interpolate : RigidbodyInterpolation.None;
 		}
 
 		private void UpdateState()

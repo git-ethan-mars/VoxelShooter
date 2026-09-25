@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 8144455097408562770}
   - component: {fileID: 7486787625224097987}
   - component: {fileID: 1329361541010092145}
-  - component: {fileID: -1983227290228430223}
   - component: {fileID: 7512252938045079943}
   - component: {fileID: 6878792441961298351}
   m_Layer: 9
@@ -52,7 +51,6 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0.1
-  positionConstraint: {fileID: -1983227290228430223}
   rigidBody: {fileID: 6878792441961298351}
 --- !u!114 &7486787625224097987
 MonoBehaviour:
@@ -84,24 +82,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Reflex::Reflex.Components.GameObjectSelfInjector
   _injectionStrategy: 0
---- !u!1818360608 &-1983227290228430223
-PositionConstraint:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7261819779245193037}
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Weight: 1
-  m_TranslationAtRest: {x: 0, y: 0, z: 0}
-  m_TranslationOffset: {x: 0, y: 0, z: 0}
-  m_AffectTranslationX: 1
-  m_AffectTranslationY: 1
-  m_AffectTranslationZ: 1
-  m_Active: 1
-  m_IsLocked: 0
-  m_Sources: []
 --- !u!65 &7512252938045079943
 BoxCollider:
   m_ObjectHideFlags: 0

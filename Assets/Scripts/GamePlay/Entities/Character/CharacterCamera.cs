@@ -45,8 +45,16 @@ namespace GamePlay
 		{
 			if (isLocalPlayer)
 			{
-				_cameraProvider.MainCamera.transform.position = head.position;
 				Rotate(_inputService.MouseAxis);
+			}
+		}
+
+		// The head bone is animated after Update, so the camera follows it once the pose of this frame is final.
+		private void LateUpdate()
+		{
+			if (isLocalPlayer)
+			{
+				_cameraProvider.MainCamera.transform.position = head.position;
 			}
 		}
 

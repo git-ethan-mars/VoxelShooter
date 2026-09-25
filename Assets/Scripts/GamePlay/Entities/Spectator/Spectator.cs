@@ -6,7 +6,6 @@ using R3;
 using Reflex.Attributes;
 using Services;
 using UnityEngine;
-using UnityEngine.Animations;
 using VoxelMap;
 
 namespace GamePlay
@@ -19,8 +18,8 @@ namespace GamePlay
 		private const float DistanceToTarget = 5.0f;
 		private const float CameraRadius = 0.3f;
 		private const float WallMargin = 0.6f;
+		private const float PitchLimit = 89.9f;
 
-		[SerializeField] private PositionConstraint positionConstraint;
 		[SerializeField] private Rigidbody rigidBody;
 
 		[SyncVar] private uint _killerNetId;
@@ -36,6 +35,8 @@ namespace GamePlay
 		private float _yRotation;
 		private Entity _target;
 		private SpectatingMode _mode;
+
+		private Quaternion ViewRotation => Quaternion.Euler(_xRotation, _yRotation, 0.0f);
 
 		[Inject]
 		private void Construct(IInputService inputService, IStorageService storageService, CameraProvider cameraProvider,
@@ -96,9 +97,24 @@ namespace GamePlay
 			{
 				Move(_inputService.Axis);
 			}
+		}
+
+		// The camera is placed after movement, interpolation and network updates of this frame.
+		private void LateUpdate()
+		{
+			if (!isLocalPlayer)
+			{
+				return;
+			}
+
+			if (_mode == SpectatingMode.Follow && _target != null)
+			{
+				transform.position = _target.transform.position;
+				PlaceFollowCamera();
+			}
 			else
 			{
-				UpdateFollowCameraDistance();
+				_cameraProvider.MainCamera.transform.SetPositionAndRotation(transform.position, ViewRotation);
 			}
 		}
 
@@ -131,25 +147,16 @@ namespace GamePlay
 			_mode = SpectatingMode.Follow;
 			_target = target;
 
-			var constraintSource = new ConstraintSource() { sourceTransform = target.transform, weight = 1 };
-
-			if (positionConstraint.sourceCount == 0)
-			{
-				positionConstraint.AddSource(constraintSource);
-			}
-			else
-			{
-				positionConstraint.SetSource(0, constraintSource);
-			}
-
-			// The constraint moves the spectator now, so physics must not fight it.
+			// The spectator is snapped to the target every frame, so physics and interpolation must stay out of it.
 			if (!rigidBody.isKinematic)
 			{
 				rigidBody.linearVelocity = Vector3.zero;
 				rigidBody.isKinematic = true;
 			}
-			positionConstraint.constraintActive = true;
-			UpdateFollowCameraDistance();
+
+			rigidBody.interpolation = RigidbodyInterpolation.None;
+			transform.position = target.transform.position;
+			PlaceFollowCamera();
 		}
 
 		private void EnterFreeView()
@@ -159,40 +166,37 @@ namespace GamePlay
 			_mode = SpectatingMode.FreeView;
 			_target = null;
 
-			if (positionConstraint.sourceCount > 0)
-			{
-				positionConstraint.RemoveSource(0);
-			}
-
-			positionConstraint.constraintActive = false;
 			Vector3 position = ClampInsideWalls(cameraPosition);
 			transform.position = position;
 			rigidBody.position = position;
 			rigidBody.isKinematic = false;
+			rigidBody.interpolation = RigidbodyInterpolation.Interpolate;
 			rigidBody.linearVelocity = Vector3.zero;
-			_cameraProvider.MainCamera.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 		}
 
 		private void Move(Vector2 direction)
 		{
 			float speed = _inputService.IsSprintButtonHold() ? Speed * AccelerationMultiplier : Speed;
+			Quaternion rotation = ViewRotation;
 
 			// Moved by velocity, so the map walls stop the spectator.
-			rigidBody.linearVelocity = (transform.forward * direction.x + transform.right * direction.y) * speed;
+			rigidBody.linearVelocity = (rotation * Vector3.forward * direction.x + rotation * Vector3.right * direction.y) * speed;
 		}
 
-		// Pulls the follow camera closer when a map wall is behind it, so it never looks out of the map.
-		private void UpdateFollowCameraDistance()
+		// Orbits the camera around the target and pulls it closer when a map wall is behind it.
+		private void PlaceFollowCamera()
 		{
+			Quaternion rotation = ViewRotation;
+			Vector3 back = rotation * Vector3.back;
 			float distance = DistanceToTarget;
 
-			if (Physics.SphereCast(transform.position, CameraRadius, -transform.forward, out RaycastHit hit, DistanceToTarget,
+			if (Physics.SphereCast(transform.position, CameraRadius, back, out RaycastHit hit, DistanceToTarget,
 				    LayerMasks.WallMask, QueryTriggerInteraction.Ignore))
 			{
 				distance = hit.distance;
 			}
 
-			_cameraProvider.MainCamera.transform.SetLocalPositionAndRotation(Vector3.back * distance, Quaternion.identity);
+			_cameraProvider.MainCamera.transform.SetPositionAndRotation(transform.position + back * distance, rotation);
 		}
 
 		private Vector3 ClampInsideWalls(Vector3 position)
@@ -268,8 +272,7 @@ namespace GamePlay
 			float mouseX = direction.x * SensitivityMultiplier * _sensitivity * Time.deltaTime;
 			float mouseY = direction.y * SensitivityMultiplier * _sensitivity * Time.deltaTime;
 			_yRotation += mouseX;
-			_xRotation -= mouseY;
-			transform.rotation = Quaternion.Euler(_xRotation, _yRotation, 0);
+			_xRotation = Mathf.Clamp(_xRotation - mouseY, -PitchLimit, PitchLimit);
 		}
 
 		private void ChangeMouseSettings(MouseSettingsData mouseSettings)
