@@ -15,8 +15,7 @@ namespace GamePlay
 			_assets = assets;
 		}
 
-		public void CreateFallingMesh(MeshData meshData,
-			FallingMeshParticlePool fallingMeshParticlePool)
+		public void CreateFallingMesh(MeshData meshData, FallingMeshParticlePool fallingMeshParticlePool, Vector3 position)
 		{
 			var mesh = new Mesh();
 			mesh.indexFormat = meshData.IndexFormat;
@@ -24,7 +23,9 @@ namespace GamePlay
 			mesh.SetTriangles(meshData.Triangles, 0);
 			mesh.SetColors(meshData.Colors);
 			mesh.SetNormals(meshData.Normals);
+			mesh.SetUVs(0, meshData.Uvs);
 			GameObject fallingMesh = _assets.Instantiate(MeshPath.FallingMeshPath);
+			fallingMesh.transform.position = position;
 			fallingMesh.GetComponent<MeshFilter>().mesh = mesh;
 			fallingMesh.GetComponent<FallingMesh>().Construct(fallingMeshParticlePool);
 			var torque = new Vector3(Random.Range(0, 40), 0, Random.Range(0, 40));

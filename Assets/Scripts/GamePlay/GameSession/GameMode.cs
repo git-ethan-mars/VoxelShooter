@@ -94,6 +94,7 @@ namespace GamePlay
 
 			MapProvider.Map.CurrentValue.AddFeature<MapBuilding>();
 			MapProvider.Map.CurrentValue.AddFeature<MapDestruction>();
+			MapProvider.Map.CurrentValue.AddFeature<ColumnDestructionAlgorithm>();
 			MapProvider.Map.CurrentValue.AddFeature<VoxelHealthSystem>();
 			MapProvider.Map.CurrentValue.AddFeature<MapUpdateSender>();
 

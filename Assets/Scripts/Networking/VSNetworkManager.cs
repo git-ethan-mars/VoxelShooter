@@ -56,6 +56,7 @@ namespace Networking
 			RegisterResponse<MapDownloadResponse>();
 			RegisterResponse<AddedVoxelResponse>();
 			RegisterResponse<RemovedPositionResponse>();
+			RegisterResponse<FallingVoxelsResponse>();
 			RegisterResponse<GameSettingsResponse>();
 			RegisterResponse<CharacterDiedResponse>();
 			RegisterResponse<MapChangeResponse>();
@@ -85,6 +86,7 @@ namespace Networking
 			UnregisterResponse<MapDownloadResponse>();
 			UnregisterResponse<AddedVoxelResponse>();
 			UnregisterResponse<RemovedPositionResponse>();
+			UnregisterResponse<FallingVoxelsResponse>();
 			UnregisterResponse<GameSettingsResponse>();
 			UnregisterResponse<CharacterDiedResponse>();
 			UnregisterResponse<MapChangeResponse>();

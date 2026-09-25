@@ -38,6 +38,7 @@ namespace Infrastructure.Installers
 			containerBuilder.AddSingleton(typeof(NetworkFactory), typeof(INetworkFactory));
 			containerBuilder.AddSingleton(typeof(ParticleFactory), typeof(IParticleFactory));
 			containerBuilder.AddSingleton(typeof(MeshFactory), typeof(IMeshFactory));
+			containerBuilder.AddSingleton(typeof(FallMeshGenerator));
 			containerBuilder.AddSingleton(typeof(SlotPresenterFactory), typeof(ISlotPresenterFactory));
 			containerBuilder.AddSingleton(typeof(GameModeFactory));
 		}

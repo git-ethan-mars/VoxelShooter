@@ -1,9 +1,10 @@
-﻿using VoxelMap;
+using UnityEngine;
+using VoxelMap;
 
 namespace GamePlay
 {
 	public interface IMeshFactory
 	{
-		void CreateFallingMesh(MeshData meshData, FallingMeshParticlePool fallingMeshParticlePool);
+		void CreateFallingMesh(MeshData meshData, FallingMeshParticlePool fallingMeshParticlePool, Vector3 position);
 	}
 }

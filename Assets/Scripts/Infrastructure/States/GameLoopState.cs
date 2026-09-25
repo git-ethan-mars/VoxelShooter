@@ -18,17 +18,19 @@ namespace Infrastructure.States
 		private readonly MapProvider _mapProvider;
 		private readonly VSNetworkManager _networkManager;
 		private readonly AudioPlayer _audioPlayer;
+		private readonly FallMeshGenerator _fallMeshGenerator;
 
 		private CompositeDisposable _disposables;
 
 		public GameLoopState(GameStateMachine gameStateMachine, IUIFactory uiFactory,
-			MapProvider mapProvider, VSNetworkManager networkManager, AudioPlayer audioPlayer)
+			MapProvider mapProvider, VSNetworkManager networkManager, AudioPlayer audioPlayer, FallMeshGenerator fallMeshGenerator)
 		{
 			_gameStateMachine = gameStateMachine;
 			_uiFactory = uiFactory;
 			_mapProvider = mapProvider;
 			_networkManager = networkManager;
 			_audioPlayer = audioPlayer;
+			_fallMeshGenerator = fallMeshGenerator;
 		}
 
 		public UniTask EnterAsync(GameMode gameMode)
@@ -43,6 +45,9 @@ namespace Infrastructure.States
 				.Subscribe(_ => gameMode.Update())
 				.AddTo(_disposables);
 
+			_networkManager.MessageReceived.OfMessageType<FallingVoxelsResponse>()
+				.Subscribe(directedMessage => _fallMeshGenerator.GenerateFallVoxels(directedMessage.Message.Voxels))
+				.AddTo(_disposables);
 			_networkManager.MessageReceived.OfMessageType<StaticAudioResponse>()
 				.Subscribe(directedMessage => _audioPlayer.PlayAsync(directedMessage.Message.AudioType, directedMessage.Message.Position).Forget())
 				.AddTo(_disposables);

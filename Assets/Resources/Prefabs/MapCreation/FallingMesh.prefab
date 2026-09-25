@@ -68,7 +68,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 940859ed725ba884795f6dcacc5764a4, type: 2}
+  - {fileID: 2100000, guid: a1f28b4d2e054e54199f2565a87d1fc7, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -90,6 +90,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!54 &-6508187311240828720
 Rigidbody:
@@ -131,6 +132,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   meshFilter: {fileID: 8264681656219096422}
-  rb: {fileID: 0}
+  rb: {fileID: -6508187311240828720}
   meshRenderer: {fileID: 2485591047693363179}
   lifeTime: 0

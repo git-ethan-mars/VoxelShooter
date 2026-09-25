@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using Networking;
+using Networking.Messages;
 using R3;
 using Reflex.Attributes;
 using UnityEngine;
@@ -9,324 +10,378 @@ using VoxelMap;
 
 namespace GamePlay
 {
+	// Keeps every map column as vertical runs of solid voxels plus a graph of touching runs.
+	// After voxels are removed, runs that can no longer reach the ground (y = 0) are removed as floating.
 	public class ColumnDestructionAlgorithm : MapFeature
 	{
-		private Dictionary<Run, HashSet<Run>> _neighboursByRun;
+		private const int MaxVoxelsPerMessage = 1000;
+
+		private readonly Dictionary<Run, HashSet<Run>> _neighboursByRun = new Dictionary<Run, HashSet<Run>>();
+
 		private List<Run>[] _columns;
 		private MapProvider _mapProvider;
+		private VSNetworkManager _networkManager;
+		private int _width;
+		private int _height;
+		private int _depth;
 
 		[Inject]
-		private void Construct(MapProvider mapProvider)
+		private void Construct(MapProvider mapProvider, VSNetworkManager networkManager)
 		{
 			_mapProvider = mapProvider;
+			_networkManager = networkManager;
 		}
 
 		private void Start()
 		{
-			_columns = new List<Run>[_mapProvider.Map.CurrentValue.Width * _mapProvider.Map.CurrentValue.Depth];
-			_neighboursByRun = new Dictionary<Run, HashSet<Run>>();
+			Map map = _mapProvider.Map.CurrentValue;
+			_width = map.Width;
+			_height = map.Height;
+			_depth = map.Depth;
+			_columns = new List<Run>[_width * _depth];
 
-			for (int i = 0; i < _columns.Length; i++)
-			{
-				_columns[i] = new List<Run>();
-			}
-
-			PreProcessColumns();
+			PreProcessColumns(map);
 			PreProcessGraph();
 
-			_mapProvider.Map.CurrentValue.VoxelsAdded
+			map.VoxelsAdded
 				.Subscribe(Add)
 				.AddTo(this);
-			_mapProvider.Map.CurrentValue.VoxelsRemoved
+			map.VoxelsRemoved
 				.Subscribe(Remove)
 				.AddTo(this);
 		}
 
 		private void Add(IReadOnlyList<Voxel> voxels)
 		{
-			for (int i = 0; i < voxels.Count; i++)
+			foreach (Voxel voxel in voxels)
 			{
-				if (!TryMergeWithExistingRuns(voxels[i]))
-				{
-					var singleVoxelRun = new Run(voxels[i].Position.x, voxels[i].Position.z, voxels[i].Position.y, 1, true);
-					AddRun(singleVoxelRun);
-				}
-			}
-		}
+				Vector3Ushort position = voxel.Position;
 
-		private void Remove(IReadOnlyList<Vector3Ushort> removingPositions)
-		{
-			using PooledObject<List<Vector3Ushort>> neighbourPositions = ListPool<Vector3Ushort>.Get(out List<Vector3Ushort> neighboursList);
-			using PooledObject<HashSet<Run>> runsSet = HashSetPool<Run>.Get(out HashSet<Run> runs);
-			using PooledObject<List<Run>> deletingRunsList = ListPool<Run>.Get(out List<Run> deletingRuns);
-			using PooledObject<List<Voxel>> fallingVoxelsList = ListPool<Voxel>.Get(out List<Voxel> fallingVoxels);
-
-			for (int i = 0; i < removingPositions.Count; i++)
-			{
-				if (!TryFindRunInColumn(removingPositions[i], out Run run))
+				if (TryFindRunInColumn(position.x, position.y, position.z, out _))
 				{
 					continue;
 				}
 
-				if (removingPositions[i].y == run.Begin || removingPositions[i].y == run.Begin + run.Length - 1)
+				bool hasRunBelow = TryFindRunInColumn(position.x, position.y - 1, position.z, out Run runBelow);
+				bool hasRunAbove = TryFindRunInColumn(position.x, position.y + 1, position.z, out Run runAbove);
+
+				if (hasRunBelow && hasRunAbove)
 				{
-					var newRun = new Run(run.X, run.Z, removingPositions[i].y == run.Begin ? (ushort)(run.Begin + 1) : run.Begin,
-						(ushort)(run.Length - 1), run.IsCreatedByPlayer);
-					RemoveRun(run);
-					AddRun(newRun);
+					RemoveRun(runBelow);
+					RemoveRun(runAbove);
+					AddRun(new Run(runBelow.X, runBelow.Z, runBelow.Begin, (ushort)(runBelow.Length + 1 + runAbove.Length),
+						runBelow.IsCreatedByPlayer));
+				}
+				else if (hasRunBelow)
+				{
+					RemoveRun(runBelow);
+					AddRun(new Run(runBelow.X, runBelow.Z, runBelow.Begin, (ushort)(runBelow.Length + 1), runBelow.IsCreatedByPlayer));
+				}
+				else if (hasRunAbove)
+				{
+					RemoveRun(runAbove);
+					AddRun(new Run(runAbove.X, runAbove.Z, position.y, (ushort)(runAbove.Length + 1), runAbove.IsCreatedByPlayer));
 				}
 				else
 				{
-					SplitRun(run, removingPositions[i].y, out Run firstRun, out Run secondRun);
-					RemoveRun(run);
-					AddRun(firstRun);
-					AddRun(secondRun);
-				}
-
-				foreach (Vector3Ushort neighbour in GetConnectedNeighbours(removingPositions[i]))
-				{
-					neighboursList.Add(neighbour);
+					AddRun(new Run(position.x, position.z, position.y, 1, true));
 				}
 			}
+		}
 
-			foreach (Vector3Ushort neighbour in neighboursList)
+		private void Remove(IReadOnlyList<Vector3Ushort> removedPositions)
+		{
+			using PooledObject<HashSet<Run>> candidatesSet = HashSetPool<Run>.Get(out HashSet<Run> candidates);
+			using PooledObject<HashSet<Run>> groundedSet = HashSetPool<Run>.Get(out HashSet<Run> grounded);
+			using PooledObject<HashSet<Run>> floatingSet = HashSetPool<Run>.Get(out HashSet<Run> floating);
+			using PooledObject<List<Voxel>> fallingVoxelsList = ListPool<Voxel>.Get(out List<Voxel> fallingVoxels);
+
+			foreach (Vector3Ushort position in removedPositions)
 			{
-				if (TryFindRunInColumn(neighbour, out Run run))
+				if (!TryFindRunInColumn(position.x, position.y, position.z, out Run run))
 				{
-					runs.Add(run);
+					continue;
 				}
+
+				RemoveRun(run);
+				AddRun(new Run(run.X, run.Z, run.Begin, (ushort)(position.y - run.Begin), run.IsCreatedByPlayer));
+				AddRun(new Run(run.X, run.Z, (ushort)(position.y + 1), (ushort)(run.End - position.y), run.IsCreatedByPlayer));
 			}
 
-			var path = new Stack<Run>();
-			while (runs.Count > 0)
+			// Only runs around the removed voxels can have lost their support.
+			foreach (Vector3Ushort position in removedPositions)
 			{
-				using PooledObject<HashSet<Run>> visitedSet = HashSetPool<Run>.Get(out HashSet<Run> visited);
-				Run startRun = runs.First();
-				path.Push(startRun);
-				bool isSeparatedComponent = true;
-
-				while (path.Count > 0)
-				{
-					Run currentRun = path.Pop();
-					visited.Add(currentRun);
-					runs.Remove(currentRun);
-
-					foreach (Run nextRun in _neighboursByRun[currentRun])
-					{
-						if (visited.Contains(nextRun))
-						{
-							continue;
-						}
-
-						if (nextRun.Begin == 0)
-						{
-							isSeparatedComponent = false;
-							break;
-						}
-
-						path.Push(nextRun);
-					}
-				}
-
-				if (isSeparatedComponent)
-				{
-					deletingRuns.AddRange(visited);
-				}
+				CollectRunsAround(position, candidates);
 			}
 
-			foreach (Run deletingRun in deletingRuns)
+			using PooledObject<List<Run>> componentList = ListPool<Run>.Get(out List<Run> component);
+
+			foreach (Run candidate in candidates)
 			{
-				foreach (Vector3Ushort fallingPosition in GetPositionsInRun(deletingRun))
+				if (grounded.Contains(candidate) || floating.Contains(candidate) || !_neighboursByRun.ContainsKey(candidate))
 				{
-					fallingVoxels.Add(new Voxel(fallingPosition, VoxelData.Air));
+					continue;
 				}
 
-				RemoveRun(deletingRun);
+				if (TryFindFloatingComponent(candidate, grounded, floating, component))
+				{
+					DetachComponent(component, fallingVoxels);
+				}
 			}
 
 			if (fallingVoxels.Count > 0)
 			{
-				Debug.Log(fallingVoxels.Count);
 				_mapProvider.Map.CurrentValue.SetVoxelsByGlobalPositions(fallingVoxels);
+			}
+		}
+
+		// Depth-first search that always continues with the lowest run first, so a supported
+		// component usually reaches the ground in a few steps and the search stops right there.
+		private bool TryFindFloatingComponent(Run start, HashSet<Run> grounded, HashSet<Run> floating, List<Run> component)
+		{
+			component.Clear();
+			using PooledObject<HashSet<Run>> visitedSet = HashSetPool<Run>.Get(out HashSet<Run> visited);
+			using PooledObject<List<Run>> pathList = ListPool<Run>.Get(out List<Run> path);
+			using PooledObject<List<Run>> nextRunsList = ListPool<Run>.Get(out List<Run> nextRuns);
+			path.Add(start);
+
+			while (path.Count > 0)
+			{
+				Run current = path[^1];
+				path.RemoveAt(path.Count - 1);
+
+				if (!visited.Add(current))
+				{
+					continue;
+				}
+
+				if (current.Begin == 0 || grounded.Contains(current))
+				{
+					grounded.UnionWith(visited);
+					return false;
+				}
+
+				nextRuns.Clear();
+
+				foreach (Run neighbour in _neighboursByRun[current])
+				{
+					if (!visited.Contains(neighbour))
+					{
+						nextRuns.Add(neighbour);
+					}
+				}
+
+				// Highest first, so the lowest run ends on top of the stack.
+				nextRuns.Sort((first, second) => second.Begin.CompareTo(first.Begin));
+				path.AddRange(nextRuns);
+			}
+
+			floating.UnionWith(visited);
+			component.AddRange(visited);
+			return true;
+		}
+
+		// Turns a floating component into air and sends its voxels to clients, which let it fall as one mesh.
+		private void DetachComponent(List<Run> component, List<Voxel> fallingVoxels)
+		{
+			Map map = _mapProvider.Map.CurrentValue;
+			var componentVoxels = new List<Voxel>();
+
+			foreach (Run run in component)
+			{
+				for (int y = run.Begin; y <= run.End; y++)
+				{
+					var position = new Vector3Ushort(run.X, (ushort)y, run.Z);
+					componentVoxels.Add(new Voxel(position, map.GetVoxelByGlobalPosition(position)));
+					fallingVoxels.Add(new Voxel(position, VoxelData.Air));
+				}
+
+				RemoveRun(run);
+			}
+
+			for (int start = 0; start < componentVoxels.Count; start += MaxVoxelsPerMessage)
+			{
+				int count = Math.Min(MaxVoxelsPerMessage, componentVoxels.Count - start);
+				_networkManager.SendResponseToAll(new FallingVoxelsResponse(componentVoxels.GetRange(start, count)));
 			}
 		}
 
 		private void AddRun(Run run)
 		{
-			_columns[run.X * _mapProvider.Map.CurrentValue.Depth + run.Z].Add(run);
-			_neighboursByRun[run] = new HashSet<Run>();
-
-			using PooledObject<List<Vector3Ushort>> pooledObject = ListPool<Vector3Ushort>.Get(out List<Vector3Ushort> neighbourPositions);
-
-			for (ushort y = run.Begin; y < run.Begin + run.Length; y++)
+			if (run.Length == 0)
 			{
-				var position = new Vector3Ushort(run.X, y, run.Z);
-
-				foreach (Vector3Ushort neighbour in run.IsCreatedByPlayer
-					         ? GetConnectedNeighboursWithoutDiagonals(position)
-					         : GetConnectedNeighbours(position))
-				{
-					neighbourPositions.Add(neighbour);
-				}
+				return;
 			}
 
-			foreach (Vector3Ushort neighbour in neighbourPositions)
+			_columns[GetColumnIndex(run.X, run.Z)].Add(run);
+			var neighbours = new HashSet<Run>();
+			_neighboursByRun[run] = neighbours;
+
+			for (int x = run.X - 1; x <= run.X + 1; x++)
 			{
-				if (TryFindRunInColumn(neighbour, out Run neighbourRun) && run != neighbourRun)
+				for (int z = run.Z - 1; z <= run.Z + 1; z++)
 				{
-					_neighboursByRun[run].Add(neighbourRun);
-					_neighboursByRun[neighbourRun].Add(run);
+					if (!IsInsideColumns(x, z))
+					{
+						continue;
+					}
+
+					foreach (Run other in _columns[GetColumnIndex(x, z)])
+					{
+						if (other != run && AreConnected(run, other))
+						{
+							neighbours.Add(other);
+							_neighboursByRun[other].Add(run);
+						}
+					}
 				}
 			}
 		}
 
 		private void RemoveRun(Run run)
 		{
-			_columns[run.X * _mapProvider.Map.CurrentValue.Depth + run.Z].Remove(run);
+			_columns[GetColumnIndex(run.X, run.Z)].Remove(run);
 
-			foreach (Run adjacentRun in _neighboursByRun[run])
+			foreach (Run neighbour in _neighboursByRun[run])
 			{
-				_neighboursByRun[adjacentRun].Remove(run);
+				_neighboursByRun[neighbour].Remove(run);
 			}
 
 			_neighboursByRun.Remove(run);
 		}
 
-		private IEnumerable<Vector3Ushort> GetPositionsInRun(Run run)
+		private void PreProcessColumns(Map map)
 		{
-			for (ushort y = run.Begin; y < run.Begin + run.Length; y++)
+			for (ushort x = 0; x < _width; x++)
 			{
-				var position = new Vector3Ushort(run.X, y, run.Z);
-				yield return position;
-			}
-		}
-
-		private void PreProcessColumns()
-		{
-			for (ushort x = 0; x < _mapProvider.Map.CurrentValue.Width; x++)
-			{
-				for (ushort z = 0; z < _mapProvider.Map.CurrentValue.Depth; z++)
+				for (ushort z = 0; z < _depth; z++)
 				{
 					var runs = new List<Run>();
-					ushort startRun = 0;
-					ushort length = 0;
-					for (ushort y = 0; y < _mapProvider.Map.CurrentValue.Height; y++)
+					int begin = -1;
+
+					for (int y = 0; y <= _height; y++)
 					{
-						bool isSolid = _mapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(x, y, z).IsSolid();
-						if (isSolid)
-						{
-							if (length == 0)
-							{
-								startRun = y;
-							}
+						bool isSolid = y < _height && map.GetVoxelByGlobalPosition(x, (ushort)y, z).IsSolid();
 
-							length += 1;
+						if (isSolid && begin < 0)
+						{
+							begin = y;
 						}
-
-						if (!isSolid || y == _mapProvider.Map.CurrentValue.Height - 1)
+						else if (!isSolid && begin >= 0)
 						{
-							if (length > 0)
-							{
-								runs.Add(new Run(x, z, startRun, length, false));
-							}
-
-							length = 0;
+							runs.Add(new Run(x, z, (ushort)begin, (ushort)(y - begin), false));
+							begin = -1;
 						}
 					}
 
-					_columns[x * _mapProvider.Map.CurrentValue.Depth + z] = runs;
+					_columns[GetColumnIndex(x, z)] = runs;
 				}
 			}
 		}
 
 		private void PreProcessGraph()
 		{
-			for (int i = 0; i < _columns.Length; i++)
+			foreach (List<Run> column in _columns)
 			{
-				for (int j = 0; j < _columns[i].Count; j++)
+				foreach (Run run in column)
 				{
-					_neighboursByRun[_columns[i][j]] = new HashSet<Run>();
+					_neighboursByRun[run] = new HashSet<Run>();
 				}
 			}
 
-			for (ushort x = 0; x < _mapProvider.Map.CurrentValue.Width; x++)
+			// Runs of one column never touch, so only neighbouring columns are compared, each pair once.
+			for (int x = 0; x < _width; x++)
 			{
-				for (ushort z = 0; z < _mapProvider.Map.CurrentValue.Depth; z++)
+				for (int z = 0; z < _depth; z++)
 				{
-					for (ushort y = 0; y < _mapProvider.Map.CurrentValue.Height; y++)
+					foreach (Run run in _columns[GetColumnIndex(x, z)])
 					{
-						var position = new Vector3Ushort(x, y, z);
+						ConnectWithColumn(run, x + 1, z - 1);
+						ConnectWithColumn(run, x + 1, z);
+						ConnectWithColumn(run, x + 1, z + 1);
+						ConnectWithColumn(run, x, z + 1);
+					}
+				}
+			}
+		}
 
-						if (!_mapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(position).IsSolid() || !TryFindRunInColumn(position, out Run
-							    currentRun))
-						{
-							continue;
-						}
+		private void ConnectWithColumn(Run run, int x, int z)
+		{
+			if (!IsInsideColumns(x, z))
+			{
+				return;
+			}
 
-						foreach (Vector3Ushort neighbour in GetConnectedNeighbours(position))
+			foreach (Run other in _columns[GetColumnIndex(x, z)])
+			{
+				if (AreConnected(run, other))
+				{
+					_neighboursByRun[run].Add(other);
+					_neighboursByRun[other].Add(run);
+				}
+			}
+		}
+
+		// Map voxels hold on to anything they touch, even diagonally; voxels placed by players only hold by faces.
+		private static bool AreConnected(Run first, Run second)
+		{
+			int deltaX = Math.Abs(first.X - second.X);
+			int deltaZ = Math.Abs(first.Z - second.Z);
+
+			if (deltaX > 1 || deltaZ > 1)
+			{
+				return false;
+			}
+
+			if (deltaX == 0 && deltaZ == 0)
+			{
+				return first.End + 1 == second.Begin || second.End + 1 == first.Begin;
+			}
+
+			bool isFaceOnly = first.IsCreatedByPlayer || second.IsCreatedByPlayer;
+
+			if (isFaceOnly && deltaX + deltaZ != 1)
+			{
+				return false;
+			}
+
+			int tolerance = isFaceOnly ? 0 : 1;
+			return first.Begin <= second.End + tolerance && second.Begin <= first.End + tolerance;
+		}
+
+		private void CollectRunsAround(Vector3Ushort position, HashSet<Run> runs)
+		{
+			for (int x = position.x - 1; x <= position.x + 1; x++)
+			{
+				for (int z = position.z - 1; z <= position.z + 1; z++)
+				{
+					if (!IsInsideColumns(x, z))
+					{
+						continue;
+					}
+
+					foreach (Run run in _columns[GetColumnIndex(x, z)])
+					{
+						if (run.Begin <= position.y + 1 && position.y - 1 <= run.End)
 						{
-							if (TryFindRunInColumn(neighbour, out Run neighbourRun) && currentRun != neighbourRun)
-							{
-								_neighboursByRun[currentRun].Add(neighbourRun);
-								_neighboursByRun[neighbourRun].Add(currentRun);
-							}
+							runs.Add(run);
 						}
 					}
 				}
 			}
 		}
 
-		private bool TryMergeWithExistingRuns(Voxel voxel)
+		private bool TryFindRunInColumn(int x, int y, int z, out Run run)
 		{
-			List<Run> runs = _columns[voxel.Position.x * _mapProvider.Map.CurrentValue.Depth + voxel.Position.z];
-
-			for (int i = 0; i < runs.Count; i++)
+			if (IsInsideColumns(x, z) && y >= 0 && y < _height)
 			{
-				if (voxel.Position.y >= runs[i].Begin && voxel.Position.y < runs[i].Begin + runs[i].Length)
+				foreach (Run columnRun in _columns[GetColumnIndex(x, z)])
 				{
-					return false;
-				}
-
-				if (runs[i].Begin + runs[i].Length == voxel.Position.y)
-				{
-					RemoveRun(runs[i]);
-					Run mergedRun = runs[i];
-					mergedRun.Length += 1;
-					AddRun(mergedRun);
-					return true;
-				}
-
-				if (runs[i].Begin - 1 == voxel.Position.y)
-				{
-					RemoveRun(runs[i]);
-					Run mergedRun = runs[i];
-					mergedRun.Begin -= 1;
-					mergedRun.Length += 1;
-					AddRun(mergedRun);
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		private void SplitRun(Run run, int separationHeight, out Run firstRun, out Run secondRun)
-		{
-			firstRun = new Run(run.X, run.Z, run.Begin, (ushort)(separationHeight - run.Begin), run.IsCreatedByPlayer);
-			secondRun = new Run(run.X, run.Z, (ushort)(separationHeight + 1), (ushort)(run.Length - 1 - firstRun.Length),
-				run.IsCreatedByPlayer);
-		}
-
-		private bool TryFindRunInColumn(Vector3Ushort position, out Run run)
-		{
-			List<Run> column = _columns[position.x * _mapProvider.Map.CurrentValue.Depth + position.z];
-
-			for (int i = 0; i < column.Count; i++)
-			{
-				if (column[i].Begin <= position.y && position.y < column[i].Begin + column[i].Length)
-				{
-					run = column[i];
-					return true;
+					if (columnRun.Begin <= y && y <= columnRun.End)
+					{
+						run = columnRun;
+						return true;
+					}
 				}
 			}
 
@@ -334,78 +389,23 @@ namespace GamePlay
 			return false;
 		}
 
-		private IEnumerable<Vector3Ushort> GetConnectedNeighbours(Vector3Ushort position)
+		private bool IsInsideColumns(int x, int z)
 		{
-			for (int xOffset = -1; xOffset <= 1; xOffset++)
-			{
-				for (int yOffset = -1; yOffset <= 1; yOffset++)
-				{
-					for (int zOffset = -1; zOffset <= 1; zOffset++)
-					{
-						if (position.x + xOffset >= _mapProvider.Map.CurrentValue.Width ||
-						    position.y + yOffset >= _mapProvider.Map.CurrentValue.Height ||
-						    position.z + zOffset >= _mapProvider.Map.CurrentValue.Depth ||
-						    position.x + xOffset < 0 ||
-						    position.y + yOffset < 0 ||
-						    position.z + zOffset < 0)
-						{
-							continue;
-						}
-
-						var neighbour = new Vector3Ushort((ushort)(position.x + xOffset), (ushort)(position.y + yOffset),
-							(ushort)(position.z + zOffset));
-
-						if (_mapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(neighbour).IsSolid())
-						{
-							yield return neighbour;
-						}
-					}
-				}
-			}
+			return x >= 0 && x < _width && z >= 0 && z < _depth;
 		}
 
-		private IEnumerable<Vector3Ushort> GetConnectedNeighboursWithoutDiagonals(Vector3Ushort position)
+		private int GetColumnIndex(int x, int z)
 		{
-			for (int xOffset = -1; xOffset <= 1; xOffset++)
-			{
-				for (int yOffset = -1; yOffset <= 1; yOffset++)
-				{
-					for (int zOffset = -1; zOffset <= 1; zOffset++)
-					{
-						if (Math.Abs(xOffset) + Math.Abs(yOffset) + Math.Abs(zOffset) != 1)
-						{
-							continue;
-						}
-
-						if (position.x + xOffset >= _mapProvider.Map.CurrentValue.Width ||
-						    position.y + yOffset >= _mapProvider.Map.CurrentValue.Height ||
-						    position.z + zOffset >= _mapProvider.Map.CurrentValue.Depth ||
-						    position.x + xOffset < 0 ||
-						    position.y + yOffset < 0 ||
-						    position.z + zOffset < 0)
-						{
-							continue;
-						}
-
-						var neighbour = new Vector3Ushort((ushort)(position.x + xOffset), (ushort)(position.y + yOffset),
-							(ushort)(position.z + zOffset));
-
-						if (_mapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(neighbour).IsSolid())
-						{
-							yield return neighbour;
-						}
-					}
-				}
-			}
+			return x * _depth + z;
 		}
 
-		private struct Run : IEquatable<Run>
+		private readonly struct Run : IEquatable<Run>
 		{
 			public readonly bool IsCreatedByPlayer;
 			public readonly ushort X;
 			public readonly ushort Z;
-			public ushort Begin;
-			public ushort Length;
+			public readonly ushort Begin;
+			public readonly ushort Length;
 
 			public Run(ushort x, ushort z, ushort begin, ushort length, bool isCreatedByPlayer)
 			{
@@ -416,9 +416,12 @@ namespace GamePlay
 				IsCreatedByPlayer = isCreatedByPlayer;
 			}
 
+			public int End => Begin + Length - 1;
+
 			public bool Equals(Run other)
 			{
-				return IsCreatedByPlayer == other.IsCreatedByPlayer && X == other.X && Z == other.Z && Begin == other.Begin && Length == other.Length;
+				return IsCreatedByPlayer == other.IsCreatedByPlayer && X == other.X && Z == other.Z && Begin == other.Begin &&
+				       Length == other.Length;
 			}
 
 			public override bool Equals(object obj)
@@ -433,12 +436,12 @@ namespace GamePlay
 
 			public static bool operator ==(Run left, Run right)
 			{
-				return Equals(left, right);
+				return left.Equals(right);
 			}
 
 			public static bool operator !=(Run left, Run right)
 			{
-				return !(left == right);
+				return !left.Equals(right);
 			}
 
 			public override string ToString()
