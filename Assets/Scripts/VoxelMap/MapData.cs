@@ -192,6 +192,10 @@ namespace VoxelMap
 				_faces = mapData.Faces.AsReadOnly();
 			}
 
+			public int VoxelCount => _voxels.Length;
+
+			public VoxelData this[int index] => _voxels[index];
+
 			public VoxelData this[ushort x, ushort y, ushort z]
 			{
 				get

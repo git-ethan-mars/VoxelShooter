@@ -1,6 +1,4 @@
-using System;
-using System.Threading;
-using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,48 +6,38 @@ namespace UI
 {
 	public class PaletteElementView : MonoBehaviour
 	{
-		private const float SwitchColorTime = 0.25f;
+		private const float SelectedScale = 1.2f;
+		private const float ScaleDuration = 0.1f;
 
 		[SerializeField] private Image colorIcon;
-		[SerializeField] private Image boarder;
-		[SerializeField] private Sprite blackBoarder;
-		[SerializeField] private Sprite blueBoarder;
+		[SerializeField] private GameObject selection;
 
-		public void Construct(Color color)
+		public Color32 Color { get; private set; }
+
+		private void OnDisable()
 		{
-			colorIcon.color = color;
+			transform.DOKill();
 		}
 
-		public async UniTask RunAnimationAsync(CancellationToken token)
+		public void Construct(Color32 color)
 		{
-			boarder.gameObject.SetActive(true);
+			Color = color;
+			colorIcon.color = color;
+			selection.SetActive(false);
+			transform.DOKill();
+			transform.localScale = Vector3.one;
+		}
 
-			try
+		public void SetSelected(bool isSelected)
+		{
+			if (selection.activeSelf == isSelected)
 			{
-				while (!token.IsCancellationRequested)
-				{
-					if (boarder == null)
-					{
-						return;
-					}
-
-					boarder.sprite = blackBoarder;
-					await UniTask.WaitForSeconds(SwitchColorTime, cancellationToken: token);
-
-					if (boarder == null)
-					{
-						return;
-					}
-
-					boarder.sprite = blueBoarder;
-					await UniTask.WaitForSeconds(SwitchColorTime, cancellationToken: token);
-				}
+				return;
 			}
 
-			catch (OperationCanceledException)
-			{
-				boarder.gameObject.SetActive(false);
-			}
+			selection.SetActive(isSelected);
+			transform.DOKill();
+			transform.DOScale(isSelected ? SelectedScale : 1.0f, ScaleDuration);
 		}
 	}
 }

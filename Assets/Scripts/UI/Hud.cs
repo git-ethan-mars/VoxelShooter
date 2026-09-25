@@ -99,12 +99,12 @@ namespace UI
 
 		public void ShowPalette()
 		{
-			paletteView.Initialize();
+			paletteView.Show();
 		}
 
 		public void HidePalette()
 		{
-			paletteView.Clear();
+			paletteView.Hide();
 		}
 	}
 }

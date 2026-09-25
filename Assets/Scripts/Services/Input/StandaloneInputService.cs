@@ -96,6 +96,11 @@ namespace Services
 			return Input.GetKeyUp(KeyCode.M);
 		}
 
+		public bool IsPaletteButtonHold()
+		{
+			return Input.GetKey(KeyCode.Q) && _isEnabled;
+		}
+
 		public bool IsLeftArrowButtonDown()
 		{
 			return Input.GetKeyDown(KeyCode.LeftArrow) && _isEnabled;
