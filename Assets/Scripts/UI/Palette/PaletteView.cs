@@ -26,6 +26,25 @@ namespace UI
 			_characterProvider = characterProvider;
 		}
 
+		public void Initialize()
+		{
+			Character character = _characterProvider.Character.Value;
+
+			grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+			grid.constraintCount = _rectPalette.ColumnCount;
+			for (int i = 0; i < _rectPalette.RowCount; i++)
+			{
+				for (int j = 0; j < _rectPalette.ColumnCount; j++)
+				{
+					PaletteElementView element = SpawnElement();
+					element.Construct(_rectPalette[i, j]);
+				}
+			}
+
+			_rectPalette.SelectedCell.Subscribe(t => OnElementSelectedAsync(t.row, t.column))
+				.AddTo(character);
+		}
+
 		private void Update()
 		{
 			if (_inputService.IsUpArrowButtonDown())
@@ -52,25 +71,6 @@ namespace UI
 		private void OnDestroy()
 		{
 			_cts?.Dispose();
-		}
-
-		public void Initialize()
-		{
-			Character character = _characterProvider.Character.Value;
-
-			grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-			grid.constraintCount = _rectPalette.ColumnCount;
-			for (int i = 0; i < _rectPalette.RowCount; i++)
-			{
-				for (int j = 0; j < _rectPalette.ColumnCount; j++)
-				{
-					PaletteElementView element = SpawnElement();
-					element.Construct(_rectPalette[i, j]);
-				}
-			}
-
-			_rectPalette.SelectedCell.Subscribe(t => OnElementSelectedAsync(t.row, t.column))
-				.AddTo(character);
 		}
 
 		private async void OnElementSelectedAsync(int row, int column)

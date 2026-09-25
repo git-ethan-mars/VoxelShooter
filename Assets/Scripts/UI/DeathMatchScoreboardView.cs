@@ -13,15 +13,15 @@ namespace UI
 		private DeathmatchScoreboard _scoreboard;
 		[field: SerializeField] public CanvasGroup CanvasGroup { get; private set; }
 
-		private void OnDestroy()
-		{
-			_scoreboard.PlayerDataById.CollectionChanged -= OnCollectionChanged;
-		}
-
 		public void Initialize(DeathmatchScoreboard scoreboard)
 		{
 			_scoreboard = scoreboard;
 			_scoreboard.PlayerDataById.CollectionChanged += OnCollectionChanged;
+		}
+
+		private void OnDestroy()
+		{
+			_scoreboard.PlayerDataById.CollectionChanged -= OnCollectionChanged;
 		}
 
 		private void OnCollectionChanged(in NotifyCollectionChangedEventArgs<KeyValuePair<NetworkConnectionToClient, DeathMatchPlayerData>> e)

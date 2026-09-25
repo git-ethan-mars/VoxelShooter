@@ -35,6 +35,13 @@ namespace GamePlay
 			EntityContainer = entityContainer;
 		}
 
+		[Server]
+		public void Initialize(GameClass gameClass, string nickName)
+		{
+			_gameClass = gameClass;
+			_nickName = nickName;
+		}
+
 		public override void OnStartClient()
 		{
 			base.OnStartClient();
@@ -57,13 +64,6 @@ namespace GamePlay
 		public override void OnStopLocalPlayer()
 		{
 			_characterProvider.Character.Value = null;
-		}
-
-		[Server]
-		public void Initialize(GameClass gameClass, string nickName)
-		{
-			_gameClass = gameClass;
-			_nickName = nickName;
 		}
 	}
 }
