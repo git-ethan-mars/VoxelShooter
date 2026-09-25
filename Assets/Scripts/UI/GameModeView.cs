@@ -110,8 +110,6 @@ namespace UI
 			_currentState?.Exit();
 			_currentState = _states[typeof(T)];
 			_currentState.Enter();
-
-			Debug.Log(_currentState.GetType().Name);
 		}
 
 		private void OnMouseSettingsChanged(MouseSettingsData mouseSettingsData)

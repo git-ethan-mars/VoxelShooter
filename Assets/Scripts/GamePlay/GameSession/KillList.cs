@@ -1,7 +1,6 @@
 using Data;
 using Mirror;
 using R3;
-using UnityEngine;
 
 namespace GamePlay
 {
@@ -21,7 +20,6 @@ namespace GamePlay
 			}
 
 			Kills.Add(kill);
-			Debug.Log(kill);
 			_killAdded.OnNext(kill);
 		}
 	}

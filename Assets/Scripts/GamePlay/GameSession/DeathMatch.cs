@@ -198,14 +198,11 @@ namespace GamePlay
 
 		private void TrySpawnSpectator(NetworkConnectionToClient connection)
 		{
-			Debug.Log("TRY SPAWN");
 			if (MutableGameState.Value != GamePlay.GameState.Playing || connection.identity != null ||
 			    !_sessions.ContainsKey(connection))
 			{
 				return;
 			}
-
-			Debug.Log("TRY SPAWN 2");
 
 			Vector3 spawnPosition = _spawnPointService.GetRandomSpawnPoint();
 			Spectator spectator = _entityFactory.CreateSpectator(spawnPosition);
