@@ -16,13 +16,21 @@ namespace UI
 		[SerializeField] private TextMeshProUGUI title;
 
 		private IInputService _inputService;
-
+		private VotingElement _selectedElement;
 		private Voting _voting;
 
 		[Inject]
 		private void Construct(IInputService inputService)
 		{
 			_inputService = inputService;
+		}
+
+		public void Initialize(Voting voting)
+		{
+			_voting = voting;
+
+			_voting.Title.Subscribe(title.SetText).AddTo(this);
+			_voting.VoteByCandidate.CollectionChanged += OnVotingChanged;
 		}
 
 		private void OnEnable()
@@ -32,17 +40,39 @@ namespace UI
 
 		private void Update()
 		{
-			int i = 0;
-
-			foreach ((string candidate, int _) in _voting.VoteByCandidate)
+			for (int i = 0; i < Items.Count; i++)
 			{
-				if (_inputService.IsSlotButtonPressed(i))
+				if (!_inputService.IsSlotButtonPressed(i))
 				{
-					_voting.SendVote(candidate);
+					continue;
 				}
 
-				i++;
+				if (!_selectedElement)
+				{
+					SelectElement(Items[i]);
+				}
+				else
+				{
+					_selectedElement.Deselect();
+
+					if (_selectedElement != Items[i])
+					{
+						SelectElement(Items[i]);
+					}
+					else
+					{
+						_voting.CancelVote();
+						_selectedElement = null;
+					}
+				}
 			}
+		}
+
+		private void SelectElement(VotingElement element)
+		{
+			_voting.SendVote(element.Candidate);
+			_selectedElement = element;
+			_selectedElement.Select();
 		}
 
 		private void OnDisable()
@@ -53,16 +83,6 @@ namespace UI
 		private void OnDestroy()
 		{
 			_voting.VoteByCandidate.CollectionChanged -= OnVotingChanged;
-		}
-
-		public void Initialize(Voting voting)
-		{
-			_voting = voting;
-
-			_voting.IsActivated.Subscribe(value => enabled = value);
-
-			_voting.Title.Subscribe(title.SetText).AddTo(this);
-			_voting.VoteByCandidate.CollectionChanged += OnVotingChanged;
 		}
 
 		private void OnVotingChanged(in NotifyCollectionChangedEventArgs<KeyValuePair<string, int>> e)

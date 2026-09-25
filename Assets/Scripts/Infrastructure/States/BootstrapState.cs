@@ -1,4 +1,6 @@
-﻿namespace Infrastructure.States
+﻿using Cysharp.Threading.Tasks;
+
+namespace Infrastructure.States
 {
 	public class BootstrapState : IState
 	{
@@ -11,19 +13,14 @@
 			_sceneLoader = sceneLoader;
 		}
 
-		public async void Enter()
+		public async UniTask EnterAsync()
 		{
 			await _sceneLoader.LoadAsync(Scenes.Initial);
-			EnterLoadLevel();
+			await _stateMachine.EnterAsync<GameMenuState>();
 		}
 
 		public void Exit()
 		{
-		}
-
-		private void EnterLoadLevel()
-		{
-			_stateMachine.Enter<GameMenuState>();
 		}
 	}
 }

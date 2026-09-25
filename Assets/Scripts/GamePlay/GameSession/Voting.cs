@@ -16,10 +16,8 @@ namespace GamePlay
 	{
 		private readonly VSNetworkManager _networkManager;
 		private readonly ObservableDictionary<string, int> _voteByCandidate = new ObservableDictionary<string, int>();
-		private readonly HashSet<NetworkConnectionToClient> _voted = new HashSet<NetworkConnectionToClient>();
-		private readonly ReactiveProperty<bool> _isActivated = new ReactiveProperty<bool>();
+		private readonly Dictionary<NetworkConnectionToClient, string> _voteByConnection = new Dictionary<NetworkConnectionToClient, string>();
 		private readonly ReactiveProperty<string> _title = new ReactiveProperty<string>();
-		public Observable<bool> IsActivated => _isActivated;
 		public IReadOnlyObservableDictionary<string, int> VoteByCandidate => _voteByCandidate;
 		public Observable<string> Title => _title;
 
@@ -38,6 +36,9 @@ namespace GamePlay
 			networkManager.MessageReceived.OfMessageType<VoteRequest>()
 				.Subscribe(directedMessage => voting.AddVote(directedMessage.Connection, directedMessage.Message.Variant))
 				.AddTo(networkManager);
+			networkManager.MessageReceived.OfMessageType<VoteCancelRequest>()
+				.Subscribe(directedMessage => voting.RemoveVote(directedMessage.Connection))
+				.AddTo(networkManager);
 			networkManager.MessageReceived.OfMessageType<VoteFinishResponse>()
 				.Subscribe(_ => voting.FinishVote())
 				.AddTo(networkManager);
@@ -47,7 +48,6 @@ namespace GamePlay
 		public async UniTask<string> RunVotingAsync(TimeSpan duration, string title,
 			string[] variants, CancellationToken cancellationToken = default)
 		{
-			_isActivated.Value = true;
 			_title.Value = title;
 
 			var response = new VoteResponse(title, variants);
@@ -77,6 +77,11 @@ namespace GamePlay
 			_networkManager.SendRequest(new VoteRequest(variant));
 		}
 
+		public void CancelVote()
+		{
+			_networkManager.SendRequest(new VoteCancelRequest());
+		}
+
 		public void OnAddPlayer(NetworkConnectionToClient connection)
 		{
 			var response = new VoteResponse(_title.CurrentValue, _voteByCandidate.Select(kvp => kvp.Key).ToArray());
@@ -85,18 +90,29 @@ namespace GamePlay
 
 		private void AddVote(NetworkConnectionToClient connection, string candidate)
 		{
-			if (_voted.Contains(connection) || !_voteByCandidate.ContainsKey(candidate))
+			if (string.IsNullOrEmpty(candidate) || !_voteByCandidate.ContainsKey(candidate))
 			{
 				return;
 			}
 
+			RemoveVote(connection);
+
+			_voteByConnection[connection] = candidate;
 			_voteByCandidate[candidate]++;
-			_voted.Add(connection);
+		}
+
+		private void RemoveVote(NetworkConnectionToClient connection)
+		{
+			if (!_voteByConnection.Remove(connection, out string candidate))
+			{
+				return;
+			}
+
+			_voteByCandidate[candidate]--;
 		}
 
 		private void OnVoteResponse(string title, string[] candidates)
 		{
-			_isActivated.Value = true;
 			_title.Value = title;
 
 			foreach (string candidate in candidates)
@@ -107,9 +123,8 @@ namespace GamePlay
 
 		private void FinishVote()
 		{
-			_isActivated.Value = false;
+			_voteByConnection.Clear();
 			_voteByCandidate.Clear();
-			_voted.Clear();
 		}
 	}
 }

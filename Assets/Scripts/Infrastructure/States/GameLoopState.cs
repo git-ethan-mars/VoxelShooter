@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using GamePlay;
 using Mirror;
 using Networking;
@@ -18,7 +19,7 @@ namespace Infrastructure.States
 		private readonly VSNetworkManager _networkManager;
 		private readonly AudioPlayer _audioPlayer;
 
-		private IDisposable _updateLoop;
+		private CompositeDisposable _disposables;
 
 		public GameLoopState(GameStateMachine gameStateMachine, IUIFactory uiFactory,
 			MapProvider mapProvider, VSNetworkManager networkManager, AudioPlayer audioPlayer)
@@ -30,33 +31,41 @@ namespace Infrastructure.States
 			_audioPlayer = audioPlayer;
 		}
 
-		public void Enter(GameMode gameMode)
+		public UniTask EnterAsync(GameMode gameMode)
 		{
 			LoadingWindow loadingWindow = _uiFactory.CreateLoadingWindow();
 			GameModeView gameModeView = _uiFactory.CreateGameModeView(gameMode);
 			_mapProvider.MapLoadingProgress = new Progress<float>(loadingWindow.UpdateLoadingBar);
 
-			_updateLoop = Observable.EveryUpdate().Subscribe(_ => gameMode.Update());
+			_disposables = new CompositeDisposable();
+
+			Observable.EveryUpdate()
+				.Subscribe(_ => gameMode.Update())
+				.AddTo(_disposables);
 
 			_networkManager.MessageReceived.OfMessageType<StaticAudioResponse>()
 				.Subscribe(directedMessage => _audioPlayer.PlayAsync(directedMessage.Message.AudioType, directedMessage.Message.Position).Forget())
-				.AddTo(_networkManager);
+				.AddTo(_disposables);
 			_networkManager.MessageReceived.OfMessageType<DynamicAudioResponse>()
 				.Subscribe(directedMessage => _audioPlayer.PlayAsync(directedMessage.Message.AudioType, directedMessage.Message.NetworkIdentity,
 					directedMessage.Message.IsSpatial).Forget())
-				.AddTo(_networkManager);
+				.AddTo(_disposables);
 
 			gameModeView.InGameMenu.ExitButtonPressed
-				.Subscribe(_ => OnExitButtonPressed())
-				.AddTo(gameModeView);
+				.Subscribe(_ => OnExitButtonPressed().Forget())
+				.AddTo(_disposables);
 			gameMode.GameState.Subscribe(gameModeView.OnGameStateChanged)
-				.AddTo(gameModeView);
-			_mapProvider.Map.Where(map => map).Subscribe(gameModeView.OnMapChanged);
+				.AddTo(_disposables);
+			_mapProvider.Map.Where(map => map)
+				.Subscribe(gameModeView.OnMapChanged)
+				.AddTo(_disposables);
+
+			return UniTask.CompletedTask;
 		}
 
 		public void Exit()
 		{
-			_updateLoop.Dispose();
+			_disposables.Dispose();
 
 			if (_networkManager.mode == NetworkManagerMode.Host)
 			{
@@ -68,9 +77,9 @@ namespace Infrastructure.States
 			}
 		}
 
-		private void OnExitButtonPressed()
+		private async UniTaskVoid OnExitButtonPressed()
 		{
-			_gameStateMachine.Enter<GameMenuState>();
+			await _gameStateMachine.EnterAsync<GameMenuState>();
 		}
 	}
 }

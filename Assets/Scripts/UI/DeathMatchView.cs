@@ -28,6 +28,34 @@ namespace UI
 			_uiProvider = uiProvider;
 		}
 
+		public void Initialize(DeathMatch deathMatch)
+		{
+			_deathMatch = deathMatch;
+
+			chooseClassMenu.Initialize();
+			chooseClassMenu.ChangeClassButtonPressed.Subscribe(_deathMatch.ChangeClass).AddTo(this);
+			chooseClassMenu.ChangeClassButtonPressed.Subscribe(_ => SwitchState<DefaultState>()).AddTo(this);
+			chooseClassMenu.ExitButtonPressed.Subscribe(_ => SwitchState<DefaultState>()).AddTo(this);
+
+			_deathMatch.CharacterDied.Subscribe(_ => OnCharacterDied()).AddTo(this);
+			_deathMatch.TimeLeft.Subscribe(OnGameTimeChanged).AddTo(this);
+
+			votingView.Initialize(_deathMatch.MapVoting);
+
+			deathMatchScoreboard.Initialize(_deathMatch.Scoreboard);
+
+			var scoreBoardState = new ScoreboardState(deathMatchScoreboard);
+			AddState(scoreBoardState);
+
+			var chooseClassMenuState = new ChooseClassMenuState(InputService, chooseClassMenu);
+			AddState(chooseClassMenuState);
+
+			var deathMatchState = new DeathMatchState(CharacterProvider, timeInfo, Hud, inventoryView);
+			AddState<DefaultState>(deathMatchState);
+
+			SwitchState<ChooseClassMenuState>();
+		}
+
 		protected override void Update()
 		{
 			base.Update();
@@ -62,34 +90,6 @@ namespace UI
 			timeInfo.ChangeRespawnTime(TimeSpan.FromSeconds(_respawnTimer.TotalSeconds));
 		}
 
-		public void Initialize(DeathMatch deathMatch)
-		{
-			_deathMatch = deathMatch;
-
-			chooseClassMenu.Initialize();
-			chooseClassMenu.ChangeClassButtonPressed.Subscribe(_deathMatch.ChangeClass).AddTo(this);
-			chooseClassMenu.ChangeClassButtonPressed.Subscribe(_ => SwitchState<DefaultState>()).AddTo(this);
-			chooseClassMenu.ExitButtonPressed.Subscribe(_ => SwitchState<DefaultState>()).AddTo(this);
-
-			_deathMatch.CharacterDied.Subscribe(_ => OnCharacterDied()).AddTo(this);
-			_deathMatch.TimeLeft.Subscribe(OnGameTimeChanged).AddTo(this);
-
-			votingView.Initialize(_deathMatch.MapVoting);
-
-			deathMatchScoreboard.Initialize(_deathMatch.Scoreboard);
-
-			var scoreBoardState = new ScoreboardState(deathMatchScoreboard);
-			AddState(scoreBoardState);
-
-			var chooseClassMenuState = new ChooseClassMenuState(InputService, chooseClassMenu);
-			AddState(chooseClassMenuState);
-
-			var deathMatchState = new DeathMatchState(CharacterProvider, timeInfo, Hud, inventoryView);
-			AddState<DefaultState>(deathMatchState);
-
-			SwitchState<ChooseClassMenuState>();
-		}
-
 		public override void OnGameStateChanged(GameState gameState)
 		{
 			if (gameState == GameState.Loading)
@@ -100,6 +100,7 @@ namespace UI
 			if (gameState == GameState.Playing)
 			{
 				_uiProvider.LoadingWindow.Hide();
+				SwitchState<ChooseClassMenuState>();
 			}
 
 			if (gameState == GameState.ShowingStatistics)

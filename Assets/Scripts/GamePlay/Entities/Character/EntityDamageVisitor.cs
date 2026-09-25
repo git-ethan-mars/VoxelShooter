@@ -24,6 +24,11 @@ namespace GamePlay
 		[Server]
 		public void Visit(RangeWeapon rangeWeapon, RaycastHit hit)
 		{
+			if (healthSystem.Health.CurrentValue == 0)
+			{
+				return;
+			}
+
 			healthSystem.Decrease(rangeWeapon.Configure.Damage);
 
 			if (healthSystem.Health.CurrentValue == 0)
@@ -45,6 +50,11 @@ namespace GamePlay
 		[Server]
 		public void Visit(MeleeWeapon meleeWeapon, RaycastHit hit)
 		{
+			if (healthSystem.Health.CurrentValue == 0)
+			{
+				return;
+			}
+
 			healthSystem.Decrease(meleeWeapon.Configure.DamageToPlayer);
 
 			if (healthSystem.Health.CurrentValue == 0)
@@ -64,6 +74,11 @@ namespace GamePlay
 		[Server]
 		public void Visit(Explosive explosive, ExplosionData explosionData)
 		{
+			if (healthSystem.Health.CurrentValue == 0)
+			{
+				return;
+			}
+
 			if (Vector3.Distance(explosive.transform.position, transform.position) >= explosionData.radius)
 			{
 				return;
@@ -89,6 +104,11 @@ namespace GamePlay
 
 		public void Visit(FallingDamage fallingDamage, int damage)
 		{
+			if (healthSystem.Health.CurrentValue == 0)
+			{
+				return;
+			}
+
 			healthSystem.Decrease(damage);
 
 			if (healthSystem.Health.CurrentValue == 0)

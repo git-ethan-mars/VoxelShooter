@@ -1,9 +1,10 @@
+using Cysharp.Threading.Tasks;
 using Data;
 using GamePlay;
-using Mirror;
 using Networking;
 using Networking.Core;
 using Networking.Messages;
+using R3;
 
 namespace Infrastructure.States
 {
@@ -20,23 +21,29 @@ namespace Infrastructure.States
 			_gameModeFactory = gameModeFactory;
 		}
 
-		public async void Enter()
+		public async UniTask EnterAsync()
 		{
 			_networkManager.StartClient();
 
-			await _networkManager.MessageReceived.FirstAsync<AuthenticationResponse>();
-			NetworkClient.connection.isAuthenticated = true;
+			await _networkManager.ClientAuthenticated.FirstAsync();
+			GameSettings gameSettings = await GetGameSettings();
+			GameMode gameMode = _gameModeFactory.CreateGameMode();
+			await gameMode.StartAsync(gameSettings);
 
-			_networkManager.SendRequest(new GameSettingsRequest());
-			GameSettings gameSettings = (await _networkManager.MessageReceived
-				.FirstAsync<GameSettingsResponse>()).Message.GameSettings;
-
-			GameMode gameMode = await _gameModeFactory.CreateGameModeAsync(gameSettings);
-			_gameStateMachine.Enter<GameLoopState, GameMode>(gameMode);
+			await _gameStateMachine.EnterAsync<GameLoopState, GameMode>(gameMode);
 		}
 
 		public void Exit()
 		{
+		}
+
+		private async UniTask<GameSettings> GetGameSettings()
+		{
+			_networkManager.SendRequest(new GameSettingsRequest());
+
+			DirectedMessage<GameSettingsResponse> response = await _networkManager.MessageReceived
+				.FirstAsync<GameSettingsResponse>();
+			return response.Message.GameSettings;
 		}
 	}
 }

@@ -32,6 +32,7 @@ namespace GamePlay
 				}
 
 				session.RespawnTime -= TimeSpan.FromSeconds(deltaTime);
+				Debug.Log(session.RespawnTime);
 
 				if (session.RespawnTime <= TimeSpan.Zero)
 				{
@@ -42,6 +43,7 @@ namespace GamePlay
 
 		public void Respawn(DeathMatchPlayerSession session)
 		{
+			Debug.Log("RESPWAN");
 			Vector3 position = _spawnPointService.GetSpawnPoint();
 			Character character = _entityFactory.CreateCharacter(
 				position, session.Data.GameClass, session.Data.NickName);
@@ -53,18 +55,20 @@ namespace GamePlay
 			session.RespawnTime = TimeSpan.Zero;
 		}
 
-		public void Kill(DeathMatchPlayerSession session)
+		public void Kill(DeathMatchPlayerSession session, NetworkConnectionToClient killer = null)
 		{
 			if (!session.IsAlive)
 			{
 				return;
 			}
 
+			Debug.Log("KILL");
 			Vector3 position = session.Connection.identity.transform.position;
 			Tombstone tombstone = _entityFactory.CreateTombstone(position, session.Connection);
 			tombstone.ExplodeWithDelayAsync(_respawnTime - TimeSpan.FromSeconds(1)).Forget();
 
 			Spectator spectator = _entityFactory.CreateSpectator(position);
+			spectator.Initialize(killer);
 			NetworkServer.ReplacePlayerForConnection(
 				session.Connection, spectator.gameObject, ReplacePlayerOptions.Destroy);
 

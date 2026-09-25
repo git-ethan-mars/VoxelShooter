@@ -22,14 +22,19 @@ namespace GamePlay
 
 		public void CreateSpawnPoints()
 		{
-			_spawnPointIndex = 0;
-			_spawnPoints.Clear();
+			Clear();
 
 			foreach (SpawnPointData spawnPointData in _mapProvider.Map.CurrentValue.MapConfigure.SpawnPoints)
 			{
 				SpawnPoint spawnPoint = _entityFactory.CreateSpawnPoint(spawnPointData, _mapProvider.Map.CurrentValue.transform);
 				_spawnPoints.Add(spawnPoint);
 			}
+		}
+
+		public void Clear()
+		{
+			_spawnPointIndex = 0;
+			_spawnPoints.Clear();
 		}
 
 		public Vector3 GetSpawnPoint()

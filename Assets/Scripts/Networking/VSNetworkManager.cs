@@ -16,14 +16,18 @@ namespace Networking
 		[SerializeField] private float sendInterval = 0.5f;
 
 		private readonly Subject<DirectedMessage> _messageReceived = new Subject<DirectedMessage>();
+		private readonly Subject<NetworkConnectionToClient> _playerReady = new Subject<NetworkConnectionToClient>();
 		private readonly Subject<NetworkConnectionToClient> _playerDisconnected = new Subject<NetworkConnectionToClient>();
 		private MapProvider _mapProvider;
 
 		public Observable<DirectedMessage> MessageReceived => _messageReceived;
 
+		public Observable<Unit> ClientAuthenticated => ((VSNetworkAuthenticator)authenticator).ClientAuthenticated;
+
 		public Observable<(NetworkConnectionToClient connection, string nickName, Texture2D avatar)> PlayerConnected
 			=> ((VSNetworkAuthenticator)authenticator).OnAuthenticatedPlayer;
 
+		public Observable<NetworkConnectionToClient> PlayerReady => _playerReady;
 		public Observable<NetworkConnectionToClient> PlayerDisconnected => _playerDisconnected;
 
 		[Inject]
@@ -41,13 +45,13 @@ namespace Networking
 			RegisterRequest<GameSettingsRequest>();
 			RegisterRequest<ChangeGameClassRequest>();
 			RegisterRequest<VoteRequest>();
+			RegisterRequest<VoteCancelRequest>();
 		}
 
 		public override void OnStartClient()
 		{
 			base.OnStartClient();
 
-			RegisterResponse<AuthenticationResponse>(false);
 			RegisterResponse<MapNameResponse>();
 			RegisterResponse<MapDownloadResponse>();
 			RegisterResponse<AddedVoxelResponse>();
@@ -70,13 +74,13 @@ namespace Networking
 			UnregisterRequest<GameSettingsRequest>();
 			UnregisterRequest<ChangeGameClassRequest>();
 			UnregisterRequest<VoteRequest>();
+			UnregisterRequest<VoteCancelRequest>();
 		}
 
 		public override void OnStopClient()
 		{
 			base.OnStopClient();
 
-			UnregisterResponse<AuthenticationResponse>();
 			UnregisterResponse<MapNameResponse>();
 			UnregisterResponse<MapDownloadResponse>();
 			UnregisterResponse<AddedVoxelResponse>();
@@ -95,6 +99,19 @@ namespace Networking
 			base.OnServerDisconnect(connection);
 
 			_playerDisconnected.OnNext(connection);
+		}
+
+		public override void OnServerReady(NetworkConnectionToClient connection)
+		{
+			base.OnServerReady(connection);
+
+			_playerReady.OnNext(connection);
+		}
+
+		public override void OnClientConnect()
+		{
+			// Base implementation calls NetworkClient.Ready() right away.
+			// Client becomes ready only after the map is loaded (see GameMode and InitializeHostState).
 		}
 
 		public async UniTask SendMapAsync(NetworkConnectionToClient connection)

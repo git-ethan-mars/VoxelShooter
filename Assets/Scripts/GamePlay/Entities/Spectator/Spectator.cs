@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Linq;
+using Data;
 using Mirror;
 using R3;
 using Reflex.Attributes;
@@ -17,6 +19,8 @@ namespace GamePlay
 
 		[SerializeField] private PositionConstraint positionConstraint;
 
+		[SyncVar] private uint _killerNetId;
+
 		private IInputService _inputService;
 		private CameraProvider _cameraProvider;
 		private IStorageService _storageService;
@@ -25,7 +29,8 @@ namespace GamePlay
 		private float _sensitivity;
 		private float _xRotation;
 		private float _yRotation;
-		private Transform _target;
+		private Entity _target;
+		private SpectatingMode _mode;
 
 		[Inject]
 		private void Construct(IInputService inputService, IStorageService storageService, CameraProvider cameraProvider,
@@ -37,12 +42,29 @@ namespace GamePlay
 			_entityContainer = entityContainer;
 		}
 
+		[Server]
+		public void Initialize(NetworkConnectionToClient killer)
+		{
+			_killerNetId = killer != null && killer.identity != null ? killer.identity.netId : 0;
+		}
+
 		public override void OnStartLocalPlayer()
 		{
-			MountCamera();
+			_cameraProvider.MainCamera.transform.SetParent(transform);
 
 			_sensitivity = _storageService.Load<MouseSettingsData>(IStorageService.MouseSettingsKey).GeneralSensitivity;
 			_storageService.Subscribe<MouseSettingsData>(ChangeMouseSettings).AddTo(this);
+
+			Entity initialTarget = GetKillerCharacter() ?? GetRandomTarget();
+
+			if (initialTarget != null)
+			{
+				Follow(initialTarget);
+			}
+			else
+			{
+				EnterFreeView();
+			}
 		}
 
 		private void Update()
@@ -54,35 +76,20 @@ namespace GamePlay
 
 			Rotate(_inputService.MouseAxis);
 
-			if (_inputService.IsFirstActionButtonDown() || _target == null)
+			if (_inputService.IsFirstActionButtonDown() || (_mode == SpectatingMode.Follow && _target == null))
 			{
-				Entity entity = GetNextTarget();
-
-				if (entity != null)
-				{
-					_target = entity.transform;
-					var constraintSource = new ConstraintSource() { sourceTransform = _target.transform, weight = 1 };
-
-					if (positionConstraint.sourceCount == 0)
-					{
-						positionConstraint.AddSource(constraintSource);
-					}
-					else
-					{
-						positionConstraint.SetSource(0, constraintSource);
-					}
-				}
+				FollowNextTarget();
 			}
 
-			if (_inputService.Axis != Vector2.zero && positionConstraint.sourceCount > 0)
+			if (_mode == SpectatingMode.Follow && _inputService.Axis != Vector2.zero)
 			{
-				positionConstraint.RemoveSource(0);
+				EnterFreeView();
 			}
 
-			float speed = _inputService.IsSprintButtonHold() ? Speed * AccelerationMultiplier : Speed;
-
-			transform.position += (transform.forward * _inputService.Axis.x + transform.right * _inputService.Axis.y)
-			                      * (speed * Time.deltaTime);
+			if (_mode == SpectatingMode.FreeView)
+			{
+				Move(_inputService.Axis);
+			}
 		}
 
 		public override void OnStopLocalPlayer()
@@ -93,6 +100,87 @@ namespace GamePlay
 			{
 				_cameraProvider.MainCamera.transform.SetParent(null);
 			}
+		}
+
+		private void FollowNextTarget()
+		{
+			Entity nextTarget = GetNextTarget();
+
+			if (nextTarget != null)
+			{
+				Follow(nextTarget);
+			}
+			else
+			{
+				EnterFreeView();
+			}
+		}
+
+		private void Follow(Entity target)
+		{
+			_mode = SpectatingMode.Follow;
+			_target = target;
+
+			var constraintSource = new ConstraintSource() { sourceTransform = target.transform, weight = 1 };
+
+			if (positionConstraint.sourceCount == 0)
+			{
+				positionConstraint.AddSource(constraintSource);
+			}
+			else
+			{
+				positionConstraint.SetSource(0, constraintSource);
+			}
+
+			positionConstraint.constraintActive = true;
+			_cameraProvider.MainCamera.transform.SetLocalPositionAndRotation(Vector3.back * DistanceToTarget, Quaternion.identity);
+		}
+
+		private void EnterFreeView()
+		{
+			Vector3 cameraPosition = _cameraProvider.MainCamera.transform.position;
+
+			_mode = SpectatingMode.FreeView;
+			_target = null;
+
+			if (positionConstraint.sourceCount > 0)
+			{
+				positionConstraint.RemoveSource(0);
+			}
+
+			positionConstraint.constraintActive = false;
+			transform.position = cameraPosition;
+			_cameraProvider.MainCamera.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+		}
+
+		private void Move(Vector2 direction)
+		{
+			float speed = _inputService.IsSprintButtonHold() ? Speed * AccelerationMultiplier : Speed;
+
+			transform.position += (transform.forward * direction.x + transform.right * direction.y) * (speed * Time.deltaTime);
+		}
+
+		private Character GetKillerCharacter()
+		{
+			if (_killerNetId == 0)
+			{
+				return null;
+			}
+
+			return _entityContainer.GetEntitiesByType<Character>()
+				.FirstOrDefault(character => character.netId == _killerNetId);
+		}
+
+		private Entity GetRandomTarget()
+		{
+			Character character = GetRandom(_entityContainer.GetEntitiesByType<Character>().ToList());
+
+			if (character != null)
+			{
+				return character;
+			}
+
+			return GetRandom(_entityContainer.GetEntitiesByType<SpawnPoint>().ToList());
 		}
 
 		private Entity GetNextTarget()
@@ -109,37 +197,20 @@ namespace GamePlay
 
 		private TEntity SelectNextTarget<TEntity>() where TEntity : Entity
 		{
-			TEntity nextTarget = null;
+			var entities = _entityContainer.GetEntitiesByType<TEntity>().ToList();
 
-			if (_target == null)
+			if (entities.Count == 0)
 			{
-				nextTarget = _entityContainer.GetEntitiesByType<TEntity>().FirstOrDefault();
-			}
-			else
-			{
-				bool previousEntityWasTarget = false;
-
-				foreach (TEntity entity in _entityContainer.GetEntitiesByType<TEntity>())
-				{
-					if (previousEntityWasTarget)
-					{
-						nextTarget = entity;
-						break;
-					}
-
-					if (entity.transform == _target)
-					{
-						previousEntityWasTarget = true;
-					}
-				}
-
-				if (nextTarget == null)
-				{
-					nextTarget = _entityContainer.GetEntitiesByType<TEntity>().FirstOrDefault();
-				}
+				return null;
 			}
 
-			return nextTarget;
+			int currentIndex = _target is TEntity current ? entities.IndexOf(current) : -1;
+			return entities[(currentIndex + 1) % entities.Count];
+		}
+
+		private static TEntity GetRandom<TEntity>(IReadOnlyList<TEntity> entities) where TEntity : Entity
+		{
+			return entities.Count == 0 ? null : entities[Random.Range(0, entities.Count)];
 		}
 
 		private void Rotate(Vector2 direction)
@@ -154,12 +225,6 @@ namespace GamePlay
 		private void ChangeMouseSettings(MouseSettingsData mouseSettings)
 		{
 			_sensitivity = mouseSettings.GeneralSensitivity;
-		}
-
-		private void MountCamera()
-		{
-			_cameraProvider.MainCamera.transform.SetParent(transform);
-			_cameraProvider.MainCamera.transform.SetLocalPositionAndRotation(Vector3.back * DistanceToTarget, Quaternion.identity);
 		}
 	}
 }

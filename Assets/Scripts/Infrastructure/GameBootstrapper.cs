@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using Infrastructure.States;
 using Reflex.Attributes;
 using UnityEngine;
@@ -30,9 +31,9 @@ namespace Infrastructure
 			DontDestroyOnLoad(this);
 		}
 
-		private void Start()
+		private async UniTaskVoid Start()
 		{
-			_gameStateMachine.Enter<BootstrapState>();
+			await _gameStateMachine.EnterAsync<BootstrapState>();
 		}
 
 #if UNITY_EDITOR

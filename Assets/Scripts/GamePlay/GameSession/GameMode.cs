@@ -2,6 +2,7 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Data;
@@ -61,6 +62,7 @@ namespace GamePlay
 			GameSettings = gameSettings;
 			NetworkManager.PlayerConnected.Subscribe(tuple => OnAddPlayer(tuple.connection, tuple.nickName, tuple.avatar))
 				.AddTo(NetworkManager);
+			NetworkManager.PlayerReady.Subscribe(OnPlayerReady).AddTo(NetworkManager);
 			NetworkManager.PlayerDisconnected.Subscribe(OnRemovePlayer).AddTo(NetworkManager);
 			NetworkManager.MessageReceived
 				.OfMessageType<MapDownloadRequest>()
@@ -81,6 +83,7 @@ namespace GamePlay
 					.AddTo(NetworkManager);
 
 				await DownloadMapAsync(gameSettings.MapName);
+				SetClientReady();
 			}
 		}
 
@@ -102,11 +105,25 @@ namespace GamePlay
 		{
 		}
 
+		protected virtual void OnPlayerReady(NetworkConnectionToClient connection)
+		{
+		}
+
 		protected virtual void OnRemovePlayer(NetworkConnectionToClient connection)
 		{
 		}
 
 		protected virtual void CleanUp()
+		{
+			NetworkServer.SetAllClientsNotReady();
+
+			foreach (Entity entity in EntityContainer.GetEntitiesByType<Entity>().ToArray())
+			{
+				NetworkServer.Destroy(entity.gameObject);
+			}
+		}
+
+		protected void SetRemoteClientsNotReady()
 		{
 			foreach (NetworkConnectionToClient connection in NetworkServer.connections.Values)
 			{
@@ -115,10 +132,13 @@ namespace GamePlay
 					NetworkServer.SetClientNotReady(connection);
 				}
 			}
+		}
 
-			foreach (Entity entity in EntityContainer.GetEntitiesByType<Entity>())
+		protected static void SetClientReady()
+		{
+			if (!NetworkClient.ready)
 			{
-				NetworkServer.Destroy(entity.gameObject);
+				NetworkClient.Ready();
 			}
 		}
 
@@ -131,6 +151,7 @@ namespace GamePlay
 			string mapName = mapNameResponse.Message.MapName;
 			await DownloadMapAsync(mapName);
 			MutableGameState.Value = GamePlay.GameState.Playing;
+			SetClientReady();
 		}
 
 		private async UniTask DownloadMapAsync(string mapName, CancellationToken cancellationToken = default)

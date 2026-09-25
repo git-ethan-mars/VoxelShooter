@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Data;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -70,7 +71,7 @@ namespace GamePlay
 				ListPool<Voxel>.Release(voxels);
 			}
 
-			foreach (IDamageVisitor visitor in EntityContainer.GetEntitiesByType<IDamageVisitor>())
+			foreach (IDamageVisitor visitor in EntityContainer.GetEntitiesByType<IDamageVisitor>().ToList())
 			{
 				visitor.Visit(this, explosionData);
 			}

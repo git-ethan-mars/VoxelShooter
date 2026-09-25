@@ -23,5 +23,15 @@ namespace UI
 			_votes = votes;
 			text.text = $"{Candidate} [{_votes}]";
 		}
+
+		public void Select()
+		{
+			text.color = Color.forestGreen;
+		}
+
+		public void Deselect()
+		{
+			text.color = Color.white;
+		}
 	}
 }

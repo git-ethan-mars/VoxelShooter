@@ -11,10 +11,13 @@ namespace Networking
 		private readonly Subject<(NetworkConnectionToClient, string, Texture2D)> _onAuthenticatedPlayer =
 			new Subject<(NetworkConnectionToClient, string, Texture2D)>();
 
+		private readonly Subject<Unit> _clientAuthenticated = new Subject<Unit>();
+
 		private VSNetworkManager _networkManager;
 		private IPlayerDataLoader _playerDataLoader;
 
 		public Observable<(NetworkConnectionToClient, string, Texture2D)> OnAuthenticatedPlayer => _onAuthenticatedPlayer;
+		public Observable<Unit> ClientAuthenticated => _clientAuthenticated;
 
 		[Inject]
 		private void Construct(VSNetworkManager networkManager, IPlayerDataLoader playerDataLoader)
@@ -28,9 +31,19 @@ namespace Networking
 			NetworkServer.RegisterHandler<AuthenticationRequest>(OnAuthenticationRequest, false);
 		}
 
+		public override void OnStartClient()
+		{
+			NetworkClient.RegisterHandler<AuthenticationResponse>(OnAuthenticationResponse, false);
+		}
+
 		public override void OnStopServer()
 		{
 			NetworkServer.UnregisterHandler<AuthenticationRequest>();
+		}
+
+		public override void OnStopClient()
+		{
+			NetworkClient.UnregisterHandler<AuthenticationResponse>();
 		}
 
 		public async override void OnClientAuthenticate()
@@ -49,12 +62,13 @@ namespace Networking
 			connection.Send(response);
 			ServerAccept(connection);
 
-			if (_networkManager.mode == NetworkManagerMode.Host)
-			{
-				ClientAccept();
-			}
-
 			_onAuthenticatedPlayer.OnNext((connection, request.NickName, request.Avatar));
+		}
+
+		private void OnAuthenticationResponse(AuthenticationResponse response)
+		{
+			ClientAccept();
+			_clientAuthenticated.OnNext(Unit.Default);
 		}
 	}
 }

@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using Networking;
 using Services;
 using Steamworks;
@@ -16,7 +17,7 @@ namespace Infrastructure.States
 			_networkManager = networkManager;
 		}
 
-		public async void Enter(Server server)
+		public async UniTask EnterAsync(Server server)
 		{
 			SteamLobby steamLobby = _networkManager.GetComponent<SteamLobby>();
 			string networkAddress = await steamLobby.JoinLobbyAsync(new CSteamID(server.SteamIDLobby));
@@ -24,12 +25,12 @@ namespace Infrastructure.States
 			if (string.IsNullOrEmpty(networkAddress))
 			{
 				Debug.Log("Wrong network address");
-				_gameStateMachine.Enter<GameMenuState>();
+				await _gameStateMachine.EnterAsync<GameMenuState>();
 				return;
 			}
 
 			_networkManager.networkAddress = networkAddress;
-			_gameStateMachine.Enter<InitializeClientState>();
+			await _gameStateMachine.EnterAsync<InitializeClientState>();
 		}
 
 		public void Exit()

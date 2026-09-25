@@ -26,6 +26,7 @@ namespace GamePlay
 		private readonly SpawnPointService _spawnPointService;
 		private readonly LootBoxSpawner _lootBoxSpawner;
 		private readonly RespawnService _respawnService;
+		private readonly KillList _killList;
 
 		private readonly Subject<Unit> _characterDied = new Subject<Unit>();
 		private readonly ReactiveProperty<TimeSpan> _timeLeft = new ReactiveProperty<TimeSpan>();
@@ -39,7 +40,7 @@ namespace GamePlay
 
 
 		public DeathMatch(VSNetworkManager networkManager, EntityContainer entityContainer, IEntityFactory entityFactory, MapProvider mapProvider, LootBoxSpawner lootBoxSpawner, SpawnPointService spawnPointService,
-			RespawnService respawnService)
+			RespawnService respawnService, KillList killList)
 		{
 			NetworkManager = networkManager;
 			EntityContainer = entityContainer;
@@ -49,6 +50,7 @@ namespace GamePlay
 			_spawnPointService = spawnPointService;
 			_lootBoxSpawner = lootBoxSpawner;
 			_respawnService = respawnService;
+			_killList = killList;
 		}
 
 		public override void Update()
@@ -62,19 +64,20 @@ namespace GamePlay
 
 			_timeLeft.Value -= TimeSpan.FromSeconds(Time.deltaTime);
 
+			if (NetworkManager.mode != NetworkManagerMode.Host)
+			{
+				return;
+			}
+
 			if (_timeLeft.Value < TimeSpan.Zero)
 			{
 				_timeLeft.Value = TimeSpan.Zero;
-
-				if (NetworkManager.mode == NetworkManagerMode.Host)
 				{
 					CleanUp();
-
 					StartMapVotingFlowAsync().Forget();
 				}
 			}
-
-			if (NetworkManager.mode == NetworkManagerMode.Host)
+			else
 			{
 				_respawnService.OnUpdate(_sessions, Time.deltaTime);
 				_lootBoxSpawner.OnUpdate(Time.deltaTime);
@@ -103,6 +106,9 @@ namespace GamePlay
 				.OfMessageType<CharacterDiedResponse>()
 				.Subscribe(_ => OnCharacterDiedResponse())
 				.AddTo(NetworkManager);
+			_killList.KillAdded
+				.Subscribe(OnKillAdded)
+				.AddTo(NetworkManager);
 		}
 
 		public void ChangeClass(GameClass chosenClass)
@@ -118,13 +124,6 @@ namespace GamePlay
 			_spawnPointService.CreateSpawnPoints();
 
 			MutableGameState.Value = GamePlay.GameState.Playing;
-
-			foreach (NetworkConnectionToClient connection in _sessions.Keys)
-			{
-				Vector3 spawnPosition = _spawnPointService.GetRandomSpawnPoint();
-				Spectator spectator = _entityFactory.CreateSpectator(spawnPosition);
-				NetworkServer.AddPlayerForConnection(connection, spectator.gameObject);
-			}
 		}
 
 		protected override void OnAddPlayer(NetworkConnectionToClient connection, string nickName, Texture2D avatar)
@@ -142,13 +141,11 @@ namespace GamePlay
 					NetworkManager.SendResponse(connection, new MapVoteUpdateResponse(mapName, votes));
 				}
 			}
+		}
 
-			if (MutableGameState.Value == GamePlay.GameState.Playing)
-			{
-				Vector3 spawnPosition = _spawnPointService.GetRandomSpawnPoint();
-				Spectator spectator = _entityFactory.CreateSpectator(spawnPosition);
-				NetworkServer.AddPlayerForConnection(connection, spectator.gameObject);
-			}
+		protected override void OnPlayerReady(NetworkConnectionToClient connection)
+		{
+			TrySpawnSpectator(connection);
 		}
 
 		protected override void OnRemovePlayer(NetworkConnectionToClient connection)
@@ -162,11 +159,13 @@ namespace GamePlay
 			base.CleanUp();
 
 			_lootBoxSpawner.Clean();
+			_spawnPointService.Clear();
 
 			foreach (DeathMatchPlayerSession session in _sessions.Values)
 			{
 				session.IsAlive = false;
 				session.RespawnTime = TimeSpan.Zero;
+				session.Data = session.Data.WithGameClass(GameClass.None);
 			}
 		}
 
@@ -190,7 +189,27 @@ namespace GamePlay
 				NetworkManager.destroyCancellationToken);
 
 			await LoadMapAsync(mapName);
+
+			SetRemoteClientsNotReady();
 			NetworkManager.SendResponseToAll(new MapChangeResponse());
+
+			SetClientReady();
+		}
+
+		private void TrySpawnSpectator(NetworkConnectionToClient connection)
+		{
+			Debug.Log("TRY SPAWN");
+			if (MutableGameState.Value != GamePlay.GameState.Playing || connection.identity != null ||
+			    !_sessions.ContainsKey(connection))
+			{
+				return;
+			}
+
+			Debug.Log("TRY SPAWN 2");
+
+			Vector3 spawnPosition = _spawnPointService.GetRandomSpawnPoint();
+			Spectator spectator = _entityFactory.CreateSpectator(spawnPosition);
+			NetworkServer.AddPlayerForConnection(connection, spectator.gameObject);
 		}
 
 		private void OnGameSettingsRequest(NetworkConnectionToClient connection)
@@ -203,6 +222,11 @@ namespace GamePlay
 
 		private void OnChangeGameClassRequest(NetworkConnectionToClient connection, ChangeGameClassRequest request)
 		{
+			if (MutableGameState.Value != GamePlay.GameState.Playing)
+			{
+				return;
+			}
+
 			if (!_sessions.TryGetValue(connection, out DeathMatchPlayerSession session))
 			{
 				Debug.LogWarning($"Couldn't find session for id: {connection.connectionId}");
@@ -226,6 +250,29 @@ namespace GamePlay
 			}
 
 			Scoreboard.ChangeClass(connection, request.GameClass);
+		}
+
+		private void OnKillAdded(KillData kill)
+		{
+			if (!NetworkServer.active)
+			{
+				return;
+			}
+
+			DeathMatchPlayerSession victim = FindSession(kill.TargetId);
+
+			if (victim == null)
+			{
+				return;
+			}
+
+			DeathMatchPlayerSession killer = kill.SourceId == kill.TargetId ? null : FindSession(kill.SourceId);
+			_respawnService.Kill(victim, killer?.Connection);
+		}
+
+		private DeathMatchPlayerSession FindSession(PlayerId playerId)
+		{
+			return _sessions.Values.FirstOrDefault(session => new PlayerId(session.Connection.connectionId) == playerId);
 		}
 
 		private void OnCharacterDiedResponse()

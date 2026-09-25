@@ -1,17 +1,19 @@
+using Cysharp.Threading.Tasks;
+
 namespace Infrastructure.States
 {
 	public interface IPayloadedState<TPayload> : IExitableState
 	{
-		void Enter(TPayload payload);
+		UniTask EnterAsync(TPayload payload);
 	}
 
 	public interface IPayloadedState<TPayload1, TPayload2> : IExitableState
 	{
-		void Enter(TPayload1 payload1, TPayload2 payload2);
+		UniTask EnterAsync(TPayload1 payload1, TPayload2 payload2);
 	}
 
 	public interface IPayloadedState<TPayload1, TPayload2, TPayload3> : IExitableState
 	{
-		void Enter(TPayload1 payload1, TPayload2 payload2, TPayload3 payload3);
+		UniTask EnterAsync(TPayload1 payload1, TPayload2 payload2, TPayload3 payload3);
 	}
 }

@@ -1,4 +1,5 @@
-﻿using Data;
+﻿using Cysharp.Threading.Tasks;
+using Data;
 using R3;
 using Services;
 using UI;
@@ -21,7 +22,7 @@ namespace Infrastructure.States
 			_gameStateMachine = gameStateMachine;
 		}
 
-		public async void Enter()
+		public async UniTask EnterAsync()
 		{
 			await _sceneLoader.LoadAsync(Scenes.GameMenu);
 
@@ -29,12 +30,12 @@ namespace Infrastructure.States
 			AudioListener.volume = _storageService.Load<VolumeSettingsData>(IStorageService.VolumeSettingsKey).MasterVolume;
 
 			GameMenu gameMenu = _uiFactory.CreateGameMenu();
-			gameMenu.CreateGameRequested.Subscribe(OnCreateGameRequested).AddTo(gameMenu);
+			gameMenu.CreateGameRequested.Subscribe(gameSettings => OnCreateGameRequested(gameSettings).Forget()).AddTo(gameMenu);
 
 #if LOCAL_BUILD
-			gameMenu.JoinButtonPressed.Subscribe(_ => OnJoinButtonPressed()).AddTo(gameMenu);
+			gameMenu.JoinButtonPressed.Subscribe(_ => OnJoinButtonPressed().Forget()).AddTo(gameMenu);
 #else
-			gameMenu.JoinServerButtonPressed.Subscribe(OnJoinServerButtonPressed).AddTo(gameMenu);
+			gameMenu.JoinServerButtonPressed.Subscribe(server => OnJoinServerButtonPressed(server).Forget()).AddTo(gameMenu);
 #endif
 		}
 
@@ -42,23 +43,23 @@ namespace Infrastructure.States
 		{
 		}
 
-		private async void OnCreateGameRequested(GameSettings gameSettings)
+		private async UniTaskVoid OnCreateGameRequested(GameSettings gameSettings)
 		{
 			await _sceneLoader.LoadAsync(Scenes.Main);
-			_gameStateMachine.Enter<InitializeHostState, GameSettings>(gameSettings);
+			await _gameStateMachine.EnterAsync<InitializeHostState, GameSettings>(gameSettings);
 		}
 
 #if LOCAL_BUILD
-		private async void OnJoinButtonPressed()
+		private async UniTaskVoid OnJoinButtonPressed()
 		{
 			await _sceneLoader.LoadAsync(Scenes.Main);
-			_gameStateMachine.Enter<InitializeClientState>();
+			await _gameStateMachine.EnterAsync<InitializeClientState>();
 		}
 #endif
-		private async void OnJoinServerButtonPressed(Server server)
+		private async UniTaskVoid OnJoinServerButtonPressed(Server server)
 		{
 			await _sceneLoader.LoadAsync(Scenes.Main);
-			_gameStateMachine.Enter<JoinSteamLobbyState, Server>(server);
+			await _gameStateMachine.EnterAsync<JoinSteamLobbyState, Server>(server);
 		}
 	}
 }
