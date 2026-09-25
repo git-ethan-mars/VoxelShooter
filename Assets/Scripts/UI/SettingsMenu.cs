@@ -31,6 +31,11 @@ namespace UI
 		[SerializeField] private ResolutionCarouselView resolutionView;
 		[SerializeField] private ScreenModeCarouselView screenModeView;
 
+		[Header("Controls")] [SerializeField] private Toggle controlsSectionToggle;
+
+		[SerializeField] private GameObject controlsSection;
+		[SerializeField] private KeyBindingsView keyBindingsView;
+
 		[SerializeField] private Button backButton;
 		[SerializeField] private Color activeToggleColor;
 		[SerializeField] private Color inactiveToggleColor;
@@ -47,10 +52,12 @@ namespace UI
 				new SettingsMenuStateMachine(new MouseSettingsState(storageService, staticData,
 						mouseSection, generalSensitivity, aimSensitivity, crosshairView),
 					new VolumeSettingsState(storageService, volumeSection, masterVolume, musicVolume, soundVolume),
-					new VideoSettingsState(storageService, videoSection, resolutionView, screenModeView));
+					new VideoSettingsState(storageService, videoSection, resolutionView, screenModeView),
+					new ControlsSettingsState(controlsSection, keyBindingsView));
 			mouseSectionToggle.onValueChanged.AsObservable().Subscribe(OnMouseSectionToggleChanged).AddTo(this);
 			volumeSectionToggle.onValueChanged.AsObservable().Subscribe(OnVolumeSectionToggleChanged).AddTo(this);
 			videoSectionToggle.onValueChanged.AsObservable().Subscribe(OnVideoSectionToggleChanged).AddTo(this);
+			controlsSectionToggle.onValueChanged.AsObservable().Subscribe(OnControlsSectionToggleChanged).AddTo(this);
 		}
 
 		private void OnDestroy()
@@ -70,6 +77,7 @@ namespace UI
 			_storageService.Save<MouseSettingsData>(IStorageService.MouseSettingsKey);
 			_storageService.Save<VolumeSettingsData>(IStorageService.VolumeSettingsKey);
 			_storageService.Save<VideoSettingsData>(IStorageService.VideoSettingsKey);
+			_storageService.Save<KeyBindingsData>(IStorageService.KeyBindingsKey);
 		}
 
 		private void OnMouseSectionToggleChanged(bool value)
@@ -99,6 +107,16 @@ namespace UI
 			if (value)
 			{
 				_settingsMenuStateMachine.SwitchState<VideoSettingsState>();
+			}
+		}
+
+		private void OnControlsSectionToggleChanged(bool value)
+		{
+			SetToggleColor(controlsSectionToggle, value);
+
+			if (value)
+			{
+				_settingsMenuStateMachine.SwitchState<ControlsSettingsState>();
 			}
 		}
 

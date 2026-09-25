@@ -1,0 +1,36 @@
+namespace Services
+{
+	public enum ControlAction
+	{
+		MoveForward,
+		MoveBackward,
+		MoveLeft,
+		MoveRight,
+		Jump,
+		Sprint,
+		PrimaryAction,
+		SecondaryAction,
+		Reload,
+		RotateBlueprint,
+		BlueprintMenu,
+		Palette,
+		PaletteUp,
+		PaletteDown,
+		PaletteLeft,
+		PaletteRight,
+		PickColor,
+		Scoreboard,
+		ChooseClass,
+		Map,
+		Slot1,
+		Slot2,
+		Slot3,
+		Slot4,
+		Slot5,
+		Slot6,
+		Slot7,
+		Slot8,
+		Slot9,
+		Slot10
+	}
+}

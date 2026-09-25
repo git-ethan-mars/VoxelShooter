@@ -1,13 +1,16 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace Services
 {
 	public class StandaloneInputService : IInputService
 	{
+		private const int SlotCount = 10;
+
+		private KeyBindingsData _bindings;
 		private bool _isEnabled;
 
 		public Vector2 Axis => _isEnabled
-			? new Vector2(Input.GetAxisRaw("Vertical"), Input.GetAxisRaw("Horizontal"))
+			? new Vector2(GetAxis(ControlAction.MoveBackward, ControlAction.MoveForward), GetAxis(ControlAction.MoveLeft, ControlAction.MoveRight))
 			: Vector2.zero;
 
 		public Vector2 MouseAxis => _isEnabled
@@ -18,59 +21,65 @@ namespace Services
 
 		public bool IsEnabled => _isEnabled;
 
+		public StandaloneInputService(IStorageService storageService)
+		{
+			_bindings = storageService.Load<KeyBindingsData>(IStorageService.KeyBindingsKey);
+			storageService.Subscribe<KeyBindingsData>(bindings => _bindings = bindings);
+		}
+
 		public bool IsFirstActionButtonDown()
 		{
-			return Input.GetMouseButtonDown(0) && _isEnabled;
+			return IsDown(ControlAction.PrimaryAction) && _isEnabled;
 		}
 
 		public bool IsFirstActionButtonUp()
 		{
-			return Input.GetMouseButtonUp(0) && _isEnabled;
+			return IsUp(ControlAction.PrimaryAction) && _isEnabled;
 		}
 
 		public bool IsFirstActionButtonHold()
 		{
-			return Input.GetMouseButton(0) && _isEnabled;
+			return IsHeld(ControlAction.PrimaryAction) && _isEnabled;
 		}
 
 		public bool IsSecondActionButtonDown()
 		{
-			return Input.GetMouseButtonDown(1) && _isEnabled;
+			return IsDown(ControlAction.SecondaryAction) && _isEnabled;
 		}
 
 		public bool IsSecondActionButtonUp()
 		{
-			return Input.GetMouseButtonUp(1) && _isEnabled;
+			return IsUp(ControlAction.SecondaryAction) && _isEnabled;
 		}
 
 		public bool IsSecondActionButtonHold()
 		{
-			return Input.GetMouseButton(1) && _isEnabled;
+			return IsHeld(ControlAction.SecondaryAction) && _isEnabled;
 		}
 
 		public bool IsRotateButtonDown()
 		{
-			return Input.GetKeyDown(KeyCode.R) && _isEnabled;
+			return IsDown(ControlAction.RotateBlueprint) && _isEnabled;
 		}
 
 		public bool IsBlueprintMenuButtonHold()
 		{
-			return Input.GetKey(KeyCode.E);
+			return IsHeld(ControlAction.BlueprintMenu);
 		}
 
 		public bool IsReloadingButtonDown()
 		{
-			return Input.GetKeyDown(KeyCode.R) && _isEnabled;
+			return IsDown(ControlAction.Reload) && _isEnabled;
 		}
 
 		public bool IsJumpButtonDown()
 		{
-			return Input.GetKeyDown(KeyCode.Space) && _isEnabled;
+			return IsDown(ControlAction.Jump) && _isEnabled;
 		}
 
 		public bool IsSprintButtonHold()
 		{
-			return Input.GetKey(KeyCode.LeftShift) && _isEnabled;
+			return IsHeld(ControlAction.Sprint) && _isEnabled;
 		}
 
 		public float GetScrollSpeed()
@@ -80,22 +89,22 @@ namespace Services
 
 		public bool IsScrollButtonDown()
 		{
-			return _isEnabled && Input.GetMouseButtonDown(2);
+			return _isEnabled && IsDown(ControlAction.PickColor);
 		}
 
 		public bool IsScoreboardButtonDown()
 		{
-			return Input.GetKeyDown(KeyCode.Tab);
+			return IsDown(ControlAction.Scoreboard);
 		}
 
 		public bool IsScoreboardButtonUp()
 		{
-			return Input.GetKeyUp(KeyCode.Tab);
+			return IsUp(ControlAction.Scoreboard);
 		}
 
 		public bool IsChooseClassButtonDown()
 		{
-			return Input.GetKeyDown(KeyCode.N);
+			return IsDown(ControlAction.ChooseClass);
 		}
 
 		public bool IsInGameMenuButtonDown()
@@ -105,97 +114,47 @@ namespace Services
 
 		public bool IsMapButtonDown()
 		{
-			return Input.GetKeyDown(KeyCode.M);
+			return IsDown(ControlAction.Map);
 		}
 
 		public bool IsMapButtonUp()
 		{
-			return Input.GetKeyUp(KeyCode.M);
+			return IsUp(ControlAction.Map);
 		}
 
 		public bool IsPaletteButtonHold()
 		{
-			return Input.GetKey(KeyCode.Q) && _isEnabled;
+			return IsHeld(ControlAction.Palette) && _isEnabled;
 		}
 
 		public bool IsLeftArrowButtonDown()
 		{
-			return Input.GetKeyDown(KeyCode.LeftArrow) && _isEnabled;
+			return IsDown(ControlAction.PaletteLeft) && _isEnabled;
 		}
 
 		public bool IsRightArrowButtonDown()
 		{
-			return Input.GetKeyDown(KeyCode.RightArrow) && _isEnabled;
+			return IsDown(ControlAction.PaletteRight) && _isEnabled;
 		}
 
 		public bool IsUpArrowButtonDown()
 		{
-			return Input.GetKeyDown(KeyCode.UpArrow) && _isEnabled;
+			return IsDown(ControlAction.PaletteUp) && _isEnabled;
 		}
 
 		public bool IsDownArrowButtonDown()
 		{
-			return Input.GetKeyDown(KeyCode.DownArrow) && _isEnabled;
+			return IsDown(ControlAction.PaletteDown) && _isEnabled;
 		}
 
 		public bool IsSlotButtonPressed(int number)
 		{
-			if (!_isEnabled)
+			if (!_isEnabled || number < 0 || number >= SlotCount)
 			{
 				return false;
 			}
 
-			if (number == 0)
-			{
-				return Input.GetKeyDown(KeyCode.Alpha1);
-			}
-
-			if (number == 1)
-			{
-				return Input.GetKeyDown(KeyCode.Alpha2);
-			}
-
-			if (number == 2)
-			{
-				return Input.GetKeyDown(KeyCode.Alpha3);
-			}
-
-			if (number == 3)
-			{
-				return Input.GetKeyDown(KeyCode.Alpha4);
-			}
-
-			if (number == 4)
-			{
-				return Input.GetKeyDown(KeyCode.Alpha5);
-			}
-
-			if (number == 5)
-			{
-				return Input.GetKeyDown(KeyCode.Alpha6);
-			}
-
-			if (number == 6)
-			{
-				return Input.GetKeyDown(KeyCode.Alpha7);
-			}
-
-			if (number == 7)
-			{
-				return Input.GetKeyDown(KeyCode.Alpha8);
-			}
-
-			if (number == 8)
-			{
-				return Input.GetKeyDown(KeyCode.Alpha9);
-			}
-
-			if (number == 9)
-			{
-				return Input.GetKeyDown(KeyCode.Alpha0);
-			}
-
-			return false;
+			return IsDown(ControlAction.Slot1 + number);
 		}
 
 		public void Enable() // TODO: This method probably does not belong here
@@ -206,6 +165,26 @@ namespace Services
 		public void Disable()
 		{
 			_isEnabled = false;
+		}
+
+		private bool IsDown(ControlAction action)
+		{
+			return Input.GetKeyDown(_bindings.GetKey(action));
+		}
+
+		private bool IsUp(ControlAction action)
+		{
+			return Input.GetKeyUp(_bindings.GetKey(action));
+		}
+
+		private bool IsHeld(ControlAction action)
+		{
+			return Input.GetKey(_bindings.GetKey(action));
+		}
+
+		private float GetAxis(ControlAction negative, ControlAction positive)
+		{
+			return (IsHeld(positive) ? 1.0f : 0.0f) - (IsHeld(negative) ? 1.0f : 0.0f);
 		}
 	}
 }

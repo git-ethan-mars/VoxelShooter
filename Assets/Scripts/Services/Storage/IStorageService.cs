@@ -7,6 +7,7 @@ namespace Services
 		public const string VideoSettingsKey = "video_settings";
 		public const string MouseSettingsKey = "mouse_settings";
 		public const string VolumeSettingsKey = "volume_settings";
+		public const string KeyBindingsKey = "key_bindings";
 		T Load<T>(string key) where T : ISettingsData, new();
 		void Set<T>(T data) where T : ISettingsData;
 		void Save<T>(string key) where T : ISettingsData;
