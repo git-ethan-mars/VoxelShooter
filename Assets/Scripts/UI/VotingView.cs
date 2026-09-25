@@ -31,11 +31,7 @@ namespace UI
 
 			_voting.Title.Subscribe(title.SetText).AddTo(this);
 			_voting.VoteByCandidate.CollectionChanged += OnVotingChanged;
-		}
-
-		private void OnEnable()
-		{
-			canvasGroup.alpha = 1;
+			UpdateVisibility();
 		}
 
 		private void Update()
@@ -75,11 +71,6 @@ namespace UI
 			_selectedElement.Select();
 		}
 
-		private void OnDisable()
-		{
-			canvasGroup.alpha = 0;
-		}
-
 		private void OnDestroy()
 		{
 			if (_voting != null)
@@ -94,7 +85,7 @@ namespace UI
 			{
 				case NotifyCollectionChangedAction.Add:
 					VotingElement element = SpawnElement();
-					element.Initialize(e.NewItem.Key);
+					element.Initialize(Items.Count - 1, e.NewItem.Key);
 					break;
 				case NotifyCollectionChangedAction.Replace:
 					string candidateName = e.NewItem.Key;
@@ -105,6 +96,13 @@ namespace UI
 					Clear();
 					break;
 			}
+
+			UpdateVisibility();
+		}
+
+		private void UpdateVisibility()
+		{
+			canvasGroup.alpha = Items.Count > 0 ? 1.0f : 0.0f;
 		}
 	}
 }

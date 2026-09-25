@@ -1,37 +1,42 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace UI
 {
 	public class VotingElement : MonoBehaviour
 	{
-		[SerializeField] private TextMeshProUGUI text;
+		private static readonly Color SelectedColor = new Color(0.72f, 0.95f, 0.62f, 1.0f);
 
-		private int _votes;
+		[SerializeField] private Image background;
+		[SerializeField] private TextMeshProUGUI number;
+		[SerializeField] private TextMeshProUGUI candidateName;
+		[SerializeField] private TextMeshProUGUI votes;
 
 		public string Candidate { get; private set; }
 
-		public void Initialize(string candidate)
+		public void Initialize(int index, string candidate)
 		{
 			Candidate = candidate;
-			_votes = 0;
-			text.text = $"{candidate} [{_votes}]";
+			number.SetText((index + 1).ToString());
+			candidateName.SetText(candidate);
+			SetVotes(0);
+			Deselect();
 		}
 
-		public void SetVotes(int votes)
+		public void SetVotes(int voteCount)
 		{
-			_votes = votes;
-			text.text = $"{Candidate} [{_votes}]";
+			votes.SetText(voteCount.ToString());
 		}
 
 		public void Select()
 		{
-			text.color = Color.forestGreen;
+			background.color = SelectedColor;
 		}
 
 		public void Deselect()
 		{
-			text.color = Color.white;
+			background.color = Color.white;
 		}
 	}
 }
