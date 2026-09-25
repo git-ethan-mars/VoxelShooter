@@ -1,5 +1,4 @@
-using System;
-using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -7,85 +6,89 @@ namespace GamePlay
 {
 	public class FallingMesh : MonoBehaviour
 	{
-		private const int DestructionTime = 4;
-		private const int ParticleSystemsCountModifier = 200;
-		private const int MaxVerticesForMeshCollider = 24000;
+		private const float BreakDelay = 0.3f;
+		private const float MaxLifetime = 8.0f;
+		private const int MaxParticleSystems = 60;
+		private const int ParticleStartSpeed = 1;
+		private const int ParticlesPerSystem = 5;
+
 		[SerializeField] private MeshFilter meshFilter;
-		[SerializeField] private Rigidbody rb;
-		[SerializeField] private MeshRenderer meshRenderer;
-		[SerializeField] private float lifeTime;
-		private bool _hasCollided;
 
 		private FallingMeshParticlePool _particlePool;
+		private bool _isBreaking;
 
 		public void Construct(FallingMeshParticlePool particlePool)
 		{
 			_particlePool = particlePool;
 		}
 
-		private async void OnCollisionEnter(Collision collision)
+		private void Start()
 		{
-			int length = meshFilter.mesh.vertexCount;
-			if (length > MaxVerticesForMeshCollider)
-			{
-				rb.isKinematic = true;
-			}
+			// Pieces that never hit anything (e.g. fell off the map) are removed anyway.
+			Destroy(gameObject, MaxLifetime);
+		}
 
-			if (_hasCollided)
+		private void OnCollisionEnter(Collision collision)
+		{
+			if (_isBreaking)
 			{
 				return;
 			}
 
-			_hasCollided = true;
-			await ProcessCollisionAsync(meshFilter.mesh, length, DestructionTime);
+			_isBreaking = true;
+			BreakAsync(destroyCancellationToken).Forget();
 		}
 
-		private async UniTask ProcessCollisionAsync(Mesh mesh, int length, float lifetime)
+		private void OnDestroy()
 		{
-			await UniTask.WaitForSeconds(lifetime);
-
-			Vector3[] vertices = mesh.vertices;
-			Color[] colors = mesh.colors;
-			var particlesContainer = new List<ParticleSystem>();
-			int blocksCount = length / 24;
-			double modifier = Math.Max(Math.Round((double)blocksCount / ParticleSystemsCountModifier), 1);
-			int counter = 0;
-			for (int i = 0; i < length; i += 24)
+			if (meshFilter.sharedMesh != null)
 			{
-				if (counter % modifier == 0)
-				{
-					ParticleSystem particles = _particlePool.Get();
-					Vector3 position = transform.localRotation * (vertices[i] + new Vector3(0.5f, -0.5f, 0.5f)) +
-					                   transform.localPosition;
-					ConfigureParticles(particles, position, 1, 5, colors[i / 4]);
-					particlesContainer.Add(particles);
-				}
-
-				counter++;
+				Destroy(meshFilter.sharedMesh);
 			}
+		}
 
-			meshRenderer.enabled = false;
-			GetComponent<Collider>().enabled = false;
-			rb.isKinematic = true;
-			IEnumerable<UniTask> tasks = particlesContainer.Select(p => _particlePool.ReleaseAsync(p, p.main.startLifetime.constant));
-			await UniTask.WhenAll(tasks);
-			await UniTask.WaitForSeconds(lifetime);
+		private async UniTaskVoid BreakAsync(CancellationToken cancellationToken)
+		{
+			await UniTask.WaitForSeconds(BreakDelay, cancellationToken: cancellationToken);
+			SpawnParticles();
 			Destroy(gameObject);
 		}
 
-		private void ConfigureParticles(ParticleSystem particles, Vector3 position, int startSpeed, int burstCount,
-			Color meshColor)
+		// Particles come from the pool and outlive the mesh, so the piece can be destroyed right away.
+		private void SpawnParticles()
 		{
-			particles.gameObject.transform.position = position;
+			Mesh mesh = meshFilter.sharedMesh;
+			Vector3[] vertices = mesh.vertices;
+			Color32[] colors = mesh.colors32;
+			int faceCount = vertices.Length / 4;
+			int faceStep = Mathf.Max(1, Mathf.CeilToInt((float)faceCount / MaxParticleSystems));
+
+			for (int face = 0; face < faceCount; face += faceStep)
+			{
+				int vertex = face * 4;
+				Vector3 faceCenter = (vertices[vertex] + vertices[vertex + 2]) * 0.5f;
+				ParticleSystem particles = _particlePool.Get();
+				ConfigureParticles(particles, transform.TransformPoint(faceCenter), colors[vertex]);
+				_particlePool.ReleaseAsync(particles, particles.main.startLifetime.constant).Forget();
+			}
+		}
+
+		private static void ConfigureParticles(ParticleSystem particles, Vector3 position, Color32 color)
+		{
+			particles.transform.position = position;
 			ParticleSystem.MainModule main = particles.main;
-			main.startSpeed = startSpeed;
-			main.startColor = meshColor;
-			var burst = new ParticleSystem.Burst(0f, burstCount, 1, 0.05f)
+			main.startSpeed = ParticleStartSpeed;
+			// Vertex alpha stores ambient occlusion, not transparency.
+			Color startColor = color;
+			startColor.a = 1.0f;
+			main.startColor = startColor;
+			var burst = new ParticleSystem.Burst(0.0f, ParticlesPerSystem, 1, 0.05f)
 			{
 				probability = 1
 			};
 
 			particles.emission.SetBurst(0, burst);
+			particles.Play();
 		}
 	}
 }
