@@ -13,8 +13,7 @@ namespace Data
 		{
 			MapName = mapName;
 			BoxRespawnTime = TimeSpan.FromSeconds(boxSpawnTime);
-			// TODO: temporary hardcoded match duration for testing, restore TimeSpan.FromMinutes(gameDuration).
-			GameDuration = TimeSpan.FromSeconds(25);
+			GameDuration = TimeSpan.FromMinutes(gameDuration);
 			RespawnTime = TimeSpan.FromSeconds(characterRespawnTime);
 		}
 
