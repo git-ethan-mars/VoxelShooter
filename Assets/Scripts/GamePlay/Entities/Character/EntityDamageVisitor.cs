@@ -79,13 +79,13 @@ namespace GamePlay
 				return;
 			}
 
-			if (Vector3.Distance(explosive.transform.position, transform.position) >= explosionData.radius)
+			int damage = explosive.GetDamageAt(transform.position, explosionData);
+
+			if (damage <= 0)
 			{
 				return;
 			}
 
-			int damage = (int)((1 - Vector3.Distance(transform.position, explosive.transform.position) / explosionData.radius)
-			                   * explosionData.damage);
 			healthSystem.Decrease(damage);
 
 			if (healthSystem.Health.CurrentValue == 0)

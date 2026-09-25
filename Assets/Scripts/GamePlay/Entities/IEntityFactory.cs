@@ -16,5 +16,6 @@ namespace GamePlay
 		SpawnPoint CreateSpawnPoint(SpawnPointData position, Transform parent);
 		Spectator CreateSpectator(Vector3 position);
 		Character CreateCharacter(Vector3 position, GameClass chosenClass, string nickname);
+		Dummy CreateDummy(Vector3 position, Quaternion rotation, int maxHealth);
 	}
 }

@@ -19,6 +19,10 @@ namespace GamePlay
 		// Length of the map voting music track (Audio/Sounds/golosovanie-ks.mp3).
 		private const float VotingDuration = 18.05f;
 		private const int VotingMaps = 4;
+		private const int DefaultDummyHealth = 100;
+		private const int MaxDummyHealth = 100000;
+		private const float DummyDistance = 3.0f;
+		private const float DummyGroundSearchDistance = 50.0f;
 		public readonly DeathmatchScoreboard Scoreboard = new DeathmatchScoreboard();
 
 		public readonly Voting MapVoting;
@@ -29,6 +33,7 @@ namespace GamePlay
 		private readonly LootBoxSpawner _lootBoxSpawner;
 		private readonly RespawnService _respawnService;
 		private readonly KillList _killList;
+		private readonly CameraProvider _cameraProvider;
 
 		private readonly Subject<Unit> _characterDied = new Subject<Unit>();
 		private readonly ReactiveProperty<TimeSpan> _timeLeft = new ReactiveProperty<TimeSpan>();
@@ -42,7 +47,7 @@ namespace GamePlay
 
 
 		public DeathMatch(VSNetworkManager networkManager, EntityContainer entityContainer, IEntityFactory entityFactory, MapProvider mapProvider, LootBoxSpawner lootBoxSpawner, SpawnPointService spawnPointService,
-			RespawnService respawnService, KillList killList)
+			RespawnService respawnService, KillList killList, CameraProvider cameraProvider)
 		{
 			NetworkManager = networkManager;
 			EntityContainer = entityContainer;
@@ -54,6 +59,7 @@ namespace GamePlay
 			_lootBoxSpawner = lootBoxSpawner;
 			_respawnService = respawnService;
 			_killList = killList;
+			_cameraProvider = cameraProvider;
 
 			RegisterChatCommands();
 		}
@@ -286,6 +292,8 @@ namespace GamePlay
 			Chat.RegisterCommand(new ChatCommand("kick", "/kick <id>", "Disconnect a player from the game", KickPlayer));
 			Chat.RegisterCommand(new ChatCommand("kill", "/kill <id>", "Kill a player's character", KillPlayer));
 			Chat.RegisterCommand(new ChatCommand("spectate", "/spectate <id>", "Watch a player; N returns you to the game", SpectatePlayer));
+			Chat.RegisterCommand(new ChatCommand("dummy", "/dummy [health]", "Spawn a training dummy in front of you", SpawnDummy));
+			Chat.RegisterCommand(new ChatCommand("cleardummies", "/cleardummies", "Remove all training dummies", _ => ClearDummies()));
 			Chat.RegisterCommand(new ChatCommand("endround", "/endround", "Finish the round and start the map voting", _ => EndRound()));
 		}
 
@@ -366,6 +374,55 @@ namespace GamePlay
 			}
 
 			return $"Spectating {target.Data.NickName}, press N to return to the game";
+		}
+
+		private string SpawnDummy(string[] arguments)
+		{
+			int health = DefaultDummyHealth;
+
+			if (arguments.Length > 0 && (!int.TryParse(arguments[0], out health) || health < 1 || health > MaxDummyHealth))
+			{
+				return $"Health should be a number from 1 to {MaxDummyHealth}";
+			}
+
+			NetworkIdentity host = NetworkServer.localConnection.identity;
+
+			if (MutableGameState.Value != GamePlay.GameState.Playing || host == null)
+			{
+				return "The round is not running";
+			}
+
+			// Placed on the ground in front of the host's view, facing the host. Commands run only for the host, so its camera is local.
+			Transform view = _cameraProvider.MainCamera.transform;
+			Vector3 forward = Vector3.ProjectOnPlane(view.forward, Vector3.up);
+
+			if (forward.sqrMagnitude < 0.01f)
+			{
+				forward = Vector3.ProjectOnPlane(view.up, Vector3.up);
+			}
+
+			forward.Normalize();
+			Vector3 position = view.position + forward * DummyDistance;
+
+			if (Physics.Raycast(position, Vector3.down, out RaycastHit hit, DummyGroundSearchDistance, LayerMasks.BuildMask))
+			{
+				position = hit.point;
+			}
+
+			_entityFactory.CreateDummy(position, Quaternion.LookRotation(-forward), health);
+			return $"Dummy with {health} health spawned, /cleardummies removes them";
+		}
+
+		private string ClearDummies()
+		{
+			Dummy[] dummies = EntityContainer.GetEntitiesByType<Dummy>().ToArray();
+
+			foreach (Dummy dummy in dummies)
+			{
+				NetworkServer.Destroy(dummy.gameObject);
+			}
+
+			return $"Removed {dummies.Length} dummies";
 		}
 
 		// Finds a player by the id shown in /players. The error is null when the id is missing.

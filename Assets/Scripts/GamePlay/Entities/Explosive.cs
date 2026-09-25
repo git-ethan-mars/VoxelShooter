@@ -43,6 +43,13 @@ namespace GamePlay
 			}
 		}
 
+		// Falls off linearly from the full damage in the center to nothing at the radius.
+		public int GetDamageAt(Vector3 position, ExplosionData explosionData)
+		{
+			float distance = Vector3.Distance(transform.position, position);
+			return distance >= explosionData.radius ? 0 : (int)((1 - distance / explosionData.radius) * explosionData.damage);
+		}
+
 		private void DestroyVoxels(MapDestruction mapDestruction, ExplosionData explosionData)
 		{
 			var explosionCenter = Vector3Ushort.FloorToUshort(transform.position);

@@ -23,6 +23,7 @@ namespace GamePlay
 		private const string SniperPath = "Prefabs/Entities/Characters/Sniper";
 		private const string GrenadierPath = "Prefabs/Entities/Characters/Grenadier";
 		private const string SpectatorPlayerPath = "Prefabs/Entities/Spectator";
+		private const string DummyPath = "Prefabs/Entities/Characters/Dummy";
 
 		private readonly IAssetProvider _assets;
 		private readonly IStaticDataService _staticData;
@@ -116,6 +117,14 @@ namespace GamePlay
 		{
 			Spectator spectator = _assets.Instantiate(SpectatorPlayerPath, position, Quaternion.identity).GetComponent<Spectator>();
 			return spectator;
+		}
+
+		public Dummy CreateDummy(Vector3 position, Quaternion rotation, int maxHealth)
+		{
+			Dummy dummy = _assets.Instantiate(DummyPath, position, rotation).GetComponent<Dummy>();
+			dummy.Initialize(maxHealth);
+			NetworkServer.Spawn(dummy.gameObject);
+			return dummy;
 		}
 	}
 }
