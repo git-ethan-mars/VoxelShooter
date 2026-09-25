@@ -26,6 +26,7 @@ namespace Services
 		bool IsInGameMenuButtonDown();
 		bool IsMapButtonDown();
 		bool IsMapButtonUp();
+		bool IsChatButtonDown();
 		bool IsPaletteButtonHold();
 		bool IsLeftArrowButtonDown();
 		bool IsRightArrowButtonDown();

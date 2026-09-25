@@ -22,6 +22,7 @@ namespace GamePlay
 		public readonly DeathmatchScoreboard Scoreboard = new DeathmatchScoreboard();
 
 		public readonly Voting MapVoting;
+		public readonly Chat Chat;
 
 		private readonly IEntityFactory _entityFactory;
 		private readonly SpawnPointService _spawnPointService;
@@ -47,11 +48,14 @@ namespace GamePlay
 			EntityContainer = entityContainer;
 			MapProvider = mapProvider;
 			MapVoting = Voting.Create(networkManager);
+			Chat = Chat.Create(networkManager, GetNickName);
 			_entityFactory = entityFactory;
 			_spawnPointService = spawnPointService;
 			_lootBoxSpawner = lootBoxSpawner;
 			_respawnService = respawnService;
 			_killList = killList;
+
+			RegisterChatCommands();
 		}
 
 		public override void Update()
@@ -132,6 +136,7 @@ namespace GamePlay
 			DeathMatchPlayerData playerData = Scoreboard.AddPlayer(connection, nickName, avatar);
 			var session = new DeathMatchPlayerSession(connection, playerData);
 			_sessions[connection] = session;
+			Chat.SendSystemMessage($"{nickName} joined the game");
 
 			if (MutableGameState.Value == GamePlay.GameState.MapVoting)
 			{
@@ -151,8 +156,15 @@ namespace GamePlay
 
 		protected override void OnRemovePlayer(NetworkConnectionToClient connection)
 		{
+			string nickName = GetNickName(connection);
+
 			Scoreboard.RemovePlayer(connection);
 			_sessions.Remove(connection);
+
+			if (nickName != null)
+			{
+				Chat.SendSystemMessage($"{nickName} left the game");
+			}
 		}
 
 		protected override void CleanUp()
@@ -266,6 +278,100 @@ namespace GamePlay
 
 			DeathMatchPlayerSession killer = kill.SourceId == kill.TargetId ? null : FindSession(kill.SourceId);
 			_respawnService.Kill(victim, killer?.Connection);
+		}
+
+		private void RegisterChatCommands()
+		{
+			Chat.RegisterCommand(new ChatCommand("players", "/players", "List the connected players with their ids", _ => ListPlayers()));
+			Chat.RegisterCommand(new ChatCommand("kick", "/kick <id>", "Disconnect a player from the game", KickPlayer));
+			Chat.RegisterCommand(new ChatCommand("kill", "/kill <id>", "Kill a player's character", KillPlayer));
+			Chat.RegisterCommand(new ChatCommand("endround", "/endround", "Finish the round and start the map voting", _ => EndRound()));
+		}
+
+		private string ListPlayers()
+		{
+			return string.Join("\n", _sessions.Values.Select(session =>
+				$"#{session.Connection.connectionId} {session.Data.NickName} ({session.Data.GameClass})"));
+		}
+
+		private string KickPlayer(string[] arguments)
+		{
+			if (!TryFindSession(arguments, out DeathMatchPlayerSession session, out string error))
+			{
+				return error ?? "Usage: /kick <id>";
+			}
+
+			if (session.Connection == NetworkServer.localConnection)
+			{
+				return "You can't kick yourself";
+			}
+
+			Chat.SendSystemMessage($"{session.Data.NickName} was kicked by the host");
+			session.Connection.Disconnect();
+			return null;
+		}
+
+		private string KillPlayer(string[] arguments)
+		{
+			if (!TryFindSession(arguments, out DeathMatchPlayerSession session, out string error))
+			{
+				return error ?? "Usage: /kill <id>";
+			}
+
+			if (MutableGameState.Value != GamePlay.GameState.Playing || !session.IsAlive)
+			{
+				return $"{session.Data.NickName} is not alive";
+			}
+
+			_respawnService.Kill(session);
+			Chat.SendSystemMessage($"{session.Data.NickName} was killed by the host");
+			return null;
+		}
+
+		// Finds a player by the id shown in /players. The error is null when the id is missing.
+		private bool TryFindSession(string[] arguments, out DeathMatchPlayerSession session, out string error)
+		{
+			session = null;
+			error = null;
+
+			if (arguments.Length == 0)
+			{
+				return false;
+			}
+
+			if (!int.TryParse(arguments[0].TrimStart('#'), out int connectionId))
+			{
+				error = $"{arguments[0]} is not a player id, see /players";
+				return false;
+			}
+
+			session = _sessions.Values.FirstOrDefault(candidate => candidate.Connection.connectionId == connectionId);
+
+			if (session == null)
+			{
+				error = $"Player #{connectionId} not found, see /players";
+				return false;
+			}
+
+			return true;
+		}
+
+		private string EndRound()
+		{
+			if (MutableGameState.Value != GamePlay.GameState.Playing)
+			{
+				return "The round is not running";
+			}
+
+			// The next update sees the timer run out and starts the map voting.
+			_timeLeft.Value = TimeSpan.Zero;
+			Chat.SendSystemMessage("The host ended the round");
+			return null;
+		}
+
+		private string GetNickName(NetworkConnectionToClient connection)
+		{
+			return _sessions.TryGetValue(connection, out DeathMatchPlayerSession session) ? session.Data.NickName : null;
 		}
 
 		private DeathMatchPlayerSession FindSession(PlayerId playerId)

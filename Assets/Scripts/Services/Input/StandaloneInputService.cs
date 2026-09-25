@@ -122,6 +122,11 @@ namespace Services
 			return IsUp(ControlAction.Map);
 		}
 
+		public bool IsChatButtonDown()
+		{
+			return IsDown(ControlAction.Chat);
+		}
+
 		public bool IsPaletteButtonHold()
 		{
 			return IsHeld(ControlAction.Palette) && _isEnabled;

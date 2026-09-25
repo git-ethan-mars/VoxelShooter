@@ -15,6 +15,7 @@ namespace UI
 		[SerializeField] private ChooseClassMenu chooseClassMenu;
 		[SerializeField] private DeathMatchScoreboardView deathMatchScoreboard;
 		[SerializeField] private VotingView votingView;
+		[SerializeField] private ChatView chatView;
 
 		private TimeSpan _respawnTimer;
 
@@ -57,6 +58,10 @@ namespace UI
 			var deathMatchState = new DeathMatchState(CharacterProvider, timeInfo, Hud, inventoryView);
 			AddState<DefaultState>(deathMatchState);
 
+			chatView.Initialize(_deathMatch.Chat);
+			chatView.Submitted.Subscribe(OnChatSubmitted).AddTo(this);
+			AddState(new ChatState(deathMatchState, InputService, chatView));
+
 			AddState(new VotingState(InputService));
 			_deathMatch.MapVoting.Started.Subscribe(_ => SwitchState<VotingState>()).AddTo(this);
 			_deathMatch.MapVoting.Finished.Subscribe(_ => SwitchState<DefaultState>()).AddTo(this);
@@ -79,6 +84,15 @@ namespace UI
 			}
 
 			if (InputService.IsScoreboardButtonUp() && IsInState<ScoreboardState>())
+			{
+				SwitchState<DefaultState>();
+			}
+
+			if (InputService.IsChatButtonDown() && IsInState<DefaultState>())
+			{
+				SwitchState<ChatState>();
+			}
+			else if (InputService.IsInGameMenuButtonDown() && IsInState<ChatState>())
 			{
 				SwitchState<DefaultState>();
 			}
@@ -118,7 +132,13 @@ namespace UI
 
 		protected override bool AreHotkeysBlocked()
 		{
-			return IsInState<VotingState>();
+			return IsInState<VotingState>() || IsInState<ChatState>();
+		}
+
+		private void OnChatSubmitted(string text)
+		{
+			_deathMatch.Chat.Send(text);
+			SwitchState<DefaultState>();
 		}
 
 		private void OnGameTimeChanged(TimeSpan timeLeft)

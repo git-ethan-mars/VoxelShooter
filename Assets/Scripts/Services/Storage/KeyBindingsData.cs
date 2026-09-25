@@ -28,6 +28,7 @@ namespace Services
 			[ControlAction.Scoreboard] = KeyCode.Tab,
 			[ControlAction.ChooseClass] = KeyCode.N,
 			[ControlAction.Map] = KeyCode.M,
+			[ControlAction.Chat] = KeyCode.T,
 			[ControlAction.Slot1] = KeyCode.Alpha1,
 			[ControlAction.Slot2] = KeyCode.Alpha2,
 			[ControlAction.Slot3] = KeyCode.Alpha3,

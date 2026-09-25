@@ -40,6 +40,7 @@ namespace UI
 			(ControlAction.Scoreboard, "SCOREBOARD"),
 			(ControlAction.ChooseClass, "CHOOSE CLASS"),
 			(ControlAction.Map, "MAP"),
+			(ControlAction.Chat, "CHAT"),
 			(null, "INVENTORY"),
 			(ControlAction.Slot1, "SLOT 1"),
 			(ControlAction.Slot2, "SLOT 2"),

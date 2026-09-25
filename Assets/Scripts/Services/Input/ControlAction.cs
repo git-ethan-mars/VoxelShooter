@@ -31,6 +31,7 @@ namespace Services
 		Slot7,
 		Slot8,
 		Slot9,
-		Slot10
+		Slot10,
+		Chat
 	}
 }

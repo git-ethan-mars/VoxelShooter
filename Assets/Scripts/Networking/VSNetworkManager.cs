@@ -46,6 +46,7 @@ namespace Networking
 			RegisterRequest<ChangeGameClassRequest>();
 			RegisterRequest<VoteRequest>();
 			RegisterRequest<VoteCancelRequest>();
+			RegisterRequest<ChatMessageRequest>();
 		}
 
 		public override void OnStartClient()
@@ -64,6 +65,7 @@ namespace Networking
 			RegisterResponse<DynamicAudioResponse>();
 			RegisterResponse<VoteResponse>();
 			RegisterResponse<VoteFinishResponse>();
+			RegisterResponse<ChatMessageResponse>();
 		}
 
 		public override void OnStopHost()
@@ -76,6 +78,7 @@ namespace Networking
 			UnregisterRequest<ChangeGameClassRequest>();
 			UnregisterRequest<VoteRequest>();
 			UnregisterRequest<VoteCancelRequest>();
+			UnregisterRequest<ChatMessageRequest>();
 		}
 
 		public override void OnStopClient()
@@ -94,6 +97,7 @@ namespace Networking
 			UnregisterResponse<DynamicAudioResponse>();
 			UnregisterResponse<VoteResponse>();
 			UnregisterResponse<VoteFinishResponse>();
+			UnregisterResponse<ChatMessageResponse>();
 		}
 
 		public override void OnServerDisconnect(NetworkConnectionToClient connection)
