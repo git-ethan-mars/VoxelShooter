@@ -66,7 +66,6 @@ MonoBehaviour:
   spawnPrefabs:
   - {fileID: 3783366468306986140, guid: e150b3aebe210d54bb8b21b922da3858, type: 3}
   - {fileID: 9030222180740480023, guid: bad7feca91d5cae45acf91b46eeac0d9, type: 3}
-  - {fileID: 8095424271465804933, guid: e7405952fd04e7d44882e05434800af4, type: 3}
   - {fileID: 6794632857203204427, guid: 79a94a9476f5a8c43a47623b1527785b, type: 3}
   - {fileID: 6697332420508056661, guid: 9860fafbb48c93645810fd16cbff451c, type: 3}
   - {fileID: 6697332420508056661, guid: f70e4119561657e4389b45408ec672df, type: 3}
@@ -112,6 +111,8 @@ MonoBehaviour:
   evaluationMethod: 0
   evaluationInterval: 3
   timeInterpolationGui: 0
+  messageSize: 512000
+  sendInterval: 0.5
 --- !u!114 &3322668320336600090
 MonoBehaviour:
   m_ObjectHideFlags: 0

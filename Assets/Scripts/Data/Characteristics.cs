@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Data
@@ -11,5 +12,6 @@ namespace Data
 		[field: SerializeField] public float JumpHeight { get; private set; }
 		[field: SerializeField] public float PlaceDistance { get; private set; }
 		[field: SerializeField] public int VoxelsCount { get; private set; }
+		[field: SerializeField] public List<BlueprintLayout> BlueprintLayouts { get; private set; }
 	}
 }

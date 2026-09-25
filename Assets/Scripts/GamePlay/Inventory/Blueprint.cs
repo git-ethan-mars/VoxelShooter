@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Data;
 using Mirror;
 using R3;
@@ -7,21 +6,25 @@ using Reflex.Attributes;
 using Services;
 using UnityEngine;
 using VoxelMap;
-using AudioType = Data.AudioType;
 
 namespace GamePlay
 {
 	public class Blueprint : InventoryItem
 	{
+		private const float ReachTolerance = 2.0f;
+
+		private static readonly Color AvailableColor = new Color(0.0f, 1.0f, 0.0f, 0.2f);
+		private static readonly Color UnavailableColor = new Color(1.0f, 0.0f, 0.0f, 0.2f);
+
 		[SerializeField] protected MeshRenderer meshRenderer;
 
 		[SerializeField] private MeshFilter meshFilter;
 
 		private IInputService _inputService;
+		private IStaticDataService _staticData;
 		private CameraProvider _cameraProvider;
 		private MapProvider _mapProvider;
 		private CharacterProvider _characterProvider;
-		private AudioPlayer _audioPlayer;
 
 		[SyncVar(hook = nameof(OnLayoutChanged))]
 		private int _layoutIndex;
@@ -31,14 +34,24 @@ namespace GamePlay
 
 		private readonly Subject<BlueprintLayout> _layoutChanged = new Subject<BlueprintLayout>();
 		private readonly List<Vector3Int> _positions = new List<Vector3Int>();
+		private readonly List<Vector3Int> _linePositions = new List<Vector3Int>();
+		private readonly List<Vector3Int> _lineOffsets = new List<Vector3Int>();
 		private int _positionsLayoutIndex = -1;
 		private int _positionsRotationStep = -1;
 		private Vector3Int _minPosition;
 		private Vector3Int _maxPosition;
+		private Mesh _layoutMesh;
+		private Mesh _lineMesh;
+		private bool _isDrawingLine;
+		private Vector3Int _lineStart;
+		private Vector3Int _lineEnd;
+
 		public override ItemType Type => ItemType.Blueprint;
 
 		public new BlueprintConfigure Configure => base.Configure as BlueprintConfigure;
-		public BlueprintLayout CurrentLayout => Configure.Layouts[_layoutIndex];
+		public IReadOnlyList<BlueprintLayout> Layouts => _staticData.GetCharacteristics(OwnerClass).BlueprintLayouts;
+		public int LayoutIndex => _layoutIndex;
+		public BlueprintLayout CurrentLayout => Layouts[_layoutIndex];
 		public Observable<BlueprintLayout> LayoutChanged => _layoutChanged;
 
 		public IReadOnlyList<Vector3Int> Positions
@@ -51,20 +64,21 @@ namespace GamePlay
 		}
 
 		[Inject]
-		private void Construct(IInputService inputService, CameraProvider cameraProvider, CharacterProvider characterProvider,
-			MapProvider mapProvider, AudioPlayer audioPlayer)
+		private void Construct(IInputService inputService, IStaticDataService staticData, CameraProvider cameraProvider,
+			CharacterProvider characterProvider, MapProvider mapProvider)
 		{
 			_inputService = inputService;
+			_staticData = staticData;
 			_cameraProvider = cameraProvider;
 			_characterProvider = characterProvider;
 			_mapProvider = mapProvider;
-			_audioPlayer = audioPlayer;
 		}
 
 		public override void OnStartAuthority()
 		{
 			base.OnStartAuthority();
-			meshFilter.mesh = CreateBlueprintMesh();
+			_layoutMesh = CreateBlueprintMesh(Positions);
+			meshFilter.mesh = _layoutMesh;
 		}
 
 		private void Update()
@@ -77,39 +91,38 @@ namespace GamePlay
 			Character character = _characterProvider.Character.Value;
 			float placeDistance = character.Characteristics.PlaceDistance;
 			Color32 voxelColor = character.Inventory.DesiredVoxelColor.Value;
+			bool hasHit = _cameraProvider.GetBuildRayCastHit(out RaycastHit hit, placeDistance);
+
+			if (_inputService.IsRotateButtonDown())
+			{
+				CmdRotate();
+			}
+
+			if (_inputService.IsSecondActionButtonDown() && hasHit && CurrentLayout.CanBuildLine)
+			{
+				_isDrawingLine = true;
+				_lineStart = GetLinePosition(hit);
+				_lineEnd = _lineStart;
+				RebuildLinePreview();
+			}
+
+			if (_isDrawingLine)
+			{
+				UpdateLine(hasHit, hit, character, voxelColor);
+				return;
+			}
 
 			if (_inputService.IsFirstActionButtonDown())
 			{
 				CmdBuild(_cameraProvider.CentredRay, voxelColor);
 			}
 
-			if (_inputService.IsSecondActionButtonDown())
-			{
-				CmdRotate();
-			}
-
-			for (int i = 0; i < Configure.Layouts.Count; i++)
-			{
-				if (_inputService.IsBlueprintButtonDown(i))
-				{
-					CmdSelectLayout(i);
-				}
-			}
-
-			if (_cameraProvider.GetBuildRayCastHit(out RaycastHit hit, placeDistance))
+			if (hasHit)
 			{
 				Vector3Int blueprintPosition = GetPlacementPosition(hit);
-				IBuildVisitor buildVisitor = hit.collider.GetComponentInParent<IBuildVisitor>();
-
-				if (Positions.Any(offset => !buildVisitor.IsAvailablePosition(blueprintPosition + offset)))
-				{
-					meshRenderer.materials[1].color = new Color(1, 0, 0, 0.2f);
-				}
-				else
-				{
-					meshRenderer.materials[1].color = new Color(0, 1, 0, 0.2f);
-				}
-
+				bool isAvailable = Positions.Count <= character.Inventory.VoxelAmount.CurrentValue &&
+				                   IsAvailable(blueprintPosition, Positions);
+				meshRenderer.materials[1].color = isAvailable ? AvailableColor : UnavailableColor;
 				transform.position = blueprintPosition;
 				meshRenderer.enabled = true;
 
@@ -118,13 +131,22 @@ namespace GamePlay
 					var colorPickingPosition = Vector3Ushort.FloorToUshort(hit.point - hit.normal / 2);
 					VoxelData colorPickingVoxel = _mapProvider.Map.CurrentValue.GetVoxelByGlobalPosition(colorPickingPosition);
 					character.Inventory.DesiredVoxelColor.Value = colorPickingVoxel.Color;
-					Debug.Log(colorPickingVoxel.Color);
 				}
 			}
 			else
 			{
 				meshRenderer.enabled = false;
 			}
+		}
+
+		private void OnDisable()
+		{
+			StopLine();
+		}
+
+		public void SelectLayout(int layoutIndex)
+		{
+			CmdSelectLayout(layoutIndex);
 		}
 
 		public Vector3Int GetPlacementPosition(RaycastHit hit)
@@ -160,10 +182,99 @@ namespace GamePlay
 			return 0;
 		}
 
+		private static Vector3Int GetLinePosition(RaycastHit hit)
+		{
+			return Vector3Int.FloorToInt(hit.point + hit.normal / 2);
+		}
+
+		private void UpdateLine(bool hasHit, RaycastHit hit, Character character, Color32 voxelColor)
+		{
+			if (_inputService.IsSecondActionButtonUp())
+			{
+				CmdBuildLine(_lineStart, _lineEnd, voxelColor);
+				StopLine();
+				return;
+			}
+
+			// Input was disabled (a menu opened) while the button was held: drop the line.
+			if (!_inputService.IsSecondActionButtonHold())
+			{
+				StopLine();
+				return;
+			}
+
+			if (hasHit)
+			{
+				Vector3Int lineEnd = GetLinePosition(hit);
+
+				if (lineEnd != _lineEnd)
+				{
+					_lineEnd = lineEnd;
+					RebuildLinePreview();
+				}
+			}
+
+			bool isAvailable = IsLineWithinReach(character, _lineStart, _lineEnd) &&
+			                   _linePositions.Count <= character.Inventory.VoxelAmount.CurrentValue &&
+			                   IsAvailable(Vector3Int.zero, _linePositions);
+			meshRenderer.materials[1].color = isAvailable ? AvailableColor : UnavailableColor;
+			transform.position = _lineStart;
+			meshRenderer.enabled = true;
+		}
+
+		private void RebuildLinePreview()
+		{
+			VoxelLine.GetPositions(_lineStart, _lineEnd, Configure.MaxLineLength, _linePositions);
+			_lineOffsets.Clear();
+
+			foreach (Vector3Int position in _linePositions)
+			{
+				_lineOffsets.Add(position - _lineStart);
+			}
+
+			if (_lineMesh != null)
+			{
+				Destroy(_lineMesh);
+			}
+
+			_lineMesh = CreateBlueprintMesh(_lineOffsets);
+			meshFilter.mesh = _lineMesh;
+		}
+
+		private void StopLine()
+		{
+			if (!_isDrawingLine)
+			{
+				return;
+			}
+
+			_isDrawingLine = false;
+			_linePositions.Clear();
+			meshFilter.mesh = _layoutMesh;
+		}
+
+		private bool IsAvailable(Vector3Int origin, IReadOnlyList<Vector3Int> offsets)
+		{
+			if (!_mapProvider.Map.CurrentValue.TryGetFeature(out MapBuilding mapBuilding))
+			{
+				return false;
+			}
+
+			foreach (Vector3Int offset in offsets)
+			{
+				if (!mapBuilding.IsAvailablePosition(origin + offset))
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+
 		[Command]
 		private void CmdSelectLayout(int layoutIndex)
 		{
-			if (!IsSelected || layoutIndex < 0 || layoutIndex >= Configure.Layouts.Count)
+			if (!IsSelected || layoutIndex < 0 || layoutIndex >= Layouts.Count)
 			{
 				return;
 			}
@@ -184,6 +295,11 @@ namespace GamePlay
 
 		private void OnLayoutChanged(int oldLayoutIndex, int newLayoutIndex)
 		{
+			if (!CurrentLayout.CanBuildLine)
+			{
+				StopLine();
+			}
+
 			RebuildMeshIfOwned();
 			_layoutChanged.OnNext(CurrentLayout);
 		}
@@ -195,9 +311,21 @@ namespace GamePlay
 
 		private void RebuildMeshIfOwned()
 		{
-			if (isOwned)
+			if (!isOwned)
 			{
-				meshFilter.mesh = CreateBlueprintMesh();
+				return;
+			}
+
+			if (_layoutMesh != null)
+			{
+				Destroy(_layoutMesh);
+			}
+
+			_layoutMesh = CreateBlueprintMesh(Positions);
+
+			if (!_isDrawingLine)
+			{
+				meshFilter.mesh = _layoutMesh;
 			}
 		}
 
@@ -230,25 +358,15 @@ namespace GamePlay
 		[Command]
 		private void CmdBuild(Ray ray, Color32 voxelColor, NetworkConnectionToClient connection = null)
 		{
-			if (connection == null)
+			Character character = GetOwnerCharacter(connection);
+
+			if (character == null || character.Inventory.VoxelAmount.CurrentValue < Positions.Count)
 			{
 				return;
 			}
 
-			Character character = connection.identity.GetComponent<Character>();
-
-			if (character == null)
-			{
-				return;
-			}
-
-			if (character.Inventory.VoxelAmount.CurrentValue < Positions.Count)
-			{
-				PlayDeniedSound();
-				return;
-			}
-
-			bool raycastResult = Physics.Raycast(ray, out RaycastHit rayHit, character.Characteristics.PlaceDistance, LayerMasks.AttackMask);
+			// Same mask as the client preview, so entities in the way don't make the server reject a green preview.
+			bool raycastResult = Physics.Raycast(ray, out RaycastHit rayHit, character.Characteristics.PlaceDistance, LayerMasks.BuildMask);
 
 			if (!raycastResult)
 			{
@@ -261,19 +379,51 @@ namespace GamePlay
 			{
 				character.Inventory.VoxelAmount.Value -= Positions.Count;
 			}
-			else
-			{
-				PlayDeniedSound();
-			}
 		}
 
-		[TargetRpc]
-		private void PlayDeniedSound()
+		[Command]
+		private void CmdBuildLine(Vector3Int start, Vector3Int end, Color32 voxelColor, NetworkConnectionToClient connection = null)
 		{
-			_audioPlayer.PlayAsync(AudioType.ShotgunShoot, transform.position).Forget();
+			Character character = GetOwnerCharacter(connection);
+
+			if (character == null || !IsSelected || !CurrentLayout.CanBuildLine)
+			{
+				return;
+			}
+
+			if (!IsLineWithinReach(character, start, end))
+			{
+				return;
+			}
+
+			var positions = new List<Vector3Int>();
+			VoxelLine.GetPositions(start, end, Configure.MaxLineLength, positions);
+
+			if (character.Inventory.VoxelAmount.CurrentValue < positions.Count ||
+			    !_mapProvider.Map.CurrentValue.TryGetFeature(out MapBuilding mapBuilding) ||
+			    !mapBuilding.Build(positions, voxelColor))
+			{
+				return;
+			}
+
+			character.Inventory.VoxelAmount.Value -= positions.Count;
 		}
 
-		private Mesh CreateBlueprintMesh()
+		// The end must be within reach; the start may trail behind by up to a full line, so the builder can walk while drawing.
+		private bool IsLineWithinReach(Character character, Vector3Int start, Vector3Int end)
+		{
+			float reach = character.Characteristics.PlaceDistance + ReachTolerance;
+			Vector3 characterPosition = character.transform.position;
+			return Vector3.Distance(characterPosition, end + Map.WorldOffset) <= reach &&
+			       Vector3.Distance(characterPosition, start + Map.WorldOffset) <= reach + Configure.MaxLineLength;
+		}
+
+		private static Character GetOwnerCharacter(NetworkConnectionToClient connection)
+		{
+			return connection?.identity != null ? connection.identity.GetComponent<Character>() : null;
+		}
+
+		private Mesh CreateBlueprintMesh(IReadOnlyList<Vector3Int> positions)
 		{
 			var mesh = new Mesh();
 			var vertices = new List<Vector3>();
@@ -281,12 +431,10 @@ namespace GamePlay
 			var colors = new List<Color32>();
 			var uv = new List<Vector2>();
 			var triangles = new List<int>();
-			var occupied = new HashSet<Vector3Int>(Positions);
+			var occupied = new HashSet<Vector3Int>(positions);
 
-			for (int i = 0; i < Positions.Count; i++)
+			foreach (Vector3Int voxelPosition in positions)
 			{
-				Vector3Int voxelPosition = Positions[i];
-
 				if (!occupied.Contains(new Vector3Int(voxelPosition.x, voxelPosition.y + 1, voxelPosition.z)))
 				{
 					GenerateTopSide(voxelPosition.x, voxelPosition.y, voxelPosition.z, Color.white, vertices, normals, colors, uv, triangles);

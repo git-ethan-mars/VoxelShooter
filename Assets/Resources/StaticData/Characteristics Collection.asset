@@ -21,6 +21,12 @@ MonoBehaviour:
         <JumpHeight>k__BackingField: 1.25
         <PlaceDistance>k__BackingField: 8
         <VoxelsCount>k__BackingField: 75
+        <BlueprintLayouts>k__BackingField:
+        - {fileID: 11400000, guid: d06388f4e4cf0af4d811346a2a4073f5, type: 2}
+        - {fileID: 11400000, guid: 1000c3528184d464e87446e8e5d262f8, type: 2}
+        - {fileID: 11400000, guid: a4e07240281a05746bebe45c71c700f7, type: 2}
+        - {fileID: 11400000, guid: 76b54b8785d2464479e4df58ed79e243, type: 2}
+        - {fileID: 11400000, guid: 2346fd0b3b9f443488dbfb5e75370c04, type: 2}
       index: 0
       isKeyDuplicated: 0
     - Key: 2
@@ -30,6 +36,12 @@ MonoBehaviour:
         <JumpHeight>k__BackingField: 1.25
         <PlaceDistance>k__BackingField: 6
         <VoxelsCount>k__BackingField: 50
+        <BlueprintLayouts>k__BackingField:
+        - {fileID: 11400000, guid: d06388f4e4cf0af4d811346a2a4073f5, type: 2}
+        - {fileID: 11400000, guid: 1000c3528184d464e87446e8e5d262f8, type: 2}
+        - {fileID: 11400000, guid: a4e07240281a05746bebe45c71c700f7, type: 2}
+        - {fileID: 11400000, guid: 76b54b8785d2464479e4df58ed79e243, type: 2}
+        - {fileID: 11400000, guid: 2346fd0b3b9f443488dbfb5e75370c04, type: 2}
       index: 1
       isKeyDuplicated: 0
     - Key: 3
@@ -39,6 +51,12 @@ MonoBehaviour:
         <JumpHeight>k__BackingField: 1.25
         <PlaceDistance>k__BackingField: 6
         <VoxelsCount>k__BackingField: 50
+        <BlueprintLayouts>k__BackingField:
+        - {fileID: 11400000, guid: d06388f4e4cf0af4d811346a2a4073f5, type: 2}
+        - {fileID: 11400000, guid: 1000c3528184d464e87446e8e5d262f8, type: 2}
+        - {fileID: 11400000, guid: a4e07240281a05746bebe45c71c700f7, type: 2}
+        - {fileID: 11400000, guid: 76b54b8785d2464479e4df58ed79e243, type: 2}
+        - {fileID: 11400000, guid: 2346fd0b3b9f443488dbfb5e75370c04, type: 2}
       index: 2
       isKeyDuplicated: 0
     - Key: 1
@@ -48,5 +66,11 @@ MonoBehaviour:
         <JumpHeight>k__BackingField: 1.75
         <PlaceDistance>k__BackingField: 6
         <VoxelsCount>k__BackingField: 50
+        <BlueprintLayouts>k__BackingField:
+        - {fileID: 11400000, guid: d06388f4e4cf0af4d811346a2a4073f5, type: 2}
+        - {fileID: 11400000, guid: 1000c3528184d464e87446e8e5d262f8, type: 2}
+        - {fileID: 11400000, guid: a4e07240281a05746bebe45c71c700f7, type: 2}
+        - {fileID: 11400000, guid: 76b54b8785d2464479e4df58ed79e243, type: 2}
+        - {fileID: 11400000, guid: 2346fd0b3b9f443488dbfb5e75370c04, type: 2}
       index: 3
       isKeyDuplicated: 0

@@ -34,35 +34,31 @@ MonoBehaviour:
       Value: {fileID: 697211748399907209, guid: 1c4296936330d494684804c1fb525ba0, type: 3}
       index: 4
       isKeyDuplicated: 0
-    - Key: 5
-      Value: {fileID: 8095424271465804933, guid: e7405952fd04e7d44882e05434800af4, type: 3}
-      index: 5
-      isKeyDuplicated: 0
     - Key: 6
       Value: {fileID: 1374883755550458842, guid: 5a903469ac2556d40a9b97e33dd3c162, type: 3}
-      index: 6
+      index: 5
       isKeyDuplicated: 0
     - Key: 7
       Value: {fileID: 5106030963746976738, guid: 16151daf92ba0b34ebb62a92aa9aa5df, type: 3}
-      index: 7
+      index: 6
       isKeyDuplicated: 0
     - Key: 8
       Value: {fileID: 7922214257710745971, guid: 210bed499898fd94ab9b5cb2589b65a1, type: 3}
-      index: 8
+      index: 7
       isKeyDuplicated: 0
     - Key: 9
       Value: {fileID: 9106257655567110729, guid: f659729cb3772da44b3692ae21197233, type: 3}
-      index: 9
+      index: 8
       isKeyDuplicated: 0
     - Key: 10
       Value: {fileID: 4245606585116657588, guid: 7ad44d29c785b7242974a6af01b5e2b8, type: 3}
-      index: 10
+      index: 9
       isKeyDuplicated: 0
     - Key: 11
       Value: {fileID: 8009858165730397543, guid: c2a01d48d01d91447b0e60f5a94e9e66, type: 3}
-      index: 11
+      index: 10
       isKeyDuplicated: 0
     - Key: 12
       Value: {fileID: 3154853761452899251, guid: bdf7c404b6427f0459eb59677ca4f23b, type: 3}
-      index: 12
+      index: 11
       isKeyDuplicated: 0

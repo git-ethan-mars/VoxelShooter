@@ -34,33 +34,29 @@ MonoBehaviour:
       Value: {fileID: -510781377, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
       index: 4
       isKeyDuplicated: 0
-    - Key: 5
-      Value: {fileID: 21300000, guid: ede331431870261449d4d10f4a679bfe, type: 3}
-      index: 5
-      isKeyDuplicated: 0
     - Key: 6
       Value: {fileID: 631782971, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
-      index: 6
+      index: 5
       isKeyDuplicated: 0
     - Key: 7
       Value: {fileID: 21300000, guid: 40cc6259cca09954585d891b066e341f, type: 3}
-      index: 7
+      index: 6
       isKeyDuplicated: 0
     - Key: 8
       Value: {fileID: 21300000, guid: 7f8099d3ba88821449ae3fcf68f2e286, type: 3}
-      index: 8
+      index: 7
       isKeyDuplicated: 0
     - Key: 9
       Value: {fileID: 1150218188, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
-      index: 9
+      index: 8
       isKeyDuplicated: 0
     - Key: 10
       Value: {fileID: 21300000, guid: 9721a1bd44132464cab96dd63e203df2, type: 3}
-      index: 10
+      index: 9
       isKeyDuplicated: 0
     - Key: 11
       Value: {fileID: -74087829, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
-      index: 11
+      index: 10
       isKeyDuplicated: 0
   <ProjectileIconByItemType>k__BackingField:
     dictionaryList:
@@ -84,29 +80,25 @@ MonoBehaviour:
       Value: {fileID: 1304307358, guid: e7634cc0bf7762649a525e59875cd9d1, type: 3}
       index: 4
       isKeyDuplicated: 0
-    - Key: 5
-      Value: {fileID: 21300000, guid: bdba8651c9955fe46ab98523b5600518, type: 3}
-      index: 5
-      isKeyDuplicated: 0
     - Key: 6
       Value: {fileID: 886209943, guid: e7634cc0bf7762649a525e59875cd9d1, type: 3}
-      index: 6
+      index: 5
       isKeyDuplicated: 0
     - Key: 7
       Value: {fileID: 21300000, guid: 0b09eb0582cb7fa4b9fccb1d7e798c0c, type: 3}
-      index: 7
+      index: 6
       isKeyDuplicated: 0
     - Key: 10
       Value: {fileID: 21300000, guid: 9721a1bd44132464cab96dd63e203df2, type: 3}
-      index: 8
+      index: 7
       isKeyDuplicated: 0
     - Key: 11
       Value: {fileID: 21300000, guid: cdcc1eea4b5858c468c9bb86e248f34b, type: 3}
-      index: 9
+      index: 8
       isKeyDuplicated: 0
     - Key: 12
       Value: {fileID: 21300000, guid: bdba8651c9955fe46ab98523b5600518, type: 3}
-      index: 10
+      index: 9
       isKeyDuplicated: 0
   <ScopeIconByItemType>k__BackingField:
     dictionaryList:

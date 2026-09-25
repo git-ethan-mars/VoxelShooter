@@ -15,18 +15,18 @@ MonoBehaviour:
   <Inventory>k__BackingField:
     dictionaryList:
     - Key: 0
-      Value: 020000000700000008000000050000000b0000000c000000
+      Value: 0200000007000000080000000c0000000b000000
       index: 0
       isKeyDuplicated: 0
     - Key: 2
-      Value: 000000000400000009000000050000000a000000
+      Value: 0000000004000000090000000c0000000a000000
       index: 1
       isKeyDuplicated: 0
     - Key: 3
-      Value: 060000000300000008000000050000000a000000
+      Value: 0600000003000000080000000c0000000a000000
       index: 2
       isKeyDuplicated: 0
     - Key: 1
-      Value: 010000000300000009000000050000000a000000
+      Value: 0100000003000000090000000c0000000a000000
       index: 3
       isKeyDuplicated: 0

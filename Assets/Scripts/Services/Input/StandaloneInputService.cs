@@ -4,8 +4,6 @@ namespace Services
 {
 	public class StandaloneInputService : IInputService
 	{
-		private static readonly KeyCode[] BlueprintKeys = { KeyCode.Z, KeyCode.X, KeyCode.C, KeyCode.V };
-
 		private bool _isEnabled;
 
 		public Vector2 Axis => _isEnabled
@@ -15,6 +13,10 @@ namespace Services
 		public Vector2 MouseAxis => _isEnabled
 			? new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"))
 			: Vector2.zero;
+
+		public Vector2 RawMouseAxis => new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
+
+		public bool IsEnabled => _isEnabled;
 
 		public bool IsFirstActionButtonDown()
 		{
@@ -39,6 +41,21 @@ namespace Services
 		public bool IsSecondActionButtonUp()
 		{
 			return Input.GetMouseButtonUp(1) && _isEnabled;
+		}
+
+		public bool IsSecondActionButtonHold()
+		{
+			return Input.GetMouseButton(1) && _isEnabled;
+		}
+
+		public bool IsRotateButtonDown()
+		{
+			return Input.GetKeyDown(KeyCode.R) && _isEnabled;
+		}
+
+		public bool IsBlueprintMenuButtonHold()
+		{
+			return Input.GetKey(KeyCode.E);
 		}
 
 		public bool IsReloadingButtonDown()
@@ -179,16 +196,6 @@ namespace Services
 			}
 
 			return false;
-		}
-
-		public bool IsBlueprintButtonDown(int number)
-		{
-			if (!_isEnabled || number < 0 || number >= BlueprintKeys.Length)
-			{
-				return false;
-			}
-
-			return Input.GetKeyDown(BlueprintKeys[number]);
 		}
 
 		public void Enable() // TODO: This method probably does not belong here

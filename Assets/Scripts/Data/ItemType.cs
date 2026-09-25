@@ -7,7 +7,6 @@ namespace Data
 		Shotgun = 2,
 		MachineGun = 3,
 		Revolver = 4,
-		Block = 5,
 		RocketLauncher = 6,
 		DrillLauncher = 7,
 		Spade = 8,

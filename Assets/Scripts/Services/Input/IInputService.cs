@@ -6,11 +6,16 @@ namespace Services
 	{
 		Vector2 Axis { get; }
 		Vector2 MouseAxis { get; }
+		Vector2 RawMouseAxis { get; }
+		bool IsEnabled { get; }
 		bool IsFirstActionButtonDown();
 		bool IsFirstActionButtonUp();
 		bool IsFirstActionButtonHold();
 		bool IsSecondActionButtonDown();
 		bool IsSecondActionButtonUp();
+		bool IsSecondActionButtonHold();
+		bool IsRotateButtonDown();
+		bool IsBlueprintMenuButtonHold();
 		bool IsReloadingButtonDown();
 		bool IsJumpButtonDown();
 		bool IsSprintButtonHold();
@@ -27,7 +32,6 @@ namespace Services
 		bool IsUpArrowButtonDown();
 		bool IsDownArrowButtonDown();
 		bool IsSlotButtonPressed(int number);
-		bool IsBlueprintButtonDown(int number);
 		void Enable();
 		void Disable();
 		bool IsScrollButtonDown();

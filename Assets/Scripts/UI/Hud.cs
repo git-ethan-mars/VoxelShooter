@@ -17,6 +17,7 @@ namespace UI
 		[SerializeField] private TextMeshProUGUI itemCount;
 		[SerializeField] private HealthCounter healthCounter;
 		[SerializeField] private PaletteView paletteView;
+		[SerializeField] private BlueprintMenuView blueprintMenu;
 		[SerializeField] private Image scopeImage;
 		[SerializeField] private Image crosshairImage;
 
@@ -105,6 +106,16 @@ namespace UI
 		public void HidePalette()
 		{
 			paletteView.Hide();
+		}
+
+		public void ShowBlueprintMenu(Blueprint blueprint)
+		{
+			blueprintMenu.Bind(blueprint);
+		}
+
+		public void HideBlueprintMenu()
+		{
+			blueprintMenu.Unbind();
 		}
 	}
 }

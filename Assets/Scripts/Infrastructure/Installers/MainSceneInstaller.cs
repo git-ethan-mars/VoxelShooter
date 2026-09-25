@@ -89,8 +89,6 @@ namespace Infrastructure.Installers
 			UIProvider uiProvider = container.Single<UIProvider>();
 			CharacterProvider characterProvider = container.Single<CharacterProvider>();
 			ISlotPresenterRegistry registry = container.Single<ISlotPresenterRegistry>();
-			registry.Register<Block>((block, view) =>
-				new BlockPresenter(staticData, characterProvider, uiProvider, block, view));
 			registry.Register<DrillLauncher>((drill, view) =>
 				new DrillLauncherPresenter(staticData, uiProvider, drill, view));
 			registry.Register<Grenade>((grenade, view) =>

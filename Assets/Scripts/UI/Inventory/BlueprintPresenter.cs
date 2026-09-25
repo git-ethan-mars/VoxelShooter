@@ -37,6 +37,7 @@ namespace UI.Inventory
 			base.Select();
 
 			_hud.ShowPalette();
+			_hud.ShowBlueprintMenu(InventoryItem);
 			_hud.ShowItemInfo(_projectileIcon, GetItemInfoText());
 			_hud.SetCrosshairVisibility(true);
 		}
@@ -46,6 +47,7 @@ namespace UI.Inventory
 			base.Deselect();
 
 			_hud.HidePalette();
+			_hud.HideBlueprintMenu();
 			_hud.HideItemInfo();
 			_hud.SetCrosshairVisibility(false);
 		}

@@ -25,6 +25,7 @@ namespace GamePlay
 			{
 				GameObject itemPrefab = _staticData.GetItemPrefab(itemType);
 				InventoryItem item = _assets.Instantiate(itemPrefab).GetComponent<InventoryItem>();
+				item.Initialize(gameClass);
 				NetworkServer.Spawn(item.gameObject);
 				items.Add(item);
 			}

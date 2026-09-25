@@ -18,39 +18,31 @@ namespace GamePlay
 			_entityContainer = entityContainer;
 		}
 
-		public bool Visit(Block block, RaycastHit rayCastHit, Color32 color)
-		{
-			var voxelPosition = Vector3Ushort.FloorToUshort(rayCastHit.point + rayCastHit.normal / 2);
-			var voxel = new Voxel(voxelPosition, new VoxelData(color));
-
-			using PooledObject<List<Voxel>> pooledList = ListPool<Voxel>.Get(out List<Voxel> voxels);
-			voxels.Add(voxel);
-
-			if (!IsAvailablePosition(voxel.Position))
-			{
-				return false;
-			}
-
-			_mapProvider.Map.CurrentValue.SetVoxelsByGlobalPositions(voxels);
-
-			return true;
-		}
-
 		public bool Visit(Blueprint blueprint, RaycastHit rayCastHit, Color32 color)
 		{
 			Vector3Int blueprintPosition = blueprint.GetPlacementPosition(rayCastHit);
-			using PooledObject<List<Voxel>> pooledList = ListPool<Voxel>.Get(out List<Voxel> voxels);
+			using PooledObject<List<Vector3Int>> pooledList = ListPool<Vector3Int>.Get(out List<Vector3Int> positions);
 
 			foreach (Vector3Int offset in blueprint.Positions)
 			{
-				Vector3Int voxelPosition = blueprintPosition + offset;
+				positions.Add(blueprintPosition + offset);
+			}
 
-				if (!IsAvailablePosition(voxelPosition))
+			return Build(positions, color);
+		}
+
+		public bool Build(IReadOnlyList<Vector3Int> positions, Color32 color)
+		{
+			using PooledObject<List<Voxel>> pooledList = ListPool<Voxel>.Get(out List<Voxel> voxels);
+
+			foreach (Vector3Int position in positions)
+			{
+				if (!IsAvailablePosition(position))
 				{
 					return false;
 				}
 
-				voxels.Add(new Voxel((Vector3Ushort)voxelPosition, new VoxelData(color)));
+				voxels.Add(new Voxel((Vector3Ushort)position, new VoxelData(color)));
 			}
 
 			_mapProvider.Map.CurrentValue.SetVoxelsByGlobalPositions(voxels);

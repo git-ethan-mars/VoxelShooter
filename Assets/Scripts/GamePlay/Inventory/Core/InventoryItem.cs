@@ -14,6 +14,9 @@ namespace GamePlay
 	{
 		[field: SerializeField] private MeshRenderer[] renderers;
 		private readonly SyncReactiveProperty<bool> _isSelected = new SyncReactiveProperty<bool>();
+
+		[SyncVar] private GameClass _ownerClass;
+
 		[field: SerializeField] public MeshFilter[] MeshFilters { get; private set; }
 		public abstract ItemType Type { get; }
 		public bool IsSelected => _isSelected.Value;
@@ -32,12 +35,19 @@ namespace GamePlay
 		}
 
 		protected InventoryItemConfigure Configure { get; private set; }
+		protected GameClass OwnerClass => _ownerClass;
 		protected bool IsLocalItem => isOwned;
 
 		[Inject]
 		private void Construct(CharacterProvider characterProvider, IStaticDataService staticData)
 		{
 			Configure = staticData.GetItemConfigure<InventoryItemConfigure>(Type);
+		}
+
+		[Server]
+		public void Initialize(GameClass ownerClass)
+		{
+			_ownerClass = ownerClass;
 		}
 
 		public override void OnStartClient()

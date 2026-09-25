@@ -9,7 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 927b971191a7431f8eb2fcddadcff301, type: 3}
+  m_Script: {fileID: 11500000, guid: 5721ae5c5d41d1f4665076cdfa553d11, type: 3}
   m_Name: Block
-  m_EditorClassIdentifier: 
-  <Amount>k__BackingField: 50
+  m_EditorClassIdentifier: VoxelShooter.Data::Data.BlueprintLayout
+  <Name>k__BackingField: Block
+  <Positions>k__BackingField:
+  - {x: 0, y: 0, z: 0}
+  <CanBuildLine>k__BackingField: 1
