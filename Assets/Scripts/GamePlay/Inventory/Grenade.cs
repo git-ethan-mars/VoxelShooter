@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using Data;
 using Mirror;
 using Networking.Core;
@@ -77,6 +78,7 @@ namespace GamePlay
 			float throwForce = Math.Max(holdTime * Configure.ThrowForceModifier, Configure.MinThrowForce);
 			SpawningGrenade spawningGrenade = _entityFactory.CreateSpawningGrenade(ray.origin, connectionToClient);
 			spawningGrenade.Throw(ray.direction, throwForce);
+			spawningGrenade.ExplodeAsync(spawningGrenade.destroyCancellationToken).Forget();
 
 			_amount.Value -= 1;
 		}

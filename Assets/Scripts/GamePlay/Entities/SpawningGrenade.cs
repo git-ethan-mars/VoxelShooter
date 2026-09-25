@@ -6,7 +6,6 @@ using Mirror;
 using Networking;
 using Reflex.Attributes;
 using Services;
-using TMPro;
 using UnityEngine;
 using VoxelMap;
 using AudioType = Data.AudioType;
@@ -17,8 +16,6 @@ namespace GamePlay
 	{
 		[SerializeField] private Rigidbody rigidBody;
 		[SerializeField] private BoxCollider boxCollider;
-		[SerializeField] private Canvas canvas;
-		[SerializeField] private TextMeshProUGUI timerText;
 
 		private GrenadeConfigure _configure;
 		private IParticleFactory _particleFactory;
@@ -46,20 +43,10 @@ namespace GamePlay
 		[ServerCallback]
 		public async UniTask ExplodeAsync(CancellationToken cancellationToken)
 		{
-			canvas.transform.position = gameObject.transform.position + new Vector3(0, 1.5f, 0);
+			bool isCancelled = await UniTask.Delay(TimeSpan.FromSeconds(_configure.DelayInSeconds), cancellationToken: cancellationToken)
+				.SuppressCancellationThrow();
 
-			float elapsedTime = _configure.DelayInSeconds;
-			timerText.SetText(elapsedTime.ToString());
-
-			while (elapsedTime > 0 && !cancellationToken.IsCancellationRequested)
-			{
-				await UniTask.Delay(TimeSpan.FromSeconds(1), cancellationToken: cancellationToken);
-
-				elapsedTime -= 1;
-				timerText.SetText(elapsedTime.ToString());
-			}
-
-			if (cancellationToken.IsCancellationRequested)
+			if (isCancelled)
 			{
 				return;
 			}

@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <Amount>k__BackingField: 5
   <DelayInSeconds>k__BackingField: 2
-  <Radius>k__BackingField: 4
-  <Damage>k__BackingField: 0
+  <ExplosionData>k__BackingField:
+    radius: 4
+    damage: 150
   <MaxThrowDuration>k__BackingField: 1
   <ThrowForceModifier>k__BackingField: 1800
   <MinThrowForce>k__BackingField: 900
