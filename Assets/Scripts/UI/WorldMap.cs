@@ -53,8 +53,12 @@ namespace UI
 
 		private void OnDestroy()
 		{
-			_heightBuffer.Release();
-			MainTexture?.Release();
+			_heightBuffer?.Release();
+
+			if (MainTexture != null)
+			{
+				MainTexture.Release();
+			}
 		}
 
 		internal void OnMapChanged(Map map)
