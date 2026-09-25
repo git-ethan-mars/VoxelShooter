@@ -19,6 +19,21 @@ namespace GamePlay
 			_audioPool = new AudioPool(assetProvider);
 		}
 
+		public async UniTaskVoid PlayAsync(AudioType audioType)
+		{
+			AudioData audioData = _staticData.GetAudioData(audioType);
+			AudioSource audioSource = _audioPool.Get();
+			SetupAudioSource(audioSource, audioData, false);
+			audioSource.Play();
+
+			await UniTask.Delay(TimeSpan.FromSeconds(audioData.Clip.length));
+
+			if (audioSource != null)
+			{
+				_audioPool.Release(audioSource);
+			}
+		}
+
 		public async UniTaskVoid PlayAsync(AudioType audioType, Vector3 position)
 		{
 			AudioData audioData = _staticData.GetAudioData(audioType);

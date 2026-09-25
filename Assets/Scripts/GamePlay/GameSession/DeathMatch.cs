@@ -16,7 +16,8 @@ namespace GamePlay
 {
 	public class DeathMatch : GameMode
 	{
-		private const int VotingDuration = 20;
+		// Length of the map voting music track (Audio/Sounds/golosovanie-ks.mp3).
+		private const float VotingDuration = 18.05f;
 		private const int VotingMaps = 4;
 		public readonly DeathmatchScoreboard Scoreboard = new DeathmatchScoreboard();
 

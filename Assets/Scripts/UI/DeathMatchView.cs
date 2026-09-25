@@ -5,6 +5,7 @@ using Reflex.Attributes;
 using Services;
 using UI.InGameUIStates;
 using UnityEngine;
+using AudioType = Data.AudioType;
 
 namespace UI
 {
@@ -18,14 +19,16 @@ namespace UI
 		private TimeSpan _respawnTimer;
 
 		private UIProvider _uiProvider;
+		private AudioPlayer _audioPlayer;
 		private DeathMatch _deathMatch;
 
 		[Inject]
 		private void Construct(IInputService inputService, IStaticDataService staticData, IStorageService storageService,
-			CharacterProvider characterProvider, UIProvider uiProvider)
+			CharacterProvider characterProvider, UIProvider uiProvider, AudioPlayer audioPlayer)
 		{
 			base.Construct(inputService, staticData, storageService, characterProvider);
 			_uiProvider = uiProvider;
+			_audioPlayer = audioPlayer;
 		}
 
 		public void Initialize(DeathMatch deathMatch)
@@ -41,6 +44,7 @@ namespace UI
 			_deathMatch.TimeLeft.Subscribe(OnGameTimeChanged).AddTo(this);
 
 			votingView.Initialize(_deathMatch.MapVoting);
+			_deathMatch.MapVoting.Started.Subscribe(_ => _audioPlayer.PlayAsync(AudioType.MapVoting).Forget()).AddTo(this);
 
 			deathMatchScoreboard.Initialize(_deathMatch.Scoreboard);
 

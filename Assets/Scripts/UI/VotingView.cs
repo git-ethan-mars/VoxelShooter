@@ -82,7 +82,10 @@ namespace UI
 
 		private void OnDestroy()
 		{
-			_voting.VoteByCandidate.CollectionChanged -= OnVotingChanged;
+			if (_voting != null)
+			{
+				_voting.VoteByCandidate.CollectionChanged -= OnVotingChanged;
+			}
 		}
 
 		private void OnVotingChanged(in NotifyCollectionChangedEventArgs<KeyValuePair<string, int>> e)
@@ -98,6 +101,7 @@ namespace UI
 					Items.Find(votingElement => votingElement.Candidate == candidateName).SetVotes(e.NewItem.Value);
 					break;
 				case NotifyCollectionChangedAction.Reset:
+					_selectedElement = null;
 					Clear();
 					break;
 			}
