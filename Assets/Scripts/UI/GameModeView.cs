@@ -45,22 +45,18 @@ namespace UI
 
 		protected virtual void Update()
 		{
-			if (InputService.IsScoreboardButtonUp())
-			{
-				SwitchState<DefaultState>();
-			}
-
 			if (InputService.IsInGameMenuButtonDown())
 			{
 				SwitchState<InGameMenuState>();
 			}
 
-			if (InputService.IsMapButtonDown())
+			// Hold-to-show screens open only over the game itself, so their keys do not close menus.
+			if (InputService.IsMapButtonDown() && IsInState<DefaultState>())
 			{
 				SwitchState<WorldMapState>();
 			}
 
-			if (InputService.IsMapButtonUp())
+			if (InputService.IsMapButtonUp() && IsInState<WorldMapState>())
 			{
 				SwitchState<DefaultState>();
 			}
@@ -98,6 +94,11 @@ namespace UI
 			}
 
 			_states[typeof(T)] = state;
+		}
+
+		protected bool IsInState<T>() where T : IInGameUIState
+		{
+			return _states.TryGetValue(typeof(T), out IInGameUIState state) && _currentState == state;
 		}
 
 		protected void SwitchState<T>() where T : IInGameUIState

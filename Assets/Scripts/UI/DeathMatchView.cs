@@ -64,17 +64,17 @@ namespace UI
 		{
 			base.Update();
 
-			if (InputService.IsChooseClassButtonDown())
+			if (InputService.IsChooseClassButtonDown() && IsInState<DefaultState>())
 			{
 				SwitchState<ChooseClassMenuState>();
 			}
 
-			if (InputService.IsScoreboardButtonDown())
+			if (InputService.IsScoreboardButtonDown() && IsInState<DefaultState>())
 			{
 				SwitchState<ScoreboardState>();
 			}
 
-			if (InputService.IsScoreboardButtonUp())
+			if (InputService.IsScoreboardButtonUp() && IsInState<ScoreboardState>())
 			{
 				SwitchState<DefaultState>();
 			}
