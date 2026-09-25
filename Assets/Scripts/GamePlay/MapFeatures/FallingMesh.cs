@@ -6,7 +6,7 @@ namespace GamePlay
 {
 	public class FallingMesh : MonoBehaviour
 	{
-		private const float BreakDelay = 0.3f;
+		private const float BreakDelay = 1.5f;
 		private const float MaxLifetime = 8.0f;
 		private const int MaxParticleSystems = 60;
 		private const int ParticleStartSpeed = 1;
