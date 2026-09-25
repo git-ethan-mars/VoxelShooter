@@ -15,14 +15,16 @@ namespace UI
 		[SerializeField] private CanvasGroup canvasGroup;
 		[SerializeField] private TextMeshProUGUI title;
 
-		private IInputService _inputService;
+		private readonly HashSet<VotingElement> _subscribedElements = new HashSet<VotingElement>();
+
+		private IMapConfigureLoader _mapConfigureLoader;
 		private VotingElement _selectedElement;
 		private Voting _voting;
 
 		[Inject]
-		private void Construct(IInputService inputService)
+		private void Construct(IMapConfigureLoader mapConfigureLoader)
 		{
-			_inputService = inputService;
+			_mapConfigureLoader = mapConfigureLoader;
 		}
 
 		public void Initialize(Voting voting)
@@ -34,43 +36,6 @@ namespace UI
 			UpdateVisibility();
 		}
 
-		private void Update()
-		{
-			for (int i = 0; i < Items.Count; i++)
-			{
-				if (!_inputService.IsSlotButtonPressed(i))
-				{
-					continue;
-				}
-
-				if (!_selectedElement)
-				{
-					SelectElement(Items[i]);
-				}
-				else
-				{
-					_selectedElement.Deselect();
-
-					if (_selectedElement != Items[i])
-					{
-						SelectElement(Items[i]);
-					}
-					else
-					{
-						_voting.CancelVote();
-						_selectedElement = null;
-					}
-				}
-			}
-		}
-
-		private void SelectElement(VotingElement element)
-		{
-			_voting.SendVote(element.Candidate);
-			_selectedElement = element;
-			_selectedElement.Select();
-		}
-
 		private void OnDestroy()
 		{
 			if (_voting != null)
@@ -79,13 +44,32 @@ namespace UI
 			}
 		}
 
+		// Clicking the voted map again takes the vote back.
+		private void OnElementClicked(VotingElement element)
+		{
+			if (_selectedElement != null)
+			{
+				_selectedElement.Deselect();
+			}
+
+			if (_selectedElement == element)
+			{
+				_voting.CancelVote();
+				_selectedElement = null;
+				return;
+			}
+
+			_voting.SendVote(element.Candidate);
+			_selectedElement = element;
+			_selectedElement.Select();
+		}
+
 		private void OnVotingChanged(in NotifyCollectionChangedEventArgs<KeyValuePair<string, int>> e)
 		{
 			switch (e.Action)
 			{
 				case NotifyCollectionChangedAction.Add:
-					VotingElement element = SpawnElement();
-					element.Initialize(Items.Count - 1, e.NewItem.Key);
+					AddElement(e.NewItem.Key);
 					break;
 				case NotifyCollectionChangedAction.Replace:
 					string candidateName = e.NewItem.Key;
@@ -100,9 +84,24 @@ namespace UI
 			UpdateVisibility();
 		}
 
+		private void AddElement(string candidate)
+		{
+			VotingElement element = SpawnElement();
+			element.Initialize(candidate, _mapConfigureLoader.GetMapConfigure(candidate).Image);
+
+			// Elements are pooled by the list, so each one is subscribed only once.
+			if (_subscribedElements.Add(element))
+			{
+				element.Clicked.Subscribe(_ => OnElementClicked(element)).AddTo(element);
+			}
+		}
+
 		private void UpdateVisibility()
 		{
-			canvasGroup.alpha = Items.Count > 0 ? 1.0f : 0.0f;
+			bool isVisible = Items.Count > 0;
+			canvasGroup.alpha = isVisible ? 1.0f : 0.0f;
+			canvasGroup.blocksRaycasts = isVisible;
+			canvasGroup.interactable = isVisible;
 		}
 	}
 }

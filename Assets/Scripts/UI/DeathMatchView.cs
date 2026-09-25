@@ -57,6 +57,10 @@ namespace UI
 			var deathMatchState = new DeathMatchState(CharacterProvider, timeInfo, Hud, inventoryView);
 			AddState<DefaultState>(deathMatchState);
 
+			AddState(new VotingState(InputService));
+			_deathMatch.MapVoting.Started.Subscribe(_ => SwitchState<VotingState>()).AddTo(this);
+			_deathMatch.MapVoting.Finished.Subscribe(_ => SwitchState<DefaultState>()).AddTo(this);
+
 			SwitchState<ChooseClassMenuState>();
 		}
 
@@ -110,6 +114,11 @@ namespace UI
 			if (gameState == GameState.ShowingStatistics)
 			{
 			}
+		}
+
+		protected override bool AreHotkeysBlocked()
+		{
+			return IsInState<VotingState>();
 		}
 
 		private void OnGameTimeChanged(TimeSpan timeLeft)

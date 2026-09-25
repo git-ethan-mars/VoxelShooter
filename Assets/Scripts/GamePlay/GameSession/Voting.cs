@@ -19,9 +19,11 @@ namespace GamePlay
 		private readonly Dictionary<NetworkConnectionToClient, string> _voteByConnection = new Dictionary<NetworkConnectionToClient, string>();
 		private readonly ReactiveProperty<string> _title = new ReactiveProperty<string>();
 		private readonly Subject<Unit> _started = new Subject<Unit>();
+		private readonly Subject<Unit> _finished = new Subject<Unit>();
 		public IReadOnlyObservableDictionary<string, int> VoteByCandidate => _voteByCandidate;
 		public Observable<string> Title => _title;
 		public Observable<Unit> Started => _started;
+		public Observable<Unit> Finished => _finished;
 
 		private Voting(VSNetworkManager networkManager)
 		{
@@ -130,6 +132,7 @@ namespace GamePlay
 			_title.Value = string.Empty;
 			_voteByConnection.Clear();
 			_voteByCandidate.Clear();
+			_finished.OnNext(Unit.Default);
 		}
 	}
 }

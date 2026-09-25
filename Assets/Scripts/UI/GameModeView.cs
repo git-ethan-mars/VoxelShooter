@@ -45,6 +45,11 @@ namespace UI
 
 		protected virtual void Update()
 		{
+			if (AreHotkeysBlocked())
+			{
+				return;
+			}
+
 			if (InputService.IsInGameMenuButtonDown())
 			{
 				SwitchState<InGameMenuState>();
@@ -94,6 +99,12 @@ namespace UI
 			}
 
 			_states[typeof(T)] = state;
+		}
+
+		// A modal screen keeps menu and hold-to-show keys from switching the UI away from it.
+		protected virtual bool AreHotkeysBlocked()
+		{
+			return false;
 		}
 
 		protected bool IsInState<T>() where T : IInGameUIState
