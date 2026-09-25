@@ -3628,6 +3628,7 @@ MonoBehaviour:
   inputGroup: {fileID: 2205129471208002314}
   inputField: {fileID: 8722662082184332816}
   scrollbarGroup: {fileID: 7633914118661968503}
+  sentHistorySize: 15
 --- !u!1 &1535611069508722991
 GameObject:
   m_ObjectHideFlags: 0
