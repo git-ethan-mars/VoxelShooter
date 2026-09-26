@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <Type>k__BackingField: 9
   <InventoryIcon>k__BackingField: {fileID: 1150218188, guid: 6d0a4d7be4748db4393ae2029e347b57, type: 3}
-  <Range>k__BackingField: 5
+  <AttackRange>k__BackingField: 1
+  <DiggingRange>k__BackingField: 3.5
   <TimeBetweenHit>k__BackingField: 0.3
   <DamageToPlayer>k__BackingField: 30
   <HeadMultiplier>k__BackingField: 1.25

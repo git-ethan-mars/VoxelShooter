@@ -44,7 +44,7 @@ namespace GamePlay
 				Hit(CameraProvider.CentredRay, true);
 			}
 
-			if (CameraProvider.GetBuildRayCastHit(out RaycastHit hit, Configure.Range))
+			if (CameraProvider.GetBuildRayCastHit(out RaycastHit hit, Configure.DiggingRange))
 			{
 				var voxelPosition = Vector3Ushort.FloorToUshort(hit.point - hit.normal / 2);
 
@@ -88,7 +88,8 @@ namespace GamePlay
 		[Server]
 		private void ScanHit(Ray ray, bool isStrongHit)
 		{
-			bool raycastResult = Physics.Raycast(ray, out RaycastHit rayHit, Configure.Range, LayerMasks.AttackMask);
+			float maxRange = Mathf.Max(Configure.AttackRange, Configure.DiggingRange);
+			bool raycastResult = Physics.Raycast(ray, out RaycastHit rayHit, maxRange, LayerMasks.AttackMask);
 
 			if (!raycastResult)
 			{
@@ -99,6 +100,11 @@ namespace GamePlay
 
 			if (mapDestruction != null)
 			{
+				if (rayHit.distance > Configure.DiggingRange)
+				{
+					return;
+				}
+
 				mapDestruction.Visit(this, isStrongHit, rayHit);
 				AudioSender.SendAudio(digSound, rayHit.point);
 				return;
@@ -106,7 +112,7 @@ namespace GamePlay
 
 			IDamageVisitor damageVisitor = rayHit.collider.GetComponentInParent<IDamageVisitor>();
 
-			if (damageVisitor != null)
+			if (damageVisitor != null && rayHit.distance <= Configure.AttackRange)
 			{
 				AudioSender.SendAudio(hitSound, rayHit.point);
 				damageVisitor.Visit(this, rayHit);

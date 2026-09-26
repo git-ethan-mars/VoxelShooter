@@ -7,7 +7,9 @@ namespace Data
 	{
 		[field: Header("Configure")]
 		[field: SerializeField]
-		public float Range { get; private set; }
+		public float AttackRange { get; private set; }
+
+		[field: SerializeField] public float DiggingRange { get; private set; }
 
 		[field: SerializeField] public float TimeBetweenHit { get; private set; }
 		[field: SerializeField] public int DamageToPlayer { get; private set; }
@@ -17,11 +19,5 @@ namespace Data
 		[field: SerializeField] public float ArmMultiplier { get; private set; }
 		[field: SerializeField] public int DamageToVoxel { get; private set; }
 		[field: SerializeField] public bool HasStrongHit { get; private set; }
-
-		[field: Header("Sound")]
-		[field: SerializeField]
-		public AudioData DiggingAudio { get; private set; }
-
-		[field: SerializeField] public AudioData HittingAudio { get; private set; }
 	}
 }
