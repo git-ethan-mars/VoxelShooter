@@ -15,6 +15,12 @@ namespace Services
 
 		public void Save<T>(string key) where T : ISettingsData
 		{
+			// Settings that were never loaded were not changed either, so the file is already up to date.
+			if (StorageHelper<T>.ReactiveProperty == null)
+			{
+				return;
+			}
+
 			string path = BuildPath(key);
 			string json = JsonConvert.SerializeObject(StorageHelper<T>.ReactiveProperty.CurrentValue);
 			using (var fileStream = new StreamWriter(path))
