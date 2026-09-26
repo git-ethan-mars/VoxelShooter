@@ -9,14 +9,15 @@ namespace UI.SettingsMenuStates
 		private ISettingsMenuState _currentState;
 
 		public SettingsMenuStateMachine(ISettingsMenuState mouseSettingsState, ISettingsMenuState volumeSettingsState,
-			ISettingsMenuState videoSettingsState, ISettingsMenuState controlsSettingsState)
+			ISettingsMenuState videoSettingsState, ISettingsMenuState controlsSettingsState, ISettingsMenuState gameplaySettingsState)
 		{
 			_states = new Dictionary<Type, ISettingsMenuState>
 			{
 				[typeof(MouseSettingsState)] = mouseSettingsState,
 				[typeof(VolumeSettingsState)] = volumeSettingsState,
 				[typeof(VideoSettingsState)] = videoSettingsState,
-				[typeof(ControlsSettingsState)] = controlsSettingsState
+				[typeof(ControlsSettingsState)] = controlsSettingsState,
+				[typeof(GameplaySettingsState)] = gameplaySettingsState
 			};
 		}
 

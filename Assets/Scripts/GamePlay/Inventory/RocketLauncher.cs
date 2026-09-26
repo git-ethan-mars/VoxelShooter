@@ -16,6 +16,8 @@ namespace GamePlay
 		private CameraProvider _cameraProvider;
 
 		private bool _isReloading;
+		private bool _isAutoReloadEnabled;
+		private bool _isAutoReloadRequested;
 		private readonly SyncReactiveProperty<int> _amount = new SyncReactiveProperty<int>();
 		private readonly SyncReactiveProperty<int> _chargedRockets = new SyncReactiveProperty<int>();
 		public ReactiveProperty<int> Amount => _amount;
@@ -26,11 +28,15 @@ namespace GamePlay
 
 		[Inject]
 		private void Construct(IInputService inputService, IEntityFactory entityFactory, CameraProvider cameraProvider,
-			IStaticDataService staticData)
+			IStaticDataService staticData, IStorageService storageService)
 		{
 			_inputService = inputService;
 			_entityFactory = entityFactory;
 			_cameraProvider = cameraProvider;
+
+			_isAutoReloadEnabled = storageService.Load<GameplaySettingsData>(IStorageService.GameplaySettingsKey).AutoReload;
+			storageService.Subscribe<GameplaySettingsData>(settings => _isAutoReloadEnabled = settings.AutoReload)
+				.AddTo(this);
 		}
 
 		public override void OnStartServer()
@@ -55,6 +61,24 @@ namespace GamePlay
 
 			if (_inputService.IsReloadingButtonDown())
 			{
+				ReloadAsync();
+			}
+
+			TryAutoReload();
+		}
+
+		// Sends a single reload request each time the charged rockets run out.
+		private void TryAutoReload()
+		{
+			if (_chargedRockets.Value > 0)
+			{
+				_isAutoReloadRequested = false;
+				return;
+			}
+
+			if (_isAutoReloadEnabled && !_isAutoReloadRequested && CanReload())
+			{
+				_isAutoReloadRequested = true;
 				ReloadAsync();
 			}
 		}

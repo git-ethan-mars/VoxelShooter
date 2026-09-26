@@ -6,6 +6,7 @@ using Mirror;
 using Networking;
 using Networking.Core;
 using R3;
+using Reflex.Attributes;
 using Services;
 using UnityEngine;
 using AudioType = Data.AudioType;
@@ -24,6 +25,8 @@ namespace GamePlay
 		private CancellationTokenSource _onChangeSlot;
 		private bool _isReloading;
 		private bool _isReady = true;
+		private bool _isAutoReloadEnabled;
+		private bool _isAutoReloadRequested;
 		private float _recoilModifier;
 		private readonly SyncReactiveProperty<int> _totalBullets = new SyncReactiveProperty<int>();
 		private readonly SyncReactiveProperty<int> _bulletsInMagazine = new SyncReactiveProperty<int>();
@@ -36,6 +39,14 @@ namespace GamePlay
 		protected IInputService InputService { get; set; }
 		protected NetworkAudioSender AudioSender { get; set; }
 		protected CameraProvider CameraProvider { get; set; }
+
+		[Inject]
+		private void ConstructGameplaySettings(IStorageService storageService)
+		{
+			_isAutoReloadEnabled = storageService.Load<GameplaySettingsData>(IStorageService.GameplaySettingsKey).AutoReload;
+			storageService.Subscribe<GameplaySettingsData>(settings => _isAutoReloadEnabled = settings.AutoReload)
+				.AddTo(this);
+		}
 
 		public override void OnStartServer()
 		{
@@ -82,8 +93,10 @@ namespace GamePlay
 
 			if (InputService.IsReloadingButtonDown() && CanReload())
 			{
-				Reload();
+				CmdReload();
 			}
+
+			TryAutoReload();
 		}
 
 		public override void Select()
@@ -135,7 +148,32 @@ namespace GamePlay
 			ResetShoot();
 		}
 
+		// Sends a single reload request each time the magazine runs empty.
+		private void TryAutoReload()
+		{
+			if (_bulletsInMagazine.Value > 0)
+			{
+				_isAutoReloadRequested = false;
+				return;
+			}
+
+			if (_isAutoReloadEnabled && !_isAutoReloadRequested && CanReload())
+			{
+				_isAutoReloadRequested = true;
+				CmdReload();
+			}
+		}
+
 		[Command]
+		private void CmdReload()
+		{
+			if (CanReload())
+			{
+				Reload();
+			}
+		}
+
+		[Server]
 		private async void Reload()
 		{
 			_isReloading = true;
