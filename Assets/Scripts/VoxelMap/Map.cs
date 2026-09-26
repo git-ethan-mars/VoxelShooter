@@ -51,6 +51,12 @@ namespace VoxelMap
 
 		private void OnDestroy()
 		{
+			// A map destroyed mid-build was never constructed and owns no data.
+			if (!_mapData.Voxels.IsCreated)
+			{
+				return;
+			}
+
 			_mapData.Dispose();
 		}
 
