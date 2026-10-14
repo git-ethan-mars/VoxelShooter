@@ -1,4 +1,5 @@
 using Mirror;
+using R3;
 using Reflex.Attributes;
 using Services;
 using UnityEngine;
@@ -32,7 +33,10 @@ namespace GamePlay
 		private static readonly Collider[] OverlapBuffer = new Collider[16];
 
 		private IInputService _inputService;
+		private IStorageService _storageService;
 		private MapProvider _mapProvider;
+
+		private bool _isAutoJumpEnabled;
 
 		private Vector3 _desiredMovementDirection;
 		private float _jumpHeight;
@@ -51,9 +55,10 @@ namespace GamePlay
 		public MovementState State { get; private set; }
 
 		[Inject]
-		private void Construct(IInputService inputService, MapProvider mapProvider)
+		private void Construct(IInputService inputService, IStorageService storageService, MapProvider mapProvider)
 		{
 			_inputService = inputService;
+			_storageService = storageService;
 			_mapProvider = mapProvider;
 		}
 
@@ -72,6 +77,10 @@ namespace GamePlay
 		public override void OnStartLocalPlayer()
 		{
 			SetSimulated(true);
+
+			_isAutoJumpEnabled = _storageService.Load<GameplaySettingsData>(IStorageService.GameplaySettingsKey).AutoJump;
+			_storageService.Subscribe<GameplaySettingsData>(settings => _isAutoJumpEnabled = settings.AutoJump)
+				.AddTo(this);
 		}
 
 		private void FixedUpdate()
@@ -153,7 +162,7 @@ namespace GamePlay
 				{
 					rigidBody.AddForce(Mathf.Sqrt(-2 * GravityScale * Physics.gravity.y * _jumpHeight) * Vector3.up, ForceMode.Impulse);
 				}
-				else if (_groundedTicks > 1 && TryFindStep(out float stepHeight))
+				else if (_isAutoJumpEnabled && _groundedTicks > 1 && TryFindStep(out float stepHeight))
 				{
 					_isSteppingUp = true;
 					_stepTargetHeight = stepHeight;

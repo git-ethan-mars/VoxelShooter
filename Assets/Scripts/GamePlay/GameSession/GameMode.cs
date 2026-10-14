@@ -89,6 +89,7 @@ namespace GamePlay
 
 		public virtual async UniTask LoadMapAsync(string mapName)
 		{
+			MapProvider.BeginLoading(mapName);
 			MapData mapData = await MapDataReader.ReadFromFileAsync(mapName);
 			await MapProvider.LoadMapAsync(mapData, mapName);
 
@@ -157,6 +158,7 @@ namespace GamePlay
 
 		private async UniTask DownloadMapAsync(string mapName, CancellationToken cancellationToken = default)
 		{
+			MapProvider.BeginLoading(mapName);
 			var tsc = new UniTaskCompletionSource();
 			var request = new MapDownloadRequest();
 			NetworkManager.SendRequest(request);

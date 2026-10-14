@@ -41,6 +41,10 @@ namespace Infrastructure.States
 
 			_disposables = new CompositeDisposable();
 
+			_mapProvider.LoadingMapConfigure.Where(mapConfigure => mapConfigure)
+				.Subscribe(mapConfigure => loadingWindow.SetMapPreview(mapConfigure.Image))
+				.AddTo(_disposables);
+
 			Observable.EveryUpdate()
 				.Subscribe(_ => gameMode.Update())
 				.AddTo(_disposables);

@@ -7,14 +7,18 @@ namespace UI
 	public class LoadingWindow : ListView<Image>
 	{
 		[SerializeField] private CanvasGroup canvasGroup;
+		[SerializeField] private Image mapPreview;
 		[SerializeField] private int bulletCount;
 		[SerializeField, Range(0, 1)] private float hideAlpha;
 		[SerializeField, Range(0, 1)] private float showAlpha;
 
 		private float _previousProgress;
+		private Sprite _defaultMapPreview;
 
 		private void Awake()
 		{
+			_defaultMapPreview = mapPreview.sprite;
+
 			for (int i = 0; i < bulletCount; i++)
 			{
 				SpawnElement();
@@ -30,6 +34,11 @@ namespace UI
 				Color currentColor = Items[i].color;
 				Items[i].color = new Color(currentColor.r, currentColor.g, currentColor.b, hideAlpha);
 			}
+		}
+
+		public void SetMapPreview(Sprite preview)
+		{
+			mapPreview.sprite = preview != null ? preview : _defaultMapPreview;
 		}
 
 		public void Hide()

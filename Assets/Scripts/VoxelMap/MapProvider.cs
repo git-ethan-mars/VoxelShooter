@@ -12,13 +12,21 @@ namespace VoxelMap
 	{
 		private readonly IMapConfigureLoader _mapConfigLoader;
 		private readonly ReactiveProperty<Map> _map = new ReactiveProperty<Map>();
+		private readonly ReactiveProperty<MapConfigure> _loadingMapConfigure = new ReactiveProperty<MapConfigure>();
 
 		public ReadOnlyReactiveProperty<Map> Map => _map;
+		public ReadOnlyReactiveProperty<MapConfigure> LoadingMapConfigure => _loadingMapConfigure;
 		public IProgress<float> MapLoadingProgress { get; set; }
 
 		public MapProvider(IMapConfigureLoader mapConfigLoader)
 		{
 			_mapConfigLoader = mapConfigLoader;
+		}
+
+		// Announces the map before its data is read or downloaded, so the loading screen can show it right away.
+		public void BeginLoading(string mapName)
+		{
+			_loadingMapConfigure.Value = _mapConfigLoader.GetMapConfigure(mapName);
 		}
 
 		public async UniTask LoadMapAsync(MapData mapData, string mapName)

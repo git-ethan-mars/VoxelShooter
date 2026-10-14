@@ -88,6 +88,7 @@ GameObject:
   - component: {fileID: 2244688022105813021}
   - component: {fileID: 1021405778092772090}
   - component: {fileID: 1446498418969560098}
+  - component: {fileID: 8686772517304294641}
   m_Layer: 0
   m_Name: GameMenu
   m_TagString: Untagged
@@ -206,6 +207,22 @@ MonoBehaviour:
   joinMatchMenu: {fileID: 813123247179271810}
   settingsMenu: {fileID: 4784235854547221735}
   matchMenu: {fileID: 6630534251350237312}
+--- !u!114 &8686772517304294641
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3320900094824660025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e35e232b86d0894eaa6f87d817bda7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: VoxelShooter.UI::UI.MainMenuPanorama
+  panoramaSkybox: {fileID: 2100000, guid: 3f0884cb5ca0e9c47a725f92b84efd4c, type: 2}
+  backgroundImage: {fileID: 2143244463474706445}
+  rotationSpeed: 3
+  pitch: -15
 --- !u!1001 &700476680227527774
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -419,6 +436,26 @@ PrefabInstance:
       propertyPath: m_Name
       value: SettingsMenu
       objectReference: {fileID: 0}
+    - target: {fileID: 1016382623514438211, guid: a0a1e47bdbbd1854291801c1a7799eac, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1016382623514438211, guid: a0a1e47bdbbd1854291801c1a7799eac, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1016382623514438211, guid: a0a1e47bdbbd1854291801c1a7799eac, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1016382623514438211, guid: a0a1e47bdbbd1854291801c1a7799eac, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1016382623514438211, guid: a0a1e47bdbbd1854291801c1a7799eac, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1438328140489687357, guid: a0a1e47bdbbd1854291801c1a7799eac, type: 3}
       propertyPath: m_SizeDelta.x
       value: 0
@@ -524,6 +561,26 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3567229616533241170, guid: a0a1e47bdbbd1854291801c1a7799eac, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4457889876158685033, guid: a0a1e47bdbbd1854291801c1a7799eac, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4457889876158685033, guid: a0a1e47bdbbd1854291801c1a7799eac, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4457889876158685033, guid: a0a1e47bdbbd1854291801c1a7799eac, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4457889876158685033, guid: a0a1e47bdbbd1854291801c1a7799eac, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4457889876158685033, guid: a0a1e47bdbbd1854291801c1a7799eac, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
@@ -908,6 +965,14 @@ PrefabInstance:
     - target: {fileID: 6223077014454618404, guid: 3cb75ac2f61a0b141b06cb39ce10dbbb, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6223889183551862229, guid: 3cb75ac2f61a0b141b06cb39ce10dbbb, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4281597951
+      objectReference: {fileID: 0}
+    - target: {fileID: 6223889183551862229, guid: 3cb75ac2f61a0b141b06cb39ce10dbbb, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
       objectReference: {fileID: 0}
     - target: {fileID: 8716844086390062443, guid: 3cb75ac2f61a0b141b06cb39ce10dbbb, type: 3}
       propertyPath: m_AnchorMax.y

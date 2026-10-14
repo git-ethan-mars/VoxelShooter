@@ -330,6 +330,7 @@ MonoBehaviour:
   itemPrefab: {fileID: 3676637211148037588, guid: a04f59400e35e5f4dbff253e71203320, type: 3}
   container: {fileID: 2233474113477491711}
   canvasGroup: {fileID: 258867676704271533}
+  mapPreview: {fileID: 3582769749075365244}
   bulletCount: 50
   hideAlpha: 0.4
   showAlpha: 1

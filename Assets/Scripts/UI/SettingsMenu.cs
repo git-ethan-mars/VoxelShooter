@@ -36,6 +36,12 @@ namespace UI
 		[SerializeField] private GameObject controlsSection;
 		[SerializeField] private KeyBindingsView keyBindingsView;
 
+		[Header("Gameplay")] [SerializeField] private Toggle gameplaySectionToggle;
+
+		[SerializeField] private GameObject gameplaySection;
+		[SerializeField] private Toggle autoJumpToggle;
+		[SerializeField] private Toggle autoReloadToggle;
+
 		[SerializeField] private Button backButton;
 		[SerializeField] private Color activeToggleColor;
 		[SerializeField] private Color inactiveToggleColor;
@@ -53,11 +59,13 @@ namespace UI
 						mouseSection, generalSensitivity, aimSensitivity, crosshairView),
 					new VolumeSettingsState(storageService, volumeSection, masterVolume, musicVolume, soundVolume),
 					new VideoSettingsState(storageService, videoSection, resolutionView, screenModeView),
-					new ControlsSettingsState(controlsSection, keyBindingsView));
+					new ControlsSettingsState(controlsSection, keyBindingsView),
+					new GameplaySettingsState(storageService, gameplaySection, autoJumpToggle, autoReloadToggle));
 			mouseSectionToggle.onValueChanged.AsObservable().Subscribe(OnMouseSectionToggleChanged).AddTo(this);
 			volumeSectionToggle.onValueChanged.AsObservable().Subscribe(OnVolumeSectionToggleChanged).AddTo(this);
 			videoSectionToggle.onValueChanged.AsObservable().Subscribe(OnVideoSectionToggleChanged).AddTo(this);
 			controlsSectionToggle.onValueChanged.AsObservable().Subscribe(OnControlsSectionToggleChanged).AddTo(this);
+			gameplaySectionToggle.onValueChanged.AsObservable().Subscribe(OnGameplaySectionToggleChanged).AddTo(this);
 		}
 
 		private void OnDestroy()
@@ -78,6 +86,7 @@ namespace UI
 			_storageService.Save<VolumeSettingsData>(IStorageService.VolumeSettingsKey);
 			_storageService.Save<VideoSettingsData>(IStorageService.VideoSettingsKey);
 			_storageService.Save<KeyBindingsData>(IStorageService.KeyBindingsKey);
+			_storageService.Save<GameplaySettingsData>(IStorageService.GameplaySettingsKey);
 		}
 
 		private void OnMouseSectionToggleChanged(bool value)
@@ -117,6 +126,16 @@ namespace UI
 			if (value)
 			{
 				_settingsMenuStateMachine.SwitchState<ControlsSettingsState>();
+			}
+		}
+
+		private void OnGameplaySectionToggleChanged(bool value)
+		{
+			SetToggleColor(gameplaySectionToggle, value);
+
+			if (value)
+			{
+				_settingsMenuStateMachine.SwitchState<GameplaySettingsState>();
 			}
 		}
 
