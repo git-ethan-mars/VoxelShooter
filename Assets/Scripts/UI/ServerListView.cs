@@ -28,7 +28,7 @@ namespace UI
 			{
 				Server server = servers[i];
 				ServerView serverView = SpawnElement();
-				serverView.ServerName.SetText(server.ServerTitle);
+				serverView.ServerName.SetText(server.Title);
 				serverView.MapName.SetText(server.MapName);
 				_disposables.Add(serverView.JoinButtonPressed.Subscribe(_ => OnServerJoinButtonPressed(server)));
 			}

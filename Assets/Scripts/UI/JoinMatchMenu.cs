@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using R3;
 using Reflex.Attributes;
 using Services;
@@ -10,6 +13,7 @@ namespace UI
 	public class JoinMatchMenu : BaseMenu
 	{
 		private IServerListService _serverList;
+		private CancellationTokenSource _loadCancellation;
 
 		[SerializeField] private ServerListView serverListView;
 		[SerializeField] private Button backButton;
@@ -22,15 +26,47 @@ namespace UI
 			_serverList = serverList;
 		}
 
-		public override async void Show()
+		public override void Show()
 		{
-			List<Server> servers = await _serverList.GetServersAsync(Application.exitCancellationToken);
-			serverListView.Init(servers);
+			CancelLoading();
+			_loadCancellation = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+			LoadServersAsync(_loadCancellation.Token).Forget();
 		}
 
 		public override void Hide()
 		{
+			CancelLoading();
 			serverListView.Hide();
+		}
+
+		private async UniTaskVoid LoadServersAsync(CancellationToken cancellationToken)
+		{
+			List<Server> servers;
+			try
+			{
+				servers = await _serverList.GetActiveServersAsync(cancellationToken);
+			}
+			catch (OperationCanceledException)
+			{
+				return;
+			}
+			catch (Exception exception)
+			{
+				Debug.LogWarning($"Failed to load the server list: {exception.Message}");
+				return;
+			}
+
+			// Servers without a Steam lobby cannot be joined.
+			servers.RemoveAll(server => server.SteamIDLobby == null);
+			serverListView.Hide();
+			serverListView.Init(servers);
+		}
+
+		private void CancelLoading()
+		{
+			_loadCancellation?.Cancel();
+			_loadCancellation?.Dispose();
+			_loadCancellation = null;
 		}
 	}
 }

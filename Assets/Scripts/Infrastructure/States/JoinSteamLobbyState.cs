@@ -20,7 +20,7 @@ namespace Infrastructure.States
 		public async UniTask EnterAsync(Server server)
 		{
 			SteamLobby steamLobby = _networkManager.GetComponent<SteamLobby>();
-			string networkAddress = await steamLobby.JoinLobbyAsync(new CSteamID(server.SteamIDLobby));
+			string networkAddress = await steamLobby.JoinLobbyAsync(new CSteamID(server.SteamIDLobby.Value));
 
 			if (string.IsNullOrEmpty(networkAddress))
 			{

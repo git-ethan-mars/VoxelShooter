@@ -1,6 +1,8 @@
 using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Mirror;
+using R3;
 using Reflex.Attributes;
 using Services;
 using Steamworks;
@@ -11,14 +13,15 @@ namespace Networking
 {
 	public class VSSteamNetworkManager : VSNetworkManager
 	{
+		private const int MaxServerListTextLength = 32;
+		private const string DefaultServerTitle = "VoxelShooter server";
+
 		[SerializeField] private SteamLobby steamLobby;
 		[SerializeField] private float serverListUpdateInterval = 5.0f;
 
 		private IServerListService _serverList;
-		private Server _server;
-
 		private MapProvider _mapProvider;
-		private CSteamID _steamLobbyID;
+		private CancellationTokenSource _hostCancellation;
 
 		[Inject]
 		private void Construct(IServerListService serverList, MapProvider mapProvider)
@@ -27,36 +30,124 @@ namespace Networking
 			_mapProvider = mapProvider;
 		}
 
-		public override async void OnStartHost()
+		public override void OnStartHost()
 		{
 			base.OnStartHost();
 
-			_steamLobbyID = await steamLobby.CreateLobbyAsync(maxConnections);
-			_server = await _serverList.CreateNewServerAsync(_steamLobbyID.m_SteamID, maxConnections, destroyCancellationToken);
-			UpdateServerPeriodicallyAsync().Forget();
+			_hostCancellation = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+			ListServerAsync(_hostCancellation.Token).Forget();
 		}
 
-		public override async void OnStopHost()
+		public override void OnStopHost()
 		{
 			base.OnStopHost();
 
-			if (_server != null)
+			_hostCancellation?.Cancel();
+			_hostCancellation?.Dispose();
+			_hostCancellation = null;
+		}
+
+		// Keeps the server in the server list while the host is running: the backend drops servers
+		// that were not updated within its TTL, so the update loop doubles as a heartbeat.
+		private async UniTaskVoid ListServerAsync(CancellationToken cancellationToken)
+		{
+			CSteamID steamLobbyID = CSteamID.Nil;
+			Server server = null;
+
+			try
 			{
-				steamLobby.LeaveLobby(_steamLobbyID);
-				await _serverList.RemoveServerAsync(_server.ServerID, destroyCancellationToken);
+				steamLobbyID = await steamLobby.CreateLobbyAsync(maxConnections);
+				// The backend requires a map name, and the map is loaded only after the host has started.
+				await _mapProvider.Map.Where(map => map != null).FirstAsync(cancellationToken: cancellationToken);
+
+				while (true)
+				{
+					cancellationToken.ThrowIfCancellationRequested();
+
+					try
+					{
+						server = server == null
+							? await _serverList.CreateServerAsync(CreateServerCreateRequest(steamLobbyID), cancellationToken)
+							: await _serverList.UpdateServerAsync(server.ID, CreateServerUpdateRequest(), cancellationToken);
+					}
+					catch (UnityWebRequestException exception) when (exception.ResponseCode == 404)
+					{
+						// The backend removed the server by TTL (e.g. after a long freeze), register it again.
+						server = null;
+						continue;
+					}
+					catch (UnityWebRequestException exception)
+					{
+						Debug.LogWarning($"Server list request failed: {exception.Message}");
+					}
+
+					await UniTask.Delay(TimeSpan.FromSeconds(serverListUpdateInterval), cancellationToken: cancellationToken);
+				}
+			}
+			catch (OperationCanceledException)
+			{
+			}
+			catch (Exception exception)
+			{
+				Debug.LogException(exception);
+			}
+			finally
+			{
+				if (steamLobbyID != CSteamID.Nil)
+				{
+					steamLobby.LeaveLobby(steamLobbyID);
+				}
+
+				if (server != null)
+				{
+					RemoveServerAsync(server.ID).Forget();
+				}
 			}
 		}
 
-		private async UniTaskVoid UpdateServerPeriodicallyAsync()
+		private async UniTaskVoid RemoveServerAsync(long serverID)
 		{
-			while (!destroyCancellationToken.IsCancellationRequested)
+			try
 			{
-				await UniTask.Delay(TimeSpan.FromSeconds(serverListUpdateInterval), cancellationToken: destroyCancellationToken);
-				_server.MapName = _mapProvider.Map.CurrentValue.MapName ?? string.Empty;
-				_server.ConnectedPlayers = NetworkServer.connections.Count;
-				_server.AvailableSlots = maxConnections;
-				await _serverList.UpdateServerAsync(_server, destroyCancellationToken);
+				await _serverList.RemoveServerAsync(serverID, destroyCancellationToken);
 			}
+			catch (Exception exception) when (exception is not OperationCanceledException)
+			{
+				// Not critical: the backend drops the server by TTL anyway.
+				Debug.LogWarning($"Failed to remove server from the server list: {exception.Message}");
+			}
+		}
+
+		private ServerCreateRequest CreateServerCreateRequest(CSteamID steamLobbyID)
+		{
+			string title = SteamFriends.GetPersonaName();
+			if (string.IsNullOrWhiteSpace(title))
+			{
+				title = DefaultServerTitle;
+			}
+
+			return new ServerCreateRequest(Truncate(title), GetMapName(), GetOccupiedSlots(), maxConnections, steamLobbyID.m_SteamID);
+		}
+
+		private ServerUpdateRequest CreateServerUpdateRequest()
+		{
+			return new ServerUpdateRequest(mapName: GetMapName(), occupiedSlots: GetOccupiedSlots());
+		}
+
+		private string GetMapName()
+		{
+			return Truncate(_mapProvider.Map.CurrentValue.MapName);
+		}
+
+		private int GetOccupiedSlots()
+		{
+			// The backend rejects occupied_slots greater than available_slots.
+			return Math.Min(NetworkServer.connections.Count, maxConnections);
+		}
+
+		private static string Truncate(string text)
+		{
+			return text.Length <= MaxServerListTextLength ? text : text.Substring(0, MaxServerListTextLength);
 		}
 	}
 }
