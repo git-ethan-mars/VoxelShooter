@@ -219,12 +219,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e35e232b86d0894eaa6f87d817bda7c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: VoxelShooter.UI::UI.MainMenuPanorama
+  panoramaSkybox: {fileID: 2100000, guid: 3f0884cb5ca0e9c47a725f92b84efd4c, type: 2}
   backgroundImage: {fileID: 2143244463474706445}
-  fadeDuration: 1.5
   rotationSpeed: 3
-  orbitRadiusFactor: 0.35
-  cameraHeightFactor: 1.2
-  lookHeightFactor: 0.3
+  pitch: -15
 --- !u!1001 &700476680227527774
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -967,6 +965,14 @@ PrefabInstance:
     - target: {fileID: 6223077014454618404, guid: 3cb75ac2f61a0b141b06cb39ce10dbbb, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6223889183551862229, guid: 3cb75ac2f61a0b141b06cb39ce10dbbb, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4281597951
+      objectReference: {fileID: 0}
+    - target: {fileID: 6223889183551862229, guid: 3cb75ac2f61a0b141b06cb39ce10dbbb, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
       objectReference: {fileID: 0}
     - target: {fileID: 8716844086390062443, guid: 3cb75ac2f61a0b141b06cb39ce10dbbb, type: 3}
       propertyPath: m_AnchorMax.y
