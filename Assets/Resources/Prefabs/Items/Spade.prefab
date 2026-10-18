@@ -140,14 +140,19 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  <MeshFilters>k__BackingField:
-  - {fileID: 443292984298458466}
   renderers:
   - {fileID: 2341372412497764022}
+  <MeshFilters>k__BackingField:
+  - {fileID: 443292984298458466}
+  <HoldPosition>k__BackingField: {x: 0.05, y: -0.05, z: 0.15}
+  <HoldRotation>k__BackingField: {x: 0, y: 90, z: 55}
+  <GripPosition>k__BackingField: {x: 0, y: 0.035, z: 0.197}
+  <GripRotation>k__BackingField: {x: 80, y: 0, z: 0}
+  <SupportHandPosition>k__BackingField: {x: 0, y: 0, z: 0}
   wireframeMaterial: {fileID: 2100000, guid: c79e2cccda412094c920cf69114c22e9, type: 2}
   wireframeCube: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
-  digSound: 19
   hitSound: 20
+  digSound: 19
 --- !u!114 &-9188332417845526111
 MonoBehaviour:
   m_ObjectHideFlags: 0

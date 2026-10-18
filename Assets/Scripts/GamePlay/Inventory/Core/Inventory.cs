@@ -11,6 +11,8 @@ namespace GamePlay
 	{
 		private readonly SyncList<InventoryItem> _items = new SyncList<InventoryItem>();
 
+		[SerializeField] private CharacterItemHolder itemHolder;
+
 		[SyncVar(hook = nameof(OnSlotSelected))]
 		private int _activeSlotIndex;
 
@@ -47,6 +49,11 @@ namespace GamePlay
 			for (int i = 0; i < _items.Count; i++)
 			{
 				OnItemAdded(i);
+			}
+
+			if (_activeSlotIndex < _items.Count)
+			{
+				itemHolder.Hold(_items[_activeSlotIndex]);
 			}
 
 			ItemAdded = Observable.FromEvent<int>(handler => _items.OnAdd += handler, handler => _items.OnAdd -= handler);
@@ -96,11 +103,12 @@ namespace GamePlay
 		private void OnItemAdded(int index)
 		{
 			InventoryItem item = _items[index];
-			item.transform.SetParent(transform, false);
+			itemHolder.Attach(item);
 		}
 
 		private void OnSlotSelected(int oldSlotIndex, int slotIndex)
 		{
+			itemHolder.Hold(_items[slotIndex]);
 			_onSlotSelected.OnNext((oldSlotIndex, slotIndex));
 		}
 	}
