@@ -1,15 +1,12 @@
 using System;
-using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Data;
 using DG.Tweening;
 using R3;
 using Reflex.Attributes;
-using Services;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
-using Random = UnityEngine.Random;
 
 namespace UI
 {
@@ -18,13 +15,12 @@ namespace UI
 		private const float AnimationDuration = 0.5f;
 
 		[SerializeField] private Canvas canvas;
-		[SerializeField] private List<Sprite> backgroundSprites;
-		[SerializeField] private Image backgroundImage;
 
 		[SerializeField] private MainMenu mainMenu;
 		[SerializeField] private JoinMatchMenu joinMatchMenu;
 		[SerializeField] private SettingsMenu settingsMenu;
 		[SerializeField] private MatchMenu matchMenu;
+		[SerializeField] private TextMeshProUGUI versionText;
 
 		private EventSystem _eventSystem;
 
@@ -45,9 +41,6 @@ namespace UI
 				throw new NullReferenceException($"Couldn't find {nameof(EventSystem)} on scene");
 			}
 
-			Sprite backgroundSprite = backgroundSprites[Random.Range(0, backgroundSprites.Count)];
-			backgroundImage.sprite = backgroundSprite;
-
 			EventSystem.current.firstSelectedGameObject = mainMenu.CreateMatchButton.gameObject;
 
 			mainMenu.CreateMatchButtonPressed.Subscribe(_ => OnCreateMatchButtonPressed()).AddTo(mainMenu);
@@ -59,6 +52,11 @@ namespace UI
 			mainMenu.ExitButtonPressed.Subscribe(_ => Application.Quit()).AddTo(mainMenu);
 			settingsMenu.BackButtonPressed.Subscribe(_ => OnSettingsMenuBackButtonPressed()).AddTo(settingsMenu);
 			matchMenu.BackButtonPressed.Subscribe(_ => OnMatchMenuBackButtonPressed()).AddTo(matchMenu);
+		}
+
+		private void Start()
+		{
+			versionText.SetText($"v. {Application.version}");
 		}
 
 		private void OnCreateMatchButtonPressed()

@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace UI
 {
@@ -9,7 +8,6 @@ namespace UI
 		private static readonly int RotationProperty = Shader.PropertyToID("_Rotation");
 
 		[SerializeField] private Material panoramaSkybox;
-		[SerializeField] private Image backgroundImage;
 		[SerializeField] private float rotationSpeed = 2.0f;
 		[SerializeField, Range(-30, 30)] private float pitch = 5.0f;
 
@@ -31,7 +29,6 @@ namespace UI
 			_skybox = new Material(panoramaSkybox);
 			RenderSettings.skybox = _skybox;
 			_camera.clearFlags = CameraClearFlags.Skybox;
-			backgroundImage.enabled = false;
 			_rotation = Random.Range(0, 360.0f);
 		}
 

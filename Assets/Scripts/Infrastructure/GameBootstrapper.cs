@@ -39,6 +39,18 @@ namespace Infrastructure
 #if UNITY_EDITOR
 		private void OnValidate()
 		{
+			// Only the prefab asset owns the define, otherwise copies with different values toggle it in a recompile loop
+			if (Application.isPlaying || !EditorUtility.IsPersistent(this))
+				return;
+
+			EditorApplication.delayCall += UpdateLocalBuildSymbol;
+		}
+
+		private void UpdateLocalBuildSymbol()
+		{
+			if (this == null)
+				return;
+
 			PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.Standalone, out string[] initialSymbols);
 			var symbols = new List<string>(initialSymbols);
 			if (isLocalBuild && !initialSymbols.Contains(LocalBuild))
