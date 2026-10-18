@@ -79,3 +79,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uiArea: {fileID: 6188922093886575589}
+  iconMaterial: {fileID: 2100000, guid: 5da5d9c3352191141a6a46f164cbc124, type: 2}

@@ -3,14 +3,19 @@ using System.Linq;
 using DG.Tweening;
 using GamePlay;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 namespace UI.Inventory
 {
 	public sealed class SlotView : MonoBehaviour
 	{
+		private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+
 		[SerializeField] private RectTransform uiArea;
+		[SerializeField] private Material iconMaterial;
 		private readonly List<MeshRenderer> _meshRenderers = new List<MeshRenderer>();
+		private readonly List<Material> _iconMaterials = new List<Material>();
 
 		public IEnumerable<MeshRenderer> MeshRenderers => _meshRenderers;
 
@@ -51,6 +56,9 @@ namespace UI.Inventory
 				modelBounds.Encapsulate(meshFilter.mesh.bounds);
 
 				MeshRenderer meshRenderer = modelCopy.GetComponent<MeshRenderer>();
+				meshRenderer.sharedMaterials = meshRenderer.sharedMaterials.Select(CreateIconMaterial).ToArray();
+				meshRenderer.shadowCastingMode = ShadowCastingMode.Off;
+				meshRenderer.receiveShadows = false;
 				meshRenderer.enabled = true;
 				_meshRenderers.Add(meshRenderer);
 			}
@@ -71,6 +79,32 @@ namespace UI.Inventory
 			}
 
 			_meshRenderers.Clear();
+
+			foreach (Material material in _iconMaterials)
+			{
+				Destroy(material);
+			}
+
+			_iconMaterials.Clear();
+		}
+
+		// Keeps the item's texture and color, but swaps the scene-lit shader for the fixed icon lighting
+		private Material CreateIconMaterial(Material source)
+		{
+			var material = new Material(iconMaterial);
+
+			if (source != null)
+			{
+				material.mainTexture = source.mainTexture;
+
+				if (source.HasProperty(BaseColorId))
+				{
+					material.SetColor(BaseColorId, source.GetColor(BaseColorId));
+				}
+			}
+
+			_iconMaterials.Add(material);
+			return material;
 		}
 	}
 }
