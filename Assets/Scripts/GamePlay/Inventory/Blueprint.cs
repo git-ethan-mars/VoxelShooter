@@ -123,7 +123,7 @@ namespace GamePlay
 				bool isAvailable = Positions.Count <= character.Inventory.VoxelAmount.CurrentValue &&
 				                   IsAvailable(blueprintPosition, Positions);
 				meshRenderer.materials[1].color = isAvailable ? AvailableColor : UnavailableColor;
-				transform.position = blueprintPosition;
+				meshRenderer.transform.SetPositionAndRotation(blueprintPosition, Quaternion.identity);
 				meshRenderer.enabled = true;
 
 				if (_inputService.IsScrollButtonDown())
@@ -218,7 +218,7 @@ namespace GamePlay
 			                   _linePositions.Count <= character.Inventory.VoxelAmount.CurrentValue &&
 			                   IsAvailable(Vector3Int.zero, _linePositions);
 			meshRenderer.materials[1].color = isAvailable ? AvailableColor : UnavailableColor;
-			transform.position = _lineStart;
+			meshRenderer.transform.SetPositionAndRotation(_lineStart, Quaternion.identity);
 			meshRenderer.enabled = true;
 		}
 
