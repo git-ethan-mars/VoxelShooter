@@ -25,9 +25,14 @@ Material:
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
+    - _AOStrength: 0.7
+    - _AmbientStrength: 1
+    - _DrawDistanceFade: 16
     - _EdgeColorLightness: 0.015
     - _EdgeDetection: 0.95
+    - _LightWrap: 0.3
     - _Value: 0
-    m_Colors: []
+    m_Colors:
+    - _AmbientFloor: {r: 0.6, g: 0.6, b: 0.6, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
