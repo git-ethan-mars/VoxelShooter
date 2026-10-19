@@ -12,6 +12,11 @@ Shader "Cyanilux/URPTemplates/SimpleLitShaderExample" {
     {
         _EdgeDetection ("Edge detection", Range(0, 1)) = 0.95
         _EdgeColorLightness ("Edge lightness", Range(0, 1)) = 0.015
+        _AmbientFloor ("Ambient floor", Color) = (0.6, 0.6, 0.6, 1)
+        _AmbientStrength ("Ambient probe strength", Range(0, 2)) = 1
+        _LightWrap ("Light wrap", Range(0, 1)) = 0.3
+        _AOStrength ("AO strength", Range(0, 1)) = 0.7
+        _DrawDistanceFade ("Draw distance fade", Range(0, 64)) = 16
     }
 	SubShader {
 		Tags {
@@ -102,13 +107,31 @@ Shader "Cyanilux/URPTemplates/SimpleLitShaderExample" {
 			CBUFFER_START(UnityPerMaterial)
 			float _EdgeDetection;
 			float _EdgeColorLightness;
+			half4 _AmbientFloor;
+			half _AmbientStrength;
+			half _LightWrap;
+			half _AOStrength;
+			float _DrawDistanceFade;
 			CBUFFER_END
+
+			float DitherNoise(float2 pixel)
+			{
+				return frac(52.9829189 * frac(dot(pixel, float2(0.06711056, 0.00583715))));
+			}
+
+			// The camera far plane is flat, so cut chunks by radial distance instead to get a circular draw distance
+			void ClipByDrawDistance(float distanceToCamera, float2 pixel)
+			{
+				float drawDistance = _ProjectionParams.z;
+				float fade = saturate((drawDistance - distanceToCamera) / max(_DrawDistanceFade, 0.001));
+				clip(fade - DitherNoise(pixel));
+			}
 
 			float GetAmbientOcclusion(float alpha)
             {
                 int    t = clamp(alpha * 255, 0.0, 3.0);
                 float4 aoValues = float4(0.1, 0.6, 0.8, 1);
-                return aoValues[t];
+                return lerp(1.0, aoValues[t], _AOStrength);
             }
 
             float maxcomp(float4 v)
@@ -207,6 +230,9 @@ Shader "Cyanilux/URPTemplates/SimpleLitShaderExample" {
 
 			// Fragment Shader
 			half4 LitPassFragment(Varyings IN) : SV_Target {
+				float distanceToCamera = distance(IN.positionWS, _WorldSpaceCameraPos);
+				ClipByDrawDistance(distanceToCamera, IN.positionCS.xy);
+
 				float3 hsv = RgbToHsv(IN.color.rgb);
                 float4 edgeFactor = EdgeDetection(IN.uv, IN.neighbours);
                 float4 edgeColor = float4(HsvToRgb(float3(hsv.rg, saturate(hsv.b + _EdgeColorLightness))), 1);
@@ -217,17 +243,23 @@ Shader "Cyanilux/URPTemplates/SimpleLitShaderExample" {
 				// Setup InputData
 				InputData inputData;
 				InitializeInputData(IN, inputData);
-				// Simple Lighting (Lambert & BlinnPhong)
-				//UniversalFragmentBlinnPhong()
 				half4 shadowMask = CalculateShadowMask(inputData);
-				AmbientOcclusionFactor aoFactor = CreateAmbientOcclusionFactor(inputData, surfaceData);
-    			Light mainLight = GetMainLight(inputData, shadowMask, aoFactor);
-				inputData.bakedGI *= surfaceData.albedo; // inputData.bakedGI - ambient
-				LightingData lightingData = CreateLightingData(inputData, surfaceData);
-				lightingData.additionalLightsColor = CalculateBlinnPhong(mainLight, inputData, surfaceData);
-				//float4 color = CalculateFinalColor(lightingData, surfaceData.alpha);
-				float3 color = MixFog(surfaceData.albedo, inputData.fogCoord) * IN.ao;
-				return float4(color, 1);
+				Light mainLight = GetMainLight(inputData.shadowCoord, inputData.positionWS, shadowMask);
+
+				// Wrapped Lambert: faces turned away from the sun fade out gradually instead of dropping to zero
+				half NdotL = dot(inputData.normalWS, mainLight.direction);
+				half diffuse = saturate((NdotL + _LightWrap) / (1.0 + _LightWrap));
+				half sunAmount = diffuse * mainLight.shadowAttenuation * mainLight.distanceAttenuation;
+
+				// Ambient never goes below the floor, so back faces stay readable even with a dark skybox probe
+				half3 ambient = max(inputData.bakedGI * _AmbientStrength, _AmbientFloor.rgb);
+
+				// Map colors are authored for unlit rendering, so a fully sunlit face keeps its original color
+				// and faces turned away from the sun or in shadow fade down to the ambient level
+				half3 lighting = lerp(ambient, mainLight.color, sunAmount);
+				half3 lit = surfaceData.albedo * lighting * IN.ao;
+				// Radial fog, so it matches the circular draw distance instead of the flat view depth
+				return half4(MixFog(lit, ComputeFogFactorZ0ToFar(distanceToCamera)), 1);
 			}
 			ENDHLSL
 		}

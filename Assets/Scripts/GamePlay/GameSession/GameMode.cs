@@ -35,7 +35,7 @@ namespace GamePlay
 		{
 			if (NetworkManager.mode == NetworkManagerMode.ClientOnly)
 			{
-				if (MapProvider.Map == null)
+				if (MapProvider.Map.CurrentValue == null)
 				{
 					return;
 				}
@@ -83,6 +83,7 @@ namespace GamePlay
 					.AddTo(NetworkManager);
 
 				await DownloadMapAsync(gameSettings.MapName);
+				MutableGameState.Value = GamePlay.GameState.Playing;
 				SetClientReady();
 			}
 		}

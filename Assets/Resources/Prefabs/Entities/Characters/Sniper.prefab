@@ -689,6 +689,7 @@ SkinnedMeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   serializedVersion: 2
   m_Quality: 0
   m_UpdateWhenOffscreen: 0
@@ -832,6 +833,30 @@ PrefabInstance:
       propertyPath: m_Data.m_ConstrainedObject
       value: 
       objectReference: {fileID: 877888381016588664}
+    - target: {fileID: 271007759460952936, guid: 92b0505206f2409479089fbcb3bde1eb, type: 3}
+      propertyPath: m_Data.m_Mid
+      value: 
+      objectReference: {fileID: 5755569036430762370}
+    - target: {fileID: 271007759460952936, guid: 92b0505206f2409479089fbcb3bde1eb, type: 3}
+      propertyPath: m_Data.m_Tip
+      value: 
+      objectReference: {fileID: 5955133663884227619}
+    - target: {fileID: 271007759460952936, guid: 92b0505206f2409479089fbcb3bde1eb, type: 3}
+      propertyPath: m_Data.m_Root
+      value: 
+      objectReference: {fileID: 4569775199153414800}
+    - target: {fileID: 1178758840735117811, guid: 92b0505206f2409479089fbcb3bde1eb, type: 3}
+      propertyPath: m_Data.m_Mid
+      value: 
+      objectReference: {fileID: 2434279252557450283}
+    - target: {fileID: 1178758840735117811, guid: 92b0505206f2409479089fbcb3bde1eb, type: 3}
+      propertyPath: m_Data.m_Tip
+      value: 
+      objectReference: {fileID: 6015317293422544485}
+    - target: {fileID: 1178758840735117811, guid: 92b0505206f2409479089fbcb3bde1eb, type: 3}
+      propertyPath: m_Data.m_Root
+      value: 
+      objectReference: {fileID: 5250571830230229892}
     - target: {fileID: 2245012279666688116, guid: 92b0505206f2409479089fbcb3bde1eb, type: 3}
       propertyPath: head
       value: 

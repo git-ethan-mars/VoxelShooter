@@ -28,9 +28,10 @@ namespace Infrastructure.States
 			await _networkManager.ClientAuthenticated.FirstAsync();
 			GameSettings gameSettings = await GetGameSettings();
 			GameMode gameMode = _gameModeFactory.CreateGameMode();
-			await gameMode.StartAsync(gameSettings);
 
+			// Enter the game loop first so the loading window exists while the map downloads.
 			await _gameStateMachine.EnterAsync<GameLoopState, GameMode>(gameMode);
+			await gameMode.StartAsync(gameSettings);
 		}
 
 		public void Exit()

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Serialization;
 
 namespace VoxelMap.Data
 {
@@ -19,6 +20,7 @@ namespace VoxelMap.Data
 
 		[field: Header("Lighting")]
 		[field: SerializeField]
+		[field: FormerlySerializedAs("<LightData>k__BackingField")]
 		public DirectionalLightData DirectionalLightData { get; private set; } = new DirectionalLightData(Vector3.zero, Quaternion.identity, Color.white, 0, 0);
 
 		[field: Header("Skybox")]

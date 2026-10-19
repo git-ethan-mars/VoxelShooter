@@ -18,6 +18,7 @@ namespace VoxelMap
 			RenderSettings.ambientEquatorColor = ambientData.equatorColor;
 			RenderSettings.ambientGroundColor = ambientData.groundColor;
 			RenderSettings.ambientIntensity = ambientData.intensity;
+			DynamicGI.UpdateEnvironment();
 		}
 	}
 }

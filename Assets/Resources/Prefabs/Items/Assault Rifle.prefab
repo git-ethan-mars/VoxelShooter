@@ -355,14 +355,19 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  <MeshFilters>k__BackingField:
-  - {fileID: 6488955652210647103}
-  - {fileID: 5395277646785709440}
-  - {fileID: 287065407741255459}
   renderers:
   - {fileID: 7721664450987836587}
   - {fileID: 8933552102566240532}
   - {fileID: 3665479669250751415}
+  <MeshFilters>k__BackingField:
+  - {fileID: 6488955652210647103}
+  - {fileID: 5395277646785709440}
+  - {fileID: 287065407741255459}
+  <HoldPosition>k__BackingField: {x: 0, y: 0, z: 0}
+  <HoldRotation>k__BackingField: {x: 0, y: 0, z: 0}
+  <GripPosition>k__BackingField: {x: 0, y: 0.08, z: 0.02}
+  <GripRotation>k__BackingField: {x: 0, y: 0, z: 0}
+  <SupportHandPosition>k__BackingField: {x: 0, y: -0.02, z: 0.35}
   shootSound: 1
   reloadSound: 0
   shootingParticles: {fileID: 5788705993261693164}

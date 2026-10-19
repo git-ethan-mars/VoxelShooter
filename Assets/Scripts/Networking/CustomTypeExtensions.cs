@@ -19,7 +19,8 @@ namespace Networking
 
 		public static DeathMatchPlayerData ReadDeathMatchPlayerData(this NetworkReader reader)
 		{
-			return new DeathMatchPlayerData(reader.ReadString(), reader.ReadTexture2D());
+			return new DeathMatchPlayerData(reader.ReadString(), reader.ReadTexture2D(), gameClass: reader.Read<GameClass>(),
+				kills: reader.ReadInt(), deaths: reader.ReadInt());
 		}
 
 		public static void WriteDeathMatchPlayerData(this NetworkWriter writer, DeathMatchPlayerData playerData)

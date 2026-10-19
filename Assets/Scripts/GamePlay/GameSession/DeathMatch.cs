@@ -16,15 +16,13 @@ namespace GamePlay
 {
 	public class DeathMatch : GameMode
 	{
-		// Length of the map voting music track (Audio/Sounds/golosovanie-ks.mp3).
 		private const float VotingDuration = 18.05f;
 		private const int VotingMaps = 4;
 		private const int DefaultDummyHealth = 100;
 		private const int MaxDummyHealth = 100000;
 		private const float DummyDistance = 3.0f;
 		private const float DummyGroundSearchDistance = 50.0f;
-		public readonly DeathmatchScoreboard Scoreboard = new DeathmatchScoreboard();
-
+		public readonly DeathmatchScoreboard Scoreboard;
 		public readonly Voting MapVoting;
 		public readonly Chat Chat;
 
@@ -52,6 +50,7 @@ namespace GamePlay
 			NetworkManager = networkManager;
 			EntityContainer = entityContainer;
 			MapProvider = mapProvider;
+			Scoreboard = DeathmatchScoreboard.Create(networkManager);
 			MapVoting = Voting.Create(networkManager);
 			Chat = Chat.Create(networkManager, GetNickName);
 			_entityFactory = entityFactory;
@@ -107,7 +106,7 @@ namespace GamePlay
 
 			NetworkManager.MessageReceived
 				.OfMessageType<GameSettingsRequest>()
-				.Subscribe(directedMessage => OnGameSettingsRequest(directedMessage.Connection))
+				.Subscribe(directedMessage => OnGameSettingsRequestAsync(directedMessage.Connection).Forget())
 				.AddTo(NetworkManager);
 			NetworkManager.MessageReceived
 				.OfMessageType<ChangeGameClassRequest>()
@@ -133,14 +132,16 @@ namespace GamePlay
 
 			await base.LoadMapAsync(mapName);
 			_spawnPointService.CreateSpawnPoints();
+			// Scores stay visible during the map voting and start over with the new round.
+			Scoreboard.ResetRound();
 
 			MutableGameState.Value = GamePlay.GameState.Playing;
 		}
 
 		protected override void OnAddPlayer(NetworkConnectionToClient connection, string nickName, Texture2D avatar)
 		{
-			DeathMatchPlayerData playerData = Scoreboard.AddPlayer(connection, nickName, avatar);
-			var session = new DeathMatchPlayerSession(connection, playerData);
+			Scoreboard.AddPlayer(connection, nickName, avatar);
+			var session = new DeathMatchPlayerSession(connection, new DeathMatchPlayerData(nickName, avatar));
 			_sessions[connection] = session;
 			Chat.SendSystemMessage($"{nickName} joined the game");
 
@@ -157,6 +158,7 @@ namespace GamePlay
 
 		protected override void OnPlayerReady(NetworkConnectionToClient connection)
 		{
+			Scoreboard.SendTo(connection);
 			TrySpawnSpectator(connection);
 		}
 
@@ -228,8 +230,18 @@ namespace GamePlay
 			NetworkServer.AddPlayerForConnection(connection, spectator.gameObject);
 		}
 
-		private void OnGameSettingsRequest(NetworkConnectionToClient connection)
+		private async UniTaskVoid OnGameSettingsRequestAsync(NetworkConnectionToClient connection)
 		{
+			if (!MapProvider.Map.CurrentValue)
+			{
+				await MapProvider.Map.FirstAsync(map => map, NetworkManager.destroyCancellationToken);
+			}
+
+			if (!NetworkServer.connections.ContainsKey(connection.connectionId))
+			{
+				return;
+			}
+
 			var gameSettings = new GameSettings(MapProvider.Map.CurrentValue.MapName, _timeLeft.Value, _gameSettings.RespawnTime,
 				_gameSettings.BoxRespawnTime);
 			var response = new GameSettingsResponse(gameSettings);
@@ -277,13 +289,20 @@ namespace GamePlay
 
 			DeathMatchPlayerSession victim = FindSession(kill.TargetId);
 
-			if (victim == null)
+			if (victim == null || !victim.IsAlive)
 			{
 				return;
 			}
 
 			DeathMatchPlayerSession killer = kill.SourceId == kill.TargetId ? null : FindSession(kill.SourceId);
 			_respawnService.Kill(victim, killer?.Connection);
+
+			Scoreboard.AddDeath(victim.Connection);
+
+			if (killer != null)
+			{
+				Scoreboard.AddKill(killer.Connection);
+			}
 		}
 
 		private void RegisterChatCommands()
@@ -394,7 +413,7 @@ namespace GamePlay
 
 			// Placed on the ground in front of the host's view, facing the host. Commands run only for the host, so its camera is local.
 			Transform view = _cameraProvider.MainCamera.transform;
-			Vector3 forward = Vector3.ProjectOnPlane(view.forward, Vector3.up);
+			var forward = Vector3.ProjectOnPlane(view.forward, Vector3.up);
 
 			if (forward.sqrMagnitude < 0.01f)
 			{

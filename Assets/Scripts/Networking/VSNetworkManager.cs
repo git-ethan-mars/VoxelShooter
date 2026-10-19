@@ -66,6 +66,8 @@ namespace Networking
 			RegisterResponse<VoteResponse>();
 			RegisterResponse<VoteFinishResponse>();
 			RegisterResponse<ChatMessageResponse>();
+			RegisterResponse<ScoreboardResponse>();
+			RegisterResponse<PlayerAvatarResponse>();
 		}
 
 		public override void OnStopHost()
@@ -98,6 +100,8 @@ namespace Networking
 			UnregisterResponse<VoteResponse>();
 			UnregisterResponse<VoteFinishResponse>();
 			UnregisterResponse<ChatMessageResponse>();
+			UnregisterResponse<ScoreboardResponse>();
+			UnregisterResponse<PlayerAvatarResponse>();
 		}
 
 		public override void OnServerDisconnect(NetworkConnectionToClient connection)

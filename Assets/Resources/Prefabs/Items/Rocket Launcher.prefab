@@ -50,10 +50,15 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  <MeshFilters>k__BackingField:
-  - {fileID: 2621684144857545447}
   renderers:
   - {fileID: 6178636684452455657}
+  <MeshFilters>k__BackingField:
+  - {fileID: 2621684144857545447}
+  <HoldPosition>k__BackingField: {x: 0.16, y: -0.08, z: 0.65}
+  <HoldRotation>k__BackingField: {x: 0, y: 0, z: 0}
+  <GripPosition>k__BackingField: {x: 0, y: 0.08, z: 0.05}
+  <GripRotation>k__BackingField: {x: 0, y: 0, z: 0}
+  <SupportHandPosition>k__BackingField: {x: 0, y: -0.02, z: 0.4}
 --- !u!114 &-2563391821612416368
 MonoBehaviour:
   m_ObjectHideFlags: 0

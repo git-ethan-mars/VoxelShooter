@@ -2,6 +2,7 @@
 using Data;
 using R3;
 using Services;
+using Steamworks;
 using UI;
 using UnityEngine;
 
@@ -45,6 +46,14 @@ namespace Infrastructure.States
 
 		private async UniTaskVoid OnCreateGameRequested(GameSettings gameSettings)
 		{
+#if !LOCAL_BUILD
+			if (!SteamAPI.Init())
+			{
+				Debug.LogWarning("Steamworks API is not initialized");
+				return;
+			}
+#endif
+
 			await _sceneLoader.LoadAsync(Scenes.Main);
 			await _gameStateMachine.EnterAsync<InitializeHostState, GameSettings>(gameSettings);
 		}
@@ -58,6 +67,12 @@ namespace Infrastructure.States
 #endif
 		private async UniTaskVoid OnJoinServerButtonPressed(Server server)
 		{
+			if (!SteamAPI.Init())
+			{
+				Debug.LogWarning("Steamworks API is not initialized");
+				return;
+			}
+
 			await _sceneLoader.LoadAsync(Scenes.Main);
 			await _gameStateMachine.EnterAsync<JoinSteamLobbyState, Server>(server);
 		}

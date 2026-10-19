@@ -1,16 +1,14 @@
-﻿using System.Collections.Generic;
-using Data;
-using Mirror;
+﻿using Data;
 
 namespace Networking.Messages
 {
-	public struct ScoreboardResponse : NetworkMessage
+	public struct ScoreboardResponse : IResponse
 	{
-		public readonly List<DeathMatchPlayerData> Scores;
+		public readonly ScoreboardEntry[] Entries;
 
-		public ScoreboardResponse(List<DeathMatchPlayerData> scores)
+		public ScoreboardResponse(ScoreboardEntry[] entries)
 		{
-			Scores = scores;
+			Entries = entries;
 		}
 	}
 }

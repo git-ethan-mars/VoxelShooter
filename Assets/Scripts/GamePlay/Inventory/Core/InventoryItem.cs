@@ -18,6 +18,17 @@ namespace GamePlay
 		[SyncVar] private GameClass _ownerClass;
 
 		[field: SerializeField] public MeshFilter[] MeshFilters { get; private set; }
+
+		// Offset of the model from the first person anchor; the anchor looks along the view direction
+		[field: SerializeField] public Vector3 HoldPosition { get; private set; }
+		[field: SerializeField] public Vector3 HoldRotation { get; private set; }
+
+		// Offset of the model from the right palm of other players' characters; the grip looks along the aim
+		[field: SerializeField] public Vector3 GripPosition { get; private set; }
+		[field: SerializeField] public Vector3 GripRotation { get; private set; }
+
+		// Point of the model held by the left hand; zero leaves the left hand to the animation
+		[field: SerializeField] public Vector3 SupportHandPosition { get; private set; }
 		public abstract ItemType Type { get; }
 		public bool IsSelected => _isSelected.Value;
 
@@ -72,16 +83,26 @@ namespace GamePlay
 			_isSelected.Value = false;
 		}
 
+		public void EnableModel()
+		{
+			Array.ForEach(renderers, part => part.enabled = true);
+		}
+
+		public void DisableModel()
+		{
+			Array.ForEach(renderers, part => part.enabled = false);
+		}
+
 		private void OnSelected()
 		{
 			enabled = true;
-			Array.ForEach(renderers, part => part.enabled = true);
+			EnableModel();
 		}
 
 		private void OnDeselected()
 		{
 			enabled = false;
-			Array.ForEach(renderers, part => part.enabled = false);
+			DisableModel();
 		}
 	}
 }

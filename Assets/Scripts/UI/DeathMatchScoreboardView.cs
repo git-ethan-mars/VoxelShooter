@@ -1,9 +1,7 @@
-using System;
-using System.Collections.Generic;
+using System.Linq;
 using Data;
 using GamePlay;
-using Mirror;
-using ObservableCollections;
+using R3;
 using UnityEngine;
 
 namespace UI
@@ -16,42 +14,35 @@ namespace UI
 		public void Initialize(DeathmatchScoreboard scoreboard)
 		{
 			_scoreboard = scoreboard;
-			_scoreboard.PlayerDataById.CollectionChanged += OnCollectionChanged;
+			_scoreboard.Changed.Subscribe(_ => Redraw()).AddTo(this);
+			Redraw();
 		}
 
-		private void OnDestroy()
+		private void Redraw()
 		{
-			_scoreboard.PlayerDataById.CollectionChanged -= OnCollectionChanged;
-		}
+			ScoreboardEntry[] entries = _scoreboard.Entries
+				.OrderByDescending(entry => entry.Kills)
+				.ThenBy(entry => entry.Deaths)
+				.ToArray();
 
-		private void OnCollectionChanged(in NotifyCollectionChangedEventArgs<KeyValuePair<NetworkConnectionToClient, DeathMatchPlayerData>> e)
-		{
-			if (Items.Count < _scoreboard.PlayerDataById.Count)
+			while (Items.Count < entries.Length)
 			{
-				int difference = _scoreboard.PlayerDataById.Count - Items.Count;
-				for (int i = 0; i < difference; i++)
-				{
-					SpawnElement();
-				}
-			}
-			else
-			{
-				for (int i = _scoreboard.PlayerDataById.Count; i < Items.Count; i++)
-				{
-					DespawnElement(Items[i]);
-				}
+				SpawnElement();
 			}
 
-			int index = 0;
-
-			foreach ((_, DeathMatchPlayerData playerData) in _scoreboard.PlayerDataById)
+			while (Items.Count > entries.Length)
 			{
-				Items[index].NickName.SetText(playerData.NickName);
-				Items[index].KillCount.SetText(playerData.Kills.ToString());
-				Items[index].DeathCount.SetText(playerData.Deaths.ToString());
-				Items[index].ClassName.SetText(playerData.GameClass.ToString());
-				Items[index].Avatar.texture = playerData.Avatar;
-				index++;
+				DespawnElement(Items[^1]);
+			}
+
+			for (int i = 0; i < entries.Length; i++)
+			{
+				ScoreboardEntry entry = entries[i];
+				Items[i].NickName.SetText(entry.NickName);
+				Items[i].KillCount.SetText(entry.Kills.ToString());
+				Items[i].DeathCount.SetText(entry.Deaths.ToString());
+				Items[i].ClassName.SetText(entry.GameClass.ToString());
+				Items[i].Avatar.texture = _scoreboard.GetAvatar(entry.PlayerId);
 			}
 		}
 	}
