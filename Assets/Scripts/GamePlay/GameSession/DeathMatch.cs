@@ -16,7 +16,6 @@ namespace GamePlay
 {
 	public class DeathMatch : GameMode
 	{
-		// Length of the map voting music track (Audio/Sounds/golosovanie-ks.mp3).
 		private const float VotingDuration = 18.05f;
 		private const int VotingMaps = 4;
 		private const int DefaultDummyHealth = 100;
@@ -233,7 +232,6 @@ namespace GamePlay
 
 		private async UniTaskVoid OnGameSettingsRequestAsync(NetworkConnectionToClient connection)
 		{
-			// A client can connect while the host is still loading the map.
 			if (!MapProvider.Map.CurrentValue)
 			{
 				await MapProvider.Map.FirstAsync(map => map, NetworkManager.destroyCancellationToken);
@@ -415,7 +413,7 @@ namespace GamePlay
 
 			// Placed on the ground in front of the host's view, facing the host. Commands run only for the host, so its camera is local.
 			Transform view = _cameraProvider.MainCamera.transform;
-			Vector3 forward = Vector3.ProjectOnPlane(view.forward, Vector3.up);
+			var forward = Vector3.ProjectOnPlane(view.forward, Vector3.up);
 
 			if (forward.sqrMagnitude < 0.01f)
 			{

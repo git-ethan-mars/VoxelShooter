@@ -77,12 +77,14 @@ namespace UI.Inventory
 				_hud.SetScopeIcon(StaticData.GetScopeIcon(InventoryItem.Type));
 				_hud.SetCrosshairVisibility(false);
 				_cameraProvider.ZoomIn(InventoryItem.Configure.ZoomMultiplier);
+				InventoryItem.DisableModel();
 			}
 			else
 			{
 				_hud.SetScopeIcon(null);
 				_hud.SetCrosshairVisibility(true);
 				_cameraProvider.ZoomOut();
+				InventoryItem.EnableModel();
 			}
 		}
 	}

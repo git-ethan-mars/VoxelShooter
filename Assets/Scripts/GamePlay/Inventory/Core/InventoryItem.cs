@@ -83,16 +83,26 @@ namespace GamePlay
 			_isSelected.Value = false;
 		}
 
+		public void EnableModel()
+		{
+			Array.ForEach(renderers, part => part.enabled = true);
+		}
+
+		public void DisableModel()
+		{
+			Array.ForEach(renderers, part => part.enabled = false);
+		}
+
 		private void OnSelected()
 		{
 			enabled = true;
-			Array.ForEach(renderers, part => part.enabled = true);
+			EnableModel();
 		}
 
 		private void OnDeselected()
 		{
 			enabled = false;
-			Array.ForEach(renderers, part => part.enabled = false);
+			DisableModel();
 		}
 	}
 }
