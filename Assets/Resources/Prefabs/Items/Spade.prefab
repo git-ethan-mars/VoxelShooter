@@ -145,7 +145,7 @@ MonoBehaviour:
   <MeshFilters>k__BackingField:
   - {fileID: 443292984298458466}
   <HoldPosition>k__BackingField: {x: 0.05, y: -0.05, z: 0.15}
-  <HoldRotation>k__BackingField: {x: 0, y: 90, z: 55}
+  <HoldRotation>k__BackingField: {x: 0, y: 0, z: 55}
   <GripPosition>k__BackingField: {x: 0, y: 0.035, z: 0.197}
   <GripRotation>k__BackingField: {x: 80, y: 0, z: 0}
   <SupportHandPosition>k__BackingField: {x: 0, y: 0, z: 0}

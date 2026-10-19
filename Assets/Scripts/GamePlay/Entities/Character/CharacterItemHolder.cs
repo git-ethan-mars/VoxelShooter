@@ -13,7 +13,15 @@ namespace GamePlay
 		private const string HeadPath = "Skeleton/spine/head";
 
 		private static readonly Vector3 FirstPersonOffset = new Vector3(0.25f, -0.28f, 0.45f);
-		private static readonly Vector3 ThirdPersonOffset = new Vector3(0.04f, -0.3f, 0.18f);
+
+		// Other players' hands turn around a point in the chest, so looking up or down moves the item in front of the
+		// body instead of swinging it around the head into the torso. The hand is held clear of the chest, which sticks
+		// out 0.25 in front of the spine, and steep looks only tilt the arms down to the belly or up to the chin.
+		private static readonly Vector3 ChestPivot = new Vector3(0.12f, 0.3f, 0.05f);
+		private const float HoldDistance = 0.38f;
+		private const float HandPitchUpLimit = 30.0f;
+		private const float HandPitchDownLimit = 60.0f;
+
 		private static readonly Vector3 RightElbowHintOffset = new Vector3(0.6f, -0.5f, -0.4f);
 		private static readonly Vector3 LeftElbowHintOffset = new Vector3(-0.6f, -0.5f, -0.2f);
 
@@ -40,6 +48,7 @@ namespace GamePlay
 		private Transform _grip;
 		private Vector3 _leftHandOffset;
 		private bool _isTwoHanded;
+		private float _leftArmReach;
 
 		[Inject]
 		private void Construct(CameraProvider cameraProvider)
@@ -53,6 +62,11 @@ namespace GamePlay
 			_grip = new GameObject("Grip").transform;
 			_grip.SetParent(rightHandIK.data.tip, false);
 			_grip.SetLocalPositionAndRotation(PalmOffset, Quaternion.Inverse(GripToHand));
+
+			// Slightly short of the full length, so the elbow keeps a bend instead of snapping straight
+			TwoBoneIKConstraintData leftArm = leftHandIK.data;
+			_leftArmReach = 0.97f * (Vector3.Distance(leftArm.root.position, leftArm.mid.position) +
+			                         Vector3.Distance(leftArm.mid.position, leftArm.tip.position));
 		}
 
 		private void Start()
@@ -70,12 +84,16 @@ namespace GamePlay
 			if (!networkIdentity.isLocalPlayer)
 			{
 				Vector3 lookDirection = headTrackingObject.position - _head.position;
+				Vector3 horizontalDirection = Vector3.ProjectOnPlane(lookDirection, Vector3.up);
 
-				if (lookDirection.sqrMagnitude > 0.0001f)
+				if (horizontalDirection.sqrMagnitude > 0.0001f)
 				{
-					Quaternion lookRotation = Quaternion.LookRotation(lookDirection);
-					anchor.SetPositionAndRotation(_head.position + lookRotation * ThirdPersonOffset, lookRotation);
-					PlaceHandTargets();
+					Quaternion yawRotation = Quaternion.LookRotation(horizontalDirection);
+					float pitch = Vector3.SignedAngle(horizontalDirection, lookDirection, yawRotation * Vector3.right);
+					Quaternion aimRotation = yawRotation * Quaternion.Euler(Mathf.Clamp(pitch, -HandPitchUpLimit, HandPitchDownLimit), 0.0f, 0.0f);
+					Vector3 pivot = _head.parent.TransformPoint(ChestPivot);
+					anchor.SetPositionAndRotation(pivot + aimRotation * Vector3.forward * HoldDistance, aimRotation);
+					PlaceHandTargets(yawRotation);
 				}
 			}
 		}
@@ -113,15 +131,17 @@ namespace GamePlay
 		}
 
 		// The rig syncs only the local pose of its targets, so they sit under a still parent and get world poses here
-		private void PlaceHandTargets()
+		// The elbows are hinted in the horizontal aim frame, so they stay out and down whatever the pitch
+		private void PlaceHandTargets(Quaternion yawRotation)
 		{
 			rightHandIK.data.target.SetPositionAndRotation(anchor.TransformPoint(RightHandOffset), anchor.rotation * GripToHand);
-			rightHandIK.data.hint.position = anchor.TransformPoint(RightElbowHintOffset);
+			rightHandIK.data.hint.position = anchor.position + yawRotation * RightElbowHintOffset;
 
 			if (_isTwoHanded)
 			{
-				leftHandIK.data.target.position = anchor.TransformPoint(_leftHandOffset);
-				leftHandIK.data.hint.position = anchor.TransformPoint(LeftElbowHintOffset);
+				Vector3 supportPoint = anchor.TransformPoint(_leftHandOffset);
+				leftHandIK.data.target.position = ClampToLeftArmReach(anchor.position, supportPoint);
+				leftHandIK.data.hint.position = anchor.position + yawRotation * LeftElbowHintOffset;
 			}
 			else
 			{
@@ -129,6 +149,33 @@ namespace GamePlay
 				leftHandIK.data.target.position = spine.TransformPoint(LeftHandRestPosition);
 				leftHandIK.data.hint.position = spine.TransformPoint(LeftElbowRestHint);
 			}
+		}
+
+		// The arms are short, so a support point far along the barrel is out of reach; the left hand then slides back
+		// along the item towards the grip to the farthest point it can still hold
+		private Vector3 ClampToLeftArmReach(Vector3 gripPoint, Vector3 supportPoint)
+		{
+			Vector3 shoulder = leftHandIK.data.root.position;
+
+			if ((supportPoint - shoulder).sqrMagnitude <= _leftArmReach * _leftArmReach)
+			{
+				return supportPoint;
+			}
+
+			Vector3 along = supportPoint - gripPoint;
+			Vector3 fromShoulder = gripPoint - shoulder;
+			float a = along.sqrMagnitude;
+			float b = 2.0f * Vector3.Dot(fromShoulder, along);
+			float c = fromShoulder.sqrMagnitude - _leftArmReach * _leftArmReach;
+			float discriminant = b * b - 4.0f * a * c;
+
+			if (a < 0.0001f || discriminant < 0.0f)
+			{
+				return gripPoint;
+			}
+
+			float t = Mathf.Clamp01((-b + Mathf.Sqrt(discriminant)) / (2.0f * a));
+			return gripPoint + along * t;
 		}
 
 		// The local player has no visible body, so a floating item must not cast a shadow either

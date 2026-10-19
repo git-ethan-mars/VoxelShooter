@@ -2055,7 +2055,7 @@ MonoBehaviour:
   syncDirection: 1
   syncMode: 0
   syncInterval: 0
-  target: {fileID: 2291839090602957664}
+  target: {fileID: 7846052843520873579}
   syncPosition: 1
   syncRotation: 0
   syncScale: 0
