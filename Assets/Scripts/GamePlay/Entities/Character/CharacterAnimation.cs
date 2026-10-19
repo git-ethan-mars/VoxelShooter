@@ -8,13 +8,6 @@ namespace GamePlay
 	{
 		private const float RotationSpineThreshold = 30f;
 
-		// Matches the Head IK X limit. Near ±90° the horizontal part of the look direction vanishes
-		// and the Head IK Y aim flips the head around, so the target never goes steeper than this.
-		private const float HeadPitchLimit = 80f;
-
-		// A distant target keeps the aim stable against small offsets between the head and the camera.
-		private const float HeadTargetDistance = 10f;
-
 		[SerializeField] private CharacterMovement characterMovement;
 		[SerializeField] private Transform headTrackingObject;
 		[SerializeField] private Transform spineTrackingObject;
@@ -36,21 +29,12 @@ namespace GamePlay
 		{
 			if (isLocalPlayer)
 			{
-				Transform cameraTransform = _cameraProvider.MainCamera.transform;
-				Vector3 lookDirection = GetClampedLookDirection(cameraTransform);
-				headTrackingObject.position = cameraTransform.position + lookDirection * HeadTargetDistance;
-				HandleSpineRotation(cameraTransform.position + lookDirection);
+				headTrackingObject.position = _cameraProvider.MainCamera.transform.position + _cameraProvider.MainCamera.transform.forward;
+				HandleSpineRotation();
 			}
 		}
 
-		private static Vector3 GetClampedLookDirection(Transform cameraTransform)
-		{
-			Vector3 euler = cameraTransform.eulerAngles;
-			float pitch = Mathf.Clamp(Mathf.DeltaAngle(0f, euler.x), -HeadPitchLimit, HeadPitchLimit);
-			return Quaternion.Euler(pitch, euler.y, 0f) * Vector3.forward;
-		}
-
-		private void HandleSpineRotation(Vector3 lookTarget)
+		private void HandleSpineRotation()
 		{
 			float currentAngle = _cameraProvider.MainCamera.transform.eulerAngles.y;
 
@@ -68,7 +52,7 @@ namespace GamePlay
 
 			if (characterMovement.GetHorizontalVelocity().magnitude != 0)
 			{
-				spineTrackingObject.position = Vector3.Slerp(spineTrackingObject.position, lookTarget, 0.05f);
+				spineTrackingObject.position = Vector3.Slerp(spineTrackingObject.position, headTrackingObject.position, 0.05f);
 				_leftBoarderAngle = totalAngle - RotationSpineThreshold;
 				_rightBoarderAngle = totalAngle + RotationSpineThreshold;
 			}
